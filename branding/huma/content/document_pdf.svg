@@ -1,0 +1,16 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="pdfGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0A6E6E"/>
+      <stop offset="1" stop-color="#00D4FF"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="4" width="40" height="56" rx="3" fill="#F0F0F0" stroke="#CCCCCC" stroke-width="1"/>
+  <path d="M38 4 L48 4 L48 14 Z" fill="#DDDDDD"/>
+  <path d="M38 4 L38 14 L48 14" fill="none" stroke="#CCCCCC" stroke-width="1"/>
+  <rect x="14" y="32" width="28" height="8" rx="2" fill="url(#pdfGrad)"/>
+  <text x="18" y="39" font-family="Inter, system-ui, sans-serif" font-size="6" font-weight="700" fill="#FFFFFF">PDF</text>
+</svg>

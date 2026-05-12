@@ -1,0 +1,21 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!-- Simplified favicon variant: drops fine feather detail so the silhouette
+     reads at 16x16. Single linear gradient, no clipping. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="favWing" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7FE3EF"/>
+      <stop offset="1" stop-color="#1B6E80"/>
+    </linearGradient>
+  </defs>
+  <circle cx="256" cy="256" r="220" fill="#0E1E3F"/>
+  <path d="M130 320
+           C 200 252, 300 220, 400 232
+           C 460 240, 500 210, 510 188
+           C 488 280, 408 326, 320 332
+           C 250 336, 188 340, 144 348 Z"
+        fill="url(#favWing)"/>
+  <circle cx="256" cy="256" r="220" fill="none" stroke="#04102B" stroke-width="6" stroke-opacity="0.6"/>
+</svg>

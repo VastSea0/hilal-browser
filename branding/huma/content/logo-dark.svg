@@ -1,0 +1,28 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!-- Dark-mode variant: brighter wing, deeper orb, stronger contrast. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <radialGradient id="orbD" cx="0.35" cy="0.30" r="0.85">
+      <stop offset="0" stop-color="#1A2F5A"/>
+      <stop offset="0.55" stop-color="#0B1B3D"/>
+      <stop offset="1" stop-color="#040A1C"/>
+    </radialGradient>
+    <linearGradient id="wingD" x1="0.1" y1="0.2" x2="0.95" y2="0.85">
+      <stop offset="0" stop-color="#A5EEF6"/>
+      <stop offset="0.55" stop-color="#4DC8DA"/>
+      <stop offset="1" stop-color="#1F8094"/>
+    </linearGradient>
+    <clipPath id="orbClipD">
+      <circle cx="256" cy="256" r="208"/>
+    </clipPath>
+  </defs>
+  <circle cx="256" cy="256" r="208" fill="url(#orbD)"/>
+  <g clip-path="url(#orbClipD)">
+    <path d="M120 332 C 170 290, 230 280, 300 296 C 360 310, 410 296, 446 268 C 430 320, 384 360, 320 372 C 256 384, 198 372, 156 356 Z" fill="url(#wingD)" opacity="0.95"/>
+    <path d="M150 296 C 210 232, 286 208, 360 214 C 432 220, 480 188, 502 156 C 484 234, 432 286, 360 304 C 296 320, 232 314, 180 324 Z" fill="url(#wingD)"/>
+    <path d="M298 222 C 340 196, 384 184, 430 188 C 416 208, 388 222, 354 230 C 332 234, 312 230, 298 222 Z" fill="#C8F4F9" opacity="0.9"/>
+  </g>
+  <circle cx="256" cy="256" r="208" fill="none" stroke="#5FD4E6" stroke-opacity="0.25" stroke-width="2"/>
+</svg>

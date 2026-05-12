@@ -1,0 +1,8 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!-- "Hüma" wordmark using currentColor so consumers can tint at runtime. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 80" fill="currentColor">
+  <text x="0" y="60" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif"
+        font-size="64" font-weight="600" letter-spacing="-1.5">H&#xFC;ma</text>
+</svg>

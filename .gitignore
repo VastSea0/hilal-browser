@@ -1,0 +1,73 @@
+# Hüma Browser patch-layer .gitignore
+#
+# This repo MUST NOT contain the Firefox source tree, build artifacts,
+# or any other large generated content. It only holds patches, overlays,
+# and scripts.
+
+# === Firefox source tree (NEVER commit) =====================================
+# The Firefox checkout lives here by default. It's many GB and has its own
+# git history; we don't want it in this repo.
+/firefox/
+firefox/
+
+# === Build outputs ==========================================================
+obj-*/
+dist/
+package-stage/
+*.dmg
+*.pkg
+*.tar.bz2
+*.tar.xz
+*.tar.gz
+*.zip
+
+# === Mach / Mozilla state ===================================================
+.mozbuild/
+.mozconfig
+.config/
+mozinfo.json
+config.cache
+config.status
+config.log
+configure
+configure.lineno
+
+# === Rust / Cargo ===========================================================
+target/
+Cargo.lock.bak
+
+# === Editor / IDE noise =====================================================
+.vscode/
+.idea/
+.cursor/
+.zed/
+*.swp
+*.swo
+*~
+.\#*
+\#*\#
+
+# === macOS / OS junk ========================================================
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+Thumbs.db
+desktop.ini
+
+# === Python / tooling caches ================================================
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+
+# === Scratch / artifacts ====================================================
+artifacts/
+tmp/
+*.log
+*.rej
+*.orig
