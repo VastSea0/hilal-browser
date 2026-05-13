@@ -7,3 +7,4 @@
 # Keep entries small and focused; one logical change per patch.
 
 0001-hilal-branding-defaults.patch
+0002-hilal-transparent-macos-chrome.patch

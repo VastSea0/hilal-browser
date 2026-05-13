@@ -36,6 +36,9 @@ pref("sidebar.revamp", true);
 pref("sidebar.verticalTabs", true);
 pref("sidebar.visibility", "always-show");
 
+// Use transparent macOS chrome surfaces for Hilal's Tahoe-style glass look.
+pref("hilal.browser.transparent-chrome.enabled", true);
+
 // Privacy-first Hilal defaults, informed by Betterfox and arkenfox.
 // These are default prefs rather than locked prefs, so users can still opt in.
 
