@@ -1,42 +1,34 @@
 Hilal Browser: enable transparent macOS chrome surfaces
 
-Makes Hilal top-level macOS windows non-opaque when the Hilal
-transparent chrome pref is enabled, then softens the browser chrome,
-sidebar, content frame, and new tab page into translucent Tahoe-style
-glass surfaces.
+Makes Hilal top-level macOS windows non-opaque, then softens the
+browser chrome, sidebar, content frame, and new tab page into
+translucent Tahoe-style glass surfaces. The chrome styling is applied
+unconditionally on macOS for Hilal builds so the vertical tabs sidebar,
+toolbar, and new tab canvas do not fall back to opaque Firefox surfaces.
 
 ---
- browser/extensions/newtab/content-src/styles/activity-stream.scss | 18 ++++++++++++++++++
- browser/extensions/newtab/css/activity-stream.css                 | 16 ++++++++++++++++
- browser/themes/shared/browser-colors.css                         | 20 ++++++++++++++++++++
- browser/themes/shared/browser-shared.css                         | 25 +++++++++++++++++++++++++
- browser/themes/shared/sidebar.css                                | 21 +++++++++++++++++++++
- browser/themes/shared/tabbrowser/content-area.css                 | 26 ++++++++++++++++++++++++++
- widget/cocoa/nsCocoaWindow.mm                                    |  9 +++++++--
- 7 files changed, 133 insertions(+), 2 deletions(-)
-
 diff --git a/browser/extensions/newtab/content-src/styles/activity-stream.scss b/browser/extensions/newtab/content-src/styles/activity-stream.scss
+index 4ac1348a809a..f4dc955ff01d 100644
 --- a/browser/extensions/newtab/content-src/styles/activity-stream.scss
 +++ b/browser/extensions/newtab/content-src/styles/activity-stream.scss
-@@ -42,6 +42,24 @@ body {
+@@ -42,6 +42,23 @@ body {
    overflow-y: scroll;
  }
  
 +@media (-moz-platform: macos) {
-+  @media -moz-pref("hilal.browser.transparent-chrome.enabled") {
-+    :root {
-+      --newtab-background-color: transparent;
-+      --newtab-background-color-secondary: light-dark(rgba(255, 255, 255, 0.82), rgba(42, 41, 49, 0.72));
-+      --newtab-background-card: light-dark(rgba(255, 255, 255, 0.72), rgba(66, 65, 77, 0.62));
-+      --newtab-weather-background-color: light-dark(rgba(255, 255, 255, 0.7), rgba(66, 65, 77, 0.62));
-+      --newtab-overlay-color: light-dark(rgba(255, 255, 255, 0.64), rgba(43, 42, 51, 0.58));
-+    }
++  :root {
++    --newtab-background-color: transparent;
++    --newtab-background-color-secondary: light-dark(rgba(255, 255, 255, 0.68), rgba(42, 41, 49, 0.6));
++    --newtab-background-card: light-dark(rgba(255, 255, 255, 0.52), rgba(66, 65, 77, 0.5));
++    --newtab-weather-background-color: light-dark(rgba(255, 255, 255, 0.5), rgba(66, 65, 77, 0.48));
++    --newtab-overlay-color: light-dark(rgba(255, 255, 255, 0.44), rgba(43, 42, 51, 0.42));
++  }
 +
-+    html,
-+    body,
-+    #root {
-+      background-color: transparent;
-+    }
++  html,
++  body,
++  #root,
++  .activity-stream {
++    background-color: transparent;
 +  }
 +}
 +
@@ -44,90 +36,86 @@ diff --git a/browser/extensions/newtab/content-src/styles/activity-stream.scss b
  h2 {
    font-weight: var(--font-weight);
 diff --git a/browser/extensions/newtab/css/activity-stream.css b/browser/extensions/newtab/css/activity-stream.css
+index ab4d30c3c1b4..77d60f6188e2 100644
 --- a/browser/extensions/newtab/css/activity-stream.css
 +++ b/browser/extensions/newtab/css/activity-stream.css
-@@ -338,6 +338,22 @@ body {
+@@ -338,6 +338,21 @@ body {
    overflow-y: scroll;
  }
  
 +@media (-moz-platform: macos) {
-+  @media -moz-pref("hilal.browser.transparent-chrome.enabled") {
-+    :root {
-+      --newtab-background-color: transparent;
-+      --newtab-background-color-secondary: light-dark(rgba(255, 255, 255, 0.82), rgba(42, 41, 49, 0.72));
-+      --newtab-background-card: light-dark(rgba(255, 255, 255, 0.72), rgba(66, 65, 77, 0.62));
-+      --newtab-weather-background-color: light-dark(rgba(255, 255, 255, 0.7), rgba(66, 65, 77, 0.62));
-+      --newtab-overlay-color: light-dark(rgba(255, 255, 255, 0.64), rgba(43, 42, 51, 0.58));
-+    }
-+    html,
-+    body,
-+    #root {
-+      background-color: transparent;
-+    }
++  :root {
++    --newtab-background-color: transparent;
++    --newtab-background-color-secondary: light-dark(rgba(255, 255, 255, 0.68), rgba(42, 41, 49, 0.6));
++    --newtab-background-card: light-dark(rgba(255, 255, 255, 0.52), rgba(66, 65, 77, 0.5));
++    --newtab-weather-background-color: light-dark(rgba(255, 255, 255, 0.5), rgba(66, 65, 77, 0.48));
++    --newtab-overlay-color: light-dark(rgba(255, 255, 255, 0.44), rgba(43, 42, 51, 0.42));
++  }
++  html,
++  body,
++  #root,
++  .activity-stream {
++    background-color: transparent;
 +  }
 +}
  h1,
  h2 {
    font-weight: var(--font-weight);
 diff --git a/browser/themes/shared/browser-colors.css b/browser/themes/shared/browser-colors.css
+index 3022f907be0e..0b771f557c65 100644
 --- a/browser/themes/shared/browser-colors.css
 +++ b/browser/themes/shared/browser-colors.css
-@@ -37,6 +37,26 @@
+@@ -37,6 +37,23 @@
    --content-area-shadow: var(--card-box-shadow);
    --chrome-content-separator-color: var(--card-border-color);
  
 +  @media (-moz-platform: macos) {
-+    /* stylelint-disable-next-line media-query-no-invalid */
-+    @media -moz-pref("hilal.browser.transparent-chrome.enabled") {
-+      --hilal-glass-toolbar-background: light-dark(rgba(255, 255, 255, 0.5), rgba(28, 28, 34, 0.46));
-+      --hilal-glass-toolbar-background-inactive: light-dark(rgba(245, 245, 248, 0.42), rgba(28, 28, 34, 0.36));
-+      --hilal-glass-sidebar-background: light-dark(rgba(255, 255, 255, 0.34), rgba(24, 24, 30, 0.34));
-+      --hilal-glass-content-background: light-dark(rgba(249, 249, 251, 0.26), rgba(43, 42, 51, 0.3));
-+      --hilal-glass-border-color: light-dark(rgba(30, 30, 36, 0.14), rgba(255, 255, 255, 0.16));
-+      --hilal-glass-shadow: 0 18px 42px light-dark(rgba(30, 30, 36, 0.12), rgba(0, 0, 0, 0.34));
++    --hilal-glass-toolbar-background: light-dark(rgba(255, 255, 255, 0.18), rgba(28, 28, 34, 0.2));
++    --hilal-glass-toolbar-background-inactive: light-dark(rgba(255, 255, 255, 0.12), rgba(28, 28, 34, 0.14));
++    --hilal-glass-sidebar-background: light-dark(rgba(255, 255, 255, 0.1), rgba(24, 24, 30, 0.12));
++    --hilal-glass-content-background: transparent;
++    --hilal-glass-border-color: light-dark(rgba(30, 30, 36, 0.12), rgba(255, 255, 255, 0.14));
++    --hilal-glass-shadow: 0 18px 42px light-dark(rgba(30, 30, 36, 0.08), rgba(0, 0, 0, 0.24));
 +
-+      --toolbox-background-color: var(--hilal-glass-toolbar-background);
-+      --toolbox-background-color-inactive: var(--hilal-glass-toolbar-background-inactive);
-+      --toolbar-background-color: var(--hilal-glass-toolbar-background);
-+      --sidebar-background-color: var(--hilal-glass-sidebar-background);
-+      --sidebar-border-color: var(--hilal-glass-border-color);
-+      --chrome-content-separator-color: var(--hilal-glass-border-color);
-+      --content-area-shadow: var(--hilal-glass-shadow);
-+    }
++    --toolbox-background-color: var(--hilal-glass-toolbar-background);
++    --toolbox-background-color-inactive: var(--hilal-glass-toolbar-background-inactive);
++    --toolbar-background-color: transparent;
++    --sidebar-background-color: transparent;
++    --sidebar-border-color: var(--hilal-glass-border-color);
++    --chrome-content-separator-color: var(--hilal-glass-border-color);
++    --content-area-shadow: var(--hilal-glass-shadow);
 +  }
 +
    /* stylelint-disable-next-line media-query-no-invalid */
    @media not -moz-pref("sidebar.revamp"), -moz-pref("browser.nova.enabled") {
      &:not([lwtheme]) {
 diff --git a/browser/themes/shared/browser-shared.css b/browser/themes/shared/browser-shared.css
+index f38e980ba766..67090e60610c 100644
 --- a/browser/themes/shared/browser-shared.css
 +++ b/browser/themes/shared/browser-shared.css
-@@ -248,6 +248,31 @@ body {
+@@ -248,6 +248,28 @@ body {
    }
  }
  
 +@media (-moz-platform: macos) {
-+  /* stylelint-disable-next-line media-query-no-invalid */
-+  @media -moz-pref("hilal.browser.transparent-chrome.enabled") {
-+    :root:not([macOSNativeFullscreen]) body {
-+      background-color: transparent;
-+    }
++  :root:not([macOSNativeFullscreen]) body {
++    background-color: transparent;
++  }
 +
-+    :root:not([macOSNativeFullscreen]) #navigator-toolbox,
-+    :root:not([macOSNativeFullscreen]) #sidebar-main,
-+    :root:not([macOSNativeFullscreen]) .chrome-block {
-+      background-color: var(--hilal-glass-toolbar-background);
-+      backdrop-filter: blur(28px) saturate(1.35);
-+    }
++  :root:not([macOSNativeFullscreen]) #navigator-toolbox,
++  :root:not([macOSNativeFullscreen]) #sidebar-main,
++  :root:not([macOSNativeFullscreen]) .chrome-block {
++    background-color: var(--hilal-glass-toolbar-background);
++    backdrop-filter: blur(30px) saturate(1.35);
++  }
 +
-+    :root:not([macOSNativeFullscreen]) .browser-toolbar:not(.browser-titlebar) {
-+      background-color: transparent;
-+    }
++  :root:not([macOSNativeFullscreen]) .browser-toolbar:not(.browser-titlebar) {
++    background-color: transparent;
++  }
 +
-+    :root:not([macOSNativeFullscreen]) .browserContainer > findbar {
-+      background-color: var(--hilal-glass-toolbar-background);
-+      backdrop-filter: blur(24px) saturate(1.25);
-+    }
++  :root:not([macOSNativeFullscreen]) .browserContainer > findbar {
++    background-color: var(--hilal-glass-toolbar-background);
++    backdrop-filter: blur(24px) saturate(1.25);
 +  }
 +}
 +
@@ -135,30 +123,29 @@ diff --git a/browser/themes/shared/browser-shared.css b/browser/themes/shared/br
  @media -moz-pref("browser.nova.enabled") {
    .chrome-block {
 diff --git a/browser/themes/shared/sidebar.css b/browser/themes/shared/sidebar.css
+index 90e6bf90ff2f..636e17dddbaf 100644
 --- a/browser/themes/shared/sidebar.css
 +++ b/browser/themes/shared/sidebar.css
-@@ -236,6 +236,27 @@
+@@ -236,6 +236,25 @@
    min-width: 16em;
  }
  
 +@media (-moz-platform: macos) {
-+  /* stylelint-disable-next-line media-query-no-invalid */
-+  @media -moz-pref("hilal.browser.transparent-chrome.enabled") {
-+    :root:not([macOSNativeFullscreen]) #sidebar-main,
-+    :root:not([macOSNativeFullscreen]) #sidebar-box {
-+      background-color: transparent;
-+    }
++  :root:not([macOSNativeFullscreen]) #sidebar-main,
++  :root:not([macOSNativeFullscreen]) #sidebar-box {
++    background-color: transparent;
++  }
 +
-+    :root:not([macOSNativeFullscreen]) #sidebar {
-+      background-color: var(--hilal-glass-sidebar-background);
-+      backdrop-filter: blur(28px) saturate(1.3);
-+    }
++  :root:not([macOSNativeFullscreen]) #sidebar {
++    background-color: var(--hilal-glass-sidebar-background);
++    backdrop-filter: blur(30px) saturate(1.35);
++    box-shadow: none;
++  }
 +
-+    :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-launcher-expanded],
-+    :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-ongoing-animations]:not([sidebar-launcher-expanded]) {
-+      background-color: var(--hilal-glass-toolbar-background);
-+      backdrop-filter: blur(28px) saturate(1.3);
-+    }
++  :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-launcher-expanded],
++  :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-ongoing-animations]:not([sidebar-launcher-expanded]) {
++    background-color: var(--hilal-glass-toolbar-background);
++    backdrop-filter: blur(30px) saturate(1.35);
 +  }
 +}
 +
@@ -166,42 +153,38 @@ diff --git a/browser/themes/shared/sidebar.css b/browser/themes/shared/sidebar.c
    display: none;
  }
 diff --git a/browser/themes/shared/tabbrowser/content-area.css b/browser/themes/shared/tabbrowser/content-area.css
+index 522c1f35f50e..c61a543f28b6 100644
 --- a/browser/themes/shared/tabbrowser/content-area.css
 +++ b/browser/themes/shared/tabbrowser/content-area.css
-@@ -23,6 +23,15 @@
+@@ -23,6 +23,12 @@
        --tabpanel-background-color: linear-gradient(45deg, #722291 0%, #45278d 50%, #393473 100%) !important;
      }
    }
 +
 +  @media (-moz-platform: macos) {
-+    /* stylelint-disable-next-line media-query-no-invalid */
-+    @media -moz-pref("hilal.browser.transparent-chrome.enabled") {
-+      &:not([privatebrowsingmode="temporary"]) {
-+        --tabpanel-background-color: var(--hilal-glass-content-background, transparent);
-+      }
++    &:not([privatebrowsingmode="temporary"]) {
++      --tabpanel-background-color: var(--hilal-glass-content-background, transparent);
 +    }
 +  }
  }
  
  /* stylelint-disable-next-line media-query-no-invalid */
-@@ -204,6 +213,23 @@
+@@ -204,6 +210,21 @@
    }
  }
  
 +@media (-moz-platform: macos) {
-+  /* stylelint-disable-next-line media-query-no-invalid */
-+  @media -moz-pref("hilal.browser.transparent-chrome.enabled") {
-+    :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) #browser,
-+    :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) #tabbrowser-tabbox,
-+    :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) #tabbrowser-tabpanels,
-+    :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserSidebarContainer,
-+    :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserStack {
-+      background-color: transparent;
-+    }
++  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) #browser,
++  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) #tabbrowser-tabbox,
++  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) #tabbrowser-tabpanels,
++  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserSidebarContainer,
++  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserStack {
++    background-color: transparent;
++  }
 +
-+    :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserContainer {
-+      background: transparent;
-+    }
++  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserContainer {
++    background: transparent;
++    box-shadow: none;
 +  }
 +}
 +
@@ -209,17 +192,16 @@ diff --git a/browser/themes/shared/tabbrowser/content-area.css b/browser/themes/
    position: absolute;
    inset: 0;
 diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
+index 0e2fa0c1c0f7..096b46324a5d 100644
 --- a/widget/cocoa/nsCocoaWindow.mm
 +++ b/widget/cocoa/nsCocoaWindow.mm
-@@ -5105,8 +5105,13 @@ static unsigned int WindowMaskForBorderStyle(BorderStyle aBorderStyle) {
+@@ -5105,8 +5105,11 @@ static unsigned int WindowMaskForBorderStyle(BorderStyle aBorderStyle) {
      mWindow.collectionBehavior = mWindow.collectionBehavior |
                                   NSWindowCollectionBehaviorMoveToActiveSpace;
    } else {
 -    // Non-popup windows are always opaque.
 -    mWindow.opaque = YES;
-+    const bool hilalTransparentChrome =
-+        mWindowType == WindowType::TopLevel &&
-+        Preferences::GetBool("hilal.browser.transparent-chrome.enabled", false);
++    const bool hilalTransparentChrome = mWindowType == WindowType::TopLevel;
 +    mWindow.opaque = !hilalTransparentChrome;
 +    if (hilalTransparentChrome) {
 +      mWindow.backgroundColor = NSColor.clearColor;

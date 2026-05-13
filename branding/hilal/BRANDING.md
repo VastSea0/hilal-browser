@@ -155,21 +155,18 @@ commits:
    Store package; not produced yet. Generate from `about-logo.svg` at the
    sizes Microsoft expects (Square44, Square150, Wide310x150, StoreLogo,
    etc.).
-2. **macOS `Assets.car`** — compiled asset catalog used by recent macOS
-   builds for `AppIcon`. Build with `actool` from a `.xcassets` bundle that
-   contains `firefox.icns`-equivalent slices.
-3. **Hardcoded "Firefox" / "Mozilla" strings** in `.ftl` files outside the
+2. **Hardcoded "Firefox" / "Mozilla" strings** in `.ftl` files outside the
    branding directory (e.g. `browser/locales/en-US/browser/aboutDialog.ftl`).
    Most prose already references `{ -brand-short-name }`, but marketing
    copy in onboarding flows still mentions "Firefox" verbatim.
-4. **Android (Fenix / GeckoView) branding** — `mobile/android/branding/`.
+3. **Android (Fenix / GeckoView) branding** — `mobile/android/branding/`.
    Intentionally excluded per scope.
-5. **Update channel branding** — separate icons / wordmarks for Beta /
+4. **Update channel branding** — separate icons / wordmarks for Beta /
    Nightly / DevEdition if you intend to ship multiple channels.
-6. **App signing / notarization identifiers** — `org.mozilla.updater` in
+5. **App signing / notarization identifiers** — `org.mozilla.updater` in
    `Info.plist` should become `org.hilal.updater` once a real developer
    certificate exists.
-7. **Crash-reporter and Sentry/Glean app IDs** — review
+6. **Crash-reporter and Sentry/Glean app IDs** — review
    `toolkit/crashreporter/` and telemetry configs before public release.
 
 ## 8. Build verification notes
