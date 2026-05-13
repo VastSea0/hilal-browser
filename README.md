@@ -1,11 +1,11 @@
-# Hüma Browser
+# Hilal Browser
 
-Hüma Browser is a Firefox-based browser. This repository is **not** a
+Hilal Browser is a Firefox-based browser. This repository is **not** a
 fork of the Firefox source code — it is a small **patch and overlay
 layer** on top of upstream
 [mozilla-firefox/firefox](https://github.com/mozilla-firefox/firefox).
 
-Everything Hüma-specific lives here:
+Everything Hilal-specific lives here:
 
 | Folder | Purpose |
 | --- | --- |
@@ -29,13 +29,13 @@ rebasing forward forever.
 #    https://firefox-source-docs.mozilla.org/setup/macos_build.html
 
 # 1. Clone this repo
-git clone https://github.com/VastSea0/huma-browser.git
-cd huma-browser
+git clone https://github.com/VastSea0/hilal-browser.git
+cd hilal-browser
 
 # 2. Clone Firefox into ./firefox (gitignored)
 scripts/setup-firefox.sh
 
-# 3. Apply all Hüma patches and overlays
+# 3. Apply all Hilal patches and overlays
 scripts/apply.sh
 
 # 4. Build (delegates to ./mach build inside ./firefox)
@@ -55,9 +55,9 @@ inside this repo, so you can't accidentally commit it.
 | Goal | Command |
 | --- | --- |
 | Get a Firefox checkout next to this repo | `scripts/setup-firefox.sh` |
-| Apply every Hüma patch + overlay onto Firefox | `scripts/apply.sh` |
+| Apply every Hilal patch + overlay onto Firefox | `scripts/apply.sh` |
 | Regenerate patches from changes you made in `./firefox` | `scripts/refresh.sh` |
-| Pull upstream Firefox and rebase Hüma on top | `scripts/sync-upstream.sh` |
+| Pull upstream Firefox and rebase Hilal on top | `scripts/sync-upstream.sh` |
 | Build on macOS | `scripts/build-macos.sh` |
 
 All scripts accept `-h` for usage. See `docs/WORKFLOW.md` for the full
@@ -86,8 +86,8 @@ reviewable.
 
 ### Source tree layout
 ```
-huma-browser/              <- this repo
-├── branding/huma/         <- assets, mirrored into firefox/browser/branding/huma/
+hilal-browser/              <- this repo
+├── branding/hilal/         <- assets, mirrored into firefox/browser/branding/hilal/
 ├── patches/series         <- order of patch application
 ├── patches/*.patch        <- focused source-code patches
 ├── prefs/                 <- optional pref / config overlays
@@ -108,7 +108,7 @@ huma-browser/              <- this repo
 
 ## License
 
-The Hüma branding assets in `branding/huma/` are © Hüma Browser
+The Hilal branding assets in `branding/hilal/` are © Hilal Browser
 contributors. The build glue, scripts, and patches in this repository
 are released under the
 [Mozilla Public License 2.0](https://www.mozilla.org/en-US/MPL/2.0/) to

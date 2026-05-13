@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/build-macos.sh
 #
-# Thin convenience wrapper around `./mach build` for the Hüma workflow.
+# Thin convenience wrapper around `./mach build` for the Hilal workflow.
 # Does not invent its own build system; delegates entirely to mach.
 #
 # Prerequisites (one-time, per Mozilla's setup docs):
@@ -32,8 +32,8 @@ if [ $# -gt 0 ]; then
     faster)   cmd=("./mach" "build" "faster") ;;
     binaries) cmd=("./mach" "build" "binaries") ;;
     run)
-      log "Building, then running Hüma"
-      (cd "$HUMA_FIREFOX_SRC" && ./mach build && ./mach run "${@:2}")
+      log "Building, then running Hilal"
+      (cd "$HILAL_FIREFOX_SRC" && ./mach build && ./mach run "${@:2}")
       exit 0
       ;;
     --) shift; cmd=("./mach" "build" "$@") ;;
@@ -41,8 +41,8 @@ if [ $# -gt 0 ]; then
   esac
 fi
 
-log "Building in $HUMA_FIREFOX_SRC: ${cmd[*]}"
+log "Building in $HILAL_FIREFOX_SRC: ${cmd[*]}"
 log "(this can take 10-40 minutes on a first full build)"
-(cd "$HUMA_FIREFOX_SRC" && "${cmd[@]}")
+(cd "$HILAL_FIREFOX_SRC" && "${cmd[@]}")
 
-log "Build finished. Launch with: (cd $HUMA_FIREFOX_SRC && ./mach run)"
+log "Build finished. Launch with: (cd $HILAL_FIREFOX_SRC && ./mach run)"

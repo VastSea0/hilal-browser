@@ -1,4 +1,4 @@
-# Building Hüma Browser on macOS
+# Building Hilal Browser on macOS
 
 This is a short addendum to Mozilla's official guide:
 <https://firefox-source-docs.mozilla.org/setup/macos_build.html>
@@ -14,7 +14,7 @@ That installs Xcode CLT, the build sysroot, `mozbuild`/`mach`
 dependencies, `cargo`, and `cbindgen`. It only needs to run once per
 machine.
 
-## Building Hüma
+## Building Hilal
 
 From the repo root:
 
@@ -48,13 +48,13 @@ and are documented at <https://firefox-source-docs.mozilla.org/build/buildsystem
 After a successful build, the macOS app bundle is at:
 
 ```
-firefox/obj-aarch64-apple-darwin*/dist/Nightly.app
+firefox/obj-aarch64-apple-darwin*/dist/Hilal Browser.app
 ```
 
-The bundle name is `Nightly.app` because we keep the upstream
-`MOZ_APP_DISPLAYNAME`. The CFBundleIdentifier reflects our
-distribution id (`org.huma`) thanks to the patch in
-`patches/0001-huma-branding-defaults.patch`.
+The bundle name comes from `branding/hilal/configure.sh`, which sets
+`MOZ_APP_DISPLAYNAME` to `Hilal Browser`. The CFBundleIdentifier reflects
+our distribution id (`org.hilal`) thanks to the patch in
+`patches/0001-hilal-branding-defaults.patch`.
 
 ## Code signing
 

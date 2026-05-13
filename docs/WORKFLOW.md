@@ -1,22 +1,22 @@
 # Workflow
 
-This document walks through day-to-day work on Hüma Browser.
+This document walks through day-to-day work on Hilal Browser.
 
 ## Mental model
 
 There are exactly two trees:
 
-1. **`huma-browser/`** (this repo) — small, text-only, version-controlled. Holds patches, branding, scripts, docs.
-2. **`huma-browser/firefox/`** — the Firefox source checkout. Gitignored from this repo. It has its own git history pointing at `mozilla-firefox/firefox`.
+1. **`hilal-browser/`** (this repo) — small, text-only, version-controlled. Holds patches, branding, scripts, docs.
+2. **`hilal-browser/firefox/`** — the Firefox source checkout. Gitignored from this repo. It has its own git history pointing at `mozilla-firefox/firefox`.
 
-The Hüma changes live in `huma-browser/` as the source of truth.
+The Hilal changes live in `hilal-browser/` as the source of truth.
 Whenever you want to build, you "stamp" them onto `firefox/` with
 `scripts/apply.sh`. Whenever you change source code in `firefox/`,
 you bring the changes back with `scripts/refresh.sh`.
 
 ```
                     apply.sh
-huma-browser/  ─────────────►  firefox/         (build & run from here)
+hilal-browser/  ─────────────►  firefox/         (build & run from here)
    ▲                              │
    │           refresh.sh         │
    └──────────────────────────────┘
@@ -25,10 +25,10 @@ huma-browser/  ─────────────►  firefox/         (bui
 ## First-time setup
 
 ```bash
-git clone https://github.com/VastSea0/huma-browser.git
-cd huma-browser
+git clone https://github.com/VastSea0/hilal-browser.git
+cd hilal-browser
 scripts/setup-firefox.sh    # clones Firefox into ./firefox
-scripts/apply.sh            # stamps Hüma changes onto ./firefox
+scripts/apply.sh            # stamps Hilal changes onto ./firefox
 scripts/build-macos.sh      # delegates to ./mach build
 ```
 
@@ -42,7 +42,7 @@ Edit files inside `firefox/` directly. Use `./mach build`, `./mach
 run`, `./mach test --auto`, etc. as documented at
 <https://firefox-source-docs.mozilla.org>.
 
-When the change is ready to ship in Hüma:
+When the change is ready to ship in Hilal:
 
 ```bash
 scripts/refresh.sh
@@ -51,7 +51,7 @@ scripts/refresh.sh
 This compares the current Firefox tree against `HEAD` (the upstream
 revision you started from), excludes overlay-managed paths (branding,
 prefs), and writes the resulting diff into
-`patches/0001-huma-local-changes.patch`. Review with `git diff`, then
+`patches/0001-hilal-local-changes.patch`. Review with `git diff`, then
 commit.
 
 ### Splitting into multiple focused patches
@@ -61,19 +61,19 @@ work prefer **commit-per-feature** in the Firefox tree:
 
 ```bash
 cd firefox
-git checkout -b huma/main
+git checkout -b hilal/main
 # ... make change ...
 git add -p
-git commit -m "Hüma: enable foo by default"
+git commit -m "Hilal: enable foo by default"
 # ... make next change ...
-git commit -m "Hüma: change tab strip color"
+git commit -m "Hilal: change tab strip color"
 ```
 
 Then export every commit as its own patch:
 
 ```bash
 cd ..
-scripts/refresh.sh --from-commits origin/main..huma/main
+scripts/refresh.sh --from-commits origin/main..hilal/main
 ```
 
 This regenerates `patches/*.patch` and `patches/series` so each
@@ -84,8 +84,8 @@ etc.). Commits stay reviewable; series stays ordered.
 
 Branding files are NOT patches. Either:
 
-- Edit them in `branding/huma/` directly (they're real PNGs/ICOs/etc.) and run `scripts/apply.sh` to push to Firefox. Then build.
-- Or edit them inside `firefox/browser/branding/huma/` and run `scripts/refresh.sh` to pull back.
+- Edit them in `branding/hilal/` directly (they're real PNGs/ICOs/etc.) and run `scripts/apply.sh` to push to Firefox. Then build.
+- Or edit them inside `firefox/browser/branding/hilal/` and run `scripts/refresh.sh` to pull back.
 
 Same model for `prefs/`: a file at `prefs/browser/app/profile/firefox.js`
 would be copied to `firefox/browser/app/profile/firefox.js` on apply.
@@ -99,7 +99,7 @@ touching. Options, in order of preference:
    ```bash
    cd firefox && git reset --hard origin/main
    # apply remaining patches manually (or use --3way)
-   # edit the conflicting file by hand to make the Hüma change work
+   # edit the conflicting file by hand to make the Hilal change work
    cd ..
    scripts/refresh.sh
    ```
@@ -110,7 +110,7 @@ touching. Options, in order of preference:
 
 - Patches use plain unified diff format. We do NOT include `index <hash>..<hash>` lines because they're tied to specific blobs and become noisy across upstream updates.
 - Patch filenames: `<NNNN>-<kebab-case-summary>.patch`. NNNN is just for ordering.
-- Branding assets are case-sensitive; the directory name `branding/huma/` must match the value of `MOZ_BRANDING_DIRECTORY` set in patch 0001.
+- Branding assets are case-sensitive; the directory name `branding/hilal/` must match the value of `MOZ_BRANDING_DIRECTORY` set in patch 0001.
 - Commit one logical change per commit, with a short subject line. The same advice from `AGENTS.md` applies: be sparing with comments, follow upstream conventions.
 
 ## Common one-liners
@@ -120,9 +120,9 @@ touching. Options, in order of preference:
 (cd firefox && git status && git diff --stat)
 
 # Show what apply.sh will sync (branding only)
-diff -r branding/huma firefox/browser/branding/huma
+diff -r branding/hilal firefox/browser/branding/hilal
 
-# Reset Firefox tree to a clean upstream + Hüma state
+# Reset Firefox tree to a clean upstream + Hilal state
 scripts/apply.sh --force
 
 # Roll forward to latest upstream

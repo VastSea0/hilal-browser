@@ -1,0 +1,7 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Hilal Browser">
+  <path fill="currentColor" fill-rule="evenodd"
+        d="M352 64c-94 24-164 109-164 210s70 186 164 210c-30 15-64 24-100 24C126 508 24 406 24 280S126 52 252 52c36 0 70 8 100 24Z"/>
+</svg>

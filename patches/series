@@ -1,4 +1,4 @@
-# Hüma Browser patch series.
+# Hilal Browser patch series.
 #
 # Patches are applied in the order they appear here, top to bottom, by
 # `scripts/apply.sh`. Lines starting with `#` and blank lines are ignored.
@@ -6,4 +6,4 @@
 # Each entry is a path relative to the patches/ directory.
 # Keep entries small and focused; one logical change per patch.
 
-0001-huma-branding-defaults.patch
+0001-hilal-branding-defaults.patch

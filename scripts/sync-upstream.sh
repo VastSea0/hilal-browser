@@ -2,13 +2,13 @@
 # scripts/sync-upstream.sh
 #
 # Pull the latest Firefox upstream, reset the working tree, and
-# re-apply all Hüma patches on top. Intended to be the one-shot
+# re-apply all Hilal patches on top. Intended to be the one-shot
 # command to run after an upstream bump.
 #
 # What it does:
-#   1. git -C $HUMA_FIREFOX_SRC fetch + fast-forward main
+#   1. git -C $HILAL_FIREFOX_SRC fetch + fast-forward main
 #   2. git reset --hard origin/main
-#   3. Remove the branding/huma overlay directory (so apply.sh recreates it)
+#   3. Remove the branding/hilal overlay directory (so apply.sh recreates it)
 #   4. Run scripts/apply.sh
 #   5. Print a reminder to run a build and verify
 #
@@ -39,15 +39,15 @@ done
 require_firefox_src
 
 if [ -z "$BRANCH" ]; then
-  BRANCH="$(git -C "$HUMA_FIREFOX_SRC" rev-parse --abbrev-ref HEAD)"
+  BRANCH="$(git -C "$HILAL_FIREFOX_SRC" rev-parse --abbrev-ref HEAD)"
 fi
 
 log "Upstream sync starting"
-log "  Firefox src : $HUMA_FIREFOX_SRC"
+log "  Firefox src : $HILAL_FIREFOX_SRC"
 log "  Branch      : $BRANCH"
 
 # Refuse to clobber local commits silently.
-unmerged_commits="$(git -C "$HUMA_FIREFOX_SRC" rev-list "@{u}..HEAD" 2>/dev/null | wc -l | tr -d ' ' || echo 0)"
+unmerged_commits="$(git -C "$HILAL_FIREFOX_SRC" rev-list "@{u}..HEAD" 2>/dev/null | wc -l | tr -d ' ' || echo 0)"
 if [ "$unmerged_commits" != "0" ]; then
   warn "$unmerged_commits commit(s) on $BRANCH are not in origin/$BRANCH."
   warn "Refusing to fast-forward. Either commit them via scripts/refresh.sh"
@@ -56,15 +56,16 @@ if [ "$unmerged_commits" != "0" ]; then
 fi
 
 log "Fetching upstream..."
-git -C "$HUMA_FIREFOX_SRC" fetch origin
+git -C "$HILAL_FIREFOX_SRC" fetch origin
 
 log "Resetting $BRANCH to origin/$BRANCH (working tree changes will be discarded)"
-git -C "$HUMA_FIREFOX_SRC" checkout "$BRANCH"
-git -C "$HUMA_FIREFOX_SRC" reset --hard "origin/$BRANCH"
-git -C "$HUMA_FIREFOX_SRC" clean -fdx -- browser/branding/huma || true
+git -C "$HILAL_FIREFOX_SRC" checkout "$BRANCH"
+git -C "$HILAL_FIREFOX_SRC" reset --hard "origin/$BRANCH"
+git -C "$HILAL_FIREFOX_SRC" clean -fdx -- browser/branding/hilal || true
+git -C "$HILAL_FIREFOX_SRC" clean -fdx -- browser/branding/huma || true
 
-log "Re-applying Hüma patches"
-"$HUMA_REPO_ROOT/scripts/apply.sh"
+log "Re-applying Hilal patches"
+"$HILAL_REPO_ROOT/scripts/apply.sh"
 
 log "Upstream sync complete."
 log "Next: scripts/build-macos.sh and verify the browser still launches."

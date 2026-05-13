@@ -1,6 +1,6 @@
 # Syncing with upstream Firefox
 
-Firefox moves fast. To keep Hüma viable we have to roll forward
+Firefox moves fast. To keep Hilal viable we have to roll forward
 regularly. This document covers the happy path and the recovery paths.
 
 ## TL;DR
@@ -12,9 +12,9 @@ scripts/sync-upstream.sh
 That does:
 
 1. `git fetch origin` in `firefox/`
-2. Refuses to proceed if you have local commits on the Firefox branch (so we don't lose Hüma work-in-progress)
+2. Refuses to proceed if you have local commits on the Firefox branch (so we don't lose Hilal work-in-progress)
 3. `git reset --hard origin/<branch>` to land at the new tip
-4. Cleans the `branding/huma/` overlay out of the working tree
+4. Cleans the `branding/hilal/` overlay out of the working tree
 5. Re-runs `scripts/apply.sh`
 
 If every patch applies cleanly, you're done: rebuild and verify.
@@ -73,12 +73,12 @@ scripts/build-macos.sh
 (cd firefox && ./mach test --auto)      # if you have time
 ```
 
-Then exercise any Hüma-specific surface: branding visible, vendor
+Then exercise any Hilal-specific surface: branding visible, vendor
 string in `about:` matches, etc.
 
 ## Picking a base ref
 
-Until we ship a release branch, Hüma tracks `main`. If we later cut
+Until we ship a release branch, Hilal tracks `main`. If we later cut
 a stable branch (e.g. `firefox-esr-128`), pin the Firefox checkout to
 that branch:
 
@@ -98,9 +98,9 @@ that case the patches under `patches/` and the overlay path in
 `scripts/apply.sh` both need adjusting. The safest path:
 
 1. Reset Firefox to upstream HEAD
-2. Manually port the Hüma change in the new location
+2. Manually port the Hilal change in the new location
 3. `scripts/refresh.sh` to capture the new diff
-4. Update `branding/huma/` location if needed
+4. Update `branding/hilal/` location if needed
 5. Commit, document the move in the commit message
 
 Keep the patch repository small and the changes few — every change is

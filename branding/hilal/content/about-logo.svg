@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   role="img"
+   aria-label="Hilal Browser"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="about-logo.svg"
+   inkscape:version="1.4.2 (ebf0e940, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.82832499"
+     inkscape:cx="293.96674"
+     inkscape:cy="223.94592"
+     inkscape:window-width="1472"
+     inkscape:window-height="842"
+     inkscape:window-x="0"
+     inkscape:window-y="33"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <ellipse
+     style="fill:#b1d9f2;fill-opacity:1;stroke-width:1.21776"
+     id="path1-9"
+     cx="256"
+     cy="256.00128"
+     rx="256"
+     ry="256.00128" />
+  <ellipse
+     style="fill:#ffffff;fill-opacity:1;stroke-width:0.998946"
+     id="path1"
+     cx="287.41422"
+     cy="228.92976"
+     rx="210.00037"
+     ry="209.99965"
+     transform="matrix(0.99963114,-0.02715838,0.02709598,0.99963284,0,0)" />
+</svg>
