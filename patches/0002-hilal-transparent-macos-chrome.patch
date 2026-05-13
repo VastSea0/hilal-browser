@@ -1,22 +1,33 @@
-Hilal Browser: enable transparent macOS chrome surfaces
+Hilal Browser: enable native blurred macOS chrome surfaces
 
-Makes Hilal top-level macOS windows stay non-opaque, enables native
-macOS vibrancy behind the browser chrome, and removes the opaque Firefox
-backstops that otherwise keep the toolbar, sidebar, and content frame white.
-The chrome styling is applied unconditionally on macOS for Hilal builds so
-the vertical tabs sidebar, toolbar, and tab panels sit on readable frosted
-Tahoe-style surfaces with real blur instead of opaque Firefox white or fully clear glass.
+Makes Hilal top-level macOS windows non-opaque, installs a real
+macOS vibrancy surface behind the browser chrome, and removes the CSS-only
+backdrop-filter fallback that left the desktop wallpaper directly readable.
+The Hilal background element mirrors Zen Browser: the element itself is
+native-themed with -moz-sidebar so Gecko can emit sidebar theme geometry, while
+the tint is painted on pseudo-elements so native theming is not suppressed by
+author-specified backgrounds.
+
+Hilal also forces a full-window Sidebar vibrancy region from Cocoa for top-level
+windows, so toolbar and sidebar blur do not depend on the browser-box layout or
+on whether a CSS frame happened to register theme geometry. This is the actual
+NSVisualEffectView path that obscures wallpaper details.
+
+Also ports Zen Browser's WebRender opaque-backdrop fallback so CSS
+backdrop-filter surfaces remain well-defined inside transparent windows. The
+desktop/wallpaper blur itself is provided by NSVisualEffectView vibrancy, not
+by CSS opacity.
 
 ---
 diff --git a/browser/base/content/browser-box.inc.xhtml b/browser/base/content/browser-box.inc.xhtml
-index 31cd4f927c27..a4b6959fc492 100644
+index 31cd4f927c27..ce009eeca751 100644
 --- a/browser/base/content/browser-box.inc.xhtml
 +++ b/browser/base/content/browser-box.inc.xhtml
 @@ -3,6 +3,7 @@
  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
  
  <hbox flex="1" id="browser">
-+  <html:div id="hilal-browser-background"/>
++  <html:div id="hilal-browser-background" class="hilal-browser-generic-background"/>
    <box context="sidebar-context-menu" id="sidebar-main" class="chrome-block" hidden="true">
      <html:sidebar-main flex="1">
        <box id="vertical-tabs" slot="tabstrip" customizable="true" contextmenu="toolbar-context-menu"></box>
@@ -75,7 +86,7 @@ index ab4d30c3c1b4..2565cb9e6531 100644
  h2 {
    font-weight: var(--font-weight);
 diff --git a/browser/themes/shared/browser-colors.css b/browser/themes/shared/browser-colors.css
-index 3022f907be0e..7c376bf3c7bc 100644
+index 3022f907be0e..840fec2e336b 100644
 --- a/browser/themes/shared/browser-colors.css
 +++ b/browser/themes/shared/browser-colors.css
 @@ -37,6 +37,24 @@
@@ -83,11 +94,11 @@ index 3022f907be0e..7c376bf3c7bc 100644
    --chrome-content-separator-color: var(--card-border-color);
  
 +  @media (-moz-platform: macos) {
-+    --hilal-glass-window-background: light-dark(rgba(248, 249, 252, 0.22), rgba(18, 18, 24, 0.2));
-+    --hilal-glass-toolbar-background: light-dark(rgba(248, 249, 252, 0.36), rgba(28, 28, 34, 0.32));
-+    --hilal-glass-toolbar-background-inactive: light-dark(rgba(248, 249, 252, 0.3), rgba(28, 28, 34, 0.26));
-+    --hilal-glass-sidebar-background: light-dark(rgba(248, 249, 252, 0.34), rgba(24, 24, 30, 0.3));
-+    --hilal-glass-content-background: light-dark(rgba(255, 255, 255, 0.32), rgba(28, 28, 34, 0.28));
++    --hilal-glass-window-background: light-dark(rgba(246, 248, 252, 0.34), rgba(18, 19, 24, 0.36));
++    --hilal-glass-toolbar-background: light-dark(rgba(248, 250, 253, 0.42), rgba(28, 29, 34, 0.44));
++    --hilal-glass-toolbar-background-inactive: light-dark(rgba(248, 250, 253, 0.34), rgba(28, 29, 34, 0.36));
++    --hilal-glass-sidebar-background: light-dark(rgba(248, 250, 253, 0.4), rgba(24, 25, 31, 0.42));
++    --hilal-glass-content-background: light-dark(rgba(255, 255, 255, 0.36), rgba(28, 29, 34, 0.34));
 +    --hilal-glass-border-color: light-dark(rgba(30, 30, 36, 0.14), rgba(255, 255, 255, 0.16));
 +    --hilal-glass-shadow: 0 20px 48px light-dark(rgba(30, 30, 36, 0.12), rgba(0, 0, 0, 0.3));
 +
@@ -104,10 +115,10 @@ index 3022f907be0e..7c376bf3c7bc 100644
    @media not -moz-pref("sidebar.revamp"), -moz-pref("browser.nova.enabled") {
      &:not([lwtheme]) {
 diff --git a/browser/themes/shared/browser-shared.css b/browser/themes/shared/browser-shared.css
-index f38e980ba766..a65763d25b58 100644
+index f38e980ba766..db0d3ee8234c 100644
 --- a/browser/themes/shared/browser-shared.css
 +++ b/browser/themes/shared/browser-shared.css
-@@ -248,6 +248,56 @@ body {
+@@ -248,6 +248,75 @@ body {
    }
  }
  
@@ -117,26 +128,47 @@ index f38e980ba766..a65763d25b58 100644
 +  }
 +
 +  :root:not([macOSNativeFullscreen]) body {
-+    background: var(--hilal-glass-window-background) !important;
++    background: transparent !important;
++  }
++
++  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #browser {
++    background: transparent !important;
++    position: relative;
++  }
++
++  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) .hilal-browser-generic-background {
++    position: fixed;
++    inset: 0;
++    width: 100vw;
++    height: 100vh;
++    z-index: 0;
++    pointer-events: none;
++    overflow: clip;
++    isolation: isolate;
++    contain: content;
 +  }
 +
 +  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background {
 +    -moz-default-appearance: -moz-sidebar;
 +    appearance: auto;
-+    position: absolute;
-+    inset: 0;
-+    z-index: 0;
-+    pointer-events: none;
-+    overflow: hidden;
-+    background: transparent;
++    color: AccentColor;
 +  }
 +
++  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background::before,
 +  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background::after {
 +    content: "";
 +    position: absolute;
 +    inset: 0;
++    z-index: 0;
++    pointer-events: none;
++  }
++
++  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background::before {
++    background: light-dark(rgba(255, 255, 255, 0.16), rgba(0, 0, 0, 0.12));
++  }
++
++  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background::after {
 +    background: var(--hilal-glass-window-background);
-+    backdrop-filter: blur(80px) saturate(1.25);
 +  }
 +
 +  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #browser > :not(#hilal-browser-background) {
@@ -148,7 +180,6 @@ index f38e980ba766..a65763d25b58 100644
 +  :root:not([macOSNativeFullscreen]) #sidebar-main,
 +  :root:not([macOSNativeFullscreen]) .chrome-block {
 +    background-color: var(--hilal-glass-toolbar-background) !important;
-+    backdrop-filter: blur(72px) saturate(1.25);
 +  }
 +
 +  :root:not([macOSNativeFullscreen]) .browser-toolbar:not(.browser-titlebar) {
@@ -157,7 +188,6 @@ index f38e980ba766..a65763d25b58 100644
 +
 +  :root:not([macOSNativeFullscreen]) .browserContainer > findbar {
 +    background-color: var(--hilal-glass-toolbar-background);
-+    backdrop-filter: blur(64px) saturate(1.2);
 +  }
 +}
 +
@@ -165,10 +195,10 @@ index f38e980ba766..a65763d25b58 100644
  @media -moz-pref("browser.nova.enabled") {
    .chrome-block {
 diff --git a/browser/themes/shared/sidebar.css b/browser/themes/shared/sidebar.css
-index 90e6bf90ff2f..5529eec905f5 100644
+index 90e6bf90ff2f..cb29d4bf6e7b 100644
 --- a/browser/themes/shared/sidebar.css
 +++ b/browser/themes/shared/sidebar.css
-@@ -236,6 +236,27 @@
+@@ -236,6 +236,25 @@
    min-width: 16em;
  }
  
@@ -181,7 +211,6 @@ index 90e6bf90ff2f..5529eec905f5 100644
 +
 +  :root:not([macOSNativeFullscreen]) #sidebar {
 +    background-color: var(--hilal-glass-sidebar-background) !important;
-+    backdrop-filter: blur(72px) saturate(1.25);
 +    box-shadow: none;
 +  }
 +
@@ -189,7 +218,6 @@ index 90e6bf90ff2f..5529eec905f5 100644
 +  :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-ongoing-animations]:not([sidebar-launcher-expanded]) {
 +    background-color: var(--hilal-glass-toolbar-background) !important;
 +    background-image: none !important;
-+    backdrop-filter: blur(72px) saturate(1.25);
 +  }
 +}
 +
@@ -197,7 +225,7 @@ index 90e6bf90ff2f..5529eec905f5 100644
    display: none;
  }
 diff --git a/browser/themes/shared/tabbrowser/content-area.css b/browser/themes/shared/tabbrowser/content-area.css
-index 522c1f35f50e..fce004531a69 100644
+index 522c1f35f50e..6e18ae406ff0 100644
 --- a/browser/themes/shared/tabbrowser/content-area.css
 +++ b/browser/themes/shared/tabbrowser/content-area.css
 @@ -23,6 +23,12 @@
@@ -213,7 +241,7 @@ index 522c1f35f50e..fce004531a69 100644
  }
  
  /* stylelint-disable-next-line media-query-no-invalid */
-@@ -204,6 +210,28 @@
+@@ -204,6 +210,26 @@
    }
  }
  
@@ -224,12 +252,10 @@ index 522c1f35f50e..fce004531a69 100644
 +  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserSidebarContainer,
 +  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserStack {
 +    background: var(--hilal-glass-content-background) !important;
-+    backdrop-filter: blur(72px) saturate(1.2);
 +  }
 +
 +  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserContainer {
 +    background: var(--hilal-glass-content-background) !important;
-+    backdrop-filter: blur(72px) saturate(1.2);
 +    box-shadow: none !important;
 +    outline-color: transparent;
 +  }
@@ -242,6 +268,145 @@ index 522c1f35f50e..fce004531a69 100644
  .browserSidebarContainer {
    position: absolute;
    inset: 0;
+diff --git a/gfx/webrender_bindings/WebRenderAPI.cpp b/gfx/webrender_bindings/WebRenderAPI.cpp
+index 1ffce6399075..13de395ed9f1 100644
+--- a/gfx/webrender_bindings/WebRenderAPI.cpp
++++ b/gfx/webrender_bindings/WebRenderAPI.cpp
+@@ -300,7 +300,9 @@ RefPtr<WebRenderAPI::CreatePromise> WebRenderAPI::Create(
+                 StaticPrefs::gfx_webrender_low_quality_pinch_zoom_AtStartup(),
+                 StaticPrefs::gfx_webrender_max_shared_surface_size_AtStartup(),
+                 StaticPrefs::gfx_webrender_enable_subpixel_aa_AtStartup(),
+-                compositor->ShouldUseLayerCompositor())) {
++                compositor->ShouldUseLayerCompositor(),
++                StaticPrefs::
++                    gfx_webrender_opaque_backdrop_fallback_AtStartup())) {
+           // wr_window_new puts a message into gfxCriticalNote if it returns
+           // false
+           MOZ_ASSERT(errorMessage);
+diff --git a/gfx/webrender_bindings/src/bindings.rs b/gfx/webrender_bindings/src/bindings.rs
+index 2280364f6839..5d86cac2e881 100644
+--- a/gfx/webrender_bindings/src/bindings.rs
++++ b/gfx/webrender_bindings/src/bindings.rs
+@@ -2000,6 +2000,7 @@ pub extern "C" fn wr_window_new(
+     max_shared_surface_size: i32,
+     enable_subpixel_aa: bool,
+     use_layer_compositor: bool,
++    opaque_backdrop_fallback: bool,
+ ) -> bool {
+     assert!(unsafe { is_in_render_thread() });
+ 
+@@ -2166,6 +2167,7 @@ pub extern "C" fn wr_window_new(
+         low_quality_pinch_zoom,
+         max_shared_surface_size,
+         enable_dithering,
++        opaque_backdrop_fallback,
+         ..Default::default()
+     };
+ 
+diff --git a/gfx/wr/webrender/src/device/gl.rs b/gfx/wr/webrender/src/device/gl.rs
+index a8d05508065c..133197cbbb3c 100644
+--- a/gfx/wr/webrender/src/device/gl.rs
++++ b/gfx/wr/webrender/src/device/gl.rs
+@@ -3984,6 +3984,10 @@ impl Device {
+         self.gl.color_mask(false, false, false, false);
+     }
+ 
++    pub fn set_color_mask(&self, r: bool, g: bool, b: bool, a: bool) {
++        self.gl.color_mask(r, g, b, a);
++    }
++
+     pub fn set_blend(&mut self, enable: bool) {
+         if enable {
+             self.gl.enable(gl::BLEND);
+diff --git a/gfx/wr/webrender/src/renderer/init.rs b/gfx/wr/webrender/src/renderer/init.rs
+index ff1ae8a7b465..1f8834e29add 100644
+--- a/gfx/wr/webrender/src/renderer/init.rs
++++ b/gfx/wr/webrender/src/renderer/init.rs
+@@ -206,6 +206,8 @@ pub struct WebRenderOptions {
+     /// If true, open a debug socket to listen for remote debugger.
+     /// Relies on `debugger` cargo feature being enabled.
+     pub enable_debugger: bool,
++    /// See the explanation for `gfx.webrender.opaque-backdrop-fallback`.
++    pub opaque_backdrop_fallback: bool,
+ }
+ 
+ impl WebRenderOptions {
+@@ -279,6 +281,7 @@ impl Default for WebRenderOptions {
+             low_quality_pinch_zoom: false,
+             max_shared_surface_size: 2048,
+             enable_debugger: true,
++            opaque_backdrop_fallback: false,
+         }
+     }
+ }
+@@ -804,6 +807,7 @@ pub fn create_webrender_instance(
+         buffer_damage_tracker: BufferDamageTracker::default(),
+         max_primitive_instance_count,
+         enable_instancing: options.enable_instancing,
++        opaque_backdrop_fallback: options.opaque_backdrop_fallback,
+         consecutive_oom_frames: 0,
+         target_frame_publish_id: None,
+         pending_result_msg: None,
+diff --git a/gfx/wr/webrender/src/renderer/mod.rs b/gfx/wr/webrender/src/renderer/mod.rs
+index 7fe112859d2b..7128b8f4846f 100644
+--- a/gfx/wr/webrender/src/renderer/mod.rs
++++ b/gfx/wr/webrender/src/renderer/mod.rs
+@@ -869,6 +869,8 @@ pub struct Renderer {
+     max_primitive_instance_count: usize,
+     enable_instancing: bool,
+ 
++    opaque_backdrop_fallback: bool,
++
+     /// Count consecutive oom frames to detectif we are stuck unable to render
+     /// in a loop.
+     consecutive_oom_frames: u32,
+@@ -2789,14 +2791,25 @@ impl Renderer {
+                 // Should always be drawing to picture cache tiles or off-screen surface!
+                 debug_assert!(!draw_target.is_default());
+                 let device_to_framebuffer = Scale::new(1i32);
++                let dest_fb_rect = dest * device_to_framebuffer;
+ 
+                 self.device.blit_render_target(
+                     read_target,
+                     src * device_to_framebuffer,
+                     draw_target,
+-                    dest * device_to_framebuffer,
++                    dest_fb_rect,
+                     TextureFilter::Linear,
+                 );
++
++                if self.opaque_backdrop_fallback {
++                    self.device.set_color_mask(false, false, false, true);
++                    self.device.clear_target(
++                        Some([0.0, 0.0, 0.0, 1.0]),
++                        None,
++                        Some(dest_fb_rect),
++                    );
++                    self.device.set_color_mask(true, true, true, true);
++                }
+             }
+         }
+     }
+diff --git a/modules/libpref/init/StaticPrefList.yaml b/modules/libpref/init/StaticPrefList.yaml
+index 9a52bd957643..98f9d01bbaac 100644
+--- a/modules/libpref/init/StaticPrefList.yaml
++++ b/modules/libpref/init/StaticPrefList.yaml
+@@ -8464,6 +8464,15 @@
+ #endif
+   mirror: once
+ 
++# Make backdrop-filter treat its captured backdrop as if it had been composited
++# over an opaque black background. This keeps chrome backdrop-filter surfaces
++# from disappearing into a transparent native window; native macOS vibrancy is
++# still responsible for blurring pixels behind the window.
++- name: gfx.webrender.opaque-backdrop-fallback
++  type: bool
++  value: true
++  mirror: once
++
+ # Disable wait of GPU execution completion
+ - name: gfx.webrender.wait-gpu-finished.disabled
+   type: bool
 diff --git a/widget/cocoa/VibrancyManager.mm b/widget/cocoa/VibrancyManager.mm
 index 5df70a63afb2..2ad7425357c1 100644
 --- a/widget/cocoa/VibrancyManager.mm
@@ -256,10 +421,21 @@ index 5df70a63afb2..2ad7425357c1 100644
        return NSVisualEffectMaterialTitlebar;
    }
 diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
-index 0e2fa0c1c0f7..bc525c8b636d 100644
+index 0e2fa0c1c0f7..28bd95d5ddf0 100644
 --- a/widget/cocoa/nsCocoaWindow.mm
 +++ b/widget/cocoa/nsCocoaWindow.mm
-@@ -5105,8 +5105,11 @@ static unsigned int WindowMaskForBorderStyle(BorderStyle aBorderStyle) {
+@@ -1267,6 +1267,10 @@ static void MakeRegionsNonOverlapping(Span<LayoutDeviceIntRegion> aRegions) {
+ void nsCocoaWindow::UpdateVibrancy(
+     const nsTArray<ThemeGeometry>& aThemeGeometries) {
+   auto regions = GatherVibrantRegions(aThemeGeometries);
++  if (mWindowType == WindowType::TopLevel && !mInFullScreenMode) {
++    regions[VibrancyType::Sidebar].OrWith(
++        LayoutDeviceIntRect(0, 0, mBounds.width, mBounds.height));
++  }
+   MakeRegionsNonOverlapping(regions);
+ 
+   auto& vm = EnsureVibrancyManager();
+@@ -5105,8 +5109,11 @@ static unsigned int WindowMaskForBorderStyle(BorderStyle aBorderStyle) {
      mWindow.collectionBehavior = mWindow.collectionBehavior |
                                   NSWindowCollectionBehaviorMoveToActiveSpace;
    } else {
@@ -273,7 +449,7 @@ index 0e2fa0c1c0f7..bc525c8b636d 100644
    }
  
    if (mAlwaysOnTop || mIsAlert) {
-@@ -5620,7 +5623,9 @@ static void SyncPopoverBounds(NSPopover* aPopover,
+@@ -5620,7 +5627,9 @@ static void SyncPopoverBounds(NSPopover* aPopover,
      return;
    }
  
