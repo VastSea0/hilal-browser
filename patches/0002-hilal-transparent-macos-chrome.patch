@@ -1,10 +1,11 @@
 Hilal Browser: enable transparent macOS chrome surfaces
 
-Makes Hilal top-level macOS windows non-opaque, then softens the
-browser chrome, sidebar, content frame, and new tab page into
-translucent Tahoe-style glass surfaces. The chrome styling is applied
-unconditionally on macOS for Hilal builds so the vertical tabs sidebar,
-toolbar, and new tab canvas do not fall back to opaque Firefox surfaces.
+Makes Hilal top-level macOS windows stay non-opaque, enables native
+macOS vibrancy behind the browser chrome, and removes the opaque Firefox
+backstops that otherwise keep the toolbar, sidebar, and content frame white.
+The chrome styling is applied unconditionally on macOS for Hilal builds so
+the vertical tabs sidebar, toolbar, and tab panels can sit on translucent
+Tahoe-style surfaces instead of opaque Firefox surfaces.
 
 ---
 diff --git a/browser/extensions/newtab/content-src/styles/activity-stream.scss b/browser/extensions/newtab/content-src/styles/activity-stream.scss
@@ -90,27 +91,36 @@ index 3022f907be0e..0b771f557c65 100644
    @media not -moz-pref("sidebar.revamp"), -moz-pref("browser.nova.enabled") {
      &:not([lwtheme]) {
 diff --git a/browser/themes/shared/browser-shared.css b/browser/themes/shared/browser-shared.css
-index f38e980ba766..67090e60610c 100644
+index f38e980ba766..68fb1360fbdb 100644
 --- a/browser/themes/shared/browser-shared.css
 +++ b/browser/themes/shared/browser-shared.css
-@@ -248,6 +248,28 @@ body {
+@@ -248,6 +248,37 @@ body {
    }
  }
  
 +@media (-moz-platform: macos) {
++  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) {
++    background: transparent !important;
++  }
++
 +  :root:not([macOSNativeFullscreen]) body {
-+    background-color: transparent;
++    background: transparent !important;
++  }
++
++  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) body::after {
++    -moz-default-appearance: -moz-sidebar;
++    appearance: auto;
 +  }
 +
 +  :root:not([macOSNativeFullscreen]) #navigator-toolbox,
 +  :root:not([macOSNativeFullscreen]) #sidebar-main,
 +  :root:not([macOSNativeFullscreen]) .chrome-block {
-+    background-color: var(--hilal-glass-toolbar-background);
++    background-color: var(--hilal-glass-toolbar-background) !important;
 +    backdrop-filter: blur(30px) saturate(1.35);
 +  }
 +
 +  :root:not([macOSNativeFullscreen]) .browser-toolbar:not(.browser-titlebar) {
-+    background-color: transparent;
++    background-color: transparent !important;
 +  }
 +
 +  :root:not([macOSNativeFullscreen]) .browserContainer > findbar {
@@ -123,28 +133,30 @@ index f38e980ba766..67090e60610c 100644
  @media -moz-pref("browser.nova.enabled") {
    .chrome-block {
 diff --git a/browser/themes/shared/sidebar.css b/browser/themes/shared/sidebar.css
-index 90e6bf90ff2f..636e17dddbaf 100644
+index 90e6bf90ff2f..918ca15d090f 100644
 --- a/browser/themes/shared/sidebar.css
 +++ b/browser/themes/shared/sidebar.css
-@@ -236,6 +236,25 @@
+@@ -236,6 +236,27 @@
    min-width: 16em;
  }
  
 +@media (-moz-platform: macos) {
 +  :root:not([macOSNativeFullscreen]) #sidebar-main,
 +  :root:not([macOSNativeFullscreen]) #sidebar-box {
-+    background-color: transparent;
++    background: transparent !important;
++    background-image: none !important;
 +  }
 +
 +  :root:not([macOSNativeFullscreen]) #sidebar {
-+    background-color: var(--hilal-glass-sidebar-background);
++    background-color: var(--hilal-glass-sidebar-background) !important;
 +    backdrop-filter: blur(30px) saturate(1.35);
 +    box-shadow: none;
 +  }
 +
 +  :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-launcher-expanded],
 +  :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-ongoing-animations]:not([sidebar-launcher-expanded]) {
-+    background-color: var(--hilal-glass-toolbar-background);
++    background-color: var(--hilal-glass-toolbar-background) !important;
++    background-image: none !important;
 +    backdrop-filter: blur(30px) saturate(1.35);
 +  }
 +}
@@ -153,7 +165,7 @@ index 90e6bf90ff2f..636e17dddbaf 100644
    display: none;
  }
 diff --git a/browser/themes/shared/tabbrowser/content-area.css b/browser/themes/shared/tabbrowser/content-area.css
-index 522c1f35f50e..c61a543f28b6 100644
+index 522c1f35f50e..422a6c0aaa1b 100644
 --- a/browser/themes/shared/tabbrowser/content-area.css
 +++ b/browser/themes/shared/tabbrowser/content-area.css
 @@ -23,6 +23,12 @@
@@ -169,7 +181,7 @@ index 522c1f35f50e..c61a543f28b6 100644
  }
  
  /* stylelint-disable-next-line media-query-no-invalid */
-@@ -204,6 +210,21 @@
+@@ -204,6 +210,26 @@
    }
  }
  
@@ -179,20 +191,38 @@ index 522c1f35f50e..c61a543f28b6 100644
 +  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) #tabbrowser-tabpanels,
 +  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserSidebarContainer,
 +  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserStack {
-+    background-color: transparent;
++    background: transparent !important;
 +  }
 +
 +  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserContainer {
-+    background: transparent;
-+    box-shadow: none;
++    background: transparent !important;
++    box-shadow: none !important;
++    outline-color: transparent;
++  }
++
++  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) browser[type="content"][transparent="true"] {
++    background: transparent !important;
 +  }
 +}
 +
  .browserSidebarContainer {
    position: absolute;
    inset: 0;
+diff --git a/widget/cocoa/VibrancyManager.mm b/widget/cocoa/VibrancyManager.mm
+index 5df70a63afb2..2ad7425357c1 100644
+--- a/widget/cocoa/VibrancyManager.mm
++++ b/widget/cocoa/VibrancyManager.mm
+@@ -36,7 +36,7 @@ static NSVisualEffectMaterial VisualEffectMaterialForVibrancyType(
+     VibrancyType aType) {
+   switch (aType) {
+     case VibrancyType::Sidebar:
+-      return NSVisualEffectMaterialSidebar;
++      return NSVisualEffectMaterialHUDWindow;
+     case VibrancyType::Titlebar:
+       return NSVisualEffectMaterialTitlebar;
+   }
 diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
-index 0e2fa0c1c0f7..096b46324a5d 100644
+index 0e2fa0c1c0f7..bc525c8b636d 100644
 --- a/widget/cocoa/nsCocoaWindow.mm
 +++ b/widget/cocoa/nsCocoaWindow.mm
 @@ -5105,8 +5105,11 @@ static unsigned int WindowMaskForBorderStyle(BorderStyle aBorderStyle) {
@@ -209,3 +239,14 @@ index 0e2fa0c1c0f7..096b46324a5d 100644
    }
  
    if (mAlwaysOnTop || mIsAlert) {
+@@ -5620,7 +5623,9 @@ static void SyncPopoverBounds(NSPopover* aPopover,
+     return;
+   }
+ 
+-  BOOL isTransparent = aMode == TransparencyMode::Transparent;
++  const bool hilalTransparentChrome = mWindowType == WindowType::TopLevel;
++  BOOL isTransparent =
++      hilalTransparentChrome || aMode == TransparencyMode::Transparent;
+   BOOL currentTransparency = !mWindow.isOpaque;
+   if (isTransparent == currentTransparency) {
+     return;
