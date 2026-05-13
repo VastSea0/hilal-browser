@@ -159,6 +159,11 @@ pref("browser.ml.chat.menu", false);
 pref("browser.tabs.groups.smart.enabled", false);
 pref("browser.ml.linkPreview.enabled", false);
 
+// Hilal Workspaces defaults.
+pref("hilal.workspaces.enabled", true);
+pref("hilal.workspaces.data", "[]");
+pref("hilal.workspaces.active", "default");
+
 // Permission defaults.
 pref("permissions.default.desktop-notification", 2);
 pref("permissions.default.geo", 2);

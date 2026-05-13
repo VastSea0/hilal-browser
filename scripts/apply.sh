@@ -98,8 +98,8 @@ if [ -d "$HILAL_REPO_ROOT/prefs" ] && compgen -G "$HILAL_REPO_ROOT/prefs/*" >/de
       rel="${rel#./}"
       dst="$HILAL_FIREFOX_SRC/$rel"
       mkdir -p "$(dirname "$dst")"
-      cp -f "$rel" "$dst"
-      log "  prefs -> $rel"
+      ln -sf "$(pwd)/$rel" "$dst"
+      log "  prefs -> $rel (symlink)"
     done
   )
 fi

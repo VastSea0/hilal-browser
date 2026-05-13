@@ -1,0 +1,70 @@
+Hilal Browser: add Hilal settings section to General preferences
+
+Adds a "Hilal Browser" groupbox to the General pane with a checkbox to
+enable/disable workspaces and a Reset Workspaces button. The pref binding
+is handled manually via JS (getBoolPref/setBoolPref) to avoid the missing
+preference declaration error from the old XUL preference= attribute system.
+
+---
+diff --git a/browser/components/preferences/main.inc.xhtml b/browser/components/preferences/main.inc.xhtml
+index 32e3edbbe933..418522a4c0a1 100644
+--- a/browser/components/preferences/main.inc.xhtml
++++ b/browser/components/preferences/main.inc.xhtml
+@@ -214,4 +214,20 @@
+ 
+ <!-- Network Settings-->
+ <html:setting-group groupid="networkProxy" data-category="paneGeneral" data-subcategory="netsettings" hidden="true" data-srd-migrated="" />
++
++<!-- Hilal Browser -->
++<groupbox id="hilalSettingsGroup" data-category="paneGeneral" hidden="true">
++  <label><html:h2>Hilal Browser</html:h2></label>
++  <vbox align="start">
++    <checkbox id="hilalWorkspacesEnabled"
++              label="Enable workspaces"/>
++    <hbox>
++      <description flex="1">Reset all workspace data (cannot be undone).</description>
++      <button id="hilalWorkspacesReset"
++              is="highlightable-button"
++              class="accessory-button"
++              label="Reset Workspaces"/>
++    </hbox>
++  </vbox>
++</groupbox>
+ </html:template>
+diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+index dd1f2e21e8b2..a73e61d43dfb 100644
+--- a/browser/components/preferences/main.js
++++ b/browser/components/preferences/main.js
+@@ -13,7 +13,7 @@
+ /* import-globals-from preferences.js */
+ /* import-globals-from /toolkit/mozapps/preferences/fontbuilder.js */
+ /* import-globals-from /browser/base/content/aboutDialog-appUpdater.js */
+-/* global MozXULElement */
++/* global MozXULElement, Services */
+ 
+ /**
+  * @import { Setting } from "chrome://global/content/preferences/Setting.mjs"
+@@ -830,6 +830,23 @@ var gMainPane = {
+       AppFileHandler._init();
+     }
+ 
++    // Hilal Browser settings.
++    const hilalWsCheckbox = /** @type {HTMLInputElement|null} */ (document.getElementById("hilalWorkspacesEnabled"));
++    if (hilalWsCheckbox) {
++      hilalWsCheckbox.checked = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
++      hilalWsCheckbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref("hilal.workspaces.enabled", hilalWsCheckbox.checked);
++      });
++    }
++    setEventListener("hilalWorkspacesReset", "command", function () {
++      if (Services.prompt.confirm(window, "Reset Workspaces", "This will delete all workspace data and cannot be undone. Continue?")) {
++        Services.prefs.setStringPref("hilal.workspaces.data", "[]");
++        Services.prefs.setStringPref("hilal.workspaces.active", "default");
++        Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
++        if (hilalWsCheckbox) hilalWsCheckbox.checked = true;
++      }
++    });
++
+     // Listen for window unload so we can remove our preference observers.
+     window.addEventListener("unload", this);
+ 
