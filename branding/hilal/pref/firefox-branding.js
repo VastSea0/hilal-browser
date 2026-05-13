@@ -31,6 +31,11 @@ pref("app.update.badgeWaitTime", 14400);
 // If this is less than 5, then pasting code into the web console is disabled.
 pref("devtools.selfxss.count", 5);
 
+// Sidebar and vertical tabs are enabled by default in Hilal.
+pref("sidebar.revamp", true);
+pref("sidebar.verticalTabs", true);
+pref("sidebar.visibility", "always-show");
+
 // Privacy-first Hilal defaults, informed by Betterfox and arkenfox.
 // These are default prefs rather than locked prefs, so users can still opt in.
 
