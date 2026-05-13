@@ -63,7 +63,7 @@ optional "Browser" suffix.
 | `logo-monochrome.svg` | Single-color variant | Uses `currentColor` |
 | `logo-favicon.svg` | Small-size variant | Same crescent geometry |
 | `about-wordmark.svg` | Full "Hilal Browser" lockup | About dialog |
-| `hilal-wordmark.svg` | "Hilal" only, `currentColor` | Exposed at the chrome URL `firefox-wordmark.svg` for compatibility |
+| `hilal-wordmark.svg` | "Hilal Browser", `currentColor` | Exposed at the chrome URL `firefox-wordmark.svg` for compatibility |
 | `document_pdf.svg` | PDF document icon | Navy + cyan band |
 
 ### Generated rasters (`./`)

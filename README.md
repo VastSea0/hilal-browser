@@ -5,6 +5,14 @@ fork of the Firefox source code — it is a small **patch and overlay
 layer** on top of upstream
 [mozilla-firefox/firefox](https://github.com/mozilla-firefox/firefox).
 
+## Project history
+
+Hilal Browser is the continuation of the project previously developed as
+**Huma Browser**. The project has now been officially restarted and
+reintroduced under the **Hilal Browser** name, with the current
+repository, branding, defaults, and documentation reflecting that new
+identity.
+
 Everything Hilal-specific lives here:
 
 | Folder | Purpose |
