@@ -5,11 +5,23 @@ macOS vibrancy behind the browser chrome, and removes the opaque Firefox
 backstops that otherwise keep the toolbar, sidebar, and content frame white.
 The chrome styling is applied unconditionally on macOS for Hilal builds so
 the vertical tabs sidebar, toolbar, and tab panels sit on readable frosted
-Tahoe-style surfaces instead of either opaque Firefox white or fully clear glass.
+Tahoe-style surfaces with real blur instead of opaque Firefox white or fully clear glass.
 
 ---
+diff --git a/browser/base/content/browser-box.inc.xhtml b/browser/base/content/browser-box.inc.xhtml
+index 31cd4f927c27..a4b6959fc492 100644
+--- a/browser/base/content/browser-box.inc.xhtml
++++ b/browser/base/content/browser-box.inc.xhtml
+@@ -3,6 +3,7 @@
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+ <hbox flex="1" id="browser">
++  <html:div id="hilal-browser-background"/>
+   <box context="sidebar-context-menu" id="sidebar-main" class="chrome-block" hidden="true">
+     <html:sidebar-main flex="1">
+       <box id="vertical-tabs" slot="tabstrip" customizable="true" contextmenu="toolbar-context-menu"></box>
 diff --git a/browser/extensions/newtab/content-src/styles/activity-stream.scss b/browser/extensions/newtab/content-src/styles/activity-stream.scss
-index 4ac1348a809a..a1f67b64499b 100644
+index 4ac1348a809a..7122d586e50a 100644
 --- a/browser/extensions/newtab/content-src/styles/activity-stream.scss
 +++ b/browser/extensions/newtab/content-src/styles/activity-stream.scss
 @@ -42,6 +42,23 @@ body {
@@ -19,10 +31,10 @@ index 4ac1348a809a..a1f67b64499b 100644
 +@media (-moz-platform: macos) {
 +  :root {
 +    --newtab-background-color: transparent;
-+    --newtab-background-color-secondary: light-dark(rgba(255, 255, 255, 0.78), rgba(42, 41, 49, 0.68));
-+    --newtab-background-card: light-dark(rgba(255, 255, 255, 0.68), rgba(66, 65, 77, 0.58));
-+    --newtab-weather-background-color: light-dark(rgba(255, 255, 255, 0.66), rgba(66, 65, 77, 0.56));
-+    --newtab-overlay-color: light-dark(rgba(255, 255, 255, 0.58), rgba(43, 42, 51, 0.5));
++    --newtab-background-color-secondary: light-dark(rgba(255, 255, 255, 0.58), rgba(42, 41, 49, 0.52));
++    --newtab-background-card: light-dark(rgba(255, 255, 255, 0.48), rgba(66, 65, 77, 0.46));
++    --newtab-weather-background-color: light-dark(rgba(255, 255, 255, 0.46), rgba(66, 65, 77, 0.44));
++    --newtab-overlay-color: light-dark(rgba(255, 255, 255, 0.42), rgba(43, 42, 51, 0.4));
 +  }
 +
 +  html,
@@ -37,7 +49,7 @@ index 4ac1348a809a..a1f67b64499b 100644
  h2 {
    font-weight: var(--font-weight);
 diff --git a/browser/extensions/newtab/css/activity-stream.css b/browser/extensions/newtab/css/activity-stream.css
-index ab4d30c3c1b4..93c954e30a3e 100644
+index ab4d30c3c1b4..2565cb9e6531 100644
 --- a/browser/extensions/newtab/css/activity-stream.css
 +++ b/browser/extensions/newtab/css/activity-stream.css
 @@ -338,6 +338,21 @@ body {
@@ -47,10 +59,10 @@ index ab4d30c3c1b4..93c954e30a3e 100644
 +@media (-moz-platform: macos) {
 +  :root {
 +    --newtab-background-color: transparent;
-+    --newtab-background-color-secondary: light-dark(rgba(255, 255, 255, 0.78), rgba(42, 41, 49, 0.68));
-+    --newtab-background-card: light-dark(rgba(255, 255, 255, 0.68), rgba(66, 65, 77, 0.58));
-+    --newtab-weather-background-color: light-dark(rgba(255, 255, 255, 0.66), rgba(66, 65, 77, 0.56));
-+    --newtab-overlay-color: light-dark(rgba(255, 255, 255, 0.58), rgba(43, 42, 51, 0.5));
++    --newtab-background-color-secondary: light-dark(rgba(255, 255, 255, 0.58), rgba(42, 41, 49, 0.52));
++    --newtab-background-card: light-dark(rgba(255, 255, 255, 0.48), rgba(66, 65, 77, 0.46));
++    --newtab-weather-background-color: light-dark(rgba(255, 255, 255, 0.46), rgba(66, 65, 77, 0.44));
++    --newtab-overlay-color: light-dark(rgba(255, 255, 255, 0.42), rgba(43, 42, 51, 0.4));
 +  }
 +  html,
 +  body,
@@ -63,7 +75,7 @@ index ab4d30c3c1b4..93c954e30a3e 100644
  h2 {
    font-weight: var(--font-weight);
 diff --git a/browser/themes/shared/browser-colors.css b/browser/themes/shared/browser-colors.css
-index 3022f907be0e..05475c248c6e 100644
+index 3022f907be0e..7c376bf3c7bc 100644
 --- a/browser/themes/shared/browser-colors.css
 +++ b/browser/themes/shared/browser-colors.css
 @@ -37,6 +37,24 @@
@@ -71,11 +83,11 @@ index 3022f907be0e..05475c248c6e 100644
    --chrome-content-separator-color: var(--card-border-color);
  
 +  @media (-moz-platform: macos) {
-+    --hilal-glass-window-background: light-dark(rgba(248, 249, 252, 0.56), rgba(18, 18, 24, 0.5));
-+    --hilal-glass-toolbar-background: light-dark(rgba(248, 249, 252, 0.74), rgba(28, 28, 34, 0.58));
-+    --hilal-glass-toolbar-background-inactive: light-dark(rgba(248, 249, 252, 0.64), rgba(28, 28, 34, 0.48));
-+    --hilal-glass-sidebar-background: light-dark(rgba(248, 249, 252, 0.7), rgba(24, 24, 30, 0.56));
-+    --hilal-glass-content-background: light-dark(rgba(255, 255, 255, 0.68), rgba(28, 28, 34, 0.52));
++    --hilal-glass-window-background: light-dark(rgba(248, 249, 252, 0.22), rgba(18, 18, 24, 0.2));
++    --hilal-glass-toolbar-background: light-dark(rgba(248, 249, 252, 0.36), rgba(28, 28, 34, 0.32));
++    --hilal-glass-toolbar-background-inactive: light-dark(rgba(248, 249, 252, 0.3), rgba(28, 28, 34, 0.26));
++    --hilal-glass-sidebar-background: light-dark(rgba(248, 249, 252, 0.34), rgba(24, 24, 30, 0.3));
++    --hilal-glass-content-background: light-dark(rgba(255, 255, 255, 0.32), rgba(28, 28, 34, 0.28));
 +    --hilal-glass-border-color: light-dark(rgba(30, 30, 36, 0.14), rgba(255, 255, 255, 0.16));
 +    --hilal-glass-shadow: 0 20px 48px light-dark(rgba(30, 30, 36, 0.12), rgba(0, 0, 0, 0.3));
 +
@@ -92,10 +104,10 @@ index 3022f907be0e..05475c248c6e 100644
    @media not -moz-pref("sidebar.revamp"), -moz-pref("browser.nova.enabled") {
      &:not([lwtheme]) {
 diff --git a/browser/themes/shared/browser-shared.css b/browser/themes/shared/browser-shared.css
-index f38e980ba766..3e26a471bda7 100644
+index f38e980ba766..a65763d25b58 100644
 --- a/browser/themes/shared/browser-shared.css
 +++ b/browser/themes/shared/browser-shared.css
-@@ -248,6 +248,37 @@ body {
+@@ -248,6 +248,56 @@ body {
    }
  }
  
@@ -108,16 +120,35 @@ index f38e980ba766..3e26a471bda7 100644
 +    background: var(--hilal-glass-window-background) !important;
 +  }
 +
-+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) body::after {
++  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background {
 +    -moz-default-appearance: -moz-sidebar;
 +    appearance: auto;
++    position: absolute;
++    inset: 0;
++    z-index: 0;
++    pointer-events: none;
++    overflow: hidden;
++    background: transparent;
++  }
++
++  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background::after {
++    content: "";
++    position: absolute;
++    inset: 0;
++    background: var(--hilal-glass-window-background);
++    backdrop-filter: blur(80px) saturate(1.25);
++  }
++
++  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #browser > :not(#hilal-browser-background) {
++    position: relative;
++    z-index: 1;
 +  }
 +
 +  :root:not([macOSNativeFullscreen]) #navigator-toolbox,
 +  :root:not([macOSNativeFullscreen]) #sidebar-main,
 +  :root:not([macOSNativeFullscreen]) .chrome-block {
 +    background-color: var(--hilal-glass-toolbar-background) !important;
-+    backdrop-filter: blur(44px) saturate(1.25);
++    backdrop-filter: blur(72px) saturate(1.25);
 +  }
 +
 +  :root:not([macOSNativeFullscreen]) .browser-toolbar:not(.browser-titlebar) {
@@ -126,7 +157,7 @@ index f38e980ba766..3e26a471bda7 100644
 +
 +  :root:not([macOSNativeFullscreen]) .browserContainer > findbar {
 +    background-color: var(--hilal-glass-toolbar-background);
-+    backdrop-filter: blur(34px) saturate(1.2);
++    backdrop-filter: blur(64px) saturate(1.2);
 +  }
 +}
 +
@@ -134,7 +165,7 @@ index f38e980ba766..3e26a471bda7 100644
  @media -moz-pref("browser.nova.enabled") {
    .chrome-block {
 diff --git a/browser/themes/shared/sidebar.css b/browser/themes/shared/sidebar.css
-index 90e6bf90ff2f..dca0b7d64ad9 100644
+index 90e6bf90ff2f..5529eec905f5 100644
 --- a/browser/themes/shared/sidebar.css
 +++ b/browser/themes/shared/sidebar.css
 @@ -236,6 +236,27 @@
@@ -150,7 +181,7 @@ index 90e6bf90ff2f..dca0b7d64ad9 100644
 +
 +  :root:not([macOSNativeFullscreen]) #sidebar {
 +    background-color: var(--hilal-glass-sidebar-background) !important;
-+    backdrop-filter: blur(44px) saturate(1.25);
++    backdrop-filter: blur(72px) saturate(1.25);
 +    box-shadow: none;
 +  }
 +
@@ -158,7 +189,7 @@ index 90e6bf90ff2f..dca0b7d64ad9 100644
 +  :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-ongoing-animations]:not([sidebar-launcher-expanded]) {
 +    background-color: var(--hilal-glass-toolbar-background) !important;
 +    background-image: none !important;
-+    backdrop-filter: blur(44px) saturate(1.25);
++    backdrop-filter: blur(72px) saturate(1.25);
 +  }
 +}
 +
@@ -166,7 +197,7 @@ index 90e6bf90ff2f..dca0b7d64ad9 100644
    display: none;
  }
 diff --git a/browser/themes/shared/tabbrowser/content-area.css b/browser/themes/shared/tabbrowser/content-area.css
-index 522c1f35f50e..6e18ae406ff0 100644
+index 522c1f35f50e..fce004531a69 100644
 --- a/browser/themes/shared/tabbrowser/content-area.css
 +++ b/browser/themes/shared/tabbrowser/content-area.css
 @@ -23,6 +23,12 @@
@@ -182,7 +213,7 @@ index 522c1f35f50e..6e18ae406ff0 100644
  }
  
  /* stylelint-disable-next-line media-query-no-invalid */
-@@ -204,6 +210,26 @@
+@@ -204,6 +210,28 @@
    }
  }
  
@@ -193,10 +224,12 @@ index 522c1f35f50e..6e18ae406ff0 100644
 +  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserSidebarContainer,
 +  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserStack {
 +    background: var(--hilal-glass-content-background) !important;
++    backdrop-filter: blur(72px) saturate(1.2);
 +  }
 +
 +  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserContainer {
 +    background: var(--hilal-glass-content-background) !important;
++    backdrop-filter: blur(72px) saturate(1.2);
 +    box-shadow: none !important;
 +    outline-color: transparent;
 +  }
