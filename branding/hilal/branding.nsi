@@ -12,11 +12,11 @@
 !define BrandShorterName      "Hilal"
 !define BrandProductName      "Hilal"
 !define CompanyName           "Hilal"
-!define URLInfoAbout          "https://browser.gkdevstudio.org"
-!define HelpLink              "https://browser.gkdevstudio.org/support"
+!define URLInfoAbout          "https://hilal.gkdevstudio.org"
+!define HelpLink              "https://hilal.gkdevstudio.org/support"
 
-!define URLManualDownload     "https://browser.gkdevstudio.org/download"
-!define URLSystemRequirements "https://browser.gkdevstudio.org/system-requirements"
+!define URLManualDownload     "https://hilal.gkdevstudio.org/download"
+!define URLSystemRequirements "https://hilal.gkdevstudio.org/system-requirements"
 !define Channel               "release"
 
 # Dialog units are used so the UI displays correctly with the system's DPI
