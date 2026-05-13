@@ -1,0 +1,122 @@
+name: Build and Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Git tag to build (e.g. v1.0.0)"
+        required: true
+
+env:
+  HILAL_FIREFOX_UPSTREAM: "https://github.com/mozilla-firefox/firefox.git"
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.vars.outputs.tag }}
+      upload_url: ${{ steps.create-release.outputs.upload_url }}
+    steps:
+      - name: Determine tag
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        id: create-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.tag }}
+          name: "Hilal Browser ${{ steps.vars.outputs.tag }}"
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+
+  build:
+    needs: create-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux
+            artifact_glob: "firefox/obj-x86_64-pc-linux-gnu/dist/*.tar.bz2"
+            mach_target: ""
+          - os: macos-latest
+            name: macos
+            artifact_glob: "firefox/obj-aarch64-apple-darwin*/dist/*.dmg"
+            mach_target: ""
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout Hilal
+        uses: actions/checkout@v4
+
+      - name: Read pinned Firefox commit
+        id: firefox-commit
+        run: |
+          COMMIT=$(cat FIREFOX_COMMIT | tr -d '[:space:]')
+          echo "commit=$COMMIT" >> "$GITHUB_OUTPUT"
+
+      - name: Clone Firefox at pinned commit
+        run: |
+          COMMIT="${{ steps.firefox-commit.outputs.commit }}"
+          mkdir -p firefox
+          cd firefox
+          git init
+          git remote add origin "$HILAL_FIREFOX_UPSTREAM"
+          git fetch --depth=1 origin "$COMMIT"
+          git checkout FETCH_HEAD
+
+      - name: Bootstrap dependencies (Linux)
+        if: matrix.name == 'linux'
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip python3-venv git curl
+          cd firefox
+          ./mach bootstrap --application-choice browser --no-interactive || true
+
+      - name: Bootstrap dependencies (macOS)
+        if: matrix.name == 'macos'
+        run: |
+          brew install mercurial || true
+          cd firefox
+          ./mach bootstrap --application-choice browser --no-interactive || true
+
+      - name: Apply Hilal patches and branding
+        run: |
+          bash scripts/apply.sh
+        shell: bash
+
+      - name: Configure mozconfig
+        run: |
+          cp mozconfigs/${{ matrix.name }} firefox/mozconfig
+
+      - name: Build Firefox
+        run: |
+          cd firefox
+          ./mach build
+
+      - name: Package Firefox
+        run: |
+          cd firefox
+          ./mach package
+
+      - name: Upload release asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ needs.create-release.outputs.tag }}"
+          for f in ${{ matrix.artifact_glob }}; do
+            [ -f "$f" ] || continue
+            echo "Uploading $f ..."
+            gh release upload "$TAG" "$f" --clobber
+          done
+        shell: bash

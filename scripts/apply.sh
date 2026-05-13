@@ -13,6 +13,7 @@
 # Usage:
 #   scripts/apply.sh
 #   scripts/apply.sh --force      # reset Firefox tree to a clean state first
+#   scripts/apply.sh --no-symlinks # copy instead of symlink (Windows CI)
 #   HILAL_FIREFOX_SRC=/path/to/ff scripts/apply.sh
 
 set -euo pipefail
@@ -21,11 +22,13 @@ set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 
 FORCE=0
+NO_SYMLINKS=0
 for arg in "$@"; do
   case "$arg" in
     --force|-f) FORCE=1 ;;
+    --no-symlinks) NO_SYMLINKS=1 ;;
     -h|--help)
-      sed -n '2,16p' "$0"
+      sed -n '2,17p' "$0"
       exit 0
       ;;
     *) die "Unknown argument: $arg" ;;
@@ -88,7 +91,7 @@ fi
 
 # -- 3. Copy any prefs/ overlays ---------------------------------------------
 
-if [ -d "$HILAL_REPO_ROOT/prefs" ] && compgen -G "$HILAL_REPO_ROOT/prefs/*" >/dev/null; then
+if [ -d "$HILAL_REPO_ROOT/prefs" ] && [ "$(find "$HILAL_REPO_ROOT/prefs" -type f ! -name '.DS_Store' ! -name '.gitkeep' -print -quit 2>/dev/null)" ]; then
   log "Syncing prefs/ overlays into Firefox tree"
   # Convention: a file at prefs/<relative/path/in/firefox> is copied to that
   # path in the Firefox source. Subdirectories under prefs/ mirror the tree.
@@ -98,8 +101,16 @@ if [ -d "$HILAL_REPO_ROOT/prefs" ] && compgen -G "$HILAL_REPO_ROOT/prefs/*" >/de
       rel="${rel#./}"
       dst="$HILAL_FIREFOX_SRC/$rel"
       mkdir -p "$(dirname "$dst")"
-      ln -sf "$(pwd)/$rel" "$dst"
-      log "  prefs -> $rel (symlink)"
+      if [ "$NO_SYMLINKS" = 1 ]; then
+        cp -f "$(pwd)/$rel" "$dst"
+        log "  prefs -> $rel (copy)"
+      else
+        src_abs="$(pwd)/$rel"
+        dst_dir="$(dirname "$dst")"
+        rel_link="$(python3 -c 'import os.path; import sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))' "$src_abs" "$dst_dir")"
+        ln -sf "$rel_link" "$dst"
+        log "  prefs -> $rel (symlink)"
+      fi
     done
   )
 fi
