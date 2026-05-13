@@ -1,0 +1,16 @@
+Hilal Browser: add Fluent strings for preferences UI
+
+Adds Hilal workspace preference strings to the existing preferences
+Fluent file so the General pane can localize the new groupbox.
+
+---
+diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
+--- a/browser/locales/en-US/browser/preferences/preferences.ftl
++++ b/browser/locales/en-US/browser/preferences/preferences.ftl
+@@ -2750,0 +2751,6 @@
++hilal-settings-header = Hilal Browser
++hilal-workspaces-enabled = Enable workspaces
++hilal-workspaces-reset-description = Reset all workspace data (cannot be undone).
++hilal-workspaces-reset-button = Reset Workspaces
++hilal-workspaces-reset-confirm-title = Reset Workspaces
++hilal-workspaces-reset-confirm-message = This will delete all workspace data and cannot be undone. Continue?

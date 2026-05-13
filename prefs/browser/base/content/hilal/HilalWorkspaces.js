@@ -26,6 +26,10 @@
       this._container = null;
       this._addBtn = null;
       this._shadowRoot = null;
+      this._tabOpenHandler = null;
+      this._tabRestoreHandler = null;
+      this._prefDataObserver = null;
+      this._prefEnabledObserver = null;
     }
 
     _uuid() {
@@ -47,6 +51,7 @@
           ws.emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
         }
       }
+      this._saveData();
       try {
         this._activeId = Services.prefs.getStringPref(PREF_ACTIVE, this._workspaces[0].id);
       } catch (e) {
@@ -73,7 +78,7 @@
     }
 
     _hookEvents() {
-      gBrowser.tabContainer.addEventListener("TabOpen", e => {
+      this._tabOpenHandler = e => {
         const tab = e.target;
         if (!tab.hasAttribute("hilal-workspace")) {
           tab.setAttribute("hilal-workspace", this._activeId);
@@ -81,26 +86,47 @@
             SessionStore.setCustomTabValue(tab, STORE_KEY, this._activeId);
           }
         }
-      });
+      };
+      gBrowser.tabContainer.addEventListener("TabOpen", this._tabOpenHandler);
 
-      gBrowser.tabContainer.addEventListener("SSTabRestored", e => {
+      this._tabRestoreHandler = e => {
         if (typeof SessionStore === "undefined") return;
         const tab = e.target;
         const ws = SessionStore.getCustomTabValue(tab, STORE_KEY);
         if (ws) tab.setAttribute("hilal-workspace", ws);
-      });
+      };
+      gBrowser.tabContainer.addEventListener("SSTabRestored", this._tabRestoreHandler);
 
-      Services.prefs.addObserver(PREF_DATA, () => {
+      this._prefDataObserver = () => {
         this._loadData();
         this._updateUI();
         this._apply();
-      });
+      };
+      Services.prefs.addObserver(PREF_DATA, this._prefDataObserver);
 
-      Services.prefs.addObserver(PREF_ENABLED, () => {
+      this._prefEnabledObserver = () => {
         this._enabled = Services.prefs.getBoolPref(PREF_ENABLED, true);
         if (this._container) this._container.hidden = !this._enabled;
         this._apply();
-      });
+      };
+      Services.prefs.addObserver(PREF_ENABLED, this._prefEnabledObserver);
+
+      window.addEventListener("unload", () => this._destroy(), { once: true });
+    }
+
+    _destroy() {
+      if (this._tabOpenHandler) {
+        gBrowser.tabContainer.removeEventListener("TabOpen", this._tabOpenHandler);
+      }
+      if (this._tabRestoreHandler) {
+        gBrowser.tabContainer.removeEventListener("SSTabRestored", this._tabRestoreHandler);
+      }
+      if (this._prefDataObserver) {
+        Services.prefs.removeObserver(PREF_DATA, this._prefDataObserver);
+      }
+      if (this._prefEnabledObserver) {
+        Services.prefs.removeObserver(PREF_ENABLED, this._prefEnabledObserver);
+      }
     }
 
     _getTabWorkspace(tab) {
@@ -137,7 +163,7 @@
       if (selectedWs !== this._activeId && activeTabs.length) {
         gBrowser.selectedTab = activeTabs[0];
       }
-      if (selectedWs !== this._activeId) {
+      if (selectedWs !== this._activeId && !selected.pinned) {
         gBrowser.hideTab(selected, "hilal-workspace");
       }
       if (!activeTabs.length) {
@@ -147,6 +173,7 @@
 
     switchTo(id) {
       if (id === this._activeId) return;
+      if (!this._workspaces.find(w => w.id === id)) return;
       this._activeId = id;
       Services.prefs.setStringPref(PREF_ACTIVE, this._activeId);
       this._updateUI();
@@ -176,10 +203,10 @@
       const idx = this._workspaces.findIndex(w => w.id === id);
       if (idx < 0) return;
       const fallback = this._workspaces[idx === 0 ? 1 : 0].id;
-      if (typeof SessionStore !== "undefined") {
-        for (const tab of gBrowser.tabs) {
-          if (this._getTabWorkspace(tab) === id) {
-            tab.setAttribute("hilal-workspace", fallback);
+      for (const tab of gBrowser.tabs) {
+        if (this._getTabWorkspace(tab) === id) {
+          tab.setAttribute("hilal-workspace", fallback);
+          if (typeof SessionStore !== "undefined") {
             SessionStore.setCustomTabValue(tab, STORE_KEY, fallback);
           }
         }
@@ -192,14 +219,6 @@
       this._saveData();
       this._updateUI();
       this._apply();
-    }
-
-    _escapeHTML(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
     }
 
     _makeMozBtn(label, type) {
@@ -543,6 +562,9 @@
 
   let retries = 0;
   function tryInit() {
+    if (!Services.prefs.getBoolPref("sidebar.revamp", false)) {
+      return;
+    }
     const sidebarEl = document.querySelector("sidebar-main");
     const hasShadowRoot = sidebarEl?.shadowRoot?.querySelector(".buttons-wrapper");
     if (typeof gBrowser !== "undefined" && hasShadowRoot) {
