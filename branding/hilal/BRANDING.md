@@ -68,7 +68,7 @@ optional "Browser" suffix.
 
 ### Generated rasters (`./`)
 All of the following are produced from `about-logo.svg` by
-`tools/gen_hilal_assets.py` (using `qlmanage` + `Pillow` + `iconutil`).
+`tools/gen_hilal_assets.py` (using Inkscape + `Pillow` + `iconutil`).
 They are committed to the tree so contributors do not need the renderer
 toolchain.
 
@@ -129,15 +129,17 @@ Re-run the asset script after editing any SVG:
 
 ```sh
 # From the repo root.
-mkdir -p browser/branding/hilal/_raster
+INKSCAPE=/Applications/Inkscape.app/Contents/MacOS/inkscape
+mkdir -p branding/hilal/_raster
 for s in 16 22 24 32 48 64 70 128 150 256 512 1024; do
-  qlmanage -t -s $s -o browser/branding/hilal/_raster \
-    browser/branding/hilal/content/about-logo.svg >/dev/null
-  mv "browser/branding/hilal/_raster/about-logo.svg.png" \
-     "browser/branding/hilal/_raster/logo-${s}.png"
+  "$INKSCAPE" branding/hilal/content/about-logo.svg \
+    --export-type=png \
+    --export-filename="branding/hilal/_raster/logo-${s}.png" \
+    --export-width="$s" \
+    --export-height="$s" >/dev/null
 done
-python3 browser/branding/hilal/tools/gen_hilal_assets.py
-rm -rf browser/branding/hilal/_raster
+python3 branding/hilal/tools/gen_hilal_assets.py
+rm -rf branding/hilal/_raster
 ```
 
 (The `tools/gen_hilal_assets.py` script is the same one used to seed this

@@ -18,7 +18,29 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs1" />
+     id="defs1">
+    <mask
+       id="crescent-cutout"
+       maskUnits="userSpaceOnUse"
+       x="0"
+       y="0"
+       width="512"
+       height="512">
+      <rect
+         x="0"
+         y="0"
+         width="512"
+         height="512"
+         fill="#ffffff" />
+      <ellipse
+         fill="#000000"
+         cx="287.41422"
+         cy="228.92976"
+         rx="210.00037"
+         ry="209.99965"
+         transform="matrix(0.99963114,-0.02715838,0.02709598,0.99963284,0,0)" />
+    </mask>
+  </defs>
   <sodipodi:namedview
      id="namedview1"
      pagecolor="#ffffff"
@@ -43,13 +65,6 @@
      cx="256"
      cy="256.00128"
      rx="256"
-     ry="256.00128" />
-  <ellipse
-     style="fill:#ffffff;fill-opacity:1;stroke-width:0.998946"
-     id="path1"
-     cx="287.41422"
-     cy="228.92976"
-     rx="210.00037"
-     ry="209.99965"
-     transform="matrix(0.99963114,-0.02715838,0.02709598,0.99963284,0,0)" />
+     ry="256.00128"
+     mask="url(#crescent-cutout)" />
 </svg>

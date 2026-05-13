@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Generate all Hilal Browser raster branding assets from PNGs already
-rendered from SVGs by `qlmanage`.
+rendered from SVGs by an alpha-preserving renderer such as Inkscape.
 
 Inputs (in branding/hilal/_raster/ or browser/branding/hilal/_raster/):
     logo-{16,22,24,32,48,64,70,128,150,256,512,1024}.png
