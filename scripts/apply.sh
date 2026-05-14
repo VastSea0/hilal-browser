@@ -58,9 +58,14 @@ if [ -d "$HILAL_REPO_ROOT/branding" ]; then
     dst="$HILAL_FIREFOX_SRC/browser/branding/$name"
     log "Syncing branding: $name -> browser/branding/$name"
     mkdir -p "$dst"
-    # rsync is available on macOS by default; --delete keeps things clean
-    # when files are removed upstream-in-repo.
-    rsync -a --delete "$src" "$dst/"
+    # Prefer rsync (macOS/Linux) for --delete semantics.
+    # Fall back to rm + cp for environments without rsync (e.g. Git Bash on Windows).
+    if command -v rsync >/dev/null 2>&1; then
+      rsync -a --delete "$src" "$dst/"
+    else
+      rm -rf "$dst"
+      cp -r "$src" "$dst"
+    fi
   done
 fi
 

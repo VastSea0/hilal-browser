@@ -55,7 +55,12 @@ for src in "$HILAL_REPO_ROOT/branding"/*/; do
   ff_src="$HILAL_FIREFOX_SRC/browser/branding/$name"
   if [ -d "$ff_src" ]; then
     log "Refreshing branding overlay: $name <- browser/branding/$name"
-    rsync -a --delete "$ff_src/" "$src"
+    if command -v rsync >/dev/null 2>&1; then
+      rsync -a --delete "$ff_src/" "$src"
+    else
+      rm -rf "$src"
+      cp -r "$ff_src/" "$src"
+    fi
   fi
 done
 
