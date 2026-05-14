@@ -26,8 +26,14 @@ param(
     [switch]$Run,
     [switch]$Package,
     [switch]$Apply,
-    [switch]$SkipApply
+    [switch]$SkipApply,
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]$Rest
 )
+
+if ($Rest) {
+    Write-Warn "Ignored unexpected argument(s): $($Rest -join ' ')"
+}
 
 $ErrorActionPreference = "Stop"
 
