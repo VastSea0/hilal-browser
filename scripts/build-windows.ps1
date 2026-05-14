@@ -56,11 +56,11 @@ function Write-Err($msg) {
 # --- 1. Resolve repo root and Firefox src -----------------------------------
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$repoRoot = Resolve-Path (Join-Path $scriptDir "..")
+$repoRoot = (Resolve-Path (Join-Path $scriptDir "..")).Path
 $firefoxSrc = Join-Path $repoRoot "firefox"
 
 # Convert Windows backslash paths to forward-slash for bash compatibility
-$repoRootUnix = $repoRoot.Path.Replace("\", "/")
+$repoRootUnix = $repoRoot.Replace("\", "/")
 $firefoxSrcUnix = $firefoxSrc.Replace("\", "/")
 
 Write-Step "Repo root : $repoRoot"
@@ -140,7 +140,7 @@ if (-not $SkipApply) {
 
 # --- 5. Copy mozconfig ------------------------------------------------------
 
-$mozconfigSrc = Join-Path $repoRoot "mozconfigs" "windows"
+$mozconfigSrc = Join-Path (Join-Path $repoRoot "mozconfigs") "windows"
 $mozconfigDst = Join-Path $firefoxSrc "mozconfig"
 
 if (Test-Path $mozconfigSrc) {
