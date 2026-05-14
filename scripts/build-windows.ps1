@@ -118,7 +118,7 @@ if (-not $SkipApply) {
     }
 
     Write-Step "Applying Hilal patches ..."
-    $applyCmd = "cd `"$repoRootUnix`" && bash scripts/apply.sh $applyArgs"
+    $applyCmd = "cd `"$repoRootUnix`" && bash scripts/apply.sh --no-symlinks $applyArgs"
     & $gitBash -c $applyCmd
     if ($LASTEXITCODE -ne 0) {
         Write-Err "scripts/apply.sh failed. Try: bash scripts/apply.sh --force"
