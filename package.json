@@ -1,0 +1,13 @@
+{
+  "name": "hilal-browser",
+  "private": true,
+  "description": "Hilal Browser overlay. See docs/ for build instructions.",
+  "scripts": {
+    "setup:deps": "powershell -ExecutionPolicy Bypass -File scripts/install-deps-windows.ps1",
+    "build": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1",
+    "build:faster": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1 -Faster",
+    "build:binaries": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1 -Binaries",
+    "run": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1 -Run",
+    "package": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1 -Package"
+  }
+}
