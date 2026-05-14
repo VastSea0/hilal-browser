@@ -49,6 +49,10 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $repoRoot = Resolve-Path (Join-Path $scriptDir "..")
 $firefoxSrc = Join-Path $repoRoot "firefox"
 
+# Convert Windows backslash paths to forward-slash for bash compatibility
+$repoRootUnix = $repoRoot.Path.Replace("\", "/")
+$firefoxSrcUnix = $firefoxSrc.Replace("\", "/")
+
 Write-Step "Repo root : $repoRoot"
 Write-Step "Firefox src: $firefoxSrc"
 
@@ -114,7 +118,7 @@ if (-not $SkipApply) {
     }
 
     Write-Step "Applying Hilal patches ..."
-    $applyCmd = "cd `"$repoRoot`" && bash scripts/apply.sh $applyArgs"
+    $applyCmd = "cd `"$repoRootUnix`" && bash scripts/apply.sh $applyArgs"
     & $gitBash -c $applyCmd
     if ($LASTEXITCODE -ne 0) {
         Write-Err "scripts/apply.sh failed. Try: bash scripts/apply.sh --force"
