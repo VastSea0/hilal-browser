@@ -16,18 +16,16 @@ index 32e3edbbe933..418522a4c0a1 100644
  <html:setting-group groupid="networkProxy" data-category="paneGeneral" data-subcategory="netsettings" hidden="true" data-srd-migrated="" />
 +
 +<!-- Hilal Browser -->
-+<groupbox id="hilalSettingsGroup" data-category="paneGeneral" hidden="true" data-subcategory="hilal" data-srd-migrated="">
-+  <label><html:h2 data-l10n-id="hilal-settings-header">Hilal Browser</html:h2></label>
++<groupbox id="hilalSettingsGroup" data-category="paneGeneral" hidden="true">
++  <label><html:h2>Hilal Browser</html:h2></label>
 +  <vbox align="start">
 +    <checkbox id="hilalWorkspacesEnabled"
-+              data-l10n-id="hilal-workspaces-enabled"
 +              label="Enable workspaces"/>
 +    <hbox>
-+      <description flex="1" data-l10n-id="hilal-workspaces-reset-description">Reset all workspace data (cannot be undone).</description>
++      <description flex="1">Reset all workspace data (cannot be undone).</description>
 +      <button id="hilalWorkspacesReset"
 +              is="highlightable-button"
 +              class="accessory-button"
-+              data-l10n-id="hilal-workspaces-reset-button"
 +              label="Reset Workspaces"/>
 +    </hbox>
 +  </vbox>
@@ -58,10 +56,8 @@ index dd1f2e21e8b2..a73e61d43dfb 100644
 +        Services.prefs.setBoolPref("hilal.workspaces.enabled", hilalWsCheckbox.checked);
 +      });
 +    }
-+    setEventListener("hilalWorkspacesReset", "command", async function () {
-+      const title = await document.l10n.formatValue("hilal-workspaces-reset-confirm-title");
-+      const message = await document.l10n.formatValue("hilal-workspaces-reset-confirm-message");
-+      if (Services.prompt.confirm(window, title, message)) {
++    setEventListener("hilalWorkspacesReset", "command", function () {
++      if (Services.prompt.confirm(window, "Reset Workspaces", "This will delete all workspace data and cannot be undone. Continue?")) {
 +        Services.prefs.setStringPref("hilal.workspaces.data", "[]");
 +        Services.prefs.setStringPref("hilal.workspaces.active", "default");
 +        Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
