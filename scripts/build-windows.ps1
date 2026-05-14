@@ -19,23 +19,27 @@
 #   .\scripts\build-windows.ps1 -Apply            # force-apply before build
 #   .\scripts\build-windows.ps1 -SkipApply        # skip apply step
 
-[CmdletBinding()]
-param(
-    [switch]$Faster,
-    [switch]$Binaries,
-    [switch]$Run,
-    [switch]$Package,
-    [switch]$Apply,
-    [switch]$SkipApply,
-    [Parameter(ValueFromRemainingArguments = $true)]
-    [string[]]$Rest
-)
-
-if ($Rest) {
-    Write-Warn "Ignored unexpected argument(s): $($Rest -join ' ')"
-}
-
 $ErrorActionPreference = "Stop"
+
+# Manual argument parsing to avoid PowerShell parameter-binding issues on Windows.
+$Faster = $false
+$Binaries = $false
+$Run = $false
+$Package = $false
+$Apply = $false
+$SkipApply = $false
+
+foreach ($arg in $args) {
+    switch ($arg.ToLower()) {
+        "-faster"     { $Faster = $true }
+        "-binaries"   { $Binaries = $true }
+        "-run"        { $Run = $true }
+        "-package"    { $Package = $true }
+        "-apply"      { $Apply = $true }
+        "-skipapply"  { $SkipApply = $true }
+        default       { Write-Warn "Ignored unexpected argument: $arg" }
+    }
+}
 
 function Write-Step($msg) {
     Write-Host "[hilal] $msg" -ForegroundColor Cyan
@@ -163,7 +167,7 @@ if ($Faster) {
 
 Push-Location $firefoxSrc
 try {
-    & python $cmdArgs
+    & python $mach $cmdArgs
     if ($LASTEXITCODE -ne 0) {
         Write-Err "mach build failed with exit code $LASTEXITCODE."
         exit 1
@@ -180,7 +184,7 @@ if ($Run) {
     Write-Step "Launching Hilal Browser ..."
     Push-Location $firefoxSrc
     try {
-        & python @("run")
+        & python $mach @("run")
     } finally {
         Pop-Location
     }
@@ -193,7 +197,7 @@ if ($Package) {
     Write-Step "Packaging Hilal Browser ..."
     Push-Location $firefoxSrc
     try {
-        & python @("package")
+        & python $mach @("package")
         if ($LASTEXITCODE -ne 0) {
             Write-Err "mach package failed with exit code $LASTEXITCODE."
             exit 1
