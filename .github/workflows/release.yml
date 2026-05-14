@@ -9,6 +9,9 @@ on:
         description: "Git tag to build (e.g. v1.0.0)"
         required: true
 
+permissions:
+  contents: write
+
 env:
   HILAL_FIREFOX_UPSTREAM: "https://github.com/mozilla-firefox/firefox.git"
 
@@ -48,11 +51,12 @@ jobs:
           - os: ubuntu-latest
             name: linux
             artifact_glob: "firefox/obj-x86_64-pc-linux-gnu/dist/*.tar.bz2"
-            mach_target: ""
           - os: macos-latest
             name: macos
             artifact_glob: "firefox/obj-aarch64-apple-darwin*/dist/*.dmg"
-            mach_target: ""
+          - os: windows-latest
+            name: windows
+            artifact_glob: "firefox/obj-*-pc-windows-msvc/dist/*.zip"
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Hilal
@@ -60,11 +64,13 @@ jobs:
 
       - name: Read pinned Firefox commit
         id: firefox-commit
+        shell: bash
         run: |
           COMMIT=$(cat FIREFOX_COMMIT | tr -d '[:space:]')
           echo "commit=$COMMIT" >> "$GITHUB_OUTPUT"
 
       - name: Clone Firefox at pinned commit
+        shell: bash
         run: |
           COMMIT="${{ steps.firefox-commit.outputs.commit }}"
           mkdir -p firefox
@@ -76,6 +82,7 @@ jobs:
 
       - name: Bootstrap dependencies (Linux)
         if: matrix.name == 'linux'
+        shell: bash
         run: |
           export DEBIAN_FRONTEND=noninteractive
           sudo apt-get update
@@ -85,26 +92,37 @@ jobs:
 
       - name: Bootstrap dependencies (macOS)
         if: matrix.name == 'macos'
+        shell: bash
         run: |
           brew install mercurial || true
           cd firefox
           ./mach bootstrap --application-choice browser --no-interactive || true
 
+      - name: Bootstrap dependencies (Windows)
+        if: matrix.name == 'windows'
+        shell: bash
+        run: |
+          cd firefox
+          ./mach bootstrap --application-choice browser --no-interactive || true
+
       - name: Apply Hilal patches and branding
+        shell: bash
         run: |
           bash scripts/apply.sh
-        shell: bash
 
       - name: Configure mozconfig
+        shell: bash
         run: |
           cp mozconfigs/${{ matrix.name }} firefox/mozconfig
 
       - name: Build Firefox
+        shell: bash
         run: |
           cd firefox
           ./mach build
 
       - name: Package Firefox
+        shell: bash
         run: |
           cd firefox
           ./mach package
@@ -112,6 +130,7 @@ jobs:
       - name: Upload release asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
           TAG="${{ needs.create-release.outputs.tag }}"
           for f in ${{ matrix.artifact_glob }}; do
@@ -119,4 +138,3 @@ jobs:
             echo "Uploading $f ..."
             gh release upload "$TAG" "$f" --clobber
           done
-        shell: bash
