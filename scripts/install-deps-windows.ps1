@@ -70,22 +70,40 @@ if (-not $hasVS) {
     exit 1
 }
 
-# --- 3. Python --------------------------------------------------------------
+# --- 3. Python (3.11 or 3.12 required) --------------------------------------
 
-Write-Step "Checking for Python 3.11+ ..."
+Write-Step "Checking for Python 3.11 or 3.12 ..."
 
-try {
-    $pyVer = (& python --version 2>&1).ToString().Split()[1]
-    $verParts = $pyVer.Split('.')
-    $major = [int]$verParts[0]
-    $minor = [int]$verParts[1]
-    if ($major -eq 3 -and $minor -ge 11) {
-        Write-Host "  OK: Python $pyVer"
-    } else {
-        throw "too old"
+$pythonExe = $null
+$pythonCandidates = @(
+    @("py", @("-3.12", "--version")),
+    @("py", @("-3.11", "--version")),
+    @("python3.12", @("--version")),
+    @("python3.11", @("--version")),
+    @("python", @("--version"))
+)
+
+foreach ($c in $pythonCandidates) {
+    $exe = $c[0]
+    $testArgs = $c[1]
+    try {
+        $verOutput = & $exe $testArgs 2>&1
+        $verStr = $verOutput.ToString()
+        if ($verStr -match "3\.(\d+)") {
+            $minor = [int]$Matches[1]
+            if ($minor -ge 11 -and $minor -le 12) {
+                $pythonExe = $exe
+                Write-Host "  OK: $exe ($verStr)"
+                break
+            }
+        }
+    } catch {
+        continue
     }
-} catch {
-    Write-Warn "Python 3.11+ not found."
+}
+
+if (-not $pythonExe) {
+    Write-Warn "Python 3.11 or 3.12 not found."
     Write-Host ""
     Write-Host "  Install via:"
     Write-Host "    winget install Python.Python.3.11"
@@ -128,7 +146,37 @@ if (-not (Test-Path $gitBash)) {
 }
 Write-Host "  OK: $gitBash"
 
-# --- 6. Mozilla bootstrap.py --------------------------------------------------
+# --- 6. MozillaBuild --------------------------------------------------------
+
+Write-Step "Checking for MozillaBuild ..."
+
+$mozBuild = $null
+$mozBuildCandidates = @(
+    "C:\mozilla-build",
+    "${env:LOCALAPPDATA}\mozilla-build",
+    "${env:ProgramFiles}\mozilla-build",
+    "${env:ProgramFiles(x86)}\mozilla-build"
+)
+
+foreach ($c in $mozBuildCandidates) {
+    if (Test-Path $c) {
+        $mozBuild = $c
+        break
+    }
+}
+
+if ($mozBuild) {
+    Write-Host "  OK: $mozBuild"
+} else {
+    Write-Warn "MozillaBuild not found."
+    Write-Host ""
+    Write-Host "  Download from: https://wiki.mozilla.org/MozillaBuild"
+    Write-Host "  Install to:     C:\mozilla-build"
+    Write-Host ""
+    exit 1
+}
+
+# --- 7. Mozilla bootstrap.py --------------------------------------------------
 
 if ($SkipBootstrap) {
     Write-Step "Skipping Mozilla bootstrap (--SkipBootstrap passed)."
@@ -146,7 +194,7 @@ if ($SkipBootstrap) {
     }
 
     Write-Host "  Downloaded bootstrap.py"
-    & python $bootstrapFile
+    & $pythonExe $bootstrapFile
     if ($LASTEXITCODE -ne 0) {
         Write-Warn "bootstrap.py exited with code $LASTEXITCODE."
         Write-Warn "You may need to run it manually or use the MozillaBuild shell."
@@ -155,7 +203,7 @@ if ($SkipBootstrap) {
     Remove-Item $bootstrapFile -ErrorAction SilentlyContinue
 }
 
-# --- 7. Long paths ----------------------------------------------------------
+# --- 8. Long paths ----------------------------------------------------------
 
 Write-Step "Checking Windows long-path support ..."
 

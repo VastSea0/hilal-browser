@@ -7,7 +7,9 @@
 #
 # Prerequisites:
 #   - Visual Studio 2022 with Desktop development with C++
-#   - Python 3.11+, Git for Windows (with Git Bash)
+#   - Python 3.11 or 3.12
+#   - Git for Windows (with Git Bash)
+#   - MozillaBuild (https://wiki.mozilla.org/MozillaBuild)
 #   - Mozilla bootstrap.py already run once
 #
 # Usage:
@@ -98,7 +100,72 @@ if (-not $gitBash) {
 }
 Write-Step "Git Bash : $gitBash"
 
-# --- 3. Verify Firefox source tree ------------------------------------------
+# --- 3. Find MozillaBuild -------------------------------------------------
+
+$mozBuildCandidates = @(
+    "C:\mozilla-build",
+    "${env:LOCALAPPDATA}\mozilla-build",
+    "${env:ProgramFiles}\mozilla-build",
+    "${env:ProgramFiles(x86)}\mozilla-build"
+)
+
+$mozBuild = $null
+foreach ($c in $mozBuildCandidates) {
+    if (Test-Path $c) {
+        $mozBuild = $c
+        break
+    }
+}
+
+if ($mozBuild) {
+    Write-Step "MozillaBuild: $mozBuild"
+    $env:MOZILLABUILD = $mozBuild
+} else {
+    Write-Warn "MozillaBuild not found."
+    Write-Host ""
+    Write-Host "  Download from: https://wiki.mozilla.org/MozillaBuild"
+    Write-Host "  Or install to: C:\mozilla-build (or set MOZILLABUILD env var)"
+    Write-Host ""
+    exit 1
+}
+
+# --- 4. Find a compatible Python (3.11 or 3.12) -----------------------------
+
+$pythonExe = $null
+$pythonCandidates = @(
+    @("py", @("-3.12", "--version")),
+    @("py", @("-3.11", "--version")),
+    @("python3.12", @("--version")),
+    @("python3.11", @("--version")),
+    @("python", @("--version"))
+)
+
+foreach ($c in $pythonCandidates) {
+    $exe = $c[0]
+    $testArgs = $c[1]
+    try {
+        $verOutput = & $exe $testArgs 2>&1
+        $verStr = $verOutput.ToString()
+        if ($verStr -match "3\.(\d+)") {
+            $minor = [int]$Matches[1]
+            if ($minor -ge 11 -and $minor -le 12) {
+                $pythonExe = $exe
+                Write-Step "Python     : $exe ($verStr)"
+                break
+            }
+        }
+    } catch {
+        continue
+    }
+}
+
+if (-not $pythonExe) {
+    Write-Err "No compatible Python found. Firefox requires Python 3.11 or 3.12."
+    Write-Err "  Install via: winget install Python.Python.3.11"
+    exit 1
+}
+
+# --- 5. Verify Firefox source tree ------------------------------------------
 
 if (-not (Test-Path $firefoxSrc)) {
     Write-Warn "Firefox source tree not found at: $firefoxSrc"
@@ -119,7 +186,7 @@ if (-not (Test-Path (Join-Path $firefoxSrc "mach"))) {
     exit 1
 }
 
-# --- 4. Apply Hilal patches and branding ------------------------------------
+# --- 6. Apply Hilal patches and branding ------------------------------------
 
 if (-not $SkipApply) {
     $applyArgs = ""
@@ -138,7 +205,7 @@ if (-not $SkipApply) {
     Write-Step "Skipping apply step (--SkipApply)."
 }
 
-# --- 5. Copy mozconfig ------------------------------------------------------
+# --- 7. Copy mozconfig ------------------------------------------------------
 
 $mozconfigSrc = Join-Path (Join-Path $repoRoot "mozconfigs") "windows"
 $mozconfigDst = Join-Path $firefoxSrc "mozconfig"
@@ -150,7 +217,7 @@ if (Test-Path $mozconfigSrc) {
     Write-Warn "mozconfigs/windows not found; using default Firefox build config."
 }
 
-# --- 6. Build ---------------------------------------------------------------
+# --- 8. Build ---------------------------------------------------------------
 
 $mach = Join-Path $firefoxSrc "mach"
 $cmdArgs = @("build")
@@ -167,7 +234,7 @@ if ($Faster) {
 
 Push-Location $firefoxSrc
 try {
-    & python $mach $cmdArgs
+    & $pythonExe $mach $cmdArgs
     if ($LASTEXITCODE -ne 0) {
         Write-Err "mach build failed with exit code $LASTEXITCODE."
         exit 1
@@ -178,26 +245,26 @@ try {
 
 Write-Step "Build finished."
 
-# --- 7. Run -----------------------------------------------------------------
+# --- 9. Run -----------------------------------------------------------------
 
 if ($Run) {
     Write-Step "Launching Hilal Browser ..."
     Push-Location $firefoxSrc
     try {
-        & python $mach @("run")
+        & $pythonExe $mach @("run")
     } finally {
         Pop-Location
     }
     exit 0
 }
 
-# --- 8. Package -------------------------------------------------------------
+# --- 10. Package ------------------------------------------------------------
 
 if ($Package) {
     Write-Step "Packaging Hilal Browser ..."
     Push-Location $firefoxSrc
     try {
-        & python $mach @("package")
+        & $pythonExe $mach @("package")
         if ($LASTEXITCODE -ne 0) {
             Write-Err "mach package failed with exit code $LASTEXITCODE."
             exit 1
