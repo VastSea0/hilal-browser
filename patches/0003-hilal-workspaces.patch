@@ -1,30 +1,20 @@
-Hilal Browser: load HilalWorkspaces JS and CSS in browser.xhtml
+Hilal Browser: load HilalWorkspaces JS in browser.xhtml
 
-Registers HilalWorkspaces.js and hilal-workspaces.css in browser/base/jar.mn
-and loads them in browser.xhtml so the workspace sidebar strip is available
-on every browser window.
+Registers HilalWorkspaces.js in browser/base/jar.mn and loads it in
+browser.xhtml so the workspace sidebar strip is available on every
+browser window. The component injects its own styles into a Shadow
+DOM via _getCSS(), so no separate stylesheet is shipped.
 
 ---
- browser/base/content/browser.xhtml | 4 ++++
- browser/base/jar.mn                | 2 ++
- 2 files changed, 6 insertions(+)
+ browser/base/content/browser.xhtml | 2 ++
+ browser/base/jar.mn                | 1 +
+ 2 files changed, 3 insertions(+)
 
 diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
-index d8ed09dca6c8..a4dbc47ea684 100644
+index d8ed09dca6c8..c71bf555f8aa 100644
 --- a/browser/base/content/browser.xhtml
 +++ b/browser/base/content/browser.xhtml
-@@ -53,6 +53,10 @@
-     rel="stylesheet"
-     href="chrome://global/content/resistfingerprinting/letterboxing.css"
-   />
-+  <link
-+    rel="stylesheet"
-+    href="chrome://browser/content/hilal/hilal-workspaces.css"
-+  />
- 
-   <link rel="localization" href="branding/brand.ftl"/>
-   <link rel="localization" href="browser/allTabsMenu.ftl"/>
-@@ -150,5 +154,7 @@
+@@ -150,5 +150,7 @@
  
    <!-- Put it at the very end to make sure it's not covered by anything. -->
    <html:div id="fullscr-toggler" hidden="hidden"/>
@@ -33,15 +23,14 @@ index d8ed09dca6c8..a4dbc47ea684 100644
  </html:body>
  </html>
 diff --git a/browser/base/jar.mn b/browser/base/jar.mn
-index 7eaca95f7e87..025b4a98439a 100644
+index 7eaca95f7e87..ef0f1f92408c 100644
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
-@@ -72,6 +72,8 @@ browser.jar:
+@@ -72,6 +72,7 @@ browser.jar:
          content/browser/browser-unified-extensions.js       (content/browser-unified-extensions.js)
          content/browser/browser-graphics-utils.js           (content/browser-graphics-utils.js)
          content/browser/browser-webrtc.js                   (content/browser-webrtc.js)
 +        content/browser/hilal/HilalWorkspaces.js            (content/hilal/HilalWorkspaces.js)
-+        content/browser/hilal/hilal-workspaces.css           (content/hilal/hilal-workspaces.css)
          content/browser/global-scripts.js                   (content/global-scripts.js)
          content/browser/main-popupset.js                    (content/main-popupset.js)
  *       content/browser/pageinfo/pageInfo.xhtml             (content/pageinfo/pageInfo.xhtml)
