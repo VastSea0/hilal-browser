@@ -8,10 +8,13 @@
 # instead of BrandFullName and typically should not be modified.
 !define BrandFullNameInternal "Hilal Browser"
 !define BrandFullName         "Hilal Browser"
-!define BrandShortName        "Hilal"
 !define BrandShorterName      "Hilal"
-!define BrandProductName      "Hilal"
 !define CompanyName           "Hilal"
+# BrandShortName and BrandProductName are defined by Mozilla's
+# defines.nsi.in (BrandShortName from MOZ_APP_DISPLAYNAME, BrandProductName
+# hardcoded to "Firefox"). Defining them here as well triggers a "!define
+# already defined" error in NSIS because branding.nsi is included before
+# defines.nsi by uninstaller.nsi/installer.nsi/stub.nsh.
 !define URLInfoAbout          "https://hilal.gkdevstudio.org"
 !define HelpLink              "https://hilal.gkdevstudio.org/support"
 
