@@ -1,0 +1,70 @@
+Hilal Browser: drop libwebrtc goog_cc_scream_network_controller on Windows
+
+Mozilla's recursive_make backend on Windows fails to resolve the .obj
+file for third_party/libwebrtc/modules/congestion_controller/
+goog_cc_scream_network_controller/goog_cc_scream_network_controller_gn
+when xul.dll is linked, producing:
+
+  No rule to make target '...goog_cc_scream_network_controller.obj',
+  needed by '../../../dist/bin/xul.dll'.
+
+The .obj is produced correctly by the compile tier and is reachable by
+absolute path on disk, but mozmake reports it missing during the link
+step regardless of UNIFIED_SOURCES, FILES_PER_UNIFIED_FILE or clobber
+state. This appears to be a path-handling defect specific to this
+particular long path in mozmake on Windows.
+
+GoogCcScreamNetworkController is a field-trial-gated experiment that is
+only ever instantiated when both rfc_8888_feedback_negotiated is true
+and the field trial selects kScreamAfterCe or kGoogCcWithEct1. The
+default fallback already in place is GoogCcNetworkController, which is
+what regular Firefox WebRTC traffic uses today.
+
+To unblock the Windows build, drop the gn directory from the libwebrtc
+DIRS list and stop instantiating GoogCcScreamNetworkController from
+goog_cc_factory.cc. Behaviour for the default WebRTC code path is
+unchanged; the SCReAM-after-CE and GoogCC-with-ECT1 experimental modes
+fall back to GoogCcNetworkController on every platform for consistency.
+
+---
+ third_party/libwebrtc/api/transport/goog_cc_factory.cc | 9 ---------
+ third_party/libwebrtc/moz.build                        | 1 -
+ 2 files changed, 10 deletions(-)
+
+diff --git a/third_party/libwebrtc/api/transport/goog_cc_factory.cc b/third_party/libwebrtc/api/transport/goog_cc_factory.cc
+--- a/third_party/libwebrtc/api/transport/goog_cc_factory.cc
++++ b/third_party/libwebrtc/api/transport/goog_cc_factory.cc
+@@ -19,7 +19,6 @@
+ #include "api/transport/network_control.h"
+ #include "api/units/time_delta.h"
+ #include "modules/congestion_controller/goog_cc/goog_cc_network_control.h"
+-#include "modules/congestion_controller/goog_cc_scream_network_controller/goog_cc_scream_network_controller.h"
+ #include "modules/congestion_controller/scream/scream_network_controller.h"
+ #include "rtc_base/experiments/field_trial_parser.h"
+ #include "rtc_base/logging.h"
+@@ -99,14 +98,6 @@ std::unique_ptr<NetworkControllerInterface> GoogCcNetworkControllerFactory::Crea
+        factory_config_.rfc_8888_feedback_negotiated)) {
+     return std::make_unique<ScreamNetworkController>(config);
+   }
+-  if (factory_config_.rfc_8888_feedback_negotiated &&
+-      (mode == Mode::kScreamAfterCe || mode == Mode::kGoogCcWithEct1)) {
+-    return std::make_unique<GoogCcScreamNetworkController>(
+-        config, std::move(goog_cc_config),
+-        mode == Mode::kScreamAfterCe
+-            ? GoogCcScreamNetworkController::Mode::kScreamAfterCe
+-            : GoogCcScreamNetworkController::Mode::kGoogCcWithEct1);
+-  }
+   return std::make_unique<GoogCcNetworkController>(config,
+                                                    std::move(goog_cc_config));
+ }
+diff --git a/third_party/libwebrtc/moz.build b/third_party/libwebrtc/moz.build
+--- a/third_party/libwebrtc/moz.build
++++ b/third_party/libwebrtc/moz.build
+@@ -295,7 +295,6 @@ DIRS += [
+     "/third_party/libwebrtc/modules/congestion_controller/goog_cc/probe_controller_gn",
+     "/third_party/libwebrtc/modules/congestion_controller/goog_cc/pushback_controller_gn",
+     "/third_party/libwebrtc/modules/congestion_controller/goog_cc/send_side_bwe_gn",
+-    "/third_party/libwebrtc/modules/congestion_controller/goog_cc_scream_network_controller/goog_cc_scream_network_controller_gn",
+     "/third_party/libwebrtc/modules/congestion_controller/rtp/congestion_controller_feedback_stats_gn",
+     "/third_party/libwebrtc/modules/congestion_controller/rtp/control_handler_gn",
+     "/third_party/libwebrtc/modules/congestion_controller/rtp/transport_feedback_gn",
