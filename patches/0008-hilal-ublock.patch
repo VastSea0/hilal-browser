@@ -1,0 +1,23 @@
+Always bundle uBlock Origin by default
+
+---
+
+diff --git a/browser/app/distribution/moz.build b/browser/app/distribution/moz.build
+index b174449a0989..6003a33476c6 100644
+--- a/browser/app/distribution/moz.build
++++ b/browser/app/distribution/moz.build
+@@ -4,7 +4,10 @@
+ 
+ DIST_SUBDIR = ""
+ 
+-if CONFIG["BUILT_BY_MOZILLA"]:
+-    FINAL_TARGET_FILES.distribution += [
+-        "distribution.ini",
+-    ]
++FINAL_TARGET_FILES.distribution += [
++    "distribution.ini",
++]
++
++FINAL_TARGET_FILES.distribution.extensions += [
++    "extensions/uBlock0@raymondhill.net.xpi",
++]

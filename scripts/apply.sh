@@ -120,4 +120,16 @@ if [ -d "$HILAL_REPO_ROOT/prefs" ] && [ "$(find "$HILAL_REPO_ROOT/prefs" -type f
   )
 fi
 
+# -- 4. Download and copy default extensions ---------------------------------
+
+EXT_DIR="$HILAL_FIREFOX_SRC/browser/app/distribution/extensions"
+mkdir -p "$EXT_DIR"
+if [ ! -f "$EXT_DIR/uBlock0@raymondhill.net.xpi" ]; then
+  log "Downloading uBlock Origin extension..."
+  if ! curl -L -f -s -o "$EXT_DIR/uBlock0@raymondhill.net.xpi" "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"; then
+    warn "Failed to download uBlock Origin. Please check your internet connection."
+  fi
+fi
+
 log "All Hilal changes applied. Build with: scripts/build-macos.sh"
+
