@@ -164,6 +164,7 @@ pref("hilal.workspaces.enabled", true);
 pref("hilal.workspaces.data", "[]");
 pref("hilal.workspaces.active", "default");
 pref("hilal.workspaces.pinned.public", false);
+pref("hilal.workspaces.groups.public", false);
 
 // Permission defaults.
 pref("permissions.default.desktop-notification", 2);

@@ -94,6 +94,10 @@
       return Services.prefs.getBoolPref("hilal.workspaces.pinned.public", false);
     }
 
+    get _groupsIsPublic() {
+      return Services.prefs.getBoolPref("hilal.workspaces.groups.public", false);
+    }
+
     _normalizeName(name, fallback) {
       const normalized = String(name || fallback || "Workspace")
         .replace(/\s+/g, " ")
@@ -421,6 +425,28 @@
         this._prefPinnedPublicObserver
       );
 
+      this._prefGroupsPublicObserver = () => {
+        this._apply();
+      };
+      Services.prefs.addObserver(
+        "hilal.workspaces.groups.public",
+        this._prefGroupsPublicObserver
+      );
+
+      this._tabGroupedHandler = () => {
+        if (this._enabled) {
+          this._apply();
+        }
+      };
+      gBrowser.tabContainer.addEventListener(
+        "TabGrouped",
+        this._tabGroupedHandler
+      );
+      gBrowser.tabContainer.addEventListener(
+        "TabUngrouped",
+        this._tabGroupedHandler
+      );
+
       window.addEventListener("unload", () => this._destroy(), { once: true });
     }
 
@@ -443,6 +469,16 @@
           this._tabPinnedHandler
         );
       }
+      if (this._tabGroupedHandler) {
+        gBrowser.tabContainer.removeEventListener(
+          "TabGrouped",
+          this._tabGroupedHandler
+        );
+        gBrowser.tabContainer.removeEventListener(
+          "TabUngrouped",
+          this._tabGroupedHandler
+        );
+      }
       if (this._keyDownHandler) {
         window.removeEventListener("keydown", this._keyDownHandler, true);
       }
@@ -459,6 +495,12 @@
         Services.prefs.removeObserver(
           "hilal.workspaces.pinned.public",
           this._prefPinnedPublicObserver
+        );
+      }
+      if (this._prefGroupsPublicObserver) {
+        Services.prefs.removeObserver(
+          "hilal.workspaces.groups.public",
+          this._prefGroupsPublicObserver
         );
       }
       this._closeOpenSurfaces();
@@ -719,6 +761,9 @@
             gBrowser.showTab(tab);
           }
         }
+        for (const group of gBrowser.tabGroups) {
+          group.removeAttribute("hidden");
+        }
         return;
       }
 
@@ -728,6 +773,7 @@
       const selectedWorkspace = this._getTabWorkspace(selected);
       const activeTabs = [];
       const pinnedIsPublic = this._pinnedIsPublic;
+      const groupsIsPublic = this._groupsIsPublic;
 
       for (const tab of gBrowser.tabs) {
         const workspaceId = this._getTabWorkspace(tab);
@@ -735,8 +781,13 @@
           typeof SessionStore !== "undefined" &&
           SessionStore.getCustomTabValue(tab, PINNED_KEY) === "true";
         const isTabPinned = tab.pinned || isPinnedSession;
+        const isTabGrouped = !!tab.group;
 
-        if (workspaceId === this._activeId || (pinnedIsPublic && isTabPinned)) {
+        if (
+          workspaceId === this._activeId ||
+          (pinnedIsPublic && isTabPinned) ||
+          (groupsIsPublic && isTabGrouped)
+        ) {
           if (!tab.hidden || this._isHiddenByWorkspace(tab)) {
             this._showWorkspaceTab(tab);
             activeTabs.push(tab);
@@ -764,7 +815,7 @@
           selected.hidden ||
           selected.closing)
       ) {
-        if (!(pinnedIsPublic && selected.pinned)) {
+        if (!(pinnedIsPublic && selected.pinned) && !(groupsIsPublic && selected.group)) {
           gBrowser.selectedTab = nextSelected;
         }
       }
@@ -774,7 +825,19 @@
           if (pinnedIsPublic && tab.pinned) {
             continue;
           }
+          if (groupsIsPublic && tab.group) {
+            continue;
+          }
           this._hideWorkspaceTab(tab);
+        }
+      }
+
+      for (const group of gBrowser.tabGroups) {
+        const hasVisibleTab = group.tabs.some(tab => !tab.hidden);
+        if (hasVisibleTab) {
+          group.removeAttribute("hidden");
+        } else {
+          group.setAttribute("hidden", "true");
         }
       }
     }

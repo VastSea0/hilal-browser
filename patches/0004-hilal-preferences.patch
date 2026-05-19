@@ -1,16 +1,15 @@
 Hilal Browser: add Hilal settings section to General preferences
 
-Adds a "Hilal Browser" groupbox to the General pane with a checkbox to
-enable/disable workspaces and a Reset Workspaces button. The pref binding
-is handled manually via JS (getBoolPref/setBoolPref) to avoid the missing
-preference declaration error from the old XUL preference= attribute system.
+Adds a "Hilal Browser" groupbox to the General pane with checkboxes to
+enable/disable workspaces, toggle public pinned tabs, toggle public tab groups,
+and a Reset Workspaces button. The pref binding is handled manually via JS.
 
 ---
 diff --git a/browser/components/preferences/main.inc.xhtml b/browser/components/preferences/main.inc.xhtml
-index 32e3edbbe933..cf9064ce3826 100644
+index 32e3edbbe933..e1f11778fed7 100644
 --- a/browser/components/preferences/main.inc.xhtml
 +++ b/browser/components/preferences/main.inc.xhtml
-@@ -214,4 +214,22 @@
+@@ -214,4 +214,24 @@
  
  <!-- Network Settings-->
  <html:setting-group groupid="networkProxy" data-category="paneGeneral" data-subcategory="netsettings" hidden="true" data-srd-migrated="" />
@@ -23,6 +22,8 @@ index 32e3edbbe933..cf9064ce3826 100644
 +              label="Enable workspaces"/>
 +    <checkbox id="hilalWorkspacesPinnedPublic"
 +              label="Make pinned tabs visible in all workspaces"/>
++    <checkbox id="hilalWorkspacesGroupsPublic"
++              label="Make tab groups visible in all workspaces"/>
 +    <hbox>
 +      <description flex="1">Reset all workspace data (cannot be undone).</description>
 +      <button id="hilalWorkspacesReset"
@@ -34,7 +35,7 @@ index 32e3edbbe933..cf9064ce3826 100644
 +</groupbox>
  </html:template>
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index dd1f2e21e8b2..7c992276ec6e 100644
+index dd1f2e21e8b2..aec7bc5eb903 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
 @@ -13,7 +13,7 @@
@@ -55,7 +56,7 @@ index dd1f2e21e8b2..7c992276ec6e 100644
    UpdateListener: "resource://gre/modules/UpdateListener.sys.mjs",
    LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
    MigrationUtils: "resource:///modules/MigrationUtils.sys.mjs",
-@@ -830,6 +832,82 @@ var gMainPane = {
+@@ -830,6 +832,101 @@ var gMainPane = {
        AppFileHandler._init();
      }
  
@@ -89,6 +90,9 @@ index dd1f2e21e8b2..7c992276ec6e 100644
 +    const hilalWsPinnedPublicCheckbox = /** @type {HTMLInputElement|null} */ (
 +      document.getElementById("hilalWorkspacesPinnedPublic")
 +    );
++    const hilalWsGroupsPublicCheckbox = /** @type {HTMLInputElement|null} */ (
++      document.getElementById("hilalWorkspacesGroupsPublic")
++    );
 +    if (hilalWsCheckbox) {
 +      hilalWsCheckbox.checked = Services.prefs.getBoolPref(
 +        "hilal.workspaces.enabled",
@@ -113,6 +117,18 @@ index dd1f2e21e8b2..7c992276ec6e 100644
 +        );
 +      });
 +    }
++    if (hilalWsGroupsPublicCheckbox) {
++      hilalWsGroupsPublicCheckbox.checked = Services.prefs.getBoolPref(
++        "hilal.workspaces.groups.public",
++        false
++      );
++      hilalWsGroupsPublicCheckbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref(
++          "hilal.workspaces.groups.public",
++          hilalWsGroupsPublicCheckbox.checked
++        );
++      });
++    }
 +    setEventListener("hilalWorkspacesReset", "command", function () {
 +      if (
 +        Services.prompt.confirm(
@@ -126,11 +142,15 @@ index dd1f2e21e8b2..7c992276ec6e 100644
 +        Services.prefs.setStringPref("hilal.workspaces.active", "default");
 +        Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
 +        Services.prefs.setBoolPref("hilal.workspaces.pinned.public", false);
++        Services.prefs.setBoolPref("hilal.workspaces.groups.public", false);
 +        if (hilalWsCheckbox) {
 +          hilalWsCheckbox.checked = true;
 +        }
 +        if (hilalWsPinnedPublicCheckbox) {
 +          hilalWsPinnedPublicCheckbox.checked = false;
++        }
++        if (hilalWsGroupsPublicCheckbox) {
++          hilalWsGroupsPublicCheckbox.checked = false;
 +        }
 +      }
 +    });
