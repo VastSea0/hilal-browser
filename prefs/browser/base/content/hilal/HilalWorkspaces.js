@@ -604,43 +604,78 @@
       }
 
       let newTab = null;
+      let isFreshNewTab = false;
+      let state = null;
       try {
-        const state = JSON.parse(SessionStore.getTabState(tab));
-        state.userContextId = targetUserContextId;
-        state.pinned = false;
-        state.hidden = false;
-        delete state.groupId;
-        delete state.splitViewId;
-        state.extData = state.extData || {};
-        state.extData[STORE_KEY] = workspaceId;
-        if (sourceWasPinned) {
-          state.extData[PINNED_KEY] = "true";
-        } else {
-          delete state.extData[PINNED_KEY];
+        if (typeof SessionStore !== "undefined") {
+          state = JSON.parse(SessionStore.getTabState(tab));
+          const entries = state.entries || [];
+          if (
+            entries.length === 0 ||
+            (entries.length === 1 &&
+              (entries[0].url === "about:blank" ||
+                entries[0].url === "about:newtab" ||
+                entries[0].url === "about:home"))
+          ) {
+            isFreshNewTab = true;
+          }
         }
-
-        newTab = gBrowser.addTrustedTab("about:blank", {
-          inBackground: !(select || sourceWasSelected),
-          skipLoad: true,
-          tabIndex: tab._tPos + 1,
-          userContextId: targetUserContextId,
-        });
-        this._setTabWorkspace(newTab, workspaceId);
-        SessionStore.setTabState(newTab, JSON.stringify(state));
       } catch (e) {
-        this._warn(
-          "failed to preserve tab state while moving workspace tab",
-          e
-        );
-        const uri = tab.linkedBrowser?.currentURI?.spec || "about:newtab";
-        newTab = gBrowser.addWebTab(uri, {
+        // Ignored
+      }
+
+      if (isFreshNewTab) {
+        newTab = gBrowser.addTrustedTab("about:newtab", {
           inBackground: !(select || sourceWasSelected),
           tabIndex: tab._tPos + 1,
           userContextId: targetUserContextId,
         });
         this._setTabWorkspace(newTab, workspaceId);
-        if (sourceWasPinned) {
-          this._rememberPinned(newTab);
+      } else {
+        try {
+          if (!state && typeof SessionStore !== "undefined") {
+            state = JSON.parse(SessionStore.getTabState(tab));
+          }
+          if (state) {
+            state.userContextId = targetUserContextId;
+            state.pinned = false;
+            state.hidden = false;
+            delete state.groupId;
+            delete state.splitViewId;
+            state.extData = state.extData || {};
+            state.extData[STORE_KEY] = workspaceId;
+            if (sourceWasPinned) {
+              state.extData[PINNED_KEY] = "true";
+            } else {
+              delete state.extData[PINNED_KEY];
+            }
+
+            newTab = gBrowser.addTrustedTab("about:blank", {
+              inBackground: !(select || sourceWasSelected),
+              skipLoad: true,
+              tabIndex: tab._tPos + 1,
+              userContextId: targetUserContextId,
+            });
+            this._setTabWorkspace(newTab, workspaceId);
+            SessionStore.setTabState(newTab, JSON.stringify(state));
+          } else {
+            throw new Error("SessionStore unavailable or failed");
+          }
+        } catch (e) {
+          this._warn(
+            "failed to preserve tab state while moving workspace tab",
+            e
+          );
+          const uri = tab.linkedBrowser?.currentURI?.spec || "about:newtab";
+          newTab = gBrowser.addWebTab(uri, {
+            inBackground: !(select || sourceWasSelected),
+            tabIndex: tab._tPos + 1,
+            userContextId: targetUserContextId,
+          });
+          this._setTabWorkspace(newTab, workspaceId);
+          if (sourceWasPinned) {
+            this._rememberPinned(newTab);
+          }
         }
       }
 
