@@ -1202,22 +1202,31 @@
         ${this._getColorCSS()}
 
         #hilal-workspace-strip {
-          padding-inline: var(--space-medium);
+          padding-inline: 0;
           padding-block: var(--space-xxsmall);
           border-bottom: var(--tabstrip-inner-border);
           box-sizing: border-box;
           flex-shrink: 0;
+          overflow: hidden;
         }
 
         #hilal-ws-list {
           display: flex;
           flex-direction: row;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
           gap: var(--space-xxsmall);
           align-items: center;
+          padding-inline: 12px;
           padding-block: var(--space-xxsmall);
-          max-block-size: 96px;
-          overflow: auto;
+          overflow-x: auto;
+          overflow-y: hidden;
+          scrollbar-width: none;
+          mask-image: linear-gradient(to right, transparent, black 12px, black calc(100% - 12px), transparent);
+          -webkit-mask-image: linear-gradient(to right, transparent, black 12px, black calc(100% - 12px), transparent);
+        }
+
+        #hilal-ws-list::-webkit-scrollbar {
+          display: none;
         }
 
         .hilal-ws-btn,
@@ -1268,7 +1277,7 @@
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          max-width: 12em;
+          max-width: 80px;
         }
 
         .hilal-ws-count {
@@ -1308,6 +1317,9 @@
           flex-wrap: nowrap;
           max-block-size: none;
           overflow: visible;
+          padding-inline: 0;
+          mask-image: none;
+          -webkit-mask-image: none;
         }
 
         :host(:not([expanded])) .hilal-ws-btn,
@@ -1619,6 +1631,13 @@
 
       if (this._addBtn) {
         list.appendChild(this._addBtn);
+      }
+
+      const activeBtn = list.querySelector(".hilal-ws-active");
+      if (activeBtn) {
+        requestAnimationFrame(() => {
+          activeBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+        });
       }
     }
   }
