@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "title": "Hilal Browser",
+    "description": "Firefox kaynak kodu üzerine doğrudan inşa edilmiş, gizlilik odaklı, açık kaynaklı tarayıcı. VastSea, Türkiye tarafından geliştirildi."
+  },
+  "nav": {
+    "github": "GitHub",
+    "language": "Dil"
+  },
+  "hero": {
+    "badge": "Erken Alpha",
+    "title": "Hilal Browser",
+    "tagline": "Firefox üzerine inşa edilmiş, gizlilik odaklı, açık kaynaklı bir tarayıcı. Türkiye'de üretildi, herkes için.",
+    "cta": "GitHub'da Görüntüle"
+  },
+  "why": {
+    "title": "Neden Hilal?",
+    "features": {
+      "privacy": {
+        "title": "Gizlilik öncelikli",
+        "description": "Telemetri varsayılan olarak devre dışı. Sıkı izleme koruması. İzinsiz ağ çağrısı yok. Veriniz size ait."
+      },
+      "opensource": {
+        "title": "Açık kaynak ve ücretsiz",
+        "description": "Mozilla Public License 2.0 altında yayınlandı. Tam kaynak kodu mevcut. Ücret duvarı yok, tescilli kilit yok."
+      },
+      "community": {
+        "title": "Topluluk odaklı",
+        "description": "Küçük bir ekip ve topluluk katkılarıyla inşa edildi. Her sorun, test ve çeviri önemlidir."
+      },
+      "turkey": {
+        "title": "Türkiye'de üretildi, herkes için",
+        "description": "VastSea tarafından Türkiye'de, küresel bir bakış açısıyla geliştirildi. Yerel özen, dünya çapında erişim."
+      },
+      "firefox": {
+        "title": "Firefox üzerine inşa edildi",
+        "description": "Chromium değil. Düşünceli varsayılanlar ve modern kullanıcı deneyimiyle gerçek bir Firefox motoru."
+      }
+    }
+  },
+  "history": {
+    "title": "Geliştirme Geçmişi",
+    "subtitle": "Aynı vizyon. Farklı biçimler. Her bölüm bize yeni bir şey öğretti.",
+    "eras": {
+      "pyqt": {
+        "name": "PyQtEngine",
+        "note": "Chromium tabanlı başlangıçlar"
+      },
+      "electron": {
+        "name": "Electron",
+        "note": "Hâlâ Chromium — yığını keşfetmek"
+      },
+      "anka": {
+        "name": "Anka Browser",
+        "note": "Firefox kaynağına geçiş"
+      },
+      "huma": {
+        "name": "Hüma Browser",
+        "note": "Firefox tabanlı geliştirme sürdürüldü"
+      },
+      "hilal": {
+        "name": "Hilal Browser",
+        "note": "Firefox üzerinden sıfırdan yeniden inşa"
+      }
+    }
+  },
+  "alpha": {
+    "title": "Erken Alpha",
+    "body": "Hilal Browser deneysel bir yazılımdır. Özellikler değişebilir, çökebilir veya habersizce ortadan kalkabilir. Bunu açık bir şekilde inşa ediyoruz ve cesur test kullanıcılarını ve erken katkıda bulunanları geleceği şekillendirmeye davet ediyoruz. Henüz kararlı bir sürüm yok — olduğunda, ilk buradan duyuracağız.",
+    "cta": "GitHub'da gelişmeyi takip et"
+  },
+  "contribute": {
+    "title": "Katkıda Bulun",
+    "body": "Hilal bir topluluk projesidir. Kod yazın, hata bildirin, derlemeleri test edin veya çeviri yapın — herkes için bir yer var.",
+    "ways": {
+      "issues": "Sorun bildirin ve özellik isteyin",
+      "testing": "Erken derlemeleri test edin ve geri bildirim verin",
+      "code": "Yama ve iyileştirmeler gönderin",
+      "translate": "Çeviri ve yerelleştirmeye yardım edin"
+    },
+    "cta": "GitHub'da bize katıl"
+  },
+  "footer": {
+    "license": "Hilal marka varlıkları Hilal Browser katkıda bulunanlarına aittir. Derleme araçları, betikler ve yamalar Mozilla Public License 2.0 altında yayınlanmıştır.",
+    "developer": "VastSea tarafından geliştirildi",
+    "source": "Kaynak kodu",
+    "switchLanguage": "Dil değiştir"
+  }
+}

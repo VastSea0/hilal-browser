@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "title": "Hilal Browser",
+    "description": "Privacy-first, open-source browser built directly on Firefox source code. Developed by VastSea, Turkey."
+  },
+  "nav": {
+    "github": "GitHub",
+    "language": "Language"
+  },
+  "hero": {
+    "badge": "Early Alpha",
+    "title": "Hilal Browser",
+    "tagline": "A privacy-first, open-source browser built on Firefox. Crafted in Turkey, for everyone.",
+    "cta": "View on GitHub"
+  },
+  "why": {
+    "title": "Why Hilal?",
+    "features": {
+      "privacy": {
+        "title": "Privacy-first",
+        "description": "Telemetry disabled by default. Strict tracking protection. No unsolicited network calls. Your data stays yours."
+      },
+      "opensource": {
+        "title": "Open source & free",
+        "description": "Released under the Mozilla Public License 2.0. Full source available. No paywalls, no proprietary lock-in."
+      },
+      "community": {
+        "title": "Community-driven",
+        "description": "Built by a small team with community input. Every issue, test, and translation matters."
+      },
+      "turkey": {
+        "title": "Built in Turkey, for everyone",
+        "description": "Developed by VastSea in Turkey with a global perspective. Local care, worldwide reach."
+      },
+      "firefox": {
+        "title": "Built on Firefox",
+        "description": "Not Chromium. A genuine Firefox-based engine with thoughtful defaults and modern UX."
+      }
+    }
+  },
+  "history": {
+    "title": "Development History",
+    "subtitle": "Same vision. Different forms. Each chapter taught us something new.",
+    "eras": {
+      "pyqt": {
+        "name": "PyQtEngine",
+        "note": "Chromium-based beginnings"
+      },
+      "electron": {
+        "name": "Electron",
+        "note": "Still Chromium — exploring the stack"
+      },
+      "anka": {
+        "name": "Anka Browser",
+        "note": "Switched to Firefox source"
+      },
+      "huma": {
+        "name": "Hüma Browser",
+        "note": "Refined Firefox-based development"
+      },
+      "hilal": {
+        "name": "Hilal Browser",
+        "note": "Rebuilt from scratch on Firefox"
+      }
+    }
+  },
+  "alpha": {
+    "title": "Early Alpha",
+    "body": "Hilal Browser is experimental software. Features may change, crash, or disappear without warning. We are building this in the open and invite brave testers and early contributors to shape what comes next. There is no stable release yet — when there is, you will hear it here first.",
+    "cta": "Follow development on GitHub"
+  },
+  "contribute": {
+    "title": "Contribute",
+    "body": "Hilal is a community project. Whether you write code, file bugs, test builds, or translate strings, there is a place for you.",
+    "ways": {
+      "issues": "Report issues and request features",
+      "testing": "Test early builds and give feedback",
+      "code": "Submit patches and improvements",
+      "translate": "Help translate and localize"
+    },
+    "cta": "Join us on GitHub"
+  },
+  "footer": {
+    "license": "Hilal branding assets are © Hilal Browser contributors. Build glue, scripts, and patches are released under the Mozilla Public License 2.0.",
+    "developer": "Developed by VastSea",
+    "source": "Source code",
+    "switchLanguage": "Switch language"
+  }
+}
