@@ -1,0 +1,457 @@
+Add browser-wide Bangs! support
+
+---
+
+diff --git a/browser/components/urlbar/UrlbarUtils.sys.mjs b/browser/components/urlbar/UrlbarUtils.sys.mjs
+index 90ca04272688..ee3962517b11 100644
+--- a/browser/components/urlbar/UrlbarUtils.sys.mjs
++++ b/browser/components/urlbar/UrlbarUtils.sys.mjs
+@@ -727,6 +727,215 @@ export var UrlbarUtils = {
+    *    post data (object).
+    */
+   getSearchQueryUrl(engine, query) {
++    const BANGS_MAP = {
++      g: {
++        search: "https://www.google.com/search?q={query}",
++        home: "https://www.google.com",
++      },
++      google: {
++        search: "https://www.google.com/search?q={query}",
++        home: "https://www.google.com",
++      },
++      yt: {
++        search: "https://www.youtube.com/results?search_query={query}",
++        home: "https://www.youtube.com",
++      },
++      youtube: {
++        search: "https://www.youtube.com/results?search_query={query}",
++        home: "https://www.youtube.com",
++      },
++      w: {
++        search: "https://en.wikipedia.org/wiki/Special:Search?search={query}",
++        home: "https://www.wikipedia.org",
++      },
++      wikipedia: {
++        search: "https://en.wikipedia.org/wiki/Special:Search?search={query}",
++        home: "https://www.wikipedia.org",
++      },
++      d: {
++        search: "https://duckduckgo.com/?q={query}",
++        home: "https://duckduckgo.com",
++      },
++      duckduckgo: {
++        search: "https://duckduckgo.com/?q={query}",
++        home: "https://duckduckgo.com",
++      },
++      gh: {
++        search: "https://github.com/search?q={query}",
++        home: "https://github.com",
++      },
++      github: {
++        search: "https://github.com/search?q={query}",
++        home: "https://github.com",
++      },
++      r: {
++        search: "https://www.reddit.com/search/?q={query}",
++        home: "https://www.reddit.com",
++      },
++      reddit: {
++        search: "https://www.reddit.com/search/?q={query}",
++        home: "https://www.reddit.com",
++      },
++      a: {
++        search: "https://www.amazon.com/s?k={query}",
++        home: "https://www.amazon.com",
++      },
++      amazon: {
++        search: "https://www.amazon.com/s?k={query}",
++        home: "https://www.amazon.com",
++      },
++      n: {
++        search: "https://www.netflix.com/search?q={query}",
++        home: "https://www.netflix.com",
++      },
++      netflix: {
++        search: "https://www.netflix.com/search?q={query}",
++        home: "https://www.netflix.com",
++      },
++      imdb: {
++        search: "https://www.imdb.com/find?q={query}",
++        home: "https://www.imdb.com",
++      },
++      tr: {
++        search: "https://translate.google.com/?sl=auto&tl=en&text={query}",
++        home: "https://translate.google.com",
++      },
++      translate: {
++        search: "https://translate.google.com/?sl=auto&tl=en&text={query}",
++        home: "https://translate.google.com",
++      },
++      tw: {
++        search: "https://twitter.com/search?q={query}",
++        home: "https://twitter.com",
++      },
++      twitter: {
++        search: "https://twitter.com/search?q={query}",
++        home: "https://twitter.com",
++      },
++      x: { search: "https://x.com/search?q={query}", home: "https://x.com" },
++      maps: {
++        search: "https://www.google.com/maps/search/{query}",
++        home: "https://maps.google.com",
++      },
++      b: {
++        search: "https://www.bing.com/search?q={query}",
++        home: "https://www.bing.com",
++      },
++      bing: {
++        search: "https://www.bing.com/search?q={query}",
++        home: "https://www.bing.com",
++      },
++      y: {
++        search: "https://search.yahoo.com/search?p={query}",
++        home: "https://yahoo.com",
++      },
++      yahoo: {
++        search: "https://search.yahoo.com/search?p={query}",
++        home: "https://yahoo.com",
++      },
++      ebay: {
++        search: "https://www.ebay.com/sch/i.html?_nkw={query}",
++        home: "https://www.ebay.com",
++      },
++      wiki: {
++        search: "https://en.wikipedia.org/wiki/Special:Search?search={query}",
++        home: "https://www.wikipedia.org",
++      },
++      wa: {
++        search: "https://www.wolframalpha.com/input?i={query}",
++        home: "https://www.wolframalpha.com",
++      },
++      wolfram: {
++        search: "https://www.wolframalpha.com/input?i={query}",
++        home: "https://www.wolframalpha.com",
++      },
++      stack: {
++        search: "https://stackoverflow.com/search?q={query}",
++        home: "https://stackoverflow.com",
++      },
++      so: {
++        search: "https://stackoverflow.com/search?q={query}",
++        home: "https://stackoverflow.com",
++      },
++      twitch: {
++        search: "https://www.twitch.tv/search?term={query}",
++        home: "https://www.twitch.tv",
++      },
++      pinterest: {
++        search: "https://www.pinterest.com/search/pins/?q={query}",
++        home: "https://www.pinterest.com",
++      },
++      spotify: {
++        search: "https://open.spotify.com/search/{query}",
++        home: "https://open.spotify.com",
++      },
++      steam: {
++        search: "https://store.steampowered.com/search/?term={query}",
++        home: "https://store.steampowered.com",
++      },
++      medium: {
++        search: "https://medium.com/search?q={query}",
++        home: "https://medium.com",
++      },
++      quora: {
++        search: "https://www.quora.com/search?q={query}",
++        home: "https://www.quora.com",
++      },
++      facebook: {
++        search: "https://www.facebook.com/search/top/?q={query}",
++        home: "https://www.facebook.com",
++      },
++      fb: {
++        search: "https://www.facebook.com/search/top/?q={query}",
++        home: "https://www.facebook.com",
++      },
++      instagram: {
++        search: "https://www.instagram.com/explore/tags/{query}",
++        home: "https://www.instagram.com",
++      },
++      ig: {
++        search: "https://www.instagram.com/explore/tags/{query}",
++        home: "https://www.instagram.com",
++      },
++    };
++
++    if (query) {
++      const trimmed = query.trim();
++      const bangRegex = /(?:^|\s)!([a-zA-Z0-9_-]+)(?:\s|$)/i;
++      const match = trimmed.match(bangRegex);
++      if (match) {
++        const bang = match[1].toLowerCase();
++        const bangWord = "!" + match[1];
++        const extractedQuery = trimmed
++          .replace(
++            new RegExp(
++              "(?:^|\\s)" +
++                bangWord.replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&") +
++                "(?:\\s|$)",
++              "i"
++            ),
++            " "
++          )
++          .trim();
++
++        let redirectedUrl;
++        if (bang in BANGS_MAP) {
++          if (!extractedQuery) {
++            redirectedUrl = BANGS_MAP[bang].home;
++          } else {
++            redirectedUrl = BANGS_MAP[bang].search.replace(
++              "{query}",
++              encodeURIComponent(extractedQuery)
++            );
++          }
++        } else {
++          redirectedUrl =
++            "https://duckduckgo.com/?q=" + encodeURIComponent(trimmed);
++        }
++        return [redirectedUrl, null];
++      }
++    }
++
+     let submission = engine.getSubmission(query);
+     return [submission.uri.spec, submission.postData];
+   },
+diff --git a/browser/modules/URILoadingHelper.sys.mjs b/browser/modules/URILoadingHelper.sys.mjs
+index c10e1e3a34f8..d83d07b0ab9a 100644
+--- a/browser/modules/URILoadingHelper.sys.mjs
++++ b/browser/modules/URILoadingHelper.sys.mjs
+@@ -462,6 +462,228 @@ export const URILoadingHelper = {
+       return;
+     }
+ 
++    const BANGS_MAP = {
++      g: {
++        search: "https://www.google.com/search?q={query}",
++        home: "https://www.google.com",
++      },
++      google: {
++        search: "https://www.google.com/search?q={query}",
++        home: "https://www.google.com",
++      },
++      yt: {
++        search: "https://www.youtube.com/results?search_query={query}",
++        home: "https://www.youtube.com",
++      },
++      youtube: {
++        search: "https://www.youtube.com/results?search_query={query}",
++        home: "https://www.youtube.com",
++      },
++      w: {
++        search: "https://en.wikipedia.org/wiki/Special:Search?search={query}",
++        home: "https://www.wikipedia.org",
++      },
++      wikipedia: {
++        search: "https://en.wikipedia.org/wiki/Special:Search?search={query}",
++        home: "https://www.wikipedia.org",
++      },
++      d: {
++        search: "https://duckduckgo.com/?q={query}",
++        home: "https://duckduckgo.com",
++      },
++      duckduckgo: {
++        search: "https://duckduckgo.com/?q={query}",
++        home: "https://duckduckgo.com",
++      },
++      gh: {
++        search: "https://github.com/search?q={query}",
++        home: "https://github.com",
++      },
++      github: {
++        search: "https://github.com/search?q={query}",
++        home: "https://github.com",
++      },
++      r: {
++        search: "https://www.reddit.com/search/?q={query}",
++        home: "https://www.reddit.com",
++      },
++      reddit: {
++        search: "https://www.reddit.com/search/?q={query}",
++        home: "https://www.reddit.com",
++      },
++      a: {
++        search: "https://www.amazon.com/s?k={query}",
++        home: "https://www.amazon.com",
++      },
++      amazon: {
++        search: "https://www.amazon.com/s?k={query}",
++        home: "https://www.amazon.com",
++      },
++      n: {
++        search: "https://www.netflix.com/search?q={query}",
++        home: "https://www.netflix.com",
++      },
++      netflix: {
++        search: "https://www.netflix.com/search?q={query}",
++        home: "https://www.netflix.com",
++      },
++      imdb: {
++        search: "https://www.imdb.com/find?q={query}",
++        home: "https://www.imdb.com",
++      },
++      tr: {
++        search: "https://translate.google.com/?sl=auto&tl=en&text={query}",
++        home: "https://translate.google.com",
++      },
++      translate: {
++        search: "https://translate.google.com/?sl=auto&tl=en&text={query}",
++        home: "https://translate.google.com",
++      },
++      tw: {
++        search: "https://twitter.com/search?q={query}",
++        home: "https://twitter.com",
++      },
++      twitter: {
++        search: "https://twitter.com/search?q={query}",
++        home: "https://twitter.com",
++      },
++      x: { search: "https://x.com/search?q={query}", home: "https://x.com" },
++      maps: {
++        search: "https://www.google.com/maps/search/{query}",
++        home: "https://maps.google.com",
++      },
++      b: {
++        search: "https://www.bing.com/search?q={query}",
++        home: "https://www.bing.com",
++      },
++      bing: {
++        search: "https://www.bing.com/search?q={query}",
++        home: "https://www.bing.com",
++      },
++      y: {
++        search: "https://search.yahoo.com/search?p={query}",
++        home: "https://yahoo.com",
++      },
++      yahoo: {
++        search: "https://search.yahoo.com/search?p={query}",
++        home: "https://yahoo.com",
++      },
++      ebay: {
++        search: "https://www.ebay.com/sch/i.html?_nkw={query}",
++        home: "https://www.ebay.com",
++      },
++      wiki: {
++        search: "https://en.wikipedia.org/wiki/Special:Search?search={query}",
++        home: "https://www.wikipedia.org",
++      },
++      wa: {
++        search: "https://www.wolframalpha.com/input?i={query}",
++        home: "https://www.wolframalpha.com",
++      },
++      wolfram: {
++        search: "https://www.wolframalpha.com/input?i={query}",
++        home: "https://www.wolframalpha.com",
++      },
++      stack: {
++        search: "https://stackoverflow.com/search?q={query}",
++        home: "https://stackoverflow.com",
++      },
++      so: {
++        search: "https://stackoverflow.com/search?q={query}",
++        home: "https://stackoverflow.com",
++      },
++      twitch: {
++        search: "https://www.twitch.tv/search?term={query}",
++        home: "https://www.twitch.tv",
++      },
++      pinterest: {
++        search: "https://www.pinterest.com/search/pins/?q={query}",
++        home: "https://www.pinterest.com",
++      },
++      spotify: {
++        search: "https://open.spotify.com/search/{query}",
++        home: "https://open.spotify.com",
++      },
++      steam: {
++        search: "https://store.steampowered.com/search/?term={query}",
++        home: "https://store.steampowered.com",
++      },
++      medium: {
++        search: "https://medium.com/search?q={query}",
++        home: "https://medium.com",
++      },
++      quora: {
++        search: "https://www.quora.com/search?q={query}",
++        home: "https://www.quora.com",
++      },
++      facebook: {
++        search: "https://www.facebook.com/search/top/?q={query}",
++        home: "https://www.facebook.com",
++      },
++      fb: {
++        search: "https://www.facebook.com/search/top/?q={query}",
++        home: "https://www.facebook.com",
++      },
++      instagram: {
++        search: "https://www.instagram.com/explore/tags/{query}",
++        home: "https://www.instagram.com",
++      },
++      ig: {
++        search: "https://www.instagram.com/explore/tags/{query}",
++        home: "https://www.instagram.com",
++      },
++    };
++
++    if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
++      try {
++        let parsedUrl = new URL(url);
++        let q =
++          parsedUrl.searchParams.get("q") ||
++          parsedUrl.searchParams.get("p") ||
++          parsedUrl.searchParams.get("text") ||
++          parsedUrl.searchParams.get("wd") ||
++          parsedUrl.searchParams.get("word") ||
++          parsedUrl.searchParams.get("query") ||
++          parsedUrl.searchParams.get("search");
++        if (q) {
++          const trimmed = q.trim();
++          const bangRegex = /(?:^|\s)!([a-zA-Z0-9_-]+)(?:\s|$)/i;
++          const match = trimmed.match(bangRegex);
++          if (match) {
++            const bang = match[1].toLowerCase();
++            const bangWord = "!" + match[1];
++            const extractedQuery = trimmed
++              .replace(
++                new RegExp(
++                  "(?:^|\\s)" +
++                    bangWord.replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&") +
++                    "(?:\\s|$)",
++                  "i"
++                ),
++                " "
++              )
++              .trim();
++
++            if (bang in BANGS_MAP) {
++              if (!extractedQuery) {
++                url = BANGS_MAP[bang].home;
++              } else {
++                url = BANGS_MAP[bang].search.replace(
++                  "{query}",
++                  encodeURIComponent(extractedQuery)
++                );
++              }
++            } else {
++              url = "https://duckduckgo.com/?q=" + encodeURIComponent(trimmed);
++            }
++            // Clear postData if any, since we redirected to a standard GET search URL
++            params = Object.assign({}, params);
++            params.postData = null;
++          }
++        }
++      } catch (e) {}
++    }
++
+     let {
+       allowThirdPartyFixup,
+       postData,
