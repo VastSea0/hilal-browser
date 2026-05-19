@@ -1365,10 +1365,8 @@
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          min-height: var(--button-size-icon);
-          min-width: var(--button-size-icon);
-          padding-block: 0;
-          padding-inline: var(--space-small);
+          width: var(--button-size-icon);
+          height: var(--button-size-icon);
           border: 1px solid transparent;
           border-radius: var(--button-border-radius);
           background: var(--button-background-color-ghost);
@@ -1378,8 +1376,8 @@
           font-size: var(--font-size-small);
           line-height: 1;
           box-sizing: border-box;
-          gap: var(--space-small);
-          max-width: 100%;
+          padding: 0;
+          flex-shrink: 0;
         }
 
         .hilal-ws-btn:hover,
@@ -1404,10 +1402,7 @@
         }
 
         .hilal-ws-label {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          max-width: 80px;
+          display: none;
         }
 
         .hilal-ws-count {
@@ -1417,19 +1412,6 @@
         .hilal-ws-btn.hilal-ws-drop-target {
           outline: var(--focus-outline);
           outline-offset: var(--focus-outline-offset);
-        }
-
-        /* Inactive buttons show only emoji and are compact squares */
-        .hilal-ws-btn:not(.hilal-ws-active) .hilal-ws-label,
-        .hilal-ws-btn:not(.hilal-ws-active) .hilal-ws-count {
-          display: none;
-        }
-
-        .hilal-ws-btn:not(.hilal-ws-active),
-        #hilal-ws-add {
-          width: var(--button-size-icon);
-          height: var(--button-size-icon);
-          padding: 0;
         }
 
         :host(:not([expanded])) #hilal-workspace-strip {
