@@ -31390,4 +31390,37 @@
     --menuitem-image: url("chrome://browser/skin/icons/pwa-remove.svg");
   }
 }
+
+  /* Center Awesomebar on New Tab Page */
+  :root[has-newtab-open] #urlbar-container {
+    position: fixed !important;
+    top: 35% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 650px !important;
+    max-width: 90vw !important;
+    z-index: 9999 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  :root[has-newtab-open] #urlbar {
+    border-radius: 28px !important;
+    background-color: var(--toolbar-field-focus-background, #ffffff) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    height: 52px !important;
+    font-size: 16px !important;
+    padding: 0 16px !important;
+  }
+
+  /* Fade out other toolbar items for a premium, minimalist new tab page */
+  :root[has-newtab-open] #nav-bar-customization-target > :not(#urlbar-container) {
+    opacity: 0.15 !important;
+    transition: opacity 0.3s ease !important;
+  }
+
+  :root[has-newtab-open] #nav-bar-customization-target > :not(#urlbar-container):hover {
+    opacity: 1.0 !important;
+  }
 }
+

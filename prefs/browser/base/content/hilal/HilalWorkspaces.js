@@ -1763,6 +1763,44 @@
     }
   }
 
+  function initNewTabCentering() {
+    if (typeof gBrowser === "undefined") {
+      return;
+    }
+    const progressListener = {
+      onLocationChange(aWebProgress, aRequest, aLocationURI, aFlags) {
+        if (!aWebProgress.isTopLevel) {
+          return;
+        }
+        const spec = aLocationURI ? aLocationURI.spec : "";
+        const isNewTab = /^(about:newtab|about:home|about:blank)$/i.test(spec);
+        if (isNewTab) {
+          document.documentElement.setAttribute("has-newtab-open", "true");
+          if (typeof gURLBar !== "undefined") {
+            gURLBar.focus();
+            gURLBar.select();
+          }
+        } else {
+          document.documentElement.removeAttribute("has-newtab-open");
+        }
+      },
+      QueryInterface: ChromeUtils.generateQI([
+        "nsIWebProgressListener",
+        "nsISupportsWeakReference",
+      ]),
+    };
+    gBrowser.addProgressListener(progressListener);
+    window.addEventListener("unload", () => {
+      gBrowser.removeProgressListener(progressListener);
+    }, { once: true });
+  }
+
+  if (document.readyState === "complete") {
+    initNewTabCentering();
+  } else {
+    window.addEventListener("load", initNewTabCentering, { once: true });
+  }
+
   let retries = 0;
   function tryInit() {
     if (!Services.prefs.getBoolPref("sidebar.revamp", false)) {
