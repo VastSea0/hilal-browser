@@ -774,6 +774,7 @@
           }
         }
         for (const group of gBrowser.tabGroups) {
+          group.removeAttribute("collapsed");
           group.removeAttribute("hidden");
         }
         return;
@@ -847,8 +848,10 @@
       for (const group of gBrowser.tabGroups) {
         const hasVisibleTab = group.tabs.some(tab => !tab.hidden);
         if (hasVisibleTab) {
+          group.removeAttribute("collapsed");
           group.removeAttribute("hidden");
         } else {
+          group.setAttribute("collapsed", "true");
           group.setAttribute("hidden", "true");
         }
       }
