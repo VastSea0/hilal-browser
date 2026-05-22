@@ -334,31 +334,15 @@
       this._tryBuildSidebarUI();
 
       const seenPref = "hilal.welcome-screen.seen";
-      const seen = Services.prefs.getBoolPref(seenPref, false);
-      console.error(`[HilalWorkspaces] seenPref (${seenPref}) is: ${seen}`);
-
-      if (!seen) {
-        console.error("[HilalWorkspaces] Welcome screen has not been seen. Checking window.HilalWelcome...");
+      if (!Services.prefs.getBoolPref(seenPref, false)) {
         if (typeof window.HilalWelcome !== "undefined") {
-          console.error("[HilalWorkspaces] window.HilalWelcome is DEFINED! Deferring start by 500ms...");
           setTimeout(() => {
-            const currentSeen = Services.prefs.getBoolPref(seenPref, false);
-            console.error(`[HilalWorkspaces] Timeout fired! Re-checking seenPref: ${currentSeen}`);
-            if (!currentSeen) {
-              console.error("[HilalWorkspaces] Creating and starting HilalWelcome...");
-              try {
-                const welcome = new window.HilalWelcome(this);
-                welcome.start();
-                console.error("[HilalWorkspaces] HilalWelcome.start() completed.");
-              } catch (err) {
-                console.error("[HilalWorkspaces] CRITICAL error starting HilalWelcome: ", err);
-              }
-            } else {
-              console.error("[HilalWorkspaces] seenPref became true inside timeout!");
+            // Re-verify the preference inside the timeout
+            if (!Services.prefs.getBoolPref(seenPref, false)) {
+              const welcome = new window.HilalWelcome(this);
+              welcome.start();
             }
           }, 500);
-        } else {
-          console.error("[HilalWorkspaces] window.HilalWelcome is UNDEFINED!");
         }
       }
     }
@@ -1824,117 +1808,10 @@
     }
   }
 
-  function initNewTabCentering() {
-    if (typeof gBrowser === "undefined") {
-      return;
-    }
-    const isNewTabSpec = spec => /^(about:newtab|about:home|about:blank)$/i.test(spec);
-    const getSelectedSpec = () =>
-        gBrowser.selectedBrowser?.currentURI?.spec ||
-        gBrowser.currentURI?.spec ||
-        "";
-    const focusUrlBarIfNewTab = () => {
-      if (!isNewTabSpec(getSelectedSpec())) {
-        return;
-      }
-      const urlBar = window.gURLBar;
-      if (urlBar) {
-        urlBar.focus();
-        urlBar.select();
-      }
-    };
-    const updateNewTabCentering = ({ focus = false } = {}) => {
-      const spec = getSelectedSpec();
-      if (isNewTabSpec(spec)) {
-        document.documentElement.setAttribute("has-newtab-open", "true");
-        if (focus) {
-          focusUrlBarIfNewTab();
-          window.requestAnimationFrame(focusUrlBarIfNewTab);
-          setTimeout(focusUrlBarIfNewTab, 100);
-        }
-      } else {
-        document.documentElement.removeAttribute("has-newtab-open");
-      }
-    };
-    const progressListener = {
-      onLocationChange(aWebProgress, _aRequest, _aLocationURI, _aFlags) {
-        if (!aWebProgress.isTopLevel) {
-          return;
-        }
-        updateNewTabCentering({ focus: true });
-      },
-      QueryInterface: ChromeUtils.generateQI([
-        "nsIWebProgressListener",
-        "nsISupportsWeakReference",
-      ]),
-    };
-    gBrowser.addProgressListener(progressListener);
-    gBrowser.tabContainer.addEventListener("TabSelect", () => {
-      updateNewTabCentering({ focus: true });
-    });
-    updateNewTabCentering({ focus: true });
-    window.addEventListener("unload", () => {
-      gBrowser.removeProgressListener(progressListener);
-    }, { once: true });
-  }
-
-  if (document.readyState === "complete") {
-    initNewTabCentering();
-  } else {
-    window.addEventListener("load", initNewTabCentering, { once: true });
-  }
-
-  window.gHilalBrowser = {
-    copyCurrentURL() {
-      if (typeof gBrowser === "undefined") {
-        return;
-      }
-      const url = gBrowser.currentURI ? gBrowser.currentURI.spec : "";
-      if (!url) {
-        return;
-      }
-      try {
-        const clipboardHelper = Cc["@mozilla.org/widget/clipboardhelper;1"]
-                                  .getService(Ci.nsIClipboardHelper);
-        clipboardHelper.copyString(url);
-
-        const button = document.getElementById("copy-url-button-box");
-        if (button) {
-          button.setAttribute("copied", "true");
-          setTimeout(() => {
-            button.removeAttribute("copied");
-          }, 1500);
-
-          if (window.ConfirmationHint) {
-            window.ConfirmationHint.show(button, "confirmation-hint-url-copied");
-          }
-        }
-      } catch (e) {
-        console.error("Failed to copy URL to clipboard: ", e);
-      }
-    }
-  };
-
-  let retries = 0;
-  const COPY_INIT_MAX_RETRIES = 10;
-
   function tryInit() {
-    if (!Services.prefs.getBoolPref("sidebar.revamp", false)) {
-      return;
-    }
-    const sidebarEl = document.querySelector("sidebar-main");
-    const hasShadowRoot = sidebarEl?.shadowRoot?.querySelector(".wrapper");
-    if (typeof gBrowser !== "undefined" && hasShadowRoot) {
+    if (typeof gBrowser !== "undefined") {
       window.gHilalWorkspaces = new HilalWorkspaces();
       window.gHilalWorkspaces.init();
-      return;
-    }
-    if (++retries < COPY_INIT_MAX_RETRIES) {
-      setTimeout(tryInit, 100);
-    } else {
-      console.warn(
-        "HilalWorkspaces: gave up waiting for sidebar-main shadow root"
-      );
     }
   }
 
