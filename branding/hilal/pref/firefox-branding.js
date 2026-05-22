@@ -173,3 +173,7 @@ pref("geo.provider.network.url", "https://beacondb.net/v1/geolocate");
 pref("geo.provider.ms-windows-location", false);
 pref("geo.provider.use_corelocation", false);
 pref("geo.provider.use_geoclue", false);
+
+// First-run onboarding screen state
+pref("hilal.welcome-screen.seen", false);
+
