@@ -3,10 +3,10 @@ Add browser-wide Bangs! support
 ---
 
 diff --git a/browser/components/urlbar/UrlbarUtils.sys.mjs b/browser/components/urlbar/UrlbarUtils.sys.mjs
-index 90ca04272688..ee3962517b11 100644
+index 90ca04272688..5d68524cdb51 100644
 --- a/browser/components/urlbar/UrlbarUtils.sys.mjs
 +++ b/browser/components/urlbar/UrlbarUtils.sys.mjs
-@@ -727,6 +727,215 @@ export var UrlbarUtils = {
+@@ -727,6 +727,212 @@ export var UrlbarUtils = {
     *    post data (object).
     */
    getSearchQueryUrl(engine, query) {
@@ -201,8 +201,8 @@ index 90ca04272688..ee3962517b11 100644
 +          )
 +          .trim();
 +
-+        let redirectedUrl;
 +        if (bang in BANGS_MAP) {
++          let redirectedUrl;
 +          if (!extractedQuery) {
 +            redirectedUrl = BANGS_MAP[bang].home;
 +          } else {
@@ -211,11 +211,8 @@ index 90ca04272688..ee3962517b11 100644
 +              encodeURIComponent(extractedQuery)
 +            );
 +          }
-+        } else {
-+          redirectedUrl =
-+            "https://duckduckgo.com/?q=" + encodeURIComponent(trimmed);
++          return [redirectedUrl, null];
 +        }
-+        return [redirectedUrl, null];
 +      }
 +    }
 +
@@ -223,10 +220,10 @@ index 90ca04272688..ee3962517b11 100644
      return [submission.uri.spec, submission.postData];
    },
 diff --git a/browser/modules/URILoadingHelper.sys.mjs b/browser/modules/URILoadingHelper.sys.mjs
-index c10e1e3a34f8..d83d07b0ab9a 100644
+index c10e1e3a34f8..264fd2157196 100644
 --- a/browser/modules/URILoadingHelper.sys.mjs
 +++ b/browser/modules/URILoadingHelper.sys.mjs
-@@ -462,6 +462,228 @@ export const URILoadingHelper = {
+@@ -462,6 +462,226 @@ export const URILoadingHelper = {
        return;
      }
  
@@ -441,12 +438,10 @@ index c10e1e3a34f8..d83d07b0ab9a 100644
 +                  encodeURIComponent(extractedQuery)
 +                );
 +              }
-+            } else {
-+              url = "https://duckduckgo.com/?q=" + encodeURIComponent(trimmed);
++              // Clear postData if any, since we redirected to a standard GET search URL
++              params = Object.assign({}, params);
++              params.postData = null;
 +            }
-+            // Clear postData if any, since we redirected to a standard GET search URL
-+            params = Object.assign({}, params);
-+            params.postData = null;
 +          }
 +        }
 +      } catch (e) {}
