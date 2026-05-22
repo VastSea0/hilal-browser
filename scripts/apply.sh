@@ -122,13 +122,48 @@ fi
 
 # -- 4. Download and copy default extensions ---------------------------------
 
+UBO_VERSION="1.57.2"
+UBO_URL="https://github.com/gorhill/uBlock/releases/download/${UBO_VERSION}/uBlock0_${UBO_VERSION}.firefox.signed.xpi"
+UBO_SHA256="9928e79a52cecf7cfa231fdb0699c7d7a427660d94eb10d711ed5a2f10d2eb89"
+
 EXT_DIR="$HILAL_FIREFOX_SRC/browser/app/distribution/extensions"
 mkdir -p "$EXT_DIR"
-if [ ! -f "$EXT_DIR/uBlock0@raymondhill.net.xpi" ]; then
-  log "Downloading uBlock Origin extension..."
-  if ! curl -L -f -s -o "$EXT_DIR/uBlock0@raymondhill.net.xpi" "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"; then
-    warn "Failed to download uBlock Origin. Please check your internet connection."
+UBO_PATH="$EXT_DIR/uBlock0@raymondhill.net.xpi"
+
+get_sha256() {
+  local file="$1"
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$file" | cut -d' ' -f1
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$file" | cut -d' ' -f1
+  else
+    python3 -c "import hashlib; print(hashlib.sha256(open('$file','rb').read()).hexdigest())"
   fi
+}
+
+verify_ubo_checksum() {
+  if [ -f "$UBO_PATH" ]; then
+    local current_hash
+    current_hash=$(get_sha256 "$UBO_PATH")
+    if [ "$current_hash" = "$UBO_SHA256" ]; then
+      return 0
+    fi
+  fi
+  return 1
+}
+
+if ! verify_ubo_checksum; then
+  log "Downloading uBlock Origin v${UBO_VERSION} extension..."
+  if ! curl -L -f -s -o "$UBO_PATH" "$UBO_URL"; then
+    die "Failed to download uBlock Origin from ${UBO_URL}."
+  fi
+  if ! verify_ubo_checksum; then
+    rm -f "$UBO_PATH"
+    die "CRITICAL: uBlock Origin checksum verification failed! Downloaded file is corrupt or compromised."
+  fi
+  log "uBlock Origin v${UBO_VERSION} successfully downloaded and verified."
+else
+  log "uBlock Origin v${UBO_VERSION} is already present and verified."
 fi
 
 log "All Hilal changes applied. Build with: scripts/build-macos.sh"
