@@ -2,41 +2,24 @@
 
 #hilal-welcome-overlay {
   position: fixed;
-  inset: 0;
-  /* sit above everything including chrome UI */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* sit above all chrome UI including tabs/toolbars */
   z-index: 2147483647;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #07050f;
+  background: radial-gradient(ellipse at 20% 30%, rgba(124, 58, 237, 0.22) 0%, transparent 55%),
+              radial-gradient(ellipse at 80% 75%, rgba(59, 130, 246, 0.18) 0%, transparent 50%),
+              #07050f;
   font-family: -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
   color: #f0eeff;
   overflow: hidden;
   -moz-window-dragging: drag;
 }
 
-/* Ambient background orbs */
-#hilal-welcome-overlay::before {
-  content: '';
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  top: -150px;
-  left: -100px;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.18) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-#hilal-welcome-overlay::after {
-  content: '';
-  position: absolute;
-  width: 500px;
-  height: 500px;
-  bottom: -100px;
-  right: -80px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.14) 0%, transparent 70%);
-  pointer-events: none;
-}
 
 .hw-panel {
   position: relative;

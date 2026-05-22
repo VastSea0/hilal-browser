@@ -44,14 +44,15 @@
     }
 
     _injectStyles() {
+      const head = document.head || document.documentElement;
       if (document.getElementById("hilal-welcome-style")) {
         return;
       }
-      this._style = document.createElement("link");
+      this._style = document.createElementNS("http://www.w3.org/1999/xhtml", "link");
       this._style.id = "hilal-welcome-style";
       this._style.rel = "stylesheet";
       this._style.href = "chrome://browser/content/hilal/HilalWelcome.css";
-      document.head.appendChild(this._style);
+      head.appendChild(this._style);
     }
 
     async _fetchEngines() {
@@ -91,8 +92,10 @@
     _createOverlay() {
       let overlay = document.getElementById("hilal-welcome-overlay");
       if (!overlay) {
-        overlay = document.createElement("div");
+        overlay = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
         overlay.id = "hilal-welcome-overlay";
+        /* Append to document.documentElement. position:fixed inside a XUL
+         * window anchors to the viewport, which is what we want. */
         document.documentElement.appendChild(overlay);
       }
       this._overlay = overlay;
@@ -129,7 +132,7 @@
             <div class="hw-hero">
               ${this._logoSVG()}
               <h1 class="hw-title">Hilal Browser'a Ho\u015f Geldiniz</h1>
-              <p class="hw-sub">Gizlilik odakl\u0131, h\u0131zl\u0131 ve size \u00f6zel<br>yeni nesil internet taray\u0131c\u0131n\u0131z.</p>
+              <p class="hw-sub">Gizlilik odakl\u0131, h\u0131zl\u0131 ve size \u00f6zel yeni nesil internet taray\u0131c\u0131n\u0131z.</p>
             </div>
           `;
         case 1:
@@ -143,7 +146,7 @@
                   <span class="hw-row-desc">Hilal Browser'\u0131 sistemin varsay\u0131lan taray\u0131c\u0131s\u0131 yap\u0131n.</span>
                 </div>
                 <label class="hw-toggle">
-                  <input type="checkbox" id="hw-default-browser-toggle"${this._defaultBrowserSelected ? " checked" : ""}>
+                  <input type="checkbox" id="hw-default-browser-toggle"${this._defaultBrowserSelected ? " checked" : ""}/>
                   <span class="hw-toggle-track"></span>
                 </label>
               </div>
@@ -177,7 +180,7 @@
             <div class="hw-hero">
               ${this._checkSVG()}
               <h1 class="hw-title">Her \u015eey Haz\u0131r!</h1>
-              <p class="hw-sub">G\u00fcvenli, h\u0131zl\u0131 ve izole bir internet<br>deneyimi sizi bekliyor.</p>
+              <p class="hw-sub">G\u00fcvenli, h\u0131zl\u0131 ve izole bir internet deneyimi sizi bekliyor.</p>
             </div>
           `;
       }
@@ -264,7 +267,7 @@
           const active = this._workspacesSelected[item.key];
           return `
             <div class="hw-ws-card${active ? ` hw-ws-active-${item.key}` : ""}" id="hw-ws-${item.key}">
-              <input type="checkbox" class="hw-ws-check" id="hw-ws-chk-${item.key}"${active ? " checked" : ""}>
+              <input type="checkbox" class="hw-ws-check" id="hw-ws-chk-${item.key}"${active ? " checked" : ""}/>
               <div class="hw-ws-icon" style="background:${item.bg};color:${item.color}">${item.icon}</div>
               <span class="hw-ws-name">${item.label}</span>
             </div>
@@ -442,15 +445,7 @@
 
     _logoSVG() {
       return `
-        <svg class="hw-logo-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="hw-grad-logo" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#7c3aed"/>
-              <stop offset="1" stop-color="#3b82f6"/>
-            </linearGradient>
-          </defs>
-          <path d="M32 8C18.745 8 8 18.745 8 32C8 45.255 18.745 56 32 56C45.255 56 56 45.255 56 32C56 30.026 55.764 28.107 55.318 26.272C52.866 28.257 49.734 29.467 46.333 29.467C38.002 29.467 31.2 22.665 31.2 14.333C31.2 12.254 31.641 10.28 32.404 8.488C32.271 8.328 32.136 8.169 32 8.013L32 8Z" fill="url(#hw-grad-logo)"/>
-        </svg>
+        <img class="hw-logo-mark" src="chrome://branding/content/about-logo.svg" />
       `;
     }
 
