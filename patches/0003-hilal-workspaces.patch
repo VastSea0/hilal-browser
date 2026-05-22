@@ -1,24 +1,24 @@
-Hilal Browser: load HilalWorkspaces JS in browser.xhtml
+Hilal Browser: load HilalWorkspaces and HilalWelcome in browser.xhtml
 
-Registers HilalWorkspaces.js in browser/base/jar.mn and loads it in
-browser.xhtml so the workspace sidebar strip is available on every
-browser window. The component injects its own styles into a Shadow
-DOM via _getCSS(), so no separate stylesheet is shipped.
+Registers HilalWorkspaces.js, HilalWelcome.js, and HilalWelcome.css in
+browser/base/jar.mn and loads them in browser.xhtml so the welcome experience
+and workspaces features are fully operational.
 
 ---
- browser/base/content/browser.xhtml | 2 ++
- browser/base/jar.mn                | 1 +
- 2 files changed, 3 insertions(+)
+ browser/base/content/browser.xhtml | 3 +++
+ browser/base/jar.mn                | 3 +++
+ 2 files changed, 6 insertions(+)
 
 diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
 index d8ed09dca6c8..c71bf555f8aa 100644
 --- a/browser/base/content/browser.xhtml
 +++ b/browser/base/content/browser.xhtml
-@@ -150,5 +150,7 @@
+@@ -150,5 +150,8 @@
  
    <!-- Put it at the very end to make sure it's not covered by anything. -->
    <html:div id="fullscr-toggler" hidden="hidden"/>
 +
++  <script src="chrome://browser/content/hilal/HilalWelcome.js"></script>
 +  <script src="chrome://browser/content/hilal/HilalWorkspaces.js"></script>
  </html:body>
  </html>
@@ -26,10 +26,12 @@ diff --git a/browser/base/jar.mn b/browser/base/jar.mn
 index 7eaca95f7e87..ef0f1f92408c 100644
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
-@@ -72,6 +72,7 @@ browser.jar:
+@@ -72,6 +72,9 @@ browser.jar:
          content/browser/browser-unified-extensions.js       (content/browser-unified-extensions.js)
          content/browser/browser-graphics-utils.js           (content/browser-graphics-utils.js)
          content/browser/browser-webrtc.js                   (content/browser-webrtc.js)
++        content/browser/hilal/HilalWelcome.js               (content/hilal/HilalWelcome.js)
++        content/browser/hilal/HilalWelcome.css              (content/hilal/HilalWelcome.css)
 +        content/browser/hilal/HilalWorkspaces.js            (content/hilal/HilalWorkspaces.js)
          content/browser/global-scripts.js                   (content/global-scripts.js)
          content/browser/main-popupset.js                    (content/main-popupset.js)

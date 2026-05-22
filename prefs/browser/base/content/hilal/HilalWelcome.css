@@ -1,0 +1,391 @@
+#hilal-welcome {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0e0720 0%, #04010b 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  z-index: 2999999999;
+  color: #ffffff;
+  overflow: hidden;
+  -moz-window-dragging: drag;
+}
+
+#hilal-welcome-card {
+  width: 560px;
+  height: 460px;
+  background: rgba(20, 12, 40, 0.45);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  position: relative;
+  -moz-window-dragging: no-drag;
+  box-sizing: border-box;
+}
+
+#hilal-welcome-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+#hilal-welcome-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #37adff, #af51f5);
+  transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+#hilal-welcome-stage-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 0;
+}
+
+.hilal-welcome-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  animation: fadeInStage 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes fadeInStage {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.text-center {
+  text-align: center;
+}
+
+.hilal-welcome-logo {
+  margin-bottom: 24px;
+  filter: drop-shadow(0 0 15px rgba(175, 81, 245, 0.4));
+  animation: floatLogo 4s ease-in-out infinite;
+}
+
+@keyframes floatLogo {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+#hilal-welcome h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  background: linear-gradient(135deg, #ffffff 50%, #e0c8ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  letter-spacing: -0.5px;
+}
+
+.hilal-welcome-desc {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin: 0 0 20px 0;
+  max-width: 90%;
+}
+
+.hilal-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.hilal-settings-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.hilal-card-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.hilal-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.hilal-card-desc {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.4;
+  text-align: left;
+}
+
+.hilal-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.hilal-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.hilal-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: .3s;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.hilal-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+.hilal-switch input:checked + .hilal-slider {
+  background: linear-gradient(90deg, #37adff, #af51f5);
+}
+
+.hilal-switch input:checked + .hilal-slider:before {
+  transform: translateX(20px);
+}
+
+.hilal-engine-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  margin-top: 15px;
+  box-sizing: border-box;
+}
+
+.hilal-engine-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.hilal-engine-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.hilal-engine-card.active {
+  background: rgba(175, 81, 245, 0.08);
+  border-color: #af51f5;
+  box-shadow: 0 0 15px rgba(175, 81, 245, 0.15);
+}
+
+.hilal-engine-icon-container {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hilal-engine-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.hilal-badge {
+  position: absolute;
+  top: -9px;
+  background: linear-gradient(90deg, #37adff, #af51f5);
+  color: #ffffff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.hilal-ws-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  margin-top: 15px;
+  box-sizing: border-box;
+}
+
+.hilal-ws-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 24px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.hilal-ws-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.hilal-ws-card.active-personal {
+  background: rgba(55, 173, 255, 0.06);
+  border-color: #37adff;
+  box-shadow: 0 0 15px rgba(55, 173, 255, 0.12);
+}
+
+.hilal-ws-card.active-work {
+  background: rgba(255, 159, 0, 0.06);
+  border-color: #ff9f00;
+  box-shadow: 0 0 15px rgba(255, 159, 0, 0.12);
+}
+
+.hilal-ws-card.active-social {
+  background: rgba(255, 75, 218, 0.06);
+  border-color: #ff4bda;
+  box-shadow: 0 0 15px rgba(255, 75, 218, 0.12);
+}
+
+.hilal-ws-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.hilal-ws-card-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.hilal-ws-checkbox {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  cursor: pointer;
+  accent-color: #af51f5;
+}
+
+#hilal-welcome-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.hilal-btn-primary {
+  background: linear-gradient(90deg, #af51f5, #7a22cc);
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 10px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(175, 81, 245, 0.25);
+}
+
+.hilal-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(175, 81, 245, 0.35);
+}
+
+.hilal-btn-primary:active {
+  transform: translateY(0);
+}
+
+.hilal-btn-secondary {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.hilal-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.hilal-btn-secondary.disabled,
+.hilal-btn-secondary[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.04);
+}
