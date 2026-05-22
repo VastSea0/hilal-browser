@@ -310,6 +310,15 @@
         return;
       }
       try {
+        if (typeof Services !== "undefined" && Services.clearData) {
+          Services.clearData.deleteDataFromOriginAttributesPattern({
+            userContextId: workspace.containerId,
+          });
+        }
+      } catch (e) {
+        this._warn(`failed to clear site data for ${workspace.name}`, e);
+      }
+      try {
         ContextualIdentityService.remove(workspace.containerId);
       } catch (e) {
         this._warn(`failed to remove container for ${workspace.name}`, e);
