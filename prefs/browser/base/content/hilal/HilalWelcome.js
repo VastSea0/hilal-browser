@@ -179,6 +179,12 @@
         }
       }
 
+      try {
+        Services.prefs.setBoolPref("hilal.welcome-screen.seen", true);
+      } catch (e) {
+        console.error("HilalWelcome: failed to save seen preference", e);
+      }
+
       this._restoreUI();
     }
 

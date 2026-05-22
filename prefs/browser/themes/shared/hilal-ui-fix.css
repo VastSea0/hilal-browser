@@ -11891,11 +11891,11 @@
         list-style-image: url("chrome://global/skin/icons/search-glass.svg");
       }
       #appMenu-translate-button {
-        list-style-image: url("chrome://browser/skin/icons/translations.svg");
+        list-style-image: url("chrome://browser/skin/translations.svg");
       }
       #appMenu-zoom-controls2::before,
       #appMenu-zoom-controls::before {
-        content: url("chrome://browser/skin/icons/screenshot.svg");
+        content: url("chrome://browser/skin/screenshot.svg");
       }
     }
     #save-page-button {
@@ -13592,7 +13592,7 @@
         --menuitem-image: url("chrome://global/skin/icons/search-glass.svg");
       }
       #context-translate-selection {
-        --menuitem-image: url("chrome://browser/skin/icons/translations.svg");
+        --menuitem-image: url("chrome://browser/skin/translations.svg");
       }
       #context-ask-chat {
         --menuitem-image: url("chrome://browser/skin/icons/chat-sparkle.svg");
@@ -14254,7 +14254,7 @@
         --menuitem-image: var(--uc-sidebar-icon);
       }
       #viewFullZoomMenu {
-        --menuitem-image: url("chrome://browser/skin/icons/screenshot.svg");
+        --menuitem-image: url("chrome://browser/skin/screenshot.svg");
       }
       #pageStyleMenu {
         --menuitem-image: url("chrome://browser/skin/icons/document-css.svg");
@@ -14308,7 +14308,7 @@
         --menuitem-image: url("chrome://browser/skin/icons/resize.svg");
       }
       #toggle_zoom {
-        --menuitem-image: url("chrome://browser/skin/icons/screenshot.svg");
+        --menuitem-image: url("chrome://browser/skin/screenshot.svg");
       }
       /*= goPopup ==================================================================*/
       #menu_showAllHistory {
@@ -14374,7 +14374,7 @@
         --menuitem-image: url("chrome://browser/skin/sync.svg");
       }
       #menu_openFirefoxView {
-        --menuitem-image: url("chrome://browser/skin/icons/firefox-view.svg");
+        --menuitem-image: url("chrome://browser/skin/firefox-view.svg");
       }
       #webDeveloperMenu,
       #browserToolsMenu {
@@ -14523,13 +14523,13 @@
   /** Icons - 1.25px Stroke Width ***********************************************/
   @media -moz-pref("userChrome.icon.1-25px_stroke") {
     #firefox-view-button {
-      list-style-image: url("chrome://browser/skin/icons/firefox-view.svg") !important;
+      list-style-image: url("chrome://browser/skin/firefox-view.svg") !important;
     }
     #reset-pbm-toolbar-button {
       list-style-image: url("chrome://browser/skin/icons/flame.svg") !important;
     }
     #translations-button-icon {
-      list-style-image: url("chrome://browser/skin/icons/translations.svg") !important;
+      list-style-image: url("chrome://browser/skin/translations.svg") !important;
     }
     .tabbrowser-tab:is([image="chrome://global/skin/icons/performance.svg"],
     [image="chrome://devtools/skin/images/tool-profiler.svg"]) .tab-icon-image
@@ -27788,11 +27788,11 @@
     list-style-image: url("chrome://global/skin/icons/search-glass.svg");
   }
   #appMenu-translate-button {
-    list-style-image: url("chrome://browser/skin/icons/translations.svg");
+    list-style-image: url("chrome://browser/skin/translations.svg");
   }
   #appMenu-zoom-controls2::before,
   #appMenu-zoom-controls::before {
-    content: url("chrome://browser/skin/icons/screenshot.svg");
+    content: url("chrome://browser/skin/screenshot.svg");
   }
 }
 @media (not (-moz-bool-pref: "userChrome.icon.disabled")) and (-moz-bool-pref: "userChrome.icon.panel") {
@@ -29897,7 +29897,7 @@
 }
 @media (not (-moz-bool-pref: "userChrome.icon.disabled")) and (-moz-bool-pref: "userChrome.icon.menu") and (-moz-bool-pref: "userChrome.icon.context_menu") {
   #context-translate-selection {
-    --menuitem-image: url("chrome://browser/skin/icons/translations.svg");
+    --menuitem-image: url("chrome://browser/skin/translations.svg");
   }
 }
 @media (not (-moz-bool-pref: "userChrome.icon.disabled")) and (-moz-bool-pref: "userChrome.icon.menu") and (-moz-bool-pref: "userChrome.icon.context_menu") {
@@ -30851,7 +30851,7 @@
 }
 @media (not (-moz-bool-pref: "userChrome.icon.disabled")) and (-moz-bool-pref: "userChrome.icon.menu") and (-moz-bool-pref: "userChrome.icon.global_menu") {
   #viewFullZoomMenu {
-    --menuitem-image: url("chrome://browser/skin/icons/screenshot.svg");
+    --menuitem-image: url("chrome://browser/skin/screenshot.svg");
   }
 }
 @media (not (-moz-bool-pref: "userChrome.icon.disabled")) and (-moz-bool-pref: "userChrome.icon.menu") and (-moz-bool-pref: "userChrome.icon.global_menu") {
@@ -30934,7 +30934,7 @@
 }
 @media (not (-moz-bool-pref: "userChrome.icon.disabled")) and (-moz-bool-pref: "userChrome.icon.menu") and (-moz-bool-pref: "userChrome.icon.global_menu") {
   #toggle_zoom {
-    --menuitem-image: url("chrome://browser/skin/icons/screenshot.svg");
+    --menuitem-image: url("chrome://browser/skin/screenshot.svg");
   }
 }
 @media (not (-moz-bool-pref: "userChrome.icon.disabled")) and (-moz-bool-pref: "userChrome.icon.menu") and (-moz-bool-pref: "userChrome.icon.global_menu") {
@@ -31035,7 +31035,7 @@
 }
 @media (not (-moz-bool-pref: "userChrome.icon.disabled")) and (-moz-bool-pref: "userChrome.icon.menu") and (-moz-bool-pref: "userChrome.icon.global_menu") {
   #menu_openFirefoxView {
-    --menuitem-image: url("chrome://browser/skin/icons/firefox-view.svg");
+    --menuitem-image: url("chrome://browser/skin/firefox-view.svg");
   }
 }
 @media (not (-moz-bool-pref: "userChrome.icon.disabled")) and (-moz-bool-pref: "userChrome.icon.menu") and (-moz-bool-pref: "userChrome.icon.global_menu") {
@@ -31249,13 +31249,13 @@
 }
 @media (not (-moz-bool-pref: "userChrome.icon.disabled")) and (-moz-bool-pref: "userChrome.icon.1-25px_stroke") {
   #firefox-view-button {
-    list-style-image: url("chrome://browser/skin/icons/firefox-view.svg") !important;
+    list-style-image: url("chrome://browser/skin/firefox-view.svg") !important;
   }
   #reset-pbm-toolbar-button {
     list-style-image: url("chrome://browser/skin/icons/flame.svg") !important;
   }
   #translations-button-icon {
-    list-style-image: url("chrome://browser/skin/icons/translations.svg") !important;
+    list-style-image: url("chrome://browser/skin/translations.svg") !important;
   }
   .tabbrowser-tab:is([image="chrome://global/skin/icons/performance.svg"],
   [image="chrome://devtools/skin/images/tool-profiler.svg"]) .tab-icon-image

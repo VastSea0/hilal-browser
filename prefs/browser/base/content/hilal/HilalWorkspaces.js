@@ -335,10 +335,14 @@
 
       const seenPref = "hilal.welcome-screen.seen";
       if (!Services.prefs.getBoolPref(seenPref, false)) {
-        Services.prefs.setBoolPref(seenPref, true);
         if (typeof window.HilalWelcome !== "undefined") {
-          const welcome = new window.HilalWelcome(this);
-          welcome.start();
+          setTimeout(() => {
+            // Re-verify the preference inside the timeout
+            if (!Services.prefs.getBoolPref(seenPref, false)) {
+              const welcome = new window.HilalWelcome(this);
+              welcome.start();
+            }
+          }, 500);
         }
       }
     }
