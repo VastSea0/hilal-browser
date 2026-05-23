@@ -1,7 +1,7 @@
-Hilal Browser: add Fluent strings for preferences UI
+Hilal Browser: add Fluent strings for preferences UI and welcome screen
 
-Adds Hilal preference strings to the existing preferences Fluent file so the
-Hilal Browser category can localize its headings and dialogs.
+Adds Hilal preference and welcome screen strings to the preferences and browser
+Fluent files so headings, dialogs, and setup screens can localize correctly.
 
 ---
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
@@ -16,3 +16,78 @@ diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser
 +hilal-workspaces-reset-confirm-title = Reset Workspaces
 +hilal-workspaces-reset-confirm-message = This will delete all workspace data and cannot be undone. Continue?
 +hilal-uifix-header = UI Enhancements
+diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/browser/browser.ftl
+index e58851d05c3c..90d953881f7d 100644
+--- a/browser/locales/en-US/browser/browser.ftl
++++ b/browser/locales/en-US/browser/browser.ftl
+@@ -1604,3 +1604,70 @@ reduced-protection-infobar-reload-button = Reload
+   .accesskey = R
+ reduced-protection-infobar-never-show-button = Don’t show again
+   .accesskey = D
++
++## Hilal Welcome Screen
++
++hilal-welcome-skip = Skip
++hilal-welcome-step-count = Step { $current }/{ $total }
++hilal-welcome-recommended = Recommended
++
++hilal-welcome-brand-text = Hilal Browser
++
++hilal-welcome-step-label-moon = Welcome
++hilal-welcome-step-label-settings = Settings
++hilal-welcome-step-label-search = Search
++hilal-welcome-step-label-tabs = Workspaces
++hilal-welcome-step-label-check = Ready
++
++hilal-welcome-stage-0-kicker = Welcome to Hilal
++hilal-welcome-stage-0-title = Set up your browser to a clean rhythm.
++hilal-welcome-stage-0-subtitle = Clarify privacy, search, and workspaces on first startup.
++
++hilal-welcome-stage-1-kicker = Basic Settings
++hilal-welcome-stage-1-title = Import your data in a clean step.
++hilal-welcome-stage-1-subtitle = Choose default browser settings and easily import your bookmarks and passwords.
++
++hilal-welcome-stage-2-kicker = Search
++hilal-welcome-stage-2-title = Don’t let your search engine track you.
++hilal-welcome-stage-2-subtitle = Choose the default search experience. You can change this decision later in settings.
++
++hilal-welcome-stage-3-kicker = Workspaces
++hilal-welcome-stage-3-title = Keep your workflows separate.
++hilal-welcome-stage-3-subtitle = Create initial isolated spaces to separate your personal, work, and social tabs.
++
++hilal-welcome-stage-4-kicker = Final Check
++hilal-welcome-stage-4-title = Everything is ready.
++hilal-welcome-stage-4-subtitle = Your selections will be applied, and Hilal will open in a calm, empty window.
++
++hilal-welcome-home-preview-image-alt =
++    .alt = Hilal Browser home page preview
++
++hilal-welcome-feature-privacy = Privacy focused
++hilal-welcome-feature-workspaces = Workspaces
++hilal-welcome-feature-clean = Clean interface
++
++hilal-welcome-default-browser-label = Default browser
++hilal-welcome-default-browser-desc = Make Hilal Browser your default browser for system links.
++hilal-welcome-import-label = Bookmarks and passwords
++hilal-welcome-import-desc = Import your existing bookmarks, history, and passwords from another browser.
++hilal-welcome-import-button = Import
++hilal-welcome-imported-button = Imported
++
++hilal-welcome-workspace-label-personal = Personal
++hilal-welcome-workspace-label-work = Work
++hilal-welcome-workspace-label-social = Social
++
++hilal-welcome-workspace-state-added = Will be added
++hilal-welcome-workspace-state-skipped = Skipped
++
++hilal-welcome-summary-search = Search
++hilal-welcome-summary-workspaces = Workspaces
++hilal-welcome-summary-default-browser = Default browser
++hilal-welcome-summary-none = None
++hilal-welcome-summary-default-set = Set as default
++hilal-welcome-summary-default-no-change = Do not change
++
++hilal-welcome-action-back = Back
++hilal-welcome-action-continue = Continue
++hilal-welcome-action-start = Start
++hilal-welcome-action-start-browsing = Start browsing

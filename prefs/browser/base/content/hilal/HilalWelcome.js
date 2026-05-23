@@ -172,7 +172,7 @@
           <aside class="hw-rail">
             <div class="hw-brand">
               <span class="hw-brand-mark">${this._logoHTML()}</span>
-              <span class="hw-brand-text">Hilal Browser</span>
+              <span class="hw-brand-text" data-l10n-id="hilal-welcome-brand-text">Hilal Browser</span>
             </div>
             <div class="hw-rail-copy">
               ${this._stageCopyHTML()}
@@ -184,9 +184,9 @@
           </aside>
           <main class="hw-main">
             <div class="hw-topbar">
-              <span class="hw-step-count">Ad\u0131m ${this._stage + 1}/${STAGES.length}</span>
+              <span class="hw-step-count" data-l10n-id="hilal-welcome-step-count" data-l10n-args='{"current": ${this._stage + 1}, "total": ${STAGES.length}}'>Ad\u0131m ${this._stage + 1}/${STAGES.length}</span>
               <button type="button" class="hw-skip" id="hw-skip-btn">
-                <span>Atla</span>
+                <span data-l10n-id="hilal-welcome-skip">Atla</span>
                 <span class="hw-icon hw-icon-close"></span>
               </button>
             </div>
@@ -213,7 +213,7 @@
           <li class="hw-step${state}">
             <span class="hw-step-icon hw-icon hw-icon-${stage.icon}"></span>
             <span class="hw-step-number">${stage.short}</span>
-            <span class="hw-step-label">${stage.title}</span>
+            <span class="hw-step-label" data-l10n-id="hilal-welcome-step-label-${stage.icon}">${stage.title}</span>
           </li>
         `;
       }).join("");
@@ -254,9 +254,9 @@
       ];
       const copy = stageCopies[this._stage];
       return `
-        <p class="hw-kicker">${copy.kicker}</p>
-        <h1 class="hw-title" id="hw-stage-title">${copy.title}</h1>
-        <p class="hw-sub">${copy.subtitle}</p>
+        <p class="hw-kicker" data-l10n-id="hilal-welcome-stage-${this._stage}-kicker">${copy.kicker}</p>
+        <h1 class="hw-title" id="hw-stage-title" data-l10n-id="hilal-welcome-stage-${this._stage}-title">${copy.title}</h1>
+        <p class="hw-sub" data-l10n-id="hilal-welcome-stage-${this._stage}-subtitle">${copy.subtitle}</p>
       `;
     }
 
@@ -266,12 +266,12 @@
           return `
             <div class="hw-hero-visual">
               <figure class="hw-home-image-frame">
-                <img class="hw-home-preview-image" src="chrome://browser/content/hilal/welcome-home-preview.png" alt="Hilal Browser ana sayfa \u00f6nizlemesi" />
+                <img class="hw-home-preview-image" src="chrome://browser/content/hilal/welcome-home-preview.png" data-l10n-id="hilal-welcome-home-preview-image-alt" alt="Hilal Browser ana sayfa \u00f6nizlemesi" />
               </figure>
               <div class="hw-feature-row">
-                <span><span class="hw-icon hw-icon-shield"></span>Gizlilik odakl\u0131</span>
-                <span><span class="hw-icon hw-icon-tabs"></span>\u00c7al\u0131\u015fma alanlar\u0131</span>
-                <span><span class="hw-icon hw-icon-moon"></span>Sade aray\u00fcz</span>
+                <span><span class="hw-icon hw-icon-shield"></span><span data-l10n-id="hilal-welcome-feature-privacy">Gizlilik odakl\u0131</span></span>
+                <span><span class="hw-icon hw-icon-tabs"></span><span data-l10n-id="hilal-welcome-feature-workspaces">\u00c7al\u0131\u015fma alanlar\u0131</span></span>
+                <span><span class="hw-icon hw-icon-moon"></span><span data-l10n-id="hilal-welcome-feature-clean">Sade aray\u00fcz</span></span>
               </div>
             </div>
           `;
@@ -282,8 +282,8 @@
                 <span class="hw-row-main">
                   <span class="hw-row-icon hw-icon hw-icon-check"></span>
                   <span class="hw-row-info">
-                    <span class="hw-row-label">Varsay\u0131lan taray\u0131c\u0131</span>
-                    <span class="hw-row-desc">Hilal Browser sistem ba\u011flant\u0131lar\u0131n\u0131 a\u00e7s\u0131n.</span>
+                    <span class="hw-row-label" data-l10n-id="hilal-welcome-default-browser-label">Varsay\u0131lan taray\u0131c\u0131</span>
+                    <span class="hw-row-desc" data-l10n-id="hilal-welcome-default-browser-desc">Hilal Browser sistem ba\u011flant\u0131lar\u0131n\u0131 a\u00e7s\u0131n.</span>
                   </span>
                 </span>
                 <span class="hw-toggle">
@@ -295,11 +295,11 @@
                 <span class="hw-row-main">
                   <span class="hw-row-icon hw-icon hw-icon-folder"></span>
                   <span class="hw-row-info">
-                    <span class="hw-row-label">Yer imleri ve \u015fifreler</span>
-                    <span class="hw-row-desc">Firefox aktar\u0131m sihirbaz\u0131 ile mevcut verileri ta\u015f\u0131y\u0131n.</span>
+                    <span class="hw-row-label" data-l10n-id="hilal-welcome-import-label">Yer imleri ve \u015fifreler</span>
+                    <span class="hw-row-desc" data-l10n-id="hilal-welcome-import-desc">Firefox aktar\u0131m sihirbaz\u0131 ile mevcut verileri ta\u015f\u0131y\u0131n.</span>
                   </span>
                 </span>
-                <button type="button" class="hw-btn-secondary" id="hw-import-btn">\u0130\u00e7e aktar</button>
+                <button type="button" class="hw-btn-secondary" id="hw-import-btn" data-l10n-id="hilal-welcome-import-button">\u0130\u00e7e aktar</button>
               </div>
             </div>
           `;
@@ -328,22 +328,26 @@
     _actionsHTML() {
       const isFirst = this._stage === 0;
       const isLast = this._stage === STAGES.length - 1;
-      let primaryLabel = "Devam";
+      
+      let primaryId = isLast ? "hw-finish-btn" : "hw-next-btn";
+      let primaryL10nId = "hilal-welcome-action-continue";
+      let primaryFallback = "Devam";
       if (isLast) {
-        primaryLabel = "G\u00f6z atmaya ba\u015fla";
+        primaryL10nId = "hilal-welcome-action-start-browsing";
+        primaryFallback = "G\u00f6z atmaya ba\u015fla";
       } else if (isFirst) {
-        primaryLabel = "Ba\u015fla";
+        primaryL10nId = "hilal-welcome-action-start";
+        primaryFallback = "Ba\u015fla";
       }
-      const primaryId = isLast ? "hw-finish-btn" : "hw-next-btn";
 
       return `
         <div class="hw-actions">
           <button type="button" class="hw-btn-ghost" id="hw-prev-btn"${isFirst ? ' disabled="disabled"' : ""}>
             <span class="hw-icon hw-icon-arrow-left"></span>
-            <span>Geri</span>
+            <span data-l10n-id="hilal-welcome-action-back">Geri</span>
           </button>
           <button type="button" class="hw-btn-primary" id="${primaryId}">
-            <span>${primaryLabel}</span>
+            <span data-l10n-id="${primaryL10nId}">${primaryFallback}</span>
             <span class="hw-icon hw-icon-${isLast ? "check" : "arrow-right"}"></span>
           </button>
         </div>
@@ -363,7 +367,7 @@
               </span>
               <span class="hw-engine-meta">
                 <span class="hw-engine-name">${name}</span>
-                ${isDuckDuckGo ? `<span class="hw-pill">\u00d6nerilen</span>` : ""}
+                ${isDuckDuckGo ? `<span class="hw-pill" data-l10n-id="hilal-welcome-recommended">\u00d6nerilen</span>` : ""}
               </span>
               <span class="hw-choice-check hw-icon hw-icon-check"></span>
             </button>
@@ -380,8 +384,8 @@
             <span class="hw-workspace-icon">
               <span class="hw-icon hw-icon-${item.icon}"></span>
             </span>
-            <span class="hw-workspace-label">${item.label}</span>
-            <span class="hw-workspace-state">${active ? "Eklenecek" : "Atland\u0131"}</span>
+            <span class="hw-workspace-label" data-l10n-id="hilal-welcome-workspace-label-${item.key}">${item.label}</span>
+            <span class="hw-workspace-state" data-l10n-id="hilal-welcome-workspace-state-${active ? 'added' : 'skipped'}">${active ? "Eklenecek" : "Atland\u0131"}</span>
             <span class="hw-choice-check hw-icon hw-icon-check"></span>
           </button>
         `;
@@ -390,22 +394,23 @@
 
     _summaryHTML() {
       const engineName = this._escapeHTML(this._selectedEngine?.name ?? "DuckDuckGo");
-      const workspaceLabels = WORKSPACE_PRESETS.filter(item => this._workspacesSelected[item.key])
-        .map(item => item.label)
-        .join(", ");
+      const activePresets = WORKSPACE_PRESETS.filter(item => this._workspacesSelected[item.key]);
+      const workspacesHTML = activePresets.length > 0 
+        ? activePresets.map(item => `<span data-l10n-id="hilal-welcome-workspace-label-${item.key}">${item.label}</span>`).join(", ")
+        : `<span data-l10n-id="hilal-welcome-summary-none">Yok</span>`;
 
       return `
         <div class="hw-summary-row">
-          <span class="hw-summary-label"><span class="hw-icon hw-icon-search"></span>Arama</span>
+          <span class="hw-summary-label"><span class="hw-icon hw-icon-search"></span><span data-l10n-id="hilal-welcome-summary-search">Arama</span></span>
           <strong>${engineName}</strong>
         </div>
         <div class="hw-summary-row">
-          <span class="hw-summary-label"><span class="hw-icon hw-icon-tabs"></span>\u00c7al\u0131\u015fma alanlar\u0131</span>
-          <strong>${workspaceLabels || "Yok"}</strong>
+          <span class="hw-summary-label"><span class="hw-icon hw-icon-tabs"></span><span data-l10n-id="hilal-welcome-summary-workspaces">\u00c7al\u0131\u015fma alanlar\u0131</span></span>
+          <strong>${workspacesHTML}</strong>
         </div>
         <div class="hw-summary-row">
-          <span class="hw-summary-label"><span class="hw-icon hw-icon-check"></span>Varsay\u0131lan taray\u0131c\u0131</span>
-          <strong>${this._defaultBrowserSelected ? "Ayarla" : "De\u011fi\u015ftirme"}</strong>
+          <span class="hw-summary-label"><span class="hw-icon hw-icon-check"></span><span data-l10n-id="hilal-welcome-summary-default-browser">Varsay\u0131lan taray\u0131c\u0131</span></span>
+          <strong data-l10n-id="hilal-welcome-summary-default-${this._defaultBrowserSelected ? 'set' : 'no-change'}">${this._defaultBrowserSelected ? "Ayarla" : "De\u011fi\u015ftirme"}</strong>
         </div>
       `;
     }
@@ -441,6 +446,7 @@
               isStartupMigration: true,
             });
             if (button) {
+              button.setAttribute("data-l10n-id", "hilal-welcome-imported-button");
               button.textContent = "Aktar\u0131ld\u0131";
               button.disabled = true;
             }
@@ -485,14 +491,20 @@
       if (this._workspaces) {
         for (const item of WORKSPACE_PRESETS) {
           if (this._workspacesSelected[item.key]) {
+            let label = item.label;
+            try {
+              label = await document.l10n.formatValue(`hilal-welcome-workspace-label-${item.key}`);
+            } catch (e) {
+              console.error("HilalWelcome: failed to format workspace label", e);
+            }
             if (typeof this._workspaces.ensureWorkspace === "function") {
               this._workspaces.ensureWorkspace(
-                item.label,
+                label,
                 "",
                 item.workspaceColor
               );
             } else {
-              this._workspaces.create(item.label, "", item.workspaceColor);
+              this._workspaces.create(label, "", item.workspaceColor);
             }
           }
         }
