@@ -9,6 +9,7 @@ All notable changes to the Hilal Browser project will be documented in this file
 ### Added
 - **Dynamic Firefox-UI-Fix Preferences Integration**: Integrated the Firefox-UI-Fix suite with dynamic options in the Settings UI (preferences page).
 - **Desktop Application Update Plumbing**: Enabled Firefox's desktop updater for Hilal builds, bundled a Hilal `AppUpdateURL` policy, and added a helper for creating complete MAR updates.
+- **Website Release Surface**: Added platform-aware latest release cards, visible changelog notes, release metadata JSON, and a Firefox updater XML route.
 - **Premium Onboarding Welcome Screen**: Implemented a beautiful premium onboarding/welcome overlay displayed on the first run of the browser.
 - **Bangs Search Fallback Control**: Prevented unknown bangs from automatically redirecting to DuckDuckGo, giving more predictable address bar search behavior.
 - **uBlock Origin Pinning & Verification**: Hardened uBlock Origin default installation by pinning to `1.57.2` with SHA-256 checksum verification during environment setup.

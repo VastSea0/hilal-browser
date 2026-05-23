@@ -5,6 +5,8 @@
   },
   "nav": {
     "github": "GitHub",
+    "releases": "Sürümler",
+    "contribute": "Katkı",
     "language": "Dil"
   },
   "hero": {
@@ -68,6 +70,42 @@
     "title": "Erken Alpha",
     "body": "Hilal Browser deneysel bir yazılımdır. Özellikler değişebilir, çökebilir veya habersizce ortadan kalkabilir. Bunu açık bir şekilde inşa ediyoruz ve cesur test kullanıcılarını ve erken katkıda bulunanları geleceği şekillendirmeye davet ediyoruz. Henüz kararlı bir sürüm yok — olduğunda, ilk buradan duyuracağız.",
     "cta": "GitHub'da gelişmeyi takip et"
+  },
+  "releases": {
+    "eyebrow": "İndirmeler ve güncellemeler",
+    "title": "Platforma göre en son sürüm",
+    "body": "Web sitesi artık {version} için release bilgisi, changelog notları ve Firefox updater XML endpoint'ini sağlıyor. İmzalı paketler yayınlandığında indirme bağlantıları burada görünecek.",
+    "allReleases": "Tüm sürümler",
+    "detected": "İşletim sistemin",
+    "status": {
+      "available": "Hazır",
+      "pending": "Paket bekleniyor"
+    },
+    "channel": "Güncelleme kanalı: {channel}",
+    "manualOnly": "Desktop updater dışında dağıtılır",
+    "platforms": {
+      "macos": {
+        "name": "macOS"
+      },
+      "windows": {
+        "name": "Windows"
+      },
+      "linux": {
+        "name": "Linux"
+      },
+      "android": {
+        "name": "Android"
+      }
+    },
+    "changelog": {
+      "title": "Değişiklikler",
+      "items": [
+        "Desktop uygulama güncelleme altyapısı ve Hilal update policy.",
+        "Next.js 16, next-intl 4, React 19 ve temiz website audit sonucu.",
+        "Privacy level tercihleri ve workspace tarafında uygulanması.",
+        "uBlock Origin pinleme, checksum doğrulaması ve başlangıç yükleme düzeltmeleri."
+      ]
+    }
   },
   "contribute": {
     "title": "Katkıda Bulun",

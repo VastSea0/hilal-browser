@@ -42,11 +42,18 @@ export default function Navbar() {
           {t('github')}
         </a>
         <a
+          href="#releases"
+          className="text-[13px] font-medium px-3.5 py-1.5 rounded-[20px] transition-colors hover:bg-[rgba(100,160,255,0.1)]"
+          style={{ color: '#4a6fa5', border: '1px solid transparent', textDecoration: 'none' }}
+        >
+          {t('releases')}
+        </a>
+        <a
           href="#contribute"
           className="text-[13px] font-medium px-3.5 py-1.5 rounded-[20px] transition-colors hover:bg-[rgba(100,160,255,0.1)]"
           style={{ color: '#4a6fa5', border: '1px solid transparent', textDecoration: 'none' }}
         >
-          Contribute
+          {t('contribute')}
         </a>
         <LocaleSwitcher currentLocale={locale} />
       </nav>

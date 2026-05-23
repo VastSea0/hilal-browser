@@ -5,6 +5,8 @@
   },
   "nav": {
     "github": "GitHub",
+    "releases": "Releases",
+    "contribute": "Contribute",
     "language": "Language"
   },
   "hero": {
@@ -68,6 +70,42 @@
     "title": "Early Alpha",
     "body": "Hilal Browser is experimental software. Features may change, crash, or disappear without warning. We are building this in the open and invite brave testers and early contributors to shape what comes next. There is no stable release yet — when there is, you will hear it here first.",
     "cta": "Follow development on GitHub"
+  },
+  "releases": {
+    "eyebrow": "Downloads & updates",
+    "title": "Latest release by platform",
+    "body": "The website now exposes release metadata, changelog notes, and the Firefox updater XML endpoint for {version}. Packaged downloads will appear here as soon as signed builds are published.",
+    "allReleases": "All releases",
+    "detected": "Your OS",
+    "status": {
+      "available": "Available",
+      "pending": "Package pending"
+    },
+    "channel": "Update channel: {channel}",
+    "manualOnly": "Distributed outside the desktop updater",
+    "platforms": {
+      "macos": {
+        "name": "macOS"
+      },
+      "windows": {
+        "name": "Windows"
+      },
+      "linux": {
+        "name": "Linux"
+      },
+      "android": {
+        "name": "Android"
+      }
+    },
+    "changelog": {
+      "title": "Changelog",
+      "items": [
+        "Desktop application update plumbing and Hilal update policy.",
+        "Next.js 16, next-intl 4, React 19, and clean website audit.",
+        "Privacy level preferences and workspace enforcement.",
+        "uBlock Origin pinning, checksum verification, and startup loading fixes."
+      ]
+    }
   },
   "contribute": {
     "title": "Contribute",

@@ -59,6 +59,44 @@ The update server must return Firefox update XML with a complete MAR patch for
 the requesting platform, locale, channel, and version. A foreground check adds
 `?force=1`.
 
+The `www` app now implements this route directly:
+
+```text
+www/app/update/6/[...segments]/route.ts
+```
+
+When no MAR is configured, it returns an empty `<updates>` document so clients
+do not attempt a broken update. To serve a real complete MAR, configure these
+environment variables for each platform you publish:
+
+```bash
+HILAL_UPDATE_MACOS_MAR_URL=https://updates.example/hilal-macos.complete.mar
+HILAL_UPDATE_MACOS_MAR_HASH=<sha512>
+HILAL_UPDATE_MACOS_MAR_SIZE=<bytes>
+
+HILAL_UPDATE_WINDOWS_MAR_URL=https://updates.example/hilal-windows.complete.mar
+HILAL_UPDATE_WINDOWS_MAR_HASH=<sha512>
+HILAL_UPDATE_WINDOWS_MAR_SIZE=<bytes>
+
+HILAL_UPDATE_LINUX_MAR_URL=https://updates.example/hilal-linux.complete.mar
+HILAL_UPDATE_LINUX_MAR_HASH=<sha512>
+HILAL_UPDATE_LINUX_MAR_SIZE=<bytes>
+```
+
+Optional:
+
+```bash
+HILAL_UPDATE_BUILD_ID=20260524000000
+HILAL_UPDATE_DETAILS_URL=https://hilal.gkdevstudio.org/en#releases
+HILAL_UPDATE_MACOS_MAR_HASH_FUNCTION=sha512
+```
+
+The website also exposes release metadata for the downloads UI:
+
+```text
+https://hilal.gkdevstudio.org/releases.json
+```
+
 ## Production Signing Requirement
 
 Do not ship production updates with unsigned MARs or with

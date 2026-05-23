@@ -1,6 +1,7 @@
 import { routing } from '@/i18n/routing';
 import Navbar from '@/components/navbar';
 import Hero from '@/components/hero';
+import Releases from '@/components/releases';
 import WhyHilal from '@/components/why-hilal';
 import History from '@/components/history';
 import AlphaNotice from '@/components/alpha-notice';
@@ -17,6 +18,7 @@ export default function HomePage() {
       <Navbar />
       <main>
         <Hero />
+        <Releases />
         <WhyHilal />
         <History />
         <AlphaNotice />
