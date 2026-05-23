@@ -19,8 +19,10 @@ index b174449a0989..6003a33476c6 100644
 +]
 +
 +FINAL_TARGET_FILES.distribution.extensions += [
++    "extensions/langpack-tr@firefox.mozilla.org.xpi",
 +    "extensions/uBlock0@raymondhill.net.xpi",
 +]
++
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
 index b890e0f7917d..f4305ea69206 100644
 --- a/browser/app/profile/firefox.js
