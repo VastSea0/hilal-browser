@@ -10,6 +10,7 @@
   const PREF_DATA = "hilal.workspaces.data";
   const PREF_ACTIVE = "hilal.workspaces.active";
   const PREF_ENABLED = "hilal.workspaces.enabled";
+  const PREF_PRIVACY_LEVEL = "hilal.privacy.level";
   const STORE_KEY = "hilalWorkspace";
   const PINNED_KEY = "hilalWorkspacePinned";
   const HIDDEN_BY = "hilal-workspace";
@@ -51,6 +52,53 @@
     purple: "#af51f5",
   };
 
+  const PRIVACY_LEVEL_PREFS = {
+    standard: {
+      "browser.contentblocking.category": "standard",
+      "privacy.firstparty.isolate": false,
+      "privacy.resistFingerprinting": false,
+      "privacy.resistFingerprinting.pbmode": false,
+      "media.peerconnection.enabled": true,
+      "webgl.disabled": false,
+      "webgl.enable-debug-renderer-info": true,
+      "dom.event.clipboardevents.enabled": true,
+      "network.http.referer.XOriginPolicy": 0,
+      "network.http.referer.XOriginTrimmingPolicy": 0,
+      "privacy.query_stripping.enabled": false,
+      "privacy.query_stripping.enabled.pbmode": false,
+    },
+    strict: {
+      "browser.contentblocking.category": "strict",
+      "privacy.firstparty.isolate": true,
+      "privacy.firstparty.isolate.restrict_opener_access": true,
+      "privacy.resistFingerprinting": false,
+      "privacy.resistFingerprinting.pbmode": false,
+      "media.peerconnection.enabled": true,
+      "webgl.disabled": false,
+      "webgl.enable-debug-renderer-info": false,
+      "dom.event.clipboardevents.enabled": false,
+      "network.http.referer.XOriginPolicy": 2,
+      "network.http.referer.XOriginTrimmingPolicy": 2,
+      "privacy.query_stripping.enabled": true,
+      "privacy.query_stripping.enabled.pbmode": true,
+    },
+    extreme: {
+      "browser.contentblocking.category": "strict",
+      "privacy.firstparty.isolate": true,
+      "privacy.firstparty.isolate.restrict_opener_access": true,
+      "privacy.resistFingerprinting": true,
+      "privacy.resistFingerprinting.pbmode": true,
+      "media.peerconnection.enabled": false,
+      "webgl.disabled": true,
+      "webgl.enable-debug-renderer-info": false,
+      "dom.event.clipboardevents.enabled": false,
+      "network.http.referer.XOriginPolicy": 2,
+      "network.http.referer.XOriginTrimmingPolicy": 2,
+      "privacy.query_stripping.enabled": true,
+      "privacy.query_stripping.enabled.pbmode": true,
+    },
+  };
+
   class HilalWorkspaces {
     constructor() {
       this._workspaces = [];
@@ -66,6 +114,7 @@
       this._prefDataObserver = null;
       this._prefActiveObserver = null;
       this._prefEnabledObserver = null;
+      this._prefPrivacyLevelObserver = null;
       this._savingData = false;
       this._savingActive = false;
       this._retargetingTabs = new WeakSet();
@@ -108,6 +157,36 @@
 
     _normalizeChoice(value, choices, fallback) {
       return choices.includes(value) ? value : fallback;
+    }
+
+    _normalizePrivacyLevel(value) {
+      return Object.hasOwn(PRIVACY_LEVEL_PREFS, value) ? value : "standard";
+    }
+
+    _setPrivacyPref(pref, value) {
+      switch (typeof value) {
+        case "boolean":
+          Services.prefs.setBoolPref(pref, value);
+          break;
+        case "number":
+          Services.prefs.setIntPref(pref, value);
+          break;
+        case "string":
+          Services.prefs.setStringPref(pref, value);
+          break;
+      }
+    }
+
+    _applyPrivacyLevel() {
+      const level = this._normalizePrivacyLevel(
+        Services.prefs.getStringPref(PREF_PRIVACY_LEVEL, "standard")
+      );
+      if (level !== Services.prefs.getStringPref(PREF_PRIVACY_LEVEL, "")) {
+        Services.prefs.setStringPref(PREF_PRIVACY_LEVEL, level);
+      }
+      for (const [pref, value] of Object.entries(PRIVACY_LEVEL_PREFS[level])) {
+        this._setPrivacyPref(pref, value);
+      }
     }
 
     _defaultEmoji(index) {
@@ -329,6 +408,7 @@
     init() {
       this._loadData();
       this._enabled = Services.prefs.getBoolPref(PREF_ENABLED, true);
+      this._applyPrivacyLevel();
       this._hookEvents();
       this._apply();
 
@@ -510,6 +590,14 @@
       };
       Services.prefs.addObserver(PREF_ENABLED, this._prefEnabledObserver);
 
+      this._prefPrivacyLevelObserver = () => {
+        this._applyPrivacyLevel();
+      };
+      Services.prefs.addObserver(
+        PREF_PRIVACY_LEVEL,
+        this._prefPrivacyLevelObserver
+      );
+
       this._prefPinnedPublicObserver = () => {
         this._apply();
       };
@@ -586,6 +674,12 @@
       }
       if (this._prefEnabledObserver) {
         Services.prefs.removeObserver(PREF_ENABLED, this._prefEnabledObserver);
+      }
+      if (this._prefPrivacyLevelObserver) {
+        Services.prefs.removeObserver(
+          PREF_PRIVACY_LEVEL,
+          this._prefPrivacyLevelObserver
+        );
       }
       if (this._prefPinnedPublicObserver) {
         Services.prefs.removeObserver(

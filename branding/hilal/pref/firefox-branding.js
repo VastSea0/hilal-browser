@@ -44,6 +44,7 @@ pref("widget.macos.titlebar-blend-mode.behind-window", true);
 
 // Privacy-first Hilal defaults, informed by Betterfox and arkenfox.
 // These are default prefs rather than locked prefs, so users can still opt in.
+pref("hilal.privacy.level", "standard");
 
 // Telemetry, health reports, coverage, and usage reporting.
 pref("datareporting.policy.dataSubmissionEnabled", false);
@@ -176,4 +177,3 @@ pref("geo.provider.use_geoclue", false);
 
 // First-run onboarding screen state
 pref("hilal.welcome-screen.seen", false);
-

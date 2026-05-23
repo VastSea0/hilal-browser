@@ -1,0 +1,88 @@
+Hilal Browser: add privacy levels to preferences
+
+Adds Standard, Strict, and Tor-like privacy levels to the Hilal preferences
+pane. The selected level is persisted in `hilal.privacy.level`, and the
+workspace reset action restores the default Standard level.
+
+---
+ browser/components/preferences/hilal.inc.xhtml | 18 +++++++++++++++++-
+ browser/components/preferences/main.js         | 19 +++++++++++++++++++
+ 2 files changed, 37 insertions(+), 1 deletion(-)
+
+diff --git a/browser/components/preferences/hilal.inc.xhtml b/browser/components/preferences/hilal.inc.xhtml
+--- a/browser/components/preferences/hilal.inc.xhtml
++++ b/browser/components/preferences/hilal.inc.xhtml
+@@ -29,6 +29,23 @@
+   </vbox>
+ </groupbox>
+-
++
++<groupbox id="hilalPrivacyGroup" data-category="paneHilal" hidden="true">
++  <label><html:h2>Privacy Level</html:h2></label>
++  <vbox align="start">
++    <radiogroup id="hilalPrivacyLevel" orient="vertical">
++      <radio id="hilalPrivacyStandard"
++             value="standard"
++             label="Standard"/>
++      <radio id="hilalPrivacyStrict"
++             value="strict"
++             label="Strict"/>
++      <radio id="hilalPrivacyExtreme"
++             value="extreme"
++             label="Tor-like"/>
++    </radiogroup>
++  </vbox>
++</groupbox>
++
+ <groupbox id="hilalUiFixGroup" data-category="paneHilal" hidden="true">
+   <label><html:h2 data-l10n-id="hilal-uifix-header"/></label>
+   <vbox align="start">
+diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+--- a/browser/components/preferences/main.js
++++ b/browser/components/preferences/main.js
+@@ -1831,6 +1831,11 @@ var gHilalPane = {
+     const hilalWsGroupsPublicCheckbox = /** @type {HTMLInputElement|null} */ (
+       document.getElementById("hilalWorkspacesGroupsPublic")
+     );
++    const hilalPrivacyLevelRadioGroup = /** @type {HTMLElement|null} */ (
++      document.getElementById("hilalPrivacyLevel")
++    );
++    const normalizePrivacyLevel = value =>
++      ["standard", "strict", "extreme"].includes(value) ? value : "standard";
+     const resetHilalWorkspaceContainers = () => {
+       let workspaces = [];
+       try {
+@@ -1893,6 +1899,16 @@ var gHilalPane = {
+         );
+       });
+     }
++    if (hilalPrivacyLevelRadioGroup) {
++      hilalPrivacyLevelRadioGroup.value = normalizePrivacyLevel(
++        Services.prefs.getStringPref("hilal.privacy.level", "standard")
++      );
++      hilalPrivacyLevelRadioGroup.addEventListener("command", function () {
++        const level = normalizePrivacyLevel(hilalPrivacyLevelRadioGroup.value);
++        hilalPrivacyLevelRadioGroup.value = level;
++        Services.prefs.setStringPref("hilal.privacy.level", level);
++      });
++    }
+     setEventListener("hilalWorkspacesReset", "command", function () {
+       if (
+         Services.prompt.confirm(
+@@ -1908,6 +1924,7 @@ var gHilalPane = {
+         Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
+         Services.prefs.setBoolPref("hilal.workspaces.pinned.public", false);
+         Services.prefs.setBoolPref("hilal.workspaces.groups.public", false);
++        Services.prefs.setStringPref("hilal.privacy.level", "standard");
+         if (hilalWsCheckbox) {
+           hilalWsCheckbox.checked = true;
+         }
+@@ -1917,5 +1934,8 @@ var gHilalPane = {
+         if (hilalWsGroupsPublicCheckbox) {
+           hilalWsGroupsPublicCheckbox.checked = false;
+         }
++        if (hilalPrivacyLevelRadioGroup) {
++          hilalPrivacyLevelRadioGroup.value = "standard";
++        }
+       }
+     });
