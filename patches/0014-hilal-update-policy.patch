@@ -1,0 +1,34 @@
+Hilal Browser: bundle application update policy
+
+Packages a Hilal-owned AppUpdateURL policy with the browser distribution so
+Firefox's built-in application updater checks Hilal infrastructure instead of
+Mozilla AUS. The client URL keeps Firefox's standard update URL placeholders so
+the server can route by product, version, build id, target, locale, channel,
+system capabilities, and distribution.
+
+---
+ browser/app/distribution/moz.build     | 1 +
+ browser/app/distribution/policies.json | 5 +++++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/browser/app/distribution/moz.build b/browser/app/distribution/moz.build
+--- a/browser/app/distribution/moz.build
++++ b/browser/app/distribution/moz.build
+@@ -5,6 +5,7 @@
+ 
+ FINAL_TARGET_FILES.distribution += [
+     "distribution.ini",
++    "policies.json",
+ ]
+ 
+ FINAL_TARGET_FILES.distribution.extensions += [
+diff --git a/browser/app/distribution/policies.json b/browser/app/distribution/policies.json
+new file mode 100644
+--- /dev/null
++++ b/browser/app/distribution/policies.json
+@@ -0,0 +1,5 @@
++{
++  "policies": {
++    "AppUpdateURL": "https://updates.hilal.gkdevstudio.org/update/6/%PRODUCT%/%VERSION%/%BUILD_ID%/%BUILD_TARGET%/%LOCALE%/%CHANNEL%/%OS_VERSION%/%SYSTEM_CAPABILITIES%/%DISTRIBUTION%/%DISTRIBUTION_VERSION%/update.xml"
++  }
++}

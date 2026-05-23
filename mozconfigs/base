@@ -4,4 +4,17 @@ ac_add_options --enable-optimize
 ac_add_options --disable-debug
 ac_add_options --disable-tests
 ac_add_options --disable-crashreporter
-ac_add_options --disable-updater
+
+# Hilal desktop builds ship Firefox's application updater. The update server is
+# selected through the bundled enterprise policy in patches/0014.
+if [ "${HILAL_DISABLE_UPDATER:-0}" = "1" ]; then
+  ac_add_options --disable-updater
+else
+  : "${MOZ_UPDATE_CHANNEL:=hilal-release}"
+  : "${MAR_CHANNEL_ID:=hilal-release}"
+  : "${ACCEPTED_MAR_CHANNEL_IDS:=hilal-release}"
+  export MOZ_UPDATE_CHANNEL MAR_CHANNEL_ID ACCEPTED_MAR_CHANNEL_IDS
+
+  ac_add_options --enable-updater
+  ac_add_options --enable-update-channel="$MOZ_UPDATE_CHANNEL"
+fi

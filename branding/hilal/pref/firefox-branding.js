@@ -4,6 +4,8 @@
 
 // Hilal Browser branding-specific prefs.
 
+pref("distribution.id", "hilal");
+pref("distribution.version", "1");
 pref("startup.homepage_override_url", "");
 pref("startup.homepage_welcome_url", "");
 pref("startup.homepage_welcome_url.additional", "");
