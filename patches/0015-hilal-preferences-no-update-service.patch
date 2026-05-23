@@ -1,0 +1,83 @@
+Hilal Browser: tolerate missing update service in preferences
+
+Some Hilal builds expose AppConstants.MOZ_UPDATER while the application update
+XPCOM contracts are not registered. The settings redesign imports the About
+Firefox preferences config during main.js load; touching the lazy update
+service getter in that state aborts main.js before gMainPane and the base
+Preferences.addAll registrations run.
+
+Treat the app updater as unavailable when its XPCOM services are missing so
+about:preferences can finish loading and hide the updater UI.
+
+---
+diff --git a/browser/components/preferences/config/about-firefox.mjs b/browser/components/preferences/config/about-firefox.mjs
+--- a/browser/components/preferences/config/about-firefox.mjs
++++ b/browser/components/preferences/config/about-firefox.mjs
+@@ -11,6 +11,12 @@ const { AppConstants } = ChromeUtils.importESModule(
+   "resource://gre/modules/AppConstants.sys.mjs"
+ );
+ 
++const HAS_APP_UPDATE_SERVICE =
++  !!Cc["@mozilla.org/updates/update-service;1"] &&
++  !!Cc["@mozilla.org/updates/update-manager;1"];
++const CAN_USE_APP_UPDATER =
++  AppConstants.MOZ_UPDATER && HAS_APP_UPDATE_SERVICE;
++
+ const AUTO_UPDATE_CHANGED_TOPIC =
+   UpdateUtils.PER_INSTALLATION_PREFS["app.update.auto"].observerTopic;
+ const BACKGROUND_UPDATE_CHANGED_TOPIC =
+@@ -34,7 +40,7 @@ const UpdatesHelpers = {
+     // displaying any update content here, and it would get confusing if we
+     // did, because our updater is not enabled.
+     return (
+-      AppConstants.MOZ_UPDATER && !Services.sysinfo.getProperty("isPackagedApp")
++      CAN_USE_APP_UPDATER && !Services.sysinfo.getProperty("isPackagedApp")
+     );
+   },
+ 
+@@ -70,6 +76,9 @@ const UpdatesHelpers = {
+   },
+ 
+   async checkUpdateInProgress() {
++    if (!CAN_USE_APP_UPDATER) {
++      return;
++    }
+     const aus = Cc["@mozilla.org/updates/update-service;1"].getService(
+       Ci.nsIApplicationUpdateService
+     );
+@@ -153,7 +162,7 @@ Preferences.addSetting({
+   visible: () => UpdatesHelpers.showUpdatesSettings,
+ });
+ 
+-if (AppConstants.MOZ_UPDATER && typeof appUpdater === "undefined") {
++if (CAN_USE_APP_UPDATER && typeof appUpdater === "undefined") {
+   Services.scriptloader.loadSubScript(
+     "chrome://browser/content/aboutDialog-appUpdater.js",
+     this
+@@ -166,7 +175,7 @@ Preferences.addSetting(
+     _panel: "",
+     _options: {},
+     setup(emitChange) {
+-      if (!AppConstants.MOZ_UPDATER) {
++      if (!CAN_USE_APP_UPDATER) {
+         return () => {};
+       }
+       if (gAppUpdater) {
+@@ -262,7 +271,7 @@ Preferences.addSetting({
+ 
+ Preferences.addSetting({
+   id: "disableShowUpdateHistory",
+-  pref: AppConstants.MOZ_UPDATER
++  pref: CAN_USE_APP_UPDATER
+     ? "app.update.disable_button.showUpdateHistory"
+     : undefined,
+ });
+@@ -455,7 +464,7 @@ Preferences.addSetting({
+ Preferences.addSetting({
+   id: "showUpdatePrompts",
+   pref:
+-    AppConstants.MOZ_UPDATER && AppConstants.NIGHTLY_BUILD
++    CAN_USE_APP_UPDATER && AppConstants.NIGHTLY_BUILD
+       ? "app.update.suppressPrompts"
+       : undefined,
+ });
