@@ -1,4 +1,4 @@
-Set user-facing version to 0.2.0-alpha.2
+Set user-facing version to 0.2.0-alpha.3
 
 ---
 
@@ -8,4 +8,4 @@ index eadd6244dd02..9528b8df6ae4 100644
 +++ b/browser/config/version_display.txt
 @@ -1 +1 @@
 -152.0a1
-+0.2.0-alpha.2
++0.2.0-alpha.3

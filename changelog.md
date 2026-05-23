@@ -4,6 +4,29 @@ All notable changes to the Hilal Browser project will be documented in this file
 
 ---
 
+## [0.2.0-alpha.3] - 2026-05-24
+
+### Added
+- **Dynamic Firefox-UI-Fix Preferences Integration**: Integrated the Firefox-UI-Fix suite with dynamic options in the Settings UI (preferences page).
+- **Premium Onboarding Welcome Screen**: Implemented a beautiful premium onboarding/welcome overlay displayed on the first run of the browser.
+- **Bangs Search Fallback Control**: Prevented unknown bangs from automatically redirecting to DuckDuckGo, giving more predictable address bar search behavior.
+- **uBlock Origin Pinning & Verification**: Hardened uBlock Origin default installation by pinning to `1.57.2` with SHA-256 checksum verification during environment setup.
+- **Secure Container Deletion**: Enhanced privacy and security by explicitly purging container site data upon workspace deletion.
+- **Browser Test Profile & Audit Report**: Initialized a developer test profile and added tools/scaffolding for testing preference configurations, along with a comprehensive workspace audit report.
+
+### Changed
+- **Website/www Security Update**: Upgraded website dependencies (Next.js, next-intl, postcss) to fix security vulnerabilities.
+- **Refactored Workspace Patches**: Modularized the workspaces codebase and refactored core workspace preference structures.
+
+### Fixed
+- **Privileged Scheme Protection**: Fixed container retargeting issues by preventing navigation to privileged browser schemes (e.g. `about:config`, `chrome://...`).
+- **uBlock Startup Load**: Fixed an issue where the pre-installed uBlock Origin extension would not load or scan immediately upon browser startup.
+- **CSS Preference Discarding**: Resolved a styling discard bug in UI fixes by switching to native media query preference syntax.
+- **Workspace Tab Group Collapsing**: Collapsed empty tab groups in workspace view for a cleaner sidebar aesthetics.
+- **First-run Crashes & Assets**: Fixed startup sessionstore crashes and incorrect welcome screen layout rendering, SVG icon paths, and branding logo display.
+
+---
+
 ## [0.2.0-alpha.2] - 2026-05-19
 
 ### Added
