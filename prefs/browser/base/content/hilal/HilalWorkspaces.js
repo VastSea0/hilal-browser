@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/* global ContextualIdentityService, gBrowser, SessionStore */
+/* global Ci, ContextualIdentityService, gBrowser, SessionStore */
 
 (function () {
   "use strict";
@@ -19,7 +19,6 @@
   const DEFAULT_EMOJI = "\u{1F5C2}";
   const DEFAULT_COLOR = "purple";
   const CONTAINER_NAME_PREFIX = "Hilal Workspace";
-  const INIT_MAX_RETRIES = 80;
   const MAX_NAME_LENGTH = 64;
 
   const EMOJIS = [
@@ -70,6 +69,8 @@
       this._savingData = false;
       this._savingActive = false;
       this._retargetingTabs = new WeakSet();
+      this._tabsProgressListener = null;
+      this._welcomeStarting = false;
     }
 
     _warn(message, error = null) {
@@ -333,17 +334,51 @@
 
       this._tryBuildSidebarUI();
 
+      setTimeout(() => this._startWelcome(), 500);
+    }
+
+    _startWelcome({ force = false } = {}) {
       const seenPref = "hilal.welcome-screen.seen";
-      if (!Services.prefs.getBoolPref(seenPref, false)) {
-        if (typeof window.HilalWelcome !== "undefined") {
-          setTimeout(() => {
-            // Re-verify the preference inside the timeout
-            if (!Services.prefs.getBoolPref(seenPref, false)) {
-              const welcome = new window.HilalWelcome(this);
-              welcome.start();
-            }
-          }, 500);
-        }
+      if (
+        this._welcomeStarting ||
+        document.getElementById("hilal-welcome-overlay") ||
+        typeof window.HilalWelcome === "undefined" ||
+        (!force && Services.prefs.getBoolPref(seenPref, false))
+      ) {
+        return;
+      }
+
+      this._welcomeStarting = true;
+      const welcome = new window.HilalWelcome(this);
+      Promise.resolve(welcome.start())
+        .catch(error => {
+          this._warn("failed to start welcome flow", error);
+        })
+        .finally(() => {
+          this._welcomeStarting = false;
+        });
+    }
+
+    _maybeHandleAboutWelcome(browser, uri) {
+      if (browser !== gBrowser.selectedBrowser) {
+        return;
+      }
+      const spec = uri?.spec || browser?.currentURI?.spec || "";
+      if (/^about:welcome(?:[?#]|$)/.test(spec)) {
+        this._replaceAboutWelcomePage();
+        this._startWelcome({ force: true });
+      }
+    }
+
+    _replaceAboutWelcomePage() {
+      try {
+        gBrowser.loadURI(Services.io.newURI("about:newtab"), {
+          triggeringPrincipal:
+            Services.scriptSecurityManager.getSystemPrincipal(),
+          loadFlags: Ci.nsIWebNavigation.LOAD_FLAGS_REPLACE_HISTORY,
+        });
+      } catch (error) {
+        this._warn("failed to replace Firefox welcome page", error);
       }
     }
 
@@ -420,6 +455,19 @@
         "TabPinned",
         this._tabPinnedHandler
       );
+
+      this._tabsProgressListener = {
+        onLocationChange: (browser, _webProgress, _request, locationURI) => {
+          this._maybeHandleAboutWelcome(browser, locationURI);
+        },
+      };
+      gBrowser.addTabsProgressListener(this._tabsProgressListener);
+      setTimeout(() => {
+        this._maybeHandleAboutWelcome(
+          gBrowser.selectedBrowser,
+          gBrowser.currentURI
+        );
+      }, 0);
 
       this._keyDownHandler = event => this._handleKeyDown(event);
       window.addEventListener("keydown", this._keyDownHandler, true);
@@ -523,6 +571,9 @@
           "TabUngrouped",
           this._tabGroupedHandler
         );
+      }
+      if (this._tabsProgressListener) {
+        gBrowser.removeTabsProgressListener(this._tabsProgressListener);
       }
       if (this._keyDownHandler) {
         window.removeEventListener("keydown", this._keyDownHandler, true);
@@ -937,6 +988,18 @@
       this._saveData();
       this._updateUI();
       this.switchTo(workspace.id);
+    }
+
+    ensureWorkspace(name, emoji, color) {
+      const normalizedName = this._normalizeName(name, "Workspace");
+      const existing = this._workspaces.find(
+        workspace => workspace.name === normalizedName
+      );
+      if (existing) {
+        return existing;
+      }
+      this.create(normalizedName, emoji, color);
+      return this._workspaces[this._workspaces.length - 1];
     }
 
     rename(id, name, emoji, color) {
