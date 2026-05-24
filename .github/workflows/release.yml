@@ -12,15 +12,12 @@ on:
 permissions:
   contents: write
 
-env:
-  HILAL_FIREFOX_UPSTREAM: "https://github.com/mozilla-firefox/firefox.git"
-
 jobs:
   create-release:
+    if: github.actor == github.repository_owner
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.vars.outputs.tag }}
-      upload_url: ${{ steps.create-release.outputs.upload_url }}
     steps:
       - name: Determine tag
         id: vars
@@ -42,3 +39,64 @@ jobs:
           draft: false
           prerelease: false
 
+  # ================= FOR LINUX =================
+  build-linux-package:
+    needs: create-release
+    if: github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Pack Hilal Linux Source
+        run: |
+          mkdir -p dist
+          # Yamaları, branding ve ayarları tar.gz olarak paketle
+          tar -czf dist/hilal-browser-linux.tar.gz branding/ patches/ prefs/ scripts/
+          
+      - name: Upload Linux Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.create-release.outputs.tag }}
+          files: dist/hilal-browser-linux.tar.gz
+
+  # ================= FOR WINDOWS =================
+  build-windows-package:
+    needs: create-release
+    if: github.actor == github.repository_owner
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Pack Hilal Windows Zip
+        shell: powershell
+        run: |
+          # Sadece mevcut klasörleri windows uyumlu zip haline getir (3 saniye sürer)
+          Compress-Archive -Path "branding", "patches", "prefs", "scripts" -DestinationPath "hilal-browser-windows.zip"
+
+      - name: Upload Windows Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.create-release.outputs.tag }}
+          files: hilal-browser-windows.zip
+
+  # ================= FOR MAC =================
+  build-mac-package:
+    needs: create-release
+    if: github.actor == github.repository_owner
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Pack Hilal macOS Zip
+        run: |
+          # Mac sunucusunda hızlıca ziple (Çarpanı yüksek ama 5 saniyede biteceği için kota yemez)
+          zip -r hilal-browser-macos.zip branding patches prefs scripts
+
+      - name: Upload macOS Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.create-release.outputs.tag }}
+          files: hilal-browser-macos.zip
