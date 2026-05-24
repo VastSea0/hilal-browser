@@ -1046,6 +1046,11 @@ index 8acc798e5d22..07bffb1a15ab 100644
 +          event.stopPropagation();
 +          const popup = document.getElementById("tabContextMenu");
 +          if (popup) {
++            MozXULElement.insertFTLIfNeeded("browser/tabContextMenu.ftl");
++            popup.querySelectorAll("[data-lazy-l10n-id]").forEach(el => {
++              el.setAttribute("data-l10n-id", el.getAttribute("data-lazy-l10n-id"));
++              el.removeAttribute("data-lazy-l10n-id");
++            });
 +            window.TabContextMenu.contextTab = tab;
 +            window.TabContextMenu.contextTabs = [tab];
 +            popup.openPopupAtScreen(event.screenX, event.screenY, true);
