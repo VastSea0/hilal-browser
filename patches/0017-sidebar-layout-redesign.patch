@@ -965,7 +965,7 @@ index 8acc798e5d22..b177723bf4fb 100644
 +        window.SidebarController.show("viewHistorySidebar");
 +        break;
 +      case "downloads":
-+        if (window.DownloadsPanel) {
++        if (window.DownloadsPanel && window.DownloadsButton?.getAnchor()) {
 +          window.DownloadsPanel.showPanel(true);
 +        } else {
 +          window.BrowserCommands.downloadsUI();
