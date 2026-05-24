@@ -234,7 +234,7 @@ index 90e6bf90ff2f..d4e5f2d00d35 100644
 +
 +  :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-launcher-expanded],
 +  :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-ongoing-animations]:not([sidebar-launcher-expanded]) {
-+    background-color: var(--hilal-glass-toolbar-background) !important;
++    background-color: transparent !important;
 +    background-image: none !important;
 +  }
 +}
