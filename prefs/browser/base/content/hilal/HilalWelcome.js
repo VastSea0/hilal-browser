@@ -24,10 +24,38 @@
 
   const STAGES = [
     { title: "Kar\u015f\u0131lama", short: "01", icon: "moon" },
-    { title: "Ayarlar", short: "02", icon: "settings" },
-    { title: "Arama", short: "03", icon: "search" },
-    { title: "Alanlar", short: "04", icon: "tabs" },
-    { title: "Haz\u0131r", short: "05", icon: "check" },
+    { title: "Settings", short: "02", icon: "settings" },
+    { title: "Privacy", short: "03", icon: "shield" },
+    { title: "Search", short: "04", icon: "search" },
+    { title: "Workspaces", short: "05", icon: "tabs" },
+    { title: "Ready", short: "06", icon: "check" },
+  ];
+
+  const PRIVACY_LEVELS = [
+    {
+      key: "standard",
+      label: "Balanced",
+      badge: "LibreWolf-like",
+      description:
+        "RFP, strict tracking protection, HTTPS-only, URL cleanup, WebGL off, and cookie/cache cleanup on close.",
+      detail: "WebRTC stays enabled for compatibility, with local leak surfaces reduced.",
+    },
+    {
+      key: "strict",
+      label: "Strict",
+      badge: "Less compatible",
+      description:
+        "Adds First Party Isolation on top of Balanced and disables WebRTC entirely.",
+      detail: "Video calls and some sign-in flows may break.",
+    },
+    {
+      key: "extreme",
+      label: "Maximum",
+      badge: "Not Tor",
+      description:
+        "Adds JavaScript, camera, microphone, location, and history blocking on top of Strict.",
+      detail: "Does not hide your IP address; many modern sites may not work as expected.",
+    },
   ];
 
   const WORKSPACE_PRESETS = [
@@ -65,6 +93,9 @@
       this._style = null;
       this._engines = [];
       this._selectedEngine = null;
+      this._selectedPrivacyLevel = this._normalizePrivacyLevel(
+        Services.prefs.getStringPref("hilal.privacy.level", "standard")
+      );
       this._defaultBrowserSelected = false;
       this._workspacesSelected = { personal: true, work: true, social: true };
     }
@@ -234,6 +265,12 @@
             "Varsay\u0131lan taray\u0131c\u0131 karar\u0131n\u0131 verin, yer imleri ve parolalar\u0131n\u0131z\u0131 tek ad\u0131mda getirin.",
         },
         {
+          kicker: "Privacy Level",
+          title: "Choose your protection level clearly.",
+          subtitle:
+            "uBlock Origin is installed by default. Choose which Hilal hardening profile should apply on top of it.",
+        },
+        {
           kicker: "Arama",
           title: "Arama motorunuz sizi takip etmesin.",
           subtitle:
@@ -305,17 +342,32 @@
           `;
         case 2:
           return `
+            <div class="hw-privacy-stack">
+              <div class="hw-privacy-note">
+                <span class="hw-row-icon hw-icon hw-icon-shield"></span>
+                <span class="hw-row-info">
+                  <span class="hw-row-label" data-l10n-id="hilal-welcome-ublock-label">uBlock Origin is installed by default</span>
+                  <span class="hw-row-desc" data-l10n-id="hilal-welcome-ublock-desc">Ad, tracking, and harmful-site filter lists are ready on first launch. The privacy level controls Hilal's own browser hardening settings.</span>
+                </span>
+              </div>
+              <div class="hw-privacy-list">
+                ${this._privacyLevelsHTML()}
+              </div>
+            </div>
+          `;
+        case 3:
+          return `
             <div class="hw-engine-list">
               ${this._enginesHTML()}
             </div>
           `;
-        case 3:
+        case 4:
           return `
             <div class="hw-workspace-list">
               ${this._workspacesHTML()}
             </div>
           `;
-        case 4:
+        case 5:
           return `
             <div class="hw-summary">
               ${this._summaryHTML()}
@@ -376,6 +428,27 @@
         .join("");
     }
 
+    _privacyLevelsHTML() {
+      return PRIVACY_LEVELS.map(level => {
+        const active = this._selectedPrivacyLevel === level.key;
+        return `
+          <button type="button" class="hw-privacy-choice${active ? " hw-choice-active" : ""}" data-privacy-level="${level.key}" aria-pressed="${active}">
+            <span class="hw-privacy-header">
+              <span class="hw-privacy-title">${level.label}</span>
+              <span class="hw-pill">${level.badge}</span>
+            </span>
+            <span class="hw-privacy-desc">${level.description}</span>
+            <span class="hw-privacy-detail">${level.detail}</span>
+            <span class="hw-choice-check hw-icon hw-icon-check"></span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    _normalizePrivacyLevel(value) {
+      return PRIVACY_LEVELS.some(level => level.key === value) ? value : "standard";
+    }
+
     _workspacesHTML() {
       return WORKSPACE_PRESETS.map(item => {
         const active = this._workspacesSelected[item.key];
@@ -394,6 +467,9 @@
 
     _summaryHTML() {
       const engineName = this._escapeHTML(this._selectedEngine?.name ?? "DuckDuckGo");
+      const privacyLevel =
+        PRIVACY_LEVELS.find(level => level.key === this._selectedPrivacyLevel) ||
+        PRIVACY_LEVELS[0];
       const activePresets = WORKSPACE_PRESETS.filter(item => this._workspacesSelected[item.key]);
       const workspacesHTML = activePresets.length > 0 
         ? activePresets.map(item => `<span data-l10n-id="hilal-welcome-workspace-label-${item.key}">${item.label}</span>`).join(", ")
@@ -403,6 +479,10 @@
         <div class="hw-summary-row">
           <span class="hw-summary-label"><span class="hw-icon hw-icon-search"></span><span data-l10n-id="hilal-welcome-summary-search">Arama</span></span>
           <strong>${engineName}</strong>
+        </div>
+        <div class="hw-summary-row">
+          <span class="hw-summary-label"><span class="hw-icon hw-icon-shield"></span><span data-l10n-id="hilal-welcome-summary-privacy">Privacy</span></span>
+          <strong>${privacyLevel.label}</strong>
         </div>
         <div class="hw-summary-row">
           <span class="hw-summary-label"><span class="hw-icon hw-icon-tabs"></span><span data-l10n-id="hilal-welcome-summary-workspaces">\u00c7al\u0131\u015fma alanlar\u0131</span></span>
@@ -460,6 +540,15 @@
         choice.addEventListener("click", () => {
           const index = parseInt(choice.dataset.idx, 10);
           this._selectedEngine = this._engines[index];
+          this._renderStage();
+        });
+      });
+
+      this._overlay.querySelectorAll(".hw-privacy-choice").forEach(choice => {
+        choice.addEventListener("click", () => {
+          this._selectedPrivacyLevel = this._normalizePrivacyLevel(
+            choice.dataset.privacyLevel
+          );
           this._renderStage();
         });
       });
@@ -538,6 +627,15 @@
         } catch (e) {
           console.error("HilalWelcome: failed to set default browser", e);
         }
+      }
+
+      try {
+        Services.prefs.setStringPref(
+          "hilal.privacy.level",
+          this._normalizePrivacyLevel(this._selectedPrivacyLevel)
+        );
+      } catch (e) {
+        console.error("HilalWelcome: failed to set privacy level", e);
       }
 
       this._markSeen();

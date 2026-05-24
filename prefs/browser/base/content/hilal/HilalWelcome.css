@@ -218,7 +218,7 @@
 
 .hw-steps {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 8px;
   margin: 0;
   padding: 0;
@@ -857,6 +857,7 @@
 
 .hw-row-list,
 .hw-engine-list,
+.hw-privacy-stack,
 .hw-workspace-list,
 .hw-summary {
   display: flex;
@@ -1004,7 +1005,27 @@ label.hw-row {
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 }
 
+.hw-privacy-note {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-height: 92px;
+  padding: 18px 20px;
+  border: 1px solid rgba(158, 221, 216, 0.24);
+  border-radius: 8px;
+  background: rgba(158, 221, 216, 0.1);
+  color: var(--hw-ink);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+}
+
+.hw-privacy-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
 .hw-engine-choice,
+.hw-privacy-choice,
 .hw-workspace-choice {
   position: relative;
   display: flex;
@@ -1028,8 +1049,10 @@ label.hw-row {
 }
 
 .hw-engine-choice:hover,
+.hw-privacy-choice:hover,
 .hw-workspace-choice:hover,
 .hw-engine-choice:focus-visible,
+.hw-privacy-choice:focus-visible,
 .hw-workspace-choice:focus-visible {
   border-color: rgba(158, 221, 216, 0.42);
   background: rgba(255, 255, 255, 0.105);
@@ -1096,6 +1119,37 @@ label.hw-row {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.hw-privacy-choice {
+  min-height: 214px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-right: 42px;
+}
+
+.hw-privacy-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.hw-privacy-title {
+  color: #ffffff;
+  font-size: 1.04rem;
+  font-weight: 760;
+}
+
+.hw-privacy-desc,
+.hw-privacy-detail {
+  color: rgba(247, 247, 244, 0.66);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.hw-privacy-detail {
+  color: rgba(247, 247, 244, 0.48);
 }
 
 .hw-engine-name,
@@ -1213,6 +1267,7 @@ label.hw-row {
   .hw-hero-visual,
   .hw-row-list,
   .hw-engine-list,
+  .hw-privacy-stack,
   .hw-workspace-list,
   .hw-summary {
     animation: none;
@@ -1292,6 +1347,7 @@ label.hw-row {
 
   .hw-preview-cards,
   .hw-feature-row,
+  .hw-privacy-list,
   .hw-workspace-list {
     grid-template-columns: 1fr;
   }

@@ -20,7 +20,7 @@ diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/b
 index e58851d05c3c..90d953881f7d 100644
 --- a/browser/locales/en-US/browser/browser.ftl
 +++ b/browser/locales/en-US/browser/browser.ftl
-@@ -1604,3 +1604,70 @@ reduced-protection-infobar-reload-button = Reload
+@@ -1604,3 +1604,79 @@ reduced-protection-infobar-reload-button = Reload
    .accesskey = R
  reduced-protection-infobar-never-show-button = Don’t show again
    .accesskey = D
@@ -35,6 +35,7 @@ index e58851d05c3c..90d953881f7d 100644
 +
 +hilal-welcome-step-label-moon = Welcome
 +hilal-welcome-step-label-settings = Settings
++hilal-welcome-step-label-shield = Privacy
 +hilal-welcome-step-label-search = Search
 +hilal-welcome-step-label-tabs = Workspaces
 +hilal-welcome-step-label-check = Ready
@@ -47,17 +48,21 @@ index e58851d05c3c..90d953881f7d 100644
 +hilal-welcome-stage-1-title = Import your data in a clean step.
 +hilal-welcome-stage-1-subtitle = Choose default browser settings and easily import your bookmarks and passwords.
 +
-+hilal-welcome-stage-2-kicker = Search
-+hilal-welcome-stage-2-title = Don’t let your search engine track you.
-+hilal-welcome-stage-2-subtitle = Choose the default search experience. You can change this decision later in settings.
++hilal-welcome-stage-2-kicker = Privacy Level
++hilal-welcome-stage-2-title = Choose your protection level clearly.
++hilal-welcome-stage-2-subtitle = uBlock Origin is installed by default. Choose which Hilal hardening profile should apply on top of it.
 +
-+hilal-welcome-stage-3-kicker = Workspaces
-+hilal-welcome-stage-3-title = Keep your workflows separate.
-+hilal-welcome-stage-3-subtitle = Create initial isolated spaces to separate your personal, work, and social tabs.
++hilal-welcome-stage-3-kicker = Search
++hilal-welcome-stage-3-title = Don’t let your search engine track you.
++hilal-welcome-stage-3-subtitle = Choose the default search experience. You can change this decision later in settings.
 +
-+hilal-welcome-stage-4-kicker = Final Check
-+hilal-welcome-stage-4-title = Everything is ready.
-+hilal-welcome-stage-4-subtitle = Your selections will be applied, and Hilal will open in a calm, empty window.
++hilal-welcome-stage-4-kicker = Workspaces
++hilal-welcome-stage-4-title = Keep your workflows separate.
++hilal-welcome-stage-4-subtitle = Create initial isolated spaces to separate your personal, work, and social tabs.
++
++hilal-welcome-stage-5-kicker = Final Check
++hilal-welcome-stage-5-title = Everything is ready.
++hilal-welcome-stage-5-subtitle = Your selections will be applied, and Hilal will open in a calm, empty window.
 +
 +hilal-welcome-home-preview-image-alt =
 +    .alt = Hilal Browser home page preview
@@ -73,6 +78,9 @@ index e58851d05c3c..90d953881f7d 100644
 +hilal-welcome-import-button = Import
 +hilal-welcome-imported-button = Imported
 +
++hilal-welcome-ublock-label = uBlock Origin is installed by default
++hilal-welcome-ublock-desc = Ad, tracking, and harmful-site filter lists are ready on first launch. The privacy level controls Hilal’s own browser hardening settings.
++
 +hilal-welcome-workspace-label-personal = Personal
 +hilal-welcome-workspace-label-work = Work
 +hilal-welcome-workspace-label-social = Social
@@ -81,6 +89,7 @@ index e58851d05c3c..90d953881f7d 100644
 +hilal-welcome-workspace-state-skipped = Skipped
 +
 +hilal-welcome-summary-search = Search
++hilal-welcome-summary-privacy = Privacy
 +hilal-welcome-summary-workspaces = Workspaces
 +hilal-welcome-summary-default-browser = Default browser
 +hilal-welcome-summary-none = None
