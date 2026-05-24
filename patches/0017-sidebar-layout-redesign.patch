@@ -1,29 +1,39 @@
-From a1f46515d8454f6c303ce8cf45ad829e7b0a6a4e Mon Sep 17 00:00:00 2001
-From: VastSea0 <vastseaoffical0@outlook.com>
-Date: Sun, 24 May 2026 14:59:09 +0300
-Subject: [PATCH] Hilal Browser: redesign sidebar workspace layout
+Hilal Browser: redesign sidebar workspace layout
 
+diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+index 8a8c9849b9e0..bcdcf98ce8ad 100644
+--- a/browser/app/profile/firefox.js
++++ b/browser/app/profile/firefox.js
+@@ -3601,6 +3601,7 @@ pref("browser.contentsharing.newBadge.enabled", true);
+ // When enabled, Firefox ignores the distribution.ini file if global.id is MozillaOnline.
+ pref("distribution.mozillaonline.ignore", false);
+ pref("hilal.bangs.custom", "[]");
++pref("hilal.workspaces.showBookmarks", false);
 
+ // Hilal Browser - UI Fix Integration
+ pref("hilal.uifix.enabled", true);
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
-index ef7b67413392..72c986e9769a 100644
+index ef7b67413392..784f7952b906 100644
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
-@@ -1049,6 +1049,9 @@ var SidebarController = {
+@@ -1049,6 +1049,10 @@ var SidebarController = {
     * True if the sidebar is currently open.
     */
    get isOpen() {
-+    if (Services.prefs.getBoolPref("hilal.workspaces.enabled", true)) {
++    if (Services.prefs.getBoolPref("hilal.workspaces.enabled", true) &&
++        Services.prefs.getBoolPref("sidebar.verticalTabs", false)) {
 +      return this.sidebarContainer ? !this.sidebarContainer.hidden : false;
 +    }
      return this._box ? !this._box.hidden : false;
    },
- 
-@@ -2091,7 +2094,17 @@ var SidebarController = {
+
+@@ -2091,7 +2095,18 @@ var SidebarController = {
        }
- 
+
        this.selectMenuItem(commandID);
 -      this._box.hidden = this._splitter.hidden = false;
-+      if (Services.prefs.getBoolPref("hilal.workspaces.enabled", true)) {
++      if (Services.prefs.getBoolPref("hilal.workspaces.enabled", true) &&
++          Services.prefs.getBoolPref("sidebar.verticalTabs", false)) {
 +        const isStandardPanel = [
 +          "viewHistorySidebar",
 +          "viewBookmarksSidebar",
@@ -34,17 +44,17 @@ index ef7b67413392..72c986e9769a 100644
 +      } else {
 +        this._box.hidden = this._splitter.hidden = false;
 +      }
- 
+
        this._box.setAttribute("checked", "true");
        this._state.command = commandID;
 diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
-index d16a3b60b365..ce72576f3dda 100644
+index d16a3b60b365..15868114edf1 100644
 --- a/browser/components/sidebar/sidebar-main.css
 +++ b/browser/components/sidebar/sidebar-main.css
-@@ -18,6 +18,443 @@
+@@ -18,6 +18,450 @@
    width: 100%;
  }
- 
+
 +:host([hilal-sidebar]) {
 +  --hilal-sidebar-background: var(--sidebar-background, var(--sidebar-background-color));
 +  --hilal-sidebar-border: var(--sidebar-border-color);
@@ -84,11 +94,11 @@ index d16a3b60b365..ce72576f3dda 100644
 +  border-inline-end: 1px solid var(--hilal-sidebar-border);
 +  box-sizing: border-box;
 +  display: flex;
-+  flex: 0 0 64px;
++  flex: 0 0 52px;
 +  flex-direction: column;
-+  gap: var(--space-small);
-+  min-inline-size: 64px;
-+  padding: 12px 10px;
++  gap: 8px;
++  min-inline-size: 52px;
++  padding: 10px 8px;
 +}
 +
 +.hilal-workspace-list {
@@ -96,7 +106,7 @@ index d16a3b60b365..ce72576f3dda 100644
 +  display: flex;
 +  flex: 1 1 auto;
 +  flex-direction: column;
-+  gap: 12px;
++  gap: 8px;
 +  inline-size: 100%;
 +  overflow-x: hidden;
 +  overflow-y: auto;
@@ -126,12 +136,12 @@ index d16a3b60b365..ce72576f3dda 100644
 +
 +.hilal-workspace-button,
 +#hilal-workspace-add {
-+  block-size: 40px;
-+  border-radius: 10px;
++  block-size: 34px;
++  border-radius: 8px;
 +  box-sizing: border-box;
-+  flex: 0 0 40px;
++  flex: 0 0 34px;
 +  font: inherit;
-+  inline-size: 40px;
++  inline-size: 34px;
 +}
 +
 +.hilal-workspace-button:hover,
@@ -163,7 +173,7 @@ index d16a3b60b365..ce72576f3dda 100644
 +
 +.hilal-workspace-emoji,
 +.hilal-panel-workspace-icon {
-+  font-size: 20px;
++  font-size: 16px;
 +  line-height: 1;
 +}
 +
@@ -173,7 +183,7 @@ index d16a3b60b365..ce72576f3dda 100644
 +  flex: 0 0 auto;
 +  inline-size: 100%;
 +  justify-content: center;
-+  padding-block-start: 12px;
++  padding-block-start: 8px;
 +}
 +
 +#hilal-workspace-add {
@@ -189,7 +199,7 @@ index d16a3b60b365..ce72576f3dda 100644
 +  flex: 1 1 auto;
 +  flex-direction: column;
 +  min-inline-size: 0;
-+  padding: 24px 24px 0;
++  padding: 14px 14px 0;
 +}
 +
 +.hilal-panel-header {
@@ -214,11 +224,16 @@ index d16a3b60b365..ce72576f3dda 100644
 +  min-inline-size: 0;
 +}
 +
-+.hilal-icon-button,
-+.hilal-tab-close {
-+  block-size: 32px;
++.hilal-icon-button {
++  block-size: 26px;
 +  border-radius: var(--button-border-radius);
-+  inline-size: 32px;
++  inline-size: 26px;
++}
++
++.hilal-tab-close {
++  block-size: 20px;
++  border-radius: var(--button-border-radius);
++  inline-size: 20px;
 +}
 +
 +.hilal-icon {
@@ -270,14 +285,14 @@ index d16a3b60b365..ce72576f3dda 100644
 +  appearance: none;
 +  background: var(--hilal-sidebar-faint);
 +  border: 1px solid var(--hilal-sidebar-border);
-+  border-radius: 8px;
++  border-radius: 6px;
 +  box-sizing: border-box;
 +  color: inherit;
 +  flex: 0 0 auto;
 +  font: inherit;
-+  margin-block-start: 14px;
-+  min-block-size: 34px;
-+  padding: 6px 10px;
++  margin-block-start: 8px;
++  min-block-size: 28px;
++  padding: 4px 8px;
 +}
 +
 +.hilal-new-tab-button {
@@ -285,7 +300,7 @@ index d16a3b60b365..ce72576f3dda 100644
 +  align-items: center;
 +  background: color-mix(in srgb, var(--hilal-sidebar-background) 94%, white);
 +  border: 1px solid var(--hilal-sidebar-border);
-+  border-radius: 16px;
++  border-radius: 8px;
 +  box-shadow: 0 1px 4px color-mix(in srgb, black 10%, transparent);
 +  box-sizing: border-box;
 +  color: var(--hilal-sidebar-text);
@@ -293,13 +308,13 @@ index d16a3b60b365..ce72576f3dda 100644
 +  display: flex;
 +  flex: 0 0 auto;
 +  font: inherit;
-+  font-size: 14px;
++  font-size: 13px;
 +  font-weight: 700;
-+  gap: 10px;
++  gap: 8px;
 +  justify-content: center;
-+  margin-block: 24px 26px;
-+  min-block-size: 48px;
-+  padding: 0 16px;
++  margin-block: 12px 14px;
++  min-block-size: 32px;
++  padding: 0 12px;
 +}
 +
 +.hilal-new-tab-button:hover {
@@ -324,19 +339,19 @@ index d16a3b60b365..ce72576f3dda 100644
 +.hilal-section {
 +  display: flex;
 +  flex-direction: column;
-+  gap: 10px;
-+  margin-block-end: 28px;
++  gap: 6px;
++  margin-block-end: 16px;
 +}
 +
 +.hilal-section-heading {
 +  align-items: center;
 +  color: var(--hilal-sidebar-muted);
 +  display: flex;
-+  font-size: 12px;
++  font-size: 11px;
 +  font-weight: 800;
 +  justify-content: space-between;
 +  letter-spacing: 0;
-+  min-block-size: 22px;
++  min-block-size: 18px;
 +}
 +
 +.hilal-count-badge {
@@ -345,36 +360,37 @@ index d16a3b60b365..ce72576f3dda 100644
 +  border-radius: 999px;
 +  color: var(--hilal-sidebar-muted);
 +  display: inline-flex;
-+  font-size: 12px;
++  font-size: 11px;
 +  font-weight: 700;
 +  justify-content: center;
-+  min-block-size: 20px;
-+  min-inline-size: 26px;
-+  padding-inline: 7px;
++  min-block-size: 18px;
++  min-inline-size: 22px;
++  padding-inline: 5px;
 +}
 +
 +.hilal-row-list {
 +  display: flex;
 +  flex-direction: column;
-+  gap: 4px;
++  gap: 3px;
 +}
 +
 +.hilal-row {
 +  appearance: none;
 +  align-items: center;
 +  border: 1px solid transparent;
-+  border-radius: 10px;
++  border-radius: 6px;
 +  box-sizing: border-box;
 +  color: var(--hilal-sidebar-text);
 +  cursor: pointer;
 +  display: flex;
 +  font: inherit;
-+  gap: 12px;
-+  min-block-size: 42px;
++  gap: 8px;
++  min-block-size: 30px;
 +  min-inline-size: 0;
-+  padding: 0 8px;
++  padding: 0 6px;
 +  text-align: start;
 +  width: 100%;
++  font-size: 12.5px;
 +}
 +
 +.hilal-row-active {
@@ -407,10 +423,10 @@ index d16a3b60b365..ce72576f3dda 100644
 +}
 +
 +.hilal-tab-close {
-+  block-size: 28px;
++  block-size: 20px;
 +  color: var(--hilal-sidebar-muted);
-+  flex: 0 0 28px;
-+  inline-size: 28px;
++  flex: 0 0 20px;
++  inline-size: 20px;
 +  opacity: 0;
 +  pointer-events: none;
 +}
@@ -423,21 +439,22 @@ index d16a3b60b365..ce72576f3dda 100644
 +
 +.hilal-bookmark-row {
 +  color: var(--hilal-sidebar-muted);
-+  min-block-size: 38px;
++  min-block-size: 26px;
++  font-size: 12px;
 +}
 +
 +.hilal-bookmark-badge {
 +  background: color-mix(in srgb, var(--hilal-sidebar-blue) 12%, transparent);
 +  border: 1px solid color-mix(in srgb, var(--hilal-sidebar-blue) 22%, transparent);
-+  border-radius: 6px;
++  border-radius: 4px;
 +  color: var(--hilal-sidebar-blue);
 +  flex: 0 0 auto;
-+  font-size: 11px;
++  font-size: 10px;
 +  font-weight: 700;
 +  line-height: 1;
 +  max-inline-size: 84px;
 +  overflow: hidden;
-+  padding: 5px 7px;
++  padding: 3px 5px;
 +  text-overflow: ellipsis;
 +  white-space: nowrap;
 +}
@@ -447,16 +464,16 @@ index d16a3b60b365..ce72576f3dda 100644
 +  display: flex;
 +  flex: 0 0 auto;
 +  flex-direction: column;
-+  gap: 12px;
-+  padding-block: 24px 28px;
++  gap: 8px;
++  padding-block: 12px 16px;
 +}
 +
 +.hilal-footer-group {
 +  border-block-end: 1px solid var(--hilal-sidebar-border);
 +  display: flex;
 +  flex-direction: column;
-+  gap: 6px;
-+  padding-block-end: 12px;
++  gap: 4px;
++  padding-block-end: 8px;
 +}
 +
 +.hilal-footer-group:last-child {
@@ -474,10 +491,10 @@ index d16a3b60b365..ce72576f3dda 100644
 +  cursor: pointer;
 +  display: flex;
 +  font: inherit;
-+  font-size: 13px;
++  font-size: 12px;
 +  font-weight: 650;
-+  gap: 14px;
-+  min-block-size: 36px;
++  gap: 10px;
++  min-block-size: 28px;
 +  padding: 0 8px;
 +  text-align: start;
 +}
@@ -486,7 +503,7 @@ index d16a3b60b365..ce72576f3dda 100644
    display: grid;
    grid-template-rows: auto min-content min-content;
 diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/sidebar/sidebar-main.mjs
-index 8acc798e5d22..e3adb064b97c 100644
+index 8acc798e5d22..07bffb1a15ab 100644
 --- a/browser/components/sidebar/sidebar-main.mjs
 +++ b/browser/components/sidebar/sidebar-main.mjs
 @@ -18,8 +18,9 @@ import "chrome://browser/content/sidebar/sidebar-pins-promo.mjs";
@@ -498,9 +515,9 @@ index 8acc798e5d22..e3adb064b97c 100644
 +  PlacesUtils: "resource://gre/modules/PlacesUtils.sys.mjs",
 +  ShortcutUtils: "resource://gre/modules/ShortcutUtils.sys.mjs",
  });
- 
+
  /**
-@@ -35,6 +36,17 @@ export default class SidebarMain extends MozLitElement {
+@@ -35,6 +36,18 @@ export default class SidebarMain extends MozLitElement {
      open: { type: Boolean },
      shouldShowOverflowButton: { type: Boolean },
      isOverflowMenuOpen: { type: Boolean },
@@ -513,12 +530,13 @@ index 8acc798e5d22..e3adb064b97c 100644
 +      reflect: true,
 +      attribute: "hilal-sidebar",
 +    },
++    hilalShowBookmarks: { type: Boolean },
 +    hilalTabs: { type: Array },
 +    hilalWorkspaces: { type: Array },
    };
- 
+
    static queries = {
-@@ -64,6 +76,13 @@ export default class SidebarMain extends MozLitElement {
+@@ -64,12 +77,23 @@ export default class SidebarMain extends MozLitElement {
      this.bottomActions = [];
      this.selectedView = window.SidebarController.currentID;
      this.open = window.SidebarController.isOpen;
@@ -527,31 +545,59 @@ index 8acc798e5d22..e3adb064b97c 100644
 +    this.hilalSearchOpen = false;
 +    this.hilalSearchQuery = "";
 +    this.hilalSidebarActive = false;
++    this.hilalShowBookmarks = false;
 +    this.hilalTabs = [];
 +    this.hilalWorkspaces = [];
      this.contextMenuTarget = null;
      this.expanded = false;
      this.clickCounts = {
-@@ -140,6 +159,7 @@ export default class SidebarMain extends MozLitElement {
+       genai: 0,
+       totalToolsMinusGenai: 0,
+     };
++    this._hilalPrefObserver = (_subject, topic, data) => {
++      this.observe(_subject, topic, data);
++    };
+     this.shouldShowOverflowButton = false;
+     this.overflowMenuOpen = false;
+   }
+@@ -137,9 +161,16 @@ export default class SidebarMain extends MozLitElement {
+     window.addEventListener("SidebarItemChanged", this);
+     window.addEventListener("SidebarItemRemoved", this);
+
++    Services.prefs.addObserver(
++      "sidebar.verticalTabs",
++      this._hilalPrefObserver
++    );
++    Services.prefs.addObserver("hilal.workspaces.", this._hilalPrefObserver);
++
      this.setCustomize();
      this.createSplitter();
      this.createToolsObservers();
 +    this.initHilalSidebarWhenReady();
    }
- 
+
    disconnectedCallback() {
-@@ -156,6 +176,7 @@ export default class SidebarMain extends MozLitElement {
+@@ -156,6 +187,16 @@ export default class SidebarMain extends MozLitElement {
      window.removeEventListener("SidebarItemChanged", this);
      window.removeEventListener("SidebarItemRemoved", this);
- 
+
++    Services.prefs.removeObserver(
++      "sidebar.verticalTabs",
++      this._hilalPrefObserver
++    );
++    Services.prefs.removeObserver(
++      "hilal.workspaces.",
++      this._hilalPrefObserver
++    );
++
 +    this.uninitHilalSidebar();
      this._toolsIntersectionObserver?.disconnect();
      this._toolsResizeObserver?.disconnect();
      this.ownerDocument
-@@ -163,6 +184,324 @@ export default class SidebarMain extends MozLitElement {
+@@ -163,6 +204,357 @@ export default class SidebarMain extends MozLitElement {
        ?.disconnectedCallback();
    }
- 
+
 +  initHilalSidebarWhenReady() {
 +    this._hilalInitAttempts = 0;
 +    if (this.maybeInitHilalSidebar()) {
@@ -566,15 +612,22 @@ index 8acc798e5d22..e3adb064b97c 100644
 +  }
 +
 +  maybeInitHilalSidebar() {
++    if (this.hilalSidebarActive) {
++      return true;
++    }
 +    const manager = window.gHilalWorkspaces;
 +    if (
 +      !manager ||
-+      !Services.prefs.getBoolPref("hilal.workspaces.enabled", true)
++      !Services.prefs.getBoolPref("hilal.workspaces.enabled", true) ||
++      !Services.prefs.getBoolPref("sidebar.verticalTabs", false)
 +    ) {
 +      return false;
 +    }
 +    this._hilalManager = manager;
 +    this.hilalSidebarActive = true;
++    if (this._sidebarMain) {
++      this._sidebarMain.setAttribute("hilal-sidebar", "true");
++    }
 +    this.installHilalSidebarListeners();
 +    this.refreshHilalSidebar();
 +    return true;
@@ -617,8 +670,6 @@ index 8acc798e5d22..e3adb064b97c 100644
 +      ],
 +      this._hilalPlacesListener
 +    );
-+
-+    Services.prefs.addObserver("hilal.workspaces.", this);
 +  }
 +
 +  uninitHilalSidebar() {
@@ -627,6 +678,10 @@ index 8acc798e5d22..e3adb064b97c 100644
 +      this._hilalInitTimer = null;
 +    }
 +    if (!this._hilalListenersInstalled) {
++      this.hilalSidebarActive = false;
++      if (this._sidebarMain) {
++        this._sidebarMain.removeAttribute("hilal-sidebar");
++      }
 +      return;
 +    }
 +    for (const eventName of this._hilalTabEvents) {
@@ -643,13 +698,33 @@ index 8acc798e5d22..e3adb064b97c 100644
 +      ],
 +      this._hilalPlacesListener
 +    );
-+    Services.prefs.removeObserver("hilal.workspaces.", this);
 +    this._hilalListenersInstalled = false;
++    this.hilalSidebarActive = false;
++    if (this._sidebarMain) {
++      this._sidebarMain.removeAttribute("hilal-sidebar");
++    }
 +  }
 +
 +  observe(_subject, topic, data) {
-+    if (topic === "nsPref:changed" && data.startsWith("hilal.workspaces.")) {
-+      this.refreshHilalSidebar();
++    if (topic === "nsPref:changed") {
++      if (
++        data === "sidebar.verticalTabs" ||
++        data === "hilal.workspaces.enabled"
++      ) {
++        const shouldBeActive =
++          window.gHilalWorkspaces &&
++          Services.prefs.getBoolPref("hilal.workspaces.enabled", true) &&
++          Services.prefs.getBoolPref("sidebar.verticalTabs", false);
++        if (shouldBeActive !== this.hilalSidebarActive) {
++          if (shouldBeActive) {
++            this.maybeInitHilalSidebar();
++          } else {
++            this.uninitHilalSidebar();
++          }
++        }
++      } else if (data.startsWith("hilal.workspaces.")) {
++        this.refreshHilalSidebar();
++      }
 +    }
 +  }
 +
@@ -672,7 +747,11 @@ index 8acc798e5d22..e3adb064b97c 100644
 +    this.hilalWorkspaces = [...(manager._workspaces || [])];
 +    this.hilalActiveId = manager._activeId || this.hilalWorkspaces[0]?.id || "";
 +    this.hilalTabs = this.getHilalWorkspaceTabs(this.hilalActiveId);
-+    if (!this._hilalBookmarksLoaded) {
++    this.hilalShowBookmarks = Services.prefs.getBoolPref(
++      "hilal.workspaces.showBookmarks",
++      false
++    );
++    if (this.hilalShowBookmarks && !this._hilalBookmarksLoaded) {
 +      this.refreshHilalBookmarks();
 +    }
 +  }
@@ -873,8 +952,8 @@ index 8acc798e5d22..e3adb064b97c 100644
    get isToolsDragging() {
      return this.toolsSplitter.getAttribute("state") === "dragging";
    }
-@@ -509,6 +848,16 @@ export default class SidebarMain extends MozLitElement {
- 
+@@ -509,6 +901,16 @@ export default class SidebarMain extends MozLitElement {
+
    async handleEvent(e) {
      switch (e.type) {
 +      case "SSTabRestored":
@@ -890,20 +969,23 @@ index 8acc798e5d22..e3adb064b97c 100644
        case "command":
          switch (e.target.id) {
            case "sidebar-context-menu-manage-extension":
-@@ -649,6 +998,9 @@ export default class SidebarMain extends MozLitElement {
+@@ -649,6 +1051,12 @@ export default class SidebarMain extends MozLitElement {
    }
- 
+
    updated() {
 +    if (this.hilalSidebarActive) {
++      return;
++    }
++    if (!this._toolsIntersectionObserver || !this._toolsResizeObserver) {
 +      return;
 +    }
      if (
        window.SidebarController.sidebarRevampVisibility !== "expand-on-hover"
      ) {
-@@ -790,7 +1142,327 @@ export default class SidebarMain extends MozLitElement {
+@@ -790,7 +1198,334 @@ export default class SidebarMain extends MozLitElement {
      return container && !container.hidden;
    }
- 
+
 +  hilalIcon(iconName) {
 +    return html`<span
 +      class=${`hilal-icon hilal-icon-${iconName}`}
@@ -1097,6 +1179,8 @@ index 8acc798e5d22..e3adb064b97c 100644
 +  hilalSidebarTemplate() {
 +    const activeWorkspace = this.activeHilalWorkspace;
 +    const workspaceFallback = this.fluentStrings.formatValueSync("hilal-sidebar-workspace-fallback");
++    const railLabel = this.fluentStrings.formatValueSync("hilal-sidebar-workspaces-nav-label");
++    const panelLabel = this.fluentStrings.formatValueSync("hilal-sidebar-panel-label");
 +    return html`
 +      <link
 +        rel="stylesheet"
@@ -1108,7 +1192,7 @@ index 8acc798e5d22..e3adb064b97c 100644
 +      />
 +      <div class="wrapper" hidden></div>
 +      <div class="hilal-sidebar-layout">
-+        <nav class="hilal-workspace-rail" aria-label="Çalışma alanları">
++        <nav class="hilal-workspace-rail" aria-label=${railLabel}>
 +          <div class="hilal-workspace-list">
 +            ${repeat(
 +              this.hilalWorkspaces,
@@ -1127,7 +1211,7 @@ index 8acc798e5d22..e3adb064b97c 100644
 +            </button>
 +          </div>
 +        </nav>
-+        <section class="hilal-sidebar-panel" aria-label="Hilal kenar çubuğu">
++        <section class="hilal-sidebar-panel" aria-label=${panelLabel}>
 +          <div class="hilal-panel-header">
 +            <span class="hilal-panel-workspace-icon" aria-hidden="true">
 +              ${activeWorkspace?.emoji || "\u{1F5C2}"}
@@ -1190,21 +1274,26 @@ index 8acc798e5d22..e3adb064b97c 100644
 +                )}
 +              </div>
 +            </section>
-+            <section
-+              class="hilal-section"
-+              aria-labelledby="hilal-bookmarks-heading"
-+            >
-+              <div class="hilal-section-heading" id="hilal-bookmarks-heading">
-+                <span data-l10n-id="hilal-sidebar-bookmarks"></span>
-+              </div>
-+              <div class="hilal-row-list">
-+                ${repeat(
-+                  this.filteredHilalBookmarks,
-+                  bookmark => bookmark.guid,
-+                  bookmark => this.hilalBookmarkTemplate(bookmark)
-+                )}
-+              </div>
-+            </section>
++            ${when(
++              this.hilalShowBookmarks,
++              () => html`
++                <section
++                  class="hilal-section"
++                  aria-labelledby="hilal-bookmarks-heading"
++                >
++                  <div class="hilal-section-heading" id="hilal-bookmarks-heading">
++                    <span data-l10n-id="hilal-sidebar-bookmarks"></span>
++                  </div>
++                  <div class="hilal-row-list">
++                    ${repeat(
++                      this.filteredHilalBookmarks,
++                      bookmark => bookmark.guid,
++                      bookmark => this.hilalBookmarkTemplate(bookmark)
++                    )}
++                  </div>
++                </section>
++              `
++            )}
 +          </div>
 +          <footer class="hilal-sidebar-footer">
 +            <div class="hilal-footer-group">
@@ -1228,3 +1317,55 @@ index 8acc798e5d22..e3adb064b97c 100644
      /* Add 1 to tools and extensions count for "Customize sidebar" option */
      let enabledToolsAndExtensionsCount =
        this.enabledToolsAndExtensionsCount() + 1;
+diff --git a/browser/locales/en-US/browser/sidebar.ftl b/browser/locales/en-US/browser/sidebar.ftl
+index 6bd76b8607ae..acb9597463b4 100644
+--- a/browser/locales/en-US/browser/sidebar.ftl
++++ b/browser/locales/en-US/browser/sidebar.ftl
+@@ -251,3 +251,34 @@ sidebar-widget-hide-sidebar2 =
+ # users who do not have any pinned tabs. Indicates that they can drop tabs in
+ # this area to pin them.
+ sidebar-pins-promo-text = Drag important tabs here to keep them within reach
++
++# Hilal Redesigned Sidebar
++hilal-sidebar-open-tabs = Open Tabs
++hilal-sidebar-bookmarks = Bookmarks
++hilal-sidebar-new-tab = New Tab
++hilal-sidebar-history = History
++hilal-sidebar-downloads = Downloads
++hilal-sidebar-privacy = Privacy Report
++hilal-sidebar-settings = Settings
++hilal-sidebar-close-tab =
++    .title = Close Tab
++    .aria-label = Close Tab
++hilal-sidebar-add-workspace =
++    .title = New Workspace
++    .aria-label = New Workspace
++hilal-sidebar-search-button =
++    .title = Search
++    .aria-label = Search
++hilal-sidebar-search-input =
++    .placeholder = Search
++hilal-sidebar-workspace-menu =
++    .title = Workspace Menu
++    .aria-label = Workspace Menu
++hilal-sidebar-workspace-tooltip = { $name } ({ $count })
++hilal-sidebar-workspace-aria-label = { $name }, { $count } tabs
++hilal-sidebar-bookmark-fallback = Bookmark
++hilal-sidebar-workspace-fallback = Workspace
++hilal-sidebar-badge-privacy = Privacy
++hilal-sidebar-badge-tool = Tool
++hilal-sidebar-workspaces-nav-label = Workspaces
++hilal-sidebar-panel-label = Hilal Sidebar
+diff --git a/browser/themes/shared/sidebar.css b/browser/themes/shared/sidebar.css
+index d4e5f2d00d35..d11fb3b54170 100644
+--- a/browser/themes/shared/sidebar.css
++++ b/browser/themes/shared/sidebar.css
+@@ -582,3 +582,8 @@ sidebar-main,
+     display: none;
+   }
+ }
++
++#sidebar-main[hilal-sidebar] {
++  min-width: 220px !important;
++  max-width: 50vw !important;
++}
