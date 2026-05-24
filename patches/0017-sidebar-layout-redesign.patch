@@ -1,4 +1,4 @@
-﻿Hilal Browser: redesign sidebar workspace layout
+Hilal Browser: redesign sidebar workspace layout
 
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
 index 8a8c9849b9e0..bcdcf98ce8ad 100644
@@ -110,7 +110,7 @@ index d16a3b60b365..336e5b3a7f04 100644
 +
 +.hilal-workspace-rail {
 +  align-items: center;
-+  background: color-mix(in srgb, var(--hilal-sidebar-text) 5%, transparent);
++  background: transparent;
 +  border-inline-end: 1px solid var(--hilal-sidebar-border);
 +  box-sizing: border-box;
 +  display: flex;
