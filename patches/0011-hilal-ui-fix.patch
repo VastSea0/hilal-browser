@@ -18,7 +18,7 @@ index b890e0f7917d..b631daa972a2 100644
 @@ -3600,3 +3600,98 @@ pref("browser.contentsharing.newBadge.enabled", true);
  
  // When enabled, Firefox ignores the distribution.ini file if global.id is MozillaOnline.
- pref("distribution.mozillaonline.ignore", false);
+ pref("distribution.mozillaonline.ignore", true);
 +
 +// Hilal Browser - UI Fix Integration
 +pref("hilal.uifix.enabled", true);
@@ -309,14 +309,12 @@ index db0d3ee8234c..e004a2d29dc8 100644
  @import url("chrome://browser/skin/addons/unified-extensions.css");
  @import url("chrome://browser/skin/downloads/indicator.css");
 diff --git a/browser/themes/shared/jar.inc.mn b/browser/themes/shared/jar.inc.mn
-index 70529f99b979..9cfc1b234e3c 100644
 --- a/browser/themes/shared/jar.inc.mn
 +++ b/browser/themes/shared/jar.inc.mn
-@@ -352,3 +352,208 @@
- 
+@@ -355,3 +355,207 @@
    skin/classic/browser/illustrations/market-opt-in.svg         (../shared/illustrations/market-opt-in.svg)
+   skin/classic/browser/illustrations/tab-groups.svg            (../shared/illustrations/tab-groups.svg)
    skin/classic/browser/illustrations/yelpRealtime-opt-in.svg   (../shared/illustrations/yelpRealtime-opt-in.svg)
-+
 +# Hilal UI Fix Integration
 +  skin/classic/browser/hilal-ui-fix.css                      (../shared/hilal-ui-fix.css)
 +  skin/classic/browser/icons/add-device.svg                                (../shared/icons/add-device.svg)

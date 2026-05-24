@@ -78,6 +78,45 @@ if [ -d "$HILAL_REPO_ROOT/branding" ]; then
   done
 fi
 
+patch_already_present() {
+  local patch_path="$1"
+  local root="$2"
+  python3 - "$patch_path" "$root" <<'PY'
+import os, re, sys
+patch_path = sys.argv[1]
+root = sys.argv[2]
+added = {}
+current = None
+with open(patch_path, 'r', encoding='utf-8') as f:
+    for line in f:
+        if line.startswith('diff --git '):
+            m = re.search(r'^diff --git a/(.+?) b/(.+)$', line)
+            current = m.group(1) if m else None
+            if current:
+                added[current] = []
+        elif current is None:
+            continue
+        elif line.startswith(('--- ', '+++ ', 'index ', 'new file mode ', 'deleted file mode ', 'similarity index ', 'rename from ', 'rename to ', 'copy from ', 'copy to ', '@@ ')):
+            continue
+        elif line.startswith('+') and not line.startswith('+++'):
+            content = line[1:].rstrip('\n')
+            if content.strip():
+                added[current].append(content)
+if not any(added.values()):
+    sys.exit(1)
+for file_path, lines in added.items():
+    full = os.path.join(root, file_path)
+    if not os.path.exists(full):
+        sys.exit(1)
+    with open(full, 'r', encoding='utf-8', errors='ignore') as f:
+        text = f.read()
+    for line in lines:
+        if line not in text:
+            sys.exit(1)
+sys.exit(0)
+PY
+}
+
 # -- 2. Apply patches in series order ----------------------------------------
 
 read_series
@@ -90,6 +129,11 @@ else
     patch_path="$HILAL_REPO_ROOT/patches/$p"
     [ -f "$patch_path" ] || die "Patch listed in series not found: $p"
     if git -C "$HILAL_FIREFOX_SRC" apply --check --reverse "$patch_path" >/dev/null 2>&1; then
+      log "Skip (already applied): $p"
+      skipped=$((skipped + 1))
+      continue
+    fi
+    if patch_already_present "$patch_path" "$HILAL_FIREFOX_SRC"; then
       log "Skip (already applied): $p"
       skipped=$((skipped + 1))
       continue

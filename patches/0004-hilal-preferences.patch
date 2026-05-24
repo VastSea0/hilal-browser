@@ -6,6 +6,7 @@ manually via JS.
 
 diff --git a/browser/components/preferences/hilal.inc.xhtml b/browser/components/preferences/hilal.inc.xhtml
 new file mode 100644
+index 000000000000..248a4eb03db3
 --- /dev/null
 +++ b/browser/components/preferences/hilal.inc.xhtml
 @@ -0,0 +1,33 @@
@@ -43,17 +44,9 @@ new file mode 100644
 +</groupbox>
 +</html:template>
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+index 2561c3c48d35..8f09077ca2ed 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -13,7 +13,7 @@
- /* import-globals-from preferences.js */
- /* import-globals-from /toolkit/mozapps/preferences/fontbuilder.js */
- /* import-globals-from /browser/base/content/aboutDialog-appUpdater.js */
--/* global MozXULElement */
-+/* global ContextualIdentityService, MozXULElement, Services */
- 
- /**
-  * @import { Setting } from "chrome://global/content/preferences/Setting.mjs"
 @@ -26,6 +26,8 @@ const { Multilingual } = ChromeUtils.importESModule(
  
  ChromeUtils.defineESModuleGetters(this, {
@@ -63,7 +56,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
    UpdateListener: "resource://gre/modules/UpdateListener.sys.mjs",
    LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
    MigrationUtils: "resource:///modules/MigrationUtils.sys.mjs",
-@@ -1786,6 +1788,103 @@ gMainPane.initialized = new Promise(res => {
+@@ -1785,6 +1787,107 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
@@ -74,8 +67,12 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +    }
 +
 +    const hilalWsCheckbox = document.getElementById("hilalWorkspacesEnabled");
-+    const hilalWsPinnedPublicCheckbox = document.getElementById("hilalWorkspacesPinnedPublic");
-+    const hilalWsGroupsPublicCheckbox = document.getElementById("hilalWorkspacesGroupsPublic");
++    const hilalWsPinnedPublicCheckbox = document.getElementById(
++      "hilalWorkspacesPinnedPublic"
++    );
++    const hilalWsGroupsPublicCheckbox = document.getElementById(
++      "hilalWorkspacesGroupsPublic"
++    );
 +    const resetHilalWorkspaceContainers = () => {
 +      let workspaces = [];
 +      try {
@@ -168,22 +165,24 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
    InternalHandlerInfoWrapper,
    getFileDisplayName,
 diff --git a/browser/components/preferences/preferences.js b/browser/components/preferences/preferences.js
+index 17e2268319ac..bc04ee0cf75a 100644
 --- a/browser/components/preferences/preferences.js
 +++ b/browser/components/preferences/preferences.js
-@@ -485,6 +485,7 @@ function init_all() {
-   Preferences.queueUpdateOfAllElements();
- 
-   register_module("paneGeneral", gMainPane);
+@@ -504,6 +504,7 @@ function init_all() {
+     document.getElementById("category-general").hidden = false;
+     document.getElementById("nav-separator").hidden = true;
+   }
 +  register_module("paneHilal", gHilalPane);
    register_module("paneHome", gHomePane);
    register_module("paneSearch", gSearchPane);
    register_module("panePrivacy", gPrivacyPane);
 diff --git a/browser/components/preferences/preferences.xhtml b/browser/components/preferences/preferences.xhtml
+index a118266020d4..bad9308411bb 100644
 --- a/browser/components/preferences/preferences.xhtml
 +++ b/browser/components/preferences/preferences.xhtml
-@@ -129,6 +129,11 @@
-         iconsrc="chrome://browser/skin/preferences/category-general.svg"
-         data-l10n-id="pane-general-title">
+@@ -136,6 +136,11 @@
+         iconsrc="chrome://browser/skin/preferences/category-sync.svg"
+         data-l10n-id="pane-sync-title3">
        </html:moz-page-nav-button>
 +      <html:moz-page-nav-button id="category-hilal"
 +        view="paneHilal"
@@ -193,7 +192,7 @@ diff --git a/browser/components/preferences/preferences.xhtml b/browser/componen
        <html:moz-page-nav-button id="category-home"
          view="paneHome"
          iconsrc="chrome://browser/skin/home.svg"
-@@ -254,6 +259,7 @@
+@@ -256,6 +261,7 @@
          <vbox id="mainPrefPane">
  #include searchResults.inc.xhtml
  #include main.inc.xhtml

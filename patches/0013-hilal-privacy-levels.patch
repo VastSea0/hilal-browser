@@ -1,38 +1,35 @@
-Hilal Browser: add transparent privacy levels to preferences
+Hilal Browser: add privacy levels to preferences
 
-Adds transparent, LibreWolf-aligned privacy levels to the Hilal preferences
+Adds Standard, Strict, and Tor-like privacy levels to the Hilal preferences
 pane. The selected level is persisted in `hilal.privacy.level`, and the
-workspace reset action restores the default Balanced level.
+workspace reset action restores the default Standard level.
 
 ---
- browser/components/preferences/hilal.inc.xhtml | 21 ++++++++++++++++++++-
+ browser/components/preferences/hilal.inc.xhtml | 18 +++++++++++++++++-
  browser/components/preferences/main.js         | 19 +++++++++++++++++++
- 2 files changed, 40 insertions(+), 1 deletion(-)
+ 2 files changed, 37 insertions(+), 1 deletion(-)
 
 diff --git a/browser/components/preferences/hilal.inc.xhtml b/browser/components/preferences/hilal.inc.xhtml
+index 6a2f21e..1cfcdc4 100644
 --- a/browser/components/preferences/hilal.inc.xhtml
 +++ b/browser/components/preferences/hilal.inc.xhtml
-@@ -29,6 +29,26 @@
+@@ -31,6 +31,23 @@
    </vbox>
  </groupbox>
--
-+
+ 
 +<groupbox id="hilalPrivacyGroup" data-category="paneHilal" hidden="true">
 +  <label><html:h2>Privacy Level</html:h2></label>
 +  <vbox align="start">
-+    <description style="margin-bottom: 8px; max-width: 720px;">
-+      Hilal privacy levels are explicit hardening profiles. They do not hide your public IP address, do not replace Tor Browser, and may break sites that depend on fingerprinting surfaces, WebGL, WebRTC, persistent cookies, saved passwords, or JavaScript.
-+    </description>
 +    <radiogroup id="hilalPrivacyLevel" orient="vertical">
 +      <radio id="hilalPrivacyStandard"
 +             value="standard"
-+             label="Balanced (LibreWolf-like): strict tracking protection, RFP, HTTPS-only, URL cleanup, WebGL off, reduced WebRTC exposure, cookies/cache cleared on close."/>
++             label="Standard"/>
 +      <radio id="hilalPrivacyStrict"
 +             value="strict"
-+             label="Strict: Balanced plus First Party Isolation and WebRTC disabled. Safer for privacy, more likely to break video calls and sign-in flows."/>
++             label="Strict"/>
 +      <radio id="hilalPrivacyExtreme"
 +             value="extreme"
-+             label="Maximum local hardening (not Tor): Strict plus JavaScript off, camera/microphone/location blocked, and browsing history cleared on close."/>
++             label="Tor-like"/>
 +    </radiogroup>
 +  </vbox>
 +</groupbox>
@@ -41,12 +38,13 @@ diff --git a/browser/components/preferences/hilal.inc.xhtml b/browser/components
    <label><html:h2 data-l10n-id="hilal-uifix-header"/></label>
    <vbox align="start">
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+index fdef5a3..d942f3c 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -1822,6 +1822,11 @@ var gHilalPane = {
-     const hilalWsCheckbox = document.getElementById("hilalWorkspacesEnabled");
-     const hilalWsPinnedPublicCheckbox = document.getElementById("hilalWorkspacesPinnedPublic");
-     const hilalWsGroupsPublicCheckbox = document.getElementById("hilalWorkspacesGroupsPublic");
+@@ -1800,6 +1800,11 @@ var gHilalPane = {
+     const hilalWsGroupsPublicCheckbox = document.getElementById(
+       "hilalWorkspacesGroupsPublic"
+     );
 +    const hilalPrivacyLevelRadioGroup = /** @type {HTMLElement|null} */ (
 +      document.getElementById("hilalPrivacyLevel")
 +    );
@@ -55,7 +53,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
      const resetHilalWorkspaceContainers = () => {
        let workspaces = [];
        try {
-@@ -1880,6 +1885,16 @@ var gHilalPane = {
+@@ -1860,6 +1865,16 @@ var gHilalPane = {
          );
        });
      }
@@ -72,7 +70,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
      setEventListener("hilalWorkspacesReset", "command", function () {
        if (
          Services.prompt.confirm(
-@@ -1893,6 +1908,7 @@ var gHilalPane = {
+@@ -1874,6 +1889,7 @@ var gHilalPane = {
          Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
          Services.prefs.setBoolPref("hilal.workspaces.pinned.public", false);
          Services.prefs.setBoolPref("hilal.workspaces.groups.public", false);
@@ -80,7 +78,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
          if (hilalWsCheckbox) {
            hilalWsCheckbox.checked = true;
          }
-@@ -1902,5 +1918,8 @@ var gHilalPane = {
+@@ -1883,6 +1899,9 @@ var gHilalPane = {
          if (hilalWsGroupsPublicCheckbox) {
            hilalWsGroupsPublicCheckbox.checked = false;
          }
@@ -89,3 +87,4 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +        }
        }
      });
+ 

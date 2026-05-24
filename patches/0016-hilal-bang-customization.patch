@@ -244,9 +244,9 @@ diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
 index b890e0f7917d..0000000000000 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
-@@ -3600,4 +3600,5 @@ pref("distribution.mozillaonline.ignore", false);
+@@ -3600,4 +3600,5 @@ pref("distribution.mozillaonline.ignore", true);
  // When enabled, Firefox ignores the distribution.ini file if global.id is MozillaOnline.
- pref("distribution.mozillaonline.ignore", false);
+ pref("distribution.mozillaonline.ignore", true);
 +pref("hilal.bangs.custom", "[]");
  
  // Hilal Browser - UI Fix Integration
@@ -499,5 +499,4 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +    refreshBangsList();
    },
  };
-
 
