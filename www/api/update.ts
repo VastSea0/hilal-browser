@@ -6,7 +6,7 @@ import {
   type ReleaseSummary,
   type UpdateManifest,
   type UpdateManifestEntry,
-} from "../server/github";
+} from "../server/github.ts";
 
 interface UpdateRequest {
   product: string;

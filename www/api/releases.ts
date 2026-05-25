@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { fetchGithubReleases } from "../server/github";
+import { fetchGithubReleases } from "../server/github.ts";
 
 export default async function handler(
   _req: IncomingMessage,
