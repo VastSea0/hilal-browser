@@ -478,6 +478,24 @@ export default function App() {
               {theme === "dark" ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
             </button>
 
+            {/* Discord Link */}
+            <a
+              href="https://discord.gg/JZJ4tmPHFw"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`rounded-full p-2.5 border transition-all flex items-center justify-center ${
+                theme === "dark"
+                  ? "border-gray-800 bg-[#0B0F19] text-[#7289da] hover:border-gray-700 hover:text-[#5865f2]"
+                  : "border-gray-200 bg-white text-[#5865f2] hover:bg-gray-50 hover:text-[#4752c4]"
+              }`}
+              title="Discord"
+              aria-label="Discord Server"
+            >
+              <svg className="h-4.5 w-4.5" viewBox="0 0 127.14 96.36" fill="currentColor">
+                <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,52.88,6.83,77.19,77.19,0,0,0,49.58,0,105.15,105.15,0,0,0,19.14,8.07C-3,41.58-9,74.12,6.06,96c14.62,10.83,28.69,17.43,42.45,21.75a80.3,80.3,0,0,0,9.65-15.69,67.6,67.6,0,0,1-15-7.23c1.26-.93,2.48-1.9,3.66-2.9a76.4,76.4,0,0,0,80.24,0c1.18,1,2.4,1.97,3.66,2.9a67.75,67.75,0,0,1-15,7.23,80.24,80.24,0,0,0,9.65,15.69c13.76-4.32,27.83-10.92,42.45-21.75C136,74.12,130,41.58,107.7,8.07ZM42.45,65.69C34,65.69,27.18,57.76,27.18,48s6.83-17.65,15.27-17.65,15.27,7.92,15.27,17.65S50.87,65.69,42.45,65.69Zm42.24,0C76.27,65.69,69.42,57.76,69.42,48S76.27,30.38,84.69,30.38s15.27,7.92,15.27,17.65S93.11,65.69,84.69,65.69Z"/>
+              </svg>
+            </a>
+
             {/* Minimalist install button */}
             <button
               id="nav-download-button"
@@ -905,7 +923,7 @@ export default function App() {
                 </div>
 
                 {/* Source link footer inside card */}
-                <div className="mt-8 pt-4 border-t border-[#e7e2da]/30 dark:border-[#1F2937]/30 flex items-center justify-between font-sans">
+                <div className="mt-8 pt-4 border-t border-[#e7e2da]/30 dark:border-[#1F2937]/30 flex flex-wrap gap-4 items-center justify-between font-sans">
                   <a
                     href="https://github.com/VastSea0/hilal-browser/issues"
                     target="_blank"
@@ -913,6 +931,15 @@ export default function App() {
                     className="text-xs font-semibold text-[#1C1917]/60 hover:text-teal-600 dark:text-[#F4F4F5]/60 dark:hover:text-teal-400 flex items-center gap-1.5 transition-colors"
                   >
                     {activeT.releases.bugReport}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                  <a
+                    href="https://discord.gg/JZJ4tmPHFw"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-semibold text-[#1C1917]/60 hover:text-teal-600 dark:text-[#F4F4F5]/60 dark:hover:text-teal-400 flex items-center gap-1.5 transition-colors"
+                  >
+                    Discord Chat
                     <ExternalLink className="h-3 w-3" />
                   </a>
                   <a
@@ -1112,6 +1139,17 @@ export default function App() {
                 aria-label="GitHub Repository"
               >
                 <Github className="h-5 w-5" />
+              </a>
+              <a
+                href="https://discord.gg/JZJ4tmPHFw"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#1C1917]/60 hover:text-teal-600 dark:text-[#F4F4F5]/60 dark:hover:text-teal-400 transition-colors"
+                aria-label="Discord Server"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 127.14 96.36" fill="currentColor">
+                  <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,52.88,6.83,77.19,77.19,0,0,0,49.58,0,105.15,105.15,0,0,0,19.14,8.07C-3,41.58-9,74.12,6.06,96c14.62,10.83,28.69,17.43,42.45,21.75a80.3,80.3,0,0,0,9.65-15.69,67.6,67.6,0,0,1-15-7.23c1.26-.93,2.48-1.9,3.66-2.9a76.4,76.4,0,0,0,80.24,0c1.18,1,2.4,1.97,3.66,2.9a67.75,67.75,0,0,1-15,7.23,80.24,80.24,0,0,0,9.65,15.69c13.76-4.32,27.83-10.92,42.45-21.75C136,74.12,130,41.58,107.7,8.07ZM42.45,65.69C34,65.69,27.18,57.76,27.18,48s6.83-17.65,15.27-17.65,15.27,7.92,15.27,17.65S50.87,65.69,42.45,65.69Zm42.24,0C76.27,65.69,69.42,57.76,69.42,48S76.27,30.38,84.69,30.38s15.27,7.92,15.27,17.65S93.11,65.69,84.69,65.69Z"/>
+                </svg>
               </a>
               <button
                 id="footer-download-btn"
