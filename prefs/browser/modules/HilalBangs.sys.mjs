@@ -192,6 +192,36 @@ export var HilalBangs = {
     return merged;
   },
 
+  resolveQuery(query, { fallbackToDuckDuckGo = false } = {}) {
+    const bangInfo = this._parseQuery(query);
+    if (!bangInfo) {
+      return "";
+    }
+
+    const bangsMap = this.getBangsMap();
+    const bangEntry = bangsMap[bangInfo.bang];
+    if (bangEntry) {
+      if (!bangInfo.query) {
+        return bangEntry.home;
+      }
+      return bangEntry.search.replace(
+        "{query}",
+        encodeURIComponent(bangInfo.query)
+      );
+    }
+
+    if (!fallbackToDuckDuckGo) {
+      return "";
+    }
+
+    const duckDuckGoQuery = `!${bangInfo.rawBang}${
+      bangInfo.query ? ` ${bangInfo.query}` : ""
+    }`;
+    return `https://duckduckgo.com/?q=${this._encodeDuckDuckGoQuery(
+      duckDuckGoQuery
+    )}`;
+  },
+
   getDefaultBangs() {
     return this.DEFAULT_BANGS;
   },
@@ -215,5 +245,40 @@ export var HilalBangs = {
     } catch {
       return [];
     }
+  },
+
+  _parseQuery(query) {
+    const trimmed = String(query || "").trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    const match = trimmed.match(/(?:^|\s)!([a-zA-Z0-9_-]+)(?:\s|$)/i);
+    if (!match) {
+      return null;
+    }
+
+    const bangWord = `!${match[1]}`;
+    const extractedQuery = trimmed
+      .replace(
+        new RegExp(
+          "(?:^|\\s)" +
+            bangWord.replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&") +
+            "(?:\\s|$)",
+          "i"
+        ),
+        " "
+      )
+      .trim();
+
+    return {
+      bang: match[1].toLowerCase(),
+      rawBang: match[1],
+      query: extractedQuery,
+    };
+  },
+
+  _encodeDuckDuckGoQuery(query) {
+    return encodeURIComponent(query).replace(/%20/g, "+");
   },
 };

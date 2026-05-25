@@ -29,7 +29,7 @@ index c12cb44d30e9..40cb59f3a060 100644
  
    historyEnabled: {
      pref: "places.history.enabled",
-@@ -720,20 +721,56 @@ export var UrlbarUtils = {
+@@ -720,20 +721,27 @@ export var UrlbarUtils = {
     *
     * @param {SearchEngine} engine
     *   The engine to generate the query for.
@@ -40,40 +40,11 @@ index c12cb44d30e9..40cb59f3a060 100644
     *    post data (object).
     */
    getSearchQueryUrl(engine, query) {
-+    const BANGS_MAP = lazy.HilalBangs.getBangsMap();
-+
-+    if (query) {
-+      const trimmed = query.trim();
-+      const bangRegex = /(?:^|\s)!([a-zA-Z0-9_-]+)(?:\s|$)/i;
-+      const match = trimmed.match(bangRegex);
-+      if (match) {
-+        const bang = match[1].toLowerCase();
-+        const bangWord = "!" + match[1];
-+        const extractedQuery = trimmed
-+          .replace(
-+            new RegExp(
-+              "(?:^|\\s)" +
-+                bangWord.replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&") +
-+                "(?:\\s|$)",
-+              "i"
-+            ),
-+            " "
-+          )
-+          .trim();
-+
-+        if (bang in BANGS_MAP) {
-+          let redirectedUrl;
-+          if (!extractedQuery) {
-+            redirectedUrl = BANGS_MAP[bang].home;
-+          } else {
-+            redirectedUrl = BANGS_MAP[bang].search.replace(
-+              "{query}",
-+              encodeURIComponent(extractedQuery)
-+            );
-+          }
-+          return [redirectedUrl, null];
-+        }
-+      }
++    const bangUrl = lazy.HilalBangs.resolveQuery(query, {
++      fallbackToDuckDuckGo: true,
++    });
++    if (bangUrl) {
++      return [bangUrl, null];
 +    }
 +
      let submission = engine.getSubmission(query);
@@ -112,7 +83,7 @@ index c10e1e3a34f8..fdda1de24421 100644
    )
  );
  
-@@ -455,20 +456,70 @@ export const URILoadingHelper = {
+@@ -455,20 +456,44 @@ export const URILoadingHelper = {
     * @param {boolean}  params.isContentWindowPrivate
     *                   Save content as coming from a private window.
     * @param {Document} params.initiatingDoc
@@ -123,8 +94,6 @@ index c10e1e3a34f8..fdda1de24421 100644
        return;
      }
  
-+    const BANGS_MAP = lazy.HilalBangs.getBangsMap();
-+
 +    if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
 +      try {
 +        let parsedUrl = new URL(url);
@@ -137,37 +106,13 @@ index c10e1e3a34f8..fdda1de24421 100644
 +          parsedUrl.searchParams.get("query") ||
 +          parsedUrl.searchParams.get("search");
 +        if (q) {
-+          const trimmed = q.trim();
-+          const bangRegex = /(?:^|\s)!([a-zA-Z0-9_-]+)(?:\s|$)/i;
-+          const match = trimmed.match(bangRegex);
-+          if (match) {
-+            const bang = match[1].toLowerCase();
-+            const bangWord = "!" + match[1];
-+            const extractedQuery = trimmed
-+              .replace(
-+                new RegExp(
-+                  "(?:^|\\s)" +
-+                    bangWord.replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&") +
-+                    "(?:\\s|$)",
-+                  "i"
-+                ),
-+                " "
-+              )
-+              .trim();
-+
-+            if (bang in BANGS_MAP) {
-+              if (!extractedQuery) {
-+                url = BANGS_MAP[bang].home;
-+              } else {
-+                url = BANGS_MAP[bang].search.replace(
-+                  "{query}",
-+                  encodeURIComponent(extractedQuery)
-+                );
-+              }
-+              // Clear postData if any, since we redirected to a standard GET search URL
-+              params = Object.assign({}, params);
-+              params.postData = null;
-+            }
++          const bangUrl = lazy.HilalBangs.resolveQuery(q, {
++            fallbackToDuckDuckGo: true,
++          });
++          if (bangUrl) {
++            url = bangUrl;
++            params = Object.assign({}, params);
++            params.postData = null;
 +          }
 +        }
 +      } catch (e) {}
