@@ -1,20 +1,29 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Hilal Browser Website
 
-# Run and deploy your AI Studio app
+This Vite app powers the public Hilal Browser website and the lightweight
+serverless endpoints used by releases.
 
-This contains everything you need to run your app locally.
+## Local Development
 
-View your app in AI Studio: https://ai.studio/apps/9f1951e6-fd6b-4520-9e1f-b592859625ee
+```bash
+npm install
+npm run dev
+```
 
-## Run Locally
+## Build
 
-**Prerequisites:**  Node.js
+```bash
+npm run build
+```
 
+## Release Endpoints
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- `/releases.json` proxies GitHub Releases and feeds the website release-notes
+  timeline.
+- `/update/6/.../update.xml` is rewritten to `/api/update` and returns Firefox
+  application update XML only when a valid MAR manifest exists for the
+  requesting platform and channel.
+
+The update endpoint intentionally returns an empty `<updates>` document when a
+release has no complete MAR metadata. See `../docs/UPDATES.md` for the release
+manifest and signing flow.

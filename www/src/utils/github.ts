@@ -56,6 +56,11 @@ export const FALLBACK_RELEASE_EN: GithubRelease = {
  * Retries up to 5 times on fetch/transient errors, silently (does not log retries).
  */
 export async function fetchGithubReleases(): Promise<GithubRelease[]> {
+  const localFeed = await fetchReleaseFeed("/releases.json");
+  if (localFeed.length > 0) {
+    return localFeed;
+  }
+
   const url = "https://api.github.com/repos/VastSea0/hilal-browser/releases";
   const maxRetries = 5;
   let delay = 300;
@@ -71,20 +76,7 @@ export async function fetchGithubReleases(): Promise<GithubRelease[]> {
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data) && data.length > 0) {
-          return data.map((item: any) => ({
-            id: item.id,
-            tag_name: item.tag_name,
-            name: item.name || item.tag_name,
-            published_at: item.published_at,
-            body: item.body || "",
-            html_url: item.html_url,
-            assets: (item.assets || []).map((asset: any) => ({
-              id: asset.id,
-              name: asset.name,
-              size: asset.size,
-              browser_download_url: asset.browser_download_url,
-            })),
-          }));
+          return data.map(normalizeRelease);
         }
       }
 
@@ -101,6 +93,47 @@ export async function fetchGithubReleases(): Promise<GithubRelease[]> {
   }
 
   throw new Error("Transmitting limit reached");
+}
+
+async function fetchReleaseFeed(url: string): Promise<GithubRelease[]> {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+    if (!response.ok) {
+      return [];
+    }
+    const data = await response.json();
+    const releases = Array.isArray(data) ? data : data?.releases;
+    return Array.isArray(releases) ? releases.map(normalizeRelease) : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeRelease(item: any): GithubRelease {
+  return {
+    id: Number(item.id || 0),
+    tag_name: String(item.tag_name || ""),
+    name: String(item.name || item.tag_name || ""),
+    published_at: String(item.published_at || item.created_at || ""),
+    body: String(item.body || ""),
+    html_url: String(item.html_url || ""),
+    draft: Boolean(item.draft),
+    prerelease: Boolean(item.prerelease),
+    assets: Array.isArray(item.assets)
+      ? item.assets.map((asset: any) => ({
+          id: Number(asset.id || 0),
+          name: String(asset.name || ""),
+          size: Number(asset.size || 0),
+          browser_download_url: String(asset.browser_download_url || ""),
+          content_type: asset.content_type ? String(asset.content_type) : undefined,
+          digest: asset.digest ? String(asset.digest) : undefined,
+        }))
+      : [],
+  };
 }
 
 /**

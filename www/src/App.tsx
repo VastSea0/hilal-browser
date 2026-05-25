@@ -51,6 +51,7 @@ export default function App() {
 
   // Release fetching states
   const [release, setRelease] = useState<GithubRelease | null>(null);
+  const [releases, setReleases] = useState<GithubRelease[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isApiFallback, setIsApiFallback] = useState<boolean>(false);
 
@@ -92,14 +93,17 @@ export default function App() {
         setLoading(true);
         const releases = await fetchGithubReleases();
         if (releases && releases.length > 0) {
+          setReleases(releases);
           setRelease(releases[0]);
           setIsApiFallback(false);
         } else {
           // If empty releases list, use fallback
+          setReleases([]);
           setIsApiFallback(true);
         }
       } catch (err) {
         // Fallback gracefully on rate limits or failures
+        setReleases([]);
         setIsApiFallback(true);
       } finally {
         setLoading(false);
@@ -242,6 +246,12 @@ export default function App() {
       binaryTitle: "Kurulum İkili Dosyaları",
       allReleasesLink: "Tüm sürümleri GitHub üzerinde gör",
       changelogTitle: "DEĞİŞİKLİK GÜNLÜĞÜ",
+      timelineTitle: "Anlık Sürüm Notları",
+      timelineSubtitle: "GitHub Releases akışından gün gün yayın tarihi, build türü ve özet notlar.",
+      buildTypes: "Derleme türleri",
+      noBuildAssets: "Yayın artifact bilgisi yok",
+      currentBuild: "Güncel yayın",
+      viewRelease: "Yayını aç",
       fallbackChangelog: "Sürüm ayrıntısı yüklenemedi. Detayları incelemek için lütfen resmi Github sayfasını kontrol edin.",
       bugReport: "Hata bildirimi / Geri Bildirim",
       commits: "Commit Geçmişi"
@@ -313,6 +323,12 @@ export default function App() {
       binaryTitle: "Installation Binaries",
       allReleasesLink: "View all releases on GitHub",
       changelogTitle: "CHANGELOG",
+      timelineTitle: "Live Release Notes",
+      timelineSubtitle: "Day-by-day publishing dates, build types, and summary notes from GitHub Releases.",
+      buildTypes: "Build types",
+      noBuildAssets: "No release artifact data",
+      currentBuild: "Current release",
+      viewRelease: "Open release",
       fallbackChangelog: "Release details could not be loaded. Please check the official GitHub repository for detailed release specs.",
       bugReport: "Report Bug / Feedback",
       commits: "Commit History"
@@ -351,6 +367,38 @@ export default function App() {
   const recommendedAsset = activeRelease?.assets
     ? getRecommendedAsset(activeRelease.assets, detectedOS as any)
     : null;
+
+  const releaseTimeline = isApiFallback || releases.length === 0
+    ? [activeRelease]
+    : releases.slice(0, 6);
+
+  const getBuildTypeForAsset = (name: string) => {
+    const lower = name.toLowerCase();
+    if (lower.endsWith(".mar")) return "Update MAR";
+    if (lower.endsWith(".dmg")) return "macOS DMG";
+    if (lower.endsWith(".exe")) return "Windows Installer";
+    if (lower.endsWith(".zip")) return "Windows ZIP";
+    if (lower.endsWith(".deb")) return "Linux DEB";
+    if (lower.endsWith(".appimage")) return "Linux AppImage";
+    if (lower.endsWith(".tar.xz") || lower.endsWith(".tar.gz")) return "Linux Tarball";
+    if (lower.endsWith(".sha256") || lower.endsWith(".sha512")) return "Checksum";
+    if (lower.endsWith(".json")) return "Update Manifest";
+    return "Binary";
+  };
+
+  const getBuildTypesForRelease = (item: GithubRelease) => {
+    const types = new Set<string>();
+    for (const asset of item.assets || []) {
+      types.add(getBuildTypeForAsset(asset.name));
+    }
+    return Array.from(types);
+  };
+
+  const getReleaseSummaryLines = (body: string) => {
+    return parseChangelogToSimpleLines(body)
+      .filter(line => line.type === "item" || line.type === "text")
+      .slice(0, 3);
+  };
 
   const getDynamicDownloadBtnText = () => {
     if (lang === "tr") {
@@ -492,7 +540,9 @@ export default function App() {
               title="Discord"
               aria-label="Discord Server"
             >
-              <SiDiscord className="h-4.5 w-4.5" />
+              <span className="flex h-4.5 w-4.5 items-center justify-center text-current">
+                <SiDiscord />
+              </span>
             </a>
 
             {/* Minimalist install button */}
@@ -955,6 +1005,121 @@ export default function App() {
             )}
           </div>
         </div>
+
+        {!loading && (
+          <div
+            className={`mt-8 rounded-3xl border p-6 md:p-8 ${
+              theme === "dark"
+                ? "border-[#1F2937]/50 bg-[#0B0F19]/65"
+                : "border-[#e7e2da] bg-[#FBF9F4]/70"
+            }`}
+            id="release-notes-timeline"
+          >
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase text-teal-600 dark:text-teal-400">
+                  <ListRestart className="h-3.5 w-3.5" />
+                  <span>{activeT.releases.timelineTitle}</span>
+                </div>
+                <p className="mt-2 max-w-2xl text-xs md:text-sm leading-relaxed text-[#1C1917]/65 dark:text-[#E2E8F0]/65">
+                  {activeT.releases.timelineSubtitle}
+                </p>
+              </div>
+              <a
+                href="https://github.com/VastSea0/hilal-browser/releases"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-600 transition-colors hover:text-teal-500 dark:text-teal-400"
+              >
+                {activeT.releases.allReleasesLink}
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              {releaseTimeline.map((item, index) => {
+                const buildTypes = getBuildTypesForRelease(item);
+                const summaryLines = getReleaseSummaryLines(item.body);
+                return (
+                  <article
+                    key={`${item.id}-${item.tag_name}`}
+                    className={`rounded-2xl border p-4 ${
+                      theme === "dark"
+                        ? "border-[#1F2937] bg-black/20"
+                        : "border-[#e7e2da] bg-white/55"
+                    }`}
+                  >
+                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-mono text-[11px] text-[#1C1917]/50 dark:text-white/45">
+                            {formatLocalizedDate(item.published_at, lang)}
+                          </span>
+                          {index === 0 && (
+                            <span className="rounded-full bg-teal-600/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-teal-600 dark:bg-teal-400/10 dark:text-teal-400">
+                              {activeT.releases.currentBuild}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="mt-2 font-serif text-lg font-semibold text-[#1C1917] dark:text-white">
+                          {item.tag_name}
+                        </h3>
+                        <p className="mt-1 text-xs font-mono text-[#1C1917]/55 dark:text-white/50">
+                          {item.name || item.tag_name}
+                        </p>
+                      </div>
+                      <a
+                        href={item.html_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold text-[#1C1917]/60 transition-colors hover:text-teal-600 dark:text-[#F4F4F5]/60 dark:hover:text-teal-400"
+                      >
+                        {activeT.releases.viewRelease}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[#1C1917]/45 dark:text-white/35">
+                        {activeT.releases.buildTypes}
+                      </div>
+                      {buildTypes.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {buildTypes.map(type => (
+                            <span
+                              key={`${item.id}-${type}`}
+                              className="rounded-full border border-teal-600/15 bg-teal-600/5 px-2.5 py-1 text-[11px] font-semibold text-teal-700 dark:border-teal-400/15 dark:bg-teal-400/5 dark:text-teal-300"
+                            >
+                              {type}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-[#1C1917]/50 dark:text-white/45">
+                          {activeT.releases.noBuildAssets}
+                        </p>
+                      )}
+                    </div>
+
+                    {summaryLines.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        {summaryLines.map((line, lineIndex) => (
+                          <div
+                            key={`${item.id}-line-${lineIndex}`}
+                            className="flex gap-2 text-xs text-[#1C1917]/70 dark:text-[#E2E8F0]/75"
+                          >
+                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-500/70" />
+                            <span>{line.text.replace(/\*\*/g, "").replace(/`/g, "")}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* 6. Privacy & Open Source Core Values (Bento Grid) */}
@@ -1146,7 +1311,9 @@ export default function App() {
                 className="text-[#1C1917]/60 hover:text-teal-600 dark:text-[#F4F4F5]/60 dark:hover:text-teal-400 transition-colors flex items-center"
                 aria-label="Discord Server"
               >
-                <SiDiscord className="h-5 w-5" />
+                <span className="flex h-5 w-5 items-center justify-center text-current">
+                  <SiDiscord />
+                </span>
               </a>
               <button
                 id="footer-download-btn"

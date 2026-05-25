@@ -3,6 +3,8 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
+    { "source": "/update/:path*", "destination": "/api/update?path=:path*" },
+    { "source": "/releases.json", "destination": "/api/releases" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

@@ -3,6 +3,8 @@ export interface GithubAsset {
   name: string;
   size: number;
   browser_download_url: string;
+  content_type?: string;
+  digest?: string;
 }
 
 export interface GithubRelease {
@@ -13,4 +15,6 @@ export interface GithubRelease {
   body: string;
   html_url: string;
   assets: GithubAsset[];
+  draft?: boolean;
+  prerelease?: boolean;
 }
