@@ -16,41 +16,41 @@
   <label><html:h2 data-l10n-id="hilal-workspaces-header"/></label>
   <vbox align="start">
     <checkbox id="hilalWorkspacesEnabled"
-              label="Enable workspaces"/>
+              data-l10n-id="hilal-workspaces-enabled"/>
     <checkbox id="hilalWorkspacesPinnedPublic"
-              label="Make pinned tabs visible in all workspaces"/>
+              data-l10n-id="hilal-workspaces-pinned-public"/>
     <checkbox id="hilalWorkspacesGroupsPublic"
-              label="Make tab groups visible in all workspaces"/>
+              data-l10n-id="hilal-workspaces-groups-public"/>
     <hbox>
-      <description flex="1">Reset all workspace data (cannot be undone).</description>
+      <description flex="1" data-l10n-id="hilal-workspaces-reset-description"/>
       <button id="hilalWorkspacesReset"
               is="highlightable-button"
               class="accessory-button"
-              label="Reset Workspaces"/>
+              data-l10n-id="hilal-workspaces-reset-button"/>
     </hbox>
   </vbox>
 </groupbox>
 <groupbox id="hilalSidebarGroup" data-category="paneHilal" hidden="true">
-  <label><html:h2>Sidebar Options</html:h2></label>
+  <label><html:h2 data-l10n-id="hilal-sidebar-header"/></label>
   <vbox align="start" style="margin-bottom: 16px;">
-    <description style="margin-bottom: 8px; font-weight: bold;">Standard Footer Items:</description>
+    <description style="margin-bottom: 8px; font-weight: bold;" data-l10n-id="hilal-sidebar-footer-items-label"/>
     <checkbox id="hilalSidebarFooterBookmarks"
-              label="Bookmarks"/>
+              data-l10n-id="hilal-sidebar-footer-bookmarks"/>
     <checkbox id="hilalSidebarFooterHistory"
-              label="History"/>
+              data-l10n-id="hilal-sidebar-footer-history"/>
     <checkbox id="hilalSidebarFooterPasswords"
-              label="Passwords"/>
+              data-l10n-id="hilal-sidebar-footer-passwords"/>
     <checkbox id="hilalSidebarFooterDownloads"
-              label="Downloads"/>
+              data-l10n-id="hilal-sidebar-footer-downloads"/>
     <checkbox id="hilalSidebarFooterPrivacy"
-              label="Privacy"/>
+              data-l10n-id="hilal-sidebar-footer-privacy"/>
     <checkbox id="hilalSidebarFooterSettings"
-              label="Settings"/>
+              data-l10n-id="hilal-sidebar-footer-settings"/>
   </vbox>
 
   <vbox align="start" style="border-top: 1px solid var(--in-content-border-color); padding-top: 16px; margin-top: 8px;" flex="1">
-    <description style="margin-bottom: 8px; font-weight: bold;">Custom Sidebar Shortcuts:</description>
-    <description style="margin-bottom: 8px; font-size: 0.9em; opacity: 0.85;">Add your own custom pages, bookmarks, or external links to the sidebar footer.</description>
+    <description style="margin-bottom: 8px; font-weight: bold;" data-l10n-id="hilal-sidebar-custom-shortcuts-label"/>
+    <description style="margin-bottom: 8px; font-size: 0.9em; opacity: 0.85;" data-l10n-id="hilal-sidebar-custom-shortcuts-desc"/>
     
     <richlistbox id="hilalSidebarCustomList" style="height: 120px; width: 100%; min-width: 400px; margin-bottom: 10px;">
     </richlistbox>
@@ -59,11 +59,11 @@
       <button id="hilalSidebarCustomAdd"
               is="highlightable-button"
               class="accessory-button"
-              label="Add Shortcut"/>
+              data-l10n-id="hilal-sidebar-custom-add"/>
       <button id="hilalSidebarCustomRemove"
               is="highlightable-button"
               class="accessory-button"
-              label="Remove Selected"
+              data-l10n-id="hilal-sidebar-custom-remove"
               disabled="true"/>
     </hbox>
 
@@ -75,23 +75,23 @@
         </columns>
         <rows>
           <row align="center" style="margin-bottom: 8px;">
-            <label value="Name:"/>
-            <html:input id="hilalSidebarCustomName" type="text" placeholder="e.g. My Workspace or Hacker News"/>
+            <label data-l10n-id="hilal-sidebar-custom-name-label"/>
+            <html:input id="hilalSidebarCustomName" type="text" data-l10n-id="hilal-sidebar-custom-name-placeholder"/>
           </row>
           <row align="center" style="margin-bottom: 8px;">
-            <label value="URL:"/>
-            <html:input id="hilalSidebarCustomUrl" type="text" placeholder="e.g. https://news.ycombinator.com or about:logins"/>
+            <label data-l10n-id="hilal-sidebar-custom-url-label"/>
+            <html:input id="hilalSidebarCustomUrl" type="text" data-l10n-id="hilal-sidebar-custom-url-placeholder"/>
           </row>
           <row align="center" style="margin-bottom: 8px;">
-            <label value="Icon:"/>
+            <label data-l10n-id="hilal-sidebar-custom-icon-label"/>
             <html:select id="hilalSidebarCustomIcon" style="padding: 4px; border-radius: 4px; border: 1px solid var(--in-content-border-color); background: var(--in-content-button-background); color: inherit;">
-              <html:option value="link">Globe/Link (Default)</html:option>
-              <html:option value="bookmark">Bookmark</html:option>
-              <html:option value="history">History</html:option>
-              <html:option value="key">Key (Password)</html:option>
-              <html:option value="downloads">Download</html:option>
-              <html:option value="shield">Shield (Privacy)</html:option>
-              <html:option value="settings">Settings</html:option>
+              <html:option value="link" data-l10n-id="hilal-sidebar-custom-icon-link"/>
+              <html:option value="bookmark" data-l10n-id="hilal-sidebar-custom-icon-bookmark"/>
+              <html:option value="history" data-l10n-id="hilal-sidebar-custom-icon-history"/>
+              <html:option value="key" data-l10n-id="hilal-sidebar-custom-icon-key"/>
+              <html:option value="downloads" data-l10n-id="hilal-sidebar-custom-icon-downloads"/>
+              <html:option value="shield" data-l10n-id="hilal-sidebar-custom-icon-shield"/>
+              <html:option value="settings" data-l10n-id="hilal-sidebar-custom-icon-settings"/>
             </html:select>
           </row>
         </rows>
@@ -100,32 +100,30 @@
         <button id="hilalSidebarCustomSave"
                 is="highlightable-button"
                 class="accessory-button"
-                label="Save"/>
+                data-l10n-id="hilal-sidebar-custom-save"/>
         <button id="hilalSidebarCustomCancel"
                 is="highlightable-button"
                 class="accessory-button"
-                label="Cancel"/>
+                data-l10n-id="hilal-sidebar-custom-cancel"/>
       </hbox>
     </vbox>
   </vbox>
 </groupbox>
 
 <groupbox id="hilalPrivacyGroup" data-category="paneHilal" hidden="true">
-  <label><html:h2>Privacy Level</html:h2></label>
+  <label><html:h2 data-l10n-id="hilal-privacy-header"/></label>
   <vbox align="start">
-    <description style="margin-bottom: 8px; max-width: 720px;">
-      Hilal privacy levels are explicit hardening profiles. They do not hide your public IP address, do not replace Tor Browser, and may break sites that depend on fingerprinting surfaces, WebGL, WebRTC, persistent cookies, saved passwords, or JavaScript.
-    </description>
+    <description style="margin-bottom: 8px; max-width: 720px;" data-l10n-id="hilal-privacy-description"/>
     <radiogroup id="hilalPrivacyLevel" orient="vertical">
       <radio id="hilalPrivacyStandard"
              value="standard"
-             label="Balanced (LibreWolf-like): strict tracking protection, RFP, HTTPS-only, URL cleanup, WebGL off, reduced WebRTC exposure, cookies/cache cleared on close."/>
+             data-l10n-id="hilal-privacy-standard"/>
       <radio id="hilalPrivacyStrict"
              value="strict"
-             label="Strict: Balanced plus First Party Isolation and WebRTC disabled. Safer for privacy, more likely to break video calls and sign-in flows."/>
+             data-l10n-id="hilal-privacy-strict"/>
       <radio id="hilalPrivacyExtreme"
              value="extreme"
-             label="Maximum local hardening (not Tor): Strict plus JavaScript off, camera/microphone/location blocked, and browsing history cleared on close."/>
+             data-l10n-id="hilal-privacy-extreme"/>
     </radiogroup>
   </vbox>
 </groupbox>
@@ -134,18 +132,18 @@
   <label><html:h2 data-l10n-id="hilal-uifix-header"/></label>
   <vbox align="start">
     <checkbox id="hilalUiFixEnabled"
-              label="Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)"/>
+              data-l10n-id="hilal-uifix-enabled"/>
     <vbox id="hilalUiFixSubOptions" class="indent">
       <checkbox id="hilalUiFixConnectToWindow"
-                label="Connected Tabs (Connect tab borders to the window)"/>
+                data-l10n-id="hilal-uifix-connect-to-window"/>
       <checkbox id="hilalUiFixCompactPadding"
-                label="Compact Tab Padding (Slimmer, Lepton-style tabs)"/>
+                data-l10n-id="hilal-uifix-compact-padding"/>
       <checkbox id="hilalUiFixDynamicSeparator"
-                label="Dynamic Tab Separators"/>
+                data-l10n-id="hilal-uifix-dynamic-separator"/>
       <checkbox id="hilalUiFixBottomRounded"
-                label="Rounded Bottom Tab Corners"/>
+                data-l10n-id="hilal-uifix-bottom-rounded"/>
       <checkbox id="hilalUiFixCloseOnHover"
-                label="Show Tab Close Button Only on Hover"/>
+                data-l10n-id="hilal-uifix-close-on-hover"/>
     </vbox>
   </vbox>
 </groupbox>

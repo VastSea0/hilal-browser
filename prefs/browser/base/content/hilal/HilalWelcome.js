@@ -39,6 +39,10 @@
       description:
         "RFP, strict tracking protection, HTTPS-only, URL cleanup, WebGL off, and cookie/cache cleanup on close.",
       detail: "WebRTC stays enabled for compatibility, with local leak surfaces reduced.",
+      l10nLabel: "hilal-welcome-privacy-standard-label",
+      l10nBadge: "hilal-welcome-privacy-standard-badge",
+      l10nDesc: "hilal-welcome-privacy-standard-desc",
+      l10nDetail: "hilal-welcome-privacy-standard-detail",
     },
     {
       key: "strict",
@@ -47,6 +51,10 @@
       description:
         "Adds First Party Isolation on top of Balanced and disables WebRTC entirely.",
       detail: "Video calls and some sign-in flows may break.",
+      l10nLabel: "hilal-welcome-privacy-strict-label",
+      l10nBadge: "hilal-welcome-privacy-strict-badge",
+      l10nDesc: "hilal-welcome-privacy-strict-desc",
+      l10nDetail: "hilal-welcome-privacy-strict-detail",
     },
     {
       key: "extreme",
@@ -55,6 +63,10 @@
       description:
         "Adds JavaScript, camera, microphone, location, and history blocking on top of Strict.",
       detail: "Does not hide your IP address; many modern sites may not work as expected.",
+      l10nLabel: "hilal-welcome-privacy-extreme-label",
+      l10nBadge: "hilal-welcome-privacy-extreme-badge",
+      l10nDesc: "hilal-welcome-privacy-extreme-desc",
+      l10nDetail: "hilal-welcome-privacy-extreme-detail",
     },
   ];
 
@@ -434,11 +446,11 @@
         return `
           <button type="button" class="hw-privacy-choice${active ? " hw-choice-active" : ""}" data-privacy-level="${level.key}" aria-pressed="${active}">
             <span class="hw-privacy-header">
-              <span class="hw-privacy-title">${level.label}</span>
-              <span class="hw-pill">${level.badge}</span>
+              <span class="hw-privacy-title" data-l10n-id="${level.l10nLabel}">${level.label}</span>
+              <span class="hw-pill" data-l10n-id="${level.l10nBadge}">${level.badge}</span>
             </span>
-            <span class="hw-privacy-desc">${level.description}</span>
-            <span class="hw-privacy-detail">${level.detail}</span>
+            <span class="hw-privacy-desc" data-l10n-id="${level.l10nDesc}">${level.description}</span>
+            <span class="hw-privacy-detail" data-l10n-id="${level.l10nDetail}">${level.detail}</span>
             <span class="hw-choice-check hw-icon hw-icon-check"></span>
           </button>
         `;
