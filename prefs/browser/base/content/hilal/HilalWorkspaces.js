@@ -7,6 +7,15 @@
 (function () {
   "use strict";
 
+  let PlacesUtils;
+  try {
+    PlacesUtils = ChromeUtils.importESModule(
+      "resource://gre/modules/PlacesUtils.sys.mjs"
+    ).PlacesUtils;
+  } catch (e) {
+    // ignore
+  }
+
   const PREF_DATA = "hilal.workspaces.data";
   const PREF_ACTIVE = "hilal.workspaces.active";
   const PREF_ENABLED = "hilal.workspaces.enabled";
@@ -434,12 +443,109 @@
       }
     }
 
+    async _ensureWorkspaceBookmarksFolders() {
+      if (!PlacesUtils) {
+        return false;
+      }
+      let changed = false;
+      for (const workspace of this._workspaces) {
+        if (workspace.id === DEFAULT_WORKSPACE_ID) {
+          workspace.bookmarkFolderGuid = PlacesUtils.bookmarks.toolbarGuid;
+          continue;
+        }
+
+        let folderExists = false;
+        if (workspace.bookmarkFolderGuid) {
+          try {
+            let folder = await PlacesUtils.bookmarks.fetch(workspace.bookmarkFolderGuid);
+            if (folder && folder.type === PlacesUtils.bookmarks.TYPE_FOLDER) {
+              folderExists = true;
+              if (folder.title !== workspace.name) {
+                await PlacesUtils.bookmarks.update({
+                  guid: workspace.bookmarkFolderGuid,
+                  title: workspace.name,
+                });
+              }
+            }
+          } catch (e) {
+            // folder might have been deleted manually
+          }
+        }
+
+        if (!folderExists) {
+          try {
+            let folder = await PlacesUtils.bookmarks.insert({
+              type: PlacesUtils.bookmarks.TYPE_FOLDER,
+              parentGuid: PlacesUtils.bookmarks.toolbarGuid,
+              title: workspace.name,
+            });
+            workspace.bookmarkFolderGuid = folder.guid;
+            changed = true;
+          } catch (e) {
+            this._warn(`failed to create bookmark folder for ${workspace.name}`, e);
+          }
+        }
+      }
+      return changed;
+    }
+
+    _applyBookmarksToolbar() {
+      if (!PlacesUtils) {
+        return;
+      }
+      const activeWorkspace = this._getWorkspaceById(this._activeId);
+      if (!activeWorkspace) {
+        return;
+      }
+      const folderGuid = activeWorkspace.bookmarkFolderGuid || PlacesUtils.bookmarks.toolbarGuid;
+      const placeUrl = `place:parent=${folderGuid}`;
+
+      let placesToolbar = document.getElementById("PlacesToolbar");
+      if (placesToolbar && placesToolbar._placesView) {
+        if (placesToolbar._placesView.place !== placeUrl) {
+          placesToolbar._placesView.place = placeUrl;
+        }
+      }
+    }
+
+    _recordVisitedHost(workspaceId, host) {
+      if (!workspaceId || !host) {
+        return;
+      }
+      try {
+        const prefName = "hilal.workspaces.host_mapping";
+        let mapping = {};
+        try {
+          const raw = Services.prefs.getStringPref(prefName, "{}");
+          mapping = JSON.parse(raw);
+        } catch (e) {
+          // ignore
+        }
+        if (!mapping[host]) {
+          mapping[host] = [];
+        }
+        if (!mapping[host].includes(workspaceId)) {
+          mapping[host].push(workspaceId);
+          Services.prefs.setStringPref(prefName, JSON.stringify(mapping));
+        }
+      } catch (e) {
+        this._warn("failed to record visited host", e);
+      }
+    }
+
     init() {
       this._loadData();
       this._enabled = Services.prefs.getBoolPref(PREF_ENABLED, true);
       this._applyPrivacyLevel();
       this._hookEvents();
       this._apply();
+
+      this._ensureWorkspaceBookmarksFolders().then(changed => {
+        if (changed) {
+          this._saveData();
+        }
+        this._applyBookmarksToolbar();
+      }).catch(err => this._warn("failed to initialize bookmarks folders", err));
 
       this._tryBuildSidebarUI();
 
@@ -568,6 +674,16 @@
       this._tabsProgressListener = {
         onLocationChange: (browser, _webProgress, _request, locationURI) => {
           this._maybeHandleAboutWelcome(browser, locationURI);
+
+          if (locationURI && (locationURI.scheme === "http" || locationURI.scheme === "https")) {
+            let tab = gBrowser.getTabForBrowser(browser);
+            if (tab) {
+              let workspaceId = this._getTabWorkspace(tab);
+              if (workspaceId && locationURI.host) {
+                this._recordVisitedHost(workspaceId, locationURI.host);
+              }
+            }
+          }
         },
       };
       gBrowser.addTabsProgressListener(this._tabsProgressListener);
@@ -1074,6 +1190,8 @@
           group.setAttribute("hidden", "true");
         }
       }
+
+      this._applyBookmarksToolbar();
     }
 
     switchTo(id) {
@@ -1180,6 +1298,38 @@
         this._saveActive();
       }
       this._removeWorkspaceContainer(workspace);
+
+      // Clean up Bookmark folder
+      if (workspace.bookmarkFolderGuid && PlacesUtils) {
+        PlacesUtils.bookmarks.remove(workspace.bookmarkFolderGuid).catch(err => {
+          this._warn(`failed to remove bookmark folder on deletion for ${workspace.name}`, err);
+        });
+      }
+
+      // Clean up host mappings from preference
+      try {
+        const prefName = "hilal.workspaces.host_mapping";
+        const raw = Services.prefs.getStringPref(prefName, "{}");
+        let mapping = JSON.parse(raw);
+        let mappingChanged = false;
+        for (let host of Object.keys(mapping)) {
+          let idx = mapping[host].indexOf(id);
+          if (idx !== -1) {
+            mapping[host].splice(idx, 1);
+            mappingChanged = true;
+          }
+          if (mapping[host].length === 0) {
+            delete mapping[host];
+            mappingChanged = true;
+          }
+        }
+        if (mappingChanged) {
+          Services.prefs.setStringPref(prefName, JSON.stringify(mapping));
+        }
+      } catch (e) {
+        this._warn("failed to clean up host mapping on deletion", e);
+      }
+
       this._saveData();
       this._updateUI();
       this._apply();

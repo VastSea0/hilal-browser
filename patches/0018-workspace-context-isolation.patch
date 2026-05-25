@@ -1,0 +1,72 @@
+diff --git a/browser/base/content/browser-places.js b/browser/base/content/browser-places.js
+index d60c82bcc8f5..30d9b2a4a47c 100644
+--- a/browser/base/content/browser-places.js
++++ b/browser/base/content/browser-places.js
+@@ -1114,8 +1114,21 @@ var PlacesToolbarHelper = {
+       return;
+     }
+ 
++    let initialPlace = `place:parent=${PlacesUtils.bookmarks.toolbarGuid}`;
++    try {
++      let activeWorkspaceId = Services.prefs.getStringPref("hilal.workspaces.active", "default");
++      let rawData = Services.prefs.getStringPref("hilal.workspaces.data", "[]");
++      let workspaces = JSON.parse(rawData);
++      let activeWs = workspaces.find(w => w.id === activeWorkspaceId);
++      if (activeWs && activeWs.bookmarkFolderGuid) {
++        initialPlace = `place:parent=${activeWs.bookmarkFolderGuid}`;
++      }
++    } catch (e) {
++      // fallback to default
++    }
++
+     new PlacesToolbar(
+-      `place:parent=${PlacesUtils.bookmarks.toolbarGuid}`,
++      initialPlace,
+       document.getElementById("PlacesToolbarItems"),
+       viewElt
+     );
+diff --git a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs b/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
+index 16041c10755a..c95b3b2f97a0 100644
+--- a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
++++ b/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
+@@ -729,6 +729,40 @@ class MuxerUnifiedComplete extends UrlbarMuxer {
+   // error or increase the complexity threshold.
+   // eslint-disable-next-line complexity
+   _canAddResult(result, state) {
++    // Hilal Browser: Workspace Context Isolation
++    if (result.payload && result.payload.url) {
++      try {
++        let activeWorkspace = Services.prefs.getStringPref("hilal.workspaces.active", "default");
++        let mappingPref = Services.prefs.getStringPref("hilal.workspaces.host_mapping", "{}");
++        let mapping = JSON.parse(mappingPref);
++        
++        let url = new URL(result.payload.url);
++        let host = url.hostname;
++        if (host) {
++          let current = host;
++          let isFiltered = false;
++          while (current) {
++            if (mapping[current]) {
++              if (!mapping[current].includes(activeWorkspace)) {
++                isFiltered = true;
++              }
++              break;
++            }
++            let nextDot = current.indexOf(".");
++            if (nextDot === -1) {
++              break;
++            }
++            current = current.substring(nextDot + 1);
++          }
++          if (isFiltered) {
++            return false;
++          }
++        }
++      } catch (e) {
++        // ignore invalid/unparseable URLs
++      }
++    }
++
+     // Typically the first visible Suggest result is always added.
+     if (result.providerName == lazy.UrlbarProviderQuickSuggest.name) {
+       if (result.isHiddenExposure) {
