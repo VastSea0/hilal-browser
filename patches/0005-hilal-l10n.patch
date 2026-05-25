@@ -149,7 +149,7 @@ index 93e4f9600c20..839c1bb22f9f 100644
 +    .label = Settings
 +
 +hilal-sidebar-custom-shortcuts-label = Custom Sidebar Shortcuts:
-+hilal-sidebar-custom-shortcuts-desc = Add your own custom pages, bookmarks, or external links to the sidebar footer.
++hilal-sidebar-custom-shortcuts-desc = Add custom pages, bookmarks, or external links to the sidebar footer. Hilal shows favicons from Firefox's favicon cache for web links; it does not contact a site just to fetch its icon.
 +hilal-sidebar-custom-add =
 +    .label = Add Shortcut
 +hilal-sidebar-custom-remove =
