@@ -466,7 +466,13 @@
     init() {
       this._loadData();
       this._enabled = Services.prefs.getBoolPref(PREF_ENABLED, true);
-      this._applyPrivacyLevel();
+
+      const initializedPref = "hilal.privacy.initialized";
+      if (!Services.prefs.getBoolPref(initializedPref, false)) {
+        this._applyPrivacyLevel();
+        Services.prefs.setBoolPref(initializedPref, true);
+      }
+
       this._hookEvents();
       this._apply();
 
@@ -973,8 +979,10 @@
             state.userContextId = targetUserContextId;
             state.pinned = false;
             state.hidden = false;
-            delete state.groupId;
-            delete state.splitViewId;
+            if (workspaceId !== this._activeId) {
+              delete state.groupId;
+              delete state.splitViewId;
+            }
             state.extData = state.extData || {};
             state.extData[STORE_KEY] = workspaceId;
             if (sourceWasPinned) {
