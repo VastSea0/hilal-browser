@@ -10,6 +10,7 @@
 #
 # Usage:
 #   scripts/setup-firefox.sh              # clone if missing, fetch if present
+#   scripts/setup-firefox.sh --fast       # optimize clone speed using blobless partial clone (Highly Recommended)
 #   scripts/setup-firefox.sh --pull       # also fast-forward main
 
 set -euo pipefail
@@ -19,11 +20,14 @@ set -euo pipefail
 
 UPSTREAM_URL="${HILAL_FIREFOX_UPSTREAM:-https://github.com/mozilla-firefox/firefox.git}"
 DO_PULL=0
+FAST_CLONE=0
+
 for arg in "$@"; do
   case "$arg" in
     --pull) DO_PULL=1 ;;
+    -f|--fast) FAST_CLONE=1 ;;
     -h|--help)
-      sed -n '2,12p' "$0"
+      sed -n '2,13p' "$0"
       exit 0
       ;;
     *) die "Unknown argument: $arg" ;;
@@ -33,12 +37,26 @@ done
 if [ ! -d "$HILAL_FIREFOX_SRC/.git" ]; then
   log "Cloning Firefox from $UPSTREAM_URL"
   log "  destination: $HILAL_FIREFOX_SRC"
-  log "  this may take a long time (~5+ GB)..."
-  git clone "$UPSTREAM_URL" "$HILAL_FIREFOX_SRC"
+  
+  CLONE_ARGS=()
+  if [ "$FAST_CLONE" = 1 ]; then
+    log "  mode: FAST (blobless partial clone activated)"
+    CLONE_ARGS+=("--filter=blob:none")
+  else
+    log "  this may take a long time (~5+ GB)..."
+  fi
+
+  git clone "${CLONE_ARGS[@]}" "$UPSTREAM_URL" "$HILAL_FIREFOX_SRC"
 else
   log "Firefox checkout already present at $HILAL_FIREFOX_SRC"
   log "Fetching upstream..."
-  git -C "$HILAL_FIREFOX_SRC" fetch origin
+  
+  FETCH_ARGS=()
+  if [ "$FAST_CLONE" = 1 ]; then
+    FETCH_ARGS+=("--filter=blob:none")
+  fi
+  
+  git -C "$HILAL_FIREFOX_SRC" fetch "${FETCH_ARGS[@]}" origin
 fi
 
 if [ "$DO_PULL" = 1 ]; then
