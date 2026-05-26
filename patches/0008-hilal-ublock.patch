@@ -26,12 +26,11 @@ diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
 index b890e0f7917d..f4305ea69206 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
-@@ -57,9 +57,9 @@ pref("extensions.systemAddon.update.enabled", true);
+@@ -57,7 +57,7 @@ pref("extensions.systemAddon.update.enabled", true);
  
  // Disable add-ons that are not installed by the user in all scopes by default.
  // See the SCOPE constants in AddonManager.sys.mjs for values to use here.
--pref("extensions.autoDisableScopes", 15);
-+pref("extensions.autoDisableScopes", 0);
+ pref("extensions.autoDisableScopes", 15);
  // Scopes to scan for changes at startup.
 -pref("extensions.startupScanScopes", 0);
 +pref("extensions.startupScanScopes", 8);
