@@ -1,35 +1,21 @@
 Hilal Browser: integrate Firefox-UI-Fix with dynamic settings UI
 
-Integrates Firefox-UI-Fix by @black7375 as a built-in default feature.
-Provides a master toggle in about:preferences under the Hilal Browser category
-along with nested sub-toggles to enable/disable specific elements of the theme
-(Connected Tabs, Compact Padding, Dynamic Tab Separators, Bottom Rounded Tab Corners,
-and Close Button only on Hover).
-
-All preference binds handle preference updates dynamically at runtime without
-requiring a browser restart.
-
 ---
 
-diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
-index b890e0f7917d..b631daa972a2 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
-@@ -3600,3 +3600,98 @@ pref("browser.contentsharing.newBadge.enabled", true);
+@@ -3615,3 +3615,92 @@
  
  // When enabled, Firefox ignores the distribution.ini file if global.id is MozillaOnline.
- pref("distribution.mozillaonline.ignore", false);
-+
+ pref("distribution.mozillaonline.ignore", true);
 +// Hilal Browser - UI Fix Integration
 +pref("hilal.uifix.enabled", true);
-+
 +// Theme Default Options
 +pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 +pref("svg.context-properties.content.enabled", true);
 +pref("browser.compactmode.show", true);
 +pref("browser.newtabpage.activity-stream.improvesearch.handoffToAwesomebar", false);
 +pref("layout.css.has-selector.enabled", true);
-+
 +// Theme Related Options
 +pref("userChrome.tab.connect_to_window", true);
 +pref("userChrome.tab.color_like_toolbar", true);
@@ -48,7 +34,6 @@ index b890e0f7917d..b631daa972a2 100644
 +pref("userChrome.tab.bottom_rounded_corner", true);
 +pref("userChrome.tab.photon_like_contextline", false);
 +pref("userChrome.rounding.square_tab", false);
-+
 +// Theme Default Settings
 +pref("userChrome.compatibility.theme", true);
 +pref("userChrome.compatibility.os", true);
@@ -92,7 +77,6 @@ index b890e0f7917d..b631daa972a2 100644
 +pref("userChrome.icon.global_menu", true);
 +pref("userChrome.icon.global_menubar", true);
 +pref("userChrome.icon.1-25px_stroke", true);
-+
 +// User Content
 +pref("userContent.player.ui", true);
 +pref("userContent.player.icon", true);
@@ -109,15 +93,14 @@ index b890e0f7917d..b631daa972a2 100644
 +pref("userContent.page.proton_color", true);
 +pref("userContent.page.dark_mode", true);
 +pref("userContent.page.proton", true);
-+
 +// Useful Options
 +pref("browser.tabs.hoverPreview.enabled", true);
 +pref("browser.urlbar.clipboard.featureGate", true);
 +pref("browser.urlbar.suggest.calculator", true);
-diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -1919,4 +1919,148 @@ var gHilalPane = {
+@@ -1881,6 +1881,150 @@
+         }
        }
      });
 +
@@ -267,8 +250,6 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
    },
  };
  
-diff --git a/browser/themes/shared/browser-shared.css b/browser/themes/shared/browser-shared.css
-index db0d3ee8234c..e004a2d29dc8 100644
 --- a/browser/themes/shared/browser-shared.css
 +++ b/browser/themes/shared/browser-shared.css
 @@ -4,6 +4,7 @@
@@ -279,15 +260,12 @@ index db0d3ee8234c..e004a2d29dc8 100644
  @import url("chrome://browser/skin/addons/extension-controlled.css");
  @import url("chrome://browser/skin/addons/unified-extensions.css");
  @import url("chrome://browser/skin/downloads/indicator.css");
-diff --git a/browser/themes/shared/jar.inc.mn b/browser/themes/shared/jar.inc.mn
-index 70529f99b979..9cfc1b234e3c 100644
 --- a/browser/themes/shared/jar.inc.mn
 +++ b/browser/themes/shared/jar.inc.mn
-@@ -352,3 +352,208 @@
- 
+@@ -355,3 +355,207 @@
    skin/classic/browser/illustrations/market-opt-in.svg         (../shared/illustrations/market-opt-in.svg)
+   skin/classic/browser/illustrations/tab-groups.svg            (../shared/illustrations/tab-groups.svg)
    skin/classic/browser/illustrations/yelpRealtime-opt-in.svg   (../shared/illustrations/yelpRealtime-opt-in.svg)
-+
 +# Hilal UI Fix Integration
 +  skin/classic/browser/hilal-ui-fix.css                      (../shared/hilal-ui-fix.css)
 +  skin/classic/browser/icons/add-device.svg                                (../shared/icons/add-device.svg)
