@@ -1,24 +1,3 @@
-Hilal Browser: enable native blurred macOS chrome surfaces
-
-Makes Hilal top-level macOS windows non-opaque, installs a real
-macOS vibrancy surface behind the browser chrome, and removes the CSS-only
-backdrop-filter fallback that left the desktop wallpaper directly readable.
-The Hilal background element mirrors Zen Browser: the element itself is
-native-themed with -moz-sidebar so Gecko can emit sidebar theme geometry, while
-the tint is painted on pseudo-elements so native theming is not suppressed by
-author-specified backgrounds.
-
-Hilal also forces a full-window Sidebar vibrancy region from Cocoa for top-level
-windows, so toolbar and sidebar blur do not depend on the browser-box layout or
-on whether a CSS frame happened to register theme geometry. This is the actual
-NSVisualEffectView path that obscures wallpaper details.
-
-Also ports Zen Browser's WebRender opaque-backdrop fallback so CSS
-backdrop-filter surfaces remain well-defined inside transparent windows. The
-desktop/wallpaper blur itself is provided by NSVisualEffectView vibrancy, not
-by CSS opacity.
-
----
 diff --git a/browser/base/content/browser-box.inc.xhtml b/browser/base/content/browser-box.inc.xhtml
 index 31cd4f927c27..ce009eeca751 100644
 --- a/browser/base/content/browser-box.inc.xhtml
@@ -32,7 +11,7 @@ index 31cd4f927c27..ce009eeca751 100644
      <html:sidebar-main flex="1">
        <box id="vertical-tabs" slot="tabstrip" customizable="true" contextmenu="toolbar-context-menu"></box>
 diff --git a/browser/extensions/newtab/content-src/styles/activity-stream.scss b/browser/extensions/newtab/content-src/styles/activity-stream.scss
-index 4ac1348a809a..7122d586e50a 100644
+index 75f51313796d..8cd23ecd6023 100644
 --- a/browser/extensions/newtab/content-src/styles/activity-stream.scss
 +++ b/browser/extensions/newtab/content-src/styles/activity-stream.scss
 @@ -42,6 +42,23 @@ body {
@@ -60,7 +39,7 @@ index 4ac1348a809a..7122d586e50a 100644
  h2 {
    font-weight: var(--font-weight);
 diff --git a/browser/extensions/newtab/css/activity-stream.css b/browser/extensions/newtab/css/activity-stream.css
-index ab4d30c3c1b4..2565cb9e6531 100644
+index 82deb3e57083..39b9a48bb372 100644
 --- a/browser/extensions/newtab/css/activity-stream.css
 +++ b/browser/extensions/newtab/css/activity-stream.css
 @@ -338,6 +338,21 @@ body {
@@ -86,7 +65,7 @@ index ab4d30c3c1b4..2565cb9e6531 100644
  h2 {
    font-weight: var(--font-weight);
 diff --git a/browser/themes/shared/browser-colors.css b/browser/themes/shared/browser-colors.css
-index 3022f907be0e..ebd15eb9b91c 100644
+index 73becdf3f864..7540ee375ceb 100644
 --- a/browser/themes/shared/browser-colors.css
 +++ b/browser/themes/shared/browser-colors.css
 @@ -37,6 +37,26 @@
@@ -113,15 +92,14 @@ index 3022f907be0e..ebd15eb9b91c 100644
 +    --content-area-shadow: var(--hilal-glass-shadow);
 +  }
 +
-   /* stylelint-disable-next-line media-query-no-invalid */
    @media not -moz-pref("sidebar.revamp"), -moz-pref("browser.nova.enabled") {
      &:not([lwtheme]) {
+       --chrome-content-separator-color: ThreeDShadow;
 diff --git a/browser/themes/shared/browser-shared.css b/browser/themes/shared/browser-shared.css
-index f38e980ba766..51646d9bac07 100644
+index fbc709b2bee4..433b689a39ba 100644
 --- a/browser/themes/shared/browser-shared.css
 +++ b/browser/themes/shared/browser-shared.css
-@@ -58,8 +58,8 @@ body {
-   }
+@@ -58,7 +58,7 @@ body {
  
    user-select: none;
    color-scheme: light dark;
@@ -130,7 +108,7 @@ index f38e980ba766..51646d9bac07 100644
    /* Minimum sizing comes from specific size requirements and adds on other
     * values for different scenarios that don't lend themselves to design tokens. */
    /* stylelint-disable-next-line stylelint-plugin-mozilla/use-design-tokens */
-@@ -248,6 +248,92 @@ body {
+@@ -294,6 +294,92 @@ body {
    }
  }
  
@@ -220,14 +198,14 @@ index f38e980ba766..51646d9bac07 100644
 +  }
 +}
 +
- /* stylelint-disable-next-line media-query-no-invalid */
- @media -moz-pref("browser.nova.enabled") {
-   .chrome-block {
+ /* Images go on the body by default, unless they are aligned in the y axis in
+  * which case they go on the toolbox for backwards compatibility */
+ :root:not([lwtheme-image-y-align]) body,
 diff --git a/browser/themes/shared/sidebar.css b/browser/themes/shared/sidebar.css
-index 90e6bf90ff2f..d4e5f2d00d35 100644
+index 910b7f6c99c7..c29b18e0abaf 100644
 --- a/browser/themes/shared/sidebar.css
 +++ b/browser/themes/shared/sidebar.css
-@@ -236,6 +236,25 @@
+@@ -224,6 +224,25 @@
    min-width: 16em;
  }
  
@@ -254,10 +232,10 @@ index 90e6bf90ff2f..d4e5f2d00d35 100644
    display: none;
  }
 diff --git a/browser/themes/shared/tabbrowser/content-area.css b/browser/themes/shared/tabbrowser/content-area.css
-index 522c1f35f50e..b414289e9cc5 100644
+index d3ee5780395f..26ff7f0b8c54 100644
 --- a/browser/themes/shared/tabbrowser/content-area.css
 +++ b/browser/themes/shared/tabbrowser/content-area.css
-@@ -23,6 +23,12 @@
+@@ -22,6 +22,12 @@
        --tabpanel-background-color: linear-gradient(45deg, #722291 0%, #45278d 50%, #393473 100%) !important;
      }
    }
@@ -269,8 +247,8 @@ index 522c1f35f50e..b414289e9cc5 100644
 +  }
  }
  
- /* stylelint-disable-next-line media-query-no-invalid */
-@@ -204,6 +210,40 @@
+ @media -moz-pref("browser.nova.enabled") {
+@@ -193,6 +199,40 @@
    }
  }
  
@@ -312,7 +290,7 @@ index 522c1f35f50e..b414289e9cc5 100644
    position: absolute;
    inset: 0;
 diff --git a/gfx/webrender_bindings/WebRenderAPI.cpp b/gfx/webrender_bindings/WebRenderAPI.cpp
-index 1ffce6399075..13de395ed9f1 100644
+index f27a998300c8..0d495caddd92 100644
 --- a/gfx/webrender_bindings/WebRenderAPI.cpp
 +++ b/gfx/webrender_bindings/WebRenderAPI.cpp
 @@ -300,7 +300,9 @@ RefPtr<WebRenderAPI::CreatePromise> WebRenderAPI::Create(
@@ -327,10 +305,10 @@ index 1ffce6399075..13de395ed9f1 100644
            // false
            MOZ_ASSERT(errorMessage);
 diff --git a/gfx/webrender_bindings/src/bindings.rs b/gfx/webrender_bindings/src/bindings.rs
-index 2280364f6839..5d86cac2e881 100644
+index d3a3874d9223..1db2579321e5 100644
 --- a/gfx/webrender_bindings/src/bindings.rs
 +++ b/gfx/webrender_bindings/src/bindings.rs
-@@ -2000,6 +2000,7 @@ pub extern "C" fn wr_window_new(
+@@ -1997,6 +1997,7 @@ pub extern "C" fn wr_window_new(
      max_shared_surface_size: i32,
      enable_subpixel_aa: bool,
      use_layer_compositor: bool,
@@ -338,7 +316,7 @@ index 2280364f6839..5d86cac2e881 100644
  ) -> bool {
      assert!(unsafe { is_in_render_thread() });
  
-@@ -2166,6 +2167,7 @@ pub extern "C" fn wr_window_new(
+@@ -2163,6 +2164,7 @@ pub extern "C" fn wr_window_new(
          low_quality_pinch_zoom,
          max_shared_surface_size,
          enable_dithering,
@@ -431,10 +409,10 @@ index 7fe112859d2b..7128b8f4846f 100644
          }
      }
 diff --git a/modules/libpref/init/StaticPrefList.yaml b/modules/libpref/init/StaticPrefList.yaml
-index 9a52bd957643..98f9d01bbaac 100644
+index 38d05e9bba39..c58236a154f4 100644
 --- a/modules/libpref/init/StaticPrefList.yaml
 +++ b/modules/libpref/init/StaticPrefList.yaml
-@@ -8464,6 +8464,15 @@
+@@ -8498,6 +8498,15 @@
  #endif
    mirror: once
  
@@ -450,6 +428,19 @@ index 9a52bd957643..98f9d01bbaac 100644
  # Disable wait of GPU execution completion
  - name: gfx.webrender.wait-gpu-finished.disabled
    type: bool
+diff --git a/toolkit/content/xul.css b/toolkit/content/xul.css
+index db311601fb2c..9e25b8d0471e 100644
+--- a/toolkit/content/xul.css
++++ b/toolkit/content/xul.css
+@@ -32,7 +32,7 @@
+ }
+ 
+ :root {
+-  text-rendering: optimizeLegibility;
++  text-rendering: auto;
+   -moz-control-character-visibility: visible;
+   -moz-box-collapse: legacy;
+   width: 100%;
 diff --git a/widget/cocoa/VibrancyManager.mm b/widget/cocoa/VibrancyManager.mm
 index 5df70a63afb2..2ad7425357c1 100644
 --- a/widget/cocoa/VibrancyManager.mm
@@ -464,7 +455,7 @@ index 5df70a63afb2..2ad7425357c1 100644
        return NSVisualEffectMaterialTitlebar;
    }
 diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
-index 0e2fa0c1c0f7..28bd95d5ddf0 100644
+index 30423bbd9f0f..5683c78d9579 100644
 --- a/widget/cocoa/nsCocoaWindow.mm
 +++ b/widget/cocoa/nsCocoaWindow.mm
 @@ -1267,6 +1267,10 @@ static void MakeRegionsNonOverlapping(Span<LayoutDeviceIntRegion> aRegions) {
@@ -478,7 +469,7 @@ index 0e2fa0c1c0f7..28bd95d5ddf0 100644
    MakeRegionsNonOverlapping(regions);
  
    auto& vm = EnsureVibrancyManager();
-@@ -5105,8 +5109,11 @@ static unsigned int WindowMaskForBorderStyle(BorderStyle aBorderStyle) {
+@@ -5200,8 +5204,11 @@ static unsigned int WindowMaskForBorderStyle(BorderStyle aBorderStyle) {
      mWindow.collectionBehavior = mWindow.collectionBehavior |
                                   NSWindowCollectionBehaviorMoveToActiveSpace;
    } else {
@@ -492,7 +483,7 @@ index 0e2fa0c1c0f7..28bd95d5ddf0 100644
    }
  
    if (mAlwaysOnTop || mIsAlert) {
-@@ -5620,7 +5627,9 @@ static void SyncPopoverBounds(NSPopover* aPopover,
+@@ -5726,7 +5733,9 @@ static void SyncPopoverBounds(NSPopover* aPopover,
      return;
    }
  
@@ -503,15 +494,3 @@ index 0e2fa0c1c0f7..28bd95d5ddf0 100644
    BOOL currentTransparency = !mWindow.isOpaque;
    if (isTransparent == currentTransparency) {
      return;
-diff --git a/toolkit/content/xul.css b/toolkit/content/xul.css
---- a/toolkit/content/xul.css
-+++ b/toolkit/content/xul.css
-@@ -32,7 +32,7 @@
- }
- 
- :root {
--  text-rendering: optimizeLegibility;
-+  text-rendering: auto;
-   -moz-control-character-visibility: visible;
-   -moz-box-collapse: legacy;
-   width: 100%;
