@@ -252,4 +252,9 @@ else
   log "uBlock Origin v${UBO_VERSION} is already present and verified."
 fi
 
+# -- 5. Patch Turkish language pack with custom strings ---------------------
+python3 "$HILAL_REPO_ROOT/scripts/patch-langpack.py" "$HILAL_REPO_ROOT" "$HILAL_FIREFOX_SRC"
+
 log "All Hilal changes applied. Build with: scripts/build-macos.sh"
+
+
