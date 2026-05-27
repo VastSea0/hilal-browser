@@ -29,7 +29,7 @@ diff --git a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs b/browser/com
 index 16041c10755a..c95b3b2f97a0 100644
 --- a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
 +++ b/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
-@@ -729,6 +729,44 @@ class MuxerUnifiedComplete extends UrlbarMuxer {
+@@ -729,6 +729,50 @@ class MuxerUnifiedComplete extends UrlbarMuxer {
    // error or increase the complexity threshold.
    // eslint-disable-next-line complexity
    _canAddResult(result, state) {
@@ -37,8 +37,14 @@ index 16041c10755a..c95b3b2f97a0 100644
 +    if (result.payload && result.payload.url) {
 +      try {
 +        if (state._hilalActiveWorkspace === undefined) {
-+          state._hilalActiveWorkspace = Services.prefs.getStringPref("hilal.workspaces.active", "default");
-+          let mappingPref = Services.prefs.getStringPref("hilal.workspaces.host_mapping", "{}");
++          state._hilalActiveWorkspace = Services.prefs.getStringPref(
++            "hilal.workspaces.active",
++            "default"
++          );
++          let mappingPref = Services.prefs.getStringPref(
++            "hilal.workspaces.host_mapping",
++            "{}"
++          );
 +          state._hilalMapping = JSON.parse(mappingPref);
 +        }
 +        let activeWorkspace = state._hilalActiveWorkspace;
