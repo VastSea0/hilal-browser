@@ -76,6 +76,7 @@ venv/
 # === Scratch / artifacts ====================================================
 artifacts/
 tmp/
+scratch/
 *.log
 *.rej
 *.orig

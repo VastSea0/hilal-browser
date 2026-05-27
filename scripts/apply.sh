@@ -172,7 +172,7 @@ if [ -d "$HILAL_REPO_ROOT/prefs" ] && [ "$(find "$HILAL_REPO_ROOT/prefs" -type f
   # path in the Firefox source. Subdirectories under prefs/ mirror the tree.
   (
     cd "$HILAL_REPO_ROOT/prefs"
-    find . -type f ! -name '.DS_Store' ! -name '.gitkeep' -print0 | while IFS= read -r -d '' rel; do
+    find . -type f ! -path './browser/locales/*' ! -name '.DS_Store' ! -name '.gitkeep' -print0 | while IFS= read -r -d '' rel; do
       rel="${rel#./}"
       dst="$HILAL_FIREFOX_SRC/$rel"
       mkdir -p "$(dirname "$dst")"
@@ -252,8 +252,8 @@ else
   log "uBlock Origin v${UBO_VERSION} is already present and verified."
 fi
 
-# -- 5. Patch bundled language packs with Hilal branding and strings --------
-python3 "$HILAL_REPO_ROOT/scripts/patch-langpack.py" "$HILAL_REPO_ROOT" "$HILAL_FIREFOX_SRC"
+# -- 5. Merge Hilal custom Turkish translations into local source tree -------
+python3 "$HILAL_REPO_ROOT/scripts/merge-locales.py" "$HILAL_REPO_ROOT" "$HILAL_FIREFOX_SRC"
 
 log "All Hilal changes applied. Build with: scripts/build-macos.sh"
 
