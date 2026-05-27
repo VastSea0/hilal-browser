@@ -1,1 +1,6 @@
 . "$topsrcdir/../mozconfigs/base"
+
+# Enable sccache for compiler caching if installed
+if which sccache >/dev/null 2>&1; then
+  ac_add_options --with-ccache=sccache
+fi
