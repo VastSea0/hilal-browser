@@ -2,7 +2,10 @@
 hilal-sidebar-open-tabs = Açık Sekmeler
 hilal-sidebar-bookmarks = Yer İmleri
 hilal-sidebar-passwords = Parolalar
-hilal-sidebar-new-tab = Yeni Sekme
+hilal-sidebar-new-tab =
+    .title = Yeni Sekme
+    .aria-label = Yeni Sekme
+hilal-sidebar-new-tab-label = Yeni Sekme
 hilal-sidebar-history = Geçmiş
 hilal-sidebar-downloads = İndirmeler
 hilal-sidebar-privacy = Gizlilik Raporu

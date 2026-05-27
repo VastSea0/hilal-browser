@@ -1069,10 +1069,10 @@ index d3178e9eb6e3..1c42cd38db97 100644
        this._box.setAttribute("checked", "true");
        this._state.command = commandID;
 diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
-index a8369dde37e3..d89f237f3f54 100644
+index a8369dde37e3..74f7831fe263 100644
 --- a/browser/components/sidebar/sidebar-main.css
 +++ b/browser/components/sidebar/sidebar-main.css
-@@ -17,6 +17,525 @@
+@@ -17,6 +17,520 @@
    width: 100%;
  }
  
@@ -1362,15 +1362,6 @@ index a8369dde37e3..d89f237f3f54 100644
 +  flex: 0 0 auto;
 +}
 +
-+.hilal-pinned-heading {
-+  color: var(--hilal-sidebar-muted);
-+  font-size: 11px;
-+  font-weight: 800;
-+  min-block-size: 18px;
-+  letter-spacing: 0.5px;
-+  text-transform: uppercase;
-+}
-+
 +.hilal-pinned-grid {
 +  display: grid;
 +  grid-template-columns: repeat(3, 1fr);
@@ -1414,11 +1405,15 @@ index a8369dde37e3..d89f237f3f54 100644
 +}
 +
 +.hilal-pinned-favicon {
-+  block-size: 24px;
-+  inline-size: 24px;
++  block-size: 36px;
++  inline-size: 36px;
 +  object-fit: contain;
-+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
++  filter: drop-shadow(0 1.5px 3px rgba(0, 0, 0, 0.15));
 +  pointer-events: none;
++}
++
++.hilal-pinned-card .hilal-tab-loading {
++  transform: scale(0.8);
 +}
 +
 +.hilal-panel-scroll {
@@ -1599,7 +1594,7 @@ index a8369dde37e3..d89f237f3f54 100644
    display: grid;
    grid-template-rows: auto min-content min-content;
 diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/sidebar/sidebar-main.mjs
-index 8acc798e5d22..6f8a9d20cddf 100644
+index 8acc798e5d22..380a4b144828 100644
 --- a/browser/components/sidebar/sidebar-main.mjs
 +++ b/browser/components/sidebar/sidebar-main.mjs
 @@ -18,8 +18,9 @@ import "chrome://browser/content/sidebar/sidebar-pins-promo.mjs";
@@ -2097,7 +2092,7 @@ index 8acc798e5d22..6f8a9d20cddf 100644
 +    return (
 +      tab.label ||
 +      tab.getAttribute("label") ||
-+      this.fluentStrings.formatValueSync("hilal-sidebar-new-tab")
++      this.fluentStrings.formatValueSync("hilal-sidebar-new-tab-label")
 +    );
 +  }
 +
@@ -2333,7 +2328,7 @@ index 8acc798e5d22..6f8a9d20cddf 100644
      if (
        window.SidebarController.sidebarRevampVisibility !== "expand-on-hover"
      ) {
-@@ -790,7 +1453,563 @@ export default class SidebarMain extends MozLitElement {
+@@ -790,7 +1453,562 @@ export default class SidebarMain extends MozLitElement {
      return container && !container.hidden;
    }
  
@@ -2763,7 +2758,6 @@ index 8acc798e5d22..6f8a9d20cddf 100644
 +                    @dragover=${event => this.handlePinnedContainerDragOver(event)}
 +                    @drop=${event => this.handlePinnedContainerDrop(event)}
 +                  >
-+                    <div class="hilal-pinned-heading">PINLENEN SEKMELER</div>
 +                    <div class="hilal-pinned-grid">
 +                      ${repeat(
 +                        this.filteredHilalPinnedTabs,
@@ -2898,10 +2892,10 @@ index 8acc798e5d22..6f8a9d20cddf 100644
      let enabledToolsAndExtensionsCount =
        this.enabledToolsAndExtensionsCount() + 1;
 diff --git a/browser/locales/en-US/browser/sidebar.ftl b/browser/locales/en-US/browser/sidebar.ftl
-index 6bd76b8607ae..0a064b88febb 100644
+index 6bd76b8607ae..809df0e9bd13 100644
 --- a/browser/locales/en-US/browser/sidebar.ftl
 +++ b/browser/locales/en-US/browser/sidebar.ftl
-@@ -251,3 +251,35 @@ sidebar-widget-hide-sidebar2 =
+@@ -251,3 +251,38 @@ sidebar-widget-hide-sidebar2 =
  # users who do not have any pinned tabs. Indicates that they can drop tabs in
  # this area to pin them.
  sidebar-pins-promo-text = Drag important tabs here to keep them within reach
@@ -2910,7 +2904,10 @@ index 6bd76b8607ae..0a064b88febb 100644
 +hilal-sidebar-open-tabs = Open Tabs
 +hilal-sidebar-bookmarks = Bookmarks
 +hilal-sidebar-passwords = Passwords
-+hilal-sidebar-new-tab = New Tab
++hilal-sidebar-new-tab =
++    .title = New Tab
++    .aria-label = New Tab
++hilal-sidebar-new-tab-label = New Tab
 +hilal-sidebar-history = History
 +hilal-sidebar-downloads = Downloads
 +hilal-sidebar-privacy = Privacy Report
