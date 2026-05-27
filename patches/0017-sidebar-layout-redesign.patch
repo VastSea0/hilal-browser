@@ -1594,7 +1594,7 @@ index a8369dde37e3..74f7831fe263 100644
    display: grid;
    grid-template-rows: auto min-content min-content;
 diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/sidebar/sidebar-main.mjs
-index 8acc798e5d22..380a4b144828 100644
+index 8acc798e5d22..8cef14374c85 100644
 --- a/browser/components/sidebar/sidebar-main.mjs
 +++ b/browser/components/sidebar/sidebar-main.mjs
 @@ -18,8 +18,9 @@ import "chrome://browser/content/sidebar/sidebar-pins-promo.mjs";
@@ -2328,7 +2328,7 @@ index 8acc798e5d22..380a4b144828 100644
      if (
        window.SidebarController.sidebarRevampVisibility !== "expand-on-hover"
      ) {
-@@ -790,7 +1453,562 @@ export default class SidebarMain extends MozLitElement {
+@@ -790,7 +1453,563 @@ export default class SidebarMain extends MozLitElement {
      return container && !container.hidden;
    }
  
@@ -2713,7 +2713,8 @@ index 8acc798e5d22..380a4b144828 100644
 +                <button
 +                  class="hilal-icon-button"
 +                  type="button"
-+                  data-l10n-id="hilal-sidebar-new-tab"
++                  title=${this.fluentStrings.formatValueSync("hilal-sidebar-new-tab-label")}
++                  aria-label=${this.fluentStrings.formatValueSync("hilal-sidebar-new-tab-label")}
 +                  @click=${() => this.openHilalNewTab()}
 +                >
 +                  ${this.hilalIcon("plus")}
