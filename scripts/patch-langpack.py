@@ -1,93 +1,170 @@
 #!/usr/bin/env python3
+import json
 import os
+import re
 import sys
-import zipfile
-import shutil
 import tempfile
+import zipfile
+from pathlib import Path
 
-def patch_langpack(repo_root, firefox_src):
-    xpi_path = os.path.join(firefox_src, "browser/app/distribution/extensions/langpack-tr@firefox.mozilla.org.xpi")
-    if not os.path.exists(xpi_path):
-        print(f"[hilal] Error: Turkish langpack not found at {xpi_path}")
-        return False
-        
-    # Source plain text FTL files in our repo
-    src_locales_dir = os.path.join(repo_root, "prefs/browser/locales/tr/browser")
-    if not os.path.exists(src_locales_dir):
-        print(f"[hilal] Warning: Plain text Turkish FTL source directory not found: {src_locales_dir}")
-        return False
+HILAL_BLOCK_BEGIN = "# --- Hilal custom localization begin ---"
+HILAL_BLOCK_END = "# --- Hilal custom localization end ---"
+LEGACY_HILAL_MARKERS = (
+    "## Hilal Welcome Screen",
+    "## Hilal Browser Settings",
+    "# Hilal Redesigned Sidebar",
+)
 
-    temp_dir = tempfile.mkdtemp()
+
+def read_text(path):
+    return path.read_text(encoding="utf-8")
+
+
+def write_text_if_changed(path, content):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists() and read_text(path) == content:
+        return False
+    path.write_text(content, encoding="utf-8")
+    return True
+
+
+def strip_hilal_block(content):
+    pattern = re.compile(
+        rf"\n*{re.escape(HILAL_BLOCK_BEGIN)}.*?{re.escape(HILAL_BLOCK_END)}\n*",
+        re.S,
+    )
+    content = pattern.sub("\n", content)
+
+    for marker in LEGACY_HILAL_MARKERS:
+        index = content.find(marker)
+        if index != -1:
+            content = content[:index]
+            break
+
+    return content.rstrip()
+
+
+def append_hilal_content(existing_content, custom_content):
+    existing_content = strip_hilal_block(existing_content)
+    custom_content = custom_content.strip()
+    return (
+        f"{existing_content}\n\n"
+        f"{HILAL_BLOCK_BEGIN}\n"
+        f"{custom_content}\n"
+        f"{HILAL_BLOCK_END}\n"
+    )
+
+
+def get_langpack_locale(xpi_path):
+    fallback = xpi_path.name.removeprefix("langpack-").removesuffix(
+        "@firefox.mozilla.org.xpi"
+    )
     try:
-        # Extract the entire XPI
-        print(f"[hilal] Patching Turkish langpack in Firefox tree...")
-        with zipfile.ZipFile(xpi_path, 'r') as zip_ref:
-            zip_ref.extractall(temp_dir)
-            
-        # Target files inside the extracted langpack
-        targets = {
-            "browser.ftl": "browser/localization/tr/browser/browser.ftl",
-            "preferences/preferences.ftl": "browser/localization/tr/browser/preferences/preferences.ftl",
-            "sidebar.ftl": "browser/localization/tr/browser/sidebar.ftl"
-        }
-        
-        patched_any = False
-        for rel_src, rel_dst in targets.items():
-            src_file = os.path.join(src_locales_dir, rel_src)
-            dst_file = os.path.join(temp_dir, rel_dst)
-            
-            if os.path.exists(src_file) and os.path.exists(dst_file):
-                print(f"  Appending custom strings from {rel_src} -> {rel_dst}")
-                # Read original and new strings
-                with open(src_file, 'r', encoding='utf-8') as sf:
-                    custom_content = sf.read()
-                    
-                with open(dst_file, 'r', encoding='utf-8') as df:
-                    existing_content = df.read()
-                    
-                # To prevent double appending, check if one of our unique keys is already present
-                unique_key = "hilal-"
-                if unique_key in existing_content:
-                    # Clean/restore original file first if it was already patched
-                    # Since we are running on a fresh extraction of the XPI from the source
-                    # (which might be a symlink to a previously patched XPI), let's strip
-                    # everything starting from the first custom banner.
-                    banner = "## Hilal Welcome Screen"
-                    if banner in existing_content:
-                        existing_content = existing_content.split(banner)[0]
-                    banner_prefs = "## Hilal Browser Settings"
-                    if banner_prefs in existing_content:
-                        existing_content = existing_content.split(banner_prefs)[0]
-                    banner_sidebar = "# Hilal Redesigned Sidebar"
-                    if banner_sidebar in existing_content:
-                        existing_content = existing_content.split(banner_sidebar)[0]
+        with zipfile.ZipFile(xpi_path, "r") as zip_ref:
+            manifest = json.loads(zip_ref.read("manifest.json"))
+    except (KeyError, json.JSONDecodeError, zipfile.BadZipFile):
+        return fallback
 
-                # Append custom content to clean/original content
-                with open(dst_file, 'w', encoding='utf-8') as df:
-                    df.write(existing_content.strip() + "\n\n" + custom_content.strip() + "\n")
-                patched_any = True
-                
-        if patched_any:
-            # Handle if the XPI path is a symlink (we want to write to the actual file)
-            real_xpi_path = os.path.realpath(xpi_path)
-            
-            # Repack the zip
-            with zipfile.ZipFile(real_xpi_path, 'w', zipfile.ZIP_DEFLATED) as zip_ref:
-                for root, _, files in os.walk(temp_dir):
-                    for file in files:
-                        file_path = os.path.join(root, file)
-                        rel_path = os.path.relpath(file_path, temp_dir)
-                        zip_ref.write(file_path, rel_path)
-            print("[hilal] Patched Turkish langpack repacked successfully.")
-            return True
-            
-    finally:
-        shutil.rmtree(temp_dir)
-        
-    return False
+    return (
+        manifest.get("langpack_id")
+        or next(iter(manifest.get("languages", {}) or {}), None)
+        or fallback
+    )
+
+
+def repack_zip(source_dir, xpi_path):
+    real_xpi_path = Path(os.path.realpath(xpi_path))
+    with zipfile.ZipFile(real_xpi_path, "w", zipfile.ZIP_DEFLATED) as zip_ref:
+        files = sorted(path for path in source_dir.rglob("*") if path.is_file())
+        for file_path in files:
+            rel_path = file_path.relative_to(source_dir).as_posix()
+            info = zipfile.ZipInfo(rel_path, date_time=(1980, 1, 1, 0, 0, 0))
+            info.external_attr = 0o644 << 16
+            zip_ref.writestr(info, file_path.read_bytes(), zipfile.ZIP_DEFLATED)
+
+
+def patch_branding(temp_dir, locale, repo_root):
+    changed = False
+    branding_dir = repo_root / "branding/hilal/locales/en-US"
+    brand_targets = {
+        branding_dir / "brand.ftl": temp_dir
+        / f"browser/localization/{locale}/branding/brand.ftl",
+        branding_dir / "brand.properties": temp_dir
+        / f"browser/chrome/{locale}/locale/branding/brand.properties",
+    }
+
+    for src_file, dst_file in brand_targets.items():
+        if not src_file.exists():
+            continue
+        if write_text_if_changed(dst_file, read_text(src_file).rstrip() + "\n"):
+            rel_dst = dst_file.relative_to(temp_dir)
+            print(f"  Branding: {src_file.name} -> {rel_dst}")
+            changed = True
+
+    return changed
+
+
+def patch_custom_browser_ftl(temp_dir, locale, repo_root):
+    src_dir = repo_root / "prefs/browser/locales" / locale / "browser"
+    if not src_dir.exists():
+        print(f"  No Hilal browser locale overlay for {locale}: {src_dir}")
+        return False
+
+    changed = False
+    for src_file in sorted(src_dir.rglob("*.ftl")):
+        rel_path = src_file.relative_to(src_dir)
+        dst_file = (
+            temp_dir / "browser/localization" / locale / "browser" / rel_path
+        )
+        existing_content = read_text(dst_file) if dst_file.exists() else ""
+        patched_content = append_hilal_content(
+            existing_content, read_text(src_file)
+        )
+        if write_text_if_changed(dst_file, patched_content):
+            print(f"  Fluent: {rel_path} -> {dst_file.relative_to(temp_dir)}")
+            changed = True
+
+    return changed
+
+
+def patch_langpack_xpi(repo_root, xpi_path):
+    locale = get_langpack_locale(xpi_path)
+    print(f"[hilal] Patching {locale} langpack: {xpi_path}")
+
+    with tempfile.TemporaryDirectory() as temp_root:
+        temp_dir = Path(temp_root)
+        with zipfile.ZipFile(xpi_path, "r") as zip_ref:
+            zip_ref.extractall(temp_dir)
+
+        changed = False
+        changed |= patch_branding(temp_dir, locale, repo_root)
+        changed |= patch_custom_browser_ftl(temp_dir, locale, repo_root)
+
+        if changed:
+            repack_zip(temp_dir, xpi_path)
+            print(f"[hilal] Repacked {locale} langpack.")
+        else:
+            print(f"[hilal] No {locale} langpack changes needed.")
+
+    return True
+
+
+def patch_langpacks(repo_root, firefox_src):
+    ext_dir = firefox_src / "browser/app/distribution/extensions"
+    langpacks = sorted(ext_dir.glob("langpack-*@firefox.mozilla.org.xpi"))
+    if not langpacks:
+        print(f"[hilal] No bundled langpacks found in {ext_dir}")
+        return False
+
+    for xpi_path in langpacks:
+        patch_langpack_xpi(repo_root, xpi_path)
+
+    return True
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Usage: patch-langpack.py <repo_root> <firefox_src>")
         sys.exit(1)
-    patch_langpack(sys.argv[1], sys.argv[2])
+
+    patch_langpacks(Path(sys.argv[1]), Path(sys.argv[2]))

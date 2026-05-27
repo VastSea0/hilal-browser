@@ -134,6 +134,7 @@ hilal-browser/              <- this repo
 - `docs/BUILD-MACOS.md` — macOS-specific build notes
 - `docs/BUILD-WINDOWS.md` — Windows-specific build notes
 - `docs/BUILD-FLATPAK.md` — Flatpak and Flathub packaging notes
+- `docs/LOCALIZATION.md` — bundled langpacks and Hilal locale overlays
 - `docs/UPSTREAM-SYNC.md` — how to roll forward to a newer Firefox
 - `docs/UPDATES.md` — application update channel, MAR creation, and release signing checklist
 
