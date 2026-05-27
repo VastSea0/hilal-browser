@@ -1709,7 +1709,7 @@ index 8acc798e5d22..8cef14374c85 100644
      this._toolsIntersectionObserver?.disconnect();
      this._toolsResizeObserver?.disconnect();
      this.ownerDocument
-@@ -163,6 +228,588 @@ export default class SidebarMain extends MozLitElement {
+@@ -163,6 +228,601 @@ export default class SidebarMain extends MozLitElement {
        ?.disconnectedCallback();
    }
  
@@ -1943,9 +1943,22 @@ index 8acc798e5d22..8cef14374c85 100644
 +    if (!workspaceId || !this._hilalManager?._getTabWorkspace) {
 +      return [];
 +    }
-+    return [...window.gBrowser.tabs].filter(
-+      tab => this._hilalManager._getTabWorkspace(tab) === workspaceId
++    const pinnedIsPublic = Services.prefs.getBoolPref(
++      "hilal.workspaces.pinned.public",
++      false
 +    );
++    const groupsIsPublic = Services.prefs.getBoolPref(
++      "hilal.workspaces.groups.public",
++      false
++    );
++    return [...window.gBrowser.tabs].filter(tab => {
++      const tabWorkspaceId = this._hilalManager._getTabWorkspace(tab);
++      return (
++        tabWorkspaceId === workspaceId ||
++        (pinnedIsPublic && tab.pinned) ||
++        (groupsIsPublic && tab.group)
++      );
++    });
 +  }
 +
 +  get activeHilalWorkspace() {
@@ -2298,7 +2311,7 @@ index 8acc798e5d22..8cef14374c85 100644
    get isToolsDragging() {
      return this.toolsSplitter.getAttribute("state") === "dragging";
    }
-@@ -509,6 +1156,16 @@ export default class SidebarMain extends MozLitElement {
+@@ -509,6 +1169,16 @@ export default class SidebarMain extends MozLitElement {
  
    async handleEvent(e) {
      switch (e.type) {
@@ -2315,7 +2328,7 @@ index 8acc798e5d22..8cef14374c85 100644
        case "command":
          switch (e.target.id) {
            case "sidebar-context-menu-manage-extension":
-@@ -649,6 +1306,12 @@ export default class SidebarMain extends MozLitElement {
+@@ -649,6 +1319,12 @@ export default class SidebarMain extends MozLitElement {
    }
  
    updated() {
@@ -2328,7 +2341,7 @@ index 8acc798e5d22..8cef14374c85 100644
      if (
        window.SidebarController.sidebarRevampVisibility !== "expand-on-hover"
      ) {
-@@ -790,7 +1453,563 @@ export default class SidebarMain extends MozLitElement {
+@@ -790,7 +1466,563 @@ export default class SidebarMain extends MozLitElement {
      return container && !container.hidden;
    }
  
