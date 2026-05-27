@@ -101,3 +101,11 @@ hilal-bangs-trigger-label = Tetikleyici:
 hilal-bangs-searchurl-label = Arama URL'si:
 hilal-bangs-homeurl-label = Ana Sayfa URL'si (isteğe bağlı):
 hilal-bangs-default-label = (varsayılan)
+
+## Language Selection
+
+hilal-language-header = Dil Seçimi
+hilal-language-description = Tarayıcının arayüz dilini seçin. Değişikliklerin etkili olması için tarayıcının yeniden başlatılması gerekir.
+hilal-language-apply-button =
+    .label = Uygula ve Yeniden Başlat
+

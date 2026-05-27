@@ -200,4 +200,20 @@
     </vbox>
   </vbox>
 </groupbox>
+
+<groupbox id="hilalLanguageGroup" data-category="paneHilal" hidden="true">
+  <label><html:h2 data-l10n-id="hilal-language-header"/></label>
+  <vbox align="start" style="margin-bottom: 16px;">
+    <description style="margin-bottom: 8px;" data-l10n-id="hilal-language-description"/>
+    <hbox align="center" style="margin-top: 4px;">
+      <html:select id="hilalLanguageSelect" style="padding: 4px; border-radius: 4px; border: 1px solid var(--in-content-border-color); background: var(--in-content-button-background); color: inherit; min-width: 200px; margin-right: 8px;">
+        <!-- Dynamic populated options -->
+      </html:select>
+      <button id="hilalLanguageApply"
+              is="highlightable-button"
+              class="accessory-button"
+              data-l10n-id="hilal-language-apply-button"/>
+    </hbox>
+  </vbox>
+</groupbox>
 </html:template>
