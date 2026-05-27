@@ -4,9 +4,10 @@ Hilal Browser: redesign sidebar layout
 
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
-@@ -3616,6 +3616,14 @@
+@@ -3616,7 +3616,15 @@
  // When enabled, Firefox ignores the distribution.ini file if global.id is MozillaOnline.
  pref("distribution.mozillaonline.ignore", true);
+ pref("hilal.privacy.initialized", false);
  pref("hilal.bangs.custom", "[]");
 +pref("hilal.workspaces.showBookmarks", false);
 +pref("hilal.sidebar.footer.bookmarks", false);
@@ -650,7 +651,7 @@ Hilal Browser: redesign sidebar layout
    }
  
    disconnectedCallback() {
-@@ -156,13 +206,497 @@
+@@ -156,13 +206,506 @@
      window.removeEventListener("SidebarItemChanged", this);
      window.removeEventListener("SidebarItemRemoved", this);
  
