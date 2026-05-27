@@ -1034,27 +1034,29 @@ index a9857f4682a0..114a2b1c542b 100644
          VISIBILITY_SETTING_PREF,
          "always-show"
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
-index d3178e9eb6e3..1c42cd38db97 100644
+index d3178e9eb6e3..4eec469efb74 100644
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
-@@ -1071,6 +1071,10 @@ var SidebarController = {
+@@ -1071,6 +1071,11 @@ var SidebarController = {
     * True if the sidebar is currently open.
     */
    get isOpen() {
-+    if (Services.prefs.getBoolPref("hilal.workspaces.enabled", true) &&
-+        Services.prefs.getBoolPref("sidebar.verticalTabs", false)) {
++    const workspacesEnabled = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
++    const verticalTabsEnabled = Services.prefs.getBoolPref("sidebar.verticalTabs", false);
++    if (workspacesEnabled || verticalTabsEnabled) {
 +      return this.sidebarContainer ? !this.sidebarContainer.hidden : false;
 +    }
      return this._box ? !this._box.hidden : false;
    },
  
-@@ -2113,7 +2117,18 @@ var SidebarController = {
+@@ -2113,7 +2118,19 @@ var SidebarController = {
        }
  
        this.selectMenuItem(commandID);
 -      this._box.hidden = this._splitter.hidden = false;
-+      if (Services.prefs.getBoolPref("hilal.workspaces.enabled", true) &&
-+          Services.prefs.getBoolPref("sidebar.verticalTabs", false)) {
++      const workspacesEnabled = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
++      const verticalTabsEnabled = Services.prefs.getBoolPref("sidebar.verticalTabs", false);
++      if (workspacesEnabled || verticalTabsEnabled) {
 +        const isStandardPanel = [
 +          "viewHistorySidebar",
 +          "viewBookmarksSidebar",
@@ -1594,7 +1596,7 @@ index a8369dde37e3..74f7831fe263 100644
    display: grid;
    grid-template-rows: auto min-content min-content;
 diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/sidebar/sidebar-main.mjs
-index 8acc798e5d22..8cef14374c85 100644
+index 8acc798e5d22..86dc646bb556 100644
 --- a/browser/components/sidebar/sidebar-main.mjs
 +++ b/browser/components/sidebar/sidebar-main.mjs
 @@ -18,8 +18,9 @@ import "chrome://browser/content/sidebar/sidebar-pins-promo.mjs";
@@ -1709,7 +1711,7 @@ index 8acc798e5d22..8cef14374c85 100644
      this._toolsIntersectionObserver?.disconnect();
      this._toolsResizeObserver?.disconnect();
      this.ownerDocument
-@@ -163,6 +228,601 @@ export default class SidebarMain extends MozLitElement {
+@@ -163,6 +228,612 @@ export default class SidebarMain extends MozLitElement {
        ?.disconnectedCallback();
    }
  
@@ -1731,10 +1733,9 @@ index 8acc798e5d22..8cef14374c85 100644
 +      return true;
 +    }
 +    const manager = window.gHilalWorkspaces;
-+    if (
-+      !manager ||
-+      !Services.prefs.getBoolPref("hilal.workspaces.enabled", true)
-+    ) {
++    const workspacesEnabled = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
++    const verticalTabsEnabled = Services.prefs.getBoolPref("sidebar.verticalTabs", false);
++    if (!manager || (!workspacesEnabled && !verticalTabsEnabled)) {
 +      return false;
 +    }
 +    this._hilalManager = manager;
@@ -1836,17 +1837,29 @@ index 8acc798e5d22..8cef14374c85 100644
 +        );
 +        this._sidebarMain?.toggleAttribute("vertical-tabs", enabled);
 +        this.toggleAttribute("vertical-tabs", enabled);
-+        this.requestUpdate();
-+      } else if (data === "hilal.workspaces.enabled") {
-+        const shouldBeActive =
-+          window.gHilalWorkspaces &&
-+          Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
++        const workspacesEnabled = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
++        const shouldBeActive = window.gHilalWorkspaces && (workspacesEnabled || enabled);
 +        if (shouldBeActive !== this.hilalSidebarActive) {
 +          if (shouldBeActive) {
 +            this.maybeInitHilalSidebar();
 +          } else {
 +            this.uninitHilalSidebar();
 +          }
++        } else {
++          this.requestUpdate();
++        }
++      } else if (data === "hilal.workspaces.enabled") {
++        const workspacesEnabled = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
++        const verticalTabsEnabled = Services.prefs.getBoolPref("sidebar.verticalTabs", false);
++        const shouldBeActive = window.gHilalWorkspaces && (workspacesEnabled || verticalTabsEnabled);
++        if (shouldBeActive !== this.hilalSidebarActive) {
++          if (shouldBeActive) {
++            this.maybeInitHilalSidebar();
++          } else {
++            this.uninitHilalSidebar();
++          }
++        } else {
++          this.requestUpdate();
 +        }
 +      } else if (
 +        data.startsWith("hilal.workspaces.") ||
@@ -2311,7 +2324,7 @@ index 8acc798e5d22..8cef14374c85 100644
    get isToolsDragging() {
      return this.toolsSplitter.getAttribute("state") === "dragging";
    }
-@@ -509,6 +1169,16 @@ export default class SidebarMain extends MozLitElement {
+@@ -509,6 +1180,16 @@ export default class SidebarMain extends MozLitElement {
  
    async handleEvent(e) {
      switch (e.type) {
@@ -2328,7 +2341,7 @@ index 8acc798e5d22..8cef14374c85 100644
        case "command":
          switch (e.target.id) {
            case "sidebar-context-menu-manage-extension":
-@@ -649,6 +1319,12 @@ export default class SidebarMain extends MozLitElement {
+@@ -649,6 +1330,12 @@ export default class SidebarMain extends MozLitElement {
    }
  
    updated() {
@@ -2341,7 +2354,7 @@ index 8acc798e5d22..8cef14374c85 100644
      if (
        window.SidebarController.sidebarRevampVisibility !== "expand-on-hover"
      ) {
-@@ -790,7 +1466,563 @@ export default class SidebarMain extends MozLitElement {
+@@ -790,7 +1477,578 @@ export default class SidebarMain extends MozLitElement {
      return container && !container.hidden;
    }
  
@@ -2692,35 +2705,45 @@ index 8acc798e5d22..8cef14374c85 100644
 +      />
 +      <div class="wrapper" hidden></div>
 +      <div class="hilal-sidebar-layout">
-+        <nav class="hilal-workspace-rail" aria-label=${railLabel}>
-+          <div class="hilal-workspace-list">
-+            ${repeat(
-+              this.hilalWorkspaces,
-+              workspace => workspace.id,
-+              workspace => this.hilalWorkspaceTemplate(workspace)
-+            )}
-+          </div>
-+          <div class="hilal-workspace-add-wrap">
-+            <button
-+              id="hilal-workspace-add"
-+              type="button"
-+              data-l10n-id="hilal-sidebar-add-workspace"
-+              @click=${() => this.showHilalCreateWorkspace()}
-+            >
-+              ${this.hilalIcon("plus")}
-+            </button>
-+          </div>
-+        </nav>
++        ${when(
++          Services.prefs.getBoolPref("hilal.workspaces.enabled", true),
++          () => html`
++            <nav class="hilal-workspace-rail" aria-label=${railLabel}>
++              <div class="hilal-workspace-list">
++                ${repeat(
++                  this.hilalWorkspaces,
++                  workspace => workspace.id,
++                  workspace => this.hilalWorkspaceTemplate(workspace)
++                )}
++              </div>
++              <div class="hilal-workspace-add-wrap">
++                <button
++                  id="hilal-workspace-add"
++                  type="button"
++                  data-l10n-id="hilal-sidebar-add-workspace"
++                  @click=${() => this.showHilalCreateWorkspace()}
++                >
++                  ${this.hilalIcon("plus")}
++                </button>
++              </div>
++            </nav>
++          `
++        )}
 +        ${when(
 +          Services.prefs.getBoolPref("sidebar.verticalTabs", false),
 +          () => html`
 +            <section class="hilal-sidebar-panel" aria-label=${panelLabel}>
 +              <div class="hilal-panel-header">
-+                <span class="hilal-panel-workspace-icon" aria-hidden="true">
-+                  ${activeWorkspace?.emoji || "\u{1F5C2}"}
-+                </span>
++                ${when(
++                  Services.prefs.getBoolPref("hilal.workspaces.enabled", true),
++                  () => html`
++                    <span class="hilal-panel-workspace-icon" aria-hidden="true">
++                      ${activeWorkspace?.emoji || "\u{1F5C2}"}
++                    </span>
++                  `
++                )}
 +                <span class="hilal-panel-title">
-+                  ${activeWorkspace?.name || workspaceFallback}
++                  ${(Services.prefs.getBoolPref("hilal.workspaces.enabled", true) && activeWorkspace) ? activeWorkspace.name : workspaceFallback}
 +                </span>
 +                <span class="hilal-row-spacer"></span>
 +                <button
@@ -2741,14 +2764,19 @@ index 8acc798e5d22..8cef14374c85 100644
 +                >
 +                  ${this.hilalIcon("search")}
 +                </button>
-+                <button
-+                  class="hilal-icon-button"
-+                  type="button"
-+                  data-l10n-id="hilal-sidebar-workspace-menu"
-+                  @click=${event => this.showHilalActiveWorkspaceMenu(event)}
-+                >
-+                  ${this.hilalIcon("menu")}
-+                </button>
++                ${when(
++                  Services.prefs.getBoolPref("hilal.workspaces.enabled", true),
++                  () => html`
++                    <button
++                      class="hilal-icon-button"
++                      type="button"
++                      data-l10n-id="hilal-sidebar-workspace-menu"
++                      @click=${event => this.showHilalActiveWorkspaceMenu(event)}
++                    >
++                      ${this.hilalIcon("menu")}
++                    </button>
++                  `
++                )}
 +              </div>
 +              ${when(
 +                this.hilalSearchOpen,
