@@ -29,7 +29,7 @@ diff --git a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs b/browser/com
 index 16041c10755a..c95b3b2f97a0 100644
 --- a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
 +++ b/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
-@@ -729,6 +729,40 @@ class MuxerUnifiedComplete extends UrlbarMuxer {
+@@ -729,6 +729,44 @@ class MuxerUnifiedComplete extends UrlbarMuxer {
    // error or increase the complexity threshold.
    // eslint-disable-next-line complexity
    _canAddResult(result, state) {
