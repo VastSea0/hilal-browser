@@ -1,0 +1,19 @@
+/* Hilal Browser UI overrides on top of Firefox-UI-Fix.
+ * Edit this file for Hilal-specific chrome styling.
+ */
+:root[customizing] #navigator-toolbox {
+  margin-bottom: 0 !important;
+  animation: none !important;
+  transition-delay: 0s !important;
+}
+
+:root[customizing] #titlebar,
+:root[customizing] #TabsToolbar,
+:root[customizing] #nav-bar,
+:root[customizing] #PersonalToolbar {
+  margin-bottom: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transition-delay: 0s !important;
+}

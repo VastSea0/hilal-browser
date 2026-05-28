@@ -72,6 +72,8 @@ if [ "$FORCE" = 1 ]; then
     browser/components/preferences/hilal.inc.xhtml \
     browser/base/content/hilal/ \
     browser/themes/shared/hilal-ui-fix.css \
+    browser/themes/shared/firefox-ui-fix.css \
+    browser/themes/shared/hilal-ui-overrides.css \
     browser/app/distribution/policies.json \
     browser/app/distribution/extensions/ \
     browser/modules/HilalBangs.sys.mjs \
