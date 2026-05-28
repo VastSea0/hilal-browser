@@ -336,7 +336,7 @@ diff --git a/browser/themes/shared/sidebar.css b/browser/themes/shared/sidebar.c
 index 19fafff8cb45..ace248471f7d 100644
 --- a/browser/themes/shared/sidebar.css
 +++ b/browser/themes/shared/sidebar.css
-@@ -682,3 +682,61 @@ sidebar-main,
+@@ -682,3 +682,108 @@ sidebar-main,
    border: none !important;
    padding: 0 !important;
  }
@@ -398,3 +398,50 @@ index 19fafff8cb45..ace248471f7d 100644
 +  box-shadow: none !important;
 +  border: none !important;
 +}
++
++/* Hilal Workspace Vertical Tabs Styling Overrides */
++#sidebar-main[hilal-sidebar] .tabbrowser-tab {
++  padding-inline: 4px !important;
++  margin-inline: 0 !important;
++  font-size: 12.5px !important;
++  color: var(--hilal-sidebar-text) !important;
++}
++
++#sidebar-main[hilal-sidebar] .tabbrowser-tab .tab-background {
++  border-radius: 6px !important;
++  border: 1px solid transparent !important;
++  margin-inline: 0 !important;
++  transition: background-color 0.15s ease, border-color 0.15s ease !important;
++}
++
++/* Hover state */
++#sidebar-main[hilal-sidebar] .tabbrowser-tab:hover > .tab-stack > .tab-background:not([selected]) {
++  background-color: var(--hilal-sidebar-hover) !important;
++  background-image: none !important;
++}
++
++/* Selected (active) state */
++#sidebar-main[hilal-sidebar] .tabbrowser-tab[selected="true"] > .tab-stack > .tab-background {
++  background-color: var(--hilal-sidebar-highlight) !important;
++  background-image: none !important;
++  border-color: color-mix(in srgb, var(--hilal-sidebar-text) 10%, transparent) !important;
++  box-shadow: none !important;
++}
++
++/* Text color for selected tab */
++#sidebar-main[hilal-sidebar] .tabbrowser-tab[selected="true"] {
++  color: var(--hilal-sidebar-highlight-text) !important;
++}
++
++/* Font weight and alignment */
++#sidebar-main[hilal-sidebar] .tab-label {
++  font-weight: 500 !important;
++}
++
++/* Multi-Account Container indicator adjustments */
++#sidebar-main[hilal-sidebar] .tabbrowser-tab[usercontextid] .tab-context-line {
++  height: 2px !important;
++  border-radius: 999px !important;
++  margin-inline: 8px !important;
++}
++
