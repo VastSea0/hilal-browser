@@ -41,3 +41,76 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(steps.vars.outputs.tag, 'alpha') || contains(steps.vars.outputs.tag, 'beta') || contains(steps.vars.outputs.tag, 'rc') }}
+
+  sign-macos:
+    needs: create-release
+    runs-on: macos-latest
+    timeout-minutes: 120
+    if: >
+      ${{
+        secrets.CODESIGN_IDENTITY != '' &&
+        secrets.APPLE_ID != '' &&
+        secrets.APPLE_APP_SPECIFIC_PASSWORD != '' &&
+        secrets.APPLE_TEAM_ID != ''
+      }}
+
+    steps:
+      - name: Checkout Hilal Browser
+        uses: actions/checkout@v4
+
+      - name: Cache Firefox source checkout
+        uses: actions/cache@v4
+        with:
+          path: firefox
+          key: firefox-${{ hashFiles('FIREFOX_COMMIT') }}
+          restore-keys: |
+            firefox-
+
+      - name: Set up Firefox source tree
+        run: scripts/setup-firefox.sh
+
+      - name: Apply Hilal patches
+        run: scripts/apply.sh --force --no-symlinks
+
+      - name: Import signing certificate
+        if: ${{ secrets.MACOS_CERTIFICATE != '' }}
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          CERT_PATH="$(mktemp).p12"
+          echo "$MACOS_CERTIFICATE" | base64 --decode > "$CERT_PATH"
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security import "$CERT_PATH" -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-keychain-settings -lut 3600 build.keychain
+          security set-key-partition-list -S apple-tool:,apple: -k "" build.keychain
+          rm -f "$CERT_PATH"
+
+      - name: Build and package Hilal Browser
+        run: |
+          export CODESIGN_IDENTITY="${{ secrets.CODESIGN_IDENTITY }}"
+          scripts/build-macos.sh package --no-symlinks
+
+      - name: Sign and notarize
+        env:
+          CODESIGN_IDENTITY: ${{ secrets.CODESIGN_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: scripts/sign-macos.sh --notarize
+
+      - name: Create DMG
+        run: |
+          APP_BUNDLE="$(find firefox/obj-*/dist -name '*.app' -type d -print -quit)"
+          DMG_NAME="Hilal-Browser-${{ needs.create-release.outputs.tag }}-macOS.dmg"
+          mkdir -p dist
+          hdiutil create -volname "Hilal Browser" -srcfolder "$APP_BUNDLE" -ov -format UDZO "dist/$DMG_NAME"
+          echo "dmg_path=dist/$DMG_NAME" >> "$GITHUB_ENV"
+
+      - name: Upload macOS DMG to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.create-release.outputs.tag }}
+          files: ${{ env.dmg_path }}

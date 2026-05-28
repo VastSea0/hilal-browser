@@ -9,6 +9,7 @@
 #   scripts/build-macos.sh binaries        # C++/Rust only
 #   scripts/build-macos.sh run             # build and run
 #   scripts/build-macos.sh package         # build and package
+#   scripts/build-macos.sh --no-symlinks   # copy instead of symlink prefs
 #   scripts/build-macos.sh -- <args>       # pass arguments to mach build
 
 set -euo pipefail
@@ -22,8 +23,23 @@ if [ "$(uname -s)" != "Darwin" ]; then
   warn "This script is tuned for macOS. On Linux, please use build-linux.sh."
 fi
 
+# Parse args
+NO_SYMLINKS=0
+remaining=()
+for arg in "$@"; do
+  case "$arg" in
+    --no-symlinks) NO_SYMLINKS=1 ;;
+    *) remaining+=("$arg") ;;
+  esac
+done
+set -- "${remaining[@]}"
+
 # Ensure patches/branding are applied
-bash "$(dirname "$0")/apply.sh"
+APPLY_ARGS=()
+if [ "$NO_SYMLINKS" = 1 ]; then
+  APPLY_ARGS+=(--no-symlinks)
+fi
+bash "$(dirname "$0")/apply.sh" "${APPLY_ARGS[@]}"
 
 # Copy macOS mozconfig
 if [ -f "$(dirname "$0")/../mozconfigs/macos" ]; then

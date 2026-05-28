@@ -56,12 +56,70 @@ The bundle name comes from `branding/hilal/configure.sh`, which sets
 our distribution id (`org.hilal`) thanks to the patch in
 `patches/0001-hilal-branding-defaults.patch`.
 
-## Code signing
+## Code signing and notarization
 
 Local development builds are unsigned. macOS Gatekeeper may complain
 the first time you launch from Finder; right-click → Open works around
-it, or run via `./mach run`. Production signing/notarization is out of
-scope for this repo.
+it, or run via `./mach run`.
+
+For distribution builds, use `scripts/sign-macos.sh` after packaging.
+
+### Prerequisites
+
+1. Enroll in the Apple Developer Program.
+2. Create a **Developer ID Application** certificate in Apple Developer
+   Portal and install it in your local Keychain.
+3. Generate an **app-specific password** for notarization.
+4. Note your **Apple Team ID**.
+
+### Sign only (local testing)
+
+```bash
+export CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+scripts/build-macos.sh package
+scripts/sign-macos.sh
+```
+
+### Sign + notarize + staple (release)
+
+```bash
+export CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+export APPLE_ID="you@example.com"
+export APPLE_APP_SPECIFIC_PASSWORD="xxxx-xxxx-xxxx-xxxx"
+export APPLE_TEAM_ID="TEAMID"
+
+scripts/build-macos.sh package
+scripts/sign-macos.sh --notarize
+```
+
+### Verify a signed bundle
+
+```bash
+scripts/sign-macos.sh --verify-only
+```
+
+Or manually:
+
+```bash
+codesign --verify --deep --strict "firefox/obj-*/dist/Hilal Browser.app"
+spctl -a -t exec -vv "firefox/obj-*/dist/Hilal Browser.app"
+```
+
+### CI secrets
+
+Do not commit certificates or passwords. In GitHub Actions, add these
+as repository secrets:
+
+| Secret | Description |
+| --- | --- |
+| `CODESIGN_IDENTITY` | Developer ID Application identity string |
+| `APPLE_ID` | Apple ID email |
+| `APPLE_APP_SPECIFIC_PASSWORD` | App-specific password |
+| `APPLE_TEAM_ID` | Apple Team ID |
+| `MACOS_CERTIFICATE` | Base64-encoded `.p12` certificate (optional, for CI keychain import) |
+| `MACOS_CERTIFICATE_PASSWORD` | Password for the `.p12` (optional) |
+
+See `.github/workflows/release.yml` for the optional CI signing job.
 
 ## Common issues
 
