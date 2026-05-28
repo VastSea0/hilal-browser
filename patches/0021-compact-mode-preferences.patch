@@ -489,23 +489,55 @@ index 19fafff8cb45..ace248471f7d 100644
 +/* Card-style grid for Pinned Tabs in vertical mode */
 +#sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"]::part(items-wrapper) {
 +  display: grid !important;
-+  grid-template-columns: repeat(4, 1fr) !important;
-+  gap: 6px !important;
-+  padding: 6px 4px !important;
++  grid-template-columns: repeat(3, 1fr) !important;
++  gap: 8px !important;
++  padding: 8px 6px !important;
 +}
 +
 +#sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tabbrowser-tab {
 +  aspect-ratio: 1 !important;
-+  width: auto !important;
++  width: 100% !important;
 +  height: auto !important;
-+  min-width: 42px !important;
-+  min-height: 42px !important;
++  min-width: 48px !important;
++  min-height: 48px !important;
 +  margin: 0 !important;
 +  padding: 0 !important;
++  display: flex !important;
 +  justify-content: center !important;
 +  align-items: center !important;
 +  border-radius: 8px !important;
 +  transition: background-color 0.15s ease, transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
++}
++
++#sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tab-stack {
++  width: 100% !important;
++  height: 100% !important;
++}
++
++#sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tab-content {
++  width: 100% !important;
++  height: 100% !important;
++  display: flex !important;
++  justify-content: center !important;
++  align-items: center !important;
++  padding: 0 !important;
++}
++
++#sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tab-icon-image {
++  width: 24px !important;
++  height: 24px !important;
++}
++
++#sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tabbrowser-tab[usercontextid] .tab-context-line {
++  top: auto !important;
++  bottom: 2px !important;
++  left: 6px !important;
++  right: 6px !important;
++  height: 3px !important;
++  width: auto !important;
++  border-radius: 99px !important;
++  margin: 0 !important;
++  display: block !important;
 +}
 +
 +#sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tabbrowser-tab:hover {
