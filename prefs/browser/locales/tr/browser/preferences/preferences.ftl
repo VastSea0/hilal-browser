@@ -20,6 +20,8 @@ hilal-workspaces-reset-confirm-message = Bu işlem tüm çalışma alanı verile
 ## Sidebar Options
 
 hilal-sidebar-header = Kenar Çubuğu Seçenekleri
+hilal-sidebar-compact-enabled =
+    .label = Kompakt modu etkinleştir (kenar çubuğunu ve üst araç çubuğunu göstermek için kenara gelin)
 hilal-sidebar-footer-items-label = Standart Alt Bilgi Öğeleri:
 hilal-sidebar-footer-bookmarks =
     .label = Yer İmleri

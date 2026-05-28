@@ -1,0 +1,334 @@
+diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+index 4468d36b5c9d..14e226585758 100644
+--- a/browser/components/preferences/main.js
++++ b/browser/components/preferences/main.js
+@@ -1796,6 +1796,7 @@ var gHilalPane = {
+     const hilalWsCheckbox = document.getElementById("hilalWorkspacesEnabled");
+     const hilalWsPinnedPublicCheckbox = document.getElementById("hilalWorkspacesPinnedPublic");
+     const hilalWsGroupsPublicCheckbox = document.getElementById("hilalWorkspacesGroupsPublic");
++    const hilalSidebarCompactCheckbox = document.getElementById("hilalSidebarCompactEnabled");
+     const hilalPrivacyLevelRadioGroup = /** @type {HTMLElement|null} */ (
+       document.getElementById("hilalPrivacyLevel")
+     );
+@@ -1861,6 +1862,18 @@ var gHilalPane = {
+         );
+       });
+     }
++    if (hilalSidebarCompactCheckbox) {
++      hilalSidebarCompactCheckbox.checked = Services.prefs.getBoolPref(
++        "hilal.compact.enabled",
++        false
++      );
++      hilalSidebarCompactCheckbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref(
++          "hilal.compact.enabled",
++          hilalSidebarCompactCheckbox.checked
++        );
++      });
++    }
+     if (hilalPrivacyLevelRadioGroup) {
+       hilalPrivacyLevelRadioGroup.value = normalizePrivacyLevel(
+         Services.prefs.getStringPref("hilal.privacy.level", "standard")
+@@ -1885,6 +1898,7 @@ var gHilalPane = {
+         Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
+         Services.prefs.setBoolPref("hilal.workspaces.pinned.public", false);
+         Services.prefs.setBoolPref("hilal.workspaces.groups.public", false);
++        Services.prefs.setBoolPref("hilal.compact.enabled", false);
+         Services.prefs.setStringPref("hilal.privacy.level", "standard");
+         if (hilalWsCheckbox) {
+           hilalWsCheckbox.checked = true;
+@@ -1895,6 +1909,9 @@ var gHilalPane = {
+         if (hilalWsGroupsPublicCheckbox) {
+           hilalWsGroupsPublicCheckbox.checked = false;
+         }
++        if (hilalSidebarCompactCheckbox) {
++          hilalSidebarCompactCheckbox.checked = false;
++        }
+         if (hilalPrivacyLevelRadioGroup) {
+           hilalPrivacyLevelRadioGroup.value = "standard";
+         }
+diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
+index 7311388dd53b..5bb6d63e42fd 100644
+--- a/browser/components/sidebar/browser-sidebar.js
++++ b/browser/components/sidebar/browser-sidebar.js
+@@ -2821,6 +2821,11 @@ var HilalCompactMode = {
+   _showDelayMs: 180,
+   _leaveDelayMs: 400,
+ 
++  _toolboxVisible: false,
++  _toolboxShowTimer: null,
++  _toolboxLeaveTimer: null,
++  _topHoverZoneHeight: 32,
++
+   init() {
+     this._prefObserver = (_subject, _topic, _data) => {
+       this._apply(Services.prefs.getBoolPref(this.PREF, false));
+@@ -2854,6 +2859,7 @@ var HilalCompactMode = {
+     } else {
+       this._removeMouseListeners();
+       this._hideSidebar();
++      this._hideToolbox();
+     }
+   },
+ 
+@@ -2886,57 +2892,97 @@ var HilalCompactMode = {
+       clearTimeout(this._mouseLeaveTimer);
+       this._mouseLeaveTimer = null;
+     }
++    if (this._toolboxShowTimer) {
++      clearTimeout(this._toolboxShowTimer);
++      this._toolboxShowTimer = null;
++    }
++    if (this._toolboxLeaveTimer) {
++      clearTimeout(this._toolboxLeaveTimer);
++      this._toolboxLeaveTimer = null;
++    }
+   },
+ 
+   _onMouseMove(event) {
+-    const sidebar = document.getElementById("sidebar-main");
+-    if (!sidebar) {
+-      return;
+-    }
+-
+     this._lastMouseX = event.clientX;
+     this._lastMouseY = event.clientY;
+ 
+-    const isLeft = SidebarController._positionStart;
+-    const windowWidth = window.innerWidth;
+-    const isNearEdge = isLeft
+-      ? (this._lastMouseX <= this._hoverZoneWidth)
+-      : (this._lastMouseX >= windowWidth - this._hoverZoneWidth);
++    const sidebar = document.getElementById("sidebar-main");
++    const toolbox = document.getElementById("navigator-toolbox");
+ 
+-    if (isNearEdge && !this._sidebarVisible) {
+-      if (this._mouseShowTimer) {
+-        return;
+-      }
+-      this._mouseShowTimer = setTimeout(() => {
++    // 1. Sidebar hover logic
++    if (sidebar) {
++      const isLeft = SidebarController._positionStart;
++      const windowWidth = window.innerWidth;
++      const isNearEdge = isLeft
++        ? (this._lastMouseX <= this._hoverZoneWidth)
++        : (this._lastMouseX >= windowWidth - this._hoverZoneWidth);
++
++      if (isNearEdge && !this._sidebarVisible) {
++        if (!this._mouseShowTimer) {
++          this._mouseShowTimer = setTimeout(() => {
++            this._mouseShowTimer = null;
++            const s = document.getElementById("sidebar-main");
++            if (s) {
++              const isStillLeft = SidebarController._positionStart;
++              const isStillNear = isStillLeft
++                ? (this._lastMouseX <= this._hoverZoneWidth)
++                : (this._lastMouseX >= window.innerWidth - this._hoverZoneWidth);
++              if (isStillNear) {
++                this._showSidebar(s);
++              }
++            }
++          }, this._showDelayMs);
++        }
++      } else if (this._sidebarVisible) {
++        const sidebarRect = sidebar.getBoundingClientRect();
++        const width = 280;
++        const isInsideSidebar = isLeft
++          ? (this._lastMouseX >= 0 && this._lastMouseX <= width &&
++             this._lastMouseY >= sidebarRect.top && this._lastMouseY <= sidebarRect.bottom)
++          : (this._lastMouseX >= windowWidth - width && this._lastMouseX <= windowWidth &&
++             this._lastMouseY >= sidebarRect.top && this._lastMouseY <= sidebarRect.bottom);
++
++        if (!isInsideSidebar && !isNearEdge) {
++          this._scheduleHide();
++        } else {
++          this._cancelHide();
++        }
++      } else if (!isNearEdge && this._mouseShowTimer) {
++        clearTimeout(this._mouseShowTimer);
+         this._mouseShowTimer = null;
+-        const s = document.getElementById("sidebar-main");
+-        if (s) {
+-          const isStillLeft = SidebarController._positionStart;
+-          const isStillNear = isStillLeft
+-            ? (this._lastMouseX <= this._hoverZoneWidth)
+-            : (this._lastMouseX >= window.innerWidth - this._hoverZoneWidth);
+-          if (isStillNear) {
+-            this._showSidebar(s);
+-          }
++      }
++    }
++
++    // 2. Top Toolbox hover logic
++    if (toolbox) {
++      const isNearTopEdge = (this._lastMouseY <= this._topHoverZoneHeight);
++
++      if (isNearTopEdge && !this._toolboxVisible) {
++        if (!this._toolboxShowTimer) {
++          this._toolboxShowTimer = setTimeout(() => {
++            this._toolboxShowTimer = null;
++            const t = document.getElementById("navigator-toolbox");
++            if (t) {
++              const isStillNearTop = (this._lastMouseY <= this._topHoverZoneHeight);
++              if (isStillNearTop) {
++                this._showToolbox(t);
++              }
++            }
++          }, this._showDelayMs);
+         }
+-      }, this._showDelayMs);
+-    } else if (this._sidebarVisible) {
+-      const sidebarRect = sidebar.getBoundingClientRect();
+-      const width = 280;
+-      const isInsideSidebar = isLeft
+-        ? (this._lastMouseX >= 0 && this._lastMouseX <= width &&
+-           this._lastMouseY >= sidebarRect.top && this._lastMouseY <= sidebarRect.bottom)
+-        : (this._lastMouseX >= windowWidth - width && this._lastMouseX <= windowWidth &&
+-           this._lastMouseY >= sidebarRect.top && this._lastMouseY <= sidebarRect.bottom);
+-
+-      if (!isInsideSidebar && !isNearEdge) {
+-        this._scheduleHide();
+-      } else {
+-        this._cancelHide();
++      } else if (this._toolboxVisible) {
++        const toolboxRect = toolbox.getBoundingClientRect();
++        const isInsideToolbox = (this._lastMouseY >= 0 && this._lastMouseY <= toolboxRect.bottom);
++
++        if (!isInsideToolbox && !isNearTopEdge) {
++          this._scheduleToolboxHide();
++        } else {
++          this._cancelToolboxHide();
++        }
++      } else if (!isNearTopEdge && this._toolboxShowTimer) {
++        clearTimeout(this._toolboxShowTimer);
++        this._toolboxShowTimer = null;
+       }
+-    } else if (!isNearEdge && this._mouseShowTimer) {
+-      clearTimeout(this._mouseShowTimer);
+-      this._mouseShowTimer = null;
+     }
+   },
+ 
+@@ -2974,4 +3020,39 @@ var HilalCompactMode = {
+       this._mouseLeaveTimer = null;
+     }
+   },
++
++  _showToolbox(toolbox) {
++    this._cancelToolboxHide();
++    if (this._toolboxShowTimer) {
++      clearTimeout(this._toolboxShowTimer);
++      this._toolboxShowTimer = null;
++    }
++    this._toolboxVisible = true;
++    toolbox.classList.add("hilal-compact-visible");
++  },
++
++  _hideToolbox() {
++    this._toolboxVisible = false;
++    const toolbox = document.getElementById("navigator-toolbox");
++    if (toolbox) {
++      toolbox.classList.remove("hilal-compact-visible");
++    }
++  },
++
++  _scheduleToolboxHide() {
++    if (this._toolboxLeaveTimer) {
++      return;
++    }
++    this._toolboxLeaveTimer = setTimeout(() => {
++      this._toolboxLeaveTimer = null;
++      this._hideToolbox();
++    }, this._leaveDelayMs);
++  },
++
++  _cancelToolboxHide() {
++    if (this._toolboxLeaveTimer) {
++      clearTimeout(this._toolboxLeaveTimer);
++      this._toolboxLeaveTimer = null;
++    }
++  },
+ };
+diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
+index ba7eacff8f6f..accca598926d 100644
+--- a/browser/locales/en-US/browser/preferences/preferences.ftl
++++ b/browser/locales/en-US/browser/preferences/preferences.ftl
+@@ -2782,6 +2782,8 @@ hilal-workspaces-reset-confirm-message = This will delete all workspace data and
+ ## Sidebar Options
+ 
+ hilal-sidebar-header = Sidebar Options
++hilal-sidebar-compact-enabled =
++    .label = Enable compact mode (hover to reveal sidebar and top toolbar)
+ hilal-sidebar-footer-items-label = Standard Footer Items:
+ hilal-sidebar-footer-bookmarks =
+     .label = Bookmarks
+diff --git a/browser/themes/shared/sidebar.css b/browser/themes/shared/sidebar.css
+index 19fafff8cb45..fd401373c8a9 100644
+--- a/browser/themes/shared/sidebar.css
++++ b/browser/themes/shared/sidebar.css
+@@ -682,3 +682,64 @@ sidebar-main,
+   border: none !important;
+   padding: 0 !important;
+ }
++
++/* Hilal Compact Mode — top toolbar auto-hides as a premium floating overlay on hover */
++
++:root[hilal-compact-mode] #navigator-toolbox {
++  position: fixed !important;
++  z-index: 1001 !important;
++  top: 0 !important;
++  left: 12px !important;
++  
++  /* Overrides layout height so it takes no vertical space in the window */
++  height: 0 !important;
++  min-height: 0 !important;
++  max-height: 0 !important;
++  margin: 0 !important;
++  border: none !important;
++  padding: 0 !important;
++  
++  /* Slide out of screen and hide by default */
++  overflow: visible !important;
++  opacity: 0;
++  visibility: hidden;
++  pointer-events: none;
++  transform: translate3d(0, -200px, 0) !important;
++  width: calc(100vw - 24px) !important;
++  
++  will-change: transform, opacity;
++  transition:
++    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
++    opacity 0.28s ease-out,
++    visibility 0s 0.32s;
++}
++
++/* Compact Top Toolbar Visible state */
++:root[hilal-compact-mode] #navigator-toolbox.hilal-compact-visible {
++  opacity: 1 !important;
++  visibility: visible !important;
++  pointer-events: auto !important;
++  transform: translate3d(0, 0, 0) !important;
++  
++  /* Premium aesthetic: unified floating glassmorphism card */
++  background-color: var(--hilal-sidebar-background, var(--toolbar-background-color, #1e1e2e)) !important;
++  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 12px rgba(0, 0, 0, 0.2) !important;
++  border-radius: 0 0 16px 16px !important;
++  border: 1px solid var(--hilal-sidebar-border, rgba(255, 255, 255, 0.1)) !important;
++  border-top: none !important;
++  
++  transition:
++    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
++    opacity 0.28s ease-out,
++    visibility 0s 0s;
++}
++
++/* Expose the unified card background by turning child toolbar backgrounds transparent */
++:root[hilal-compact-mode] #navigator-toolbox.hilal-compact-visible #titlebar,
++:root[hilal-compact-mode] #navigator-toolbox.hilal-compact-visible #nav-bar,
++:root[hilal-compact-mode] #navigator-toolbox.hilal-compact-visible #PersonalToolbar,
++:root[hilal-compact-mode] #navigator-toolbox.hilal-compact-visible #nav-bar-customization-target {
++  background: transparent !important;
++  box-shadow: none !important;
++  border: none !important;
++}
