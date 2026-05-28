@@ -405,10 +405,17 @@ index 19fafff8cb45..ace248471f7d 100644
 +  margin-inline: 0 !important;
 +  font-size: 12.5px !important;
 +  color: var(--hilal-sidebar-text) !important;
++  height: 34px !important;
++  margin-block: 2px !important;
++  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.15s ease !important;
++}
++
++#sidebar-main[hilal-sidebar] .tabbrowser-tab:hover:not([selected]) {
++  transform: translateY(-0.5px) !important;
 +}
 +
 +#sidebar-main[hilal-sidebar] .tabbrowser-tab .tab-background {
-+  border-radius: 6px !important;
++  border-radius: 8px !important;
 +  border: 1px solid transparent !important;
 +  margin-inline: 0 !important;
 +  transition: background-color 0.15s ease, border-color 0.15s ease !important;
@@ -418,6 +425,7 @@ index 19fafff8cb45..ace248471f7d 100644
 +#sidebar-main[hilal-sidebar] .tabbrowser-tab:hover > .tab-stack > .tab-background:not([selected]) {
 +  background-color: var(--hilal-sidebar-hover) !important;
 +  background-image: none !important;
++  border-color: color-mix(in srgb, var(--hilal-sidebar-text) 5%, transparent) !important;
 +}
 +
 +/* Selected (active) state */
@@ -425,7 +433,7 @@ index 19fafff8cb45..ace248471f7d 100644
 +  background-color: var(--hilal-sidebar-highlight) !important;
 +  background-image: none !important;
 +  border-color: color-mix(in srgb, var(--hilal-sidebar-text) 10%, transparent) !important;
-+  box-shadow: none !important;
++  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
 +}
 +
 +/* Text color for selected tab */
@@ -435,13 +443,89 @@ index 19fafff8cb45..ace248471f7d 100644
 +
 +/* Font weight and alignment */
 +#sidebar-main[hilal-sidebar] .tab-label {
-+  font-weight: 500 !important;
++  font-weight: 600 !important;
 +}
 +
-+/* Multi-Account Container indicator adjustments */
++/* Hover-scaleable close button on tabs */
++#sidebar-main[hilal-sidebar] .tabbrowser-tab .tab-close-button {
++  opacity: 0 !important;
++  transform: scale(0.8) !important;
++  transition: opacity 0.12s ease, transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
++  border-radius: 50% !important;
++  padding: 2px !important;
++  width: 16px !important;
++  height: 16px !important;
++  margin-inline-end: 2px !important;
++}
++
++#sidebar-main[hilal-sidebar] .tabbrowser-tab:hover .tab-close-button {
++  opacity: 0.85 !important;
++  transform: scale(1) !important;
++}
++
++#sidebar-main[hilal-sidebar] .tabbrowser-tab .tab-close-button:hover {
++  opacity: 1 !important;
++  background-color: rgba(255, 255, 255, 0.15) !important;
++  fill: var(--hilal-sidebar-text) !important;
++}
++
++/* Multi-Account Container vertical left-stripe indicators */
++#sidebar-main[hilal-sidebar] .tabbrowser-tab[usercontextid] {
++  position: relative !important;
++}
++
 +#sidebar-main[hilal-sidebar] .tabbrowser-tab[usercontextid] .tab-context-line {
-+  height: 2px !important;
-+  border-radius: 999px !important;
-+  margin-inline: 8px !important;
++  position: absolute !important;
++  left: 2px !important;
++  top: 6px !important;
++  bottom: 6px !important;
++  width: 3.5px !important;
++  height: auto !important;
++  border-radius: 99px !important;
++  margin: 0 !important;
++  display: block !important;
 +}
 +
++/* Card-style grid for Pinned Tabs in vertical mode */
++#sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"]::part(items-wrapper) {
++  display: grid !important;
++  grid-template-columns: repeat(4, 1fr) !important;
++  gap: 6px !important;
++  padding: 6px 4px !important;
++}
++
++#sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tabbrowser-tab {
++  aspect-ratio: 1 !important;
++  width: auto !important;
++  height: auto !important;
++  min-width: 42px !important;
++  min-height: 42px !important;
++  margin: 0 !important;
++  padding: 0 !important;
++  justify-content: center !important;
++  align-items: center !important;
++  border-radius: 8px !important;
++  transition: background-color 0.15s ease, transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
++}
++
++#sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tabbrowser-tab:hover {
++  transform: translateY(-1px) !important;
++}
++
++#sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tabbrowser-tab[selected="true"] {
++  background-color: var(--hilal-sidebar-highlight) !important;
++  border-color: color-mix(in srgb, var(--hilal-sidebar-text) 10%, transparent) !important;
++}
++
++#sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tabbrowser-tab .tab-background {
++  border-radius: 8px !important;
++}
++
++/* Unified Split View tab groupings outline */
++#sidebar-main[hilal-sidebar] tab-split-view-wrapper {
++  border: 1px solid var(--hilal-sidebar-border, rgba(255, 255, 255, 0.08)) !important;
++  border-radius: 8px !important;
++  margin-block: 4px !important;
++  padding: 2px !important;
++  background: rgba(0, 0, 0, 0.08) !important;
++}

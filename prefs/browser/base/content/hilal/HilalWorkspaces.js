@@ -957,6 +957,8 @@
       let newTab = null;
       let isFreshNewTab = false;
       let state = null;
+      const currentURI = tab.linkedBrowser?.currentURI?.spec || "";
+      const isActuallyLoadingRealURL = currentURI && !/^(about:blank|about:newtab|about:home)$/i.test(currentURI);
       try {
         if (typeof SessionStore !== "undefined") {
           state = JSON.parse(SessionStore.getTabState(tab));
@@ -968,7 +970,7 @@
                 entries[0].url === "about:newtab" ||
                 entries[0].url === "about:home"))
           ) {
-            isFreshNewTab = true;
+            isFreshNewTab = !isActuallyLoadingRealURL;
           }
         }
       } catch (e) {
@@ -994,6 +996,9 @@
             if (workspaceId !== this._activeId) {
               delete state.groupId;
               delete state.splitViewId;
+            }
+            if (isActuallyLoadingRealURL && (!state.entries || state.entries.length === 0)) {
+              state.entries = [{ url: currentURI, title: tab.label || currentURI }];
             }
             state.extData = state.extData || {};
             state.extData[STORE_KEY] = workspaceId;
