@@ -496,11 +496,12 @@ index 19fafff8cb45..ace248471f7d 100644
 +}
 +
 +#sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tabbrowser-tab {
-+  aspect-ratio: 1 !important;
++  aspect-ratio: 1.15 / 1 !important;
 +  width: 100% !important;
 +  height: auto !important;
-+  min-width: 52px !important;
-+  min-height: 52px !important;
++  min-width: 0 !important;
++  min-height: 0 !important;
++  max-width: 100% !important;
 +  margin: 0 !important;
 +  padding: 0 !important;
 +  display: flex !important;

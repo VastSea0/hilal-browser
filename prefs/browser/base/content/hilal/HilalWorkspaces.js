@@ -605,7 +605,7 @@
           let tab = gBrowser.getTabForBrowser(browser);
           if (tab) {
             let workspaceId = this._getTabWorkspace(tab);
-            this._scheduleContainerRetarget(tab, workspaceId);
+            this._scheduleContainerRetarget(tab, workspaceId, locationURI);
           }
 
           if (locationURI && (locationURI.scheme === "http" || locationURI.scheme === "https")) {
@@ -872,7 +872,7 @@
       return tab;
     }
 
-    _needsContainerRetarget(tab, workspaceId) {
+    _needsContainerRetarget(tab, workspaceId, locationURI = null) {
       if (this._isCustomizing) {
         return false;
       }
@@ -887,7 +887,7 @@
       }
 
       // Do not retarget privileged browser pages (about:, chrome:, resource:) as they cannot load in containers
-      const spec = tab.linkedBrowser?.currentURI?.spec || "";
+      const spec = locationURI?.spec || tab.linkedBrowser?.currentURI?.spec || "";
       const isTransientInitialPage = /^(about:newtab|about:blank|about:home)$/i.test(
         spec
       );
@@ -906,9 +906,9 @@
       return true;
     }
 
-    _scheduleContainerRetarget(tab, workspaceId) {
+    _scheduleContainerRetarget(tab, workspaceId, locationURI = null) {
       if (
-        !this._needsContainerRetarget(tab, workspaceId) ||
+        !this._needsContainerRetarget(tab, workspaceId, locationURI) ||
         this._retargetingTabs.has(tab)
       ) {
         return;
@@ -921,11 +921,12 @@
           tab.isConnected &&
           !tab.closing &&
           this._getTabWorkspace(tab) === workspaceId &&
-          this._needsContainerRetarget(tab, workspaceId)
+          this._needsContainerRetarget(tab, workspaceId, locationURI)
         ) {
           this._moveTabToWorkspace(tab, workspaceId, {
             copy: false,
             select: tab.selected,
+            locationURI,
           });
         }
       }, 0);
@@ -934,7 +935,7 @@
     _moveTabToWorkspace(
       tab,
       workspaceId,
-      { copy = false, select = false } = {}
+      { copy = false, select = false, locationURI = null } = {}
     ) {
       const workspace = this._getWorkspaceById(workspaceId);
       if (!tab || !workspace || tab.closing) {
@@ -957,7 +958,7 @@
       let newTab = null;
       let isFreshNewTab = false;
       let state = null;
-      const currentURI = tab.linkedBrowser?.currentURI?.spec || "";
+      const currentURI = locationURI?.spec || tab.linkedBrowser?.currentURI?.spec || "";
       const isActuallyLoadingRealURL = currentURI && !/^(about:blank|about:newtab|about:home)$/i.test(currentURI);
       try {
         if (typeof SessionStore !== "undefined") {
@@ -1024,7 +1025,7 @@
             "failed to preserve tab state while moving workspace tab",
             e
           );
-          const uri = tab.linkedBrowser?.currentURI?.spec || "about:newtab";
+          const uri = currentURI || "about:newtab";
           newTab = gBrowser.addWebTab(uri, {
             inBackground: !(select || sourceWasSelected),
             tabIndex: tab._tPos + 1,
