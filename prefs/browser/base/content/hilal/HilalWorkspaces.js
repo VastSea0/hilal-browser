@@ -891,7 +891,10 @@
 
       // Do not retarget privileged browser pages (about:, chrome:, resource:) as they cannot load in containers
       const spec = locationURI?.spec || tab.linkedBrowser?.currentURI?.spec || "";
-      const isTransientInitialPage = /^(about:newtab|about:blank|about:home)$/i.test(
+      if (spec === "about:blank" || spec === "") {
+        return false;
+      }
+      const isTransientInitialPage = /^(about:newtab|about:home)$/i.test(
         spec
       );
       // UI-triggered navigations often start in about:newtab and then resolve to
