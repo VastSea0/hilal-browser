@@ -1,16 +1,26 @@
+diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+index 339062fb2b8b..12dd35564cee 100644
+--- a/browser/app/profile/firefox.js
++++ b/browser/app/profile/firefox.js
+@@ -3720,3 +3720,4 @@ pref("hilal.sidebar.footer.privacy", true);
+ pref("hilal.sidebar.footer.settings", true);
+ pref("hilal.sidebar.customItems", "[]");
+ pref("hilal.compact.enabled", false);
++pref("hilal.compact.hide_toolbox", true);
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index 4468d36b5c9d..14e226585758 100644
+index 4468d36b5c9d..bc8740009993 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -1796,6 +1796,7 @@ var gHilalPane = {
+@@ -1796,6 +1796,8 @@ var gHilalPane = {
      const hilalWsCheckbox = document.getElementById("hilalWorkspacesEnabled");
      const hilalWsPinnedPublicCheckbox = document.getElementById("hilalWorkspacesPinnedPublic");
      const hilalWsGroupsPublicCheckbox = document.getElementById("hilalWorkspacesGroupsPublic");
 +    const hilalSidebarCompactCheckbox = document.getElementById("hilalSidebarCompactEnabled");
++    const hilalSidebarCompactHideToolbarCheckbox = document.getElementById("hilalSidebarCompactHideToolbar");
      const hilalPrivacyLevelRadioGroup = /** @type {HTMLElement|null} */ (
        document.getElementById("hilalPrivacyLevel")
      );
-@@ -1861,6 +1862,18 @@ var gHilalPane = {
+@@ -1861,6 +1863,30 @@ var gHilalPane = {
          );
        });
      }
@@ -26,32 +36,56 @@ index 4468d36b5c9d..14e226585758 100644
 +        );
 +      });
 +    }
++    if (hilalSidebarCompactHideToolbarCheckbox) {
++      hilalSidebarCompactHideToolbarCheckbox.checked = Services.prefs.getBoolPref(
++        "hilal.compact.hide_toolbox",
++        true
++      );
++      hilalSidebarCompactHideToolbarCheckbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref(
++          "hilal.compact.hide_toolbox",
++          hilalSidebarCompactHideToolbarCheckbox.checked
++        );
++      });
++    }
      if (hilalPrivacyLevelRadioGroup) {
        hilalPrivacyLevelRadioGroup.value = normalizePrivacyLevel(
          Services.prefs.getStringPref("hilal.privacy.level", "standard")
-@@ -1885,6 +1898,7 @@ var gHilalPane = {
+@@ -1885,6 +1911,8 @@ var gHilalPane = {
          Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
          Services.prefs.setBoolPref("hilal.workspaces.pinned.public", false);
          Services.prefs.setBoolPref("hilal.workspaces.groups.public", false);
 +        Services.prefs.setBoolPref("hilal.compact.enabled", false);
++        Services.prefs.setBoolPref("hilal.compact.hide_toolbox", true);
          Services.prefs.setStringPref("hilal.privacy.level", "standard");
          if (hilalWsCheckbox) {
            hilalWsCheckbox.checked = true;
-@@ -1895,6 +1909,9 @@ var gHilalPane = {
+@@ -1895,6 +1923,12 @@ var gHilalPane = {
          if (hilalWsGroupsPublicCheckbox) {
            hilalWsGroupsPublicCheckbox.checked = false;
          }
 +        if (hilalSidebarCompactCheckbox) {
 +          hilalSidebarCompactCheckbox.checked = false;
 +        }
++        if (hilalSidebarCompactHideToolbarCheckbox) {
++          hilalSidebarCompactHideToolbarCheckbox.checked = true;
++        }
          if (hilalPrivacyLevelRadioGroup) {
            hilalPrivacyLevelRadioGroup.value = "standard";
          }
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
-index 7311388dd53b..2cc5334c46aa 100644
+index 7311388dd53b..f6a1a40b7a71 100644
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
-@@ -2821,6 +2821,11 @@ var HilalCompactMode = {
+@@ -2810,6 +2810,7 @@ XPCOMUtils.defineLazyPreferenceGetter(
+ 
+ var HilalCompactMode = {
+   PREF: "hilal.compact.enabled",
++  HIDE_TOOLBOX_PREF: "hilal.compact.hide_toolbox",
+   ATTR: "hilal-compact-mode",
+ 
+   _prefObserver: null,
+@@ -2821,11 +2822,19 @@ var HilalCompactMode = {
    _showDelayMs: 180,
    _leaveDelayMs: 400,
  
@@ -61,9 +95,40 @@ index 7311388dd53b..2cc5334c46aa 100644
 +  _topHoverZoneHeight: 48,
 +
    init() {
-     this._prefObserver = (_subject, _topic, _data) => {
-       this._apply(Services.prefs.getBoolPref(this.PREF, false));
-@@ -2854,6 +2859,7 @@ var HilalCompactMode = {
+-    this._prefObserver = (_subject, _topic, _data) => {
+-      this._apply(Services.prefs.getBoolPref(this.PREF, false));
++    this._prefObserver = (_subject, _topic, data) => {
++      if (data === this.PREF || data === this.HIDE_TOOLBOX_PREF) {
++        this._apply(Services.prefs.getBoolPref(this.PREF, false));
++      }
+     };
+     Services.prefs.addObserver(this.PREF, this._prefObserver);
++    Services.prefs.addObserver(this.HIDE_TOOLBOX_PREF, this._prefObserver);
+     window.addEventListener("unload", () => this.uninit(), { once: true });
+     this._apply(Services.prefs.getBoolPref(this.PREF, false));
+   },
+@@ -2833,6 +2842,7 @@ var HilalCompactMode = {
+   uninit() {
+     if (this._prefObserver) {
+       Services.prefs.removeObserver(this.PREF, this._prefObserver);
++      Services.prefs.removeObserver(this.HIDE_TOOLBOX_PREF, this._prefObserver);
+       this._prefObserver = null;
+     }
+     this._removeMouseListeners();
+@@ -2848,12 +2858,20 @@ var HilalCompactMode = {
+ 
+   _apply(compact) {
+     document.documentElement.toggleAttribute(this.ATTR, compact);
++    
++    const hideToolbox = compact && Services.prefs.getBoolPref(this.HIDE_TOOLBOX_PREF, true);
++    document.documentElement.toggleAttribute("hilal-compact-hide-toolbox", hideToolbox);
++
+     this._syncToolbarButton(compact);
+     if (compact) {
+       this._addMouseListeners();
++      if (!hideToolbox) {
++        this._hideToolbox();
++      }
      } else {
        this._removeMouseListeners();
        this._hideSidebar();
@@ -71,7 +136,7 @@ index 7311388dd53b..2cc5334c46aa 100644
      }
    },
  
-@@ -2886,57 +2892,97 @@ var HilalCompactMode = {
+@@ -2886,57 +2904,98 @@ var HilalCompactMode = {
        clearTimeout(this._mouseLeaveTimer);
        this._mouseLeaveTimer = null;
      }
@@ -161,7 +226,8 @@ index 7311388dd53b..2cc5334c46aa 100644
 +    }
 +
 +    // 2. Top Toolbox hover logic
-+    if (toolbox) {
++    const hideToolbox = Services.prefs.getBoolPref(this.HIDE_TOOLBOX_PREF, true);
++    if (toolbox && hideToolbox) {
 +      const isNearTopEdge = (this._lastMouseY <= this._topHoverZoneHeight);
 +
 +      if (isNearTopEdge && !this._toolboxVisible) {
@@ -210,7 +276,7 @@ index 7311388dd53b..2cc5334c46aa 100644
      }
    },
  
-@@ -2974,4 +3020,39 @@ var HilalCompactMode = {
+@@ -2974,4 +3033,39 @@ var HilalCompactMode = {
        this._mouseLeaveTimer = null;
      }
    },
@@ -251,30 +317,33 @@ index 7311388dd53b..2cc5334c46aa 100644
 +  },
  };
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
-index ba7eacff8f6f..accca598926d 100644
+index ba7eacff8f6f..35b2cbf11d84 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2782,6 +2782,8 @@ hilal-workspaces-reset-confirm-message = This will delete all workspace data and
+@@ -2782,6 +2782,11 @@ hilal-workspaces-reset-confirm-message = This will delete all workspace data and
  ## Sidebar Options
  
  hilal-sidebar-header = Sidebar Options
 +hilal-sidebar-compact-enabled =
-+    .label = Enable compact mode (hover to reveal sidebar and top toolbar)
++    .label = Enable compact mode (hover mouse near screen edges to reveal sidebars)
++hilal-sidebar-compact-hide-toolbar =
++    .label = Auto-hide top toolbar in compact mode
++hilal-sidebar-compact-hide-toolbar-desc = When enabled, the top toolbar containing the address bar and tabs is automatically hidden in compact mode. Hovering near the top edge reveals it with a gorgeous premium glassmorphic slide-down animation. When disabled, the top toolbar remains permanently visible.
  hilal-sidebar-footer-items-label = Standard Footer Items:
  hilal-sidebar-footer-bookmarks =
      .label = Bookmarks
 diff --git a/browser/themes/shared/sidebar.css b/browser/themes/shared/sidebar.css
-index 19fafff8cb45..bdfa20b08d15 100644
+index 19fafff8cb45..a9e20a25d337 100644
 --- a/browser/themes/shared/sidebar.css
 +++ b/browser/themes/shared/sidebar.css
-@@ -682,3 +682,59 @@ sidebar-main,
+@@ -682,3 +682,61 @@ sidebar-main,
    border: none !important;
    padding: 0 !important;
  }
 +
 +/* Hilal Compact Mode — top toolbar auto-hides as a premium floating overlay on hover */
 +
-+:root[hilal-compact-mode] #navigator-toolbox {
++:root[hilal-compact-mode][hilal-compact-hide-toolbox] #navigator-toolbox {
 +  position: fixed !important;
 +  z-index: 1001 !important;
 +  top: 0 !important;
@@ -299,17 +368,19 @@ index 19fafff8cb45..bdfa20b08d15 100644
 +}
 +
 +/* Compact Top Toolbar Visible state */
-+:root[hilal-compact-mode] #navigator-toolbox.hilal-compact-visible {
++:root[hilal-compact-mode][hilal-compact-hide-toolbox] #navigator-toolbox.hilal-compact-visible {
 +  opacity: 1 !important;
 +  visibility: visible !important;
 +  pointer-events: auto !important;
 +  transform: translateY(0) !important;
 +  
 +  /* Premium aesthetic: unified floating glassmorphism card */
-+  background-color: var(--hilal-sidebar-background, var(--toolbar-background-color, #1e1e2e)) !important;
++  color-scheme: light dark !important;
++  background-color: light-dark(rgba(255, 255, 255, 0.85), rgba(30, 30, 46, 0.85)) !important;
++  backdrop-filter: blur(20px) !important;
 +  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 12px rgba(0, 0, 0, 0.2) !important;
 +  border-radius: 0 0 16px 16px !important;
-+  border: 1px solid var(--hilal-sidebar-border, rgba(255, 255, 255, 0.1)) !important;
++  border: 1px solid var(--sidebar-border-color, var(--hilal-sidebar-border, light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.1)))) !important;
 +  border-top: none !important;
 +  
 +  transition:
@@ -319,10 +390,10 @@ index 19fafff8cb45..bdfa20b08d15 100644
 +}
 +
 +/* Expose the unified card background by turning child toolbar backgrounds transparent */
-+:root[hilal-compact-mode] #navigator-toolbox.hilal-compact-visible #titlebar,
-+:root[hilal-compact-mode] #navigator-toolbox.hilal-compact-visible #nav-bar,
-+:root[hilal-compact-mode] #navigator-toolbox.hilal-compact-visible #PersonalToolbar,
-+:root[hilal-compact-mode] #navigator-toolbox.hilal-compact-visible #nav-bar-customization-target {
++:root[hilal-compact-mode][hilal-compact-hide-toolbox] #navigator-toolbox.hilal-compact-visible #titlebar,
++:root[hilal-compact-mode][hilal-compact-hide-toolbox] #navigator-toolbox.hilal-compact-visible #nav-bar,
++:root[hilal-compact-mode][hilal-compact-hide-toolbox] #navigator-toolbox.hilal-compact-visible #PersonalToolbar,
++:root[hilal-compact-mode][hilal-compact-hide-toolbox] #navigator-toolbox.hilal-compact-visible #nav-bar-customization-target {
 +  background: transparent !important;
 +  box-shadow: none !important;
 +  border: none !important;

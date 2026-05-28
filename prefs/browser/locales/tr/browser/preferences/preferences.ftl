@@ -21,7 +21,10 @@ hilal-workspaces-reset-confirm-message = Bu işlem tüm çalışma alanı verile
 
 hilal-sidebar-header = Kenar Çubuğu Seçenekleri
 hilal-sidebar-compact-enabled =
-    .label = Kompakt modu etkinleştir (kenar çubuğunu ve üst araç çubuğunu göstermek için kenara gelin)
+    .label = Kompakt modu etkinleştir (farenizi kenarlara yaklaştırarak kenar ve üst araç çubuklarını süzebilirsiniz)
+hilal-sidebar-compact-hide-toolbar =
+    .label = Kompakt modda üst araç çubuğunu otomatik gizle
+hilal-sidebar-compact-hide-toolbar-desc = Etkinleştirildiğinde, adres çubuğu ve sekmeleri barındıran üst araç çubuğu otomatik olarak gizlenir ve yalnızca imleç üst kenara getirildiğinde şık, yarı saydam bir süzülme animasyonuyla gösterilir. Devre dışı bırakıldığında ise üst araç çubuğu her zaman görünür kalır.
 hilal-sidebar-footer-items-label = Standart Alt Bilgi Öğeleri:
 hilal-sidebar-footer-bookmarks =
     .label = Yer İmleri
