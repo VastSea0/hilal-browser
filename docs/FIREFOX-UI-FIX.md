@@ -8,9 +8,9 @@ built into the browser.
 
 | File | Role |
 |------|------|
-| `prefs/browser/themes/shared/hilal-ui-fix.css` | Entry: `@import`s, gated by `hilal.uifix.enabled` |
-| `prefs/browser/themes/shared/firefox-ui-fix.css` | Vendored Lepton chrome CSS (upstream + Hilal path fixes) |
-| `prefs/browser/themes/shared/hilal-ui-overrides.css` | Hilal-only overrides |
+| `prefs/browser/themes/shared/hilal-ui-fix.css` | Entry: top-level `@import`s (must not be nested in `@media`) |
+| `prefs/browser/themes/shared/firefox-ui-fix.css` | Vendored Lepton CSS, wrapped in `@media -moz-pref("hilal.uifix.enabled")` |
+| `prefs/browser/themes/shared/hilal-ui-overrides.css` | Hilal-only overrides, same pref gate |
 | `prefs/browser/themes/shared/icons/` | Icons referenced as `chrome://browser/skin/icons/` |
 | `third_party/firefox-ui-fix/` | License, upstream pin metadata |
 

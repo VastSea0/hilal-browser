@@ -9,6 +9,7 @@
 @charset "UTF-8";
 @namespace xul url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 @namespace html url("http://www.w3.org/1999/xhtml");
+@media -moz-pref("hilal.uifix.enabled") {
 /** Default Theme - Contrast **************************************************/
 @media -moz-pref("userChrome.theme.built_in_contrast") {
   /*= Lightmode - Color darker =================================================*/
@@ -31396,4 +31397,6 @@
   #uninstall-ssb-contextmenu {
     --menuitem-image: url("chrome://browser/skin/icons/pwa-remove.svg");
   }
+}
+
 }

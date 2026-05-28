@@ -73,6 +73,7 @@ src_path, dst_path = sys.argv[1:3]
 text = open(src_path, encoding="utf-8").read()
 text = text.replace("../icons/", "chrome://browser/skin/icons/")
 text = re.sub(r'\[customizing="true"\]', "[customizing]", text)
+text = '@media -moz-pref("hilal.uifix.enabled") {\n' + text + "\n}\n"
 open(dst_path, "w", encoding="utf-8").write(text)
 PY
 

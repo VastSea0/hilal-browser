@@ -1,0 +1,211 @@
+Hilal Browser: wire sidebar footer and custom shortcut preferences
+
+---
+
+diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+--- a/browser/components/preferences/main.js
++++ b/browser/components/preferences/main.js
+@@ -1885,8 +1885,203 @@
+           "hilal.compact.hide_toolbox",
+           hilalSidebarCompactHideToolbarCheckbox.checked
+         );
++      });
++    }
++
++    const hilalSidebarFooterCheckboxes = [
++      ["hilalSidebarFooterBookmarks", "hilal.sidebar.footer.bookmarks", false],
++      ["hilalSidebarFooterHistory", "hilal.sidebar.footer.history", true],
++      ["hilalSidebarFooterPasswords", "hilal.sidebar.footer.passwords", false],
++      ["hilalSidebarFooterDownloads", "hilal.sidebar.footer.downloads", true],
++      ["hilalSidebarFooterPrivacy", "hilal.sidebar.footer.privacy", true],
++      ["hilalSidebarFooterSettings", "hilal.sidebar.footer.settings", true],
++    ];
++    for (const [elementId, prefName, defaultValue] of hilalSidebarFooterCheckboxes) {
++      const checkbox = document.getElementById(elementId);
++      if (!checkbox) {
++        continue;
++      }
++      checkbox.checked = Services.prefs.getBoolPref(prefName, defaultValue);
++      checkbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref(prefName, checkbox.checked);
+       });
+     }
++
++    const getHilalSidebarCustomItems = () => {
++      try {
++        const parsed = JSON.parse(
++          Services.prefs.getStringPref("hilal.sidebar.customItems", "[]")
++        );
++        return Array.isArray(parsed) ? parsed : [];
++      } catch (e) {
++        console.warn("Failed to parse hilal.sidebar.customItems", e);
++        return [];
++      }
++    };
++    const setHilalSidebarCustomItems = items => {
++      Services.prefs.setStringPref(
++        "hilal.sidebar.customItems",
++        JSON.stringify(items)
++      );
++    };
++
++    const customList = document.getElementById("hilalSidebarCustomList");
++    const customAddBtn = document.getElementById("hilalSidebarCustomAdd");
++    const customRemoveBtn = document.getElementById("hilalSidebarCustomRemove");
++    const customForm = document.getElementById("hilalSidebarCustomForm");
++    const customNameInput = document.getElementById("hilalSidebarCustomName");
++    const customUrlInput = document.getElementById("hilalSidebarCustomUrl");
++    const customIconSelect = document.getElementById("hilalSidebarCustomIcon");
++    const customSaveBtn = document.getElementById("hilalSidebarCustomSave");
++    const customCancelBtn = document.getElementById("hilalSidebarCustomCancel");
++    let editingCustomItemId = null;
++
++    const refreshHilalSidebarCustomList = () => {
++      if (!customList) {
++        return;
++      }
++      customList.textContent = "";
++      for (const item of getHilalSidebarCustomItems()) {
++        if (!item?.id) {
++          continue;
++        }
++        const row = document.createXULElement("richlistitem");
++        row.setAttribute("itemId", item.id);
++        row.setAttribute(
++          "style",
++          "padding: 6px; border-bottom: 1px solid var(--in-content-border-color); align-items: center; display: flex; flex-direction: row;"
++        );
++
++        const nameLabel = document.createXULElement("label");
++        nameLabel.setAttribute("value", item.name || item.url || item.id);
++        nameLabel.setAttribute(
++          "style",
++          "font-weight: bold; width: 160px; min-width: 160px; margin-right: 10px;"
++        );
++        row.appendChild(nameLabel);
++
++        const urlLabel = document.createXULElement("label");
++        urlLabel.setAttribute("value", item.url || "");
++        urlLabel.setAttribute("flex", "1");
++        urlLabel.setAttribute("crop", "end");
++        row.appendChild(urlLabel);
++
++        customList.appendChild(row);
++      }
++      if (customRemoveBtn) {
++        customRemoveBtn.disabled = true;
++      }
++    };
++
++    const resetHilalSidebarCustomForm = () => {
++      editingCustomItemId = null;
++      if (customForm) {
++        customForm.hidden = true;
++      }
++      if (customNameInput) {
++        customNameInput.value = "";
++      }
++      if (customUrlInput) {
++        customUrlInput.value = "";
++      }
++      if (customIconSelect) {
++        customIconSelect.value = "link";
++      }
++    };
++
++    const showHilalSidebarCustomForm = item => {
++      if (customForm) {
++        customForm.hidden = false;
++      }
++      editingCustomItemId = item?.id || null;
++      if (customNameInput) {
++        customNameInput.value = item?.name || "";
++        customNameInput.focus();
++      }
++      if (customUrlInput) {
++        customUrlInput.value = item?.url || "";
++      }
++      if (customIconSelect) {
++        customIconSelect.value = item?.icon || "link";
++      }
++    };
++
++    if (customList) {
++      customList.addEventListener("select", () => {
++        if (customRemoveBtn) {
++          customRemoveBtn.disabled = !customList.selectedItem;
++        }
++      });
++    }
++
++    if (customAddBtn) {
++      customAddBtn.addEventListener("command", () => {
++        showHilalSidebarCustomForm(null);
++      });
++    }
++
++    if (customCancelBtn) {
++      customCancelBtn.addEventListener("command", resetHilalSidebarCustomForm);
++    }
++
++    if (customSaveBtn) {
++      customSaveBtn.addEventListener("command", () => {
++        const name = customNameInput ? customNameInput.value.trim() : "";
++        const url = customUrlInput ? customUrlInput.value.trim() : "";
++        const icon = customIconSelect ? customIconSelect.value : "link";
++        if (!name || !url) {
++          Services.prompt.alert(
++            window,
++            "Invalid Input",
++            "Name and URL are required."
++          );
++          return;
++        }
++
++        const items = getHilalSidebarCustomItems();
++        const itemId =
++          editingCustomItemId ||
++          `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
++        const nextItem = { id: itemId, name, url, icon };
++        const existingIndex = items.findIndex(item => item.id === itemId);
++        if (existingIndex >= 0) {
++          items[existingIndex] = nextItem;
++        } else {
++          items.push(nextItem);
++        }
++        setHilalSidebarCustomItems(items);
++        refreshHilalSidebarCustomList();
++        resetHilalSidebarCustomForm();
++      });
++    }
++
++    if (customRemoveBtn) {
++      customRemoveBtn.addEventListener("command", () => {
++        const selected = customList ? customList.selectedItem : null;
++        if (!selected) {
++          return;
++        }
++        const itemId = selected.getAttribute("itemId");
++        if (
++          !itemId ||
++          !Services.prompt.confirm(
++            window,
++            "Remove Shortcut",
++            "Remove this custom sidebar shortcut?"
++          )
++        ) {
++          return;
++        }
++        setHilalSidebarCustomItems(
++          getHilalSidebarCustomItems().filter(item => item.id !== itemId)
++        );
++        refreshHilalSidebarCustomList();
++        resetHilalSidebarCustomForm();
++      });
++    }
++
++    refreshHilalSidebarCustomList();
++
+     if (hilalPrivacyLevelRadioGroup) {
+       hilalPrivacyLevelRadioGroup.value = normalizePrivacyLevel(
+         Services.prefs.getStringPref("hilal.privacy.level", "standard")

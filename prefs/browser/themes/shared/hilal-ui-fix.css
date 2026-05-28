@@ -1,7 +1,5 @@
 /* Hilal Browser UI fix entry — gates Firefox-UI-Fix behind hilal.uifix.enabled.
  * Upstream: https://github.com/black7375/Firefox-UI-Fix (MPL 2.0)
  */
-@media -moz-pref("hilal.uifix.enabled") {
 @import url("chrome://browser/skin/firefox-ui-fix.css");
 @import url("chrome://browser/skin/hilal-ui-overrides.css");
-}
