@@ -362,7 +362,7 @@ index d3178e9eb6e3..7311388dd53b 100644
 +  },
 +};
 diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
-index a8369dde37e3..74f7831fe263 100644
+index a8369dde37e3..db8d498444f9 100644
 --- a/browser/components/sidebar/sidebar-main.css
 +++ b/browser/components/sidebar/sidebar-main.css
 @@ -17,6 +17,520 @@
@@ -886,8 +886,33 @@ index a8369dde37e3..74f7831fe263 100644
  .wrapper {
    display: grid;
    grid-template-rows: auto min-content min-content;
+@@ -185,3 +699,24 @@
+ .bottom-actions {
+   align-self: end;
+ }
++
++#hilal-tabs-section {
++  flex: 1 1 auto;
++  display: flex;
++  flex-direction: column;
++  min-height: 250px;
++}
++
++.hilal-tabstrip-container {
++  flex: 1 1 auto;
++  display: flex;
++  flex-direction: column;
++  min-height: 0;
++}
++
++.hilal-tabstrip-container > slot[name="tabstrip"] {
++  display: flex;
++  flex-direction: column;
++  flex: 1 1 auto;
++  min-height: 0;
++}
 diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/sidebar/sidebar-main.mjs
-index 8acc798e5d22..86dc646bb556 100644
+index 8acc798e5d22..3c87b01b9a6c 100644
 --- a/browser/components/sidebar/sidebar-main.mjs
 +++ b/browser/components/sidebar/sidebar-main.mjs
 @@ -18,8 +18,9 @@ import "chrome://browser/content/sidebar/sidebar-pins-promo.mjs";
@@ -1632,11 +1657,16 @@ index 8acc798e5d22..86dc646bb556 100644
        case "command":
          switch (e.target.id) {
            case "sidebar-context-menu-manage-extension":
-@@ -649,6 +1330,12 @@ export default class SidebarMain extends MozLitElement {
+@@ -648,7 +1329,16 @@ export default class SidebarMain extends MozLitElement {
+     this._toolsResizeObserver?.disconnect();
    }
  
-   updated() {
+-  updated() {
++  updated(changedProperties) {
 +    if (this.hilalSidebarActive) {
++      if (changedProperties?.has("hilalSearchQuery")) {
++        this.applySearchFiltering();
++      }
 +      return;
 +    }
 +    if (!this._toolsIntersectionObserver || !this._toolsResizeObserver) {
@@ -1645,7 +1675,66 @@ index 8acc798e5d22..86dc646bb556 100644
      if (
        window.SidebarController.sidebarRevampVisibility !== "expand-on-hover"
      ) {
-@@ -790,7 +1477,578 @@ export default class SidebarMain extends MozLitElement {
+@@ -671,6 +1361,58 @@ export default class SidebarMain extends MozLitElement {
+     }
+   }
+ 
++  applySearchFiltering() {
++    if (!window.gHilalWorkspaces || !window.gBrowser) {
++      return;
++    }
++    const query = this.hilalSearchQuery.trim().toLocaleLowerCase();
++    if (!query) {
++      window.gHilalWorkspaces._apply();
++      return;
++    }
++
++    const activeWorkspaceId = window.gHilalWorkspaces._activeId;
++    const pinnedIsPublic = window.gHilalWorkspaces._pinnedIsPublic;
++    const groupsIsPublic = window.gHilalWorkspaces._groupsIsPublic;
++
++    for (const tab of window.gBrowser.tabs) {
++      const workspaceId = window.gHilalWorkspaces._getTabWorkspace(tab);
++      const isPinnedSession =
++        typeof SessionStore !== "undefined" &&
++        SessionStore.getCustomTabValue(tab, "hilalWorkspacePinned") === "true";
++      const isTabPinned = tab.pinned || isPinnedSession;
++      const isTabGrouped = !!tab.group;
++
++      const belongsToActiveWorkspace =
++        workspaceId === activeWorkspaceId ||
++        (pinnedIsPublic && isTabPinned) ||
++        (groupsIsPublic && isTabGrouped);
++
++      if (belongsToActiveWorkspace) {
++        const title = this.getHilalTabTitle(tab).toLocaleLowerCase();
++        if (title.includes(query)) {
++          if (tab.hidden && window.gHilalWorkspaces._isHiddenByWorkspace(tab)) {
++            window.gHilalWorkspaces._showWorkspaceTab(tab);
++          } else if (tab.hidden) {
++            window.gBrowser.showTab(tab);
++          }
++        } else {
++          if (!tab.selected && !tab.closing) {
++            if (tab.pinned) {
++              window.gHilalWorkspaces._rememberPinned(tab);
++              window.gBrowser.unpinTab(tab);
++            }
++            window.gBrowser.hideTab(tab, "hilal-workspace");
++          }
++        }
++      } else {
++        if (!tab.pinned && !(groupsIsPublic && tab.group)) {
++          window.gHilalWorkspaces._hideWorkspaceTab(tab);
++        }
++      }
++    }
++  }
++
+   getEntrypointValues(action) {
+     let providerInfo;
+     if (action.view === "viewGenaiChatSidebar") {
+@@ -790,7 +1532,409 @@ export default class SidebarMain extends MozLitElement {
      return container && !container.hidden;
    }
  
@@ -1707,150 +1796,6 @@ index 8acc798e5d22..86dc646bb556 100644
 +    `;
 +  }
 +
-+  hilalTabTemplate(tab) {
-+    const active = tab === window.gBrowser.selectedTab;
-+    const loading = tab.hasAttribute("busy");
-+    return html`
-+      <div
-+        class=${classMap({
-+          "hilal-row": true,
-+          "hilal-tab-row": true,
-+          "hilal-row-active": active,
-+        })}
-+        role="button"
-+        tabindex="0"
-+        draggable="true"
-+        @dragstart=${event => this.handleTabDragStart(tab, event)}
-+        @dragover=${event => this.handleTabDragOver(tab, event)}
-+        @drop=${event => this.handleTabDrop(tab, event)}
-+        @mouseenter=${event => this.handleTabMouseEnter(tab, event)}
-+        @mouseleave=${event => this.handleTabMouseLeave(tab, event)}
-+        title=${this.getHilalTabTitle(tab)}
-+        @click=${() => this.selectHilalTab(tab)}
-+        @keydown=${event => {
-+          if (event.target !== event.currentTarget) {
-+            return;
-+          }
-+          if (event.key === "Enter" || event.key === " ") {
-+            event.preventDefault();
-+            this.selectHilalTab(tab);
-+          }
-+        }}
-+        @contextmenu=${event => {
-+          event.preventDefault();
-+          event.stopPropagation();
-+          const popup = document.getElementById("tabContextMenu");
-+          if (popup) {
-+            MozXULElement.insertFTLIfNeeded("browser/tabContextMenu.ftl");
-+            popup.querySelectorAll("[data-lazy-l10n-id]").forEach(el => {
-+              el.setAttribute(
-+                "data-l10n-id",
-+                el.getAttribute("data-lazy-l10n-id")
-+              );
-+              el.removeAttribute("data-lazy-l10n-id");
-+            });
-+            window.TabContextMenu.contextTab = tab;
-+            window.TabContextMenu.contextTabs = [tab];
-+            popup.openPopupAtScreen(event.screenX, event.screenY, true);
-+          }
-+        }}
-+      >
-+        ${when(
-+          loading,
-+          () =>
-+            html`<span class="hilal-tab-loading" aria-hidden="true"></span>`,
-+          () => html`
-+            <img
-+              class="hilal-tab-favicon"
-+              alt=""
-+              src=${this.getHilalTabIcon(tab)}
-+              @error=${event => {
-+                event.currentTarget.src =
-+                  "chrome://global/skin/icons/defaultFavicon.svg";
-+              }}
-+            />
-+          `
-+        )}
-+        <span class="hilal-row-title">${this.getHilalTabTitle(tab)}</span>
-+        <span class="hilal-row-spacer"></span>
-+        <button
-+          class="hilal-tab-close"
-+          type="button"
-+          data-l10n-id="hilal-sidebar-close-tab"
-+          @click=${event => this.closeHilalTab(tab, event)}
-+        >
-+          ${this.hilalIcon("close")}
-+        </button>
-+      </div>
-+    `;
-+  }
-+
-+  hilalPinnedTabTemplate(tab) {
-+    const active = tab === window.gBrowser.selectedTab;
-+    const loading = tab.hasAttribute("busy");
-+    return html`
-+      <div
-+        class=${classMap({
-+          "hilal-pinned-card": true,
-+          "hilal-pinned-active": active,
-+        })}
-+        role="button"
-+        tabindex="0"
-+        draggable="true"
-+        @dragstart=${event => this.handleTabDragStart(tab, event)}
-+        @dragover=${event => this.handleTabDragOver(tab, event)}
-+        @drop=${event => this.handleTabDrop(tab, event)}
-+        @mouseenter=${event => this.handleTabMouseEnter(tab, event)}
-+        @mouseleave=${event => this.handleTabMouseLeave(tab, event)}
-+        title=${this.getHilalTabTitle(tab)}
-+        @click=${() => this.selectHilalTab(tab)}
-+        @keydown=${event => {
-+          if (event.target !== event.currentTarget) {
-+            return;
-+          }
-+          if (event.key === "Enter" || event.key === " ") {
-+            event.preventDefault();
-+            this.selectHilalTab(tab);
-+          }
-+        }}
-+        @contextmenu=${event => {
-+          event.preventDefault();
-+          event.stopPropagation();
-+          const popup = document.getElementById("tabContextMenu");
-+          if (popup) {
-+            MozXULElement.insertFTLIfNeeded("browser/tabContextMenu.ftl");
-+            popup.querySelectorAll("[data-lazy-l10n-id]").forEach(el => {
-+              el.setAttribute(
-+                "data-l10n-id",
-+                el.getAttribute("data-lazy-l10n-id")
-+              );
-+              el.removeAttribute("data-lazy-l10n-id");
-+            });
-+            window.TabContextMenu.contextTab = tab;
-+            window.TabContextMenu.contextTabs = [tab];
-+            popup.openPopupAtScreen(event.screenX, event.screenY, true);
-+          }
-+        }}
-+      >
-+        ${when(
-+          loading,
-+          () =>
-+            html`<span class="hilal-tab-loading" aria-hidden="true"></span>`,
-+          () => html`
-+            <img
-+              class="hilal-pinned-favicon"
-+              alt=""
-+              src=${this.getHilalTabIcon(tab)}
-+              @error=${event => {
-+                event.currentTarget.src =
-+                  "chrome://global/skin/icons/defaultFavicon.svg";
-+              }}
-+            />
-+          `
-+        )}
-+      </div>
-+    `;
-+  }
 +
 +  hilalBookmarkTemplate(bookmark) {
 +    const badge = this.getHilalBookmarkBadge(bookmark);
@@ -2083,27 +2028,10 @@ index 8acc798e5d22..86dc646bb556 100644
 +                  />
 +                `
 +              )}
-+              ${when(
-+                this.filteredHilalPinnedTabs.length > 0,
-+                () => html`
-+                  <section
-+                    class="hilal-pinned-section"
-+                    @dragover=${event => this.handlePinnedContainerDragOver(event)}
-+                    @drop=${event => this.handlePinnedContainerDrop(event)}
-+                  >
-+                    <div class="hilal-pinned-grid">
-+                      ${repeat(
-+                        this.filteredHilalPinnedTabs,
-+                        tab => tab,
-+                        tab => this.hilalPinnedTabTemplate(tab)
-+                      )}
-+                    </div>
-+                  </section>
-+                `
-+              )}
 +              <div class="hilal-panel-scroll">
 +                <section
 +                  class="hilal-section"
++                  id="hilal-tabs-section"
 +                  aria-labelledby="hilal-tabs-heading"
 +                >
 +                  <div class="hilal-section-heading" id="hilal-tabs-heading">
@@ -2112,16 +2040,8 @@ index 8acc798e5d22..86dc646bb556 100644
 +                      >${this.filteredHilalUnpinnedTabs.length}</span
 +                    >
 +                  </div>
-+                  <div
-+                    class="hilal-row-list"
-+                    @dragover=${event => this.handleUnpinnedContainerDragOver(event)}
-+                    @drop=${event => this.handleUnpinnedContainerDrop(event)}
-+                  >
-+                    ${repeat(
-+                      this.filteredHilalUnpinnedTabs,
-+                      tab => tab,
-+                      tab => this.hilalTabTemplate(tab)
-+                    )}
++                  <div class="hilal-tabstrip-container">
++                    <slot name="tabstrip"></slot>
 +                  </div>
 +                </section>
 +                ${when(
