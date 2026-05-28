@@ -120,7 +120,7 @@ index 15c466af31de..ef8a10951ba5 100644
        this.#props.launcherExpanded = false;
        return;
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
-index d3178e9eb6e3..c8e79f422e04 100644
+index d3178e9eb6e3..c4c486b992a8 100644
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
 @@ -481,7 +481,10 @@ var SidebarController = {
@@ -189,7 +189,7 @@ index d3178e9eb6e3..c8e79f422e04 100644
  
        this._box.setAttribute("checked", "true");
        this._state.command = commandID;
-@@ -2782,3 +2807,47 @@ XPCOMUtils.defineLazyPreferenceGetter(
+@@ -2782,3 +2807,171 @@ XPCOMUtils.defineLazyPreferenceGetter(
      }
    }
  );
@@ -280,10 +280,16 @@ index d3178e9eb6e3..c8e79f422e04 100644
 +      return;
 +    }
 +
-+    const mouseX = event.clientX;
-+    const isNearLeftEdge = mouseX <= this._hoverZoneWidth;
++    this._lastMouseX = event.clientX;
++    this._lastMouseY = event.clientY;
 +
-+    if (isNearLeftEdge && !this._sidebarVisible) {
++    const isLeft = SidebarController._positionStart;
++    const windowWidth = window.innerWidth;
++    const isNearEdge = isLeft
++      ? (this._lastMouseX <= this._hoverZoneWidth)
++      : (this._lastMouseX >= windowWidth - this._hoverZoneWidth);
++
++    if (isNearEdge && !this._sidebarVisible) {
 +      if (this._mouseShowTimer) {
 +        return;
 +      }
@@ -291,26 +297,30 @@ index d3178e9eb6e3..c8e79f422e04 100644
 +        this._mouseShowTimer = null;
 +        const s = document.getElementById("sidebar-main");
 +        if (s) {
-+          const mx = event.clientX;
-+          if (mx <= this._hoverZoneWidth) {
++          const isStillLeft = SidebarController._positionStart;
++          const isStillNear = isStillLeft
++            ? (this._lastMouseX <= this._hoverZoneWidth)
++            : (this._lastMouseX >= window.innerWidth - this._hoverZoneWidth);
++          if (isStillNear) {
 +            this._showSidebar(s);
 +          }
 +        }
 +      }, this._showDelayMs);
 +    } else if (this._sidebarVisible) {
 +      const sidebarRect = sidebar.getBoundingClientRect();
-+      const isInsideSidebar =
-+        mouseX >= sidebarRect.left &&
-+        mouseX <= sidebarRect.right &&
-+        event.clientY >= sidebarRect.top &&
-+        event.clientY <= sidebarRect.bottom;
++      const width = 280;
++      const isInsideSidebar = isLeft
++        ? (this._lastMouseX >= 0 && this._lastMouseX <= width &&
++           this._lastMouseY >= sidebarRect.top && this._lastMouseY <= sidebarRect.bottom)
++        : (this._lastMouseX >= windowWidth - width && this._lastMouseX <= windowWidth &&
++           this._lastMouseY >= sidebarRect.top && this._lastMouseY <= sidebarRect.bottom);
 +
-+      if (!isInsideSidebar && !isNearLeftEdge) {
++      if (!isInsideSidebar && !isNearEdge) {
 +        this._scheduleHide();
 +      } else {
 +        this._cancelHide();
 +      }
-+    } else if (!isNearLeftEdge && this._mouseShowTimer) {
++    } else if (!isNearEdge && this._mouseShowTimer) {
 +      clearTimeout(this._mouseShowTimer);
 +      this._mouseShowTimer = null;
 +    }
@@ -2258,10 +2268,36 @@ index 6bd76b8607ae..809df0e9bd13 100644
 +hilal-sidebar-workspaces-nav-label = Workspaces
 +hilal-sidebar-panel-label = Hilal Sidebar
 diff --git a/browser/themes/shared/sidebar.css b/browser/themes/shared/sidebar.css
-index 910b7f6c99c7..ddefd65740b5 100644
+index 910b7f6c99c7..b40b579a92c1 100644
 --- a/browser/themes/shared/sidebar.css
 +++ b/browser/themes/shared/sidebar.css
-@@ -563,3 +563,57 @@
+@@ -224,6 +224,25 @@
+   min-width: 16em;
+ }
+ 
++@media (-moz-platform: macos) {
++  :root:not([macOSNativeFullscreen]) #sidebar-main,
++  :root:not([macOSNativeFullscreen]) #sidebar-box {
++    background: transparent !important;
++    background-image: none !important;
++  }
++
++  :root:not([macOSNativeFullscreen]) #sidebar {
++    background-color: transparent !important;
++    box-shadow: none;
++  }
++
++  :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-launcher-expanded],
++  :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-ongoing-animations]:not([sidebar-launcher-expanded]) {
++    background-color: transparent !important;
++    background-image: none !important;
++  }
++}
++
+ menuseparator + #sidebar-extensions-separator {
+   display: none;
+ }
+@@ -544,3 +563,123 @@ sidebar-main,
      display: none;
    }
  }
@@ -2279,35 +2315,88 @@ index 910b7f6c99c7..ddefd65740b5 100644
 +/* Hilal Compact Mode — sidebar slides off-screen as a floating overlay on hover */
 +
 +:root[hilal-compact-mode] #sidebar-main {
-+  position: fixed;
-+  z-index: 100;
-+  top: 0;
-+  bottom: 0;
-+  left: 0;
-+  overflow: visible;
-+  box-shadow: 4px 0 24px 0 color-mix(in srgb, black 22%, transparent);
-+  border-radius: 0 var(--border-radius-medium) var(--border-radius-medium) 0;
-+  transform: translateX(-100%);
++  position: fixed !important;
++  z-index: 1000 !important;
++  top: 0 !important;
++  bottom: 0 !important;
++  
++  /* Overrides layout size to 0 so it takes no space in the browser hbox container */
++  width: 0 !important;
++  min-width: 0 !important;
++  max-width: 0 !important;
++  margin: 0 !important;
++  border: none !important;
++  padding: 0 !important;
++  
++  /* Floating container setup */
++  overflow: visible !important;
++  box-shadow: none !important;
++  background: transparent !important;
 +  opacity: 0;
 +  visibility: hidden;
 +  pointer-events: none;
-+  transition:
-+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-+    opacity 0.3s ease-out,
-+    visibility 0s 0.35s;
-+  will-change: transform;
++  will-change: transform, opacity;
 +  contain: layout style;
 +}
 +
-+:root[hilal-compact-mode] #sidebar-main.hilal-compact-visible {
-+  transform: translateX(0);
-+  opacity: 1;
-+  visibility: visible;
-+  pointer-events: auto;
++/* Left sidebar positioning */
++:root[hilal-compact-mode] #sidebar-main:not([sidebar-positionend]) {
++  left: 0 !important;
++  right: auto !important;
++  transform: translate3d(-340px, 0, 0) !important;
 +  transition:
-+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-+    opacity 0.3s ease-out,
++    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
++    opacity 0.28s ease-out,
++    visibility 0s 0.32s;
++}
++
++/* Right sidebar positioning */
++:root[hilal-compact-mode] #sidebar-main[sidebar-positionend] {
++  right: 0 !important;
++  left: auto !important;
++  transform: translate3d(340px, 0, 0) !important;
++  transition:
++    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
++    opacity 0.28s ease-out,
++    visibility 0s 0.32s;
++}
++
++/* Compact Sidebar Visible state */
++:root[hilal-compact-mode] #sidebar-main.hilal-compact-visible {
++  opacity: 1 !important;
++  visibility: visible !important;
++  pointer-events: auto !important;
++  transform: translate3d(0, 0, 0) !important;
++  transition:
++    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
++    opacity 0.28s ease-out,
 +    visibility 0s 0s;
++}
++
++/* Floating aesthetic styles applied to the inner Lit component */
++:root[hilal-compact-mode] sidebar-main,
++:root[hilal-compact-mode] html\:sidebar-main {
++  display: block !important;
++  width: 280px !important;
++  min-width: 280px !important;
++  max-width: 280px !important;
++  height: 100% !important;
++  background-color: var(--hilal-sidebar-background, var(--sidebar-background-color, #1e1e2e)) !important;
++  box-shadow: 4px 0 32px 0 rgba(0, 0, 0, 0.35), 0 4px 16px 0 rgba(0, 0, 0, 0.25) !important;
++  border-radius: 0 16px 16px 0 !important;
++  border-inline-end: 1px solid var(--hilal-sidebar-border, rgba(255, 255, 255, 0.1)) !important;
++  border-inline-start: none !important;
++  margin: 0 !important;
++  padding: 0 !important;
++}
++
++/* Round left corners instead if sidebar is on the right side */
++:root[hilal-compact-mode] #sidebar-main[sidebar-positionend] sidebar-main,
++:root[hilal-compact-mode] #sidebar-main[sidebar-positionend] html\:sidebar-main {
++  border-radius: 16px 0 0 16px !important;
++  border-inline-start: 1px solid var(--hilal-sidebar-border, rgba(255, 255, 255, 0.1)) !important;
++  border-inline-end: none !important;
++  box-shadow: -4px 0 32px 0 rgba(0, 0, 0, 0.35), 0 4px 16px 0 rgba(0, 0, 0, 0.25) !important;
 +}
 +
 +:root[hilal-compact-mode] #sidebar-launcher-splitter,
@@ -2317,6 +2406,7 @@ index 910b7f6c99c7..ddefd65740b5 100644
 +
 +:root[hilal-compact-mode] #tabbrowser-tabbox {
 +  margin-inline-start: 0 !important;
++  margin-inline-end: 0 !important;
 +}
 +
 +:root[hilal-compact-mode] #sidebar-box {
@@ -2326,4 +2416,7 @@ index 910b7f6c99c7..ddefd65740b5 100644
 +  min-width: 0 !important;
 +  max-inline-size: 0 !important;
 +  overflow: visible !important;
++  margin: 0 !important;
++  border: none !important;
++  padding: 0 !important;
 +}
