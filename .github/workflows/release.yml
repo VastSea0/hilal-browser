@@ -109,8 +109,40 @@ jobs:
           hdiutil create -volname "Hilal Browser" -srcfolder "$APP_BUNDLE" -ov -format UDZO "dist/$DMG_NAME"
           echo "dmg_path=dist/$DMG_NAME" >> "$GITHUB_ENV"
 
-      - name: Upload macOS DMG to release
+      - name: Restore Signing NSS Database
+        if: ${{ secrets.HILAL_SIGNING_DB_BASE64 != '' }}
+        run: |
+          echo "${{ secrets.HILAL_SIGNING_DB_BASE64 }}" | base64 -d > signing-db.tar.gz
+          mkdir -p /tmp/signing-db
+          tar -xzf signing-db.tar.gz -C /tmp/signing-db
+
+      - name: Create Signed Update MAR
+        env:
+          HILAL_SIGNMAR_NSS_DIR: /tmp/signing-db
+          HILAL_SIGNMAR_CERT: mar_sig
+        run: |
+          if [ -d "/tmp/signing-db" ]; then
+            scripts/make-full-update.sh "${{ needs.create-release.outputs.tag }}" dist/hilal-macos-arm64.complete.mar
+          else
+            scripts/make-full-update.sh --allow-unsigned "${{ needs.create-release.outputs.tag }}" dist/hilal-macos-arm64.complete.mar
+          fi
+
+      - name: Generate Update Manifest
+        run: |
+          TAG="${{ needs.create-release.outputs.tag }}"
+          APP_VER=$(cat firefox/browser/config/version.txt)
+          node scripts/generate-update-manifest.mjs \
+            --version "$TAG" \
+            --app-version "$APP_VER" \
+            --mar macos-arm64=dist/hilal-macos-arm64.complete.mar \
+            --mar-url macos-arm64="https://github.com/vastsea0/hilal-browser/releases/download/$TAG/hilal-macos-arm64.complete.mar" \
+            --output dist/hilal-update-manifest.json
+
+      - name: Upload assets to release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.create-release.outputs.tag }}
-          files: ${{ env.dmg_path }}
+          files: |
+            ${{ env.dmg_path }}
+            dist/hilal-macos-arm64.complete.mar
+            dist/hilal-update-manifest.json

@@ -186,3 +186,8 @@ pref("app.releaseNotesURL.aboutDialog", "https://github.com/vastsea0/hilal-brows
 // Help and feedback custom URLs
 pref("app.support.baseURL", "https://github.com/vastsea0/hilal-browser/issues");
 pref("app.feedback.baseURL", "https://github.com/vastsea0/hilal-browser/issues");
+
+// Privacy-first opt-in overrides
+pref("hilal.bangs.fallback_to_ddg", false);
+pref("hilal.workspaces.remember_host_mapping", false);
+

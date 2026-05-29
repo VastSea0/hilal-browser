@@ -125,6 +125,9 @@
       "permissions.default.microphone": 2,
       "places.history.enabled": false,
       "privacy.clearOnShutdown_v2.browsingHistoryAndDownloads": true,
+      "privacy.resistFingerprinting": true,
+      "privacy.resistFingerprinting.pbmode": true,
+      "privacy.resistFingerprinting.letterboxing": true,
     },
   };
 
@@ -438,16 +441,43 @@
       }
     }
 
+    _obfuscate(str) {
+      if (typeof window !== "undefined" && window.btoa) {
+        return window.btoa(str.split("").map(c => String.fromCharCode(c.charCodeAt(0) ^ 42)).join(""));
+      }
+      return str;
+    }
+
+    _deobfuscate(str) {
+      try {
+        if (typeof window !== "undefined" && window.atob) {
+          return window.atob(str).split("").map(c => String.fromCharCode(c.charCodeAt(0) ^ 42)).join("");
+        }
+      } catch (e) {
+        // ignore
+      }
+      return str;
+    }
+
     _recordVisitedHost(workspaceId, host) {
       if (!workspaceId || !host) {
         return;
       }
       try {
+        if (!Services.prefs.getBoolPref("hilal.workspaces.remember_host_mapping", false)) {
+          return;
+        }
         const prefName = "hilal.workspaces.host_mapping";
         let mapping = {};
         try {
           const raw = Services.prefs.getStringPref(prefName, "{}");
-          mapping = JSON.parse(raw);
+          const parsed = JSON.parse(raw);
+          for (let obfHost of Object.keys(parsed)) {
+            const deobfHost = this._deobfuscate(obfHost);
+            if (deobfHost) {
+              mapping[deobfHost] = parsed[obfHost];
+            }
+          }
         } catch (e) {
           // ignore
         }
@@ -456,7 +486,12 @@
         }
         if (!mapping[host].includes(workspaceId)) {
           mapping[host].push(workspaceId);
-          Services.prefs.setStringPref(prefName, JSON.stringify(mapping));
+          const obfMapping = {};
+          for (let plainHost of Object.keys(mapping)) {
+            const obfHost = this._obfuscate(plainHost);
+            obfMapping[obfHost] = mapping[plainHost];
+          }
+          Services.prefs.setStringPref(prefName, JSON.stringify(obfMapping));
         }
       } catch (e) {
         this._warn("failed to record visited host", e);
@@ -530,26 +565,70 @@
       if (!Services.prefs.getBoolPref("sidebar.revamp", false)) {
         return;
       }
-      let retries = 0;
-      const MAX_RETRIES = 120;
-      const attempt = () => {
+
+      let built = false;
+      const build = () => {
+        if (built) {
+          return true;
+        }
         const sidebarEl = document.querySelector("sidebar-main");
-        const hasShadowRoot = sidebarEl?.shadowRoot?.querySelector(".wrapper");
-        if (hasShadowRoot) {
+        const hasWrapper = sidebarEl?.shadowRoot?.querySelector(".wrapper");
+        if (hasWrapper) {
+          built = true;
           this._buildUI();
           this._updateUI();
           if (!this._enabled && this._container) {
             this._container.hidden = true;
           }
-          return;
+          return true;
         }
-        if (++retries < MAX_RETRIES) {
-          setTimeout(attempt, 100);
-        } else {
-          this._warn("gave up waiting for sidebar-main shadow root");
-        }
+        return false;
       };
-      attempt();
+
+      if (build()) {
+        return;
+      }
+
+      const docObserver = new MutationObserver((mutations, obs) => {
+        if (build()) {
+          obs.disconnect();
+        } else {
+          const sidebarEl = document.querySelector("sidebar-main");
+          if (sidebarEl && sidebarEl.shadowRoot && !sidebarEl._hilalShadowObserver) {
+            const shadowObserver = new MutationObserver((mutationsSub, obsSub) => {
+              if (build()) {
+                obsSub.disconnect();
+                obs.disconnect();
+              }
+            });
+            shadowObserver.observe(sidebarEl.shadowRoot, {
+              childList: true,
+              subtree: true,
+            });
+            sidebarEl._hilalShadowObserver = shadowObserver;
+          }
+        }
+      });
+
+      docObserver.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+      });
+
+      const sidebarEl = document.querySelector("sidebar-main");
+      if (sidebarEl && sidebarEl.shadowRoot) {
+        const shadowObserver = new MutationObserver((mutationsSub, obsSub) => {
+          if (build()) {
+            obsSub.disconnect();
+            docObserver.disconnect();
+          }
+        });
+        shadowObserver.observe(sidebarEl.shadowRoot, {
+          childList: true,
+          subtree: true,
+        });
+        sidebarEl._hilalShadowObserver = shadowObserver;
+      }
     }
 
     _hookEvents() {
@@ -938,7 +1017,7 @@
       }, 0);
     }
 
-    _moveTabToWorkspace(
+    async _moveTabToWorkspace(
       tab,
       workspaceId,
       { copy = false, select = false, locationURI = null } = {}
@@ -946,6 +1025,17 @@
       const workspace = this._getWorkspaceById(workspaceId);
       if (!tab || !workspace || tab.closing) {
         return null;
+      }
+
+      try {
+        const { TabStateFlusher } = ChromeUtils.importESModule(
+          "resource:///modules/sessionstore/TabStateFlusher.sys.mjs"
+        );
+        if (TabStateFlusher && tab.linkedBrowser) {
+          await TabStateFlusher.flush(tab.linkedBrowser);
+        }
+      } catch (e) {
+        this._warn("failed to flush tab state before move", e);
       }
 
       const targetUserContextId = workspace.containerId || 0;
@@ -1244,7 +1334,7 @@
       this._updateUI();
     }
 
-    remove(id) {
+    async remove(id) {
       if (this._workspaces.length <= 1) {
         return;
       }
@@ -1266,7 +1356,7 @@
         tab => this._getTabWorkspace(tab) === id
       );
       for (const tab of tabsToMove) {
-        this._moveTabToWorkspace(tab, fallback.id, {
+        await this._moveTabToWorkspace(tab, fallback.id, {
           copy: false,
           select: tab.selected,
         });
@@ -1283,7 +1373,14 @@
       try {
         const prefName = "hilal.workspaces.host_mapping";
         const raw = Services.prefs.getStringPref(prefName, "{}");
-        let mapping = JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        let mapping = {};
+        for (let obfHost of Object.keys(parsed)) {
+          const deobfHost = this._deobfuscate(obfHost);
+          if (deobfHost) {
+            mapping[deobfHost] = parsed[obfHost];
+          }
+        }
         let mappingChanged = false;
         for (let host of Object.keys(mapping)) {
           let idx = mapping[host].indexOf(id);
@@ -1297,7 +1394,12 @@
           }
         }
         if (mappingChanged) {
-          Services.prefs.setStringPref(prefName, JSON.stringify(mapping));
+          const obfMapping = {};
+          for (let plainHost of Object.keys(mapping)) {
+            const obfHost = this._obfuscate(plainHost);
+            obfMapping[obfHost] = mapping[plainHost];
+          }
+          Services.prefs.setStringPref(prefName, JSON.stringify(obfMapping));
         }
       } catch (e) {
         this._warn("failed to clean up host mapping on deletion", e);

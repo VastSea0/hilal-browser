@@ -39,7 +39,7 @@ APPLY_ARGS=()
 if [ "$NO_SYMLINKS" = 1 ]; then
   APPLY_ARGS+=(--no-symlinks)
 fi
-bash "$(dirname "$0")/apply.sh" "${APPLY_ARGS[@]}"
+bash "$(dirname "$0")/apply.sh" "${APPLY_ARGS[@]+"${APPLY_ARGS[@]}"}"
 
 # Copy macOS mozconfig
 if [ -f "$(dirname "$0")/../mozconfigs/macos" ]; then

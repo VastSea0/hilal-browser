@@ -11406,7 +11406,6 @@
 }
 @media -moz-pref("userChrome.hidden.urlbar_iconbox") {
   @media not -moz-pref("userChrome.hidden.urlbar_iconbox.label_only") {
-    #identity-box[pageproxystate="valid"].notSecureText #identity-icon-label,
     #identity-box[pageproxystate="valid"].chromeUI #identity-icon-box,
     #identity-box[pageproxystate="valid"].extensionPage #identity-icon-box {
       display: none;
@@ -27194,7 +27193,6 @@
   }
 }
 @media (-moz-bool-pref: "userChrome.hidden.urlbar_iconbox") and (not (-moz-bool-pref: "userChrome.hidden.urlbar_iconbox.label_only")) {
-  #identity-box[pageproxystate="valid"].notSecureText #identity-icon-label,
   #identity-box[pageproxystate="valid"].chromeUI #identity-icon-box,
   #identity-box[pageproxystate="valid"].extensionPage #identity-icon-box {
     display: none;

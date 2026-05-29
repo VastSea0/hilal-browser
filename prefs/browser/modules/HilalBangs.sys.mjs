@@ -231,9 +231,17 @@ export var HilalBangs = {
       return "";
     }
 
-    if (!fallbackToDuckDuckGo) {
+    let shouldFallback = fallbackToDuckDuckGo;
+    try {
+      shouldFallback = shouldFallback && Services.prefs.getBoolPref("hilal.bangs.fallback_to_ddg", false);
+    } catch (e) {
+      shouldFallback = false;
+    }
+
+    if (!shouldFallback) {
       return "";
     }
+
 
     const duckDuckGoQuery = `!${bangInfo.rawBang}${
       bangInfo.query ? ` ${bangInfo.query}` : ""
