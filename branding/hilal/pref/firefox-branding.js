@@ -179,3 +179,6 @@ pref("geo.provider.use_geoclue", false);
 
 // First-run onboarding screen state
 pref("hilal.welcome-screen.seen", false);
+
+// About dialog release notes link
+pref("app.releaseNotesURL.aboutDialog", "https://github.com/vastsea0/hilal-browser/releases");
