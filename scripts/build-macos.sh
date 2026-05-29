@@ -32,7 +32,7 @@ for arg in "$@"; do
     *) remaining+=("$arg") ;;
   esac
 done
-set -- "${remaining[@]}"
+set -- "${remaining[@]+"${remaining[@]}"}"
 
 # Ensure patches/branding are applied
 APPLY_ARGS=()
