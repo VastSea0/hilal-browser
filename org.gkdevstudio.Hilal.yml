@@ -73,16 +73,16 @@ modules:
       - test ! -f ublock-origin-source/LICENSE.txt || install -Dm644 ublock-origin-source/LICENSE.txt "$FLATPAK_DEST/share/licenses/org.gkdevstudio.Hilal/uBlock-Origin/LICENSE.txt"
     sources:
       # HILAL_SOURCE_BEGIN
-- type: git
-  url: https://github.com/VastSea0/hilal-browser.git
-  tag: v0.2.0-alpha.5
-  commit: 62c17ad6a959789926c8daf760775a0cf0ca306a
-  dest: hilal-browser
-# HILAL_SOURCE_END
-- type: git
-  url: https://github.com/mozilla-firefox/firefox.git
-  commit: e28b34ab33dbf49364999070168cbb7e11e8e5bd
-  dest: hilal-browser/firefox
+      - type: git
+        url: https://github.com/VastSea0/hilal-browser.git
+        tag: v0.2.0-alpha.5
+        commit: b497cad592030a25ee4a659d008f4b794b970b75
+        dest: hilal-browser
+      # HILAL_SOURCE_END
+      - type: git
+        url: https://github.com/mozilla-firefox/firefox.git
+        commit: e28b34ab33dbf49364999070168cbb7e11e8e5bd
+        dest: hilal-browser/firefox
       - type: file
         url: https://github.com/gorhill/uBlock/releases/download/1.57.2/uBlock0_1.57.2.firefox.signed.xpi
         sha256: 9928e79a52cecf7cfa231fdb0699c7d7a427660d94eb10d711ed5a2f10d2eb89
