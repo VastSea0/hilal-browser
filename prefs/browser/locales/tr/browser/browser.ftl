@@ -1,3 +1,6 @@
+
+
+# --- Hilal custom localization begin ---
 ## Hilal Welcome Screen
 
 hilal-welcome-skip = Atla
@@ -90,3 +93,37 @@ hilal-welcome-privacy-extreme-label = Maksimum
 hilal-welcome-privacy-extreme-badge = Tor Değil
 hilal-welcome-privacy-extreme-desc = Sıkı seviyenin üzerine JavaScript kapatma, kamera/mikrofon/konum engelleme ve kapanışta tarama geçmişi temizleme ekler.
 hilal-welcome-privacy-extreme-detail = Does not hide your IP address; many modern sites may not work as expected.
+
+## Browser UI strings
+
+network-connection-status-looking-up = { $host } aranıyor
+network-connection-status-looked-up = { $host } bulundu
+network-connection-status-connecting = Bağlanılıyor
+network-connection-status-connected = Bağlandı
+network-connection-status-waiting = Bekleniyor
+network-connection-status-transferring-data = Veri aktarılıyor
+network-connection-status-read = Okunuyor
+
+urlbar-result-action-search-in-private-w-engine = { $engine } ile Gizli Pencerede Ara
+urlbar-result-action-search-in-private = Gizli Pencerede Ara
+urlbar-result-action-search-w-engine = { $engine } ile Ara
+urlbar-result-action-sponsored = Sponsorlu
+urlbar-result-action-switch-tab = Sekmeye Geç
+urlbar-result-action-move-tab-to-split-view = Sekmeyi Bölünmüş Görünüme Taşı
+urlbar-result-action-visit = Ziyaret Et
+urlbar-result-action-switch-tab-with-container = Sekmeye Geç · <span>{ $container }</span>
+urlbar-result-action-tab-group-unnamed = Adsız grup
+urlbar-result-action-visit-from-clipboard = Panodan ziyaret et
+urlbar-result-action-before-tabtosearch-web = { $engine } ile aramak için Tab tuşuna basın
+urlbar-result-action-before-tabtosearch-other = { $engine } ile aramak için Tab tuşuna basın
+urlbar-result-action-tabtosearch-web = { $engine } ile doğrudan adres çubuğundan ara
+urlbar-result-action-tabtosearch-other-engine = { $engine } ile doğrudan adres çubuğundan ara
+urlbar-result-action-copy-to-clipboard = Kopyala
+urlbar-result-action-undefined-calculator-result = tanımsız
+urlbar-result-action-search-bookmarks = Yer imlerinde ara
+urlbar-result-action-search-history = Geçmişte ara
+urlbar-result-action-search-tabs = Sekmelerde ara
+urlbar-result-action-search-actions = Eylemlerde ara
+urlbar-result-action-switch-to-tabgroup = { $group } grubuna geç
+urlbar-result-action-open-saved-tabgroup = { $group } grubunu aç
+# --- Hilal custom localization end ---

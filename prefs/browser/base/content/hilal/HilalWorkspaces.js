@@ -88,6 +88,7 @@
     "signon.rememberSignons": false,
     "webgl.disabled": false,
     "webgl.enable-debug-renderer-info": false,
+    "webgl.force-enabled": true,
   };
 
   const PRIVACY_LEVEL_PREFS = {
@@ -116,7 +117,7 @@
     extreme: {
       ...LIBREWOLF_ALIGNED_PRIVACY_PREFS,
       "browser.contentblocking.category": "strict",
-      "javascript.enabled": false,
+      "javascript.enabled": true,
       "privacy.firstparty.isolate": true,
       "privacy.firstparty.isolate.restrict_opener_access": true,
       "media.peerconnection.enabled": false,
@@ -503,7 +504,13 @@
       this._enabled = Services.prefs.getBoolPref(PREF_ENABLED, true);
 
       const initializedPref = "hilal.privacy.initialized";
-      if (!Services.prefs.getBoolPref(initializedPref, false)) {
+      const privacyLevel = this._normalizePrivacyLevel(
+        Services.prefs.getStringPref(PREF_PRIVACY_LEVEL, "standard")
+      );
+      const needsPrivacyMigration =
+        Services.prefs.getBoolPref("webgl.disabled", false) !==
+        PRIVACY_LEVEL_PREFS[privacyLevel]["webgl.disabled"];
+      if (!Services.prefs.getBoolPref(initializedPref, false) || needsPrivacyMigration) {
         this._applyPrivacyLevel();
         Services.prefs.setBoolPref(initializedPref, true);
       }

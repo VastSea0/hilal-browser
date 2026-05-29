@@ -30,4 +30,10 @@ mkdir -p "$DIST_EXT_DIR"
 log "Copying langpack to distribution directory..."
 cp -f "$xpi_path" "$DIST_EXT_DIR/langpack-tr@firefox.mozilla.org.xpi"
 
+log "Patching bundled langpack with Hilal Fluent overlays..."
+python3 "$HILAL_REPO_ROOT/scripts/patch-langpack.py" \
+  "$HILAL_REPO_ROOT" \
+  "$HILAL_FIREFOX_SRC" \
+  "$DIST_EXT_DIR/langpack-tr@firefox.mozilla.org.xpi"
+
 log "Custom Turkish language pack bundled successfully."

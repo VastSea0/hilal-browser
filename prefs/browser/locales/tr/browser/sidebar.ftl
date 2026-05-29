@@ -1,3 +1,6 @@
+
+
+# --- Hilal custom localization begin ---
 # Hilal Redesigned Sidebar
 hilal-sidebar-open-tabs = Açık Sekmeler
 hilal-sidebar-bookmarks = Yer İmleri
@@ -32,3 +35,4 @@ hilal-sidebar-badge-privacy = Gizlilik
 hilal-sidebar-badge-tool = Araç
 hilal-sidebar-workspaces-nav-label = Çalışma Alanları
 hilal-sidebar-panel-label = Hilal Kenar Çubuğu
+# --- Hilal custom localization end ---

@@ -1,0 +1,17 @@
+Hilal Browser: guard profiles actor against a missing current profile
+
+--- a/browser/components/profiles/ProfilesParent.sys.mjs
++++ b/browser/components/profiles/ProfilesParent.sys.mjs
+@@ -38,6 +38,12 @@
+     let profileAge = await ProfileAge();
+     let profiles = await SelectableProfileService.getAllProfiles();
+     let themes = await this.getSafeForContentThemes(isDark);
++    if (!currentProfile) {
++      currentProfile = profiles[0] ?? null;
++    }
++    if (!currentProfile) {
++      throw new Error("No selectable profile is available.");
++    }
+     return {
+       currentProfile: await currentProfile.toContentSafeObject(),
+       isInAutomation: Cu.isInAutomation,

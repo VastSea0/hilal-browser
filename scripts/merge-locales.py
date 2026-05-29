@@ -76,11 +76,12 @@ def merge_locales(repo_root, firefox_src):
             continue
 
         rel_path = custom_file.relative_to(custom_dir)
-        # Map Hilal's overlay structure to the expected Firefox l10n nested structure (browser -> browser/browser)
-        parts = list(rel_path.parts)
-        if parts and parts[0] == "browser":
-            parts.insert(1, "browser")
-        target_file = target_dir / Path(*parts)
+        # Mirror the overlay path directly into browser/locales/tr/.
+        # For example:
+        #   prefs/browser/locales/tr/browser/sidebar.ftl
+        # becomes
+        #   firefox/browser/locales/tr/browser/sidebar.ftl
+        target_file = target_dir / rel_path
 
         if custom_file.suffix == ".ftl":
             existing = read_text(target_file) if target_file.exists() else ""

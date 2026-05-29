@@ -263,8 +263,10 @@ else
   log "uBlock Origin v${UBO_VERSION} is already present and verified."
 fi
 
+log "Patching bundled uBlock Origin scriptlet lifecycle guards..."
+python3 "$HILAL_REPO_ROOT/scripts/patch-ublock.py" "$UBO_PATH"
+
 # -- 5. Merge Hilal custom Turkish translations into local source tree -------
 python3 "$HILAL_REPO_ROOT/scripts/merge-locales.py" "$HILAL_REPO_ROOT" "$HILAL_FIREFOX_SRC"
 
 log "All Hilal changes applied. Build with: scripts/build-macos.sh"
-

@@ -1,3 +1,6 @@
+
+
+# --- Hilal custom localization begin ---
 ## Hilal Browser Settings
 
 hilal-settings-header = Hilal Tarayıcı
@@ -113,4 +116,4 @@ hilal-language-header = Dil Seçimi
 hilal-language-description = Tarayıcının arayüz dilini seçin. Değişikliklerin etkili olması için tarayıcının yeniden başlatılması gerekir.
 hilal-language-apply-button =
     .label = Uygula ve Yeniden Başlat
-
+# --- Hilal custom localization end ---

@@ -61,7 +61,7 @@
       label: "Maximum",
       badge: "Not Tor",
       description:
-        "Adds JavaScript, camera, microphone, location, and history blocking on top of Strict.",
+        "Adds camera, microphone, location, and history blocking on top of Strict.",
       detail: "Does not hide your IP address; many modern sites may not work as expected.",
       l10nLabel: "hilal-welcome-privacy-extreme-label",
       l10nBadge: "hilal-welcome-privacy-extreme-badge",
