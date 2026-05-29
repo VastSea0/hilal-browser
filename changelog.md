@@ -4,6 +4,31 @@ All notable changes to the Hilal Browser project will be documented in this file
 
 ---
 
+## [0.2.0-alpha.5] - 2026-05-29
+
+### Added
+- **Compact Mode with Auto-Hide Sidebar**: Implemented compact hover-triggered sidebar with floating overlay support, auto-hide functionality, and preference controls for workspace compatibility.
+- **Firefox-UI-Fix Integration**: Integrated the complete Firefox-UI-Fix suite with management scripts, CSS overrides, and dynamic preferences integration.
+- **Sidebar Layout Redesign**: Overhauled sidebar with improved tab sizing, grid-based pinned tabs, premium theme styling, and native slotted tabstrip integration.
+- **Language Selection Support**: Added `0020-hilal-language-selection.patch` for browser language preferences and Turkish language pack integration.
+- **Secure Update Signatures**: Implemented secure update signature verification with channels allowing unsigned MARs for development builds.
+- **Custom About Dialog Links**: Updated the About dialog with Hilal project resource links and custom Help/Feedback dialog link integration.
+- **Sidebar Footer & Custom Shortcuts**: Added sidebar footer and custom shortcut preferences with favicon support from Firefox's page-icon cache.
+- **Production Signing Scripts**: Added macOS code signing, notarization scripts with NSS setup, key rotation, and CI secret integration.
+- **Flatpak Build Support**: Added Flatpak build scripts, manifest, and desktop integration files.
+
+### Changed
+- **Compact Mode Workspace Optimization**: Refined workspace initial page handling with compact mode support for sidebar items and session state handling.
+- **Privacy & Workspace Improvements**: Enhanced container deletion privacy, workspace tab group collapsing, and state synchronization.
+- **Patch System Refinements**: Refactored workspace context isolation, bang customization, and localization patches.
+
+### Fixed
+- **Compact Mode Toolbar Transitions**: Enforced CSS visibility and transform properties for compact mode toolbar transitions with glassmorphic hover reveal animation.
+- **Sidebar Button Behavior**: Resolved compact mode button opening history panel instead of sidebar toggle.
+- **First-run Crashes & Layout**: Fixed startup sessionstore crashes and incorrect welcome screen rendering.
+
+---
+
 ## [0.2.0-alpha.4] - 2026-05-26
 
 ### Added
