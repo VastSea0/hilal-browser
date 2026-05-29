@@ -44,6 +44,8 @@ modules:
   - name: hilal-browser
     buildsystem: simple
     build-options:
+      build-args:
+        - --share=network
       env:
         AR: llvm-ar
         CC: clang
@@ -54,9 +56,10 @@ modules:
         PATH: /usr/lib/sdk/llvm21/bin:/usr/lib/sdk/node24/bin:/usr/lib/sdk/rust-stable/bin:/app/bin:/usr/bin
         RANLIB: llvm-ranlib
     build-commands:
+      - cargo install cbindgen --root /usr/lib/sdk/rust-stable
       - cd hilal-browser && HILAL_FIREFOX_SRC="$PWD/firefox" HILAL_UBLOCK_XPI="$PWD/uBlock0_1.57.2.firefox.signed.xpi" ./scripts/apply.sh --no-symlinks
       - cd hilal-browser && cp mozconfigs/flatpak firefox/mozconfig
-      - cd hilal-browser/firefox && ./mach build
+      - cd hilal-browser/firefox && PATH="/usr/lib/sdk/rust-stable/bin:$PATH" ./mach build
       - cd hilal-browser/firefox && ./mach package
       - cd hilal-browser/firefox && package="$(find . -path './obj-*/dist/target.tar.xz' -print -quit)" && test -n "$package" && install -d "$FLATPAK_DEST/lib" && tar -xf "$package" -C "$FLATPAK_DEST/lib"
       - install -Dm755 hilal-browser/flatpak/hilal "$FLATPAK_DEST/bin/hilal"
