@@ -1,3 +1,6 @@
 export HILAL_DISABLE_UPDATER=1
 
+# Flatpak builds use the SDK's bundled toolchain; skip bootstrap toolchain tasks.
+ac_add_options --enable-bootstrap=no-update
+
 . "$topsrcdir/../mozconfigs/base"
