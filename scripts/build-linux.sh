@@ -7,6 +7,7 @@
 #   scripts/build-linux.sh                 # full build
 #   scripts/build-linux.sh faster          # front-end only
 #   scripts/build-linux.sh binaries        # C++/Rust only
+#   scripts/build-linux.sh no-lag          # build using only 75% of CPU cores
 #   scripts/build-linux.sh run             # build and run
 #   scripts/build-linux.sh package         # build and package
 #   scripts/build-linux.sh -- <args>       # pass arguments to mach build
@@ -34,20 +35,56 @@ fi
 cmd=("./mach" "build")
 run_after=0
 package_after=0
+no_lag_active=0
+unknown_parameter=0
 
-if [ $# -gt 0 ]; then
-  case "$1" in
-    faster)   cmd=("./mach" "build" "faster") ;;
-    binaries) cmd=("./mach" "build" "binaries") ;;
+for arg in "$@"; do
+  case "$arg" in
+    faster)
+      cmd+=("faster")
+      ;;
+    binaries)
+      cmd+=("binaries")
+      ;;
+    no-lag)
+      no_lag_active=1
+      ;;
     run)
       run_after=1
       ;;
     package)
       package_after=1
       ;;
-    --) shift; cmd=("./mach" "build" "$@") ;;
-    *)  cmd=("./mach" "build" "$@") ;;
+    --)
+      shift
+      if [ $# -gt 0 ]; then
+        cmd+=("$@")
+      fi
+      break
+      ;;
+    *)
+      cmd+=("$1")
+      shift
+      unknown_parameter+=1
+      ;;
   esac
+done
+
+if [ $no_lag_active -eq 1 ]; then
+  cpu=$(grep -c ^processor /proc/cpuinfo)
+  process=$(( cpu * 75 / 100 ))
+  [ $process -lt 1 ] && process=1
+  cmd+=("-j${process}")
+fi
+
+if [ $unknown_parameter -gt 0 ]; then
+  echo ""
+  read -rp "Unknown parameters passed. Do you want to continue? [y/N] " response
+  echo ""
+  if [[ ! "$response" =~ ^[Yy]$ ]]; then
+    log ""
+    exit 1
+  fi
 fi
 
 log "Building in $HILAL_FIREFOX_SRC: ${cmd[*]}"
