@@ -205,7 +205,7 @@ export var HilalBangs = {
   resolveQuery(query, { fallbackToDuckDuckGo = false } = {}) {
     const bangInfo = this._parseQuery(query);
     if (!bangInfo) {
-      return "";
+      return null;
     }
 
     const bangsMap = this.getBangsMap();
@@ -223,12 +223,12 @@ export var HilalBangs = {
       try {
         const uri = Services.io.newURI(resolvedUrl);
         if (uri.scheme === "http" || uri.scheme === "https") {
-          return resolvedUrl;
+          return { url: resolvedUrl };
         }
       } catch (e) {
         // ignore invalid/non-http URLs
       }
-      return "";
+      return null;
     }
 
     let shouldFallback = fallbackToDuckDuckGo;
@@ -239,16 +239,17 @@ export var HilalBangs = {
     }
 
     if (!shouldFallback) {
-      return "";
+      return { query: bangInfo.query || "" };
     }
-
 
     const duckDuckGoQuery = `!${bangInfo.rawBang}${
       bangInfo.query ? ` ${bangInfo.query}` : ""
     }`;
-    return `https://duckduckgo.com/?q=${this._encodeDuckDuckGoQuery(
-      duckDuckGoQuery
-    )}`;
+    return {
+      url: `https://duckduckgo.com/?q=${this._encodeDuckDuckGoQuery(
+        duckDuckGoQuery
+      )}`,
+    };
   },
 
   getDefaultBangs() {

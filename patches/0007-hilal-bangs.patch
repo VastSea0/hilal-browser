@@ -29,7 +29,7 @@ index c12cb44d30e9..40cb59f3a060 100644
  
    historyEnabled: {
      pref: "places.history.enabled",
-@@ -720,20 +721,27 @@ export var UrlbarUtils = {
+@@ -720,20 +721,32 @@ export var UrlbarUtils = {
     *
     * @param {SearchEngine} engine
     *   The engine to generate the query for.
@@ -40,11 +40,16 @@ index c12cb44d30e9..40cb59f3a060 100644
     *    post data (object).
     */
    getSearchQueryUrl(engine, query) {
-+    const bangUrl = lazy.HilalBangs.resolveQuery(query, {
++    const resolved = lazy.HilalBangs.resolveQuery(query, {
 +      fallbackToDuckDuckGo: true,
 +    });
-+    if (bangUrl) {
-+      return [bangUrl, null];
++    if (resolved) {
++      if (resolved.url) {
++        return [resolved.url, null];
++      }
++      if (resolved.query !== undefined) {
++        query = resolved.query;
++      }
 +    }
 +
      let submission = engine.getSubmission(query);
