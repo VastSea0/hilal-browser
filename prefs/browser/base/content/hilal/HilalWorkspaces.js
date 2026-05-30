@@ -184,6 +184,14 @@
       return document.documentElement.hasAttribute("customizing");
     }
 
+    get activeContainerId() {
+      if (!this._enabled) {
+        return 0;
+      }
+      const workspace = this._getWorkspaceById(this._activeId);
+      return workspace ? (workspace.containerId || 0) : 0;
+    }
+
     _normalizeName(name, fallback) {
       const normalized = String(name || fallback || "Workspace")
         .replace(/\s+/g, " ")

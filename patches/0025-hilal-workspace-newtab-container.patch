@@ -1,0 +1,27 @@
+Hilal Browser: initialize clean new tabs in active workspace container
+
+Intercepts clean new tab creation in browser/components/tabbrowser/content/tabbrowser.js
+so they automatically initialize in the container ID of the active workspace,
+avoiding the need for immediate container retargeting which causes session state
+loss and page reloads.
+
+---
+diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/components/tabbrowser/content/tabbrowser.js
+index 37508e85da67..20702a626fd6 100644
+--- a/browser/components/tabbrowser/content/tabbrowser.js
++++ b/browser/components/tabbrowser/content/tabbrowser.js
+@@ -4161,8 +4161,12 @@
+ 
+       // Related tab inherits current tab's user context unless a different
+       // usercontextid is specified
+-      if (userContextId == null && openerTab) {
+-        userContextId = openerTab.getAttribute("usercontextid") || 0;
++      if (userContextId == null) {
++        if (openerTab) {
++          userContextId = openerTab.getAttribute("usercontextid") || 0;
++        } else if (window.gHilalWorkspaces) {
++          userContextId = window.gHilalWorkspaces.activeContainerId || 0;
++        }
+       }
+ 
+       if (!noInitialLabel) {
