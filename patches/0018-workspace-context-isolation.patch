@@ -29,7 +29,7 @@ diff --git a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs b/browser/com
 index 16041c10755a..c95b3b2f97a0 100644
 --- a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
 +++ b/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
-@@ -729,6 +729,50 @@ class MuxerUnifiedComplete extends UrlbarMuxer {
+@@ -729,6 +729,69 @@ class MuxerUnifiedComplete extends UrlbarMuxer {
    // error or increase the complexity threshold.
    // eslint-disable-next-line complexity
    _canAddResult(result, state) {
@@ -45,7 +45,26 @@ index 16041c10755a..c95b3b2f97a0 100644
 +            "hilal.workspaces.host_mapping",
 +            "{}"
 +          );
-+          state._hilalMapping = JSON.parse(mappingPref);
++          let parsed = JSON.parse(mappingPref);
++          let deobfMapping = {};
++          const deobfuscate = str => {
++            try {
++              if (typeof atob !== "undefined") {
++                return atob(str)
++                  .split("")
++                  .map(c => String.fromCharCode(c.charCodeAt(0) ^ 42))
++                  .join("");
++              }
++            } catch (e) {}
++            return str;
++          };
++          for (let obfHost of Object.keys(parsed)) {
++            let deobfHost = deobfuscate(obfHost);
++            if (deobfHost) {
++              deobfMapping[deobfHost] = parsed[obfHost];
++            }
++          }
++          state._hilalMapping = deobfMapping;
 +        }
 +        let activeWorkspace = state._hilalActiveWorkspace;
 +        let mapping = state._hilalMapping;
