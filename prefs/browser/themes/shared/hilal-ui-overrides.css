@@ -18,4 +18,32 @@
   pointer-events: auto !important;
   transition-delay: 0s !important;
 }
+
+/* Issue #29: Restore standard navigation controls and URL bar layout */
+#nav-bar-customization-target {
+  display: flex !important;
+}
+#nav-bar-customization-target > * {
+  order: 10 !important;
+}
+#nav-bar-customization-target > #back-button {
+  order: 1 !important;
+}
+#nav-bar-customization-target > #forward-button {
+  order: 2 !important;
+}
+#nav-bar-customization-target > #stop-reload-button {
+  order: 3 !important;
+}
+#nav-bar-customization-target > #home-button {
+  order: 4 !important;
+}
+#nav-bar-customization-target > #urlbar-container {
+  order: 5 !important;
+}
+
+/* Issue #24: Force "Not Secure" warning label to be visible on HTTP pages */
+#identity-box[pageproxystate="valid"].notSecureText #identity-icon-label {
+  display: -moz-box !important;
+}
 }
