@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.vars.outputs.tag }}
-      upload_url: ${{ steps.create-release.outputs.upload_url }}
+
     steps:
       - name: Determine tag
         id: vars
@@ -32,14 +32,13 @@ jobs:
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub release
-        id: create-release
+      - name: Create GitHub release (DRAFT)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.vars.outputs.tag }}
           name: "Hilal Browser ${{ steps.vars.outputs.tag }}"
           generate_release_notes: true
-          draft: false
+          draft: true
           prerelease: ${{ contains(steps.vars.outputs.tag, 'alpha') || contains(steps.vars.outputs.tag, 'beta') || contains(steps.vars.outputs.tag, 'rc') }}
 
   sign-macos:
@@ -131,6 +130,7 @@ jobs:
         run: |
           TAG="${{ needs.create-release.outputs.tag }}"
           APP_VER=$(cat firefox/browser/config/version.txt)
+
           node scripts/generate-update-manifest.mjs \
             --version "$TAG" \
             --app-version "$APP_VER" \
@@ -143,6 +143,17 @@ jobs:
         with:
           tag_name: ${{ needs.create-release.outputs.tag }}
           files: |
-            ${{ env.dmg_path }}
+            dist/*.dmg
             dist/hilal-macos-arm64.complete.mar
             dist/hilal-update-manifest.json
+
+  publish-release:
+    needs: [create-release, sign-macos]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Publish release (finalize)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit "${{ needs.create-release.outputs.tag }}" --draft=false
