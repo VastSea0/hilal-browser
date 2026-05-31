@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
   <id>org.gkdevstudio.Hilal</id>
-  <metadata_license>FSFAP</metadata_license>
+  <metadata_license>MPL-2.0</metadata_license>
   <project_license>MPL-2.0 AND GPL-3.0-only</project_license>
 
   <name>Hilal</name>
