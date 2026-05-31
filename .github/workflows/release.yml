@@ -46,6 +46,9 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 120
 
+    # ÇÖZÜM: Job seviyesinde 'env' kullanamayacağımız için doğrudan 'secrets' kontrolü yapıyoruz.
+    if: ${{ secrets.CODESIGN_IDENTITY != '' && secrets.APPLE_ID != '' && secrets.APPLE_APP_SPECIFIC_PASSWORD != '' && secrets.APPLE_TEAM_ID != '' }}
+
     env:
       HAS_CODESIGN: ${{ secrets.CODESIGN_IDENTITY }}
       HAS_APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -53,8 +56,6 @@ jobs:
       HAS_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       HAS_CERT: ${{ secrets.MACOS_CERTIFICATE }}
       HAS_SIGN_DB: ${{ secrets.HILAL_SIGNING_DB_BASE64 }}
-
-    if: ${{ env.HAS_CODESIGN != '' && env.HAS_APPLE_ID != '' && env.HAS_APPLE_PASS != '' && env.HAS_TEAM_ID != '' }}
 
     steps:
       - name: Checkout
