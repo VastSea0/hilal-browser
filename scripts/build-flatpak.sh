@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
 #
 # scripts/build-flatpak.sh
-# Flatpak build, install, run, lint, clean ve readiness-check otomasyonu.
-# Sadece dist/ klasöründeki derleme ciktisini (tar.xz) kaynak olarak kullanacak sekilde modifiye edilmistir.
-# Git tag bilgisini ve tarihini alarak dinamik isimlendirme ve manifest güncellemesi yapar.
+# Flatpak build, install, run, lint, clean, and readiness-check automation.
+# Modified to use only the build output (tar.xz) in the dist/ directory as the source.
+# Uses Git tag and date info for dynamic naming and manifest updates.
 #
-# Kullanim:
-# scripts/build-flatpak.sh build        # Flatpak paketi olustur
-# scripts/build-flatpak.sh install      # Flatpak olustur ve kullanici kurulumuna yukle
-# scripts/build-flatpak.sh run [args]   # Kurulu Flatpak'i calistir
-# scripts/build-flatpak.sh lint         # Manifest ve metadata linter'larini calistir
-# scripts/build-flatpak.sh check-ready  # Surum metadata'sinin kararli yayina uygunlugunu kontrol et
-# scripts/build-flatpak.sh clean        # Flatpak build ciktilarini temizle
+# Usage:
+# scripts/build-flatpak.sh build        # Create a Flatpak bundle
+# scripts/build-flatpak.sh install      # Build and install to user local directory
+# scripts/build-flatpak.sh run [args]   # Run the installed Flatpak
+# scripts/build-flatpak.sh lint         # Run manifest and metadata linters
+# scripts/build-flatpak.sh check-ready  # Check version metadata suitability for stable release
+# scripts/build-flatpak.sh clean        # Clean Flatpak build artifacts
 
 set -euo pipefail
 
-# Renk Tanımlamaları
+# Color Definitions
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-# Yardımcı Kütüphane Yükleme ve Varsayılan Loglama Fonksiyonları
+# Helper Library Loading and Default Logging Functions
 if [ -f "$(dirname "$0")/lib.sh" ]; then
     # shellcheck source=/dev/null
     . "$(dirname "$0")/lib.sh"
@@ -32,7 +32,7 @@ else
     die() { echo -e "${RED}[ERROR]${NC} $*" >&2; exit 1; }
 fi
 
-# Dizin ve Yapılandırma Tanımlamaları
+# Directory and Configuration Definitions
 HILAL_REPO_ROOT="$(cd "$(dirname "$0")/../" && pwd)"
 TARGET_DIST_DIR="${HILAL_REPO_ROOT}/dist"
 CONFIG_FILE="${HILAL_REPO_ROOT}/config.yml"
@@ -42,21 +42,21 @@ REPO_DIR="${HILAL_REPO_ROOT}/repo"
 
 usage() {
     cat <<'USAGE'
-Kullanim:
-  scripts/build-flatpak.sh build        # Flatpak paketi olustur (Sadece dist/ altindaki paketi kullanir)
-  scripts/build-flatpak.sh install      # Flatpak olustur ve kullanici kurulumuna yukle
-  scripts/build-flatpak.sh run [args]   # Kurulu Flatpak'i calistir
-  scripts/build-flatpak.sh lint         # Manifest ve metadata linter'larini calistir
-  scripts/build-flatpak.sh check-ready  # Surum metadata'sinin kararli yayina uygunlugunu kontrol et
-  scripts/build-flatpak.sh clean        # Flatpak build ciktilarini temizle
+Usage:
+  scripts/build-flatpak.sh build        # Create a Flatpak bundle (Uses only the package under dist/)
+  scripts/build-flatpak.sh install      # Build and install to user local directory
+  scripts/build-flatpak.sh run [args]   # Run the installed Flatpak
+  scripts/build-flatpak.sh lint         # Run manifest and metadata linters
+  scripts/build-flatpak.sh check-ready  # Verify stable release readiness of metadata
+  scripts/build-flatpak.sh clean        # Clean Flatpak build artifacts
 USAGE
 }
 
 need() {
-    command -v "$1" >/dev/null 2>&1 || die "Gerekli komut bulunamadi: $1"
+    command -v "$1" >/dev/null 2>&1 || die "Required command not found: $1"
 }
 
-# Git tag ve tarih bilgilerini alma
+# Fetch Git tag and date details
 get_git_tag() {
     if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
         git describe --tags --abbrev=0 2>/dev/null || echo "v0.1.0"
@@ -69,7 +69,7 @@ get_git_date() {
     if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
         local tag
         tag=$(get_git_tag)
-        # Tag'in oluşturulma tarihini YYYYMMDD formatında alıyoruz
+        # Fetch the creation date of the tag in YYYYMMDD format
         git log -1 --format=%cd --date=format:'%Y%m%d' "$tag" 2>/dev/null || date +'%Y%m%d'
     else
         date +'%Y%m%d'
@@ -78,7 +78,7 @@ get_git_date() {
 
 find_package() {
     local pkg
-    # Sadece ana dist/ dizininde tar.xz veya tar.gz paketleri araniyor
+    # Search for tar.xz or tar.gz packages only in the root dist/ directory
     pkg=$(find "$TARGET_DIST_DIR" -maxdepth 1 -type f \( \
         -name "firefox-*.tar.xz" -o \
         -name "firefox-*.tar.gz" -o \
@@ -116,7 +116,7 @@ manifest_hilal_tag() {
     local manifest_path
     manifest_path=$(find_manifest)
     if [ -n "$manifest_path" ] && [ -f "$manifest_path" ]; then
-        # JSON yapısı içinde tag araması yapıyoruz
+        # Search for tag value inside JSON structure
         grep -oP '"tag":\s*"\K[^"]+' "$manifest_path" | head -1 || echo ""
     else
         echo ""
@@ -127,10 +127,10 @@ flatpak_lint() {
     local manifest_path
     manifest_path=$(find_manifest)
     if [ -z "$manifest_path" ]; then
-        echo -e "${RED}[Hata]${NC} Linter calistirilamadi: Manifest bulunamadi."
+        echo -e "${RED}[Error]${NC} Cannot run lint: Manifest not found."
         return 1
     fi
-    echo -e "${BLUE}[Lint]${NC} Manifest ve uygulama metadata'lari dogrulaniyor..."
+    echo -e "${BLUE}[Lint]${NC} Validating manifest and application metadata..."
     
     if command -v flatpak-builder-lint >/dev/null 2>&1; then
         flatpak-builder-lint manifest "$manifest_path"
@@ -188,14 +188,14 @@ check_stable_ready() {
     log "Flatpak metadata is stable-release ready: version=$version tag=$tag"
 }
 
-# Kilitli kalan FUSE bağlama noktalarını güvenli bir şekilde çözen fonksiyon
+# Function to safely unmount locked FUSE mountpoints
 force_cleanup_fuse() {
     local mountpoint
-    # .flatpak-builder altındaki rofiles bağlama noktalarını bulup zorla ayırıyoruz
+    # Find and force unmount rofiles mountpoints inside .flatpak-builder
     if [ -d "$HILAL_REPO_ROOT/.flatpak-builder" ]; then
         find "$HILAL_REPO_ROOT/.flatpak-builder" -type d -name "rofiles-*" 2>/dev/null | while read -r mountpoint; do
             if mountpoint -q "$mountpoint" 2>/dev/null || (command -v gvfs-mount >/dev/null && gvfs-mount -l 2>/dev/null | grep -q "$mountpoint"); then
-                echo -e "${YELLOW}[Temizlik]${NC} Kilitli FUSE baglama noktası temizleniyor: $mountpoint"
+                echo -e "${YELLOW}[Cleanup]${NC} Cleaning up locked FUSE mountpoint: $mountpoint"
                 if command -v fusermount3 >/dev/null 2>&1; then
                     fusermount3 -u -z "$mountpoint" 2>/dev/null || true
                 elif command -v fusermount >/dev/null 2>&1; then
@@ -216,7 +216,7 @@ case "$cmd" in
         ;;
     run)
         need flatpak
-        log "Hilal Flatpak baslatiliyor: $APP_ID"
+        log "Starting Hilal Flatpak: $APP_ID"
         shift
         flatpak run "$APP_ID" "$@"
         exit 0
@@ -233,67 +233,67 @@ case "$cmd" in
         force_cleanup_fuse
         rm -rf "$BUILD_DIR" "$REPO_DIR"
         rm -rf "$TARGET_DIST_DIR/flatpak-src"
-        log "Gecici Flatpak derleme dizinleri temizlendi."
+        log "Temporary Flatpak build directories cleaned."
         exit 0
         ;;
     build|install)
-        # build veya install altında devam edecek
+        # Continue inside build or install steps below
         ;;
     *)
         usage >&2
-        die "Bilinmeyen komut: $cmd"
+        die "Unknown command: $cmd"
         ;;
 esac
 
-# Ön aşamada kilitli kalmış olabilecek FUSE mount'ları temizleyelim
+# Clean up any previously locked FUSE mountpoints as a pre-build safety step
 force_cleanup_fuse
 
-echo -e "${BLUE}[Flatpak Otomasyon]${NC} dist/ klasorunde yerel paket taramasi yapiliyor..."
+echo -e "${BLUE}[Flatpak Automation]${NC} Scanning dist/ directory for local packages..."
 PACKAGE_FILE=$(find_package)
 if [ -z "$PACKAGE_FILE" ]; then
-    echo -e "${RED}[Hata]${NC} Flatpak olusturabilmek icin 'dist/' altinda derlenmis bir paket (.tar.xz veya .tar.gz) bulunmalidir!" >&2
-    echo -e "${YELLOW}[Ipucu]${NC} Lutfen derleme ciktisini 'dist/' klasorune tasiyin veya kopyalayin." >&2
+    echo -e "${RED}[Error]${NC} A compiled package (.tar.xz or .tar.gz) must exist in 'dist/' to build the Flatpak!" >&2
+    echo -e "${YELLOW}[Tip]${NC} Please move or copy the build artifact into the 'dist/' folder." >&2
     exit 1
 fi
-echo -e "${GREEN}[Bulunan Paket]${NC} $PACKAGE_FILE"
+echo -e "${GREEN}[Found Package]${NC} $PACKAGE_FILE"
 
-# Git'ten sürüm ve tarih etiketlerini çekiyoruz
+# Retrieve version and date tags from Git
 GIT_TAG=$(get_git_tag)
 GIT_DATE=$(get_git_date)
-echo -e "${GREEN}[Git Detaylari]${NC} En son Tag: $GIT_TAG | Tag Tarihi: $GIT_DATE"
+echo -e "${GREEN}[Git Details]${NC} Latest Tag: $GIT_TAG | Tag Date: $GIT_DATE"
 
-# Geçici yerel kaynak dizini oluşturup paketi oraya açıyoruz
+# Create a temporary local source directory and extract the archive there
 LOCAL_SRC_DIR="$TARGET_DIST_DIR/flatpak-src"
-echo -e "${BLUE}[Islem]${NC} Paket gecici Flatpak kaynak dizinine aciliyor: $LOCAL_SRC_DIR"
+echo -e "${BLUE}[Action]${NC} Extracting package to temporary Flatpak source directory: $LOCAL_SRC_DIR"
 rm -rf "$LOCAL_SRC_DIR"
 mkdir -p "$LOCAL_SRC_DIR"
 tar -xf "$PACKAGE_FILE" -C "$LOCAL_SRC_DIR" --strip-components=1
 
-# flatpak/ klasöründeki yardımcı dosyaları kaynak klasörüne aktarıyoruz
+# Transfer auxiliary files from flatpak/ directory to source folder
 if [ -d "$HILAL_REPO_ROOT/flatpak" ]; then
-    echo -e "${BLUE}[Islem]${NC} flatpak/ altindaki yardimci dosyalar kaynak dizinine kopyalaniyor..."
+    echo -e "${BLUE}[Action]${NC} Copying auxiliary flatpak/ files to source directory..."
     find "$HILAL_REPO_ROOT/flatpak" -maxdepth 1 ! -name "*.json" ! -name "*.json.bak" -not -path "$HILAL_REPO_ROOT/flatpak" -exec cp -R -t "$LOCAL_SRC_DIR/" {} +
 fi
 if [ -d "$HILAL_REPO_ROOT/branding/hilal" ]; then
-    echo -e "${BLUE}[Islem]${NC} branding/hilal altindaki ikonlar kaynak dizinine kopyalaniyor..."
+    echo -e "${BLUE}[Action]${NC} Copying icons from branding/hilal to source directory..."
     mkdir -p "$LOCAL_SRC_DIR/branding/hilal"
     cp "$HILAL_REPO_ROOT/branding/hilal"/default*.png "$LOCAL_SRC_DIR/branding/hilal/" 2>/dev/null || true
 fi
 
-# Flatpak manifest dosyasını buluyoruz
+# Locate the Flatpak manifest file
 MANIFEST_PATH=$(find_manifest)
 if [ -z "$MANIFEST_PATH" ]; then
-    echo -e "${RED}[Hata]${NC} Flatpak manifest dosyasi ($APP_ID.json) bulunamadi!" >&2
+    echo -e "${RED}[Error]${NC} Flatpak manifest file ($APP_ID.json) not found!" >&2
     exit 1
 fi
-echo -e "${GREEN}[Bulunan Manifest]${NC} $MANIFEST_PATH"
+echo -e "${GREEN}[Found Manifest]${NC} $MANIFEST_PATH"
 
-# Orijinal manifest dosyasını yedekliyoruz ve çıkışta geri yüklüyoruz
+# Backup the original manifest file and restore it on script exit
 MANIFEST_BAK="${MANIFEST_PATH}.bak"
 cp "$MANIFEST_PATH" "$MANIFEST_BAK"
 cleanup() {
     if [ -f "$MANIFEST_BAK" ]; then
-        echo -e "${BLUE}[Temizlik]${NC} Orijinal Flatpak manifest dosyası geri yukleniyor..."
+        echo -e "${BLUE}[Cleanup]${NC} Restoring original Flatpak manifest file..."
         mv "$MANIFEST_BAK" "$MANIFEST_PATH"
     fi
     rm -rf "$LOCAL_SRC_DIR"
@@ -301,8 +301,8 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-# Python kullanarak manifest içindeki uzak kaynak tanımını ve tag değerlerini güncelliyoruz
-echo -e "${BLUE}[Islem]${NC} Flatpak manifesti dinamik Git bilgileriyle yerel kaynaklara yonlendiriliyor..."
+# Update remote source definitions and tags in manifest with dynamic local source paths using Python
+echo -e "${BLUE}[Action]${NC} Redirecting Flatpak manifest to local sources with dynamic Git metadata..."
 MANIFEST_PATH="$MANIFEST_PATH" LOCAL_SRC_DIR="$LOCAL_SRC_DIR" GIT_TAG="$GIT_TAG" python3 - <<'EOF'
 import json
 import sys
@@ -316,7 +316,7 @@ with open(manifest_file, 'r') as f:
     try:
         data = json.load(f)
     except Exception as e:
-        print(f"JSON Ayristirma Hatasi: {e}")
+        print(f"JSON Parsing Error: {e}")
         sys.exit(1)
 
 patched_count = 0
@@ -330,14 +330,14 @@ def patch_recursive(node):
                 "type": "dir",
                 "path": local_dir
             }]
-            # Git ile ilgili diğer parametreleri temizliyoruz
+            # Clear other Git-related configurations
             node.pop('branch', None)
             node.pop('tag', None)
             node.pop('commit', None)
-            print(f"-> '{name}' modulu yerel dizine ({local_dir}) yonlendirildi.")
+            print(f"-> Redirected '{name}' module to local directory ({local_dir}).")
             patched_count += 1
 
-        # İç içe geçmiş modülleri taramak için rekürsif çağrı
+        # Recursive call to sweep nested modules
         for key, val in list(node.items()):
             patch_recursive(val)
             
@@ -345,19 +345,19 @@ def patch_recursive(node):
         for item in node:
             patch_recursive(item)
 
-# Rekürsif taramayı başlat
+# Trigger recursive sweep
 patch_recursive(data)
 
-# Eğer hiçbir eşleşme bulunamazsa emniyet kilidi olarak son modülü yamalayalım
+# Safe fallback: if no module match was found, patch the last module in the manifest
 if patched_count == 0 and 'modules' in data and len(data['modules']) > 0:
     last_mod = data['modules'][-1]
     last_mod['sources'] = [{
         "type": "dir",
         "path": local_dir
     }]
-    print(f"-> Son modul olan '{last_mod.get('name')}' emniyet kilidi amaciyla yerel dizine yonlendirildi.")
+    print(f"-> Last module '{last_mod.get('name')}' redirected to local directory as a fallback safety measure.")
 
-# Üst düzey metadata kısmında veya gerekli yerlerde tag güncellemesi yapıyoruz
+# Update tag fields in top-level metadata as necessary
 if 'x-git-tag' in data:
     data['x-git-tag'] = git_tag
 if 'tag' in data:
@@ -367,14 +367,14 @@ with open(manifest_file, 'w') as f:
     json.dump(data, f, indent=2)
 EOF
 
-# --- BİRİNCİ DENEME: Standart Derleme (FUSE rofiles aktif) ---
-echo -e "${BLUE}[Flatpak Otomasyon]${NC} Flatpak $cmd sureci baslatiliyor..."
+# --- FIRST ATTEMPT: Standard Build (FUSE rofiles enabled) ---
+echo -e "${BLUE}[Flatpak Automation]${NC} Starting Flatpak $cmd process..."
 FLATPAK_BUNDLE_NAME="hilal-${GIT_TAG}-${GIT_DATE}.flatpak"
 FLATPAK_BUNDLE=""
 mkdir -p "$BUILD_DIR"
 BUILD_SUCCESS=0
 
-log "Standart Flatpak derlemesi baslatiliyor..."
+log "Starting standard Flatpak build..."
 if [ "$cmd" = "install" ]; then
     if flatpak-builder --force-clean --user --install "$BUILD_DIR" "$MANIFEST_PATH"; then
         BUILD_SUCCESS=1
@@ -385,31 +385,31 @@ else
     fi
 fi
 
-# --- İKİNCİ DENEME: Geri Çekilme (Fallback) Modu ---
-# Eğer standart derleme hata verirse, FUSE kilidini çözer ve --no-rofiles-fuse ile dener
+# --- SECOND ATTEMPT: Fallback Mode ---
+# If standard build fails, unlock FUSE and retry with the --no-rofiles-fuse flag
 if [ "$BUILD_SUCCESS" -eq 0 ]; then
-    warn "Standart derleme basarisiz oldu (muhtemelen FUSE/rofiles kilitleme sorunu)."
-    warn "Otomatik kurtarma baslatiliyor: Askida kalan baglantilar temizleniyor ve --no-rofiles-fuse parametresi ile tekrar deneniyor..."
+    warn "Standard build failed (likely due to a FUSE/rofiles locking issue)."
+    warn "Starting auto-recovery: Clearing hung connections and retrying with --no-rofiles-fuse parameter..."
 
-    # Askıda kalmış FUSE mount'larını zorla temizle
+    # Forcefully clear stale FUSE mountpoints
     force_cleanup_fuse
     if [ "$cmd" = "install" ]; then
         flatpak-builder --force-clean --no-rofiles-fuse --user --install "$BUILD_DIR" "$MANIFEST_PATH"
     else
         flatpak-builder --force-clean --no-rofiles-fuse --repo="$REPO_DIR" "$BUILD_DIR" "$MANIFEST_PATH"
     fi
-    log "Yedek derleme modu (--no-rofiles-fuse) basariyla tamamlandi!"
+    log "Fallback build mode (--no-rofiles-fuse) completed successfully!"
 fi
 
-# --- BUILD KOMUTU SONRASI İŞLEMLER ---
+# --- POST-BUILD INSTRUCTIONS ---
 if [ "$cmd" != "install" ]; then
     FLATPAK_BUNDLE="$TARGET_DIST_DIR/$FLATPAK_BUNDLE_NAME"
-    echo -e "${BLUE}[Islem]${NC} Dinamik Flatpak bundle olusturuluyor: $FLATPAK_BUNDLE"
+    echo -e "${BLUE}[Action]${NC} Generating dynamic Flatpak bundle: $FLATPAK_BUNDLE"
     flatpak build-bundle "$REPO_DIR" "$FLATPAK_BUNDLE" "$APP_ID"
 fi
 echo -e "\n--------------------------------------------------"
 
-# --- KONFİGÜRASYON DOSYASI (config.yml) YÖNETİMİ ---
+# --- CONFIGURATION FILE (config.yml) MANAGEMENT ---
 CURRENT_BUILD=0
 if [ -f "$CONFIG_FILE" ]; then
     CURRENT_BUILD=$(grep -E '^build_count:' "$CONFIG_FILE" | awk '{print $2}' || echo 0)
@@ -422,27 +422,27 @@ else
 fi
 NEXT_BUILD=$((CURRENT_BUILD + 1))
 
-# --- CONFIG DOSYASINI YERİNDE GÜNCELLEME ---
+# --- UPDATE CONFIG FILE IN-PLACE ---
 sed -i "s/^build_count:.*/build_count: $NEXT_BUILD/" "$CONFIG_FILE" 2>/dev/null || \
 echo "build_count: $NEXT_BUILD" > "$CONFIG_FILE"
 
-# --- INSTALL KOMUTU SONRASI İŞLEMLER ---
+# --- POST-INSTALL INSTRUCTIONS ---
 if [ "$cmd" = "install" ]; then
     if flatpak info "$APP_ID" >/dev/null 2>&1; then
-        echo -e "${GREEN}[Basarili]${NC} Flatpak basariyla kuruldu: $APP_ID"
-        echo -e "${YELLOW}[Calistirmak icin]${NC} scripts/build-flatpak.sh run"
+        echo -e "${GREEN}[Success]${NC} Flatpak successfully installed: $APP_ID"
+        echo -e "${YELLOW}[To Run]${NC} scripts/build-flatpak.sh run"
     else
-        echo -e "${YELLOW}[Bilgi]${NC} Flatpak build tamamlandi. Kurulum dogrulamasi yapilamadi."
+        echo -e "${YELLOW}[Info]${NC} Flatpak build completed. Installation verification could not be performed."
     fi
     exit 0
 fi
 
-# --- BUILD KOMUTU SONRASI İŞLEMLER ---
+# --- POST-BUILD BUNDLE VERIFICATION ---
 if [ -n "$FLATPAK_BUNDLE" ] && [ -f "$FLATPAK_BUNDLE" ]; then
-    echo -e "${GREEN}[Basarili]${NC} Flatpak bundle dist/ dizinine kaydedildi: $FLATPAK_BUNDLE"
+    echo -e "${GREEN}[Success]${NC} Flatpak bundle saved to dist/ directory: $FLATPAK_BUNDLE"
 else
-    echo -e "${YELLOW}[Bilgi]${NC} Flatpak build tamamlandi. Bundle dosyasi otomatik olarak tespit edilemedi."
-    echo -e "${YELLOW}[Bilgi]${NC} Flatpak kurulumu 'scripts/build-flatpak.sh install' komutu ile yapilabilir."
+    echo -e "${YELLOW}[Info]${NC} Flatpak build completed. Bundle file could not be automatically detected."
+    echo -e "${YELLOW}[Info]${NC} Flatpak installation can be performed using the 'scripts/build-flatpak.sh install' command."
 fi
 
 log "Done."
