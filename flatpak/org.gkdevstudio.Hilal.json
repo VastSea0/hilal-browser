@@ -1,0 +1,63 @@
+{
+  "app-id": "org.gkdevstudio.Hilal",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "23.08",
+  "sdk": "org.freedesktop.Sdk",
+  "command": "hilal",
+
+  "finish-args": [
+    "--share=ipc",
+    "--socket=x11",
+    "--socket=wayland",
+    "--device=dri",
+    "--share=network",
+    "--talk-name=org.freedesktop.Notifications",
+    "--talk-name=org.freedesktop.FileManager1",
+    "--filesystem=xdg-download",
+    "--filesystem=xdg-documents"
+  ],
+
+  "modules": [
+    {
+      "name": "hilal",
+      "buildsystem": "simple",
+
+      "build-commands": [
+        "install -d /app/bin",
+        "install -d /app/lib/hilal",
+        "install -d /app/share/applications",
+        "install -d /app/share/metainfo",
+        "install -d /app/share/icons/hicolor/16x16/apps",
+        "install -d /app/share/icons/hicolor/32x32/apps",
+        "install -d /app/share/icons/hicolor/48x48/apps",
+        "install -d /app/share/icons/hicolor/64x64/apps",
+        "install -d /app/share/icons/hicolor/128x128/apps",
+        "install -d /app/share/icons/hicolor/256x256/apps",
+
+        "cp -r . /app/lib/hilal",
+
+        "install -m755 hilal /app/bin/hilal",
+
+        "install -m644 org.gkdevstudio.Hilal.desktop /app/share/applications/",
+
+        "install -m644 org.gkdevstudio.Hilal.metainfo.xml /app/share/metainfo/",
+
+        "if [ -f branding/hilal/default16.png ]; then install -m644 branding/hilal/default16.png /app/share/icons/hicolor/16x16/apps/org.gkdevstudio.Hilal.png; fi",
+        "if [ -f branding/hilal/default32.png ]; then install -m644 branding/hilal/default32.png /app/share/icons/hicolor/32x32/apps/org.gkdevstudio.Hilal.png; fi",
+        "if [ -f branding/hilal/default48.png ]; then install -m644 branding/hilal/default48.png /app/share/icons/hicolor/48x48/apps/org.gkdevstudio.Hilal.png; fi",
+        "if [ -f branding/hilal/default64.png ]; then install -m644 branding/hilal/default64.png /app/share/icons/hicolor/64x64/apps/org.gkdevstudio.Hilal.png; fi",
+        "if [ -f branding/hilal/default128.png ]; then install -m644 branding/hilal/default128.png /app/share/icons/hicolor/128x128/apps/org.gkdevstudio.Hilal.png; fi",
+        "if [ -f branding/hilal/default256.png ]; then install -m644 branding/hilal/default256.png /app/share/icons/hicolor/256x256/apps/org.gkdevstudio.Hilal.png; fi",
+
+        "if [ -d distribution ]; then cp -r distribution /app/lib/hilal/; fi"
+      ],
+
+      "sources": [
+        {
+          "type": "flatpak-src",
+          "path": "."
+        }
+      ]
+    }
+  ]
+}

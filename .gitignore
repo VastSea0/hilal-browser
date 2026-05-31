@@ -17,6 +17,7 @@ package-stage/
 repo/
 flatpak-build/
 .flatpak-builder/
+.packages/
 *.dmg
 *.flatpak
 *.flatpakref

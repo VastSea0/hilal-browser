@@ -20,7 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.vars.outputs.tag }}
-      upload_url: ${{ steps.create-release.outputs.upload_url }}
+      has_secrets: ${{ steps.check_secrets.outputs.has_secrets }}
+
     steps:
       - name: Determine tag
         id: vars
@@ -32,30 +33,46 @@ jobs:
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub release
-        id: create-release
+      - name: Check macOS signing secrets
+        id: check_secrets
+        run: |
+          if [ -n "${{ secrets.CODESIGN_IDENTITY }}" ] && \
+             [ -n "${{ secrets.APPLE_ID }}" ] && \
+             [ -n "${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}" ] && \
+             [ -n "${{ secrets.APPLE_TEAM_ID }}" ]; then
+            echo "has_secrets=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_secrets=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create GitHub release (DRAFT)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.vars.outputs.tag }}
           name: "Hilal Browser ${{ steps.vars.outputs.tag }}"
           generate_release_notes: true
-          draft: false
+          draft: true
           prerelease: ${{ contains(steps.vars.outputs.tag, 'alpha') || contains(steps.vars.outputs.tag, 'beta') || contains(steps.vars.outputs.tag, 'rc') }}
 
   sign-macos:
     needs: create-release
     runs-on: macos-latest
     timeout-minutes: 120
-    if: >
-      ${{
-        secrets.CODESIGN_IDENTITY != '' &&
-        secrets.APPLE_ID != '' &&
-        secrets.APPLE_APP_SPECIFIC_PASSWORD != '' &&
-        secrets.APPLE_TEAM_ID != ''
-      }}
+
+    # ÇÖZÜM: create-release adımından gelen 'has_secrets' çıktısını kontrol ediyoruz.
+    # Bu yöntem GitHub Actions parser kurallarına %100 uygundur.
+    if: ${{ needs.create-release.outputs.has_secrets == 'true' }}
+
+    env:
+      HAS_CODESIGN: ${{ secrets.CODESIGN_IDENTITY }}
+      HAS_APPLE_ID: ${{ secrets.APPLE_ID }}
+      HAS_APPLE_PASS: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+      HAS_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      HAS_CERT: ${{ secrets.MACOS_CERTIFICATE }}
+      HAS_SIGN_DB: ${{ secrets.HILAL_SIGNING_DB_BASE64 }}
 
     steps:
-      - name: Checkout Hilal Browser
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Cache Firefox source checkout
@@ -66,14 +83,14 @@ jobs:
           restore-keys: |
             firefox-
 
-      - name: Set up Firefox source tree
+      - name: Setup Firefox source
         run: scripts/setup-firefox.sh
 
-      - name: Apply Hilal patches
+      - name: Apply patches
         run: scripts/apply.sh --force --no-symlinks
 
       - name: Import signing certificate
-        if: ${{ secrets.MACOS_CERTIFICATE != '' }}
+        if: ${{ env.HAS_CERT != '' }}
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
           MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
@@ -88,9 +105,9 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "" build.keychain
           rm -f "$CERT_PATH"
 
-      - name: Build and package Hilal Browser
+      - name: Build and package
         run: |
-          export CODESIGN_IDENTITY="${{ secrets.CODESIGN_IDENTITY }}"
+          export CODESIGN_IDENTITY="$HAS_CODESIGN"
           scripts/build-macos.sh package --no-symlinks
 
       - name: Sign and notarize
@@ -109,28 +126,22 @@ jobs:
           hdiutil create -volname "Hilal Browser" -srcfolder "$APP_BUNDLE" -ov -format UDZO "dist/$DMG_NAME"
           echo "dmg_path=dist/$DMG_NAME" >> "$GITHUB_ENV"
 
-      - name: Restore Signing NSS Database
-        if: ${{ secrets.HILAL_SIGNING_DB_BASE64 != '' }}
+      - name: Create MAR update
+        if: ${{ env.HAS_SIGN_DB != '' }}
+        env:
+          HILAL_SIGNING_DB_BASE64: ${{ secrets.HILAL_SIGNING_DB_BASE64 }}
         run: |
-          echo "${{ secrets.HILAL_SIGNING_DB_BASE64 }}" | base64 -d > signing-db.tar.gz
           mkdir -p /tmp/signing-db
+          echo "$HILAL_SIGNING_DB_BASE64" | base64 -d > signing-db.tar.gz
           tar -xzf signing-db.tar.gz -C /tmp/signing-db
 
-      - name: Create Signed Update MAR
-        env:
-          HILAL_SIGNMAR_NSS_DIR: /tmp/signing-db
-          HILAL_SIGNMAR_CERT: mar_sig
-        run: |
-          if [ -d "/tmp/signing-db" ]; then
-            scripts/make-full-update.sh "${{ needs.create-release.outputs.tag }}" dist/hilal-macos-arm64.complete.mar
-          else
-            scripts/make-full-update.sh --allow-unsigned "${{ needs.create-release.outputs.tag }}" dist/hilal-macos-arm64.complete.mar
-          fi
+          scripts/make-full-update.sh "${{ needs.create-release.outputs.tag }}" dist/hilal-macos-arm64.complete.mar
 
-      - name: Generate Update Manifest
+      - name: Generate update manifest
         run: |
           TAG="${{ needs.create-release.outputs.tag }}"
           APP_VER=$(cat firefox/browser/config/version.txt)
+
           node scripts/generate-update-manifest.mjs \
             --version "$TAG" \
             --app-version "$APP_VER" \
@@ -138,11 +149,23 @@ jobs:
             --mar-url macos-arm64="https://github.com/vastsea0/hilal-browser/releases/download/$TAG/hilal-macos-arm64.complete.mar" \
             --output dist/hilal-update-manifest.json
 
-      - name: Upload assets to release
+      - name: Upload assets
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.create-release.outputs.tag }}
           files: |
-            ${{ env.dmg_path }}
+            dist/*.dmg
             dist/hilal-macos-arm64.complete.mar
             dist/hilal-update-manifest.json
+
+  publish-release:
+    needs: [create-release, sign-macos]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.create-release.outputs.tag }}
+        run: |
+          gh release edit "$TAG" --draft=false

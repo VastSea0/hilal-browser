@@ -4,4 +4,10 @@ set -euo pipefail
 export TMPDIR="${XDG_CACHE_HOME:-$HOME/.cache}/tmp"
 mkdir -p "$TMPDIR"
 
-exec /app/lib/firefox/firefox --name org.gkdevstudio.Hilal "$@"
+if [ -x /app/lib/hilal/firefox ]; then
+    exec /app/lib/hilal/firefox --name org.gkdevstudio.Hilal "$@"
+elif [ -x /app/lib/Hilal/firefox ]; then
+    exec /app/lib/Hilal/firefox --name org.gkdevstudio.Hilal "$@"
+else
+    exec /app/lib/firefox/firefox --name org.gkdevstudio.Hilal "$@"
+fi
