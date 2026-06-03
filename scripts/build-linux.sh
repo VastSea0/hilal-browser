@@ -32,7 +32,7 @@ fi
 log "Initializing build environment..."
 
 # Ensure patches and branding are applied
-bash "$(dirname "$0")/apply.sh"
+"$HILAL_REPO_ROOT/bin/hil" apply
 
 # Copy Linux mozconfig
 if [ -f "$(dirname "$0")/../mozconfigs/linux" ]; then

@@ -35,11 +35,7 @@ done
 set -- "${remaining[@]+"${remaining[@]}"}"
 
 # Ensure patches/branding are applied
-APPLY_ARGS=()
-if [ "$NO_SYMLINKS" = 1 ]; then
-  APPLY_ARGS+=(--no-symlinks)
-fi
-bash "$(dirname "$0")/apply.sh" "${APPLY_ARGS[@]+"${APPLY_ARGS[@]}"}"
+"$HILAL_REPO_ROOT/bin/hil" apply
 
 # Copy macOS mozconfig
 if [ -f "$(dirname "$0")/../mozconfigs/macos" ]; then

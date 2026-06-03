@@ -59,7 +59,7 @@ if [ $# -gt 0 ]; then
 fi
 
 # 3. Apply patches and branding overlays
-bash "$(dirname "$0")/apply.sh"
+"$HILAL_REPO_ROOT/bin/hil" apply
 
 # 4. Copy selected Android mozconfig
 MOZCONFIG_SRC="$HILAL_REPO_ROOT/mozconfigs/android-$ARCH"

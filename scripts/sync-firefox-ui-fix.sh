@@ -16,7 +16,7 @@ set -euo pipefail
 REF="${1:-master}"
 UPSTREAM_URL="${HILAL_FIREFOX_UI_FIX_UPSTREAM:-https://github.com/black7375/Firefox-UI-Fix.git}"
 WORK_DIR="${HILAL_FIREFOX_UI_FIX_WORK:-$HILAL_REPO_ROOT/.cache/firefox-ui-fix}"
-DEST="$HILAL_REPO_ROOT/prefs/browser/themes/shared/firefox-ui-fix.css"
+DEST="$HILAL_REPO_ROOT/changes/browser/themes/shared/firefox-ui-fix.css"
 SOURCE_META="$HILAL_REPO_ROOT/third_party/firefox-ui-fix/SOURCE"
 HEADER='/* This file contains CSS derived from Firefox-UI-Fix (Lepton).
  * Upstream: https://github.com/black7375/Firefox-UI-Fix
@@ -99,4 +99,4 @@ PY
 fi
 
 log "Wrote $DEST (pinned $PINNED_COMMIT)"
-log "Review the diff, then run scripts/apply.sh --force and test the browser UI."
+log "Review the diff, then run ./bin/hil apply --force and test the browser UI."

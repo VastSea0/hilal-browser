@@ -56,11 +56,11 @@ def append_hilal_content(existing_content, custom_content):
 
 
 def merge_locales(repo_root, firefox_src):
-    custom_dir = repo_root / "prefs/browser/locales/tr"
+    custom_dir = repo_root / "changes/browser/locales/tr"
     target_dir = firefox_src / "browser/locales/tr"
 
     if not custom_dir.exists():
-        print("[hilal] No custom locales folder found in prefs/browser/locales/tr")
+        print("[hilal] No custom locales folder found in changes/browser/locales/tr")
         return False
 
     if not target_dir.exists():

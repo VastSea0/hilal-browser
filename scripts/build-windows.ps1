@@ -59,7 +59,7 @@ function Write-Err($msg) {
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $repoRoot = (Resolve-Path (Join-Path $scriptDir "..")).Path
-$firefoxSrc = Join-Path $repoRoot "firefox"
+$firefoxSrc = Join-Path $repoRoot "engine"
 
 # Convert Windows backslash paths to forward-slash for bash compatibility
 $repoRootUnix = $repoRoot.Replace("\", "/")
@@ -171,7 +171,7 @@ if (-not (Test-Path $firefoxSrc)) {
     Write-Warn "Firefox source tree not found at: $firefoxSrc"
     Write-Host ""
     Write-Host "  Clone it now with:"
-    Write-Host "    bash scripts/setup-firefox.sh"
+    Write-Host "    .\bin\hil.exe setup"
     Write-Host ""
     exit 1
 }
@@ -195,10 +195,10 @@ if (-not $SkipApply) {
     }
 
     Write-Step "Applying Hilal patches ..."
-    $applyCmd = "cd `"$repoRootUnix`" && bash scripts/apply.sh --no-symlinks $applyArgs"
+    $applyCmd = "cd `"$repoRootUnix`" && ./bin/hil apply $applyArgs"
     & $gitBash -c $applyCmd
     if ($LASTEXITCODE -ne 0) {
-        Write-Err "scripts/apply.sh failed. Try: bash scripts/apply.sh --force"
+        Write-Err "hil apply failed. Try: ./bin/hil apply --force"
         exit 1
     }
 } else {
