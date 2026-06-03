@@ -1,15 +1,15 @@
 diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/components/customizableui/CustomizableUI.sys.mjs
 --- a/browser/components/customizableui/CustomizableUI.sys.mjs
 +++ b/browser/components/customizableui/CustomizableUI.sys.mjs
-@@ -323,6 +323,11 @@ var CustomizableUIInternal = {
-       let addons = await lazy.AddonManager.getAddonsByTypes(["theme"]);
-       gDefaultTheme = addons.find(addon => addon.id == kDefaultThemeID);
-       gSelectedTheme = addons.find(addon => addon.isActive) || gDefaultTheme;
-+
-+      if (!Services.prefs.getBoolPref("hilal.toolbar.initialized", false)) {
-+        this.reset();
-+        Services.prefs.setBoolPref("hilal.toolbar.initialized", true);
-+      }
-     });
+@@ -317,6 +317,11 @@ var CustomizableUIInternal = {
+   initialize() {
+     lazy.log.debug("Initializing");
  
-     this.addListener(this);
++    if (!Services.prefs.getBoolPref("hilal.toolbar.initialized", false)) {
++      Services.prefs.clearUserPref("browser.uiCustomization.state");
++      Services.prefs.setBoolPref("hilal.toolbar.initialized", true);
++    }
++
+     lazy.AddonManagerPrivate.databaseReady.then(async () => {
+       lazy.AddonManager.addAddonListener(this);
+ 
