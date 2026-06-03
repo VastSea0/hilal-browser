@@ -23,16 +23,34 @@ jobs:
       - name: Checkout Hilal Browser
         uses: actions/checkout@v4
 
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            hil/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('hil/Cargo.toml') }}
+
+      - name: Compile hil tool
+        run: |
+          cargo build --release --manifest-path hil/Cargo.toml
+          mkdir -p bin
+          cp hil/target/release/hil bin/hil
+          strip bin/hil
+
       - name: Cache Firefox source checkout
         uses: actions/cache@v4
         with:
-          path: firefox
-          key: firefox-${{ hashFiles('FIREFOX_COMMIT') }}
+          path: engine
+          key: firefox-${{ hashFiles('upstream.lock') }}
           restore-keys: |
             firefox-
 
       - name: Set up Firefox source tree
-        run: scripts/setup-firefox.sh
+        run: ./bin/hil setup
 
       - name: Apply Hilal patches
-        run: scripts/apply.sh --force
+        run: ./bin/hil apply --force
