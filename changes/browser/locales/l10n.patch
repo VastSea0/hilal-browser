@@ -13,39 +13,39 @@ diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/b
 +hilal-welcome-recommended = Recommended
 +
 +hilal-welcome-brand-text = Hilal Browser
-+hilal-welcome-intro-line-1 = Welcome to Hilal
-+hilal-welcome-intro-line-2 = A calmer internet
++hilal-welcome-intro-line-1 = Hilal starts here
++hilal-welcome-intro-line-2 = Keep the window quiet
 +
 +hilal-welcome-step-label-moon = Welcome
-+hilal-welcome-step-label-settings = Settings
++hilal-welcome-step-label-settings = Choices
 +hilal-welcome-step-label-shield = Privacy
 +hilal-welcome-step-label-search = Search
-+hilal-welcome-step-label-tabs = Workspaces
++hilal-welcome-step-label-tabs = Spaces
 +hilal-welcome-step-label-check = Ready
 +
-+hilal-welcome-stage-0-kicker = Welcome
-+hilal-welcome-stage-0-title = A quieter start for the web.
-+hilal-welcome-stage-0-subtitle = Hilal opens with privacy, workspaces, and search choices in one calm flow.
++hilal-welcome-stage-0-kicker = First choices
++hilal-welcome-stage-0-title = Decide what Hilal should touch.
++hilal-welcome-stage-0-subtitle = Keep the first run quiet: import only what you want and choose whether system links should open here.
 +
-+hilal-welcome-stage-1-kicker = Bring your trail
-+hilal-welcome-stage-1-title = A new start, same bookmarks.
-+hilal-welcome-stage-1-subtitle = Move bookmarks, history, and passwords in one pass, then decide whether Hilal should become your default browser.
++hilal-welcome-stage-1-kicker = Privacy
++hilal-welcome-stage-1-title = Pick a protection posture.
++hilal-welcome-stage-1-subtitle = Hilal can stay comfortable for daily browsing or tighten the surfaces that websites use to recognize you.
 +
-+hilal-welcome-stage-2-kicker = Privacy Level
-+hilal-welcome-stage-2-title = Choose the amount of hardening.
-+hilal-welcome-stage-2-subtitle = uBlock Origin is already installed. Pick the Hilal privacy profile that matches how much site compatibility you want to keep.
++hilal-welcome-stage-2-kicker = Search
++hilal-welcome-stage-2-title = Choose the address-bar engine.
++hilal-welcome-stage-2-subtitle = This is the engine Hilal uses when you type into the bar. You can change it whenever the browser is open.
 +
-+hilal-welcome-stage-3-kicker = Search
-+hilal-welcome-stage-3-title = Choose your default search.
-+hilal-welcome-stage-3-subtitle = Select the search engine Hilal should use from the address bar. You can change it later in settings.
++hilal-welcome-stage-3-kicker = Spaces
++hilal-welcome-stage-3-title = Start with fewer mixed tabs.
++hilal-welcome-stage-3-subtitle = Create a small set of spaces now, or leave the browser empty and shape it later.
 +
-+hilal-welcome-stage-4-kicker = Workspaces
-+hilal-welcome-stage-4-title = Keep flows apart from day one.
-+hilal-welcome-stage-4-subtitle = Create a few starter spaces so personal, work, and social browsing do not collapse into the same tab pile.
++hilal-welcome-stage-4-kicker = Finish
++hilal-welcome-stage-4-title = Ready for a clean window.
++hilal-welcome-stage-4-subtitle = Your choices are saved locally. Hilal will leave the setup layer and return the browser chrome.
 +
 +hilal-welcome-stage-5-kicker = Ready
-+hilal-welcome-stage-5-title = Everything is in place.
-+hilal-welcome-stage-5-subtitle = Hilal will apply your choices and open into a clean browsing window.
++hilal-welcome-stage-5-title = Hilal is ready.
++hilal-welcome-stage-5-subtitle = The setup layer will close and your browser window will return.
 +
 +hilal-welcome-home-preview-image-alt =
 +    .alt = Hilal Browser home page preview
@@ -55,9 +55,9 @@ diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/b
 +hilal-welcome-feature-clean = Clean interface
 +
 +hilal-welcome-default-browser-label = Default browser
-+hilal-welcome-default-browser-desc = Make Hilal Browser your default browser for system links.
-+hilal-welcome-import-label = Bookmarks and passwords
-+hilal-welcome-import-desc = Import your existing bookmarks, history, and passwords from another browser.
++hilal-welcome-default-browser-desc = Use Hilal when the system opens web links.
++hilal-welcome-import-label = Browser data
++hilal-welcome-import-desc = Bring bookmarks, history, and passwords from another browser.
 +hilal-welcome-import-button = Import
 +hilal-welcome-imported-button = Imported
 +
@@ -68,36 +68,36 @@ diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/b
 +hilal-welcome-workspace-label-work = Work
 +hilal-welcome-workspace-label-social = Social
 +
-+hilal-welcome-workspace-state-added = Will be added
++hilal-welcome-workspace-state-added = Will be created
 +hilal-welcome-workspace-state-skipped = Skipped
 +
 +hilal-welcome-summary-search = Search
 +hilal-welcome-summary-privacy = Privacy
-+hilal-welcome-summary-workspaces = Workspaces
++hilal-welcome-summary-workspaces = Spaces
 +hilal-welcome-summary-default-browser = Default browser
 +hilal-welcome-summary-none = None
 +hilal-welcome-summary-default-set = Set as default
-+hilal-welcome-summary-default-no-change = Do not change
++hilal-welcome-summary-default-no-change = No change
 +
 +hilal-welcome-action-back = Back
 +hilal-welcome-action-continue = Continue
-+hilal-welcome-action-start = Start
-+hilal-welcome-action-start-browsing = Start browsing
++hilal-welcome-action-start = Set up
++hilal-welcome-action-start-browsing = Open Hilal
 +
 +## Hilal Welcome - Privacy Levels
 +
 +hilal-welcome-privacy-standard-label = Balanced
-+hilal-welcome-privacy-standard-badge = LibreWolf-like
++hilal-welcome-privacy-standard-badge = Everyday
 +hilal-welcome-privacy-standard-desc = RFP, strict tracking protection, HTTPS-only, URL cleanup, WebGL off, and cookie/cache cleanup on close.
 +hilal-welcome-privacy-standard-detail = WebRTC stays enabled for compatibility, with local leak surfaces reduced.
 +
 +hilal-welcome-privacy-strict-label = Strict
-+hilal-welcome-privacy-strict-badge = Less compatible
++hilal-welcome-privacy-strict-badge = Less exposed
 +hilal-welcome-privacy-strict-desc = Adds First Party Isolation on top of Balanced and disables WebRTC entirely.
 +hilal-welcome-privacy-strict-detail = Video calls and some sign-in flows may break.
 +
 +hilal-welcome-privacy-extreme-label = Maximum
-+hilal-welcome-privacy-extreme-badge = Not Tor
++hilal-welcome-privacy-extreme-badge = Local only
 +hilal-welcome-privacy-extreme-desc = Adds JavaScript, camera, microphone, location, and history blocking on top of Strict.
 +hilal-welcome-privacy-extreme-detail = Does not hide your IP address; many modern sites may not work as expected.
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
