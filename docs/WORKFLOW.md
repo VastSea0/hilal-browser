@@ -2,143 +2,76 @@
 
 This document walks through day-to-day work on Hilal Browser.
 
-## Mental model
+## Mental Model
 
 There are exactly two trees:
 
-1. **`hilal-browser/`** (this repo) — small, text-only, version-controlled. Holds patches, branding, scripts, docs.
-2. **`hilal-browser/firefox/`** — the Firefox source checkout. Gitignored from this repo. It has its own git history pointing at `mozilla-firefox/firefox`.
+1. **`hilal-browser/`** (this repo) — small, text-only, version-controlled. Holds the declarative configurations, patches, assets, scripts, and docs.
+2. **`hilal-browser/engine/`** — the full Firefox source checkout. Gitignored from this repo. It has its own git history pointing at `mozilla-firefox/firefox`.
 
 The Hilal changes live in `hilal-browser/` as the source of truth.
-Whenever you want to build, you "stamp" them onto `firefox/` with
-`scripts/apply.sh`. Whenever you change source code in `firefox/`,
-you bring the changes back with `scripts/refresh.sh`.
+Whenever you want to build, you "stamp" them onto `engine/` with `./bin/hil apply`. Whenever you change source code in `engine/`, you commit your changes in `engine/` and then bring them back with `./bin/hil refresh`.
 
 ```
-                    apply.sh
-hilal-browser/  ─────────────►  firefox/         (build & run from here)
+                    ./bin/hil apply
+hilal-browser/  ─────────────►  engine/         (build & run from here)
    ▲                              │
-   │           refresh.sh         │
+   │           ./bin/hil refresh  │
    └──────────────────────────────┘
 ```
 
-## First-time setup
+## First-time Setup
 
 ```bash
 git clone https://github.com/VastSea0/hilal-browser.git
 cd hilal-browser
-scripts/setup-firefox.sh    # clones Firefox into ./firefox and checks out FIREFOX_COMMIT
-scripts/apply.sh            # stamps Hilal changes onto ./firefox
-scripts/build-macos.sh      # delegates to ./mach build
+./bin/hil setup            # Clones Firefox into ./engine and checks out the pinned commit
+./bin/hil apply            # Stamps Hilal changes onto ./engine
+scripts/build-macos.sh      # Delegates to ./mach build
 ```
 
-`setup-firefox.sh` pins the checkout to the commit recorded in
-`FIREFOX_COMMIT`. Run it again whenever that file changes. `apply.sh`
-also checks the pin before applying patches, so different build machines
-do not silently build from different Firefox bases.
+`upstream.lock` pins the checkout to the exact commit hash. Run `./bin/hil setup` again whenever that file changes. `./bin/hil apply` also checks the pin before applying patches.
 
-## Editing source code
+## Editing Source Code
 
-Edit files inside `firefox/` directly. Use `./mach build`, `./mach
-run`, `./mach test --auto`, etc. as documented at
-<https://firefox-source-docs.mozilla.org>.
+Edit files inside `engine/` directly. Use `./mach build`, `./mach run`, `./mach test --auto`, etc.
 
-When the change is ready to ship in Hilal:
+When a change is ready to be synchronized back to the repository:
+
+1. Stage and commit (or amend) your change in the `engine/` Git history corresponding to the target patch sequence.
+2. From the root directory, run:
+```bash
+./bin/hil refresh
+```
+
+This compares the commit stack in the `engine/` tree against `upstream-base`, maps the changes back to the entries defined in `manifest.toml`, and regenerates the individual patch files (e.g. `changes/browser/transparent-macos-chrome.patch`) while cleanly preserving any description headers.
+
+## Branding, Prefs & Locale Changes
+
+Branding, preference configurations, and locales are **overlays**, not patches:
+
+- Edit them in `changes/` directly (e.g., real PNGs/ICOs/Fluent files), and run `./bin/hil apply` to push them to the `engine/` tree.
+- Or edit them inside `engine/` and run `./bin/hil refresh` to sync the changes back.
+
+Same model for preferences and locales: a file at `changes/browser/app/profile/firefox.js` is copied directly to `engine/browser/app/profile/firefox.js` on apply. Custom Turkish translations under `changes/browser/locales/tr/` are merged into the target locale files.
+
+## When a Patch Fails to Apply
+
+If a patch fails to apply, `./bin/hil apply` will halt and print which step failed. First, reset and make sure you are on the pristine base:
 
 ```bash
-scripts/refresh.sh
+./bin/hil apply --force
 ```
 
-This compares the current Firefox tree against `HEAD` (the upstream
-revision you started from), excludes overlay-managed paths (branding,
-prefs), and writes the resulting diff into
-`patches/0001-hilal-local-changes.patch`. Review with `git diff`, then
-commit.
+If it still fails, the options are:
 
-### Splitting into multiple focused patches
-
-The single-patch refresh is fine for prototyping, but for review-ready
-work prefer **commit-per-feature** in the Firefox tree:
-
-```bash
-cd firefox
-git checkout -b hilal/main
-# ... make change ...
-git add -p
-git commit -m "Hilal: enable foo by default"
-# ... make next change ...
-git commit -m "Hilal: change tab strip color"
-```
-
-Then export every commit as its own patch:
-
-```bash
-cd ..
-scripts/refresh.sh --from-commits origin/main..hilal/main
-```
-
-This regenerates `patches/*.patch` and `patches/series` so each
-commit becomes one numbered patch (`0001-...patch`, `0002-...patch`,
-etc.). Commits stay reviewable; series stays ordered.
-
-## Branding & prefs changes
-
-Branding files are NOT patches. Either:
-
-- Edit them in `branding/hilal/` directly (they're real PNGs/ICOs/etc.) and run `scripts/apply.sh` to push to Firefox. Then build.
-- Or edit them inside `firefox/browser/branding/hilal/` and run `scripts/refresh.sh` to pull back.
-
-Same model for `prefs/`: a file at `prefs/browser/app/profile/firefox.js`
-would be copied to `firefox/browser/app/profile/firefox.js` on apply.
-
-Localization uses the same overlay idea. Add bundled language packs under
-`prefs/browser/app/distribution/extensions/` and Hilal-specific Fluent strings
-under `prefs/browser/locales/<locale>/browser/`; see `docs/LOCALIZATION.md`.
-
-## When a patch fails to apply
-
-This usually means the Firefox checkout is not on the commit in
-`FIREFOX_COMMIT`, or upstream Firefox changed the code the patch was
-touching. First run:
-
-```bash
-scripts/setup-firefox.sh
-scripts/apply.sh
-```
-
-If the patch still fails on the pinned base, options are:
-
-1. **Refresh against current upstream**
-   ```bash
-   cd firefox && git reset --hard origin/main
-   # apply remaining patches manually (or use --3way)
-   # edit the conflicting file by hand to make the Hilal change work
-   cd ..
-   scripts/refresh.sh
-   ```
-2. **3-way apply** — try `git apply --3way patches/<file>` inside `firefox/` to get conflict markers, fix by hand, then `scripts/refresh.sh`.
-3. **Drop the patch** if upstream incorporated the change or made it obsolete; delete the entry from `patches/series` and the file.
+1. **Manual Git Conflict Resolution**:
+   Run `git apply --3way ../changes/<failing-patch>.patch` inside the `engine/` directory to get conflict markers, resolve them by hand, commit/amend the commit in the `engine/` Git history, and run `./bin/hil refresh` from the root directory.
+2. **Drop the patch**:
+   If upstream Firefox has incorporated the change, remove the patch file from `changes/` and delete its entry from `manifest.toml`.
 
 ## Conventions
 
-- Patches use plain unified diff format. We do NOT include `index <hash>..<hash>` lines because they're tied to specific blobs and become noisy across upstream updates.
-- Patch filenames: `<NNNN>-<kebab-case-summary>.patch`. NNNN is just for ordering.
-- Branding assets are case-sensitive; the directory name `branding/hilal/` must match the value of `MOZ_BRANDING_DIRECTORY` set in patch 0001.
-- Commit one logical change per commit, with a short subject line. The same advice from `AGENTS.md` applies: be sparing with comments, follow upstream conventions.
-
-## Common one-liners
-
-```bash
-# See current source-tree state vs upstream
-(cd firefox && git status && git diff --stat)
-
-# Show what apply.sh will sync (branding only)
-diff -r branding/hilal firefox/browser/branding/hilal
-
-# Reset Firefox tree to the pinned upstream + Hilal state
-scripts/setup-firefox.sh
-scripts/apply.sh --force
-
-# Roll forward to latest upstream
-scripts/sync-upstream.sh
-```
+- Patch files use plain unified diff format without noisy `index` lines.
+- The sequencing of all patches and overlays is declared in `manifest.toml`.
+- Commit one logical change per commit in this repository (never commit the `engine/` directory).

@@ -15,41 +15,41 @@ pref("intl.locale.requested", "");
 1. Add the signed Firefox language pack to:
 
    ```text
-   prefs/browser/app/distribution/extensions/langpack-<locale>@firefox.mozilla.org.xpi
+   changes/browser/app/distribution/extensions/langpack-<locale>@firefox.mozilla.org.xpi
    ```
 
 2. Add Hilal-specific Fluent translations under:
 
    ```text
-   prefs/browser/locales/<locale>/browser/
+   changes/browser/locales/<locale>/browser/
    ```
 
    This directory mirrors the language pack path after
    `browser/localization/<locale>/browser/`. For example:
 
    ```text
-   prefs/browser/locales/tr/browser/browser.ftl
-   prefs/browser/locales/tr/browser/sidebar.ftl
-   prefs/browser/locales/tr/browser/preferences/preferences.ftl
+   changes/browser/locales/tr/browser/browser.ftl
+   changes/browser/locales/tr/browser/sidebar.ftl
+   changes/browser/locales/tr/browser/preferences/preferences.ftl
    ```
 
 3. Run:
 
    ```bash
-   scripts/apply.sh
-   ```
+    ./bin/hil apply
+    ```
 
-   The apply step syncs the XPI into Firefox and then runs
-   `scripts/patch-langpack.py`. The script patches every bundled
-   `langpack-*@firefox.mozilla.org.xpi`, overwrites Mozilla branding strings
-   with Hilal branding, and appends the Hilal Fluent files for that locale.
+    The apply step copies the overlay files into the Firefox tree and then merges
+    the custom translation overrides directly using `hil`'s built-in locale merging.
+    The merging logic patches the Fluent `.ftl` files to append Hilal-specific
+    translations.
 
 4. Build or package normally.
 
 ## Notes
 
 - Brand strings are not translated. Each bundled langpack receives the Hilal
-  brand values from `branding/hilal/locales/en-US/`.
+  brand values from changes under `changes/browser/branding/hilal/`.
 - Keep Hilal-specific strings in matching files across locales where practical.
   Missing translations can fall back to English, but complete locale overlays
   avoid noisy Fluent missing-message logs.
