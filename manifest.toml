@@ -1,0 +1,119 @@
+[browser]
+name = "Hilal Browser"
+codename = "hilal"
+version = "0.3.0"
+
+[branding]
+active_profile = "hilal-default"
+
+[[patches]]
+path   = "browser/branding/hilal"
+reason = "Hilal branding assets"
+
+[[patches]]
+path   = "browser/branding-defaults.patch"
+reason = "Hilal Browser: switch default branding directory and app vendor"
+
+[[patches]]
+path   = "browser/transparent-macos-chrome.patch"
+reason = "Hilal transparent macOS chrome implementation"
+
+[[patches]]
+path   = "browser/base/workspaces.patch"
+reason = "Hilal workspace layout"
+
+[[patches]]
+path   = "browser/base/content/hilal"
+reason = "Hilal custom welcome page assets and scripts"
+
+[[patches]]
+path   = "browser/components/preferences.patch"
+reason = "Hilal preferences panels and tabs layout"
+
+[[patches]]
+path   = "browser/locales/l10n.patch"
+reason = "Hilal English localization overrides"
+
+[[patches]]
+path   = "third_party/libwebrtc/disable-goog-cc-scream-windows.patch"
+reason = "Disable goog-cc-scream on Windows"
+
+[[patches]]
+path   = "browser/components/urlbar/bangs.patch"
+reason = "Hilal Bangs implementation"
+
+[[patches]]
+path   = "browser/ublock.patch"
+reason = "Hilal distribution setup for integrated uBlock"
+
+[[patches]]
+path   = "browser/config/version.patch"
+reason = "Hilal custom version displaying"
+
+[[patches]]
+path   = "browser/app/fix-macos-openrsync-dylib-copy.patch"
+reason = "Fix macOS openrsync dylib copy path"
+
+[[patches]]
+path   = "browser/ui-fix.patch"
+reason = "Hilal custom UI style fixes and overrides"
+
+[[patches]]
+path   = "browser/app/profile/system-locale-default.patch"
+reason = "Hilal system locale default preferences"
+
+[[patches]]
+path   = "browser/components/preferences/privacy-levels.patch"
+reason = "Hilal privacy level controls in settings"
+
+[[patches]]
+path   = "browser/app/distribution/update-policy.patch"
+reason = "Hilal browser distribution update policy settings"
+
+[[patches]]
+path   = "preferences-no-update-service.patch"
+reason = "Disable background Firefox update checks and telemetry"
+
+[[patches]]
+path   = "browser/bang-customization.patch"
+reason = "Hilal search bang customization interface and backend"
+
+[[patches]]
+path   = "browser/sidebar-layout-redesign.patch"
+reason = "Redesigned sidebar panel layout and state manager"
+
+[[patches]]
+path   = "browser/workspace-context-isolation.patch"
+reason = "Isolate workspaces context for security"
+
+[[patches]]
+path   = "browser/about-version-details.patch"
+reason = "Hilal about dialog version information"
+
+[[patches]]
+path   = "browser/components/preferences/language-selection.patch"
+reason = "Hilal settings language selection panel"
+
+[[patches]]
+path   = "compact-mode-preferences.patch"
+reason = "Compact mode preference toggles and styling"
+
+[[patches]]
+path   = "browser/components/preferences/sidebar-settings-wiring.patch"
+reason = "Sidebar settings checkbox wiring in preferences"
+
+[[patches]]
+path   = "toolkit/mozapps/update/updater/secure-update-signatures.patch"
+reason = "Signature validation for update files"
+
+[[patches]]
+path   = "toolkit/mozapps/update/updater"
+reason = "Hilal update signing certificates"
+
+[[patches]]
+path   = "browser/base/content/about-dialog-custom-links.patch"
+reason = "Add custom project links to about dialog"
+
+[[patches]]
+path   = "browser/components/tabbrowser/workspace-newtab-container.patch"
+reason = "Workspace support for new tab container context"

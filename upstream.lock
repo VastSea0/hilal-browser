@@ -1,0 +1,4 @@
+firefox_version = "153.0a1"
+commit          = "e28b34ab33dbf49364999070168cbb7e11e8e5bd"
+tarball_url     = ""
+tarball_sha256  = ""
