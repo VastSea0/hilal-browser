@@ -191,3 +191,6 @@ pref("app.feedback.baseURL", "https://github.com/vastsea0/hilal-browser/issues")
 pref("hilal.bangs.fallback_to_ddg", false);
 pref("hilal.workspaces.remember_host_mapping", false);
 
+// First-run toolbar initialization
+pref("hilal.toolbar.initialized", false);
+

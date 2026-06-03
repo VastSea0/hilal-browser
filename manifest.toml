@@ -137,3 +137,7 @@ reason = "Add custom project links to about dialog"
 [[patches]]
 path   = "browser/components/tabbrowser/workspace-newtab-container.patch"
 reason = "Workspace support for new tab container context"
+
+[[patches]]
+path   = "browser/components/customizableui/reset-toolbar-on-first-run.patch"
+reason = "Reset toolbar to defaults on first run of Hilal Browser"

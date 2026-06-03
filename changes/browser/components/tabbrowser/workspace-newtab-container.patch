@@ -7,7 +7,6 @@ loss and page reloads.
 
 ---
 diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/components/tabbrowser/content/tabbrowser.js
-index 37508e85da67..20702a626fd6 100644
 --- a/browser/components/tabbrowser/content/tabbrowser.js
 +++ b/browser/components/tabbrowser/content/tabbrowser.js
 @@ -4161,8 +4161,12 @@

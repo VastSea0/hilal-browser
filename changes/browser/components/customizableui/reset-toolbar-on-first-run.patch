@@ -1,0 +1,15 @@
+diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/components/customizableui/CustomizableUI.sys.mjs
+--- a/browser/components/customizableui/CustomizableUI.sys.mjs
++++ b/browser/components/customizableui/CustomizableUI.sys.mjs
+@@ -447,6 +447,11 @@ var CustomizableUIInternal = {
+     Services.prefs.addObserver(kPrefSidebarVerticalTabsEnabled, this);
+     Services.prefs.addObserver(kPrefSidebarRevampEnabled, this);
+     Services.prefs.addObserver(kPrefSidebarPositionStartEnabled, this);
++
++    if (!Services.prefs.getBoolPref("hilal.toolbar.initialized", false)) {
++      this.reset();
++      Services.prefs.setBoolPref("hilal.toolbar.initialized", true);
++    }
+   },
+ 
+   /**
