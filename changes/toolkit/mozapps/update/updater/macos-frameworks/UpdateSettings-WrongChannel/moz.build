@@ -1,0 +1,16 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+Framework("UpdateSettings-WrongChannel")
+FINAL_TARGET = "_tests/xpcshell/toolkit/mozapps/update/tests"
+
+DEFINES["ACCEPTED_MAR_CHANNEL_IDS"] = '"wrong-channel"'
+
+UNIFIED_SOURCES += [
+    "../UpdateSettings/UpdateSettings.mm",
+]
+
+OS_LIBS += [
+    "-framework Foundation",
+]

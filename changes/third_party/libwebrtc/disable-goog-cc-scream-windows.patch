@@ -1,0 +1,37 @@
+diff --git a/third_party/libwebrtc/api/transport/goog_cc_factory.cc b/third_party/libwebrtc/api/transport/goog_cc_factory.cc
+--- a/third_party/libwebrtc/api/transport/goog_cc_factory.cc
++++ b/third_party/libwebrtc/api/transport/goog_cc_factory.cc
+@@ -19,7 +19,6 @@
+ #include "api/transport/network_control.h"
+ #include "api/units/time_delta.h"
+ #include "modules/congestion_controller/goog_cc/goog_cc_network_control.h"
+-#include "modules/congestion_controller/goog_cc_scream_network_controller/goog_cc_scream_network_controller.h"
+ #include "modules/congestion_controller/scream/scream_network_controller.h"
+ #include "rtc_base/experiments/field_trial_parser.h"
+ #include "rtc_base/logging.h"
+@@ -99,14 +98,6 @@ GoogCcNetworkControllerFactory::Create(NetworkControllerConfig config) {
+        factory_config_.rfc_8888_feedback_negotiated)) {
+     return std::make_unique<ScreamNetworkController>(config);
+   }
+-  if (factory_config_.rfc_8888_feedback_negotiated &&
+-      (mode == Mode::kScreamAfterCe || mode == Mode::kGoogCcWithEct1)) {
+-    return std::make_unique<GoogCcScreamNetworkController>(
+-        config, std::move(goog_cc_config),
+-        mode == Mode::kScreamAfterCe
+-            ? GoogCcScreamNetworkController::Mode::kScreamAfterCe
+-            : GoogCcScreamNetworkController::Mode::kGoogCcWithEct1);
+-  }
+   return std::make_unique<GoogCcNetworkController>(config,
+                                                    std::move(goog_cc_config));
+ }
+diff --git a/third_party/libwebrtc/moz.build b/third_party/libwebrtc/moz.build
+--- a/third_party/libwebrtc/moz.build
++++ b/third_party/libwebrtc/moz.build
+@@ -295,7 +295,6 @@ DIRS += [
+     "/third_party/libwebrtc/modules/congestion_controller/goog_cc/probe_controller_gn",
+     "/third_party/libwebrtc/modules/congestion_controller/goog_cc/pushback_controller_gn",
+     "/third_party/libwebrtc/modules/congestion_controller/goog_cc/send_side_bwe_gn",
+-    "/third_party/libwebrtc/modules/congestion_controller/goog_cc_scream_network_controller/goog_cc_scream_network_controller_gn",
+     "/third_party/libwebrtc/modules/congestion_controller/rtp/congestion_controller_feedback_stats_gn",
+     "/third_party/libwebrtc/modules/congestion_controller/rtp/control_handler_gn",
+     "/third_party/libwebrtc/modules/congestion_controller/rtp/transport_feedback_gn",

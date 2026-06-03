@@ -1,0 +1,30 @@
+diff --git a/browser/components/urlbar/UrlbarUtils.sys.mjs b/browser/components/urlbar/UrlbarUtils.sys.mjs
+--- a/browser/components/urlbar/UrlbarUtils.sys.mjs
++++ b/browser/components/urlbar/UrlbarUtils.sys.mjs
+@@ -45,6 +45,7 @@ const lazy = XPCOMUtils.declareLazy({
+     "moz-src:///browser/components/urlbar/UrlbarProviderOpenTabs.sys.mjs",
+   UrlbarProviderSearchTips:
+     "moz-src:///browser/components/urlbar/UrlbarProviderSearchTips.sys.mjs",
++  HilalBangs: "resource:///modules/HilalBangs.sys.mjs",
+   UrlbarSearchUtils:
+     "moz-src:///browser/components/urlbar/UrlbarSearchUtils.sys.mjs",
+   UrlbarTokenizer:
+@@ -727,6 +728,18 @@ export var UrlbarUtils = {
+    *    post data (object).
+    */
+   getSearchQueryUrl(engine, query) {
++    const resolved = lazy.HilalBangs.resolveQuery(query, {
++      fallbackToDuckDuckGo: true,
++    });
++    if (resolved) {
++      if (resolved.url) {
++        return [resolved.url, null];
++      }
++      if (resolved.query !== undefined) {
++        query = resolved.query;
++      }
++    }
++
+     let submission = engine.getSubmission(query);
+     return [submission.uri.spec, submission.postData];
+   },

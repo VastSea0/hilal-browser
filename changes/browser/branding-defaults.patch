@@ -1,0 +1,27 @@
+diff --git a/browser/confvars.sh b/browser/confvars.sh
+--- a/browser/confvars.sh
++++ b/browser/confvars.sh
+@@ -9,5 +9,5 @@
+ # For mozilla-beta, mozilla-release, or mozilla-central repositories, use
+ # "unofficial" branding.
+ # For the mozilla-aurora repository, use "aurora".
+-MOZ_BRANDING_DIRECTORY=browser/branding/unofficial
+-MOZ_OFFICIAL_BRANDING_DIRECTORY=browser/branding/official
++MOZ_BRANDING_DIRECTORY=browser/branding/hilal
++MOZ_OFFICIAL_BRANDING_DIRECTORY=browser/branding/hilal
+diff --git a/browser/moz.configure b/browser/moz.configure
+--- a/browser/moz.configure
++++ b/browser/moz.configure
+@@ -11,8 +11,11 @@ imply_option("MOZ_NORMANDY", True)
+ imply_option("MOZ_PROFILE_MIGRATOR", True)
+ 
+ 
+-imply_option("MOZ_APP_VENDOR", "Mozilla")
++imply_option("MOZ_APP_VENDOR", "Hilal")
+ imply_option("MOZ_APP_ID", "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}")
++# Hilal Browser distribution identifier. Drives macOS CFBundleIdentifier and
++# helper-process bundle ids (e.g. org.hilal.browser.plugincontainer).
++imply_option("--with-distribution-id", "org.hilal")
+ # Include the DevTools client, not just the server (which is the default)
+ imply_option("MOZ_DEVTOOLS", "all")
+ imply_option("BROWSER_CHROME_URL", "chrome://browser/content/browser.xhtml")

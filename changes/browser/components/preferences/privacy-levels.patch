@@ -1,0 +1,50 @@
+diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+--- a/browser/components/preferences/main.js
++++ b/browser/components/preferences/main.js
+@@ -1796,6 +1796,11 @@ var gHilalPane = {
+     const hilalWsCheckbox = document.getElementById("hilalWorkspacesEnabled");
+     const hilalWsPinnedPublicCheckbox = document.getElementById("hilalWorkspacesPinnedPublic");
+     const hilalWsGroupsPublicCheckbox = document.getElementById("hilalWorkspacesGroupsPublic");
++    const hilalPrivacyLevelRadioGroup = /** @type {HTMLElement|null} */ (
++      document.getElementById("hilalPrivacyLevel")
++    );
++    const normalizePrivacyLevel = value =>
++      ["standard", "strict", "extreme"].includes(value) ? value : "standard";
+     const resetHilalWorkspaceContainers = () => {
+       let workspaces = [];
+       try {
+@@ -1856,6 +1861,16 @@ var gHilalPane = {
+         );
+       });
+     }
++    if (hilalPrivacyLevelRadioGroup) {
++      hilalPrivacyLevelRadioGroup.value = normalizePrivacyLevel(
++        Services.prefs.getStringPref("hilal.privacy.level", "standard")
++      );
++      hilalPrivacyLevelRadioGroup.addEventListener("command", function () {
++        const level = normalizePrivacyLevel(hilalPrivacyLevelRadioGroup.value);
++        hilalPrivacyLevelRadioGroup.value = level;
++        Services.prefs.setStringPref("hilal.privacy.level", level);
++      });
++    }
+     setEventListener("hilalWorkspacesReset", "command", function () {
+       if (
+         Services.prompt.confirm(
+@@ -1870,6 +1885,7 @@ var gHilalPane = {
+         Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
+         Services.prefs.setBoolPref("hilal.workspaces.pinned.public", false);
+         Services.prefs.setBoolPref("hilal.workspaces.groups.public", false);
++        Services.prefs.setStringPref("hilal.privacy.level", "standard");
+         if (hilalWsCheckbox) {
+           hilalWsCheckbox.checked = true;
+         }
+@@ -1879,6 +1895,9 @@ var gHilalPane = {
+         if (hilalWsGroupsPublicCheckbox) {
+           hilalWsGroupsPublicCheckbox.checked = false;
+         }
++        if (hilalPrivacyLevelRadioGroup) {
++          hilalPrivacyLevelRadioGroup.value = "standard";
++        }
+       }
+     });
+ 

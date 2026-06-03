@@ -1,0 +1,6 @@
+diff --git a/browser/config/version_display.txt b/browser/config/version_display.txt
+--- a/browser/config/version_display.txt
++++ b/browser/config/version_display.txt
+@@ -1 +1 @@
+-153.0a1
++0.2.0-alpha.5

@@ -1,0 +1,13 @@
+diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+--- a/browser/app/profile/firefox.js
++++ b/browser/app/profile/firefox.js
+@@ -3704,3 +3704,9 @@ pref("userContent.page.proton", true);
+ pref("browser.tabs.hoverPreview.enabled", true);
+ pref("browser.urlbar.clipboard.featureGate", true);
+ pref("browser.urlbar.suggest.calculator", true);
++
++// Follow the OS language when a matching locale is installed; otherwise use en-US.
++pref("intl.locale.requested", "");
++
++// Allow custom compiled unsigned language packs
++pref("extensions.langpacks.signatures.required", false);
