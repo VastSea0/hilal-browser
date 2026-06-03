@@ -34,10 +34,14 @@ To integrate a new language pack (e.g., Turkish `tr`):
    ```
 
 3. **Apply patches and merge translations**:
-   Run the patch manager to apply all workspace configurations and merge the custom translations from `changes/browser/locales/` into the `engine/`:
+   Run the patch manager to apply all workspace configurations:
    ```bash
    ./bin/hil apply
    ```
+   The apply step copies the overlay files into the Firefox tree and then merges
+   the custom translation overrides directly using `hil`'s built-in locale merging.
+   The merging logic patches the Fluent `.ftl` files to append Hilal-specific
+   translations.
 
 4. **Compile the language pack (`.xpi`)**:
    Run the langpack compilation script to build the language pack and copy the generated `.xpi` file to the distribution extension directory:

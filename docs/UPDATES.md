@@ -4,7 +4,7 @@ Hilal uses Firefox's built-in application updater for desktop builds. The
 client-side plumbing is intentionally small:
 
 - `mozconfigs/base` enables `MOZ_UPDATER` for desktop builds.
-- `patches/0014-hilal-update-policy.patch` packages
+- `changes/browser/app/distribution/update-policy.patch` packages
   `distribution/policies.json` with an `AppUpdateURL` pointing at Hilal update
   infrastructure.
 - `scripts/make-full-update.sh` creates a complete MAR from a packaged build.
@@ -96,7 +96,7 @@ manifest asset named `hilal-update-manifest.json`:
 ```bash
 scripts/generate-update-manifest.mjs \
   --version v0.2.0-alpha.4 \
-  --app-version "$(cat firefox/browser/config/version.txt)" \
+  --app-version "$(cat engine/browser/config/version.txt)" \
   --build-id 20260525000000 \
   --mar macos-arm64=dist/hilal-macos-arm64.complete.mar \
   --mar-url macos-arm64=https://github.com/VastSea0/hilal-browser/releases/download/v0.2.0-alpha.4/hilal-macos-arm64.complete.mar \
@@ -186,14 +186,14 @@ To generate a new primary/secondary update signing keypair locally:
    Create a secure directory for your signing database (ensure this is kept outside of version control) and initialize it with an empty password:
    ```bash
    mkdir -p /path/to/signing-db
-   firefox/obj-aarch64-apple-darwin25.4.0/dist/bin/certutil -N -d sql:/path/to/signing-db --empty-password
+   engine/obj-aarch64-apple-darwin25.4.0/dist/bin/certutil -N -d sql:/path/to/signing-db --empty-password
    ```
 
 2. **Generate Keypair & Certificate**:
    Use a local random source for entropy (noise) to generate a secure 4096-bit RSA self-signed update signing certificate:
    ```bash
    dd if=/dev/urandom of=noise.bin bs=2048 count=1
-   firefox/obj-aarch64-apple-darwin25.4.0/dist/bin/certutil -S -d sql:/path/to/signing-db \
+   engine/obj-aarch64-apple-darwin25.4.0/dist/bin/certutil -S -d sql:/path/to/signing-db \
      -n mar_sig \
      -s "CN=Hilal Update Primary" \
      -t "C,," \
@@ -204,15 +204,15 @@ To generate a new primary/secondary update signing keypair locally:
 3. **Export Public Certificate**:
    Export the public certificate in DER format:
    ```bash
-   firefox/obj-aarch64-apple-darwin25.4.0/dist/bin/certutil -L -d sql:/path/to/signing-db -n mar_sig -r > release_primary.der
+   engine/obj-aarch64-apple-darwin25.4.0/dist/bin/certutil -L -d sql:/path/to/signing-db -n mar_sig -r > release_primary.der
    ```
 
 4. **Embed Certificate into Build**:
    Copy the exported certificate to your repository's overlay directory:
    ```bash
-   cp release_primary.der prefs/toolkit/mozapps/update/updater/release_primary.der
+   cp release_primary.der changes/toolkit/mozapps/update/updater/release_primary.der
    ```
-   During `scripts/apply.sh`, this file will be copied into the Firefox source tree. The build system will compile the certificate's raw bytes directly into the `updater` executable's C++ code (`primaryCertData`).
+   During `./bin/hil apply`, this file will be copied into the Firefox source tree. The build system will compile the certificate's raw bytes directly into the `updater` executable's C++ code (`primaryCertData`).
 
 ### Key Rotation Procedure
 
@@ -222,7 +222,7 @@ To smoothly transition to a new signing key without breaking auto-updates for ex
    Generate a new certificate/key in a separate or the same NSS database, naming it `mar_sig_secondary`.
 2. **Export and Overlay**:
    Export the new certificate as `release_secondary.der` and place it at:
-   `prefs/toolkit/mozapps/update/updater/release_secondary.der`
+   `changes/toolkit/mozapps/update/updater/release_secondary.der`
 3. **Build and Ship Both Certs**:
    Release a new browser version. This shipped version will trust MARs signed by *either* the primary or the secondary key.
 4. **Transition Signing**:

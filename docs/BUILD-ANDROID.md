@@ -2,7 +2,7 @@
 
 This is a comprehensive guide to building Hilal Browser for Android (based on GeckoView and Fenix). 
 
-Before starting, ensure you have set up the base repository checkout and run `scripts/setup-firefox.sh`.
+Before starting, ensure you have set up the base repository checkout and run `./bin/hil setup`.
 
 ---
 
@@ -12,7 +12,7 @@ Building for Android requires the Android SDK, NDK, and Java Development Kit (JD
 
 To bootstrap your environment for Android:
 
-1. Inside the `firefox/` directory, run:
+1. Inside the `engine/` directory, run:
    ```bash
    ./mach bootstrap
    ```
@@ -58,7 +58,7 @@ scripts/build-android.sh arm64 gradle fenix:assembleDebug
 scripts/build-android.sh arm64 gradle fenix:assembleRelease
 ```
 The compiled APK files will be located under:
-`firefox/mobile/android/fenix/app/build/outputs/apk/`
+`engine/mobile/android/fenix/app/build/outputs/apk/`
 
 ### 3. Deploying to Emulator or Connected Device
 To build GeckoView and directly push/install the Fenix debug application onto an active emulator or connected USB device running ADB:

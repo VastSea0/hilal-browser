@@ -18,7 +18,7 @@ Describe what this pull request changes and why.
 - Command used to verify:
 
 ```bash
-scripts/apply.sh --force
+./bin/hil apply --force
 ```
 
 ## Test plan
@@ -31,7 +31,7 @@ List the commands you ran and the result.
 
 ```bash
 # example
-scripts/apply.sh --force
+./bin/hil apply --force
 scripts/build-macos.sh package
 ```
 
@@ -58,7 +58,7 @@ Complete this section if the PR changes build scripts, packaging, or release art
 
 - [ ] I rebased this branch on the latest `main`.
 - [ ] I kept changes scoped to one logical purpose.
-- [ ] I updated `patches/series` if patches were added, removed, or renamed.
-- [ ] I regenerated patches with `scripts/refresh.sh` after editing inside `firefox/`.
-- [ ] I did not commit the `firefox/` source checkout or build artifacts.
+- [ ] I updated `manifest.toml` if patches or overlays were added, removed, or renamed.
+- [ ] I regenerated patches with `./bin/hil refresh` after editing inside `engine/`.
+- [ ] I did not commit the `engine/` source checkout or build artifacts.
 - [ ] I added or updated documentation when behavior changed.

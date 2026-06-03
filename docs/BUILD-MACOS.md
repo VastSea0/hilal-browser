@@ -19,17 +19,17 @@ machine.
 From the repo root:
 
 ```bash
-# One-time: fetch Firefox into ./firefox
-scripts/setup-firefox.sh
+# One-time: fetch Firefox into ./engine
+./bin/hil setup
 
 # Apply patches + branding overlays
-scripts/apply.sh
+./bin/hil apply
 
 # Full build (10-40 minutes on first run)
 scripts/build-macos.sh
 
 # Run
-(cd firefox && ./mach run)
+(cd engine && ./mach run)
 ```
 
 ## Faster iteration
@@ -51,10 +51,10 @@ After a successful build, the macOS app bundle is at:
 firefox/obj-aarch64-apple-darwin*/dist/Hilal Browser.app
 ```
 
-The bundle name comes from `branding/hilal/configure.sh`, which sets
+The bundle name comes from `changes/browser/branding/hilal/configure.sh`, which sets
 `MOZ_APP_DISPLAYNAME` to `Hilal Browser`. The CFBundleIdentifier reflects
 our distribution id (`org.hilal`) thanks to the patch in
-`patches/0001-hilal-branding-defaults.patch`.
+`changes/browser/branding-defaults.patch`.
 
 ## Code signing and notarization
 
@@ -101,8 +101,8 @@ scripts/sign-macos.sh --verify-only
 Or manually:
 
 ```bash
-codesign --verify --deep --strict "firefox/obj-*/dist/Hilal Browser.app"
-spctl -a -t exec -vv "firefox/obj-*/dist/Hilal Browser.app"
+codesign --verify --deep --strict "engine/obj-*/dist/Hilal Browser.app"
+spctl -a -t exec -vv "engine/obj-*/dist/Hilal Browser.app"
 ```
 
 ### CI secrets
@@ -124,17 +124,17 @@ See `.github/workflows/release.yml` for the optional CI signing job.
 ## Common issues
 
 **`mozconfig` not found / weird defaults.** `./mach` doesn't require a
-`mozconfig`. If you want one, drop it inside `firefox/` (gitignored by
+`mozconfig`. If you want one, drop it inside `engine/` (gitignored by
 its own tree). Don't add it here.
 
 **Object directory mismatch.** Different macOS arches use different
 `obj-*` paths. `./mach` picks correctly; if you've swapped Macs, run
-`./mach clobber` inside `firefox/`.
+`./mach clobber` inside `engine/`.
 
 **Bootstrap re-runs.** If `./mach build` complains about a missing
 `bootstrap`ed tool, rerun `./mach bootstrap` (this is the in-tree
 helper, distinct from the one-time `bootstrap.py` above).
 
-**Big rebuilds after `scripts/apply.sh --force`.** Force-apply resets
+**Big rebuilds after `./bin/hil apply --force`.** Force-apply resets
 the tree, which usually invalidates the build cache. Expect a slow next
 build.
