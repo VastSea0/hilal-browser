@@ -1,7 +1,7 @@
 # Build Hilal for Flatpak
 
 Hilal's Flatpak package is defined by `org.gkdevstudio.Hilal.yml`. It builds
-Firefox from the pinned upstream commit in `FIREFOX_COMMIT`, applies the Hilal
+Firefox from the pinned upstream commit in `upstream.lock`, applies the Hilal
 patch and overlay layer, installs the browser under `/app/lib/firefox`, and
 exports the `hilal` command.
 
