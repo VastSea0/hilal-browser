@@ -607,9 +607,9 @@ sidebar-main,
   right: auto !important;
   transform: translate3d(-340px, 0, 0) !important;
   transition:
-    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.28s ease-out,
-    visibility 0s 0.32s;
+    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.2s ease-out,
+    visibility 0s 0.3s;
 }
 
 /* Right sidebar positioning */
@@ -618,9 +618,9 @@ sidebar-main,
   left: auto !important;
   transform: translate3d(340px, 0, 0) !important;
   transition:
-    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.28s ease-out,
-    visibility 0s 0.32s;
+    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.2s ease-out,
+    visibility 0s 0.3s;
 }
 
 /* Compact Sidebar Visible state */
@@ -630,8 +630,8 @@ sidebar-main,
   pointer-events: auto !important;
   transform: translate3d(0, 0, 0) !important;
   transition:
-    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.28s ease-out,
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease-out,
     visibility 0s 0s;
 }
 
@@ -716,9 +716,9 @@ sidebar-main,
 
   will-change: transform, opacity;
   transition:
-    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.28s ease-out,
-    visibility 0s 0.32s !important;
+    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.2s ease-out,
+    visibility 0s 0.3s !important;
 }
 
 /* Compact Top Toolbar Visible state */
@@ -740,8 +740,8 @@ sidebar-main,
   border-top: none !important;
 
   transition:
-    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.28s ease-out,
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease-out,
     visibility 0s 0s !important;
 }
 
@@ -926,4 +926,43 @@ sidebar-main,
   margin-block: 4px !important;
   padding: 2px !important;
   background: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Hilal Premium Animations & Micro-interactions */
+
+/* Pop/bounce animation for selected tabs */
+#sidebar-main[hilal-sidebar] .tabbrowser-tab[selected="true"] > .tab-stack > .tab-background,
+.tabbrowser-tab[selected="true"] .tab-background {
+  animation: hilal-tab-select-pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+@keyframes hilal-tab-select-pop {
+  0% {
+    transform: scale(0.92);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Pop/lift animation for selected tab content (icon and label) */
+#sidebar-main[hilal-sidebar] .tabbrowser-tab[selected="true"] .tab-content,
+.tabbrowser-tab[selected="true"] .tab-content {
+  animation: hilal-tab-content-pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+@keyframes hilal-tab-content-pop {
+  0% {
+    transform: translateY(1.5px) scale(0.96);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Press/active physical feedback on tabs */
+#sidebar-main[hilal-sidebar] .tabbrowser-tab:active,
+.tabbrowser-tab:active {
+  transform: scale(0.96) !important;
+  transition: transform 0.08s ease-out !important;
 }
