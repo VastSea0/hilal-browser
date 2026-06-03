@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/* global Services, MigrationUtils, ChromeUtils, MozXULElement */
+/* global Services, MigrationUtils, ChromeUtils, MozXULElement, gURLBar */
 
 (function () {
   "use strict";
@@ -23,13 +23,15 @@
   }
 
   const STAGES = [
-    { title: "Kar\u015f\u0131lama", short: "01", icon: "moon" },
+    { title: "Welcome", short: "01", icon: "moon" },
     { title: "Settings", short: "02", icon: "settings" },
     { title: "Privacy", short: "03", icon: "shield" },
     { title: "Search", short: "04", icon: "search" },
     { title: "Workspaces", short: "05", icon: "tabs" },
     { title: "Ready", short: "06", icon: "check" },
   ];
+
+  const CHROME_TO_HIDE = ["#navigator-toolbox", "#browser"];
 
   const PRIVACY_LEVELS = [
     {
@@ -38,7 +40,8 @@
       badge: "LibreWolf-like",
       description:
         "RFP, strict tracking protection, HTTPS-only, URL cleanup, WebGL off, and cookie/cache cleanup on close.",
-      detail: "WebRTC stays enabled for compatibility, with local leak surfaces reduced.",
+      detail:
+        "WebRTC stays enabled for compatibility, with local leak surfaces reduced.",
       l10nLabel: "hilal-welcome-privacy-standard-label",
       l10nBadge: "hilal-welcome-privacy-standard-badge",
       l10nDesc: "hilal-welcome-privacy-standard-desc",
@@ -62,7 +65,8 @@
       badge: "Not Tor",
       description:
         "Adds JavaScript, camera, microphone, location, and history blocking on top of Strict.",
-      detail: "Does not hide your IP address; many modern sites may not work as expected.",
+      detail:
+        "Does not hide your IP address; many modern sites may not work as expected.",
       l10nLabel: "hilal-welcome-privacy-extreme-label",
       l10nBadge: "hilal-welcome-privacy-extreme-badge",
       l10nDesc: "hilal-welcome-privacy-extreme-desc",
@@ -73,23 +77,23 @@
   const WORKSPACE_PRESETS = [
     {
       key: "personal",
-      label: "Ki\u015fisel",
-      short: "K",
+      label: "Personal",
+      short: "P",
       icon: "home",
       colorClass: "blue",
       workspaceColor: "blue",
     },
     {
       key: "work",
-      label: "\u0130\u015f",
-      short: "I",
+      label: "Work",
+      short: "W",
       icon: "folder",
       colorClass: "amber",
       workspaceColor: "orange",
     },
     {
       key: "social",
-      label: "Sosyal",
+      label: "Social",
       short: "S",
       icon: "star",
       colorClass: "rose",
@@ -104,31 +108,77 @@
       this._overlay = null;
       this._style = null;
       this._engines = [];
+      this._enginesReady = null;
       this._selectedEngine = null;
       this._selectedPrivacyLevel = this._normalizePrivacyLevel(
         Services.prefs.getStringPref("hilal.privacy.level", "standard")
       );
       this._defaultBrowserSelected = false;
       this._workspacesSelected = { personal: true, work: true, social: true };
+      this._hiddenChrome = new Map();
     }
 
     async start() {
       this._injectStyles();
-      await this._fetchEngines();
+      this._enterWelcomeStage();
       this._createOverlay();
-      this._renderStage();
+      this._renderIntro();
+      this._enginesReady = this._fetchEngines();
+      await this._enginesReady;
     }
 
     _injectStyles() {
       const head = document.head || document.documentElement;
-      if (document.getElementById("hilal-welcome-style")) {
+      const existing = document.getElementById("hilal-welcome-style");
+      if (existing) {
+        this._style = existing;
         return;
       }
-      this._style = document.createElementNS("http://www.w3.org/1999/xhtml", "link");
+      this._style = document.createElementNS(
+        "http://www.w3.org/1999/xhtml",
+        "link"
+      );
       this._style.id = "hilal-welcome-style";
       this._style.rel = "stylesheet";
       this._style.href = "chrome://browser/content/hilal/HilalWelcome.css";
       head.appendChild(this._style);
+    }
+
+    _enterWelcomeStage() {
+      document.documentElement.setAttribute("hilal-welcome-stage", "true");
+
+      try {
+        gURLBar?.view?.close?.();
+        gURLBar?.blur?.();
+      } catch (e) {
+        console.error("HilalWelcome: failed to close urlbar", e);
+      }
+
+      for (const selector of CHROME_TO_HIDE) {
+        const element = document.querySelector(selector);
+        if (!element || this._hiddenChrome.has(element)) {
+          continue;
+        }
+        this._hiddenChrome.set(element, {
+          display: element.style.display,
+          pointerEvents: element.style.pointerEvents,
+          visibility: element.style.visibility,
+        });
+        element.style.display = "none";
+        element.style.pointerEvents = "none";
+        element.style.visibility = "hidden";
+      }
+    }
+
+    _leaveWelcomeStage() {
+      document.documentElement.removeAttribute("hilal-welcome-stage");
+
+      for (const [element, styles] of this._hiddenChrome) {
+        element.style.display = styles.display;
+        element.style.pointerEvents = styles.pointerEvents;
+        element.style.visibility = styles.visibility;
+      }
+      this._hiddenChrome.clear();
     }
 
     async _fetchEngines() {
@@ -175,12 +225,11 @@
       let url = "";
       try {
         if (typeof engine.getIconURL === "function") {
-          url = (
+          url =
             (await engine.getIconURL(32)) ||
             (await engine.getIconURL(16)) ||
             (await engine.getIconURL()) ||
-            ""
-          );
+            "";
         }
       } catch (e) {
         console.error("HilalWelcome: failed to fetch engine icon", e);
@@ -188,13 +237,12 @@
 
       if (!url) {
         const iconURI = engine.iconURI || engine._iconURI;
-        url = (
+        url =
           iconURI?.spec ||
           (typeof iconURI === "string" ? iconURI : "") ||
           engine.iconURL ||
           engine._iconURL ||
-          ""
-        );
+          "";
       }
 
       return this._sanitizeIconURL(url);
@@ -222,11 +270,57 @@
     _createOverlay() {
       let overlay = document.getElementById("hilal-welcome-overlay");
       if (!overlay) {
-        overlay = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+        overlay = document.createElementNS(
+          "http://www.w3.org/1999/xhtml",
+          "div"
+        );
         overlay.id = "hilal-welcome-overlay";
         document.documentElement.appendChild(overlay);
       }
       this._overlay = overlay;
+    }
+
+    _renderIntro() {
+      if (!this._overlay) {
+        return;
+      }
+
+      const markup = `
+        <section class="hw-intro" role="dialog" aria-modal="true" aria-labelledby="hw-intro-title" xmlns="http://www.w3.org/1999/xhtml">
+          <div class="hw-intro-mark">
+            ${this._logoHTML()}
+          </div>
+          <h1 class="hw-intro-title" id="hw-intro-title">
+            <span data-l10n-id="hilal-welcome-intro-line-1">Welcome to Hilal</span>
+            <span data-l10n-id="hilal-welcome-intro-line-2">A calmer internet</span>
+          </h1>
+          <button type="button" class="hw-intro-button hw-btn-primary" id="hw-start-btn">
+            <span data-l10n-id="hilal-welcome-action-start">Start</span>
+            <span class="hw-icon hw-icon-arrow-right"></span>
+          </button>
+        </section>
+      `;
+      this._overlay.replaceChildren(MozXULElement.parseXULToFragment(markup));
+      document.getElementById("hw-start-btn")?.addEventListener("click", () => {
+        this._beginPages();
+      });
+    }
+
+    async _beginPages() {
+      const button = document.getElementById("hw-start-btn");
+      if (button) {
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+      }
+
+      try {
+        await this._enginesReady;
+      } catch (e) {
+        console.error("HilalWelcome: engine preload failed", e);
+      }
+
+      this._stage = 0;
+      this._renderStage();
     }
 
     _renderStage() {
@@ -235,28 +329,30 @@
       }
 
       const markup = `
-        <div class="hw-shell" role="dialog" aria-modal="true" aria-labelledby="hw-stage-title" xmlns="http://www.w3.org/1999/xhtml">
-          <aside class="hw-rail">
+        <div class="hw-pages" role="dialog" aria-modal="true" aria-labelledby="hw-stage-title" data-stage="${this._stage}" xmlns="http://www.w3.org/1999/xhtml">
+          <aside class="hw-page-sidebar">
             <div class="hw-brand">
               <span class="hw-brand-mark">${this._logoHTML()}</span>
               <span class="hw-brand-text" data-l10n-id="hilal-welcome-brand-text">Hilal Browser</span>
             </div>
-            <div class="hw-rail-copy">
+            <div class="hw-sidebar-copy">
               ${this._stageCopyHTML()}
             </div>
-            <ol class="hw-steps">
-              ${this._stepsHTML()}
-            </ol>
-            ${this._actionsHTML()}
-          </aside>
-          <main class="hw-main">
-            <div class="hw-topbar">
-              <span class="hw-step-count" data-l10n-id="hilal-welcome-step-count" data-l10n-args='{"current": ${this._stage + 1}, "total": ${STAGES.length}}'>Ad\u0131m ${this._stage + 1}/${STAGES.length}</span>
-              <button type="button" class="hw-skip" id="hw-skip-btn">
-                <span data-l10n-id="hilal-welcome-skip">Atla</span>
-                <span class="hw-icon hw-icon-close"></span>
-              </button>
+            <div class="hw-sidebar-bottom">
+              <div class="hw-progress">
+                <span class="hw-step-count" data-l10n-id="hilal-welcome-step-count" data-l10n-args='{"current": ${this._stage + 1}, "total": ${STAGES.length}}'>Step ${this._stage + 1}/${STAGES.length}</span>
+                <ol class="hw-steps">
+                  ${this._stepsHTML()}
+                </ol>
+              </div>
+              ${this._actionsHTML()}
             </div>
+          </aside>
+          <main class="hw-page-content">
+            <button type="button" class="hw-skip" id="hw-skip-btn">
+              <span data-l10n-id="hilal-welcome-skip">Skip</span>
+              <span class="hw-icon hw-icon-close"></span>
+            </button>
             <section class="hw-content">
               ${this._stageHTML()}
             </section>
@@ -264,7 +360,6 @@
         </div>
       `;
       this._overlay.replaceChildren(MozXULElement.parseXULToFragment(markup));
-
       this._attachListeners();
     }
 
@@ -278,8 +373,7 @@
         }
         return `
           <li class="hw-step${state}">
-            <span class="hw-step-icon hw-icon hw-icon-${stage.icon}"></span>
-            <span class="hw-step-number">${stage.short}</span>
+            <span class="hw-step-dot"></span>
             <span class="hw-step-label" data-l10n-id="hilal-welcome-step-label-${stage.icon}">${stage.title}</span>
           </li>
         `;
@@ -289,40 +383,40 @@
     _stageCopyHTML() {
       const stageCopies = [
         {
-          kicker: "Hilal'e Ho\u015f Geldiniz",
-          title: "Taray\u0131c\u0131n\u0131z\u0131 temiz bir ritme kurun.",
+          kicker: "Welcome",
+          title: "A quieter start for the web.",
           subtitle:
-            "Gizlilik, arama ve \u00e7al\u0131\u015fma alanlar\u0131n\u0131 ilk a\u00e7\u0131l\u0131\u015fta netle\u015ftirin.",
+            "Hilal opens with privacy, workspaces, and search choices in one calm flow.",
         },
         {
-          kicker: "Temel Ayarlar",
-          title: "Ta\u015f\u0131nmas\u0131 gerekenler burada.",
+          kicker: "Bring your trail",
+          title: "A new start, same bookmarks.",
           subtitle:
-            "Varsay\u0131lan taray\u0131c\u0131 karar\u0131n\u0131 verin, yer imleri ve parolalar\u0131n\u0131z\u0131 tek ad\u0131mda getirin.",
+            "Move bookmarks, history, and passwords in one pass, then decide whether Hilal should become your default browser.",
         },
         {
           kicker: "Privacy Level",
-          title: "Choose your protection level clearly.",
+          title: "Choose the amount of hardening.",
           subtitle:
-            "uBlock Origin is installed by default. Choose which Hilal hardening profile should apply on top of it.",
+            "uBlock Origin is already installed. Pick the Hilal privacy profile that matches how much site compatibility you want to keep.",
         },
         {
-          kicker: "Arama",
-          title: "Arama motorunuz sizi takip etmesin.",
+          kicker: "Search",
+          title: "Choose your default search.",
           subtitle:
-            "Varsay\u0131lan arama deneyimini se\u00e7in. Bu karar\u0131 daha sonra ayarlardan de\u011fi\u015ftirebilirsiniz.",
+            "Select the search engine Hilal should use from the address bar. You can change it later in settings.",
         },
         {
-          kicker: "\u00c7al\u0131\u015fma Alanlar\u0131",
-          title: "Sekmeler birbirine kar\u0131\u015fmas\u0131n.",
+          kicker: "Workspaces",
+          title: "Keep flows apart from day one.",
           subtitle:
-            "Ki\u015fisel, i\u015f ve sosyal ak\u0131\u015flar\u0131 ayr\u0131 tutan ilk alanlar\u0131 olu\u015fturun.",
+            "Create a few starter spaces so personal, work, and social browsing do not collapse into the same tab pile.",
         },
         {
-          kicker: "Son Kontrol",
-          title: "Her \u015fey yerli yerinde.",
+          kicker: "Ready",
+          title: "Everything is in place.",
           subtitle:
-            "Se\u00e7imleriniz uygulanacak ve Hilal sizi bo\u015f, sakin bir pencereye b\u0131rakacak.",
+            "Hilal will apply your choices and open into a clean browsing window.",
         },
       ];
       const copy = stageCopies[this._stage];
@@ -339,12 +433,12 @@
           return `
             <div class="hw-hero-visual">
               <figure class="hw-home-image-frame">
-                <img class="hw-home-preview-image" src="chrome://browser/content/hilal/welcome-home-preview.png" data-l10n-id="hilal-welcome-home-preview-image-alt" alt="Hilal Browser ana sayfa \u00f6nizlemesi" />
+                <img class="hw-home-preview-image" src="chrome://browser/content/hilal/welcome-home-preview.png" data-l10n-id="hilal-welcome-home-preview-image-alt" alt="Hilal Browser home page preview" />
               </figure>
               <div class="hw-feature-row">
-                <span><span class="hw-icon hw-icon-shield"></span><span data-l10n-id="hilal-welcome-feature-privacy">Gizlilik odakl\u0131</span></span>
-                <span><span class="hw-icon hw-icon-tabs"></span><span data-l10n-id="hilal-welcome-feature-workspaces">\u00c7al\u0131\u015fma alanlar\u0131</span></span>
-                <span><span class="hw-icon hw-icon-moon"></span><span data-l10n-id="hilal-welcome-feature-clean">Sade aray\u00fcz</span></span>
+                <span><span class="hw-icon hw-icon-shield"></span><span data-l10n-id="hilal-welcome-feature-privacy">Privacy focused</span></span>
+                <span><span class="hw-icon hw-icon-tabs"></span><span data-l10n-id="hilal-welcome-feature-workspaces">Workspaces</span></span>
+                <span><span class="hw-icon hw-icon-moon"></span><span data-l10n-id="hilal-welcome-feature-clean">Clean interface</span></span>
               </div>
             </div>
           `;
@@ -355,8 +449,8 @@
                 <span class="hw-row-main">
                   <span class="hw-row-icon hw-icon hw-icon-check"></span>
                   <span class="hw-row-info">
-                    <span class="hw-row-label" data-l10n-id="hilal-welcome-default-browser-label">Varsay\u0131lan taray\u0131c\u0131</span>
-                    <span class="hw-row-desc" data-l10n-id="hilal-welcome-default-browser-desc">Hilal Browser sistem ba\u011flant\u0131lar\u0131n\u0131 a\u00e7s\u0131n.</span>
+                    <span class="hw-row-label" data-l10n-id="hilal-welcome-default-browser-label">Default browser</span>
+                    <span class="hw-row-desc" data-l10n-id="hilal-welcome-default-browser-desc">Make Hilal Browser your default browser for system links.</span>
                   </span>
                 </span>
                 <span class="hw-toggle">
@@ -368,11 +462,11 @@
                 <span class="hw-row-main">
                   <span class="hw-row-icon hw-icon hw-icon-folder"></span>
                   <span class="hw-row-info">
-                    <span class="hw-row-label" data-l10n-id="hilal-welcome-import-label">Yer imleri ve \u015fifreler</span>
-                    <span class="hw-row-desc" data-l10n-id="hilal-welcome-import-desc">Firefox aktar\u0131m sihirbaz\u0131 ile mevcut verileri ta\u015f\u0131y\u0131n.</span>
+                    <span class="hw-row-label" data-l10n-id="hilal-welcome-import-label">Bookmarks and passwords</span>
+                    <span class="hw-row-desc" data-l10n-id="hilal-welcome-import-desc">Import your existing bookmarks, history, and passwords from another browser.</span>
                   </span>
                 </span>
-                <button type="button" class="hw-btn-secondary" id="hw-import-btn" data-l10n-id="hilal-welcome-import-button">\u0130\u00e7e aktar</button>
+                <button type="button" class="hw-btn-secondary" id="hw-import-btn" data-l10n-id="hilal-welcome-import-button">Import</button>
               </div>
             </div>
           `;
@@ -416,23 +510,20 @@
     _actionsHTML() {
       const isFirst = this._stage === 0;
       const isLast = this._stage === STAGES.length - 1;
-      
+
       let primaryId = isLast ? "hw-finish-btn" : "hw-next-btn";
       let primaryL10nId = "hilal-welcome-action-continue";
-      let primaryFallback = "Devam";
+      let primaryFallback = "Continue";
       if (isLast) {
         primaryL10nId = "hilal-welcome-action-start-browsing";
-        primaryFallback = "G\u00f6z atmaya ba\u015fla";
-      } else if (isFirst) {
-        primaryL10nId = "hilal-welcome-action-start";
-        primaryFallback = "Ba\u015fla";
+        primaryFallback = "Start browsing";
       }
 
       return `
         <div class="hw-actions">
           <button type="button" class="hw-btn-ghost" id="hw-prev-btn"${isFirst ? ' disabled="disabled"' : ""}>
             <span class="hw-icon hw-icon-arrow-left"></span>
-            <span data-l10n-id="hilal-welcome-action-back">Geri</span>
+            <span data-l10n-id="hilal-welcome-action-back">Back</span>
           </button>
           <button type="button" class="hw-btn-primary" id="${primaryId}">
             <span data-l10n-id="${primaryL10nId}">${primaryFallback}</span>
@@ -455,7 +546,7 @@
               </span>
               <span class="hw-engine-meta">
                 <span class="hw-engine-name">${name}</span>
-                ${isDuckDuckGo ? `<span class="hw-pill" data-l10n-id="hilal-welcome-recommended">\u00d6nerilen</span>` : ""}
+                ${isDuckDuckGo ? `<span class="hw-pill" data-l10n-id="hilal-welcome-recommended">Recommended</span>` : ""}
               </span>
               <span class="hw-choice-check hw-icon hw-icon-check"></span>
             </button>
@@ -482,7 +573,9 @@
     }
 
     _normalizePrivacyLevel(value) {
-      return PRIVACY_LEVELS.some(level => level.key === value) ? value : "standard";
+      return PRIVACY_LEVELS.some(level => level.key === value)
+        ? value
+        : "standard";
     }
 
     _workspacesHTML() {
@@ -494,7 +587,7 @@
               <span class="hw-icon hw-icon-${item.icon}"></span>
             </span>
             <span class="hw-workspace-label" data-l10n-id="hilal-welcome-workspace-label-${item.key}">${item.label}</span>
-            <span class="hw-workspace-state" data-l10n-id="hilal-welcome-workspace-state-${active ? 'added' : 'skipped'}">${active ? "Eklenecek" : "Atland\u0131"}</span>
+            <span class="hw-workspace-state" data-l10n-id="hilal-welcome-workspace-state-${active ? "added" : "skipped"}">${active ? "Will be added" : "Skipped"}</span>
             <span class="hw-choice-check hw-icon hw-icon-check"></span>
           </button>
         `;
@@ -502,31 +595,41 @@
     }
 
     _summaryHTML() {
-      const engineName = this._escapeHTML(this._selectedEngine?.name ?? "DuckDuckGo");
+      const engineName = this._escapeHTML(
+        this._selectedEngine?.name ?? "DuckDuckGo"
+      );
       const privacyLevel =
-        PRIVACY_LEVELS.find(level => level.key === this._selectedPrivacyLevel) ||
-        PRIVACY_LEVELS[0];
-      const activePresets = WORKSPACE_PRESETS.filter(item => this._workspacesSelected[item.key]);
-      const workspacesHTML = activePresets.length > 0 
-        ? activePresets.map(item => `<span data-l10n-id="hilal-welcome-workspace-label-${item.key}">${item.label}</span>`).join(", ")
-        : `<span data-l10n-id="hilal-welcome-summary-none">Yok</span>`;
+        PRIVACY_LEVELS.find(
+          level => level.key === this._selectedPrivacyLevel
+        ) || PRIVACY_LEVELS[0];
+      const activePresets = WORKSPACE_PRESETS.filter(
+        item => this._workspacesSelected[item.key]
+      );
+      const workspacesHTML = activePresets.length
+        ? activePresets
+            .map(
+              item =>
+                `<span data-l10n-id="hilal-welcome-workspace-label-${item.key}">${item.label}</span>`
+            )
+            .join(", ")
+        : `<span data-l10n-id="hilal-welcome-summary-none">None</span>`;
 
       return `
         <div class="hw-summary-row">
-          <span class="hw-summary-label"><span class="hw-icon hw-icon-search"></span><span data-l10n-id="hilal-welcome-summary-search">Arama</span></span>
+          <span class="hw-summary-label"><span class="hw-icon hw-icon-search"></span><span data-l10n-id="hilal-welcome-summary-search">Search</span></span>
           <strong>${engineName}</strong>
         </div>
         <div class="hw-summary-row">
           <span class="hw-summary-label"><span class="hw-icon hw-icon-shield"></span><span data-l10n-id="hilal-welcome-summary-privacy">Privacy</span></span>
-          <strong>${privacyLevel.label}</strong>
+          <strong>${this._escapeHTML(privacyLevel.label)}</strong>
         </div>
         <div class="hw-summary-row">
-          <span class="hw-summary-label"><span class="hw-icon hw-icon-tabs"></span><span data-l10n-id="hilal-welcome-summary-workspaces">\u00c7al\u0131\u015fma alanlar\u0131</span></span>
+          <span class="hw-summary-label"><span class="hw-icon hw-icon-tabs"></span><span data-l10n-id="hilal-welcome-summary-workspaces">Workspaces</span></span>
           <strong>${workspacesHTML}</strong>
         </div>
         <div class="hw-summary-row">
-          <span class="hw-summary-label"><span class="hw-icon hw-icon-check"></span><span data-l10n-id="hilal-welcome-summary-default-browser">Varsay\u0131lan taray\u0131c\u0131</span></span>
-          <strong data-l10n-id="hilal-welcome-summary-default-${this._defaultBrowserSelected ? 'set' : 'no-change'}">${this._defaultBrowserSelected ? "Ayarla" : "De\u011fi\u015ftirme"}</strong>
+          <span class="hw-summary-label"><span class="hw-icon hw-icon-check"></span><span data-l10n-id="hilal-welcome-summary-default-browser">Default browser</span></span>
+          <strong data-l10n-id="hilal-welcome-summary-default-${this._defaultBrowserSelected ? "set" : "no-change"}">${this._defaultBrowserSelected ? "Set as default" : "Do not change"}</strong>
         </div>
       `;
     }
@@ -544,7 +647,9 @@
       onClick("hw-finish-btn", () => this._finish());
       onClick("hw-skip-btn", () => this._dismiss());
 
-      const defaultBrowserToggle = document.getElementById("hw-default-browser-toggle");
+      const defaultBrowserToggle = document.getElementById(
+        "hw-default-browser-toggle"
+      );
       if (defaultBrowserToggle) {
         defaultBrowserToggle.addEventListener("change", event => {
           this._defaultBrowserSelected = event.target.checked;
@@ -562,8 +667,11 @@
               isStartupMigration: true,
             });
             if (button) {
-              button.setAttribute("data-l10n-id", "hilal-welcome-imported-button");
-              button.textContent = "Aktar\u0131ld\u0131";
+              button.setAttribute(
+                "data-l10n-id",
+                "hilal-welcome-imported-button"
+              );
+              button.textContent = "Imported";
               button.disabled = true;
             }
           }
@@ -618,16 +726,17 @@
           if (this._workspacesSelected[item.key]) {
             let label = item.label;
             try {
-              label = await document.l10n.formatValue(`hilal-welcome-workspace-label-${item.key}`);
+              label = await document.l10n.formatValue(
+                `hilal-welcome-workspace-label-${item.key}`
+              );
             } catch (e) {
-              console.error("HilalWelcome: failed to format workspace label", e);
+              console.error(
+                "HilalWelcome: failed to format workspace label",
+                e
+              );
             }
             if (typeof this._workspaces.ensureWorkspace === "function") {
-              this._workspaces.ensureWorkspace(
-                label,
-                "",
-                item.workspaceColor
-              );
+              this._workspaces.ensureWorkspace(label, "", item.workspaceColor);
             } else {
               this._workspaces.create(label, "", item.workspaceColor);
             }
@@ -696,6 +805,7 @@
       this._overlay = null;
       this._style?.remove();
       this._style = null;
+      this._leaveWelcomeStage();
 
       if (this._workspaces) {
         try {
