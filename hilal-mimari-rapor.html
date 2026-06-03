@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hilal Browser — Yeni Mimari Implementasyon Raporu</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg:        #0d0f14;
+    --bg2:       #13161e;
+    --bg3:       #1a1e28;
+    --border:    #242836;
+    --border2:   #2e3344;
+    --text:      #d4d8e8;
+    --muted:     #6b7494;
+    --accent:    #5b8fff;
+    --accent2:   #7dd4a8;
+    --accent3:   #f0b060;
+    --accent4:   #e86a6a;
+    --accent5:   #b07dff;
+    --code-bg:   #0a0c12;
+    --code-text: #a8c4ff;
+    --r:         6px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 15px;
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 32px 120px;
+  }
+
+  /* ---------- COVER ---------- */
+  .cover {
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 80px 0 56px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 72px;
+    position: relative;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 60% at 80% 20%, rgba(91,143,255,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 10% 80%, rgba(125,212,168,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cover-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .cover h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #eef0f8;
+    margin-bottom: 20px;
+  }
+
+  .cover h1 span { color: var(--accent); }
+
+  .cover-sub {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  .cover-meta {
+    display: flex;
+    gap: 32px;
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+
+  .meta-item { display: flex; flex-direction: column; gap: 4px; }
+  .meta-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .meta-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  /* ---------- TOC ---------- */
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 28px 32px;
+    margin-bottom: 72px;
+  }
+
+  .toc-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .toc ol {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 32px;
+  }
+
+  .toc li { display: flex; align-items: baseline; gap: 10px; }
+
+  .toc-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 24px;
+  }
+
+  .toc a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.15s;
+  }
+  .toc a:hover { color: var(--accent); }
+
+  /* ---------- SECTIONS ---------- */
+  section { margin-bottom: 80px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 36px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 28px;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    color: #eef0f8;
+  }
+
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #c8ccde;
+    margin: 36px 0 14px;
+  }
+
+  h3::before {
+    content: '// ';
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+  }
+
+  p { margin-bottom: 18px; color: var(--text); }
+
+  strong { font-weight: 500; color: #eef0f8; }
+
+  /* ---------- CODE ---------- */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px 24px;
+    overflow-x: auto;
+    margin: 20px 0 28px;
+    position: relative;
+  }
+
+  pre .lang-tag {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--code-text);
+  }
+
+  p code, li code {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 12.5px;
+    color: #a8c4ff;
+  }
+
+  .comment  { color: #445066; }
+  .keyword  { color: #c79bf0; }
+  .string   { color: #7dd4a8; }
+  .number   { color: #f0b060; }
+  .fn       { color: #5b8fff; }
+  .type     { color: #f5c076; }
+  .op       { color: #8899bb; }
+
+  /* ---------- CALLOUT BOXES ---------- */
+  .callout {
+    border-left: 3px solid;
+    border-radius: 0 var(--r) var(--r) 0;
+    padding: 16px 20px;
+    margin: 24px 0;
+    font-size: 14px;
+  }
+  .callout-info    { border-color: var(--accent);  background: rgba(91,143,255,0.07); }
+  .callout-warn    { border-color: var(--accent3); background: rgba(240,176,96,0.07); }
+  .callout-danger  { border-color: var(--accent4); background: rgba(232,106,106,0.07); }
+  .callout-success { border-color: var(--accent2); background: rgba(125,212,168,0.07); }
+
+  .callout-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .callout-info    .callout-title { color: var(--accent); }
+  .callout-warn    .callout-title { color: var(--accent3); }
+  .callout-danger  .callout-title { color: var(--accent4); }
+  .callout-success .callout-title { color: var(--accent2); }
+
+  /* ---------- TABLE ---------- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0 32px;
+    font-size: 13.5px;
+  }
+
+  th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  td:first-child { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--accent); }
+
+  /* ---------- FILE TREE ---------- */
+  .filetree {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px 24px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    line-height: 2;
+    margin: 20px 0 28px;
+  }
+
+  .ft-dir   { color: var(--accent); }
+  .ft-file  { color: var(--text); }
+  .ft-patch { color: var(--accent2); }
+  .ft-config{ color: var(--accent3); }
+  .ft-bin   { color: var(--accent5); }
+  .ft-note  { color: var(--muted); margin-left: 8px; }
+  .ft-root  { color: #eef0f8; font-weight: 500; }
+
+  /* ---------- STEP BLOCKS ---------- */
+  .steps { display: flex; flex-direction: column; gap: 16px; margin: 24px 0 32px; }
+
+  .step {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 0 20px;
+    align-items: start;
+  }
+
+  .step-num {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .step-body h4 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    color: #eef0f8;
+    margin-bottom: 6px;
+  }
+
+  .step-body p { margin-bottom: 0; font-size: 14px; }
+
+  /* ---------- PHASE BADGE ---------- */
+  .phase-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .phase-1 { background: rgba(91,143,255,0.12); color: var(--accent); border: 1px solid rgba(91,143,255,0.25); }
+  .phase-2 { background: rgba(125,212,168,0.12); color: var(--accent2); border: 1px solid rgba(125,212,168,0.25); }
+  .phase-3 { background: rgba(240,176,96,0.12); color: var(--accent3); border: 1px solid rgba(240,176,96,0.25); }
+
+  /* ---------- COMPARISON CARDS ---------- */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0 32px;
+  }
+
+  .compare-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px;
+  }
+
+  .compare-card h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .compare-card.old h4 { color: var(--accent4); }
+  .compare-card.new h4 { color: var(--accent2); }
+
+  .compare-card ul {
+    list-style: none;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text);
+  }
+
+  .compare-card ul li::before {
+    content: '→ ';
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .compare-card.old ul li::before { color: var(--accent4); }
+  .compare-card.new ul li::before { color: var(--accent2); }
+
+  /* ---------- RISK TABLE COLORS ---------- */
+  .risk-high   { color: var(--accent4); font-weight: 500; }
+  .risk-medium { color: var(--accent3); font-weight: 500; }
+  .risk-low    { color: var(--accent2); font-weight: 500; }
+
+  /* ---------- DIVIDER ---------- */
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- COVER -->
+  <header class="cover">
+    <div class="cover-label">Hilal Browser · Teknik Mimari Raporu</div>
+    <h1>Yeni Patch Yönetim<br>Mimarisinin <span>Implementasyonu</span></h1>
+    <p class="cover-sub">
+      Mevcut bash-script tabanlı sistemin yerini alacak, deterministik, platform-bağımsız
+      ve tek-kaynak-gerçeği prensipli yeni bir mimari için tam implementasyon rehberi.
+    </p>
+    <div class="cover-meta">
+      <div class="meta-item">
+        <span class="meta-label">Proje</span>
+        <span class="meta-value">hilal-browser</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Versiyon hedefi</span>
+        <span class="meta-value">v0.3.0</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Tahmini süre</span>
+        <span class="meta-value">4–6 hafta</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Yazar</span>
+        <span class="meta-value">VastSea0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- TOC -->
+  <nav class="toc">
+    <div class="toc-title">İçindekiler</div>
+    <ol>
+      <li><span class="toc-num">01</span><a href="#s1">Yönetici Özeti</a></li>
+      <li><span class="toc-num">02</span><a href="#s2">Mevcut Mimarinin Sorunları</a></li>
+      <li><span class="toc-num">03</span><a href="#s3">Yeni Mimariye Genel Bakış</a></li>
+      <li><span class="toc-num">04</span><a href="#s4">upstream.lock Şeması</a></li>
+      <li><span class="toc-num">05</span><a href="#s5">manifest.toml Şeması</a></li>
+      <li><span class="toc-num">06</span><a href="#s6">changes/ Dizin Yapısı</a></li>
+      <li><span class="toc-num">07</span><a href="#s7">hil CLI Aracı</a></li>
+      <li><span class="toc-num">08</span><a href="#s8">Implementasyon Planı (3 Faz)</a></li>
+      <li><span class="toc-num">09</span><a href="#s9">Migrasyon Rehberi</a></li>
+      <li><span class="toc-num">10</span><a href="#s10">CI/CD Entegrasyonu</a></li>
+      <li><span class="toc-num">11</span><a href="#s11">Risk Analizi</a></li>
+      <li><span class="toc-num">12</span><a href="#s12">Başarı Kriterleri</a></li>
+    </ol>
+  </nav>
+
+  <!-- S1: YÖNETİCİ ÖZETİ -->
+  <section id="s1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Yönetici Özeti</h2>
+    </div>
+
+    <p>
+      Hilal Browser şu anda Firefox kaynak kodunu patch etmek için <strong>bash tabanlı, seri
+      dosyasıyla yönetilen</strong> bir sistem kullanmaktadır. Bu sistem işlevsel olsa da büyüyen
+      bir proje için birkaç kritik sorunu beraberinde getirmektedir: platform bağımlılığı (Windows
+      desteği kırık), kör sıralama (hangi patch'in neyi değiştirdiği anında görülemiyor),
+      determinizm eksikliği (farklı makinelerde aynı sonuç garanti edilmiyor) ve araç zincirinin
+      geliştiriciye özgü olması.
+    </p>
+
+    <p>
+      Bu rapor, söz konusu sorunların tamamını çözen <strong>dört bileşenli yeni bir mimariyi</strong>
+      ve bu mimarinin mevcut Hilal Browser reposuna nasıl adım adım uygulanacağını detaylandırmaktadır.
+      Önerilen sistem hem Hilal'in sadelik felsefesini korumakta hem de Zen Browser'ın kurumsal
+      kalitedeki araç zincirine yakın bir güvenilirlik sunmaktadır.
+    </p>
+
+    <div class="callout callout-success">
+      <div class="callout-title">Temel İlke</div>
+      Bu mimari değişiklik Hilal'in <strong>en temel prensibi olan "Firefox'u repoya alma"</strong>
+      ilkesini korur. Değişen yalnızca Firefox'un üzerine nasıl katman ekleneceğidir.
+    </div>
+  </section>
+
+  <!-- S2: MEVCUT MİMARİNİN SORUNLARI -->
+  <section id="s2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Mevcut Mimarinin Sorunları</h2>
+    </div>
+
+    <h3>2.1 — patches/series: Kör Sıralama</h3>
+    <p>
+      <code>patches/series</code> dosyası patch'lerin uygulanma sırasını yönetir ancak bu dosya
+      yapısal bilgi içermez. Bir geliştirici "bu patch hangi Firefox bileşenini değiştiriyor?" 
+      sorusunu yanıtlamak için ya patch adına ya da dosyanın içini açmak zorundadır. Patch sayısı
+      arttıkça bu durum ciddi bir bakım yükü oluşturur.
+    </p>
+
+    <pre><code><span class="comment"># Mevcut patches/series — bilgi taşımayan düz liste</span>
+<span class="fn">0001-hilal-branding.patch</span>
+<span class="fn">0002-ui-changes.patch</span>
+<span class="fn">0003-privacy-settings.patch</span>
+<span class="comment"># "0003 ne değiştiriyor?" → dosyayı aç, oku, anla</span>
+</code></pre>
+
+    <h3>2.2 — Bash Scriptler: Platform Bağımlılığı</h3>
+    <p>
+      <code>scripts/apply.sh</code>, <code>scripts/refresh.sh</code> ve diğer scriptler macOS/Linux
+      merkezli yazılmıştır. Windows'ta Git Bash veya WSL olmadan çalışmazlar. Bu durum Windows
+      üzerinde katkı yapmak isteyen geliştiricileri baştan engeller. Ayrıca CI ortamlarında
+      scriptlerin PATH bağımlılıkları ve GNU/BSD araç farkları sorun çıkarabilir.
+    </p>
+
+    <h3>2.3 — Branding/Prefs Ayrımı: İki Farklı Mekanizma</h3>
+    <p>
+      Kod değişiklikleri <code>git apply</code> ile, branding dosyaları <code>rsync</code> ile,
+      prefs dosyaları ise kopyalama ile uygulanmaktadır. Bir geliştirici olarak "bir değişiklik
+      nasıl uygulanır?" sorusunun tek bir cevabı yoktur — değişikliğin türüne göre farklı
+      mekanizmalar devreye girer.
+    </p>
+
+    <h3>2.4 — Determinizm Eksikliği</h3>
+    <p>
+      <code>FIREFOX_COMMIT</code> dosyası commit hash'ini saklıyor, bu iyi. Ancak aynı commit
+      hash'i için Firefox kaynak tarball'ının SHA256'sı doğrulanmıyor. Teorik olarak farklı
+      ağ konumlarından farklı içerikler indirilebilir. Üretim seviyesi güvenlik için
+      tarball bütünlüğünün de doğrulanması gerekir.
+    </p>
+
+    <h3>2.5 — Tek Büyük Patch Riski</h3>
+    <p>
+      <code>scripts/refresh.sh</code> dokümantasyona göre <code>patches/0001-hilal-local-changes.patch</code>
+      adlı tek bir dosyaya düşebilir. Commit-per-feature akışı destekleniyor ancak disiplin
+      gerektiriyor; araç zorlamıyor. Büyük bir monolitik patch, upstream rebase sırasında
+      çözülmesi zor çakışmalar üretir.
+    </p>
+
+    <div class="compare-grid">
+      <div class="compare-card old">
+        <h4>Mevcut sorunlar</h4>
+        <ul>
+          <li>patches/series kör sıralama</li>
+          <li>Bash Windows'ta çalışmıyor</li>
+          <li>Üç farklı uygulama mekanizması</li>
+          <li>Tarball SHA doğrulaması yok</li>
+          <li>Monolitik patch riski</li>
+          <li>Araç zinciri başkasına aktarılamaz</li>
+        </ul>
+      </div>
+      <div class="compare-card new">
+        <h4>Yeni mimari çözümler</h4>
+        <ul>
+          <li>manifest.toml + klasör yapısı</li>
+          <li>Statik binary, sıfır bağımlılık</li>
+          <li>Tek kural: changes/ yansıtır</li>
+          <li>upstream.lock ile SHA doğrulama</li>
+          <li>Zorunlu focused patch kuralı</li>
+          <li>hil aracı herkes için aynı davranış</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- S3: YENİ MİMARİYE GENEL BAKIŞ -->
+  <section id="s3">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Yeni Mimariye Genel Bakış</h2>
+    </div>
+
+    <p>
+      Yeni mimari dört ana bileşenden oluşmaktadır. Her bileşen mevcut sistemdeki belirli bir
+      problemi çözmek üzere tasarlanmıştır ve birbirinden bağımsız olarak var olabilir.
+    </p>
+
+    <h3>3.1 — Dizin Yapısı (Hedef Durum)</h3>
+
+    <div class="filetree">
+<span class="ft-root">hilal-browser/</span>
+├── <span class="ft-config">upstream.lock</span>          <span class="ft-note">← commit hash + tarball SHA256</span>
+├── <span class="ft-config">manifest.toml</span>          <span class="ft-note">← tüm yapılandırma tek dosyada</span>
+│
+├── <span class="ft-dir">changes/</span>               <span class="ft-note">← tek uygulama mekanizması</span>
+│   ├── <span class="ft-dir">browser/</span>           <span class="ft-note">← Firefox yolunu yansıtır</span>
+│   │   ├── <span class="ft-dir">branding/hilal/</span>
+│   │   │   ├── <span class="ft-bin">logo.png</span>
+│   │   │   └── <span class="ft-bin">favicon.ico</span>  <span class="ft-note">← binary → doğrudan kopyalanır</span>
+│   │   ├── <span class="ft-dir">app/profile/</span>
+│   │   │   └── <span class="ft-patch">firefox.js.patch</span>   <span class="ft-note">← .patch uzantısı → diff uygulanır</span>
+│   │   └── <span class="ft-dir">themes/shared/</span>
+│   │       └── <span class="ft-patch">browser-css.patch</span>
+│   ├── <span class="ft-dir">toolkit/</span>
+│   │   └── <span class="ft-patch">global-styles.patch</span>
+│   └── <span class="ft-dir">modules/libpref/</span>
+│       └── <span class="ft-patch">init-js.patch</span>
+│
+├── <span class="ft-dir">branding/hilal/</span>          <span class="ft-note">← SVG/kaynak dosyalar (üretim değil)</span>
+├── <span class="ft-dir">docs/</span>
+├── <span class="ft-dir">scripts/</span>               <span class="ft-note">← yalnızca CI wrapperları kalır</span>
+│
+├── <span class="ft-bin">bin/hil</span>                <span class="ft-note">← statik binary (Linux/macOS/Win)</span>
+│
+└── <span class="ft-dir">engine/</span>                <span class="ft-note">← gitignored, build ağacı</span>
+    </div>
+
+    <h3>3.2 — Değişiklik Uygulama Kuralı</h3>
+    <p>
+      Mevcut sistemdeki üç farklı mekanizmanın (git apply, rsync, cp) yerine <strong>tek bir kural</strong>
+      geçer: <code>changes/</code> altındaki bir dosya <code>.patch</code> uzantısıyla bitiyorsa
+      diff olarak uygulanır. Bitmiyorsa doğrudan kopyalanır. Kural bu kadar.
+    </p>
+
+    <div class="callout callout-info">
+      <div class="callout-title">Tasarım Kararı</div>
+      <code>changes/</code> dizininin iç yapısı Firefox kaynak ağacının yollarını birebir yansıtır.
+      Bu sayede "bu değişiklik Firefox'ta nerede?" sorusu dosya sistemine bakılarak yanıtlanabilir,
+      ayrı bir dokümantasyon gerekmez.
+    </div>
+  </section>
+
+  <!-- S4: upstream.lock -->
+  <section id="s4">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>upstream.lock Şeması</h2>
+    </div>
+
+    <p>
+      <code>upstream.lock</code> dosyası Firefox kaynağını tam olarak sabitler. Mevcut
+      <code>FIREFOX_COMMIT</code> dosyasının geliştirilmiş versiyonudur. Commit hash'ine ek olarak
+      tarball URL'i ve SHA256 özeti içerir.
+    </p>
+
+    <pre><code><span class="comment"># upstream.lock</span>
+<span class="comment"># Bu dosyayı elle düzenleme — hil sync-upstream ile güncelle</span>
+
+<span class="keyword">firefox_version</span> <span class="op">=</span> <span class="string">"128.3.0esr"</span>
+<span class="keyword">commit</span>          <span class="op">=</span> <span class="string">"a3f7c2d9e1b4f8a0c2d5e7f9a1b3c5d7e9f0a2b4"</span>
+<span class="keyword">tarball_url</span>     <span class="op">=</span> <span class="string">"https://archive.mozilla.org/pub/firefox/releases/128.3.0esr/source/firefox-128.3.0esr.source.tar.xz"</span>
+<span class="keyword">tarball_sha256</span>  <span class="op">=</span> <span class="string">"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"</span>
+<span class="keyword">tarball_size</span>    <span class="op">=</span> <span class="number">452716800</span>  <span class="comment"># bytes, hızlı doğrulama için</span>
+</code></pre>
+
+    <h3>4.1 — Neden Hem Commit Hem Tarball?</h3>
+    <p>
+      Commit hash, git geçmişi üzerinde tam bir denetim sağlar. Ancak CI ortamlarında veya hızlı
+      kurulum senaryolarında git'ten tam bir clone çekmek yavaştır. Tarball URL + SHA256 ikisi
+      birden varsa <code>hil setup</code> önce tarball'ı dener (hızlı), başarısız olursa git
+      clone'a düşer (güvenli fallback).
+    </p>
+
+    <h3>4.2 — Güncelleme Akışı</h3>
+    <pre><code><span class="comment"># Yeni Firefox ESR çıktığında</span>
+$ <span class="fn">hil sync-upstream</span> --to <span class="string">129.0esr</span>
+
+<span class="comment"># hil şunları yapar:</span>
+<span class="comment"># 1. Yeni sürümün tarball URL'ini Mozilla'dan çeker</span>
+<span class="comment"># 2. SHA256'yı hesaplar</span>
+<span class="comment"># 3. upstream.lock dosyasını günceller</span>
+<span class="comment"># 4. Mevcut patch'leri yeni üzerine rebase etmeyi dener</span>
+<span class="comment"># 5. Çakışma varsa raporlar, otomatik çözmez</span>
+</code></pre>
+
+    <div class="callout callout-warn">
+      <div class="callout-title">Önemli</div>
+      <code>upstream.lock</code> dosyası git'e commit edilmeli ve değiştirilmesi PR incelemesi
+      gerektirmelidir. Bu dosyanın değişmesi her zaman "upstream versiyon güncellendi"
+      anlamına gelir ve dikkatli inceleme ister.
+    </div>
+  </section>
+
+  <!-- S5: manifest.toml -->
+  <section id="s5">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>manifest.toml Şeması</h2>
+    </div>
+
+    <p>
+      <code>manifest.toml</code> dosyası mevcut <code>patches/series</code>, 
+      <code>package.json</code> ve mozconfig bölümlerini tek bir yapılandırma dosyasında
+      birleştirir. TOML seçiminin nedeni: JSON'dan daha okunabilir, YAML'dan daha katı,
+      shell'den daha taşınabilirdir.
+    </p>
+
+    <pre><code><span class="comment"># manifest.toml — Hilal Browser ana yapılandırma dosyası</span>
+
+[<span class="type">browser</span>]
+name          <span class="op">=</span> <span class="string">"Hilal Browser"</span>
+vendor        <span class="op">=</span> <span class="string">"Hilal Browser Project"</span>
+id            <span class="op">=</span> <span class="string">"hilal"</span>
+binary_name   <span class="op">=</span> <span class="string">"hilal"</span>
+version       <span class="op">=</span> <span class="string">"0.3.0"</span>
+
+[<span class="type">branding</span>]
+directory          <span class="op">=</span> <span class="string">"hilal"</span>        <span class="comment"># browser/branding/hilal/ içindeki isim</span>
+background_color   <span class="op">=</span> <span class="string">"#1a1e28"</span>
+accent_color       <span class="op">=</span> <span class="string">"#5b8fff"</span>
+
+[<span class="type">build</span>]
+enable_telemetry   <span class="op">=</span> <span class="keyword">false</span>
+enable_crashreport <span class="op">=</span> <span class="keyword">false</span>
+enable_normandy    <span class="op">=</span> <span class="keyword">false</span>
+mozconfig_extra    <span class="op">=</span> <span class="string">"mozconfigs/hilal-release.mozconfig"</span>
+
+<span class="comment"># Patch uygulama sırası</span>
+<span class="comment"># Her giriş changes/ altındaki göreli yol + isteğe bağlı metadata</span>
+[[<span class="type">patches</span>]]
+path    <span class="op">=</span> <span class="string">"browser/branding/hilal"</span>       <span class="comment"># dizin → tümü kopyalanır</span>
+reason  <span class="op">=</span> <span class="string">"Hilal marka kimliği ve ikonlar"</span>
+
+[[<span class="type">patches</span>]]
+path    <span class="op">=</span> <span class="string">"browser/app/profile/firefox.js.patch"</span>
+reason  <span class="op">=</span> <span class="string">"Varsayılan tercihler: gizlilik, telemetri kapatma"</span>
+
+[[<span class="type">patches</span>]]
+path    <span class="op">=</span> <span class="string">"browser/themes/shared/browser-css.patch"</span>
+reason  <span class="op">=</span> <span class="string">"Hilal UI tema renkleri ve boşluklar"</span>
+
+[[<span class="type">patches</span>]]
+path    <span class="op">=</span> <span class="string">"toolkit/global-styles.patch"</span>
+reason  <span class="op">=</span> <span class="string">"Toolkit seviyesi tipografi ve form elementleri"</span>
+
+[[<span class="type">patches</span>]]
+path    <span class="op">=</span> <span class="string">"modules/libpref/init-js.patch"</span>
+reason  <span class="op">=</span> <span class="string">"libpref başlangıç değerleri"</span>
+</code></pre>
+
+    <h3>5.1 — series Dosyasına Göre Avantajlar</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Özellik</th>
+          <th>patches/series</th>
+          <th>manifest.toml [[patches]]</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Neden uygulandığı</td>
+          <td>Yok</td>
+          <td>reason alanı</td>
+        </tr>
+        <tr>
+          <td>Koşullu uygulama</td>
+          <td>Yok</td>
+          <td>when = "os == 'linux'" eklenebilir</td>
+        </tr>
+        <tr>
+          <td>Sıralama görünürlüğü</td>
+          <td>Sadece dosya adı</td>
+          <td>path + reason okunabilir</td>
+        </tr>
+        <tr>
+          <td>Branding entegrasyonu</td>
+          <td>Ayrı rsync mekanizması</td>
+          <td>Aynı [[patches]] listesinde</td>
+        </tr>
+        <tr>
+          <td>Build konfigürasyonu</td>
+          <td>Ayrı mozconfig dosyası</td>
+          <td>[build] bölümünde referans</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>5.2 — Koşullu Patch Uygulaması (Opsiyonel)</h3>
+    <p>
+      Gelecekte platform-özel patch'ler gerekirse manifest bunu destekleyecek şekilde
+      genişletilebilir:
+    </p>
+    <pre><code>[[<span class="type">patches</span>]]
+path    <span class="op">=</span> <span class="string">"widget/gtk/wayland-fixes.patch"</span>
+reason  <span class="op">=</span> <span class="string">"Wayland compositor uyumluluk düzeltmesi"</span>
+<span class="keyword">when</span>    <span class="op">=</span> <span class="string">"os == 'linux'"</span>   <span class="comment"># sadece Linux build'de uygula</span>
+</code></pre>
+  </section>
+
+  <!-- S6: changes/ DİZİN YAPISI -->
+  <section id="s6">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>changes/ Dizin Yapısı</h2>
+    </div>
+
+    <p>
+      <code>changes/</code> dizini bu mimarinin en kritik fikridir. İçindeki dizin yapısı
+      Firefox'un kaynak ağacını birebir yansıtır. Bu basit bir kuraldır ama büyük bir
+      bilişsel yük azaltır: "bu değişiklik Firefox'ta nerede?" sorusu artık arama gerektirmez.
+    </p>
+
+    <h3>6.1 — İki Dosya Türü, Tek Kural</h3>
+
+    <div class="callout callout-info">
+      <div class="callout-title">Kural</div>
+      <strong>.patch uzantısı var mı?</strong> → <code>git apply</code> ile uygula.<br>
+      <strong>Yok mu?</strong> → Hedef konuma doğrudan kopyala.
+    </div>
+
+    <pre><code>changes/
+├── browser/
+│   ├── branding/hilal/         <span class="comment">← uzantı yok → tüm klasör kopyalanır</span>
+│   │   ├── logo.png            <span class="comment">   firefox/browser/branding/hilal/'a</span>
+│   │   └── favicon.ico
+│   ├── app/profile/
+│   │   └── firefox.js.patch    <span class="comment">← .patch → git apply ile uygulanır</span>
+│   └── themes/shared/
+│       └── browser-css.patch
+└── toolkit/
+    └── xre/
+        └── nsAppRunner.patch
+</code></pre>
+
+    <h3>6.2 — Patch Dosyası Format Kuralları</h3>
+    <p>
+      Hilal'in mevcut yaklaşımından önemli bir fark: patch dosyaları <strong>index satırları
+      içermez</strong>. Bu Zen Browser'dan alınan akıllı bir karardır; index hash'leri commit'e
+      özgüdür ve upstream rebase'lerde anlamsız çakışmalar üretir.
+    </p>
+
+    <pre><code><span class="comment">--- a/browser/app/profile/firefox.js</span>
+<span class="comment">+++ b/browser/app/profile/firefox.js</span>
+<span class="comment">@@ -42,6 +42,12 @@</span>
+ <span class="comment">// Existing pref</span>
+ <span class="fn">pref</span>(<span class="string">"browser.startup.page"</span>, <span class="number">1</span>);
+<span class="comment">
++// Hilal: telemetri ve veri toplama kapatma</span>
++<span class="fn">pref</span>(<span class="string">"toolkit.telemetry.enabled"</span>, <span class="keyword">false</span>);
++<span class="fn">pref</span>(<span class="string">"toolkit.telemetry.unified"</span>, <span class="keyword">false</span>);
++<span class="fn">pref</span>(<span class="string">"datareporting.healthreport.uploadEnabled"</span>, <span class="keyword">false</span>);
++<span class="fn">pref</span>(<span class="string">"browser.crashReports.unsubmittedCheck.enabled"</span>, <span class="keyword">false</span>);
+</code></pre>
+
+    <div class="callout callout-warn">
+      <div class="callout-title">Index Satırları Hakkında</div>
+      <code>index abc123..def456 100644</code> satırlarını patch'lere <strong>ekleme</strong>.
+      Bu satırlar belirli blob hash'lerine bağlıdır ve upstream her değiştiğinde yanlış çakışma
+      bildirimleri üretir. <code>git diff --no-index</code> veya <code>git format-patch</code>
+      ile üretilen patch'ler bu satırları içerebilir — üretimden önce temizle.
+    </div>
+
+    <h3>6.3 — Patch Adlandırma Konvansiyonu</h3>
+    <p>
+      Patch dosyaları için şu format önerilir: <code>&lt;konu&gt;-&lt;ne-yapıyor&gt;.patch</code>
+    </p>
+    <pre><code><span class="comment"># Eski (sıra numarası tabanlı)</span>
+patches/0001-hilal-local-changes.patch
+
+<span class="comment"># Yeni (açıklayıcı, yol içinde)</span>
+changes/browser/app/profile/firefox.js.patch
+changes/browser/themes/shared/browser-css.patch
+changes/toolkit/xre/nsAppRunner-hilal-branding.patch
+</code></pre>
+
+    <p>
+      Birden fazla patch aynı dosyayı etkiliyorsa sayı eki eklenebilir:
+      <code>browser-css-tabs.patch</code>, <code>browser-css-urlbar.patch</code>
+    </p>
+  </section>
+
+  <!-- S7: hil CLI ARACI -->
+  <section id="s7">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>hil CLI Aracı</h2>
+    </div>
+
+    <p>
+      <code>hil</code>, mevcut bash scriptlerinin (<code>apply.sh</code>, <code>refresh.sh</code>,
+      <code>setup-firefox.sh</code>, <code>sync-upstream.sh</code>) yerine geçen tek bir
+      çalıştırılabilir dosyadır. <strong>Rust</strong> ile yazılması önerilir çünkü:
+    </p>
+    <ul style="margin: 0 0 18px 24px; line-height: 2; font-size: 14px;">
+      <li>Firefox zaten Rust kullanıyor, toolchain zaten kurulu</li>
+      <li>Statik binary üretimi kolay (<code>musl</code> ile Linux, <code>lld</code> ile macOS)</li>
+      <li>Windows'ta MSVC veya MinGW ile cross-compile desteği</li>
+      <li>Hata mesajları zengin ve kullanıcı dostudur</li>
+    </ul>
+
+    <div class="callout callout-info">
+      <div class="callout-title">Alternatif</div>
+      Rust öğrenme eğrisi yüksekse <strong>Go</strong> de geçerli bir seçimdir. Go da statik
+      binary üretir, cross-compile desteği mükemmeldir. Ancak Rust tercih edilir çünkü
+      Firefox ekosistemiyle örtüşür.
+    </div>
+
+    <h3>7.1 — Komut Seti</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Komut</th>
+          <th>Açıklama</th>
+          <th>Mevcut Karşılık</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>hil setup</td>
+          <td>upstream.lock'tan Firefox'u indir, SHA doğrula, engine/ 'e çıkart</td>
+          <td>scripts/setup-firefox.sh</td>
+        </tr>
+        <tr>
+          <td>hil apply</td>
+          <td>manifest.toml sırasını okuyarak changes/ altındaki patch'leri engine/'e uygula</td>
+          <td>scripts/apply.sh</td>
+        </tr>
+        <tr>
+          <td>hil refresh</td>
+          <td>engine/ içindeki değişiklikleri changes/ 'e geri yaz, manifest'i güncelle</td>
+          <td>scripts/refresh.sh</td>
+        </tr>
+        <tr>
+          <td>hil sync-upstream</td>
+          <td>Yeni Firefox sürümüne geç, upstream.lock güncelle, rebase dene</td>
+          <td>scripts/sync-upstream.sh</td>
+        </tr>
+        <tr>
+          <td>hil build</td>
+          <td>engine/ içinde ./mach build çalıştır, log filtrele</td>
+          <td>scripts/build-macos.sh</td>
+        </tr>
+        <tr>
+          <td>hil status</td>
+          <td>Mevcut engine/ durumunu göster (upstream sabit mi, patch'ler uygulandı mı)</td>
+          <td>Yok</td>
+        </tr>
+        <tr>
+          <td>hil verify</td>
+          <td>upstream.lock SHA'sı ile indirilen tarball'ı karşılaştır</td>
+          <td>Yok</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>7.2 — hil apply Akışı (Detay)</h3>
+    <pre><code><span class="comment">// hil apply — sözde kod</span>
+
+<span class="keyword">fn</span> <span class="fn">apply</span>() {
+    <span class="keyword">let</span> manifest <span class="op">=</span> <span class="fn">parse_toml</span>(<span class="string">"manifest.toml"</span>);
+    <span class="keyword">let</span> lock     <span class="op">=</span> <span class="fn">parse_lock</span>(<span class="string">"upstream.lock"</span>);
+
+    <span class="comment">// 1. engine/ mevcut mu ve sabit commit'te mi?</span>
+    <span class="keyword">if</span> !<span class="fn">engine_at_commit</span>(lock.commit) {
+        <span class="fn">error</span>(<span class="string">"engine/ upstream.lock ile eşleşmiyor. Önce: hil setup"</span>);
+    }
+
+    <span class="comment">// 2. Manifest'teki sırayı takip et</span>
+    <span class="keyword">for</span> patch <span class="keyword">in</span> manifest.patches {
+        <span class="keyword">let</span> source <span class="op">=</span> <span class="fn">path</span>(<span class="string">"changes/"</span>, patch.path);
+
+        <span class="keyword">if</span> source.<span class="fn">is_dir()</span> {
+            <span class="comment">// Dizin → kopyala</span>
+            <span class="fn">copy_dir</span>(source, <span class="fn">engine_path</span>(patch.path));
+            <span class="fn">log</span>(<span class="string">"[COPY] {}"</span>, patch.path);
+
+        } <span class="keyword">else if</span> source.<span class="fn">ends_with</span>(<span class="string">".patch"</span>) {
+            <span class="comment">// Patch dosyası → git apply</span>
+            <span class="keyword">let</span> result <span class="op">=</span> <span class="fn">git_apply</span>(<span class="string">"--3way"</span>, source);
+            <span class="keyword">match</span> result {
+                Ok(_)    <span class="op">=></span> <span class="fn">log</span>(<span class="string">"[PATCH] {} ✓"</span>, patch.path),
+                Err(e)   <span class="op">=></span> <span class="fn">fail</span>(<span class="string">"[FAIL]  {} — {}"</span>, patch.path, e),
+            }
+        }
+    }
+
+    <span class="fn">log</span>(<span class="string">"\n✓ {} patch uygulandı"</span>, manifest.patches.<span class="fn">len()</span>);
+}
+</code></pre>
+
+    <h3>7.3 — hil status Çıktısı (Örnek)</h3>
+    <pre><code>$ <span class="fn">hil status</span>
+
+<span class="accent">Hilal Browser</span> — geliştirme ortamı durumu
+
+  Upstream : Firefox <span class="string">128.3.0esr</span>
+  Commit   : <span class="number">a3f7c2d9</span> ✓
+  Tarball  : SHA256 <span class="accent2">doğrulandı</span>
+  engine/  : <span class="accent2">temiz</span>, değişiklik yok
+
+  Patch'ler (<span class="number">5</span> adet):
+    <span class="accent2">✓</span>  browser/branding/hilal           (kopyalandı)
+    <span class="accent2">✓</span>  browser/app/profile/firefox.js   (uygulandı)
+    <span class="accent2">✓</span>  browser/themes/shared/browser-css (uygulandı)
+    <span class="accent2">✓</span>  toolkit/global-styles             (uygulandı)
+    <span class="accent2">✓</span>  modules/libpref/init-js           (uygulandı)
+
+  Son build : <span class="number">2025-06-01 14:32</span> — başarılı
+</code></pre>
+
+    <h3>7.4 — Proje Yapısı (Rust Crate)</h3>
+    <pre><code>hil/
+├── <span class="ft-config">Cargo.toml</span>
+└── src/
+    ├── <span class="ft-file">main.rs</span>          <span class="comment">← CLI argument parsing (clap)</span>
+    ├── <span class="ft-file">commands/</span>
+    │   ├── <span class="ft-file">setup.rs</span>     <span class="comment">← download + verify</span>
+    │   ├── <span class="ft-file">apply.rs</span>     <span class="comment">← patch application</span>
+    │   ├── <span class="ft-file">refresh.rs</span>   <span class="comment">← diff extraction</span>
+    │   ├── <span class="ft-file">sync.rs</span>      <span class="comment">← upstream update</span>
+    │   └── <span class="ft-file">status.rs</span>    <span class="comment">← state reporting</span>
+    ├── <span class="ft-file">manifest.rs</span>      <span class="comment">← manifest.toml parser</span>
+    ├── <span class="ft-file">lock.rs</span>          <span class="comment">← upstream.lock parser</span>
+    └── <span class="ft-file">engine.rs</span>        <span class="comment">← engine/ tree ops</span>
+</code></pre>
+
+    <p>Önerilen bağımlılıklar:</p>
+    <pre><code><span class="comment"># Cargo.toml [dependencies]</span>
+clap       <span class="op">=</span> { version <span class="op">=</span> <span class="string">"4"</span>, features <span class="op">=</span> [<span class="string">"derive"</span>] }  <span class="comment"># CLI</span>
+toml       <span class="op">=</span> <span class="string">"0.8"</span>                                       <span class="comment"># manifest parse</span>
+sha2       <span class="op">=</span> <span class="string">"0.10"</span>                                      <span class="comment"># SHA256</span>
+reqwest    <span class="op">=</span> { version <span class="op">=</span> <span class="string">"0.11"</span>, features <span class="op">=</span> [<span class="string">"blocking"</span>] } <span class="comment"># download</span>
+indicatif  <span class="op">=</span> <span class="string">"0.17"</span>                                      <span class="comment"># progress bar</span>
+anyhow     <span class="op">=</span> <span class="string">"1"</span>                                          <span class="comment"># hata yönetimi</span>
+</code></pre>
+  </section>
+
+  <!-- S8: IMPLEMENTASYON PLANI -->
+  <section id="s8">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>Implementasyon Planı — 3 Faz</h2>
+    </div>
+
+    <p>
+      Mimari değişiklik tek seferde yapılmaz; üç ayrı fazda, her biri kendi başına çalışan
+      ve test edilebilen adımlarla gerçekleştirilir. Bu yaklaşım riski minimize eder: herhangi
+      bir fazda sorun çıkarsa önceki duruma dönmek mümkündür.
+    </p>
+
+    <div class="phase-badge phase-1">● Faz 1 — 1-2 hafta</div>
+    <h3>Faz 1: Dosya Yapısı ve Veri Modeli</h3>
+    <p>
+      Bu fazda kod yazılmaz. Mevcut patch'ler yeni dizin yapısına taşınır, <code>upstream.lock</code>
+      ve <code>manifest.toml</code> dosyaları oluşturulur. Bash scriptler hâlâ çalışır durumda kalır.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>upstream.lock oluştur</h4>
+          <p>Mevcut <code>FIREFOX_COMMIT</code> dosyasından commit hash'i al. Firefox'un bu commit'e karşılık gelen tarball'ını Mozilla arşivinden bul. SHA256'yı hesapla. <code>upstream.lock</code> dosyasını yaz.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>changes/ dizinini oluştur</h4>
+          <p>Mevcut <code>patches/*.patch</code> dosyalarını analiz et. Her birinin hangi Firefox dosyasını etkilediğini belirle. <code>changes/</code> altında Firefox yolunu yansıtan yapıya taşı.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>branding ve prefs'i changes/'e entegre et</h4>
+          <p>Mevcut <code>branding/hilal/</code> içeriğini <code>changes/browser/branding/hilal/</code>'a kopyala. <code>prefs/</code> içeriğini uygun <code>changes/</code> alt dizinlerine taşı.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>manifest.toml yaz</h4>
+          <p><code>[browser]</code>, <code>[branding]</code>, <code>[build]</code> bölümlerini doldur. Her patch için <code>[[patches]]</code> girişi ekle, <code>reason</code> alanlarını doldur. Sıralama mevcut <code>patches/series</code> ile birebir örtüşmeli.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>Mevcut scriptlerle çalıştığını doğrula</h4>
+          <p>Yeni dosya yapısını test et: <code>scripts/apply.sh</code>'ı geçici olarak <code>changes/</code>'i okuyacak şekilde güncelle. Build al ve çalıştır. Faz 1 burada tamamlanır.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-badge phase-2">● Faz 2 — 2-3 hafta</div>
+    <h3>Faz 2: hil CLI Aracı</h3>
+    <p>
+      Bu fazda <code>hil</code> aracı sıfırdan yazılır. Önce en kritik komutlar (<code>apply</code>,
+      <code>setup</code>), sonra destekleyiciler (<code>refresh</code>, <code>status</code>,
+      <code>sync-upstream</code>).
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Rust crate iskeletini oluştur</h4>
+          <p><code>cargo new hil</code> ile başla. <code>clap</code> ile komut yapısını kur. <code>manifest.toml</code> ve <code>upstream.lock</code> parser'larını yaz. Unit testleri ekle.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>hil setup implement et</h4>
+          <p><code>reqwest</code> ile tarball indir. <code>sha2</code> ile SHA256 hesapla ve <code>upstream.lock</code> ile karşılaştır. Uyuşmuyorsa hata ver ve indirilen dosyayı sil. Tarball'ı <code>engine/</code>'e çıkart.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>hil apply implement et</h4>
+          <p>Manifest'i oku, sırayı takip et. Dizin türleri için <code>fs::copy</code>, patch türleri için <code>git apply --3way</code> çalıştır. Başarı/hata durumlarını net raporla.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>hil refresh implement et</h4>
+          <p><code>engine/</code> içindeki değişiklikleri tara. Her değişen dosya için ilgili <code>changes/</code> konumuna diff yaz. Manifest'te karşılığı olmayan değişiklikler için uyarı ver.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>hil status ve hil verify implement et</h4>
+          <p><code>status</code>: engine/ durumunu, uygulanan patch'leri, son build tarihini raporla. <code>verify</code>: <code>upstream.lock</code> SHA'sını mevcut engine/ tarball'ı ile karşılaştır.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h4>Bash scriptlerle paralel çalıştır ve karşılaştır</h4>
+          <p>Hem eski bash scriptleri hem yeni <code>hil</code> komutlarını ayrı temiz makinelerde çalıştır. Üretilen engine/ ağaçları diff alarak aynı olduğunu doğrula.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-badge phase-3">● Faz 3 — 1 hafta</div>
+    <h3>Faz 3: Eski Sistemi Kaldır ve Dokümante Et</h3>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Bash scriptleri kaldır veya arşivle</h4>
+          <p><code>scripts/</code> dizinini <code>scripts/legacy/</code>'ye taşı veya tamamen sil. <code>FIREFOX_COMMIT</code> ve <code>patches/series</code> dosyalarını kaldır.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>hil sync-upstream implement et</h4>
+          <p>Yeni Firefox sürümü çıkınca: <code>upstream.lock</code>'u güncelle, engine/'i yeni sürüme geçir, patch'leri rebase etmeyi dene, çakışmaları raporla.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Dokümantasyonu güncelle</h4>
+          <p><code>docs/WORKFLOW.md</code>'yi yeni komutlarla güncelle. <code>CLAUDE.md</code> ve <code>AGENTS.md</code>'yi güncelle. README hızlı başlangıç bölümünü yeniden yaz.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>hil'i repoya binary olarak ekle veya CI'da derle</h4>
+          <p>İki seçenek: <code>bin/</code> altında önceden derlenmiş binary'ler ekle (Linux/macOS/Win için), ya da CI'da <code>cargo build --release</code> ile her PR'da derle.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- S9: MİGRASYON REHBERİ -->
+  <section id="s9">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2>Migrasyon Rehberi</h2>
+    </div>
+
+    <p>
+      Bu bölüm mevcut patch'lerin yeni yapıya nasıl taşınacağını adım adım açıklar.
+      Her patch için aynı süreci takip et.
+    </p>
+
+    <h3>9.1 — Mevcut Patch'i Analiz Et</h3>
+    <pre><code><span class="comment"># 1. Patch'in hangi dosyaları etkilediğini gör</span>
+$ <span class="fn">grep</span> <span class="string">"^--- a/"</span> patches/0001-hilal-branding.patch
+--- a/browser/branding/hilal/configure.sh
+--- a/browser/branding/hilal/moz.build
+
+<span class="comment"># 2. Hedef dizin yapısını oluştur</span>
+$ <span class="fn">mkdir</span> -p changes/browser/branding/hilal
+
+<span class="comment"># 3. Patch'i changes/ altına kopyala</span>
+$ <span class="fn">cp</span> patches/0001-hilal-branding.patch \
+     changes/browser/branding/hilal/configure-moz.patch
+
+<span class="comment"># 4. Patch içindeki yolları kontrol et</span>
+<span class="comment"># Şu an: --- a/browser/branding/hilal/configure.sh</span>
+<span class="comment"># Olması gereken: --- a/browser/branding/hilal/configure.sh</span>
+<span class="comment"># (aynı — changes/ içinde path prefix'i yok)</span>
+</code></pre>
+
+    <h3>9.2 — Binary Dosyaları Taşı</h3>
+    <pre><code><span class="comment"># Branding binary dosyaları (PNG, ICO, SVG) doğrudan kopyalanır</span>
+$ <span class="fn">cp</span> -r branding/hilal/* changes/browser/branding/hilal/
+
+<span class="comment"># Artık changes/browser/branding/hilal/ şunları içerir:</span>
+<span class="comment"># - logo.png, favicon.ico (binary → kopyalama ile uygulanır)</span>
+<span class="comment"># - configure.sh.patch (diff → git apply ile uygulanır)</span>
+</code></pre>
+
+    <h3>9.3 — manifest.toml'a Ekle</h3>
+    <pre><code><span class="comment"># Her taşınan patch için manifest.toml'a [[patches]] girişi ekle</span>
+
+[[<span class="type">patches</span>]]
+path   <span class="op">=</span> <span class="string">"browser/branding/hilal"</span>
+reason <span class="op">=</span> <span class="string">"Hilal marka varlıkları: logo, ikon, branding scripti"</span>
+
+<span class="comment"># Sıra önemli — mevcut patches/series sırasını koru</span>
+</code></pre>
+
+    <h3>9.4 — Test Et</h3>
+    <pre><code><span class="comment"># Yeni yapı ile clean build al</span>
+$ <span class="fn">hil setup</span>      <span class="comment"># engine/ hazırla</span>
+$ <span class="fn">hil apply</span>      <span class="comment"># patch'leri uygula</span>
+$ <span class="fn">hil status</span>     <span class="comment"># her şeyin uygulandığını doğrula</span>
+$ <span class="fn">hil build</span>      <span class="comment"># derleme yap</span>
+</code></pre>
+
+    <div class="callout callout-success">
+      <div class="callout-title">Migrasyon Öncelik Sırası</div>
+      Önce en az karmaşık patch'lerle başla (branding binary'leri — en kolay).
+      Sonra basit pref patch'lerine geç. En son büyük UI patch'lerini taşı.
+      Her adımda build alarak ilerlemeyi doğrula.
+    </div>
+  </section>
+
+  <!-- S10: CI/CD -->
+  <section id="s10">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2>CI/CD Entegrasyonu</h2>
+    </div>
+
+    <p>
+      Mevcut <code>.github/workflows/</code> yapısı yeni sisteme göre güncellenmelidir.
+      Ana değişiklik: bash scriptlerin yerini <code>hil</code> komutları alır.
+    </p>
+
+    <h3>10.1 — Build Workflow (Güncellenmiş)</h3>
+    <pre><code><span class="comment"># .github/workflows/build.yml</span>
+<span class="keyword">name</span>: <span class="string">Hilal Browser Build</span>
+
+<span class="keyword">on</span>:
+  <span class="keyword">push</span>:
+    <span class="keyword">branches</span>: [main]
+  <span class="keyword">pull_request</span>:
+    <span class="keyword">paths</span>:
+      - <span class="string">'changes/**'</span>
+      - <span class="string">'manifest.toml'</span>
+      - <span class="string">'upstream.lock'</span>
+
+<span class="keyword">jobs</span>:
+  <span class="keyword">build</span>:
+    <span class="keyword">runs-on</span>: ubuntu-latest
+    <span class="keyword">steps</span>:
+      - <span class="keyword">uses</span>: actions/checkout@v4
+
+      - <span class="keyword">name</span>: <span class="string">hil'i derle</span>
+        <span class="keyword">run</span>: |
+          cargo build --release --manifest-path hil/Cargo.toml
+          echo "$PWD/hil/target/release" >> $GITHUB_PATH
+
+      - <span class="keyword">name</span>: <span class="string">SHA doğrulama</span>
+        <span class="keyword">run</span>: hil verify
+        <span class="comment"># upstream.lock SHA'sını kontrol eder</span>
+
+      - <span class="keyword">name</span>: <span class="string">Firefox kurulumu</span>
+        <span class="keyword">run</span>: hil setup
+        <span class="comment"># tarball indir, doğrula, engine/'e çıkart</span>
+
+      - <span class="keyword">name</span>: <span class="string">Patch uygula</span>
+        <span class="keyword">run</span>: hil apply
+        <span class="comment"># manifest sırasıyla changes/ uygula</span>
+
+      - <span class="keyword">name</span>: <span class="string">Build al</span>
+        <span class="keyword">run</span>: hil build
+</code></pre>
+
+    <h3>10.2 — Patch Doğrulama Workflow</h3>
+    <p>
+      Her PR'da patch uygulamasının temiz çalıştığını doğrulayan hafif bir workflow:
+    </p>
+    <pre><code><span class="keyword">name</span>: <span class="string">Patch Doğrulama</span>
+
+<span class="keyword">on</span>:
+  <span class="keyword">pull_request</span>:
+    <span class="keyword">paths</span>: [<span class="string">'changes/**'</span>, <span class="string">'manifest.toml'</span>]
+
+<span class="keyword">jobs</span>:
+  <span class="keyword">verify-patches</span>:
+    <span class="keyword">runs-on</span>: ubuntu-latest
+    <span class="keyword">steps</span>:
+      - uses: actions/checkout@v4
+      - name: <span class="string">Patch'lerin temiz uygulandığını test et</span>
+        run: |
+          hil setup --skip-build-deps
+          hil apply --dry-run    <span class="comment"># gerçekten uygulamadan simüle et</span>
+          hil status
+</code></pre>
+
+    <div class="callout callout-info">
+      <div class="callout-title">Önbellek Stratejisi</div>
+      <code>upstream.lock</code> değişmediği sürece <code>engine/</code> tarball'ını GitHub Actions cache
+      ile sakla. Bu build sürelerini önemli ölçüde kısaltır. Cache key olarak <code>upstream.lock</code>
+      dosyasının SHA256'sını kullan.
+    </div>
+  </section>
+
+  <!-- S11: RİSK ANALİZİ -->
+  <section id="s11">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <h2>Risk Analizi</h2>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Risk</th>
+          <th>Olasılık</th>
+          <th>Etki</th>
+          <th>Önlem</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Mevcut patch'lerin yeni yapıya taşınması sırasında çakışma</td>
+          <td class="risk-medium">Orta</td>
+          <td class="risk-medium">Orta</td>
+          <td>Her patch ayrı test edilir, Faz 1 boyunca bash scriptler çalışmaya devam eder</td>
+        </tr>
+        <tr>
+          <td>hil aracındaki bug'ın build'i kırması</td>
+          <td class="risk-medium">Orta</td>
+          <td class="risk-high">Yüksek</td>
+          <td>hil ile bash scriptler Faz 2 boyunca paralel çalıştırılır, sonuçlar karşılaştırılır</td>
+        </tr>
+        <tr>
+          <td>Mozilla tarball URL'inin değişmesi</td>
+          <td class="risk-low">Düşük</td>
+          <td class="risk-medium">Orta</td>
+          <td>upstream.lock fallback olarak git clone da destekler</td>
+        </tr>
+        <tr>
+          <td>Rust toolchain kurulu olmayan CI ortamı</td>
+          <td class="risk-low">Düşük</td>
+          <td class="risk-low">Düşük</td>
+          <td>Firefox zaten Rust gerektiriyor; toolchain zaten mevcut</td>
+        </tr>
+        <tr>
+          <td>manifest.toml sıra hatasının patch çakışmasına yol açması</td>
+          <td class="risk-low">Düşük</td>
+          <td class="risk-medium">Orta</td>
+          <td>hil apply sıra uyumsuzluklarını uygulama öncesi raporlar</td>
+        </tr>
+        <tr>
+          <td>Katkıda bulunanların yeni sistemi öğrenmesi gereken öğrenme eğrisi</td>
+          <td class="risk-medium">Orta</td>
+          <td class="risk-low">Düşük</td>
+          <td>hil status ve hil --help komutları yeterince açıklayıcı tasarlanır</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- S12: BAŞARI KRİTERLERİ -->
+  <section id="s12">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <h2>Başarı Kriterleri</h2>
+    </div>
+
+    <p>
+      Implementasyonun başarılı sayılması için aşağıdaki kriterlerin tümü karşılanmış olmalıdır.
+    </p>
+
+    <h3>12.1 — İşlevsel Kriterler</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">✓</div>
+        <div class="step-body">
+          <h4>Deterministik build</h4>
+          <p>Farklı iki makinede aynı <code>upstream.lock</code> ve <code>manifest.toml</code> ile build alındığında identik çıktı üretilir.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">✓</div>
+        <div class="step-body">
+          <h4>Platform bağımsızlık</h4>
+          <p><code>hil setup && hil apply && hil build</code> Windows, macOS ve Linux'ta hiçbir ekstra araç gerekmeden çalışır.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">✓</div>
+        <div class="step-body">
+          <h4>Görsel navigasyon</h4>
+          <p><code>ls changes/browser/themes/</code> çalıştırıldığında hangi Firefox dosyalarının değiştirildiği anında görülür.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">✓</div>
+        <div class="step-body">
+          <h4>SHA doğrulama</h4>
+          <p><code>hil verify</code> bozuk veya değiştirilmiş tarball'ı build başlamadan yakalar.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">✓</div>
+        <div class="step-body">
+          <h4>Sıfır ek bağımlılık</h4>
+          <p>Bir geliştirici, Firefox build araçlarına ek olarak başka bir şey kurmak zorunda kalmaz.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>12.2 — Kalite Kriterleri</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Metrik</th>
+          <th>Hedef</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>hil apply hata mesajı anlaşılırlığı</td>
+          <td>Hangi patch başarısız oldu, neden, nasıl düzeltilir — tek mesajda</td>
+        </tr>
+        <tr>
+          <td>manifest.toml okunabilirliği</td>
+          <td>Firefox geçmişi olmayan bir geliştirici her patch'in amacını anlayabilmeli</td>
+        </tr>
+        <tr>
+          <td>hil binary boyutu</td>
+          <td>≤ 5 MB (statik, release build)</td>
+        </tr>
+        <tr>
+          <td>hil apply süresi (patch başına)</td>
+          <td>≤ 100ms (network dışı operasyonlar)</td>
+        </tr>
+        <tr>
+          <td>Dokümantasyon kapsamı</td>
+          <td>Her hil komutu için örnek çıktı içeren belge</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-success">
+      <div class="callout-title">Son Not</div>
+      Bu mimari değişiklik bir özellik değil, bir altyapı yatırımıdır. Kısa vadede ek iş
+      yükü getirir ama uzun vadede her upstream güncelleme, her yeni katkıcı ve her yeni
+      platform için zaman kazandırır. Hilal'in "<em>upstream'e mümkün olduğunca yakın kal</em>"
+      felsefesiyle de tam uyumludur — çünkü upstream'i takip etmek bu sistemde daha az
+      maliyetli hale gelir.
+    </div>
+  </section>
+
+  <footer>
+    <span>Hilal Browser · Mimari Rapor · v1.0</span>
+    <span>Haziran 2026</span>
+  </footer>
+
+</div>
+</body>
+</html>

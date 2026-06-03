@@ -4,11 +4,14 @@
 # or any other large generated content. It only holds patches, overlays,
 # and scripts.
 
-# === Firefox source tree (NEVER commit) =====================================
-# The Firefox checkout lives here by default. It's many GB and has its own
-# git history; we don't want it in this repo.
+# === Engine, Legacy Firefox & Binary (NEVER commit) ==========================
+# The Firefox checkout (engine/ or legacy firefox/) lives here.
+/engine/
+engine/
 /firefox/
 firefox/
+/bin/
+bin/
 
 # === Build outputs ==========================================================
 obj-*/
