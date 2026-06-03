@@ -88,7 +88,7 @@ pref("permissions.manager.defaultsUrl", "");
 pref("browser.preferences.moreFromMozilla", false);
 pref("browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons", false);
 pref("browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features", false);
-pref("browser.aboutwelcome.enabled", false);
+pref("browser.aboutwelcome.enabled", true);
 pref("browser.startup.homepage_override.mstone", "ignore");
 
 // Crash report submission.
