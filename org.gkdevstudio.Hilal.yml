@@ -57,7 +57,7 @@ modules:
       # HILAL_SOURCE_BEGIN
       - type: git
         url: https://github.com/VastSea0/hilal-browser.git
-        tag: v0.2.0-alpha.5
-        commit: b497cad592030a25ee4a659d008f4b794b970b75
+        tag: v0.3.0-alpha.1
+        commit: 005fa2a52efc008b8b0e7cf23d9b0429712dfbf6 # temporary commit placeholder, we will update it or omit if not required by standard build
         dest: hilal-browser
       # HILAL_SOURCE_END
