@@ -671,38 +671,93 @@
     _browserMockHTML(mode) {
       const compact = mode === "compact";
       const orientationClass = this._verticalTabsSelected
-        ? "hw-mock-vertical"
-        : "hw-mock-horizontal";
+        ? "hw-preview-vertical"
+        : "hw-preview-horizontal";
       const workspaceClass = this._workspacesEnabledSelected
-        ? "hw-mock-workspaces"
-        : "hw-mock-no-workspaces";
+        ? "hw-preview-workspaces"
+        : "hw-preview-no-workspaces";
       const toolbarClass = this._compactHideToolboxSelected
-        ? "hw-mock-hide-toolbar"
-        : "hw-mock-show-toolbar";
+        ? "hw-preview-hide-toolbar"
+        : "hw-preview-show-toolbar";
       return `
-        <span class="hw-browser-mock ${compact ? "hw-mock-compact" : "hw-mock-standard"} ${orientationClass} ${workspaceClass} ${toolbarClass}" aria-hidden="true">
-          <span class="hw-mock-topbar">
-            <span class="hw-mock-window-controls">
-              <span></span><span></span><span></span>
-            </span>
-            <span class="hw-mock-tabs">
-              <span></span><span></span><span></span>
-            </span>
-            <span class="hw-mock-urlbar"></span>
-          </span>
-          <span class="hw-mock-body">
-            <span class="hw-mock-sidebar">
-              <span class="hw-mock-workspace-strip">
+        <span class="hw-browser-preview ${compact ? "hw-preview-compact" : "hw-preview-standard"} ${orientationClass} ${workspaceClass} ${toolbarClass}" aria-hidden="true">
+          <span class="hw-preview-toolbar">
+            <span class="hw-preview-tabbar">
+              <span class="hw-preview-window-controls">
                 <span></span><span></span><span></span>
               </span>
-              <span class="hw-mock-sidebar-tabs">
-                <span></span><span></span><span></span>
+              <span class="hw-preview-horizontal-tabs">
+                <span class="hw-preview-tab hw-preview-tab-active">
+                  <span class="hw-preview-favicon"></span>
+                  <span class="hw-preview-tab-label"></span>
+                </span>
+                <span class="hw-preview-tab">
+                  <span class="hw-preview-favicon"></span>
+                  <span class="hw-preview-tab-label"></span>
+                </span>
+                <span class="hw-preview-tab">
+                  <span class="hw-preview-favicon"></span>
+                  <span class="hw-preview-tab-label"></span>
+                </span>
+                <span class="hw-preview-new-tab"></span>
               </span>
             </span>
-            <span class="hw-mock-page">
-              <span></span><span></span><span></span>
+            <span class="hw-preview-navbar">
+              <span class="hw-preview-nav-button"></span>
+              <span class="hw-preview-nav-button"></span>
+              <span class="hw-preview-urlbar">
+                <span class="hw-preview-lock"></span>
+                <span class="hw-preview-url-text"></span>
+              </span>
+              <span class="hw-preview-toolbar-button"></span>
+              <span class="hw-preview-toolbar-button"></span>
             </span>
           </span>
+          <span class="hw-preview-hover-top"></span>
+          <span class="hw-preview-shell">
+            <span class="hw-preview-sidebar">
+              <span class="hw-preview-workspace-rail">
+                <span class="hw-preview-workspace hw-preview-workspace-active"></span>
+                <span class="hw-preview-workspace"></span>
+                <span class="hw-preview-workspace"></span>
+                <span class="hw-preview-workspace-add"></span>
+              </span>
+              <span class="hw-preview-tab-panel">
+                <span class="hw-preview-panel-header">
+                  <span class="hw-preview-panel-icon"></span>
+                  <span class="hw-preview-panel-title"></span>
+                  <span class="hw-preview-panel-action"></span>
+                </span>
+                <span class="hw-preview-pinned-grid">
+                  <span></span><span></span><span></span>
+                </span>
+                <span class="hw-preview-vertical-tabs">
+                  <span class="hw-preview-vertical-tab hw-preview-tab-active">
+                    <span class="hw-preview-favicon"></span>
+                    <span class="hw-preview-tab-label"></span>
+                  </span>
+                  <span class="hw-preview-vertical-tab">
+                    <span class="hw-preview-favicon"></span>
+                    <span class="hw-preview-tab-label"></span>
+                  </span>
+                  <span class="hw-preview-vertical-tab">
+                    <span class="hw-preview-favicon"></span>
+                    <span class="hw-preview-tab-label"></span>
+                  </span>
+                </span>
+              </span>
+            </span>
+            <span class="hw-preview-content">
+              <span class="hw-preview-page-card">
+                <span class="hw-preview-page-logo">${this._logoHTML()}</span>
+                <span class="hw-preview-page-search"></span>
+                <span class="hw-preview-page-tiles">
+                  <span></span><span></span><span></span>
+                </span>
+              </span>
+            </span>
+          </span>
+          <span class="hw-preview-hover-edge"></span>
         </span>
       `;
     }
