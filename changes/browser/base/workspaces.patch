@@ -21,13 +21,23 @@ diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.x
 diff --git a/browser/base/jar.mn b/browser/base/jar.mn
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
-@@ -72,6 +72,10 @@ browser.jar:
+@@ -72,6 +72,20 @@ browser.jar:
          content/browser/browser-unified-extensions.js       (content/browser-unified-extensions.js)
          content/browser/browser-graphics-utils.js           (content/browser-graphics-utils.js)
          content/browser/browser-webrtc.js                   (content/browser-webrtc.js)
 +        content/browser/hilal/HilalWelcome.js               (content/hilal/HilalWelcome.js)
 +        content/browser/hilal/HilalWelcome.css              (content/hilal/HilalWelcome.css)
 +        content/browser/hilal/welcome-home-preview.png       (content/hilal/welcome-home-preview.png)
++        content/browser/hilal/screenshots/welcome-standard.png (content/hilal/screenshots/welcome-standard.png)
++        content/browser/hilal/screenshots/welcome-compact.png (content/hilal/screenshots/welcome-compact.png)
++        content/browser/hilal/screenshots/welcome-standard-vertical.png (content/hilal/screenshots/welcome-standard-vertical.png)
++        content/browser/hilal/screenshots/welcome-standard-horizontal.png (content/hilal/screenshots/welcome-standard-horizontal.png)
++        content/browser/hilal/screenshots/welcome-compact-vertical.png (content/hilal/screenshots/welcome-compact-vertical.png)
++        content/browser/hilal/screenshots/welcome-compact-horizontal.png (content/hilal/screenshots/welcome-compact-horizontal.png)
++        content/browser/hilal/screenshots/welcome-workspaces-on.png (content/hilal/screenshots/welcome-workspaces-on.png)
++        content/browser/hilal/screenshots/welcome-workspaces-off.png (content/hilal/screenshots/welcome-workspaces-off.png)
++        content/browser/hilal/screenshots/welcome-toolbar-visible.png (content/hilal/screenshots/welcome-toolbar-visible.png)
++        content/browser/hilal/screenshots/welcome-toolbar-hidden.png (content/hilal/screenshots/welcome-toolbar-hidden.png)
 +        content/browser/hilal/HilalWorkspaces.js            (content/hilal/HilalWorkspaces.js)
          content/browser/global-scripts.js                   (content/global-scripts.js)
          content/browser/main-popupset.js                    (content/main-popupset.js)

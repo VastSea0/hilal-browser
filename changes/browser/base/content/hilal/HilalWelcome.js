@@ -24,12 +24,16 @@
 
   const STAGES = [
     { title: "First choices", icon: "settings" },
-    { title: "Look", icon: "layout" },
+    { title: "Layout", icon: "layout" },
+    { title: "Tabs", icon: "tabs" },
+    { title: "Spaces", icon: "tabs" },
+    { title: "Toolbar", icon: "layout" },
     { title: "Privacy", icon: "shield" },
     { title: "Search", icon: "search" },
-    { title: "Spaces", icon: "tabs" },
+    { title: "Spaces setup", icon: "tabs" },
     { title: "Ready", icon: "check" },
   ];
+  const STAGE_TOOLBAR = 4;
 
   const CHROME_TO_HIDE = [
     "#navigator-toolbox",
@@ -463,16 +467,36 @@
       this._attachListeners();
     }
 
+    _visibleStages() {
+      return STAGES.filter(
+        (_, index) => index !== STAGE_TOOLBAR || this._compactSelected
+      );
+    }
+
+    _visibleStageIndex() {
+      let visual = 0;
+      for (let i = 0; i < this._stage; i++) {
+        if (i !== STAGE_TOOLBAR || this._compactSelected) {
+          visual++;
+        }
+      }
+      return visual;
+    }
+
     _stepsHTML() {
-      return STAGES.map((stage, index) => {
-        const active = index === this._stage;
-        const done = index < this._stage;
-        return `
+      const visible = this._visibleStages();
+      const currentVisual = this._visibleStageIndex();
+      return visible
+        .map((stage, index) => {
+          const active = index === currentVisual;
+          const done = index < currentVisual;
+          return `
           <span class="hw-progress-dot${active ? " hw-progress-active" : ""}${done ? " hw-progress-done" : ""}">
             <span data-l10n-id="hilal-welcome-step-label-${stage.icon}">${stage.title}</span>
           </span>
         `;
-      }).join("");
+        })
+        .join("");
     }
 
     _stageCopyHTML() {
@@ -484,10 +508,28 @@
             "Bring only the data you need and decide whether links from the system should open here.",
         },
         {
-          kicker: "Look",
-          title: "Shape the window before it opens.",
+          kicker: "Layout",
+          title: "Pick a density.",
           subtitle:
-            "Pick the density, tab direction, and spaces that should define the first Hilal window.",
+            "Standard keeps the toolbar visible at all times. Compact hides it until you need it.",
+        },
+        {
+          kicker: "Tabs",
+          title: "Choose a tab direction.",
+          subtitle:
+            "Vertical tabs sit in a sidebar. Horizontal tabs line up across the top of the window.",
+        },
+        {
+          kicker: "Spaces",
+          title: "Separate your contexts.",
+          subtitle:
+            "Spaces keep personal, work, and social tabs in their own groups so they never mix.",
+        },
+        {
+          kicker: "Toolbar",
+          title: "Control the toolbar.",
+          subtitle:
+            "Auto-hide reveals the address bar only when you hover the top edge. Always visible keeps it fixed.",
         },
         {
           kicker: "Privacy",
@@ -515,11 +557,13 @@
         },
       ];
       const copy = stageCopies[this._stage];
+      const visibleIndex = this._visibleStageIndex();
+      const visibleTotal = this._visibleStages().length;
       return `
         <p class="hw-kicker" data-l10n-id="hilal-welcome-stage-${this._stage}-kicker">${copy.kicker}</p>
         <h1 class="hw-title" id="hw-stage-title" data-l10n-id="hilal-welcome-stage-${this._stage}-title">${copy.title}</h1>
         <p class="hw-sub" data-l10n-id="hilal-welcome-stage-${this._stage}-subtitle">${copy.subtitle}</p>
-        <span class="hw-step-count" data-l10n-id="hilal-welcome-step-count" data-l10n-args='{"current": ${this._stage + 1}, "total": ${STAGES.length}}'>Step ${this._stage + 1}/${STAGES.length}</span>
+        <span class="hw-step-count" data-l10n-id="hilal-welcome-step-count" data-l10n-args='{"current": ${visibleIndex + 1}, "total": ${visibleTotal}}'>Step ${visibleIndex + 1}/${visibleTotal}</span>
       `;
     }
 
@@ -550,26 +594,32 @@
             </div>
           `;
         case 1:
-          return this._layoutHTML();
+          return this._layoutModeHTML();
         case 2:
+          return this._tabOrientationHTML();
+        case 3:
+          return this._workspacesToggleHTML();
+        case 4:
+          return this._hideToolbarHTML();
+        case 5:
           return `
             <div class="hw-privacy-list">
               ${this._privacyLevelsHTML()}
             </div>
           `;
-        case 3:
+        case 6:
           return `
             <div class="hw-engine-list">
               ${this._enginesHTML()}
             </div>
           `;
-        case 4:
+        case 7:
           return `
             <div class="hw-workspace-list">
               ${this._workspacesHTML()}
             </div>
           `;
-        case 5:
+        case 8:
           return `
             <div class="hw-summary">
               ${this._summaryHTML()}
@@ -603,162 +653,106 @@
       `;
     }
 
-    _layoutHTML() {
-      return `
-        <div class="hw-layout-stack">
-          <div class="hw-layout-grid">
-            ${this._layoutChoiceHTML("standard")}
-            ${this._layoutChoiceHTML("compact")}
-          </div>
-          <div class="hw-layout-controls">
-            <div class="hw-control-row">
-              <span class="hw-control-copy">
-                <span class="hw-line-title" data-l10n-id="hilal-welcome-tabs-layout-label">Tabs</span>
-                <span class="hw-line-desc" data-l10n-id="hilal-welcome-tabs-layout-desc">Choose the direction that keeps your pages easiest to scan.</span>
-              </span>
-              <span class="hw-segment" role="group" aria-label="Tab layout">
-                <button type="button" class="hw-segment-btn${this._verticalTabsSelected ? " hw-segment-active" : ""}" data-tab-layout="vertical" aria-pressed="${this._verticalTabsSelected}">
-                  <span data-l10n-id="hilal-welcome-tabs-layout-vertical">Vertical</span>
-                </button>
-                <button type="button" class="hw-segment-btn${!this._verticalTabsSelected ? " hw-segment-active" : ""}" data-tab-layout="horizontal" aria-pressed="${!this._verticalTabsSelected}">
-                  <span data-l10n-id="hilal-welcome-tabs-layout-horizontal">Horizontal</span>
-                </button>
-              </span>
-            </div>
-            <label class="hw-control-row" for="hw-workspaces-enabled-toggle">
-              <span class="hw-control-copy">
-                <span class="hw-line-title" data-l10n-id="hilal-welcome-workspaces-enabled-label">Spaces</span>
-                <span class="hw-line-desc" data-l10n-id="hilal-welcome-workspaces-enabled-desc">Keep personal, work, and social tabs separated from the start.</span>
-              </span>
-              <span class="hw-toggle">
-                <input type="checkbox" id="hw-workspaces-enabled-toggle"${this._workspacesEnabledSelected ? ' checked="checked"' : ""}/>
-                <span class="hw-toggle-track"></span>
-              </span>
-            </label>
-            <label class="hw-control-row${this._compactSelected ? "" : " hw-control-disabled"}" for="hw-compact-hide-toolbar-toggle">
-              <span class="hw-control-copy">
-                <span class="hw-line-title" data-l10n-id="hilal-welcome-compact-toolbar-label">Hide top toolbar</span>
-                <span class="hw-line-desc" data-l10n-id="hilal-welcome-compact-toolbar-desc">In compact mode, reveal the address bar only when you need it.</span>
-              </span>
-              <span class="hw-toggle">
-                <input type="checkbox" id="hw-compact-hide-toolbar-toggle"${this._compactHideToolboxSelected ? ' checked="checked"' : ""}${this._compactSelected ? "" : ' disabled="disabled"'}/>
-                <span class="hw-toggle-track"></span>
-              </span>
-            </label>
-          </div>
-        </div>
-      `;
+    _screenshotURL(name) {
+      return `chrome://browser/content/hilal/screenshots/${name}.png`;
     }
 
-    _layoutChoiceHTML(mode) {
-      const compact = mode === "compact";
-      const active = this._compactSelected === compact;
-      const label = compact ? "Compact" : "Standard";
-      const desc = compact
-        ? "More page, less chrome."
-        : "Full toolbar, familiar spacing.";
+    _screenshotCardHTML(imageName, label, desc, active, attrs) {
       return `
-        <button type="button" class="hw-layout-choice${active ? " hw-choice-active" : ""}" data-layout-mode="${mode}" aria-pressed="${active}">
-          ${this._browserMockHTML(mode)}
+        <button type="button" class="hw-screenshot-card${active ? " hw-choice-active" : ""}" ${attrs} aria-pressed="${active}">
+          <span class="hw-screenshot-frame">
+            <img class="hw-screenshot-img" src="${this._screenshotURL(imageName)}" alt="${this._escapeHTML(label)}" />
+          </span>
           <span class="hw-layout-choice-copy">
-            <span class="hw-choice-title" data-l10n-id="hilal-welcome-layout-${mode}-label">${label}</span>
-            <span class="hw-choice-desc" data-l10n-id="hilal-welcome-layout-${mode}-desc">${desc}</span>
+            <span class="hw-choice-title">${this._escapeHTML(label)}</span>
+            <span class="hw-choice-desc">${this._escapeHTML(desc)}</span>
           </span>
         </button>
       `;
     }
 
-    _browserMockHTML(mode) {
-      const compact = mode === "compact";
-      const orientationClass = this._verticalTabsSelected
-        ? "hw-preview-vertical"
-        : "hw-preview-horizontal";
-      const workspaceClass = this._workspacesEnabledSelected
-        ? "hw-preview-workspaces"
-        : "hw-preview-no-workspaces";
-      const toolbarClass = this._compactHideToolboxSelected
-        ? "hw-preview-hide-toolbar"
-        : "hw-preview-show-toolbar";
+    _layoutModeHTML() {
       return `
-        <span class="hw-browser-preview ${compact ? "hw-preview-compact" : "hw-preview-standard"} ${orientationClass} ${workspaceClass} ${toolbarClass}" aria-hidden="true">
-          <span class="hw-preview-toolbar">
-            <span class="hw-preview-tabbar">
-              <span class="hw-preview-window-controls">
-                <span></span><span></span><span></span>
-              </span>
-              <span class="hw-preview-horizontal-tabs">
-                <span class="hw-preview-tab hw-preview-tab-active">
-                  <span class="hw-preview-favicon"></span>
-                  <span class="hw-preview-tab-label"></span>
-                </span>
-                <span class="hw-preview-tab">
-                  <span class="hw-preview-favicon"></span>
-                  <span class="hw-preview-tab-label"></span>
-                </span>
-                <span class="hw-preview-tab">
-                  <span class="hw-preview-favicon"></span>
-                  <span class="hw-preview-tab-label"></span>
-                </span>
-                <span class="hw-preview-new-tab"></span>
-              </span>
-            </span>
-            <span class="hw-preview-navbar">
-              <span class="hw-preview-nav-button"></span>
-              <span class="hw-preview-nav-button"></span>
-              <span class="hw-preview-urlbar">
-                <span class="hw-preview-lock"></span>
-                <span class="hw-preview-url-text"></span>
-              </span>
-              <span class="hw-preview-toolbar-button"></span>
-              <span class="hw-preview-toolbar-button"></span>
-            </span>
-          </span>
-          <span class="hw-preview-hover-top"></span>
-          <span class="hw-preview-shell">
-            <span class="hw-preview-sidebar">
-              <span class="hw-preview-workspace-rail">
-                <span class="hw-preview-workspace hw-preview-workspace-active"></span>
-                <span class="hw-preview-workspace"></span>
-                <span class="hw-preview-workspace"></span>
-                <span class="hw-preview-workspace-add"></span>
-              </span>
-              <span class="hw-preview-tab-panel">
-                <span class="hw-preview-panel-header">
-                  <span class="hw-preview-panel-icon"></span>
-                  <span class="hw-preview-panel-title"></span>
-                  <span class="hw-preview-panel-action"></span>
-                </span>
-                <span class="hw-preview-pinned-grid">
-                  <span></span><span></span><span></span>
-                </span>
-                <span class="hw-preview-vertical-tabs">
-                  <span class="hw-preview-vertical-tab hw-preview-tab-active">
-                    <span class="hw-preview-favicon"></span>
-                    <span class="hw-preview-tab-label"></span>
-                  </span>
-                  <span class="hw-preview-vertical-tab">
-                    <span class="hw-preview-favicon"></span>
-                    <span class="hw-preview-tab-label"></span>
-                  </span>
-                  <span class="hw-preview-vertical-tab">
-                    <span class="hw-preview-favicon"></span>
-                    <span class="hw-preview-tab-label"></span>
-                  </span>
-                </span>
-              </span>
-            </span>
-            <span class="hw-preview-content">
-              <span class="hw-preview-page-card">
-                <span class="hw-preview-page-logo">${this._logoHTML()}</span>
-                <span class="hw-preview-page-search"></span>
-                <span class="hw-preview-page-tiles">
-                  <span></span><span></span><span></span>
-                </span>
-              </span>
-            </span>
-          </span>
-          <span class="hw-preview-hover-edge"></span>
-        </span>
+        <div class="hw-layout-grid">
+          ${this._screenshotCardHTML(
+            "welcome-standard",
+            "Standard",
+            "Full toolbar, familiar spacing.",
+            !this._compactSelected,
+            'data-layout-mode="standard"'
+          )}
+          ${this._screenshotCardHTML(
+            "welcome-compact",
+            "Compact",
+            "More page, less chrome.",
+            this._compactSelected,
+            'data-layout-mode="compact"'
+          )}
+        </div>
+      `;
+    }
+
+    _tabOrientationHTML() {
+      const prefix = this._compactSelected ? "welcome-compact" : "welcome-standard";
+      return `
+        <div class="hw-layout-grid">
+          ${this._screenshotCardHTML(
+            `${prefix}-vertical`,
+            "Vertical",
+            "Tabs sit in a sidebar panel.",
+            this._verticalTabsSelected,
+            'data-tab-layout="vertical"'
+          )}
+          ${this._screenshotCardHTML(
+            `${prefix}-horizontal`,
+            "Horizontal",
+            "Tabs line up across the top.",
+            !this._verticalTabsSelected,
+            'data-tab-layout="horizontal"'
+          )}
+        </div>
+      `;
+    }
+
+    _workspacesToggleHTML() {
+      return `
+        <div class="hw-layout-grid">
+          ${this._screenshotCardHTML(
+            "welcome-workspaces-on",
+            "Spaces on",
+            "Group tabs into separate workspaces.",
+            this._workspacesEnabledSelected,
+            'data-workspaces="on"'
+          )}
+          ${this._screenshotCardHTML(
+            "welcome-workspaces-off",
+            "Spaces off",
+            "One clean browser window.",
+            !this._workspacesEnabledSelected,
+            'data-workspaces="off"'
+          )}
+        </div>
+      `;
+    }
+
+    _hideToolbarHTML() {
+      return `
+        <div class="hw-layout-grid">
+          ${this._screenshotCardHTML(
+            "welcome-toolbar-hidden",
+            "Auto-hide",
+            "Reveal the toolbar by hovering the top edge.",
+            this._compactHideToolboxSelected,
+            'data-toolbar="hidden"'
+          )}
+          ${this._screenshotCardHTML(
+            "welcome-toolbar-visible",
+            "Always visible",
+            "The toolbar stays fixed at the top.",
+            !this._compactHideToolboxSelected,
+            'data-toolbar="visible"'
+          )}
+        </div>
       `;
     }
 
@@ -944,39 +938,33 @@
         });
       });
 
-      this._overlay.querySelectorAll(".hw-layout-choice").forEach(choice => {
+      this._overlay.querySelectorAll(".hw-screenshot-card[data-layout-mode]").forEach(choice => {
         choice.addEventListener("click", () => {
           this._compactSelected = choice.dataset.layoutMode === "compact";
           this._renderStage();
         });
       });
 
-      this._overlay.querySelectorAll(".hw-segment-btn").forEach(choice => {
+      this._overlay.querySelectorAll(".hw-screenshot-card[data-tab-layout]").forEach(choice => {
         choice.addEventListener("click", () => {
           this._verticalTabsSelected = choice.dataset.tabLayout === "vertical";
           this._renderStage();
         });
       });
 
-      const workspacesEnabledToggle = document.getElementById(
-        "hw-workspaces-enabled-toggle"
-      );
-      if (workspacesEnabledToggle) {
-        workspacesEnabledToggle.addEventListener("change", event => {
-          this._workspacesEnabledSelected = event.target.checked;
+      this._overlay.querySelectorAll(".hw-screenshot-card[data-workspaces]").forEach(choice => {
+        choice.addEventListener("click", () => {
+          this._workspacesEnabledSelected = choice.dataset.workspaces === "on";
           this._renderStage();
         });
-      }
+      });
 
-      const compactHideToolbarToggle = document.getElementById(
-        "hw-compact-hide-toolbar-toggle"
-      );
-      if (compactHideToolbarToggle) {
-        compactHideToolbarToggle.addEventListener("change", event => {
-          this._compactHideToolboxSelected = event.target.checked;
+      this._overlay.querySelectorAll(".hw-screenshot-card[data-toolbar]").forEach(choice => {
+        choice.addEventListener("click", () => {
+          this._compactHideToolboxSelected = choice.dataset.toolbar === "hidden";
           this._renderStage();
         });
-      }
+      });
 
       this._overlay.querySelectorAll(".hw-workspace-choice").forEach(choice => {
         choice.addEventListener("click", () => {
@@ -987,9 +975,16 @@
       });
     }
 
+    _shouldSkipStage(stage) {
+      return stage === STAGE_TOOLBAR && !this._compactSelected;
+    }
+
     _next() {
       if (this._stage < STAGES.length - 1) {
         this._stage++;
+        if (this._shouldSkipStage(this._stage)) {
+          this._stage++;
+        }
         this._renderStage();
       }
     }
@@ -997,6 +992,9 @@
     _prev() {
       if (this._stage > 0) {
         this._stage--;
+        if (this._shouldSkipStage(this._stage)) {
+          this._stage--;
+        }
         this._renderStage();
       }
     }
@@ -1134,8 +1132,21 @@
     }
 
     _engineIconHTML(engine) {
-      if (engine.iconURL) {
-        return `<img class="hw-engine-image" src="${this._escapeHTML(engine.iconURL)}" alt="" />`;
+      const name = engine.name.toLowerCase();
+      let iconURL = engine.iconURL;
+
+      if (name.includes("duckduckgo")) {
+        iconURL = "chrome://activity-stream/content/data/content/tippytop/images/duckduckgo-com@2x.svg";
+      } else if (name.includes("google")) {
+        iconURL = "chrome://activity-stream/content/data/content/tippytop/images/google-com@2x.png";
+      } else if (name.includes("bing")) {
+        iconURL = "chrome://activity-stream/content/data/content/tippytop/images/bing-com@2x.svg";
+      } else if (name.includes("yandex")) {
+        iconURL = "chrome://activity-stream/content/data/content/tippytop/images/yandex-com@2x.png";
+      }
+
+      if (iconURL) {
+        return `<img class="hw-engine-image" src="${this._escapeHTML(iconURL)}" alt="" />`;
       }
       return `<span class="hw-icon hw-icon-search"></span>`;
     }
