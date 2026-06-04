@@ -39,7 +39,7 @@ set -- "${remaining[@]+"${remaining[@]}"}"
 
 # Copy macOS mozconfig
 if [ -f "$(dirname "$0")/../mozconfigs/macos" ]; then
-  log "Copying mozconfigs/macos -> firefox/mozconfig"
+  log "Copying mozconfigs/macos -> engine/mozconfig"
   cp "$(dirname "$0")/../mozconfigs/macos" "$HILAL_FIREFOX_SRC/mozconfig"
 fi
 
@@ -77,4 +77,3 @@ elif [ "$package_after" = 1 ]; then
 fi
 
 log "Done."
-

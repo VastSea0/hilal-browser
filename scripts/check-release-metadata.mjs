@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
@@ -27,6 +28,8 @@ const metadata = {
   distUpdateManifest: readJsonIfExists(paths.updateManifest),
 };
 
+checkTomlParses(paths.manifest);
+checkTomlParses(paths.cargo);
 requireValue("manifest.toml [browser].version", metadata.manifestVersion);
 requireValue("hil/Cargo.toml [package].version", metadata.cargoVersion);
 requireValue("browser display version patch", metadata.displayVersion);
@@ -35,7 +38,9 @@ requireValue("Flatpak metainfo latest release", metadata.flatpakRelease?.version
 
 checkManifestPaths();
 checkHilCliVersionSource();
+checkHilCliVersionOutput();
 checkUpdateGeneratorSourcePath();
+checkStaleFirefoxFallbacks();
 checkFlatpakScreenshotTags();
 
 if (metadata.displayVersion && metadata.flatpakRelease?.version) {
@@ -71,7 +76,7 @@ if (metadata.distUpdateManifest) {
   );
   if (!isFirefoxAppVersion(metadata.distUpdateManifest.appVersion)) {
     warnings.push(
-      `dist update manifest appVersion should be a Firefox/Gecko version, got ${metadata.distUpdateManifest.appVersion}.`
+      `dist update manifest appVersion should be a modern Firefox/Gecko version, got ${metadata.distUpdateManifest.appVersion}.`
     );
   }
 }
@@ -120,6 +125,9 @@ function parseArgs(args) {
       parsed.checkDist = true;
     } else if (arg === "--require-update-manifest") {
       parsed.requireUpdateManifest = true;
+    } else if (arg === "--hil-bin") {
+      parsed.hilBin = requireArg(arg, next);
+      i += 1;
     } else {
       console.error(`Unknown argument: ${arg}`);
       usage(1);
@@ -140,6 +148,7 @@ function requireArg(arg, value) {
 function usage(code) {
   console.error(`Usage:
   scripts/check-release-metadata.mjs
+  scripts/check-release-metadata.mjs --hil-bin ./bin/hil
   scripts/check-release-metadata.mjs --release-version 0.3.0 --release-tag v0.3.0 --check-dist --require-update-manifest
 
 Default mode validates fast repo guardrails. Release mode additionally requires
@@ -154,6 +163,28 @@ function abs(file) {
 
 function readText(file) {
   return readFileSync(abs(file), "utf8");
+}
+
+function checkTomlParses(file) {
+  if (!existsSync(abs(file))) {
+    return;
+  }
+
+  const result = spawnSync(
+    "python3",
+    [
+      "-c",
+      "import sys, tomllib; tomllib.load(open(sys.argv[1], 'rb'))",
+      abs(file),
+    ],
+    { encoding: "utf8" }
+  );
+
+  if (result.error) {
+    errors.push(`Cannot parse ${file}: python3 with tomllib is required.`);
+  } else if (result.status !== 0) {
+    errors.push(`${file} is not valid TOML: ${result.stderr.trim()}`);
+  }
 }
 
 function readTomlSectionValue(file, section, key) {
@@ -267,6 +298,37 @@ function checkHilCliVersionSource() {
   }
 }
 
+function checkHilCliVersionOutput() {
+  if (!options.hilBin) {
+    return;
+  }
+
+  const hilBin = resolve(repoRoot, options.hilBin);
+  if (!existsSync(hilBin)) {
+    errors.push(`hil binary not found for --hil-bin: ${options.hilBin}`);
+    return;
+  }
+
+  const result = spawnSync(hilBin, ["--version"], { encoding: "utf8" });
+  if (result.error) {
+    errors.push(`Failed to run ${options.hilBin} --version: ${result.error.message}`);
+    return;
+  }
+  if (result.status !== 0) {
+    errors.push(
+      `${options.hilBin} --version failed: ${(result.stderr || result.stdout).trim()}`
+    );
+    return;
+  }
+
+  const version = result.stdout.trim().match(/\b(\d+\.\d+\.\d+(?:-[^\s]+)?)$/)?.[1];
+  if (!version) {
+    errors.push(`${options.hilBin} --version did not print a parseable version.`);
+    return;
+  }
+  requireEqual("hil --version", version, metadata.cargoVersion);
+}
+
 function checkUpdateGeneratorSourcePath() {
   if (!existsSync(abs(paths.updateGenerator))) {
     return;
@@ -277,6 +339,43 @@ function checkUpdateGeneratorSourcePath() {
     errors.push(
       "update manifest generator still reads firefox/browser/config/version.txt; use HILAL_FIREFOX_SRC or engine/."
     );
+  }
+}
+
+function checkStaleFirefoxFallbacks() {
+  const tracked = spawnSync("git", ["ls-files", "scripts", "hil"], {
+    cwd: repoRoot,
+    encoding: "utf8",
+  });
+  if (tracked.status !== 0) {
+    warnings.push("Could not scan tracked scripts for stale firefox/ fallbacks.");
+    return;
+  }
+
+  const patterns = [
+    [/repo_root\.join\("firefox"\)/, "legacy firefox/ setup fallback"],
+    [/\bfirefox\/mozconfig\b/, "legacy firefox/mozconfig path"],
+    [/\bfirefox\/<objdir>\b/, "legacy firefox/<objdir> path"],
+    [/\bfirefox\/browser\/locales\/tr\b/, "legacy firefox/browser locale path"],
+  ];
+
+  for (const file of tracked.stdout.split(/\r?\n/).filter(Boolean)) {
+    if (file === paths.updateGenerator || file === "scripts/check-release-metadata.mjs") {
+      continue;
+    }
+    const text = readText(file);
+    const lines = text.split(/\r?\n/);
+    for (let index = 0; index < lines.length; index += 1) {
+      const line = lines[index];
+      if (line.includes("mozilla-firefox/firefox") || line.includes("firefox-ui-fix")) {
+        continue;
+      }
+      for (const [pattern, label] of patterns) {
+        if (pattern.test(line)) {
+          errors.push(`${file}:${index + 1} contains ${label}; use engine/ or HILAL_FIREFOX_SRC.`);
+        }
+      }
+    }
   }
 }
 
@@ -326,7 +425,7 @@ function checkStrictRelease(version, releaseTag) {
     );
     if (!isFirefoxAppVersion(metadata.distUpdateManifest.appVersion)) {
       errors.push(
-        `dist update manifest appVersion must be a Firefox/Gecko version, got ${metadata.distUpdateManifest.appVersion}.`
+        `dist update manifest appVersion must be a modern Firefox/Gecko version, got ${metadata.distUpdateManifest.appVersion}.`
       );
     }
   } else if (options.requireUpdateManifest) {
@@ -370,7 +469,9 @@ function isPrerelease(version) {
 }
 
 function isFirefoxAppVersion(version) {
-  return /^\d+(?:\.\d+)*(?:(?:a|b)\d+|esr)?$/i.test(String(version || ""));
+  const value = String(version || "");
+  const major = Number(value.match(/^(\d+)/)?.[1] || 0);
+  return major >= 100 && /^\d+(?:\.\d+)*(?:(?:a|b)\d+|esr)?$/i.test(value);
 }
 
 function printSummary() {

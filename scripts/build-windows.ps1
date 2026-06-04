@@ -212,7 +212,7 @@ $mozconfigDst = Join-Path $firefoxSrc "mozconfig"
 
 if (Test-Path $mozconfigSrc) {
     Copy-Item -Path $mozconfigSrc -Destination $mozconfigDst -Force
-    Write-Step "Copied mozconfigs/windows -> firefox/mozconfig"
+    Write-Step "Copied mozconfigs/windows -> engine/mozconfig"
 } else {
     Write-Warn "mozconfigs/windows not found; using default Firefox build config."
 }

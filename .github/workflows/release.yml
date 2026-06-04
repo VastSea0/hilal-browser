@@ -154,10 +154,14 @@ jobs:
       - name: Create DMG
         run: |
           APP_BUNDLE="$(find engine/obj-*/dist -name '*.app' -type d -print -quit)"
+          echo "HILAL_APP_BUNDLE=$APP_BUNDLE" >> "$GITHUB_ENV"
           DMG_NAME="Hilal-Browser-${{ needs.create-release.outputs.tag }}-macOS.dmg"
           mkdir -p dist
           hdiutil create -volname "Hilal Browser" -srcfolder "$APP_BUNDLE" -ov -format UDZO "dist/$DMG_NAME"
           echo "dmg_path=dist/$DMG_NAME" >> "$GITHUB_ENV"
+
+      - name: Smoke packaged browser
+        run: scripts/smoke-browser.sh
 
       - name: Create MAR update
         if: ${{ env.HAS_SIGN_DB != '' }}

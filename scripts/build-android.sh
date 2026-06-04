@@ -64,7 +64,7 @@ fi
 # 4. Copy selected Android mozconfig
 MOZCONFIG_SRC="$HILAL_REPO_ROOT/mozconfigs/android-$ARCH"
 if [ -f "$MOZCONFIG_SRC" ]; then
-  log "Copying mozconfigs/android-$ARCH -> firefox/mozconfig"
+  log "Copying mozconfigs/android-$ARCH -> engine/mozconfig"
   cp "$MOZCONFIG_SRC" "$HILAL_FIREFOX_SRC/mozconfig"
 else
   die "Could not find Android configuration file: $MOZCONFIG_SRC"

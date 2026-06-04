@@ -36,7 +36,7 @@ log "Initializing build environment..."
 
 # Copy Linux mozconfig
 if [ -f "$(dirname "$0")/../mozconfigs/linux" ]; then
-  log "Copying mozconfigs/linux -> firefox/mozconfig"
+  log "Copying mozconfigs/linux -> engine/mozconfig"
   cp "$(dirname "$0")/../mozconfigs/linux" "$HILAL_FIREFOX_SRC/mozconfig"
 fi
 

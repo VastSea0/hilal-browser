@@ -81,7 +81,7 @@ if (!options.appVersion) {
 options.appVersion = stripTagPrefix(options.appVersion);
 if (!isFirefoxAppVersion(options.appVersion)) {
   console.error(
-    `Invalid --app-version '${options.appVersion}'. Expected a Firefox version such as 153.0a1, 152.0, or 140.0.1esr.`
+    `Invalid --app-version '${options.appVersion}'. Expected a modern Firefox version such as 153.0a1, 152.0, or 140.0.1esr.`
   );
   process.exit(1);
 }
@@ -183,7 +183,8 @@ function readFirefoxVersion() {
 }
 
 function isFirefoxAppVersion(version) {
-  return /^\d+(?:\.\d+)*(?:(?:a|b)\d+|esr)?$/i.test(version);
+  const major = Number(String(version || "").match(/^(\d+)/)?.[1] || 0);
+  return major >= 100 && /^\d+(?:\.\d+)*(?:(?:a|b)\d+|esr)?$/i.test(version);
 }
 
 function sha512(file) {

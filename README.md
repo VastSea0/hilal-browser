@@ -116,6 +116,7 @@ The application order is strictly governed by `manifest.toml`. The `[patches]` b
 - `docs/LOCALIZATION.md` — bundled langpacks and Hilal locale overlays
 - `docs/UPSTREAM-SYNC.md` — how to roll forward to a newer Firefox
 - `docs/UPDATES.md` — application update channel, MAR creation, and release signing checklist
+- `docs/STABLE-READINESS.md` — repo guardrails, browser smoke, and human release checks
 
 ---
 

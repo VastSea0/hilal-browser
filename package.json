@@ -3,7 +3,9 @@
   "private": true,
   "description": "Hilal Browser overlay. See docs/ for build instructions.",
   "scripts": {
+    "check:repo-guardrails": "node scripts/check-release-metadata.mjs",
     "check:release-metadata": "node scripts/check-release-metadata.mjs",
+    "smoke:browser": "bash scripts/smoke-browser.sh",
     "setup:deps": "powershell -ExecutionPolicy Bypass -File scripts/install-deps-windows.ps1",
     "build": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1",
     "build:faster": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1 -Faster",

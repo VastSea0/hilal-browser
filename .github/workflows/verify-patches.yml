@@ -15,16 +15,13 @@ env:
   HILAL_FIREFOX_UPSTREAM: https://github.com/mozilla-firefox/firefox.git
 
 jobs:
-  verify-patches:
+  repo-guardrails:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 20
 
     steps:
       - name: Checkout Hilal Browser
         uses: actions/checkout@v4
-
-      - name: Check release metadata
-        run: node scripts/check-release-metadata.mjs
 
       - name: Cache cargo
         uses: actions/cache@v4
@@ -46,6 +43,34 @@ jobs:
           mkdir -p bin
           cp hil/target/release/hil bin/hil
           strip bin/hil
+
+      - name: Check repo guardrails
+        run: node scripts/check-release-metadata.mjs --hil-bin ./bin/hil
+
+      - name: Upload hil tool
+        uses: actions/upload-artifact@v4
+        with:
+          name: hil-cli
+          path: bin/hil
+          if-no-files-found: error
+
+  verify-patches:
+    needs: repo-guardrails
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout Hilal Browser
+        uses: actions/checkout@v4
+
+      - name: Download hil tool
+        uses: actions/download-artifact@v4
+        with:
+          name: hil-cli
+          path: bin
+
+      - name: Prepare hil tool
+        run: chmod +x bin/hil
 
       - name: Cache Firefox source checkout
         uses: actions/cache@v4

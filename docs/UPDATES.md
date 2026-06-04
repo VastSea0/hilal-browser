@@ -11,6 +11,9 @@ client-side plumbing is intentionally small:
 - `scripts/generate-update-manifest.mjs` records MAR URL, sha512, size,
   channel, build ID, and version metadata for GitHub Releases.
 
+Release gating for update metadata, packaged browser smoke, and manual checks is
+tracked separately in `docs/STABLE-READINESS.md`.
+
 Android keeps the updater disabled because it is distributed through platform
 package mechanisms rather than Firefox's desktop MAR updater.
 

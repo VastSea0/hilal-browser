@@ -64,7 +64,7 @@ def merge_locales(repo_root, firefox_src):
         return False
 
     if not target_dir.exists():
-        print("[hilal] Target locales directory does not exist yet: firefox/browser/locales/tr")
+        print(f"[hilal] Target locales directory does not exist yet: {target_dir}")
         print("[hilal] Run scripts/setup-locales.sh first to initialize the locale files.")
         return False
 

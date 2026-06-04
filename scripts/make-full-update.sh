@@ -21,7 +21,7 @@ Environment:
 
 Notes:
   Run after a successful package build. This creates a complete MAR from the
-  packaged application in firefox/<objdir>/dist/firefox.
+  packaged application in HILAL_FIREFOX_SRC/<objdir>/dist/firefox.
   Production update MARs must be signed with the private key matching the
   certificate embedded in the shipped updater.
 EOF
