@@ -27,6 +27,34 @@ They validate:
   Firefox app version and rejects Hilal display versions as app versions.
 - Active scripts do not fall back to a legacy `firefox/` checkout.
 
+## 2. Release Decision
+
+Every release run derives one machine-readable release environment from the tag:
+
+```bash
+scripts/release-env.mjs --tag v0.3.0 --json
+```
+
+After `engine/` exists, include the Firefox app version:
+
+```bash
+scripts/release-env.mjs \
+  --tag v0.3.0 \
+  --firefox-src engine \
+  --require-firefox-version \
+  --json
+```
+
+This produces the Hilal version, display version, release tag, prerelease flag,
+channel, Firefox/Gecko app version, and standard artifact filenames. For
+`v0.3.0` on macOS arm64 the expected files are:
+
+- `Hilal-Browser-v0.3.0-macOS.dmg`
+- `hilal-v0.3.0-macos-arm64.complete.mar`
+- `hilal-update-manifest.json`
+- `SHA256SUMS`
+- `hilal-browser-sbom.spdx.json`
+
 For a release candidate, run the strict form:
 
 ```bash
@@ -34,10 +62,21 @@ node scripts/check-release-metadata.mjs \
   --release-version 0.3.0 \
   --release-tag v0.3.0 \
   --check-dist \
-  --require-update-manifest
+  --require-update-manifest \
+  --require-platform macos-arm64
 ```
 
-## 2. Browser Smoke
+Before publishing a GitHub Release draft, validate the uploaded assets:
+
+```bash
+gh release view v0.3.0 --json tagName,isDraft,isPrerelease,assets > release.json
+scripts/check-release-assets.mjs \
+  --release-json release.json \
+  --tag v0.3.0 \
+  --platform macos-arm64
+```
+
+## 3. Browser Smoke
 
 Browser smoke tests run only after patches apply and a build/package exists:
 
@@ -53,7 +92,7 @@ with a disposable profile.
 The release workflow runs this smoke gate after packaging the macOS app and
 before publishing release assets.
 
-## 3. Human Smoke
+## 4. Human Smoke
 
 Manual testing should stay small and release-focused:
 

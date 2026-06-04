@@ -85,6 +85,10 @@ async function resolveUpdateEntry(
   request: UpdateRequest
 ): Promise<UpdateManifestEntry | null> {
   const platform = detectPlatform(request.buildTarget);
+  if (platform === "unknown") {
+    return null;
+  }
+
   const envEntry = resolveEnvEntry(platform, release);
   if (envEntry) {
     return envEntry;
@@ -96,7 +100,7 @@ async function resolveUpdateEntry(
   }
 
   const manifest = await fetchJsonAsset<UpdateManifest>(manifestAsset);
-  if (manifest.channel && manifest.channel !== request.channel) {
+  if (!isValidManifest(manifest, release, request.channel)) {
     return null;
   }
 
@@ -141,6 +145,31 @@ async function resolveUpdateEntry(
       release.html_url,
     actions: matching.actions || manifest.actions || "showURL",
   };
+}
+
+function isValidManifest(
+  manifest: UpdateManifest,
+  release: ReleaseSummary,
+  channel: string
+): boolean {
+  if (manifest.channel !== channel) {
+    return false;
+  }
+  if (stripTagPrefix(manifest.version || "") !== stripTagPrefix(release.tag_name)) {
+    return false;
+  }
+  if (!manifest.displayVersion) {
+    return false;
+  }
+  if (!manifest.buildID || !/^\d{14}$/.test(manifest.buildID)) {
+    return false;
+  }
+  const appVersion = firstFirefoxVersion(
+    manifest.firefoxVersion,
+    manifest.appVersion,
+    manifest.platformVersion
+  );
+  return Boolean(appVersion);
 }
 
 function manifestToEntries(manifest: UpdateManifest): UpdateManifestEntry[] {
@@ -260,10 +289,13 @@ function normalizePlatformName(platform: string): string {
 }
 
 export function isValidEntry(entry: UpdateManifestEntry): boolean {
+  if (!entry.platform) {
+    return false;
+  }
   if (!entry.url || !entry.url.startsWith("https://")) {
     return false;
   }
-  if (!entry.hashValue || !/^[a-f0-9]{64,128}$/i.test(entry.hashValue)) {
+  if (!entry.hashValue || !/^[a-f0-9]{128}$/i.test(entry.hashValue)) {
     return false;
   }
   if ((entry.hashFunction || "sha512").toLowerCase() !== "sha512") {
@@ -276,6 +308,9 @@ export function isValidEntry(entry: UpdateManifestEntry): boolean {
     entry.platformVersion &&
     !isFirefoxAppVersion(entry.platformVersion)
   ) {
+    return false;
+  }
+  if (!entry.buildID || !/^\d{14}$/.test(entry.buildID)) {
     return false;
   }
   return Number.isFinite(entry.size) && entry.size > 0;

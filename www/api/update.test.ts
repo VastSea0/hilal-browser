@@ -4,6 +4,7 @@ import {
   buildUpdateXml,
   compareFirefoxVersions,
   isFirefoxAppVersion,
+  isValidEntry,
   shouldOfferUpdate,
   type UpdateRequest,
 } from "./update.ts";
@@ -76,6 +77,15 @@ test("Hilal release strings are rejected as Firefox app versions", () => {
   assert.equal(isFirefoxAppVersion("0.2.0-alpha.4"), false);
   assert.equal(isFirefoxAppVersion("153.0a1"), true);
   assert.equal(isFirefoxAppVersion("140.0.1esr"), true);
+});
+
+test("update entries require complete safe metadata", () => {
+  assert.equal(isValidEntry(entry), true);
+  assert.equal(isValidEntry({ ...entry, buildID: "" }), false);
+  assert.equal(isValidEntry({ ...entry, platform: "" }), false);
+  assert.equal(isValidEntry({ ...entry, url: "http://example.com/hilal.mar" }), false);
+  assert.equal(isValidEntry({ ...entry, hashValue: "a".repeat(64) }), false);
+  assert.equal(isValidEntry({ ...entry, appVersion: "0.2.0-alpha.4" }), false);
 });
 
 test("update XML keeps displayVersion and appVersion separate", () => {

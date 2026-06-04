@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.vars.outputs.tag }}
+      version: ${{ steps.release_meta.outputs.version }}
+      prerelease: ${{ steps.release_meta.outputs.prerelease }}
       has_secrets: ${{ steps.check_secrets.outputs.has_secrets }}
 
     steps:
@@ -38,13 +40,15 @@ jobs:
         with:
           ref: ${{ steps.vars.outputs.tag }}
 
+      - name: Derive release metadata
+        id: release_meta
+        run: node scripts/release-env.mjs --tag "${{ steps.vars.outputs.tag }}" --github-output "$GITHUB_OUTPUT"
+
       - name: Check release metadata
         run: |
-          TAG="${{ steps.vars.outputs.tag }}"
-          VERSION="${TAG#v}"
           node scripts/check-release-metadata.mjs \
-            --release-version "$VERSION" \
-            --release-tag "$TAG"
+            --release-version "${{ steps.release_meta.outputs.version }}" \
+            --release-tag "${{ steps.release_meta.outputs.tag }}"
 
       - name: Check macOS signing secrets
         id: check_secrets
@@ -65,7 +69,7 @@ jobs:
           name: "Hilal Browser ${{ steps.vars.outputs.tag }}"
           generate_release_notes: true
           draft: true
-          prerelease: ${{ contains(steps.vars.outputs.tag, 'alpha') || contains(steps.vars.outputs.tag, 'beta') || contains(steps.vars.outputs.tag, 'rc') }}
+          prerelease: ${{ steps.release_meta.outputs.prerelease == 'true' }}
 
   sign-macos:
     needs: create-release
@@ -122,6 +126,15 @@ jobs:
       - name: Apply patches
         run: ./bin/hil apply --force
 
+      - name: Derive packaged release metadata
+        id: release_meta
+        run: |
+          node scripts/release-env.mjs \
+            --tag "${{ needs.create-release.outputs.tag }}" \
+            --firefox-src engine \
+            --require-firefox-version \
+            --github-output "$GITHUB_OUTPUT"
+
       - name: Import signing certificate
         if: ${{ env.HAS_CERT != '' }}
         env:
@@ -155,7 +168,7 @@ jobs:
         run: |
           APP_BUNDLE="$(find engine/obj-*/dist -name '*.app' -type d -print -quit)"
           echo "HILAL_APP_BUNDLE=$APP_BUNDLE" >> "$GITHUB_ENV"
-          DMG_NAME="Hilal-Browser-${{ needs.create-release.outputs.tag }}-macOS.dmg"
+          DMG_NAME="${{ steps.release_meta.outputs.macos_arm64_dmg }}"
           mkdir -p dist
           hdiutil create -volname "Hilal Browser" -srcfolder "$APP_BUNDLE" -ov -format UDZO "dist/$DMG_NAME"
           echo "dmg_path=dist/$DMG_NAME" >> "$GITHUB_ENV"
@@ -164,39 +177,42 @@ jobs:
         run: scripts/smoke-browser.sh
 
       - name: Create MAR update
-        if: ${{ env.HAS_SIGN_DB != '' }}
         env:
           HILAL_SIGNING_DB_BASE64: ${{ secrets.HILAL_SIGNING_DB_BASE64 }}
           HILAL_SIGNMAR_NSS_DIR: /tmp/signing-db
           HILAL_SIGNMAR_CERT: mar_sig
         run: |
+          if [ -z "$HILAL_SIGNING_DB_BASE64" ]; then
+            echo "HILAL_SIGNING_DB_BASE64 is required for production release MAR signing." >&2
+            exit 1
+          fi
           mkdir -p /tmp/signing-db
           echo "$HILAL_SIGNING_DB_BASE64" | base64 -d > signing-db.tar.gz
           tar -xzf signing-db.tar.gz -C /tmp/signing-db
 
-          scripts/make-full-update.sh "${{ needs.create-release.outputs.tag }}" dist/hilal-macos-arm64.complete.mar
+          scripts/make-full-update.sh "${{ needs.create-release.outputs.tag }}" "dist/${{ steps.release_meta.outputs.macos_arm64_mar }}"
 
       - name: Generate update manifest
         run: |
           TAG="${{ needs.create-release.outputs.tag }}"
-          APP_VER=$(cat engine/browser/config/version.txt)
 
           node scripts/generate-update-manifest.mjs \
             --version "$TAG" \
-            --app-version "$APP_VER" \
-            --mar macos-arm64=dist/hilal-macos-arm64.complete.mar \
-            --mar-url macos-arm64="https://github.com/vastsea0/hilal-browser/releases/download/$TAG/hilal-macos-arm64.complete.mar" \
+            --display-version "${{ steps.release_meta.outputs.display_version }}" \
+            --app-version "${{ steps.release_meta.outputs.firefox_app_version }}" \
+            --channel "${{ steps.release_meta.outputs.channel }}" \
+            --mar macos-arm64="dist/${{ steps.release_meta.outputs.macos_arm64_mar }}" \
+            --mar-url macos-arm64="https://github.com/VastSea0/hilal-browser/releases/download/$TAG/${{ steps.release_meta.outputs.macos_arm64_mar }}" \
             --output dist/hilal-update-manifest.json
 
       - name: Check packaged release metadata
         run: |
-          TAG="${{ needs.create-release.outputs.tag }}"
-          VERSION="${TAG#v}"
           node scripts/check-release-metadata.mjs \
-            --release-version "$VERSION" \
-            --release-tag "$TAG" \
+            --release-version "${{ steps.release_meta.outputs.version }}" \
+            --release-tag "${{ steps.release_meta.outputs.tag }}" \
             --check-dist \
-            --require-update-manifest
+            --require-update-manifest \
+            --require-platform macos-arm64
 
       - name: Generate Checksums
         run: |
@@ -226,6 +242,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout release tooling
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.create-release.outputs.tag }}
+
+      - name: Check release assets before publishing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.create-release.outputs.tag }}
+        run: |
+          gh release view "$TAG" --json tagName,isDraft,isPrerelease,assets > release.json
+          node scripts/check-release-assets.mjs \
+            --release-json release.json \
+            --tag "$TAG" \
+            --platform macos-arm64
+
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

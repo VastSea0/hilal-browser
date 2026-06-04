@@ -5,6 +5,8 @@
   "scripts": {
     "check:repo-guardrails": "node scripts/check-release-metadata.mjs",
     "check:release-metadata": "node scripts/check-release-metadata.mjs",
+    "release:env": "node scripts/release-env.mjs",
+    "release:check-assets": "node scripts/check-release-assets.mjs",
     "smoke:browser": "bash scripts/smoke-browser.sh",
     "setup:deps": "powershell -ExecutionPolicy Bypass -File scripts/install-deps-windows.ps1",
     "build": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1",

@@ -97,19 +97,20 @@ Upload the complete MAR files to the GitHub Release, then generate and upload a
 manifest asset named `hilal-update-manifest.json`:
 
 ```bash
-scripts/generate-update-manifest.mjs \
-  --version v0.2.0-alpha.4 \
-  --app-version "$(cat engine/browser/config/version.txt)" \
-  --build-id 20260525000000 \
-  --mar macos-arm64=dist/hilal-macos-arm64.complete.mar \
-  --mar-url macos-arm64=https://github.com/VastSea0/hilal-browser/releases/download/v0.2.0-alpha.4/hilal-macos-arm64.complete.mar \
-  --mar linux-x86_64=dist/hilal-linux-x86_64.complete.mar \
-  --mar-url linux-x86_64=https://github.com/VastSea0/hilal-browser/releases/download/v0.2.0-alpha.4/hilal-linux-x86_64.complete.mar
+eval "$(scripts/release-env.mjs --tag v0.3.0 --firefox-src engine --require-firefox-version)"
 
-gh release upload v0.2.0-alpha.4 \
-  dist/hilal-macos-arm64.complete.mar \
-  dist/hilal-linux-x86_64.complete.mar \
-  dist/hilal-update-manifest.json
+scripts/generate-update-manifest.mjs \
+  --version "$tag" \
+  --display-version "$display_version" \
+  --app-version "$firefox_app_version" \
+  --channel "$channel" \
+  --build-id 20260525000000 \
+  --mar macos-arm64="dist/$macos_arm64_mar" \
+  --mar-url macos-arm64="https://github.com/VastSea0/hilal-browser/releases/download/$tag/$macos_arm64_mar"
+
+gh release upload "$tag" \
+  "dist/$macos_arm64_mar" \
+  "dist/$update_manifest"
 ```
 
 The update endpoint fetches the latest GitHub Release, reads the manifest asset,
@@ -131,8 +132,9 @@ Required manifest fields for every platform:
   `linux-arm64`, `windows-x86_64`, or `windows-arm64`
 - `url`: HTTPS URL for the complete MAR, normally the GitHub Release asset URL
 - `hashFunction`: `sha512`
-- `hashValue`: sha512 of the final signed MAR
+- `hashValue`: 128-character sha512 of the final signed MAR
 - `size`: byte size of the final signed MAR
+- `buildID`: 14-digit Firefox build ID
 - `appVersion`: Firefox/Gecko app version, not the Hilal release version
 
 ### Fallback: Environment Variables

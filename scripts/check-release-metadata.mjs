@@ -1,7 +1,8 @@
 #!/usr/bin/env node
+import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { basename, join, resolve } from "node:path";
 
 const repoRoot = process.cwd();
 const options = parseArgs(process.argv.slice(2));
@@ -108,6 +109,7 @@ function parseArgs(args) {
   const parsed = {
     checkDist: false,
     requireUpdateManifest: false,
+    requiredPlatforms: [],
   };
 
   for (let i = 0; i < args.length; i += 1) {
@@ -127,6 +129,9 @@ function parseArgs(args) {
       parsed.requireUpdateManifest = true;
     } else if (arg === "--hil-bin") {
       parsed.hilBin = requireArg(arg, next);
+      i += 1;
+    } else if (arg === "--require-platform") {
+      parsed.requiredPlatforms.push(requireArg(arg, next));
       i += 1;
     } else {
       console.error(`Unknown argument: ${arg}`);
@@ -149,7 +154,7 @@ function usage(code) {
   console.error(`Usage:
   scripts/check-release-metadata.mjs
   scripts/check-release-metadata.mjs --hil-bin ./bin/hil
-  scripts/check-release-metadata.mjs --release-version 0.3.0 --release-tag v0.3.0 --check-dist --require-update-manifest
+  scripts/check-release-metadata.mjs --release-version 0.3.0 --release-tag v0.3.0 --check-dist --require-update-manifest --require-platform macos-arm64
 
 Default mode validates fast repo guardrails. Release mode additionally requires
 manifest, browser display version, Flatpak metadata, update manifest, and
@@ -419,17 +424,7 @@ function checkStrictRelease(version, releaseTag) {
   }
 
   if (metadata.distUpdateManifest) {
-    requireEqual("dist update manifest version", metadata.distUpdateManifest.version, version);
-    requireEqual(
-      "dist update manifest displayVersion",
-      metadata.distUpdateManifest.displayVersion,
-      version
-    );
-    if (!isFirefoxAppVersion(metadata.distUpdateManifest.appVersion)) {
-      errors.push(
-        `dist update manifest appVersion must be a modern Firefox/Gecko version, got ${metadata.distUpdateManifest.appVersion}.`
-      );
-    }
+    checkUpdateManifest(metadata.distUpdateManifest, version, expectedTag);
   } else if (options.requireUpdateManifest) {
     errors.push("Missing dist/hilal-update-manifest.json.");
   }
@@ -446,6 +441,7 @@ function requireEqual(label, actual, expected) {
 }
 
 function checkDistArtifactNames(version) {
+  const expectedTag = options.releaseTag || `v${version}`;
   const distDir = abs("dist");
   if (!existsSync(distDir)) {
     errors.push("dist/ does not exist.");
@@ -460,6 +456,114 @@ function checkDistArtifactNames(version) {
       errors.push(`dist artifact ${name} does not include release version ${version}.`);
     }
   }
+
+  for (const platform of options.requiredPlatforms || []) {
+    for (const artifact of expectedDistArtifacts(expectedTag, platform)) {
+      if (!existsSync(resolve(distDir, artifact))) {
+        errors.push(`Missing required dist artifact for ${platform}: ${artifact}`);
+      }
+    }
+  }
+}
+
+function checkUpdateManifest(manifest, version, expectedTag) {
+  requireEqual("dist update manifest version", manifest.version, version);
+  requireEqual("dist update manifest displayVersion", manifest.displayVersion, version);
+  if (!isFirefoxAppVersion(manifest.appVersion)) {
+    errors.push(
+      `dist update manifest appVersion must be a modern Firefox/Gecko version, got ${manifest.appVersion}.`
+    );
+  }
+  if (manifest.firefoxVersion && !isFirefoxAppVersion(manifest.firefoxVersion)) {
+    errors.push(
+      `dist update manifest firefoxVersion must be a modern Firefox/Gecko version, got ${manifest.firefoxVersion}.`
+    );
+  }
+  if (manifest.platformVersion && !isFirefoxAppVersion(manifest.platformVersion)) {
+    errors.push(
+      `dist update manifest platformVersion must be a modern Firefox/Gecko version, got ${manifest.platformVersion}.`
+    );
+  }
+  if (!/^\d{14}$/.test(String(manifest.buildID || ""))) {
+    errors.push(`dist update manifest buildID must be YYYYMMDDHHMMSS, got ${manifest.buildID || "<missing>"}.`);
+  }
+  if (!manifest.channel) {
+    errors.push("dist update manifest is missing channel.");
+  }
+
+  const entries = Array.isArray(manifest.updates) ? manifest.updates : [];
+  if (entries.length === 0) {
+    errors.push("dist update manifest has no updates entries.");
+  }
+
+  for (const entry of entries) {
+    checkUpdateManifestEntry(entry, manifest, expectedTag);
+  }
+
+  for (const platform of options.requiredPlatforms || []) {
+    if (!entries.some(entry => entry.platform === platform)) {
+      errors.push(`dist update manifest is missing required platform ${platform}.`);
+    }
+  }
+}
+
+function checkUpdateManifestEntry(entry, manifest, expectedTag) {
+  if (!entry.platform) {
+    errors.push("dist update manifest entry is missing platform.");
+  }
+  if (!entry.url || !entry.url.startsWith("https://")) {
+    errors.push(`dist update manifest entry ${entry.platform || "<unknown>"} has invalid HTTPS URL.`);
+  } else if (!entry.url.includes(`/download/${expectedTag}/`)) {
+    errors.push(`dist update manifest entry ${entry.platform} URL does not point at release ${expectedTag}.`);
+  }
+  if ((entry.hashFunction || "sha512").toLowerCase() !== "sha512") {
+    errors.push(`dist update manifest entry ${entry.platform} must use sha512.`);
+  }
+  if (!/^[a-f0-9]{128}$/i.test(String(entry.hashValue || ""))) {
+    errors.push(`dist update manifest entry ${entry.platform} has invalid sha512 hash.`);
+  }
+  if (!Number.isFinite(Number(entry.size)) || Number(entry.size) <= 0) {
+    errors.push(`dist update manifest entry ${entry.platform} has invalid size.`);
+  }
+  const appVersion = entry.appVersion || entry.firefoxVersion || manifest.appVersion;
+  if (!isFirefoxAppVersion(appVersion)) {
+    errors.push(`dist update manifest entry ${entry.platform} has invalid appVersion ${appVersion || "<missing>"}.`);
+  }
+  const buildID = entry.buildID || manifest.buildID;
+  if (!/^\d{14}$/.test(String(buildID || ""))) {
+    errors.push(`dist update manifest entry ${entry.platform} has invalid buildID ${buildID || "<missing>"}.`);
+  }
+
+  if (options.checkDist && entry.url) {
+    const localMar = resolve(repoRoot, "dist", basename(new URL(entry.url).pathname));
+    if (existsSync(localMar)) {
+      const localSize = statSync(localMar).size;
+      if (Number(entry.size) !== localSize) {
+        errors.push(`dist update manifest entry ${entry.platform} size does not match ${basename(localMar)}.`);
+      }
+      const localHash = sha512(localMar);
+      if (String(entry.hashValue || "").toLowerCase() !== localHash) {
+        errors.push(`dist update manifest entry ${entry.platform} hash does not match ${basename(localMar)}.`);
+      }
+    } else {
+      errors.push(`dist update manifest entry ${entry.platform} references missing local MAR ${basename(localMar)}.`);
+    }
+  }
+}
+
+function expectedDistArtifacts(releaseTag, platform) {
+  if (platform === "macos-arm64") {
+    return [
+      `Hilal-Browser-${releaseTag}-macOS.dmg`,
+      `hilal-${releaseTag}-macos-arm64.complete.mar`,
+      "hilal-update-manifest.json",
+    ];
+  }
+  return [`hilal-${releaseTag}-${platform}.complete.mar`];
+}
+
+function sha512(file) {
+  return createHash("sha512").update(readFileSync(file)).digest("hex");
 }
 
 function stripTagPrefix(version) {
