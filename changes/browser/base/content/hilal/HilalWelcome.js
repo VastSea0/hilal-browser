@@ -24,13 +24,27 @@
 
   const STAGES = [
     { title: "First choices", icon: "settings" },
+    { title: "Look", icon: "layout" },
     { title: "Privacy", icon: "shield" },
     { title: "Search", icon: "search" },
     { title: "Spaces", icon: "tabs" },
     { title: "Ready", icon: "check" },
   ];
 
-  const CHROME_TO_HIDE = ["#navigator-toolbox", "#browser"];
+  const CHROME_TO_HIDE = [
+    "#navigator-toolbox",
+    "#browser",
+    "#sidebar-main",
+    "#sidebar-box",
+  ];
+  const PREF_COMPACT_ENABLED = "hilal.compact.enabled";
+  const PREF_COMPACT_HIDE_TOOLBOX = "hilal.compact.hide_toolbox";
+  const PREF_VERTICAL_TABS = "sidebar.verticalTabs";
+  const PREF_WORKSPACES_ENABLED = "hilal.workspaces.enabled";
+  const SEARCH_ENGINE_PLACEHOLDER =
+    "chrome://browser/skin/search-engine-placeholder.png";
+  const SEARCH_ENGINE_PLACEHOLDER_2X =
+    "chrome://browser/skin/search-engine-placeholder@2x.png";
 
   const PRIVACY_LEVELS = [
     {
@@ -110,8 +124,26 @@
         Services.prefs.getStringPref("hilal.privacy.level", "standard")
       );
       this._defaultBrowserSelected = false;
+      this._compactSelected = Services.prefs.getBoolPref(
+        PREF_COMPACT_ENABLED,
+        true
+      );
+      this._compactHideToolboxSelected = Services.prefs.getBoolPref(
+        PREF_COMPACT_HIDE_TOOLBOX,
+        true
+      );
+      this._verticalTabsSelected = Services.prefs.getBoolPref(
+        PREF_VERTICAL_TABS,
+        false
+      );
+      this._workspacesEnabledSelected = Services.prefs.getBoolPref(
+        PREF_WORKSPACES_ENABLED,
+        true
+      );
       this._workspacesSelected = { personal: true, work: true, social: true };
       this._hiddenChrome = new Map();
+      this._chromeObserver = null;
+      this._chromeSyncScheduled = false;
     }
 
     async start() {
@@ -142,31 +174,82 @@
 
     _enterWelcomeStage() {
       document.documentElement.setAttribute("hilal-welcome-stage", "true");
+      this._closeBrowserChrome();
+      this._syncHiddenChrome();
 
+      if (!this._chromeObserver) {
+        this._chromeObserver = new MutationObserver(() => {
+          this._scheduleChromeSync();
+        });
+        this._chromeObserver.observe(document.documentElement, {
+          subtree: true,
+          childList: true,
+          attributes: true,
+          attributeFilter: ["style", "hidden", "collapsed", "open", "focused"],
+        });
+      }
+    }
+
+    _scheduleChromeSync() {
+      if (this._chromeSyncScheduled) {
+        return;
+      }
+      this._chromeSyncScheduled = true;
+      window.requestAnimationFrame(() => {
+        this._chromeSyncScheduled = false;
+        if (!this._overlay) {
+          return;
+        }
+        this._closeBrowserChrome();
+        this._syncHiddenChrome();
+      });
+    }
+
+    _closeBrowserChrome() {
       try {
         gURLBar?.view?.close?.();
         gURLBar?.blur?.();
+        document.getElementById("PopupAutoCompleteRichResult")?.hidePopup?.();
       } catch (e) {
-        console.error("HilalWelcome: failed to close urlbar", e);
+        console.error("HilalWelcome: failed to close chrome panels", e);
       }
+    }
 
+    _syncHiddenChrome() {
       for (const selector of CHROME_TO_HIDE) {
         const element = document.querySelector(selector);
-        if (!element || this._hiddenChrome.has(element)) {
+        if (!element) {
           continue;
         }
+        this._hideChromeElement(element);
+      }
+    }
+
+    _hideChromeElement(element) {
+      if (!this._hiddenChrome.has(element)) {
         this._hiddenChrome.set(element, {
           display: element.style.display,
           pointerEvents: element.style.pointerEvents,
           visibility: element.style.visibility,
         });
+      }
+      if (element.style.display !== "none") {
         element.style.display = "none";
+      }
+      if (element.style.pointerEvents !== "none") {
         element.style.pointerEvents = "none";
+      }
+      if (element.style.visibility !== "hidden") {
         element.style.visibility = "hidden";
       }
     }
 
     _leaveWelcomeStage() {
+      if (this._chromeObserver) {
+        this._chromeObserver.disconnect();
+        this._chromeObserver = null;
+      }
+      this._chromeSyncScheduled = false;
       document.documentElement.removeAttribute("hilal-welcome-stage");
 
       for (const [element, styles] of this._hiddenChrome) {
@@ -238,10 +321,33 @@
           (typeof iconURI === "string" ? iconURI : "") ||
           engine.iconURL ||
           engine._iconURL ||
+          this._bestIconFromMap(engine._iconMapObj) ||
           "";
       }
 
-      return this._sanitizeIconURL(url);
+      return this._sanitizeIconURL(url) || this._searchEnginePlaceholder();
+    }
+
+    _bestIconFromMap(iconMap) {
+      if (!iconMap) {
+        return "";
+      }
+      const widths = Object.keys(iconMap)
+        .map(width => parseInt(width, 10))
+        .filter(width => Number.isFinite(width))
+        .sort((first, second) => first - second);
+      if (!widths.length) {
+        return "";
+      }
+      const bestWidth =
+        widths.find(width => width >= 32) || widths[widths.length - 1];
+      return iconMap[bestWidth] || "";
+    }
+
+    _searchEnginePlaceholder() {
+      return window.devicePixelRatio > 1
+        ? SEARCH_ENGINE_PLACEHOLDER_2X
+        : SEARCH_ENGINE_PLACEHOLDER;
     }
 
     _sanitizeIconURL(url) {
@@ -353,6 +459,7 @@
         </div>
       `;
       this._overlay.replaceChildren(MozXULElement.parseXULToFragment(markup));
+      this._syncHiddenChrome();
       this._attachListeners();
     }
 
@@ -372,9 +479,15 @@
       const stageCopies = [
         {
           kicker: "First choices",
-          title: "Decide what Hilal should touch.",
+          title: "Choose what starts with Hilal.",
           subtitle:
-            "Keep the first run quiet: import only what you want and choose whether system links should open here.",
+            "Bring only the data you need and decide whether links from the system should open here.",
+        },
+        {
+          kicker: "Look",
+          title: "Shape the window before it opens.",
+          subtitle:
+            "Pick the density, tab direction, and spaces that should define the first Hilal window.",
         },
         {
           kicker: "Privacy",
@@ -437,24 +550,26 @@
             </div>
           `;
         case 1:
+          return this._layoutHTML();
+        case 2:
           return `
             <div class="hw-privacy-list">
               ${this._privacyLevelsHTML()}
             </div>
           `;
-        case 2:
+        case 3:
           return `
             <div class="hw-engine-list">
               ${this._enginesHTML()}
             </div>
           `;
-        case 3:
+        case 4:
           return `
             <div class="hw-workspace-list">
               ${this._workspacesHTML()}
             </div>
           `;
-        case 4:
+        case 5:
           return `
             <div class="hw-summary">
               ${this._summaryHTML()}
@@ -485,6 +600,110 @@
           <span data-l10n-id="${primaryL10nId}">${primaryFallback}</span>
           <span class="hw-icon hw-icon-${isLast ? "check" : "arrow-right"}"></span>
         </button>
+      `;
+    }
+
+    _layoutHTML() {
+      return `
+        <div class="hw-layout-stack">
+          <div class="hw-layout-grid">
+            ${this._layoutChoiceHTML("standard")}
+            ${this._layoutChoiceHTML("compact")}
+          </div>
+          <div class="hw-layout-controls">
+            <div class="hw-control-row">
+              <span class="hw-control-copy">
+                <span class="hw-line-title" data-l10n-id="hilal-welcome-tabs-layout-label">Tabs</span>
+                <span class="hw-line-desc" data-l10n-id="hilal-welcome-tabs-layout-desc">Choose the direction that keeps your pages easiest to scan.</span>
+              </span>
+              <span class="hw-segment" role="group" aria-label="Tab layout">
+                <button type="button" class="hw-segment-btn${this._verticalTabsSelected ? " hw-segment-active" : ""}" data-tab-layout="vertical" aria-pressed="${this._verticalTabsSelected}">
+                  <span data-l10n-id="hilal-welcome-tabs-layout-vertical">Vertical</span>
+                </button>
+                <button type="button" class="hw-segment-btn${!this._verticalTabsSelected ? " hw-segment-active" : ""}" data-tab-layout="horizontal" aria-pressed="${!this._verticalTabsSelected}">
+                  <span data-l10n-id="hilal-welcome-tabs-layout-horizontal">Horizontal</span>
+                </button>
+              </span>
+            </div>
+            <label class="hw-control-row" for="hw-workspaces-enabled-toggle">
+              <span class="hw-control-copy">
+                <span class="hw-line-title" data-l10n-id="hilal-welcome-workspaces-enabled-label">Spaces</span>
+                <span class="hw-line-desc" data-l10n-id="hilal-welcome-workspaces-enabled-desc">Keep personal, work, and social tabs separated from the start.</span>
+              </span>
+              <span class="hw-toggle">
+                <input type="checkbox" id="hw-workspaces-enabled-toggle"${this._workspacesEnabledSelected ? ' checked="checked"' : ""}/>
+                <span class="hw-toggle-track"></span>
+              </span>
+            </label>
+            <label class="hw-control-row${this._compactSelected ? "" : " hw-control-disabled"}" for="hw-compact-hide-toolbar-toggle">
+              <span class="hw-control-copy">
+                <span class="hw-line-title" data-l10n-id="hilal-welcome-compact-toolbar-label">Hide top toolbar</span>
+                <span class="hw-line-desc" data-l10n-id="hilal-welcome-compact-toolbar-desc">In compact mode, reveal the address bar only when you need it.</span>
+              </span>
+              <span class="hw-toggle">
+                <input type="checkbox" id="hw-compact-hide-toolbar-toggle"${this._compactHideToolboxSelected ? ' checked="checked"' : ""}${this._compactSelected ? "" : ' disabled="disabled"'}/>
+                <span class="hw-toggle-track"></span>
+              </span>
+            </label>
+          </div>
+        </div>
+      `;
+    }
+
+    _layoutChoiceHTML(mode) {
+      const compact = mode === "compact";
+      const active = this._compactSelected === compact;
+      const label = compact ? "Compact" : "Standard";
+      const desc = compact
+        ? "More page, less chrome."
+        : "Full toolbar, familiar spacing.";
+      return `
+        <button type="button" class="hw-layout-choice${active ? " hw-choice-active" : ""}" data-layout-mode="${mode}" aria-pressed="${active}">
+          ${this._browserMockHTML(mode)}
+          <span class="hw-layout-choice-copy">
+            <span class="hw-choice-title" data-l10n-id="hilal-welcome-layout-${mode}-label">${label}</span>
+            <span class="hw-choice-desc" data-l10n-id="hilal-welcome-layout-${mode}-desc">${desc}</span>
+          </span>
+        </button>
+      `;
+    }
+
+    _browserMockHTML(mode) {
+      const compact = mode === "compact";
+      const orientationClass = this._verticalTabsSelected
+        ? "hw-mock-vertical"
+        : "hw-mock-horizontal";
+      const workspaceClass = this._workspacesEnabledSelected
+        ? "hw-mock-workspaces"
+        : "hw-mock-no-workspaces";
+      const toolbarClass = this._compactHideToolboxSelected
+        ? "hw-mock-hide-toolbar"
+        : "hw-mock-show-toolbar";
+      return `
+        <span class="hw-browser-mock ${compact ? "hw-mock-compact" : "hw-mock-standard"} ${orientationClass} ${workspaceClass} ${toolbarClass}" aria-hidden="true">
+          <span class="hw-mock-topbar">
+            <span class="hw-mock-window-controls">
+              <span></span><span></span><span></span>
+            </span>
+            <span class="hw-mock-tabs">
+              <span></span><span></span><span></span>
+            </span>
+            <span class="hw-mock-urlbar"></span>
+          </span>
+          <span class="hw-mock-body">
+            <span class="hw-mock-sidebar">
+              <span class="hw-mock-workspace-strip">
+                <span></span><span></span><span></span>
+              </span>
+              <span class="hw-mock-sidebar-tabs">
+                <span></span><span></span><span></span>
+              </span>
+            </span>
+            <span class="hw-mock-page">
+              <span></span><span></span><span></span>
+            </span>
+          </span>
+        </span>
       `;
     }
 
@@ -530,6 +749,18 @@
     }
 
     _workspacesHTML() {
+      if (!this._workspacesEnabledSelected) {
+        return `
+          <div class="hw-workspace-disabled">
+            <span class="hw-workspace-disabled-icon hw-icon hw-icon-tabs"></span>
+            <span class="hw-workspace-disabled-copy">
+              <span class="hw-choice-title" data-l10n-id="hilal-welcome-workspaces-disabled-label">Spaces are off</span>
+              <span class="hw-choice-desc" data-l10n-id="hilal-welcome-workspaces-disabled-desc">Hilal will open with one clean browser space. You can turn spaces on later in Settings.</span>
+            </span>
+          </div>
+        `;
+      }
+
       return WORKSPACE_PRESETS.map(item => {
         const active = this._workspacesSelected[item.key];
         return `
@@ -555,16 +786,27 @@
       const activePresets = WORKSPACE_PRESETS.filter(
         item => this._workspacesSelected[item.key]
       );
-      const workspacesHTML = activePresets.length
-        ? activePresets
-            .map(
-              item =>
-                `<span data-l10n-id="hilal-welcome-workspace-label-${item.key}">${item.label}</span>`
-            )
-            .join(", ")
-        : `<span data-l10n-id="hilal-welcome-summary-none">None</span>`;
+      let workspacesHTML = `<span data-l10n-id="hilal-welcome-summary-off">Off</span>`;
+      if (this._workspacesEnabledSelected) {
+        workspacesHTML = activePresets.length
+          ? activePresets
+              .map(
+                item =>
+                  `<span data-l10n-id="hilal-welcome-workspace-label-${item.key}">${item.label}</span>`
+              )
+              .join(", ")
+          : `<span data-l10n-id="hilal-welcome-summary-none">None</span>`;
+      }
 
       return `
+        <div class="hw-summary-row">
+          <span data-l10n-id="hilal-welcome-summary-layout">Layout</span>
+          <strong data-l10n-id="hilal-welcome-summary-layout-${this._compactSelected ? "compact" : "standard"}">${this._compactSelected ? "Compact" : "Standard"}</strong>
+        </div>
+        <div class="hw-summary-row">
+          <span data-l10n-id="hilal-welcome-summary-tabs">Tabs</span>
+          <strong data-l10n-id="hilal-welcome-summary-tabs-${this._verticalTabsSelected ? "vertical" : "horizontal"}">${this._verticalTabsSelected ? "Vertical" : "Horizontal"}</strong>
+        </div>
         <div class="hw-summary-row">
           <span data-l10n-id="hilal-welcome-summary-search">Search</span>
           <strong>${engineName}</strong>
@@ -647,6 +889,40 @@
         });
       });
 
+      this._overlay.querySelectorAll(".hw-layout-choice").forEach(choice => {
+        choice.addEventListener("click", () => {
+          this._compactSelected = choice.dataset.layoutMode === "compact";
+          this._renderStage();
+        });
+      });
+
+      this._overlay.querySelectorAll(".hw-segment-btn").forEach(choice => {
+        choice.addEventListener("click", () => {
+          this._verticalTabsSelected = choice.dataset.tabLayout === "vertical";
+          this._renderStage();
+        });
+      });
+
+      const workspacesEnabledToggle = document.getElementById(
+        "hw-workspaces-enabled-toggle"
+      );
+      if (workspacesEnabledToggle) {
+        workspacesEnabledToggle.addEventListener("change", event => {
+          this._workspacesEnabledSelected = event.target.checked;
+          this._renderStage();
+        });
+      }
+
+      const compactHideToolbarToggle = document.getElementById(
+        "hw-compact-hide-toolbar-toggle"
+      );
+      if (compactHideToolbarToggle) {
+        compactHideToolbarToggle.addEventListener("change", event => {
+          this._compactHideToolboxSelected = event.target.checked;
+          this._renderStage();
+        });
+      }
+
       this._overlay.querySelectorAll(".hw-workspace-choice").forEach(choice => {
         choice.addEventListener("click", () => {
           const key = choice.dataset.workspace;
@@ -671,7 +947,9 @@
     }
 
     async _finish() {
-      if (this._workspaces) {
+      this._saveLayoutPrefs();
+
+      if (this._workspaces && this._workspacesEnabledSelected) {
         for (const item of WORKSPACE_PRESETS) {
           if (this._workspacesSelected[item.key]) {
             let label = item.label;
@@ -735,6 +1013,29 @@
 
       this._markSeen();
       this._teardown();
+    }
+
+    _saveLayoutPrefs() {
+      try {
+        Services.prefs.setBoolPref(PREF_COMPACT_ENABLED, this._compactSelected);
+        Services.prefs.setBoolPref(
+          PREF_COMPACT_HIDE_TOOLBOX,
+          this._compactHideToolboxSelected
+        );
+        if (this._verticalTabsSelected || this._workspacesEnabledSelected) {
+          Services.prefs.setBoolPref("sidebar.revamp", true);
+        }
+        Services.prefs.setBoolPref(
+          PREF_VERTICAL_TABS,
+          this._verticalTabsSelected
+        );
+        Services.prefs.setBoolPref(
+          PREF_WORKSPACES_ENABLED,
+          this._workspacesEnabledSelected
+        );
+      } catch (e) {
+        console.error("HilalWelcome: failed to save layout prefs", e);
+      }
     }
 
     _dismiss() {
