@@ -115,10 +115,12 @@ jobs:
       - name: Cache Firefox source checkout
         uses: actions/cache@v4
         with:
-          path: engine
-          key: firefox-${{ hashFiles('upstream.lock') }}
+          path: |
+            engine
+            !engine/obj-*
+          key: ${{ runner.os }}-firefox-${{ hashFiles('upstream.lock') }}
           restore-keys: |
-            firefox-
+            ${{ runner.os }}-firefox-
 
       - name: Setup Firefox source
         run: ./bin/hil setup
@@ -288,10 +290,12 @@ jobs:
       - name: Cache Firefox source checkout
         uses: actions/cache@v4
         with:
-          path: engine
-          key: firefox-${{ hashFiles('upstream.lock') }}
+          path: |
+            engine
+            !engine/obj-*
+          key: ${{ runner.os }}-firefox-${{ hashFiles('upstream.lock') }}
           restore-keys: |
-            firefox-
+            ${{ runner.os }}-firefox-
 
       - name: Setup Firefox source
         run: ./bin/hil setup
@@ -369,10 +373,12 @@ jobs:
       - name: Cache Firefox source checkout
         uses: actions/cache@v4
         with:
-          path: engine
-          key: firefox-${{ hashFiles('upstream.lock') }}
+          path: |
+            engine
+            !engine/obj-*
+          key: ${{ runner.os }}-firefox-${{ hashFiles('upstream.lock') }}
           restore-keys: |
-            firefox-
+            ${{ runner.os }}-firefox-
 
       - name: Setup Firefox source
         shell: pwsh
@@ -407,6 +413,7 @@ jobs:
 
   publish-release:
     needs: [create-release, sign-macos, build-linux, build-windows]
+    if: ${{ always() && !cancelled() && needs.create-release.result == 'success' && (needs.sign-macos.result == 'success' || needs.build-linux.result == 'success' || needs.build-windows.result == 'success') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -416,6 +423,7 @@ jobs:
           ref: ${{ needs.create-release.outputs.tag }}
 
       - name: Check release assets before publishing
+        if: ${{ needs.sign-macos.result == 'success' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.create-release.outputs.tag }}

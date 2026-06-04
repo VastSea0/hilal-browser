@@ -161,14 +161,24 @@ fn setup(repo_root: &Path, engine_path: &Path) -> Result<()> {
 
     // Check if engine/ already exists and matches the commit
     if engine_path.exists() && engine_path.join(".git").exists() {
-        if let Ok(current_commit) = run_cmd(&["git", "rev-parse", "HEAD"], engine_path) {
-            if current_commit.trim() == lock.commit {
-                println!(
-                    "[hil] engine/ is already initialized at commit {}.",
-                    lock.commit
-                );
-                return Ok(());
-            }
+        let is_ok = if let Ok(base_commit) =
+            run_cmd(&["git", "rev-parse", "upstream-base^{commit}"], engine_path)
+        {
+            base_commit.trim() == lock.commit
+        } else if let Ok(current_commit) =
+            run_cmd(&["git", "rev-parse", "HEAD^{commit}"], engine_path)
+        {
+            current_commit.trim() == lock.commit
+        } else {
+            false
+        };
+
+        if is_ok {
+            println!(
+                "[hil] engine/ is already initialized at commit {}.",
+                lock.commit
+            );
+            return Ok(());
         }
     }
 
@@ -310,16 +320,18 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
                 }
 
                 // Commit the patch change
-                run_cmd(&["git", "add", "-A"], engine_path)?;
-                Command::new("git")
-                    .args(&[
-                        "commit",
-                        "--allow-empty",
-                        "-m",
-                        &format!("Apply patch: {}", entry.path),
-                    ])
-                    .current_dir(engine_path)
-                    .output()?;
+                if std::env::var("GITHUB_ACTIONS").is_err() {
+                    run_cmd(&["git", "add", "-A"], engine_path)?;
+                    Command::new("git")
+                        .args(&[
+                            "commit",
+                            "--allow-empty",
+                            "-m",
+                            &format!("Apply patch: {}", entry.path),
+                        ])
+                        .current_dir(engine_path)
+                        .output()?;
+                }
             }
             applied += 1;
         } else {
@@ -336,16 +348,18 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
                 }
 
                 // Commit the overlay change
-                run_cmd(&["git", "add", "-A"], engine_path)?;
-                Command::new("git")
-                    .args(&[
-                        "commit",
-                        "--allow-empty",
-                        "-m",
-                        &format!("Sync overlay: {}", entry.path),
-                    ])
-                    .current_dir(engine_path)
-                    .output()?;
+                if std::env::var("GITHUB_ACTIONS").is_err() {
+                    run_cmd(&["git", "add", "-A"], engine_path)?;
+                    Command::new("git")
+                        .args(&[
+                            "commit",
+                            "--allow-empty",
+                            "-m",
+                            &format!("Sync overlay: {}", entry.path),
+                        ])
+                        .current_dir(engine_path)
+                        .output()?;
+                }
             }
             copied += 1;
         }
