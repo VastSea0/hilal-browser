@@ -335,7 +335,7 @@ jobs:
       - name: Install MozillaBuild
         shell: pwsh
         run: |
-          $url = "https://ftp.mozilla.org/pub/mozilla/libraries/win32/MozillaBuildSetup-4.1.1.exe"
+          $url = "https://ftp.mozilla.org/pub/mozilla/libraries/win32/MozillaBuildSetup-Latest.exe"
           $out = "$env:TEMP\MozillaBuildSetup.exe"
           Write-Host "Downloading MozillaBuild..."
           Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing
