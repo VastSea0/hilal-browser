@@ -484,14 +484,14 @@ export default function App() {
       }`}
       id="root-container"
     >
-      {/* 1. Sticky Navigation Bar */}
-      <nav
-        className="sticky top-0 z-40 w-full border-b border-neutral-200/30 dark:border-neutral-900/30 glass-panel"
-        id="navbar-sticky"
-      >
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      {/* 1. Floating Capsule Navigation Bar */}
+      <div className="sticky top-4 z-50 w-full px-4 pointer-events-none">
+        <nav
+          className="mx-auto flex max-w-5xl pointer-events-auto items-center justify-between px-6 py-2.5 rounded-full border border-neutral-200/40 bg-white/75 backdrop-blur-md dark:border-neutral-800/40 dark:bg-neutral-950/75 transition-all duration-300 shadow-md shadow-neutral-250/5 dark:shadow-none"
+          id="navbar-sticky"
+        >
           <div
-            className="flex items-center gap-3.5 cursor-pointer group"
+            className="flex items-center gap-3 cursor-pointer group"
             onClick={() => {
               setView("home");
               window.scrollTo({ top: 0, behavior: "smooth" });
@@ -499,18 +499,18 @@ export default function App() {
             id="brand-logo-container"
           >
             <img
-              src="https://raw.githubusercontent.com/VastSea0/hilal-browser/main/branding/hilal/default128.png"
+              src="/default128.png"
               alt="Hilal Browser Logo"
-              className="h-6.5 w-6.5 opacity-90 group-hover:opacity-100 transition-opacity"
+              className="h-6 w-6 opacity-90 group-hover:opacity-100 transition-opacity"
               referrerPolicy="no-referrer"
             />
-            <span className="font-sans text-xs font-semibold tracking-[0.2em] uppercase text-neutral-900 dark:text-neutral-100">
-              hilal <span className="text-neutral-400 dark:text-neutral-500 font-light">browser</span>
+            <span className="font-sans text-[10.5px] font-semibold tracking-[0.2em] uppercase text-neutral-900 dark:text-neutral-100">
+              hilal <span className="text-neutral-450 dark:text-neutral-500 font-light">browser</span>
             </span>
           </div>
 
           {/* Nav Center Links */}
-          <div className="hidden md:flex items-center gap-8 text-[10px] font-semibold tracking-wider uppercase">
+          <div className="hidden md:flex items-center gap-8 text-[9.5px] font-bold tracking-wider uppercase">
             {[
               { label: activeT.nav.features, id: "ozellikler" },
               { label: activeT.nav.interface, id: "arayuz" },
@@ -529,9 +529,9 @@ export default function App() {
                     setTimeout(() => scrollToId(item.id), 50);
                   }
                 }}
-                className={`transition-colors relative py-1 hover:text-neutral-900 dark:hover:text-white ${
+                className={`transition-colors relative py-1 hover:text-neutral-955 dark:hover:text-white ${
                   activeSection === item.id
-                    ? "text-neutral-900 dark:text-white"
+                    ? "text-neutral-955 dark:text-white"
                     : "text-neutral-400 dark:text-neutral-500"
                 }`}
               >
@@ -539,7 +539,7 @@ export default function App() {
                 {activeSection === item.id && (
                   <motion.div
                     layoutId="activeIndicator"
-                    className="absolute -bottom-1 left-0 h-0.5 w-full bg-neutral-900 dark:bg-neutral-100"
+                    className="absolute -bottom-1 left-0 h-0.5 w-full bg-neutral-950 dark:bg-neutral-100"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -548,12 +548,12 @@ export default function App() {
           </div>
 
           {/* Right utilities */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {/* Language Selector */}
             <button
               id="language-switcher"
               onClick={() => setLang(prev => (prev === "tr" ? "en" : "tr"))}
-              className="px-2.5 py-1 text-[10px] font-semibold tracking-widest rounded-md border border-neutral-200/50 hover:bg-neutral-100 text-neutral-600 dark:border-neutral-800/60 dark:hover:bg-neutral-900 dark:text-neutral-400 transition-colors"
+              className="w-8 h-8 flex items-center justify-center text-[9.5px] font-mono font-bold tracking-wider rounded-full border border-neutral-200/60 hover:bg-neutral-100 text-neutral-600 dark:border-neutral-800/60 dark:hover:bg-neutral-900 dark:text-neutral-400 transition-all select-none"
               title={lang === "tr" ? "Switch to English" : "Türkçe"}
             >
               {lang === "tr" ? "EN" : "TR"}
@@ -563,10 +563,10 @@ export default function App() {
             <button
               id="theme-toggler"
               onClick={toggleTheme}
-              className="rounded-md p-1.5 border border-neutral-200/50 hover:bg-neutral-100 text-neutral-600 dark:border-neutral-800/60 dark:hover:bg-neutral-900 dark:text-neutral-400 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-full border border-neutral-200/60 hover:bg-neutral-100 text-neutral-600 dark:border-neutral-800/60 dark:hover:bg-neutral-900 dark:text-neutral-400 transition-all"
               aria-label="Theme switcher"
             >
-              {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
             {/* Discord Link */}
@@ -574,11 +574,11 @@ export default function App() {
               href="https://discord.gg/JZJ4tmPHFw"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-md p-1.5 border border-neutral-200/50 hover:bg-neutral-100 text-neutral-600 dark:border-neutral-800/60 dark:hover:bg-neutral-900 dark:text-neutral-400 transition-colors flex items-center justify-center"
+              className="w-8 h-8 flex items-center justify-center rounded-full border border-neutral-200/60 hover:bg-neutral-100 text-neutral-600 dark:border-neutral-800/60 dark:hover:bg-neutral-900 dark:text-neutral-400 transition-all"
               aria-label="Discord Server"
             >
-              <span className="flex h-3.5 w-3.5 items-center justify-center">
-                <SiDiscord />
+              <span className="flex h-4 w-4 items-center justify-center">
+                <SiDiscord className="h-4 w-4" />
               </span>
             </a>
 
@@ -586,14 +586,14 @@ export default function App() {
             <button
               id="nav-download-button"
               onClick={() => setIsDownloadOpen(true)}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-md bg-neutral-950 px-4 py-2 text-[10px] font-bold tracking-widest uppercase text-white hover:opacity-90 dark:bg-white dark:text-neutral-950 transition-opacity"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-neutral-950 px-4.5 py-2 text-[9.5px] font-bold tracking-widest uppercase text-white hover:opacity-90 dark:bg-white dark:text-neutral-950 transition-opacity"
             >
               <Download className="h-3 w-3" />
               {activeT.footer.install}
             </button>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
 
       {/* Main Container Switcher */}
       <AnimatePresence mode="wait">
@@ -607,118 +607,128 @@ export default function App() {
             transition={{ duration: 0.3 }}
           >
             {/* Hero Section */}
-            <section className="relative z-10 mx-auto max-w-4xl px-6 pt-20 md:pt-28 text-center" id="hero">
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 rounded-full border border-neutral-200/70 bg-neutral-50 px-3.5 py-1 text-[9px] font-medium tracking-widest uppercase text-neutral-500 dark:border-neutral-900 dark:bg-neutral-950 dark:text-neutral-400"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-500" />
-                {activeT.hero.alphaBadge}
-              </motion.div>
+            <section className="relative w-full bg-gradient-to-br from-cobalt to-cobalt-dark text-white noise-bg pt-28 pb-24 md:pt-36 md:pb-32 overflow-hidden" id="hero">
+              <div className="mx-auto max-w-4xl px-6 relative z-10 text-center">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 backdrop-blur-md px-3.5 py-1 text-[9px] font-bold tracking-widest uppercase text-white/80"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
+                  {activeT.hero.alphaBadge}
+                </motion.div>
 
-              <motion.h1
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.7 }}
-                className="mt-6 font-sans text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl leading-[1.15] text-neutral-950 dark:text-white"
-              >
-                {lang === "tr" ? (
-                  <>
-                    İnternette{" "}
-                    <span className="font-serif italic font-light text-neutral-600 dark:text-neutral-400">
-                      özgürlüğün
-                    </span>{" "}
-                    ve{" "}
-                    <span className="font-serif italic font-light text-neutral-600 dark:text-neutral-400">
-                      sadeliğin
-                    </span>{" "}
-                    <div className="mt-1 font-serif italic font-light">yeni boyutu.</div>
-                  </>
-                ) : (
-                  <>
-                    {activeT.hero.title1}{" "}
-                    <span className="font-serif italic font-light text-neutral-600 dark:text-neutral-400">
-                      {activeT.hero.title2}
-                    </span>{" "}
-                    {activeT.hero.title3}{" "}
-                    <span className="font-serif italic font-light text-neutral-600 dark:text-neutral-400">
-                      {activeT.hero.title4}
-                    </span>{" "}
-                    <div className="mt-1 font-serif italic font-light">
-                      {activeT.hero.title5}
-                    </div>
-                  </>
-                )}
-              </motion.h1>
+                <motion.h1
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.7 }}
+                  className="mt-6 font-sans text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl lg:text-6.5xl leading-[1.12] text-white tracking-tighter"
+                  style={{ letterSpacing: "-0.025em" }}
+                >
+                  {lang === "tr" ? (
+                    <>
+                      İnternette{" "}
+                      <span className="font-serif italic font-light text-sky-200">
+                        özgürlüğün
+                      </span>{" "}
+                      ve{" "}
+                      <span className="font-serif italic font-light text-sky-200">
+                        sadeliğin
+                      </span>{" "}
+                      <div className="mt-1 font-serif italic font-light">yeni boyutu.</div>
+                    </>
+                  ) : (
+                    <>
+                      {activeT.hero.title1}{" "}
+                      <span className="font-serif italic font-light text-sky-200">
+                        {activeT.hero.title2}
+                      </span>{" "}
+                      {activeT.hero.title3}{" "}
+                      <span className="font-serif italic font-light text-sky-200">
+                        {activeT.hero.title4}
+                      </span>{" "}
+                      <div className="mt-1 font-serif italic font-light">
+                        {activeT.hero.title5}
+                      </div>
+                    </>
+                  )}
+                </motion.h1>
 
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.7 }}
-                className="mx-auto mt-6 max-w-xl text-xs md:text-sm leading-relaxed text-neutral-500 dark:text-neutral-400"
-              >
-                {activeT.hero.desc}
-              </motion.p>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.7 }}
+                  className="mx-auto mt-6 max-w-xl text-xs md:text-[13px] leading-relaxed text-white/70"
+                >
+                  {activeT.hero.desc}
+                </motion.p>
 
-              <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                className="mt-8 flex flex-col items-center justify-center"
-                id="hero-cta-outer-container"
-              >
-                <div className="flex flex-wrap items-center justify-center gap-3">
-                  <button
-                    id="hero-download-btn"
-                    onClick={() => setIsDownloadOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-md bg-neutral-950 px-6.5 py-3.5 text-[10px] font-bold tracking-widest uppercase text-white hover:opacity-90 dark:bg-white dark:text-neutral-950 transition-opacity"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    {getDynamicDownloadBtnText()}
-                  </button>
-                  <a
-                    href="https://github.com/VastSea0/hilal-browser"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    id="hero-github-btn"
-                    className="inline-flex items-center gap-2 rounded-md border border-neutral-200 hover:bg-neutral-50 px-6.5 py-3.5 text-[10px] font-bold tracking-widest uppercase text-neutral-900 dark:border-neutral-900 dark:text-white dark:hover:bg-neutral-950 transition-colors"
-                  >
-                    <Github className="h-3.5 w-3.5" />
-                    {activeT.hero.sourceBtn}
-                  </a>
-                </div>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  className="mt-8 flex flex-col items-center justify-center animate-fade-in"
+                  id="hero-cta-outer-container"
+                >
+                  <div className="flex flex-wrap items-center justify-center gap-3">
+                    <button
+                      id="hero-download-btn"
+                      onClick={() => setIsDownloadOpen(true)}
+                      className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-[9.5px] font-bold tracking-widest uppercase text-cobalt hover:bg-neutral-50 active:scale-98 transition-all shadow-lg shadow-black/10"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      {getDynamicDownloadBtnText()}
+                    </button>
+                    <a
+                      href="https://github.com/VastSea0/hilal-browser"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      id="hero-github-btn"
+                      className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 px-7 py-3.5 text-[9.5px] font-bold tracking-widest uppercase text-white active:scale-98 transition-all"
+                    >
+                      <Github className="h-3.5 w-3.5" />
+                      {activeT.hero.sourceBtn}
+                    </a>
+                  </div>
 
-                {recommendedAsset && (
-                  <p className="mt-3.5 text-[9px] font-mono text-neutral-400 dark:text-neutral-500" id="hero-detected-os-subtitle">
-                    {lang === "tr" ? "Sisteminiz için belirlenen paket:" : "Identified for your system:"}{" "}
-                    <span className="font-semibold text-neutral-600 dark:text-neutral-300">{recommendedAsset.name}</span>{" "}
-                    ({formatBytes(recommendedAsset.size)})
-                  </p>
-                )}
-              </motion.div>
+                  {recommendedAsset && (
+                    <p className="mt-4 text-[9px] font-mono text-white/55" id="hero-detected-os-subtitle">
+                      {lang === "tr" ? "Sisteminiz için belirlenen paket:" : "Identified for your system:"}{" "}
+                      <span className="font-semibold text-white/80">{recommendedAsset.name}</span>{" "}
+                      ({formatBytes(recommendedAsset.size)})
+                    </p>
+                  )}
+                </motion.div>
+              </div>
+
+              {/* Repeating SVG scalloped wave transition to Soft Workspace */}
+              <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
+                <svg viewBox="0 0 1440 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-6 block text-[#FAF9F6] dark:text-[#050505]">
+                  <path d="M0,0 Q60,20 120,0 Q180,20 240,0 Q300,20 360,0 Q420,20 480,0 Q540,20 600,0 Q660,20 720,0 Q780,20 840,0 Q900,20 960,0 Q1020,20 1080,0 Q1140,20 1200,0 Q1260,20 1320,0 Q1380,20 1440,0 L1440,24 L0,24 Z" fill="currentColor" />
+                </svg>
+              </div>
             </section>
 
-            {/* 3. Welcome Home Interactive Preview (Borderless Overhaul) */}
-            <section className="mx-auto max-w-4xl px-6 py-12 md:py-16" id="arayuz">
+            {/* 3. Welcome Home Interactive Preview (Image Comparison Slider) */}
+            <section className="mx-auto max-w-5xl px-6 py-12 md:py-16" id="arayuz">
               <motion.div
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.7, ease: "easeOut" }}
                 className="relative"
               >
-                {/* Completely BORDERLESS visual slider wrapper */}
+                {/* Visual slider wrapper with clean rounded corners and a premium shadow */}
                 <div
                   id="browser-preview-container"
                   ref={sliderRef}
-                  className="relative select-none overflow-hidden rounded-xl shadow-lg cursor-ew-resize bg-neutral-100 dark:bg-neutral-950"
+                  className="relative select-none overflow-hidden rounded-2xl border border-neutral-200/40 dark:border-neutral-800/40 shadow-[0_25px_60px_rgba(0,0,0,0.06)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.45)] cursor-ew-resize bg-neutral-100 dark:bg-neutral-900"
                   onMouseDown={handleSliderMouseDown}
                   onTouchStart={handleSliderTouchStart}
                 >
                   <img
-                    src="https://raw.githubusercontent.com/VastSea0/hilal-browser/main/prefs/browser/base/content/hilal/welcome-home-preview-black.png"
+                    src="/welcome-home-preview-black.png"
                     alt="Dark Preview"
                     className="w-full h-auto select-none pointer-events-none block"
                     referrerPolicy="no-referrer"
@@ -731,7 +741,7 @@ export default function App() {
                     }}
                   >
                     <img
-                      src="https://raw.githubusercontent.com/VastSea0/hilal-browser/main/prefs/browser/base/content/hilal/welcome-home-preview.png"
+                      src="/welcome-home-preview.png"
                       alt="Light Preview"
                       className="w-full h-auto select-none pointer-events-none block"
                       referrerPolicy="no-referrer"
@@ -750,10 +760,10 @@ export default function App() {
                     <span className="text-[10px] font-bold tracking-tighter">&lt;&gt;</span>
                   </div>
 
-                  <div className="absolute bottom-3 left-3 z-20 px-2.5 py-0.5 text-[9px] font-mono font-semibold tracking-wider rounded bg-white/95 text-neutral-900 dark:bg-neutral-900/95 dark:text-neutral-100 select-none uppercase shadow-sm">
+                  <div className="absolute bottom-3 left-3 z-25 px-2.5 py-0.5 text-[9px] font-mono font-semibold tracking-wider rounded bg-white/95 text-neutral-900 dark:bg-neutral-900/95 dark:text-neutral-100 select-none uppercase shadow-sm">
                     {lang === "tr" ? "Aydınlık" : "Light"}
                   </div>
-                  <div className="absolute bottom-3 right-3 z-20 px-2.5 py-0.5 text-[9px] font-mono font-semibold tracking-wider rounded bg-white/95 text-neutral-900 dark:bg-neutral-900/95 dark:text-neutral-100 select-none uppercase shadow-sm">
+                  <div className="absolute bottom-3 right-3 z-25 px-2.5 py-0.5 text-[9px] font-mono font-semibold tracking-wider rounded bg-white/95 text-neutral-900 dark:bg-neutral-900/95 dark:text-neutral-100 select-none uppercase shadow-sm">
                     {lang === "tr" ? "Karanlık" : "Dark"}
                   </div>
                 </div>
@@ -770,329 +780,381 @@ export default function App() {
             </section>
 
             {/* 4. Feature Highlights */}
-            <section className="mx-auto max-w-5xl px-6 py-12 border-t border-neutral-200/30 dark:border-neutral-900/30" id="ozellikler">
-              <div className="text-center mb-16">
-                <span className="text-[9px] font-bold tracking-[0.2em] text-neutral-400 dark:text-neutral-500 uppercase block">
-                  {activeT.features.tag}
-                </span>
-                <h2 className="mt-2 font-serif text-2xl font-medium tracking-tight sm:text-3xl text-neutral-900 dark:text-white">
-                  {activeT.features.title}
-                </h2>
-                <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-neutral-400 dark:text-neutral-500">
-                  {activeT.features.desc}
-                </p>
+            <section className="relative w-full pb-24 pt-12 text-center" id="ozellikler">
+              <div className="mx-auto max-w-5xl px-6">
+                <div className="text-center mb-16">
+                  <span className="text-[9px] font-bold tracking-[0.2em] text-neutral-400 dark:text-neutral-500 uppercase block">
+                    {activeT.features.tag}
+                  </span>
+                  <h2 className="mt-2 font-serif text-2xl font-medium tracking-tight sm:text-3xl text-neutral-900 dark:text-white">
+                    {activeT.features.title}
+                  </h2>
+                  <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-neutral-400 dark:text-neutral-500">
+                    {activeT.features.desc}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6" id="features-highlights-grid">
+                  {/* Bento Card 1 */}
+                  <div className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-[#FAF9F6] hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/10 dark:hover:bg-neutral-900/20 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.03)] dark:shadow-none transition-all duration-300">
+                    <div>
+                      <div className="w-8 h-8 rounded-full bg-neutral-200/50 dark:bg-neutral-800/50 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 flex items-center justify-center mb-5 select-none">
+                        01
+                      </div>
+                      <h3 className="font-sans text-xs font-bold tracking-wider uppercase text-neutral-900 dark:text-neutral-100">
+                        {activeT.features.card1Title}
+                      </h3>
+                      <div className="text-[10px] text-cobalt dark:text-sky-400 font-medium mt-1.5 font-sans italic">
+                        {lang === "tr" ? "Hızlı sayfa yüklemeleri, tüm eklentilerle tam uyum." : "Fast page loading, full support for your favorite extensions."}
+                      </div>
+                      <p className="mt-3.5 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+                        {activeT.features.card1Desc}
+                      </p>
+                    </div>
+                    <span className="mt-6 self-start inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-neutral-200/50 bg-neutral-100/50 dark:border-neutral-800/50 dark:bg-neutral-900/50 text-[9px] font-mono font-bold tracking-widest uppercase text-neutral-400 dark:text-neutral-500 select-none">
+                      {activeT.features.card1Foot}
+                    </span>
+                  </div>
+
+                  {/* Bento Card 2 */}
+                  <div className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-[#FAF9F6] hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/10 dark:hover:bg-neutral-900/20 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.03)] dark:shadow-none transition-all duration-300">
+                    <div>
+                      <div className="w-8 h-8 rounded-full bg-neutral-200/50 dark:bg-neutral-800/50 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 flex items-center justify-center mb-5 select-none">
+                        02
+                      </div>
+                      <h3 className="font-sans text-xs font-bold tracking-wider uppercase text-neutral-900 dark:text-neutral-100">
+                        {activeT.features.card2Title}
+                      </h3>
+                      <div className="text-[10px] text-cobalt dark:text-sky-400 font-medium mt-1.5 font-sans italic">
+                        {lang === "tr" ? "İnternette sessizce gezinin. Reklam yok, takipçi yok." : "Browse in absolute peace. No ads, no tracking cookies."}
+                      </div>
+                      <p className="mt-3.5 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+                        {activeT.features.card2Desc}
+                      </p>
+                    </div>
+                    <span className="mt-6 self-start inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-neutral-200/50 bg-neutral-100/50 dark:border-neutral-800/50 dark:bg-neutral-900/50 text-[9px] font-mono font-bold tracking-widest uppercase text-neutral-400 dark:text-neutral-500 select-none">
+                      {activeT.features.card2Foot}
+                    </span>
+                  </div>
+
+                  {/* Bento Card 3 */}
+                  <div className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-[#FAF9F6] hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/10 dark:hover:bg-neutral-900/20 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.03)] dark:shadow-none transition-all duration-300">
+                    <div>
+                      <div className="w-8 h-8 rounded-full bg-neutral-200/50 dark:bg-neutral-800/50 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 flex items-center justify-center mb-5 select-none">
+                        03
+                      </div>
+                      <h3 className="font-sans text-xs font-bold tracking-wider uppercase text-neutral-900 dark:text-neutral-100">
+                        {activeT.features.card3Title}
+                      </h3>
+                      <div className="text-[10px] text-cobalt dark:text-sky-400 font-medium mt-1.5 font-sans italic">
+                        {lang === "tr" ? "Varsayılan olarak düzenli. Geniş ekranlarda nefes alma alanı." : "Organized by default. Maximum space on widescreen displays."}
+                      </div>
+                      <p className="mt-3.5 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+                        {activeT.features.card3Desc}
+                      </p>
+                    </div>
+                    <span className="mt-6 self-start inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-neutral-200/50 bg-neutral-100/50 dark:border-neutral-800/50 dark:bg-neutral-900/50 text-[9px] font-mono font-bold tracking-widest uppercase text-neutral-400 dark:text-neutral-500 select-none">
+                      {activeT.features.card3Foot}
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-neutral-200/50 dark:divide-neutral-900/50" id="features-highlights-grid">
-                <div className="py-6 md:py-0 md:px-8 first:pl-0 last:pr-0 text-left">
-                  <span className="font-serif italic font-light text-2xl text-neutral-300 dark:text-neutral-700 block mb-3">01</span>
-                  <h3 className="font-sans text-xs font-bold tracking-wider uppercase text-neutral-900 dark:text-neutral-100">
-                    {activeT.features.card1Title}
-                  </h3>
-                  <p className="mt-2.5 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
-                    {activeT.features.card1Desc}
-                  </p>
-                  <span className="mt-4 inline-block text-[9px] font-mono text-neutral-400 dark:text-neutral-500 uppercase tracking-widest font-semibold">
-                    {activeT.features.card1Foot}
-                  </span>
-                </div>
-
-                <div className="py-6 md:py-0 md:px-8 first:pl-0 last:pr-0 text-left">
-                  <span className="font-serif italic font-light text-2xl text-neutral-300 dark:text-neutral-700 block mb-3">02</span>
-                  <h3 className="font-sans text-xs font-bold tracking-wider uppercase text-neutral-900 dark:text-neutral-100">
-                    {activeT.features.card2Title}
-                  </h3>
-                  <p className="mt-2.5 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
-                    {activeT.features.card2Desc}
-                  </p>
-                  <span className="mt-4 inline-block text-[9px] font-mono text-neutral-400 dark:text-neutral-500 uppercase tracking-widest font-semibold">
-                    {activeT.features.card2Foot}
-                  </span>
-                </div>
-
-                <div className="py-6 md:py-0 md:px-8 first:pl-0 last:pr-0 text-left">
-                  <span className="font-serif italic font-light text-2xl text-neutral-300 dark:text-neutral-700 block mb-3">03</span>
-                  <h3 className="font-sans text-xs font-bold tracking-wider uppercase text-neutral-900 dark:text-neutral-100">
-                    {activeT.features.card3Title}
-                  </h3>
-                  <p className="mt-2.5 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
-                    {activeT.features.card3Desc}
-                  </p>
-                  <span className="mt-4 inline-block text-[9px] font-mono text-neutral-400 dark:text-neutral-500 uppercase tracking-widest font-semibold">
-                    {activeT.features.card3Foot}
-                  </span>
-                </div>
+              {/* Repeating SVG scalloped wave transition to Releases (Mesh Gradient / Dark Section) */}
+              <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
+                <svg viewBox="0 0 1440 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-6 block text-[#FAF9F6] dark:text-[#050505]">
+                  <path d="M0,0 Q60,20 120,0 Q180,20 240,0 Q300,20 360,0 Q420,20 480,0 Q540,20 600,0 Q660,20 720,0 Q780,20 840,0 Q900,20 960,0 Q1020,20 1080,0 Q1140,20 1200,0 Q1260,20 1320,0 Q1380,20 1440,0 L1440,24 L0,24 Z" fill="currentColor" />
+                </svg>
               </div>
             </section>
 
-            {/* 5. Dynamic GitHub Releases & Changelog Section */}
-            <section className="mx-auto max-w-5xl px-6 py-12 md:py-16 border-t border-neutral-200/30 dark:border-neutral-900/30" id="surumler">
-              <div className="text-center mb-10">
-                <span className="text-[9px] font-bold tracking-[0.2em] text-neutral-400 dark:text-neutral-500 uppercase block">
-                  {activeT.releases.tag}
-                </span>
-                <h2 className="mt-2 font-serif text-2xl font-medium tracking-tight sm:text-3xl text-neutral-900 dark:text-white">
-                  {activeT.releases.title}
-                </h2>
-                {isApiFallback && (
-                  <p className="mt-2 text-[9px] font-mono text-neutral-400 bg-neutral-100 py-1 px-3 inline-block rounded dark:bg-neutral-950 dark:text-neutral-500">
-                    {activeT.releases.fallbackNotice}
-                  </p>
-                )}
-              </div>
+            {/* 5. Dynamic GitHub Releases & Changelog Section (Mesh Gradient Background) */}
+            <section className="relative w-full pb-20 pt-16 mesh-bg" id="surumler">
+              <div className="mx-auto max-w-5xl px-6 relative z-10">
+                <div className="text-center mb-12">
+                  <span className="text-[9px] font-bold tracking-[0.2em] text-neutral-400 dark:text-neutral-500 uppercase block">
+                    {activeT.releases.tag}
+                  </span>
+                  <h2 className="mt-2 font-serif text-2xl font-medium tracking-tight sm:text-3xl text-neutral-900 dark:text-white">
+                    {activeT.releases.title}
+                  </h2>
+                  {isApiFallback && (
+                    <p className="mt-3 text-[9px] font-mono text-neutral-500 bg-neutral-100/60 dark:bg-neutral-900/60 py-1 px-3.5 inline-block rounded-full border border-neutral-200/50 dark:border-neutral-800/50 select-none">
+                      {activeT.releases.fallbackNotice}
+                    </p>
+                  )}
+                </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                <div className="lg:col-span-5">
-                  {loading ? (
-                    <div className="p-6 rounded-md border border-neutral-200 dark:border-neutral-900 bg-neutral-50/50 dark:bg-neutral-950/20 animate-pulse space-y-3">
-                      <div className="h-3.5 bg-neutral-200 dark:bg-neutral-800 rounded w-1/4" />
-                      <div className="h-6 bg-neutral-200 dark:bg-neutral-800 rounded w-2/3" />
-                      <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-1/2" />
-                    </div>
-                  ) : (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="p-6 rounded-md border border-neutral-200 dark:border-neutral-900 bg-neutral-50/20 dark:bg-neutral-950/20"
-                      id="active-release-card"
-                    >
-                      <div className="flex items-center justify-between border-b border-neutral-200/50 dark:border-neutral-900/50 pb-3">
-                        <span className="px-2 py-0.5 rounded bg-neutral-100 text-neutral-600 dark:bg-neutral-900 dark:text-neutral-400 font-mono text-[9px] font-bold tracking-widest uppercase">
-                          {activeT.releases.latestAlpha}
-                        </span>
-                        <span className="text-[9px] text-neutral-400 dark:text-neutral-500 font-mono">
-                          {formatLocalizedDate(activeRelease?.published_at || "", lang)}
-                        </span>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                  <div className="lg:col-span-5">
+                    {loading ? (
+                      <div className="p-6 rounded-2xl border border-neutral-200/40 dark:border-neutral-850/40 bg-white/60 dark:bg-neutral-900/30 animate-pulse space-y-4">
+                        <div className="h-3.5 bg-neutral-200 dark:bg-neutral-800 rounded w-1/4" />
+                        <div className="h-6 bg-neutral-200 dark:bg-neutral-800 rounded w-2/3" />
+                        <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-1/2" />
                       </div>
-
-                      <div className="mt-4">
-                        <h3 className="font-sans text-sm font-bold tracking-wider text-neutral-900 dark:text-white">
-                          {activeRelease?.tag_name || "Unknown"}
-                        </h3>
-                        <p className="mt-1 text-[10px] text-neutral-400 dark:text-neutral-500 font-mono">
-                          {activeRelease?.name || "Initial Alpha Release"}
-                        </p>
-                      </div>
-
-                      <div className="mt-6" id="release-assets-download-list">
-                        <div className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 font-mono mb-3.5">
-                          {activeT.releases.binaryTitle}
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-6 md:p-7 rounded-2xl border border-neutral-200/40 dark:border-neutral-800/40 bg-white/70 dark:bg-neutral-900/35 backdrop-blur-sm shadow-[0_12px_40px_rgba(0,0,0,0.02)]"
+                        id="active-release-card"
+                      >
+                        <div className="flex items-center justify-between border-b border-neutral-200/40 dark:border-neutral-800/40 pb-4">
+                          <span className="px-2.5 py-0.5 rounded-full bg-cobalt/10 text-cobalt dark:bg-sky-950/45 dark:text-sky-300 font-mono text-[9px] font-bold tracking-widest uppercase">
+                            {activeT.releases.latestAlpha}
+                          </span>
+                          <span className="text-[9px] text-neutral-400 dark:text-neutral-500 font-mono">
+                            {formatLocalizedDate(activeRelease?.published_at || "", lang)}
+                          </span>
                         </div>
 
-                        <div className="divide-y divide-neutral-200/50 dark:divide-neutral-900/50">
-                          {activeRelease?.assets && activeRelease.assets.length > 0 ? (
-                            activeRelease.assets.map((asset) => (
-                              <button
-                                key={asset.id}
-                                id={`direct-asset-dl-${asset.id}`}
-                                onClick={() => {
-                                  setSelectedAssetId(asset.id);
-                                  setIsDownloadOpen(true);
-                                }}
-                                className="w-full flex items-center justify-between py-3 text-left hover:text-neutral-900 dark:hover:text-white transition-colors"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <span className="font-mono text-[9px] tracking-wider text-neutral-400 dark:text-neutral-500 font-bold border border-neutral-200 dark:border-neutral-800 rounded px-1.5 py-0.5">
-                                    {getOSIconForAsset(asset.name)}
-                                  </span>
-                                  <div className="truncate max-w-[180px]">
-                                    <div className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 truncate">
-                                      {asset.name}
+                        <div className="mt-5">
+                          <h3 className="font-sans text-sm font-bold tracking-wider text-neutral-900 dark:text-white">
+                            {activeRelease?.tag_name || "Unknown"}
+                          </h3>
+                          <p className="mt-1 text-[10px] text-neutral-400 dark:text-neutral-500 font-mono">
+                            {activeRelease?.name || "Initial Alpha Release"}
+                          </p>
+                        </div>
+
+                        <div className="mt-6" id="release-assets-download-list">
+                          <div className="text-[9px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 font-mono mb-4">
+                            {activeT.releases.binaryTitle}
+                          </div>
+
+                          <div className="space-y-2">
+                            {activeRelease?.assets && activeRelease.assets.length > 0 ? (
+                              activeRelease.assets.map((asset) => (
+                                <button
+                                  key={asset.id}
+                                  id={`direct-asset-dl-${asset.id}`}
+                                  onClick={() => {
+                                    setSelectedAssetId(asset.id);
+                                    setIsDownloadOpen(true);
+                                  }}
+                                  className="w-full flex items-center justify-between p-3 rounded-xl border border-neutral-200/35 hover:bg-neutral-50 dark:border-neutral-800/35 dark:hover:bg-neutral-900/35 transition-all text-left"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <span className="font-mono text-[8px] tracking-wider text-neutral-500 dark:text-neutral-400 font-bold border border-neutral-200 dark:border-neutral-800 rounded-full px-2 py-0.5 bg-neutral-100/50 dark:bg-neutral-900/50">
+                                      {getOSIconForAsset(asset.name)}
+                                    </span>
+                                    <div className="truncate max-w-[160px] md:max-w-[200px]">
+                                      <div className="text-[11.5px] font-semibold text-neutral-800 dark:text-neutral-200 truncate">
+                                        {asset.name}
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                                <span className="font-mono text-[9px] text-neutral-400 dark:text-neutral-500">
-                                  {formatBytes(asset.size)}
-                                </span>
-                              </button>
-                            ))
-                          ) : (
-                            <div className="text-center py-4">
-                              <a
-                                href={activeRelease?.html_url || "https://github.com/VastSea0/hilal-browser/releases"}
-                                target="_blank"
-                                className="text-[10px] font-semibold text-neutral-400 hover:text-neutral-600 underline font-mono"
-                              >
-                                {activeT.releases.allReleasesLink}
-                              </a>
-                            </div>
-                          )}
+                                  <span className="font-mono text-[9px] text-neutral-400 dark:text-neutral-500 shrink-0">
+                                    {formatBytes(asset.size)}
+                                  </span>
+                                </button>
+                              ))
+                            ) : (
+                              <div className="text-center py-4">
+                                <a
+                                  href={activeRelease?.html_url || "https://github.com/VastSea0/hilal-browser/releases"}
+                                  target="_blank"
+                                  className="text-[10px] font-semibold text-neutral-400 hover:text-neutral-600 underline font-mono"
+                                >
+                                  {activeT.releases.allReleasesLink}
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+
+                  <div className="lg:col-span-7">
+                    {loading ? (
+                      <div className="p-6 space-y-4 border border-neutral-200/40 dark:border-neutral-850/40 bg-white/60 dark:bg-neutral-900/30 rounded-2xl animate-pulse">
+                        <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-1/4" />
+                        <div className="space-y-2 pt-3">
+                          <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-full" />
+                          <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-11/12" />
                         </div>
                       </div>
-                    </motion.div>
-                  )}
-                </div>
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-6 md:p-7 rounded-2xl border border-neutral-200/40 dark:border-neutral-800/40 bg-white/70 dark:bg-neutral-900/35 backdrop-blur-sm shadow-[0_12px_40px_rgba(0,0,0,0.02)]"
+                        id="changelog-details-box"
+                      >
+                        <div className="flex items-center gap-2 text-[9px] font-mono font-bold tracking-widest text-neutral-400 dark:text-neutral-500 mb-5 uppercase">
+                          <Terminal className="h-3.5 w-3.5" />
+                          <span>{activeT.releases.changelogTitle}</span>
+                        </div>
 
-                <div className="lg:col-span-7">
-                  {loading ? (
-                    <div className="p-6 space-y-3 border border-neutral-200 dark:border-neutral-900 bg-neutral-50/50 dark:bg-neutral-950/20 rounded-md animate-pulse">
-                      <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-1/4" />
-                      <div className="space-y-1.5 pt-3">
-                        <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-full" />
-                        <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-11/12" />
-                      </div>
-                    </div>
-                  ) : (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="p-6 rounded-md border border-neutral-200 dark:border-neutral-900 bg-neutral-50/10 dark:bg-neutral-950/10"
-                      id="changelog-details-box"
-                    >
-                      <div className="flex items-center gap-2 text-[9px] font-mono font-bold tracking-widest text-neutral-400 dark:text-neutral-500 mb-4 uppercase">
-                        <Terminal className="h-3 w-3" />
-                        <span>{activeT.releases.changelogTitle}</span>
-                      </div>
-
-                      <div className="prose prose-sm dark:prose-invert max-w-none text-left font-sans select-text">
-                        {activeRelease?.body ? (
-                          <div className="space-y-3.5">
-                            {parseChangelogToSimpleLines(activeRelease.body).map((line, idx) => {
-                              if (line.type === "header") {
-                                return (
-                                  <h4
-                                    key={idx}
-                                    className="font-sans text-xs font-bold tracking-wider text-neutral-900 dark:text-neutral-100 border-b border-neutral-200/50 dark:border-neutral-900/50 pb-1 mt-4 first:mt-0"
-                                  >
-                                    {line.text}
-                                  </h4>
-                                );
-                              } else if (line.type === "item") {
-                                return (
-                                  <div key={idx} className="flex gap-2 text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
-                                    <span className="text-neutral-400 dark:text-neutral-600 shrink-0">—</span>
-                                    <span
+                        <div className="prose prose-sm dark:prose-invert max-w-none text-left font-sans select-text">
+                          {activeRelease?.body ? (
+                            <div className="space-y-4">
+                              {parseChangelogToSimpleLines(activeRelease.body).map((line, idx) => {
+                                if (line.type === "header") {
+                                  return (
+                                    <h4
+                                      key={idx}
+                                      className="font-sans text-xs font-bold tracking-wider text-neutral-900 dark:text-neutral-100 border-b border-neutral-200/40 dark:border-neutral-800/40 pb-1 mt-5 first:mt-0"
+                                    >
+                                      {line.text}
+                                    </h4>
+                                  );
+                                } else if (line.type === "item") {
+                                  return (
+                                    <div key={idx} className="flex gap-2.5 text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                                      <span className="text-neutral-350 dark:text-neutral-700 shrink-0 select-none">—</span>
+                                      <span
+                                        dangerouslySetInnerHTML={{
+                                          __html: line.text
+                                            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                                            .replace(/`(.*?)`/g, "<code class='font-mono bg-neutral-100/80 dark:bg-neutral-950/80 px-1 py-0.5 rounded text-neutral-650 dark:text-neutral-350'>$1</code>")
+                                        }}
+                                      />
+                                    </div>
+                                  );
+                                } else {
+                                  return (
+                                    <p
+                                      key={idx}
+                                      className="text-xs text-neutral-450 dark:text-neutral-500 italic"
                                       dangerouslySetInnerHTML={{
-                                        __html: line.text
-                                          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                                          .replace(/`(.*?)`/g, "<code class='font-mono bg-neutral-100 dark:bg-neutral-900 px-1 py-0.5 rounded text-neutral-600 dark:text-neutral-400'>$1</code>")
+                                        __html: line.text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
                                       }}
                                     />
-                                  </div>
-                                );
-                              } else {
-                                return (
-                                  <p
-                                    key={idx}
-                                    className="text-xs text-neutral-400 dark:text-neutral-500 italic"
-                                    dangerouslySetInnerHTML={{
-                                        __html: line.text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                                    }}
-                                  />
-                                );
-                              }
-                            })}
-                          </div>
-                        ) : (
-                          <p className="text-xs italic text-neutral-400 dark:text-neutral-500 text-center py-6">
-                            {activeT.releases.fallbackChangelog}
-                          </p>
-                        )}
-                      </div>
+                                  );
+                                }
+                              })}
+                            </div>
+                          ) : (
+                            <p className="text-xs italic text-neutral-400 dark:text-neutral-500 text-center py-6">
+                              {activeT.releases.fallbackChangelog}
+                            </p>
+                          )}
+                        </div>
 
-                      <div className="mt-8 pt-4 border-t border-neutral-200/50 dark:border-neutral-900/50 flex flex-wrap gap-5 items-center justify-between text-[10px] font-mono">
-                        <a
-                          href="https://github.com/VastSea0/hilal-browser/issues"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-neutral-400 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-300 flex items-center gap-1 transition-colors"
-                        >
-                          {activeT.releases.bugReport}
-                        </a>
-                        <a
-                          href="https://discord.gg/JZJ4tmPHFw"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-neutral-400 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-300 flex items-center gap-1 transition-colors"
-                        >
-                          Discord
-                        </a>
-                        <a
-                          href="https://github.com/VastSea0/hilal-browser/commits"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-neutral-400 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-300 flex items-center gap-1 transition-colors"
-                        >
-                          {activeT.releases.commits}
-                        </a>
-                      </div>
-                    </motion.div>
-                  )}
+                        <div className="mt-8 pt-4 border-t border-neutral-200/40 dark:border-neutral-800/40 flex flex-wrap gap-5 items-center justify-between text-[10px] font-mono">
+                          <a
+                            href="https://github.com/VastSea0/hilal-browser/issues"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-neutral-400 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-300 flex items-center gap-1 transition-colors"
+                          >
+                            {activeT.releases.bugReport}
+                          </a>
+                          <a
+                            href="https://discord.gg/JZJ4tmPHFw"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-neutral-400 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-300 flex items-center gap-1 transition-colors"
+                          >
+                            Discord
+                          </a>
+                          <a
+                            href="https://github.com/VastSea0/hilal-browser/commits"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-neutral-400 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-300 flex items-center gap-1 transition-colors"
+                          >
+                            {activeT.releases.commits}
+                          </a>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* High-end call-to-action button to switch view to Releases archive */}
-              <div className="mt-12 text-center">
-                <button
-                  onClick={() => {
-                    setView("releases");
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                  className="inline-flex items-center gap-2 rounded border border-neutral-200 hover:bg-neutral-50 dark:border-neutral-900 dark:hover:bg-neutral-950 px-6 py-3.5 text-[10px] font-mono font-bold tracking-widest uppercase text-neutral-600 dark:text-neutral-400 transition-all active:scale-[0.98]"
-                >
-                  <ListRestart className="h-3.5 w-3.5" />
-                  {lang === "tr" ? "Tüm Sürüm Arşivi ve Tarihçe →" : "Full Release Archive & History →"}
-                </button>
+                {/* High-end call-to-action button to switch view to Releases archive */}
+                <div className="mt-12 text-center">
+                  <button
+                    onClick={() => {
+                      setView("releases");
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="inline-flex items-center gap-2 rounded-full border border-neutral-300 hover:bg-neutral-55 hover:border-neutral-400/80 dark:border-neutral-800 dark:hover:bg-neutral-900 px-6.5 py-3.5 text-[9.5px] font-sans font-bold tracking-widest uppercase text-neutral-600 dark:text-neutral-400 transition-all active:scale-[0.98] shadow-sm select-none"
+                  >
+                    <ListRestart className="h-3.5 w-3.5" />
+                    {lang === "tr" ? "Tüm Sürüm Arşivi ve Tarihçe →" : "Full Release Archive & History →"}
+                  </button>
+                </div>
               </div>
             </section>
 
-            {/* 6. Principles / Core Values */}
-            <section className="mx-auto max-w-4xl px-6 py-12 md:py-16 border-t border-neutral-200/30 dark:border-neutral-900/30" id="vizyon">
-              <div className="text-center mb-12">
-                <span className="text-[9px] font-bold tracking-[0.2em] text-neutral-400 dark:text-neutral-500 uppercase block">
-                  {activeT.principles.tag}
-                </span>
-                <h2 className="mt-2 font-serif text-2xl font-medium tracking-tight sm:text-3xl text-neutral-900 dark:text-white">
-                  {activeT.principles.title}
-                </h2>
+            {/* 6. Principles / Core Values (Mesh Gradient Background) */}
+            <section className="relative w-full pb-24 pt-12 mesh-bg border-t border-neutral-200/20 dark:border-neutral-900/20" id="vizyon">
+              <div className="mx-auto max-w-4xl px-6 relative z-10">
+                <div className="text-center mb-12">
+                  <span className="text-[9px] font-bold tracking-[0.2em] text-neutral-400 dark:text-neutral-500 uppercase block">
+                    {activeT.principles.tag}
+                  </span>
+                  <h2 className="mt-2 font-serif text-2xl font-medium tracking-tight sm:text-3xl text-neutral-900 dark:text-white">
+                    {activeT.principles.title}
+                  </h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8" id="core-values-bento">
+                  {/* Principle Bento Card 1 */}
+                  <div className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-white/70 hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/35 dark:hover:bg-neutral-900/50 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.03)] transition-all duration-300">
+                    <div>
+                      <div className="h-10 w-10 rounded-full border border-neutral-200/50 bg-neutral-100/50 dark:border-neutral-800/50 dark:bg-neutral-950/50 flex items-center justify-center mb-5 text-neutral-500 dark:text-neutral-400 select-none">
+                        <CodeXml className="h-5 w-5" />
+                      </div>
+                      <h3 className="font-sans text-xs font-bold tracking-wider uppercase text-neutral-900 dark:text-white">
+                        {activeT.principles.card1Title}
+                      </h3>
+                      <div className="text-[10px] text-cobalt dark:text-sky-400 font-medium mt-1 font-sans italic">
+                        {lang === "tr" ? "Gizli veri toplama mekanizmaları yok, her şey şeffaf." : "No hidden tracking scripts. Entirely open source and auditable."}
+                      </div>
+                      <p className="mt-3.5 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+                        {activeT.principles.card1Desc}
+                      </p>
+                    </div>
+                    <a
+                      href="https://github.com/VastSea0/hilal-browser"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-6 self-start inline-flex items-center gap-1.5 px-4.5 py-1.5 rounded-full border border-neutral-200/60 bg-white text-[9.5px] font-mono font-bold tracking-widest uppercase text-neutral-500 hover:bg-neutral-100 hover:text-neutral-850 dark:border-neutral-800/65 dark:bg-neutral-900/60 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white transition-all select-none"
+                    >
+                      {activeT.principles.card1Link}
+                      <ArrowRight className="h-3 w-3" />
+                    </a>
+                  </div>
+
+                  {/* Principle Bento Card 2 */}
+                  <div className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-white/70 hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/35 dark:hover:bg-neutral-900/50 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.03)] transition-all duration-300">
+                    <div>
+                      <div className="h-10 w-10 rounded-full border border-neutral-200/50 bg-neutral-100/50 dark:border-neutral-800/50 dark:bg-neutral-950/50 flex items-center justify-center mb-5 text-neutral-500 dark:text-neutral-400 select-none">
+                        <Lock className="h-5 w-5" />
+                      </div>
+                      <h3 className="font-sans text-xs font-bold tracking-wider uppercase text-neutral-900 dark:text-white">
+                        {activeT.principles.card2Title}
+                      </h3>
+                      <div className="text-[10px] text-cobalt dark:text-sky-400 font-medium mt-1 font-sans italic">
+                        {lang === "tr" ? "Verileriniz sadece sizin cihazınızda yaşar." : "Your personal metrics and passwords never leave your hardware."}
+                      </div>
+                      <p className="mt-3.5 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+                        {activeT.principles.card2Desc}
+                      </p>
+                    </div>
+                    <div className="mt-6 self-start inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-neutral-200 bg-neutral-100/70 text-[9px] font-mono font-bold tracking-widest uppercase text-neutral-450 dark:border-neutral-800/60 dark:bg-neutral-900/40 dark:text-neutral-500 select-none">
+                      <BookmarkCheck className="h-3.5 w-3.5" />
+                      <span>{activeT.principles.card2Foot}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12" id="core-values-bento">
-                <div className="text-left flex flex-col justify-between">
-                  <div>
-                    <div className="h-9 w-9 rounded border border-neutral-200 dark:border-neutral-900 flex items-center justify-center mb-4 text-neutral-400 dark:text-neutral-500">
-                      <CodeXml className="h-4.5 w-4.5" />
-                    </div>
-                    <h3 className="font-sans text-sm font-bold tracking-wider uppercase text-neutral-900 dark:text-white">
-                      {activeT.principles.card1Title}
-                    </h3>
-                    <p className="mt-3 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
-                      {activeT.principles.card1Desc}
-                    </p>
-                  </div>
-                  <a
-                    href="https://github.com/VastSea0/hilal-browser"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-5 inline-flex items-center gap-1.5 text-[10px] font-mono font-semibold text-neutral-400 hover:text-neutral-955 dark:hover:text-white transition-colors"
-                  >
-                    {activeT.principles.card1Link}
-                    <ArrowRight className="h-3 w-3" />
-                  </a>
-                </div>
-
-                <div className="text-left flex flex-col justify-between">
-                  <div>
-                    <div className="h-9 w-9 rounded border border-neutral-200 dark:border-neutral-900 flex items-center justify-center mb-4 text-neutral-400 dark:text-neutral-500">
-                      <Lock className="h-4.5 w-4.5" />
-                    </div>
-                    <h3 className="font-sans text-sm font-bold tracking-wider uppercase text-neutral-900 dark:text-white">
-                      {activeT.principles.card2Title}
-                    </h3>
-                    <p className="mt-3 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
-                      {activeT.principles.card2Desc}
-                    </p>
-                  </div>
-                  <div className="mt-5 flex items-center gap-1.5 text-[9px] font-mono font-bold tracking-widest text-neutral-400 dark:text-neutral-500 uppercase">
-                    <BookmarkCheck className="h-3.5 w-3.5" />
-                    <span>{activeT.principles.card2Foot}</span>
-                  </div>
-                </div>
+              {/* Repeating SVG scalloped wave transition to FAQ & Footer (Cream Section) */}
+              <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
+                <svg viewBox="0 0 1440 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-6 block text-[#FAF9F6] dark:text-[#050505]">
+                  <path d="M0,0 Q60,20 120,0 Q180,20 240,0 Q300,20 360,0 Q420,20 480,0 Q540,20 600,0 Q660,20 720,0 Q780,20 840,0 Q900,20 960,0 Q1020,20 1080,0 Q1140,20 1200,0 Q1260,20 1320,0 Q1380,20 1440,0 L1440,24 L0,24 Z" fill="currentColor" />
+                </svg>
               </div>
             </section>
 
             {/* 7. FAQ Accordion */}
-            <section className="mx-auto max-w-3xl px-6 py-12 md:py-16 border-t border-neutral-200/30 dark:border-neutral-900/30" id="faq-section">
+            <section className="mx-auto max-w-3xl px-6 py-16 md:py-24" id="faq-section">
               <div className="text-center mb-12">
                 <span className="text-[9px] font-bold tracking-[0.2em] text-neutral-400 dark:text-neutral-500 uppercase block">
                   {activeT.faq.tag}
@@ -1102,23 +1164,24 @@ export default function App() {
                 </h2>
               </div>
 
-              <div className="divide-y divide-neutral-200/50 dark:divide-neutral-900/50" id="faq-accordion-group">
+              <div className="space-y-3.5" id="faq-accordion-group">
                 {faqList.map((faq, idx) => {
                   const isOpen = activeFaq === idx;
                   return (
                     <div
                       key={idx}
                       id={`faq-item-${idx}`}
-                      className="py-4 first:pt-0 last:pb-0 text-left"
+                      className="text-left rounded-2xl border border-neutral-200/30 dark:border-neutral-850/40 bg-white/30 dark:bg-neutral-900/10 hover:bg-white/60 dark:hover:bg-neutral-900/20 transition-all duration-200 overflow-hidden"
                     >
                       <button
                         onClick={() => setActiveFaq(isOpen ? null : idx)}
-                        className="w-full flex items-center justify-between text-left font-sans text-xs md:text-sm font-bold text-neutral-800 dark:text-neutral-200 py-2 hover:text-neutral-950 dark:hover:text-white transition-colors"
+                        className="w-full flex items-center justify-between text-left font-sans text-xs md:text-sm font-bold text-neutral-800 dark:text-neutral-200 py-4.5 px-5 hover:text-neutral-950 dark:hover:text-white transition-colors"
                       >
                         <span>{faq.q}</span>
                         <motion.div
                           animate={{ rotate: isOpen ? 180 : 0 }}
                           transition={{ duration: 0.2 }}
+                          className="shrink-0 pl-3"
                         >
                           <ChevronDown className="h-4 w-4 text-neutral-400" />
                         </motion.div>
@@ -1133,7 +1196,7 @@ export default function App() {
                             transition={{ duration: 0.25, ease: "easeInOut" }}
                             className="overflow-hidden"
                           >
-                            <div className="pb-3 pt-2 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+                            <div className="pb-5 pt-1 px-5 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
                               {faq.a}
                             </div>
                           </motion.div>
@@ -1247,35 +1310,35 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* 8. Footer Section */}
+      {/* 8. Footer Section (Premium Dark Solid Block) */}
       <footer
-        className="border-t border-neutral-200/30 dark:border-neutral-900/30 py-12"
+        className="w-full bg-[#0b0f19] text-neutral-350 py-16 relative overflow-hidden"
         id="app-footer"
       >
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-neutral-200/30 dark:border-neutral-900/30">
+        <div className="mx-auto max-w-6xl px-6 relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-10 border-b border-neutral-850">
             <div className="flex items-center gap-3">
               <img
-                src="https://raw.githubusercontent.com/VastSea0/hilal-browser/main/branding/hilal/default128.png"
+                src="/default128.png"
                 alt="Hilal Logo"
-                className="h-5.5 w-5.5 opacity-80"
+                className="h-6 w-6 opacity-95"
                 referrerPolicy="no-referrer"
               />
-              <span className="font-sans text-xs font-semibold tracking-[0.15em] uppercase text-neutral-900 dark:text-neutral-100">
-                hilal <span className="text-neutral-400 dark:text-neutral-500 font-light">browser</span>
+              <span className="font-sans text-[10.5px] font-bold tracking-[0.2em] uppercase text-white">
+                hilal <span className="text-neutral-500 font-light">browser</span>
               </span>
             </div>
 
-            <p className="font-serif italic text-xs text-neutral-400 dark:text-neutral-500 text-center select-text">
+            <p className="font-serif italic text-xs text-sky-200/65 text-center select-text max-w-sm md:max-w-none">
               “{activeT.footer.quote}”
             </p>
 
-            <div className="flex items-center gap-4.5">
+            <div className="flex items-center gap-4">
               <a
                 href="https://github.com/VastSea0/hilal-browser"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-neutral-400 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-white transition-colors"
+                className="text-neutral-400 hover:text-white transition-colors"
                 aria-label="GitHub Repository"
               >
                 <Github className="h-4.5 w-4.5" />
@@ -1284,7 +1347,7 @@ export default function App() {
                 href="https://discord.gg/JZJ4tmPHFw"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-neutral-400 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-white transition-colors"
+                className="text-neutral-400 hover:text-white transition-colors"
                 aria-label="Discord Server"
               >
                 <span className="flex h-4.5 w-4.5 items-center justify-center">
@@ -1294,14 +1357,14 @@ export default function App() {
               <button
                 id="footer-download-btn"
                 onClick={() => setIsDownloadOpen(true)}
-                className="text-[9px] font-bold tracking-widest uppercase border border-neutral-200 hover:bg-neutral-50 px-3.5 py-1.5 rounded text-neutral-700 dark:border-neutral-800 dark:hover:bg-neutral-950 dark:text-neutral-350 transition-colors font-mono"
+                className="text-[9px] font-bold tracking-widest uppercase border border-neutral-800 bg-neutral-900/60 px-4 py-2 rounded-full text-white hover:border-neutral-700 hover:bg-neutral-900 transition-colors font-mono select-none"
               >
                 {activeT.footer.install}
               </button>
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-center text-[10px] font-mono text-neutral-400 dark:text-neutral-500">
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-center text-[9.5px] font-mono text-neutral-500">
             <p className="select-text">
               &copy; {new Date().getFullYear()} {activeT.footer.copyright}
             </p>
