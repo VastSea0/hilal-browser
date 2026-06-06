@@ -18,6 +18,8 @@
 #   .\scripts\build-windows.ps1 -Binaries        # C++/Rust only
 #   .\scripts\build-windows.ps1 -Run             # build then run
 #   .\scripts\build-windows.ps1 -Package          # build then package
+#   .\scripts\build-windows.ps1 -Clobber          # clear stale object files before build
+#   .\scripts\build-windows.ps1 -Sccache          # use sccache if it is available on PATH
 #   .\scripts\build-windows.ps1 -Apply            # force-apply before build
 #   .\scripts\build-windows.ps1 -SkipApply        # skip apply step
 
@@ -28,6 +30,8 @@ $Faster = $false
 $Binaries = $false
 $Run = $false
 $Package = $false
+$Clobber = $false
+$Sccache = $false
 $Apply = $false
 $SkipApply = $false
 
@@ -37,6 +41,8 @@ foreach ($arg in $args) {
         "-binaries"   { $Binaries = $true }
         "-run"        { $Run = $true }
         "-package"    { $Package = $true }
+        "-clobber"    { $Clobber = $true }
+        "-sccache"    { $Sccache = $true }
         "-apply"      { $Apply = $true }
         "-skipapply"  { $SkipApply = $true }
         default       { Write-Warn "Ignored unexpected argument: $arg" }
@@ -217,9 +223,36 @@ if (Test-Path $mozconfigSrc) {
     Write-Warn "mozconfigs/windows not found; using default Firefox build config."
 }
 
-# --- 8. Build ---------------------------------------------------------------
+if ($Sccache) {
+    $sccacheCmd = Get-Command sccache -ErrorAction SilentlyContinue
+    if ($sccacheCmd) {
+        Add-Content -Path $mozconfigDst -Value "ac_add_options --with-ccache=sccache"
+        Write-Step "Enabled sccache in engine/mozconfig"
+    } else {
+        Write-Warn "Sccache requested but not found on PATH; continuing without it."
+    }
+}
+
+# --- 8. Optional clobber -----------------------------------------------------
 
 $mach = Join-Path $firefoxSrc "mach"
+
+if ($Clobber) {
+    Write-Step "Clobbering stale Windows object directory ..."
+    Push-Location $firefoxSrc
+    try {
+        & $pythonExe $mach @("clobber")
+        if ($LASTEXITCODE -ne 0) {
+            Write-Err "mach clobber failed with exit code $LASTEXITCODE."
+            exit 1
+        }
+    } finally {
+        Pop-Location
+    }
+}
+
+# --- 9. Build ---------------------------------------------------------------
+
 $cmdArgs = @("build")
 
 if ($Faster) {
@@ -245,7 +278,7 @@ try {
 
 Write-Step "Build finished."
 
-# --- 9. Run -----------------------------------------------------------------
+# --- 10. Run ----------------------------------------------------------------
 
 if ($Run) {
     Write-Step "Launching Hilal Browser ..."
@@ -258,7 +291,7 @@ if ($Run) {
     exit 0
 }
 
-# --- 10. Package ------------------------------------------------------------
+# --- 11. Package ------------------------------------------------------------
 
 if ($Package) {
     Write-Step "Packaging Hilal Browser ..."
@@ -275,6 +308,8 @@ if ($Package) {
 
     Write-Step "Package created. Look in:"
     Write-Host "  $firefoxSrc\obj-*-pc-windows-msvc\dist\"
+    Write-Host "  $firefoxSrc\obj-*-pc-windows-msvc\dist\*.installer.exe"
+    Write-Host "  $firefoxSrc\obj-*-pc-windows-msvc\dist\*.zip"
     Write-Host ""
     exit 0
 }

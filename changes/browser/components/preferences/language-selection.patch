@@ -99,20 +99,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +          : "The browser needs to be restarted to apply language changes. Restart now?";
 +
 +        if (Services.prompt.confirm(window, title, message)) {
-+          Services.locale.requestedLocales = nextLocales;
-+          let cancelQuit = Cc["@mozilla.org/supports-PRBool;1"].createInstance(
-+            Ci.nsISupportsPRBool
-+          );
-+          Services.obs.notifyObservers(
-+            cancelQuit,
-+            "quit-application-requested",
-+            "restart"
-+          );
-+          if (!cancelQuit.data) {
-+            Services.startup.quit(
-+              Services.startup.eAttemptQuit | Services.startup.eRestart
-+            );
-+          }
++          Multilingual.applyAndRestart(nextLocales);
 +        }
 +      });
 +    }

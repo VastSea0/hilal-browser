@@ -31,9 +31,11 @@ export default function DownloadModal({ isOpen, onClose, release, lang, initialA
       successDesc: "dosyası tarayıcınızın indirme kuyruğuna başarıyla teslim edildi.",
       downloadOther: "Başka bir platform sürümü seç",
       osWindowsDetail: "Windows x64 Installer",
+      osWinZipDetail: "Windows taşınabilir ZIP paketi",
       osMacDetail: "macOS Universal (Apple Silicon & Intel)",
       osDebDetail: "Linux Debian/Ubuntu DEB",
       osAppImageDetail: "Linux AppImage Çalıştırılabilir Paket",
+      osTarballDetail: "Linux tar.gz taşınabilir arşivi",
       osSrcDetail: "Hilal Kaynak Kodu Arşivi",
       osOtherDetail: "Geliştirici İkili Dosyası",
       otherVersions: "Diğer Platformlar",
@@ -57,9 +59,11 @@ export default function DownloadModal({ isOpen, onClose, release, lang, initialA
       successDesc: "has been successfully dispatched to your browser's download queue.",
       downloadOther: "Select another platform build",
       osWindowsDetail: "Windows x64 Installer",
+      osWinZipDetail: "Windows portable ZIP package",
       osMacDetail: "macOS Universal (Apple Silicon & Intel)",
       osDebDetail: "Linux Debian/Ubuntu DEB",
       osAppImageDetail: "Linux AppImage Executable Package",
+      osTarballDetail: "Linux tar.gz portable archive",
       osSrcDetail: "Hilal Source Archive",
       osOtherDetail: "Developer Binary Build",
       otherVersions: "Other Targets",
@@ -150,8 +154,17 @@ export default function DownloadModal({ isOpen, onClose, release, lang, initialA
     if (lower.endsWith(".appimage")) {
       return { os: "Linux Portable", icon: "LNX", desc: curr.osAppImageDetail };
     }
-    if (lower.endsWith(".zip") || lower.endsWith(".tar.gz")) {
-      return { os: curr.sourceCode, icon: "SRC", desc: curr.osSrcDetail };
+    if (lower.endsWith(".tar.gz") || lower.endsWith(".tar.xz")) {
+      if (lower.includes("source")) {
+        return { os: curr.sourceCode, icon: "SRC", desc: curr.osSrcDetail };
+      }
+      return { os: "Linux Tarball", icon: "LNX", desc: curr.osTarballDetail };
+    }
+    if (lower.endsWith(".zip")) {
+      if (lower.includes("source")) {
+        return { os: curr.sourceCode, icon: "SRC", desc: curr.osSrcDetail };
+      }
+      return { os: "Windows Portable", icon: "WIN", desc: curr.osWinZipDetail };
     }
     return { os: curr.otherVersions, icon: "BIN", desc: curr.osOtherDetail };
   };

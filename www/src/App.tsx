@@ -210,7 +210,13 @@ export default function App() {
     const n = name.toLowerCase();
     if (n.endsWith(".exe")) return "WIN";
     if (n.endsWith(".dmg")) return "MAC";
-    if (n.endsWith(".deb") || n.endsWith(".appimage")) return "LNX";
+    if (
+      n.endsWith(".deb") ||
+      n.endsWith(".appimage") ||
+      n.endsWith(".tar.gz") ||
+      n.endsWith(".tar.xz")
+    ) return "LNX";
+    if (n.endsWith(".zip")) return "WIN";
     return "BIN";
   };
 
@@ -430,9 +436,12 @@ export default function App() {
     const lower = name.toLowerCase();
     if (lower.endsWith(".mar")) return "Update";
     if (lower.endsWith(".dmg")) return "macOS DMG";
+    if (lower.endsWith(".installer.exe")) return "Windows Installer";
     if (lower.endsWith(".exe")) return "Windows";
+    if (lower.endsWith(".zip")) return "Windows ZIP";
     if (lower.endsWith(".deb")) return "Linux DEB";
     if (lower.endsWith(".appimage")) return "Linux AppImage";
+    if (lower.endsWith(".tar.gz") || lower.endsWith(".tar.xz")) return "Linux Tarball";
     return "Binary";
   };
 

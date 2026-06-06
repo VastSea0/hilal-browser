@@ -326,15 +326,20 @@ jobs:
       - name: Build and package (AppImage)
         env:
           SCCACHE_DIR: ${{ github.workspace }}/.sccache
+        run: scripts/build-linux.sh build appimage-build
+
+      - name: Check Linux package outputs
         run: |
-          echo "ac_add_options --with-compiler-wrapper=sccache" >> engine/mozconfig
-          scripts/build-linux.sh build appimage-build
+          test -n "$(find dist -maxdepth 1 -name '*.tar.gz' -print -quit)"
+          test -n "$(find dist -maxdepth 1 -name '*.AppImage' -print -quit)"
 
       - name: Upload Linux Assets
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.create-release.outputs.tag }}
+          fail_on_unmatched_files: true
           files: |
+            dist/*.tar.gz
             dist/*.AppImage
 
   build-windows:
@@ -400,27 +405,27 @@ jobs:
         shell: pwsh
         run: .\bin\hil.exe apply --force
 
-      - name: Cache sccache
-        uses: actions/cache@v4
-        with:
-          path: .sccache
-          key: ${{ runner.os }}-sccache-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-sccache-
-
       - name: Build and Package
         shell: pwsh
-        env:
-          SCCACHE_DIR: ${{ github.workspace }}\.sccache
+        run: .\scripts\build-windows.ps1 -Package -Clobber
+
+      - name: Check Windows package outputs
+        shell: pwsh
         run: |
-          Add-Content -Path engine\mozconfig -Value "ac_add_options --with-compiler-wrapper=sccache"
-          .\scripts\build-windows.ps1 -Package
+          $installers = Get-ChildItem -Path "engine\obj-*\dist" -Filter "*.installer.exe" -File -ErrorAction SilentlyContinue
+          $zips = Get-ChildItem -Path "engine\obj-*\dist" -Filter "*.zip" -File -ErrorAction SilentlyContinue
+          if (-not $installers) { throw "Missing Windows installer (*.installer.exe) in engine\obj-*\dist" }
+          if (-not $zips) { throw "Missing Windows zip package (*.zip) in engine\obj-*\dist" }
+          $installers | ForEach-Object { Write-Host "Installer: $($_.FullName)" }
+          $zips | ForEach-Object { Write-Host "Zip: $($_.FullName)" }
 
       - name: Upload Windows Assets
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.create-release.outputs.tag }}
+          fail_on_unmatched_files: true
           files: |
+            engine/obj-*/dist/*.installer.exe
             engine/obj-*/dist/*.zip
 
   publish-release:

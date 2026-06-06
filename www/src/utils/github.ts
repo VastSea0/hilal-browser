@@ -37,6 +37,12 @@ export const FALLBACK_RELEASE_TR: GithubRelease = {
       name: "hilal-browser-1.0.0.zip",
       size: 102140500,
       browser_download_url: "https://github.com/VastSea0/hilal-browser/releases/download/v1.0.0-alpha.5/hilal-browser-1.0.0.zip"
+    },
+    {
+      id: 106,
+      name: "Hilal-1.0.0-x86_64.tar.gz",
+      size: 99120500,
+      browser_download_url: "https://github.com/VastSea0/hilal-browser/releases/download/v1.0.0-alpha.5/Hilal-1.0.0-x86_64.tar.gz"
     }
   ]
 };
@@ -254,6 +260,11 @@ export function getRecommendedAsset(assets: GithubAsset[], os: DetectionOS): Git
     if (deb) return deb;
     const appimage = assets.find(a => a.name.toLowerCase().endsWith(".appimage"));
     if (appimage) return appimage;
+    const tarball = assets.find(a => {
+      const name = a.name.toLowerCase();
+      return name.endsWith(".tar.gz") || name.endsWith(".tar.xz");
+    });
+    if (tarball) return tarball;
   }
   return null;
 }

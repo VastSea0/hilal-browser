@@ -74,15 +74,15 @@ EOF
   exit 1
 }
 
-# Searches specifically for firefox-*.tar.xz packages
+# Searches for the packaged browser archive created by mach package.
 find_package() {
   local pkg
   # First, search within the obj-dir build directory's dist folder
-  pkg=$(find "$HILAL_FIREFOX_SRC"/obj-* -name "firefox-*.tar.xz" 2>/dev/null | head -1 || true)
+  pkg=$(find "$HILAL_FIREFOX_SRC"/obj-* \( -name "firefox-*.tar.xz" -o -name "firefox-*.tar.gz" -o -name "hilal-*.tar.xz" -o -name "hilal-*.tar.gz" \) 2>/dev/null | head -1 || true)
 
   # If not found, fall back to the main dist directory
   if [ -z "$pkg" ]; then
-    pkg=$(find "$TARGET_DIST_DIR" -name "firefox-*.tar.xz" 2>/dev/null | head -1 || true)
+    pkg=$(find "$TARGET_DIST_DIR" \( -name "firefox-*.tar.xz" -o -name "firefox-*.tar.gz" -o -name "hilal-*.tar.xz" -o -name "hilal-*.tar.gz" \) 2>/dev/null | head -1 || true)
   fi
   printf '%s\n' "$pkg"
 }
@@ -157,7 +157,7 @@ need_appimagetool
 PACKAGE_FILE=$(find_package)
 
 if [ -z "$PACKAGE_FILE" ]; then
-  echo -e "${YELLOW}[Info]${NC} Package file in 'firefox-*.tar.xz' format not found. Please run the build and package steps first." >&2
+  echo -e "${YELLOW}[Info]${NC} Package file in tar.xz/tar.gz format not found. Please run the build and package steps first." >&2
   echo -e "${YELLOW}[Hint]${NC} Run: scripts/build-linux.sh build package" >&2
   exit 1
 fi
@@ -234,6 +234,9 @@ cat > "$APPDIR/AppRun" <<'APPRUN'
 HERE="$(dirname "$(readlink -f "$0")")"
 export LD_LIBRARY_PATH="$HERE/usr/lib:$HERE/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
 export XDG_DATA_DIRS="$HERE/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+# AppImage mount paths change on every launch; opt out of Firefox's install-path
+# dedicated profiles so users keep one persistent Hilal profile.
+export MOZ_LEGACY_PROFILES=1
 
 if [ -f "$HERE/usr/firefox" ]; then
   exec "$HERE/usr/firefox" --name org.gkdevstudio.Hilal "$@"
@@ -267,8 +270,19 @@ else
 fi
 
 ARCH="$(uname -m)"
+TARBALL_NAME="Hilal-${VERSION}-${ARCH}.tar.gz"
+TARBALL_PATH="$TARGET_DIST_DIR/$TARBALL_NAME"
 APPIMAGE_NAME="Hilal-${VERSION}-${ARCH}.AppImage"
 APPIMAGE_PATH="$TARGET_DIST_DIR/$APPIMAGE_NAME"
+
+echo -e "${BLUE}[Process]${NC} Creating portable tarball: $TARBALL_NAME"
+tar -czf "$TARBALL_PATH" -C "$APPDIR/usr" --transform "s#^\\.#Hilal#" .
+
+if [ -f "$TARBALL_PATH" ]; then
+  echo -e "${GREEN}[Success]${NC} Portable tarball successfully created: $TARBALL_PATH"
+else
+  die "Failed to create portable tarball: $TARBALL_PATH"
+fi
 
 echo -e "${BLUE}[Process]${NC} Creating AppImage: $APPIMAGE_NAME"
 
