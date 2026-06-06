@@ -1,0 +1,22 @@
+diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
+--- a/browser/base/content/browser.xhtml
++++ b/browser/base/content/browser.xhtml
+@@ -152,6 +152,7 @@
+   <!-- Put it at the very end to make sure it's not covered by anything. -->
+   <html:div id="fullscr-toggler" hidden="hidden"/>
+ 
++  <script src="chrome://browser/content/hilal/HilalKeyboardShortcuts.js"></script>
+   <script src="chrome://browser/content/hilal/HilalWelcome.js"></script>
+   <script src="chrome://browser/content/hilal/HilalWorkspaces.js"></script>
+ </html:body>
+diff --git a/browser/base/jar.mn b/browser/base/jar.mn
+--- a/browser/base/jar.mn
++++ b/browser/base/jar.mn
+@@ -85,6 +85,7 @@ browser.jar:
+         content/browser/hilal/screenshots/welcome-workspaces-off.png (content/hilal/screenshots/welcome-workspaces-off.png)
+         content/browser/hilal/screenshots/welcome-toolbar-visible.png (content/hilal/screenshots/welcome-toolbar-visible.png)
+         content/browser/hilal/screenshots/welcome-toolbar-hidden.png (content/hilal/screenshots/welcome-toolbar-hidden.png)
++        content/browser/hilal/HilalKeyboardShortcuts.js     (content/hilal/HilalKeyboardShortcuts.js)
+         content/browser/hilal/HilalWorkspaces.js            (content/hilal/HilalWorkspaces.js)
+         content/browser/global-scripts.js                   (content/global-scripts.js)
+         content/browser/main-popupset.js                    (content/main-popupset.js)

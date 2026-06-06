@@ -1,0 +1,179 @@
+diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+index 8fb4544f0153..df6fd2709f46 100644
+--- a/browser/components/preferences/main.js
++++ b/browser/components/preferences/main.js
+@@ -2534,9 +2534,174 @@ var gHilalPane = {
+         }
+       });
+     }
++    gHilalShortcutsSettings.init();
+   },
+ };
+ 
++var gHilalShortcutsSettings = {
++  init() {
++    this._tbody = document.getElementById("hilalShortcutsTbody");
++    this._defaultsBtn = document.getElementById("hilalShortcutsRestoreDefaults");
++
++    if (!this._tbody) return;
++
++    this.refresh();
++
++    if (this._defaultsBtn) {
++      this._defaultsBtn.addEventListener("command", () => {
++        if (Services.prompt.confirm(window, "Restore Defaults", "Are you sure you want to restore all keyboard shortcuts to their default settings?")) {
++          Services.prefs.clearUserPref("hilal.keyboard.shortcuts.data");
++          this.refresh();
++        }
++      });
++    }
++  },
++
++  refresh() {
++    this._tbody.textContent = "";
++    
++    let defaultShortcuts = {
++      "key_toggleSidebar": { key: "B", modifiers: "accel" },
++      "key_hilalNewWorkspace": { key: "W", modifiers: "accel,shift" },
++      "key_hilalNextWorkspace": { key: "]", modifiers: "accel,shift" },
++      "key_hilalPrevWorkspace": { key: "[", modifiers: "accel,shift" },
++      "key_hilalToggleWorkspaces": { key: "E", modifiers: "accel,shift" },
++      "key_hilalToggleCompactMode": { key: "M", modifiers: "accel,shift" },
++      "key_toggleCompactHideToolbar": { key: "T", modifiers: "accel,shift" },
++      "key_focusUrlbar": { key: "L", modifiers: "accel" },
++      "key_newNavigator": { key: "N", modifiers: "accel" },
++      "key_newNavigatorTab": { key: "T", modifiers: "accel" },
++      "key_closeWindow": { key: "W", modifiers: "accel,shift" },
++      "key_close": { key: "W", modifiers: "accel" },
++      "key_undoCloseTab": { key: "T", modifiers: "accel,shift" },
++      "key_gotoHistory": { key: "H", modifiers: "accel" },
++      "key_viewBookmarksSidebar": { key: "B", modifiers: "accel" }
++    };
++
++    let userShortcuts = {};
++    try {
++      userShortcuts = JSON.parse(Services.prefs.getStringPref("hilal.keyboard.shortcuts.data", "{}"));
++    } catch (e) {}
++
++    let labels = {
++      "key_toggleSidebar": "Toggle Sidebar",
++      "key_hilalNewWorkspace": "New Workspace",
++      "key_hilalNextWorkspace": "Next Workspace",
++      "key_hilalPrevWorkspace": "Previous Workspace",
++      "key_hilalToggleWorkspaces": "Toggle Workspaces Panel",
++      "key_hilalToggleCompactMode": "Toggle Compact Mode",
++      "key_toggleCompactHideToolbar": "Toggle Top Toolbar in Compact Mode",
++      "key_focusUrlbar": "Focus Address Bar",
++      "key_newNavigator": "New Window",
++      "key_newNavigatorTab": "New Tab",
++      "key_closeWindow": "Close Window",
++      "key_close": "Close Tab",
++      "key_undoCloseTab": "Restore Closed Tab",
++      "key_gotoHistory": "History Sidebar",
++      "key_viewBookmarksSidebar": "Bookmarks Sidebar"
++    };
++
++    for (let id in defaultShortcuts) {
++      let current = userShortcuts[id] || defaultShortcuts[id];
++      this._addRow(id, labels[id] || id, current.key, current.modifiers || "");
++    }
++  },
++
++  _addRow(id, label, key, modifiers) {
++    let tr = document.createXULElement("html:tr");
++
++    let tdLabel = document.createXULElement("html:td");
++    let labelElem = document.createXULElement("label");
++    labelElem.setAttribute("value", label);
++    tdLabel.appendChild(labelElem);
++
++    let tdKey = document.createXULElement("html:td");
++    let btnKey = document.createXULElement("button");
++    let keyDisplay = this._formatKeyDisplay(key, modifiers);
++    btnKey.setAttribute("label", keyDisplay || "Not set");
++    btnKey.setAttribute("class", "keyboard-shortcut-btn");
++    
++    btnKey.addEventListener("command", () => {
++      this._startCapture(id, btnKey);
++    });
++
++    tdKey.appendChild(btnKey);
++
++    tr.appendChild(tdLabel);
++    tr.appendChild(tdKey);
++    this._tbody.appendChild(tr);
++  },
++
++  _startCapture(id, btn) {
++    btn.setAttribute("label", "Press new shortcut...");
++    btn.focus();
++
++    const handler = (e) => {
++      e.preventDefault();
++      e.stopPropagation();
++
++      if (e.key === "Escape") {
++        btn.removeEventListener("keydown", handler, true);
++        btn.removeEventListener("blur", blurHandler, true);
++        this.refresh();
++        return;
++      }
++
++      let modifiers = [];
++      if (e.metaKey) modifiers.push("accel"); // 'accel' handles meta on Mac, ctrl on Windows
++      if (e.ctrlKey) modifiers.push("control");
++      if (e.altKey) modifiers.push("alt");
++      if (e.shiftKey) modifiers.push("shift");
++
++      let key = e.key;
++      // Filter out isolated modifier key presses
++      if (["Meta", "Control", "Alt", "Shift"].includes(key)) return;
++
++      if (key.length === 1) {
++        key = key.toUpperCase();
++      }
++
++      btn.removeEventListener("keydown", handler, true);
++      btn.removeEventListener("blur", blurHandler, true);
++
++      this._save(id, key, modifiers.join(","));
++    };
++
++    const blurHandler = () => {
++      btn.removeEventListener("keydown", handler, true);
++      btn.removeEventListener("blur", blurHandler, true);
++      this.refresh();
++    };
++
++    btn.addEventListener("keydown", handler, true);
++    btn.addEventListener("blur", blurHandler, true);
++  },
++
++  _save(id, key, modifiers) {
++    let userShortcuts = {};
++    try {
++      userShortcuts = JSON.parse(Services.prefs.getStringPref("hilal.keyboard.shortcuts.data", "{}"));
++    } catch (e) {}
++
++    userShortcuts[id] = { key, modifiers };
++    Services.prefs.setStringPref("hilal.keyboard.shortcuts.data", JSON.stringify(userShortcuts));
++    this.refresh();
++  },
++
++  _formatKeyDisplay(key, modifiers) {
++    let parts = [];
++    if (modifiers) {
++      if (modifiers.includes("accel") || modifiers.includes("control")) parts.push(AppConstants.platform === "macosx" ? "Cmd" : "Ctrl");
++      if (modifiers.includes("alt")) parts.push(AppConstants.platform === "macosx" ? "Option" : "Alt");
++      if (modifiers.includes("shift")) parts.push("Shift");
++    }
++    if (key) {
++      parts.push(key);
++    }
++    return parts.join(" + ");
++  }
++};
++
+ var {
+   InternalHandlerInfoWrapper,
+   getFileDisplayName,

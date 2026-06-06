@@ -31,6 +31,10 @@ path   = "browser/components/preferences/hilal.inc.xhtml"
 reason = "Hilal preferences panels inclusion template"
 
 [[patches]]
+path   = "browser/keyboard-shortcuts-core.patch"
+reason = "Hilal keyboard shortcuts core injection"
+
+[[patches]]
 path   = "browser/components/preferences.patch"
 reason = "Hilal preferences panels and tabs layout"
 
@@ -149,3 +153,7 @@ reason = "Fix AsyncTabSwitcher and Tabbrowser assertion failures and JS errors d
 [[patches]]
 path   = "browser/base/content/test/hilal"
 reason = "Hilal browser chrome test scenarios"
+
+[[patches]]
+path   = "browser/keyboard-shortcuts-prefs.patch"
+reason = "Hilal keyboard shortcuts preferences logic"
