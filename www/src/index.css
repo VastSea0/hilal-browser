@@ -52,6 +52,8 @@ html.dark, html.dark body {
     radial-gradient(at 10% 20%, rgba(254, 215, 170, 0.22) 0px, transparent 50%),
     radial-gradient(at 90% 10%, rgba(253, 224, 71, 0.18) 0px, transparent 50%),
     radial-gradient(at 50% 80%, rgba(196, 181, 253, 0.22) 0px, transparent 50%);
+  background-size: 200% 200%;
+  animation: mesh-pulse 20s ease-in-out infinite;
 }
 
 html.dark .mesh-bg {
@@ -60,6 +62,14 @@ html.dark .mesh-bg {
     radial-gradient(at 10% 20%, rgba(15, 62, 231, 0.08) 0px, transparent 50%),
     radial-gradient(at 90% 10%, rgba(147, 51, 234, 0.06) 0px, transparent 50%),
     radial-gradient(at 50% 80%, rgba(236, 72, 153, 0.05) 0px, transparent 50%);
+  background-size: 200% 200%;
+  animation: mesh-pulse 20s ease-in-out infinite;
+}
+
+@keyframes mesh-pulse {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* Grayscale and low-contrast high-end selection */
@@ -118,5 +128,25 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 
 html.dark .glass-panel {
   background-color: rgba(5, 5, 5, 0.7);
+}
+
+@keyframes float-slow {
+  0% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+  100% { transform: translateY(0px) scale(1); }
+}
+
+@keyframes float-slower {
+  0% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(25px) scale(0.95); }
+  100% { transform: translateY(0px) scale(1); }
+}
+
+.animate-float-slow {
+  animation: float-slow 10s ease-in-out infinite;
+}
+
+.animate-float-slower {
+  animation: float-slower 14s ease-in-out infinite;
 }
 

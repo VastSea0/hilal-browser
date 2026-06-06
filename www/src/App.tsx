@@ -33,6 +33,52 @@ import {
 } from "./utils/github";
 import DownloadModal from "./components/DownloadModal";
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.05
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 15
+    }
+  }
+};
+
+const cardContainerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const cardVariants = {
+  hidden: { y: 25, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 80,
+      damping: 15
+    }
+  }
+};
+
 export default function App() {
   // Page view state: "home" or "releases" (dedicated release archives page)
   const [view, setView] = useState<"home" | "releases">("home");
@@ -69,6 +115,7 @@ export default function App() {
 
   // Active navigation highlight
   const [activeSection, setActiveSection] = useState<string>("home");
+  const [scrolled, setScrolled] = useState<boolean>(false);
 
   // Image comparison slider state and handlers
   const [sliderPosition, setSliderPosition] = useState<number>(50);
@@ -168,6 +215,7 @@ export default function App() {
   // Monitor Scroll
   useEffect(() => {
     const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
       if (view !== "home") {
         setActiveSection("surumler");
         return;
@@ -487,7 +535,11 @@ export default function App() {
       {/* 1. Floating Capsule Navigation Bar */}
       <div className="sticky top-4 z-50 w-full px-4 pointer-events-none">
         <nav
-          className="mx-auto flex max-w-5xl pointer-events-auto items-center justify-between px-6 py-2.5 rounded-full border border-neutral-200/40 bg-white/75 backdrop-blur-md dark:border-neutral-800/40 dark:bg-neutral-950/75 transition-all duration-300 shadow-md shadow-neutral-250/5 dark:shadow-none"
+          className={`mx-auto flex pointer-events-auto items-center justify-between transition-all duration-500 ease-out border ${
+            scrolled
+              ? "max-w-3xl px-5 py-2 rounded-full border-neutral-200/60 bg-white/90 dark:border-neutral-850/60 dark:bg-neutral-950/90 shadow-lg shadow-black/5 dark:shadow-none"
+              : "max-w-5xl px-6 py-2.5 rounded-full border-neutral-200/40 bg-white/75 dark:border-neutral-800/40 dark:bg-neutral-950/75 shadow-md shadow-neutral-250/5 dark:shadow-none"
+          }`}
           id="navbar-sticky"
         >
           <div
@@ -510,7 +562,7 @@ export default function App() {
           </div>
 
           {/* Nav Center Links */}
-          <div className="hidden md:flex items-center gap-8 text-[9.5px] font-bold tracking-wider uppercase">
+          <div className="hidden md:flex items-center gap-1.5 text-[9.5px] font-bold tracking-wider uppercase">
             {[
               { label: activeT.nav.features, id: "ozellikler" },
               { label: activeT.nav.interface, id: "arayuz" },
@@ -529,17 +581,17 @@ export default function App() {
                     setTimeout(() => scrollToId(item.id), 50);
                   }
                 }}
-                className={`transition-colors relative py-1 hover:text-neutral-955 dark:hover:text-white ${
+                className={`relative px-3.5 py-1.5 rounded-full transition-colors duration-300 hover:text-neutral-955 dark:hover:text-white ${
                   activeSection === item.id
                     ? "text-neutral-955 dark:text-white"
                     : "text-neutral-400 dark:text-neutral-500"
                 }`}
               >
-                {item.label}
+                <span className="relative z-10">{item.label}</span>
                 {activeSection === item.id && (
                   <motion.div
                     layoutId="activeIndicator"
-                    className="absolute -bottom-1 left-0 h-0.5 w-full bg-neutral-950 dark:bg-neutral-100"
+                    className="absolute inset-0 rounded-full bg-neutral-100/80 dark:bg-neutral-900/80 border border-neutral-200/20 dark:border-neutral-800/30"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -608,11 +660,19 @@ export default function App() {
           >
             {/* Hero Section */}
             <section className="relative w-full bg-gradient-to-br from-cobalt to-cobalt-dark text-white noise-bg pt-28 pb-24 md:pt-36 md:pb-32 overflow-hidden" id="hero">
-              <div className="mx-auto max-w-4xl px-6 relative z-10 text-center">
+              {/* Floating ambient aura color blobs */}
+              <div className="absolute top-1/4 left-1/10 w-72 h-72 rounded-full bg-sky-400/20 blur-3xl pointer-events-none animate-float-slow z-0" />
+              <div className="absolute bottom-1/4 right-1/10 w-96 h-96 rounded-full bg-indigo-500/15 blur-3xl pointer-events-none animate-float-slower z-0" />
+
+              <motion.div
+                key={lang}
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="mx-auto max-w-4xl px-6 relative z-10 text-center"
+              >
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
+                  variants={itemVariants}
                   className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 backdrop-blur-md px-3.5 py-1 text-[9px] font-bold tracking-widest uppercase text-white/80"
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
@@ -620,9 +680,7 @@ export default function App() {
                 </motion.div>
 
                 <motion.h1
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1, duration: 0.7 }}
+                  variants={itemVariants}
                   className="mt-6 font-sans text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl lg:text-6.5xl leading-[1.12] text-white tracking-tighter"
                   style={{ letterSpacing: "-0.025em" }}
                 >
@@ -656,26 +714,22 @@ export default function App() {
                 </motion.h1>
 
                 <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2, duration: 0.7 }}
+                  variants={itemVariants}
                   className="mx-auto mt-6 max-w-xl text-xs md:text-[13px] leading-relaxed text-white/70"
                 >
                   {activeT.hero.desc}
                 </motion.p>
 
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.3, duration: 0.5 }}
-                  className="mt-8 flex flex-col items-center justify-center animate-fade-in"
+                  variants={itemVariants}
+                  className="mt-8 flex flex-col items-center justify-center"
                   id="hero-cta-outer-container"
                 >
                   <div className="flex flex-wrap items-center justify-center gap-3">
                     <button
                       id="hero-download-btn"
                       onClick={() => setIsDownloadOpen(true)}
-                      className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-[9.5px] font-bold tracking-widest uppercase text-cobalt hover:bg-neutral-50 active:scale-98 transition-all shadow-lg shadow-black/10"
+                      className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-[9.5px] font-bold tracking-widest uppercase text-cobalt hover:bg-neutral-50 active:scale-98 hover:scale-[1.02] transition-all shadow-lg shadow-black/10"
                     >
                       <Download className="h-3.5 w-3.5" />
                       {getDynamicDownloadBtnText()}
@@ -685,7 +739,7 @@ export default function App() {
                       target="_blank"
                       rel="noopener noreferrer"
                       id="hero-github-btn"
-                      className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 px-7 py-3.5 text-[9.5px] font-bold tracking-widest uppercase text-white active:scale-98 transition-all"
+                      className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 px-7 py-3.5 text-[9.5px] font-bold tracking-widest uppercase text-white active:scale-98 hover:scale-[1.02] transition-all"
                     >
                       <Github className="h-3.5 w-3.5" />
                       {activeT.hero.sourceBtn}
@@ -700,7 +754,7 @@ export default function App() {
                     </p>
                   )}
                 </motion.div>
-              </div>
+              </motion.div>
 
               {/* Repeating SVG scalloped wave transition to Soft Workspace */}
               <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
@@ -794,9 +848,20 @@ export default function App() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6" id="features-highlights-grid">
+                <motion.div
+                  variants={cardContainerVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-100px" }}
+                  className="grid grid-cols-1 md:grid-cols-3 gap-6"
+                  id="features-highlights-grid"
+                >
                   {/* Bento Card 1 */}
-                  <div className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-[#FAF9F6] hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/10 dark:hover:bg-neutral-900/20 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.03)] dark:shadow-none transition-all duration-300">
+                  <motion.div
+                    variants={cardVariants}
+                    whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                    className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-[#FAF9F6] hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/10 dark:hover:bg-neutral-900/20 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.04)] dark:shadow-none transition-all duration-300"
+                  >
                     <div>
                       <div className="w-8 h-8 rounded-full bg-neutral-200/50 dark:bg-neutral-800/50 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 flex items-center justify-center mb-5 select-none">
                         01
@@ -814,10 +879,14 @@ export default function App() {
                     <span className="mt-6 self-start inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-neutral-200/50 bg-neutral-100/50 dark:border-neutral-800/50 dark:bg-neutral-900/50 text-[9px] font-mono font-bold tracking-widest uppercase text-neutral-400 dark:text-neutral-500 select-none">
                       {activeT.features.card1Foot}
                     </span>
-                  </div>
+                  </motion.div>
 
                   {/* Bento Card 2 */}
-                  <div className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-[#FAF9F6] hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/10 dark:hover:bg-neutral-900/20 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.03)] dark:shadow-none transition-all duration-300">
+                  <motion.div
+                    variants={cardVariants}
+                    whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                    className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-[#FAF9F6] hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/10 dark:hover:bg-neutral-900/20 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.04)] dark:shadow-none transition-all duration-300"
+                  >
                     <div>
                       <div className="w-8 h-8 rounded-full bg-neutral-200/50 dark:bg-neutral-800/50 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 flex items-center justify-center mb-5 select-none">
                         02
@@ -835,10 +904,14 @@ export default function App() {
                     <span className="mt-6 self-start inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-neutral-200/50 bg-neutral-100/50 dark:border-neutral-800/50 dark:bg-neutral-900/50 text-[9px] font-mono font-bold tracking-widest uppercase text-neutral-400 dark:text-neutral-500 select-none">
                       {activeT.features.card2Foot}
                     </span>
-                  </div>
+                  </motion.div>
 
                   {/* Bento Card 3 */}
-                  <div className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-[#FAF9F6] hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/10 dark:hover:bg-neutral-900/20 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.03)] dark:shadow-none transition-all duration-300">
+                  <motion.div
+                    variants={cardVariants}
+                    whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                    className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-[#FAF9F6] hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/10 dark:hover:bg-neutral-900/20 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.04)] dark:shadow-none transition-all duration-300"
+                  >
                     <div>
                       <div className="w-8 h-8 rounded-full bg-neutral-200/50 dark:bg-neutral-800/50 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 flex items-center justify-center mb-5 select-none">
                         03
@@ -856,8 +929,8 @@ export default function App() {
                     <span className="mt-6 self-start inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-neutral-200/50 bg-neutral-100/50 dark:border-neutral-800/50 dark:bg-neutral-900/50 text-[9px] font-mono font-bold tracking-widest uppercase text-neutral-400 dark:text-neutral-500 select-none">
                       {activeT.features.card3Foot}
                     </span>
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
               </div>
 
               {/* Repeating SVG scalloped wave transition to Releases (Mesh Gradient / Dark Section) */}
@@ -1093,9 +1166,20 @@ export default function App() {
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8" id="core-values-bento">
+                <motion.div
+                  variants={cardContainerVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-100px" }}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-8"
+                  id="core-values-bento"
+                >
                   {/* Principle Bento Card 1 */}
-                  <div className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-white/70 hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/35 dark:hover:bg-neutral-900/50 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.03)] transition-all duration-300">
+                  <motion.div
+                    variants={cardVariants}
+                    whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                    className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-white/70 hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/35 dark:hover:bg-neutral-900/50 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.04)] transition-all duration-300"
+                  >
                     <div>
                       <div className="h-10 w-10 rounded-full border border-neutral-200/50 bg-neutral-100/50 dark:border-neutral-800/50 dark:bg-neutral-950/50 flex items-center justify-center mb-5 text-neutral-500 dark:text-neutral-400 select-none">
                         <CodeXml className="h-5 w-5" />
@@ -1119,10 +1203,14 @@ export default function App() {
                       {activeT.principles.card1Link}
                       <ArrowRight className="h-3 w-3" />
                     </a>
-                  </div>
+                  </motion.div>
 
                   {/* Principle Bento Card 2 */}
-                  <div className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-white/70 hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/35 dark:hover:bg-neutral-900/50 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.03)] transition-all duration-300">
+                  <motion.div
+                    variants={cardVariants}
+                    whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                    className="p-6 md:p-8 flex flex-col justify-between text-left rounded-2xl border border-neutral-200/40 bg-white/70 hover:bg-white dark:border-neutral-800/40 dark:bg-neutral-900/35 dark:hover:bg-neutral-900/50 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.04)] transition-all duration-300"
+                  >
                     <div>
                       <div className="h-10 w-10 rounded-full border border-neutral-200/50 bg-neutral-100/50 dark:border-neutral-800/50 dark:bg-neutral-950/50 flex items-center justify-center mb-5 text-neutral-500 dark:text-neutral-400 select-none">
                         <Lock className="h-5 w-5" />
@@ -1141,8 +1229,8 @@ export default function App() {
                       <BookmarkCheck className="h-3.5 w-3.5" />
                       <span>{activeT.principles.card2Foot}</span>
                     </div>
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
               </div>
 
               {/* Repeating SVG scalloped wave transition to FAQ & Footer (Cream Section) */}
