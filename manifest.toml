@@ -145,3 +145,7 @@ reason = "Reset toolbar to defaults on first run of Hilal Browser"
 [[patches]]
 path   = "browser/components/tabbrowser/asynctabswitcher-robustness.patch"
 reason = "Fix AsyncTabSwitcher and Tabbrowser assertion failures and JS errors during tab switching"
+
+[[patches]]
+path   = "browser/base/content/test/hilal"
+reason = "Hilal browser chrome test scenarios"
