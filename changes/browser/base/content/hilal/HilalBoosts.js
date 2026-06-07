@@ -56,9 +56,6 @@
           },
           child: {
             esModuleURI: "chrome://browser/content/hilal/HilalBoostsActorChild.sys.mjs",
-            events: {
-              DOMWindowCreated: {},
-            },
           },
           allFrames: true,
           remoteTypes: ["web", "file"],
