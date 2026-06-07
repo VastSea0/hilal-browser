@@ -157,3 +157,7 @@ reason = "Hilal browser chrome test scenarios"
 [[patches]]
 path   = "browser/keyboard-shortcuts-prefs.patch"
 reason = "Hilal keyboard shortcuts preferences logic"
+
+[[patches]]
+path   = "browser/boosts.patch"
+reason = "Hilal boosts feature (Site Customizer and Element Zapper)"

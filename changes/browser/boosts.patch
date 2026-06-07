@@ -1,0 +1,198 @@
+diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+--- a/browser/app/profile/firefox.js
++++ b/browser/app/profile/firefox.js
+@@ -3721,3 +3721,6 @@ pref("hilal.sidebar.footer.settings", true);
+ pref("hilal.sidebar.customItems", "[]");
+ pref("hilal.compact.enabled", true);
+ pref("hilal.compact.hide_toolbox", true);
++
++pref("hilal.boosts.enabled", true);
++pref("hilal.boosts.data", "{}");
+diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
+--- a/browser/base/content/browser.xhtml
++++ b/browser/base/content/browser.xhtml
+@@ -155,5 +155,6 @@
+   <script src="chrome://browser/content/hilal/HilalKeyboardShortcuts.js"></script>
+   <script src="chrome://browser/content/hilal/HilalWelcome.js"></script>
+   <script src="chrome://browser/content/hilal/HilalWorkspaces.js"></script>
++  <script src="chrome://browser/content/hilal/HilalBoosts.js"></script>
+ </html:body>
+ </html>
+diff --git a/browser/base/content/main-popupset.inc.xhtml b/browser/base/content/main-popupset.inc.xhtml
+--- a/browser/base/content/main-popupset.inc.xhtml
++++ b/browser/base/content/main-popupset.inc.xhtml
+@@ -932,4 +932,144 @@
+     <menuitem id="select-translations-panel-about-translations-menuitem"
+               data-l10n-id="translations-panel-settings-about2"/>
+   </menupopup>
++
++  <panel id="hilal-boosts-panel"
++         type="arrow"
++         orient="vertical"
++         noautofocus="true"
++         hidden="true"
++         flip="slide"
++         position="bottomright topright"
++         class="cui-widget-panel panel-no-padding"
++         style="width: 320px; border-radius: 12px; background: color-mix(in srgb, var(--arrowpanel-background, #fff) 92%, transparent); backdrop-filter: blur(16px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);">
++    <html:style>
++      #hilal-boosts-button[active="true"] {
++        color: var(--urlbar-icon-active-color, #007aff) !important;
++      }
++      #hilal-boosts-panel {
++        --arrowpanel-padding: 0px !important;
++      }
++      .hilal-boosts-zap-item {
++        display: flex;
++        justify-content: space-between;
++        align-items: center;
++        padding: 4px 8px;
++        background: color-mix(in srgb, var(--arrowpanel-color, #000) 5%, transparent);
++        border-radius: 6px;
++        border: 1px solid var(--panel-separator-color, rgba(0,0,0,0.08));
++        gap: 8px;
++      }
++      .hilal-boosts-zap-label {
++        font-size: 11px;
++        font-family: monospace;
++        white-space: nowrap;
++        overflow: hidden;
++        text-overflow: ellipsis;
++        flex: 1;
++        color: var(--arrowpanel-color, #000);
++      }
++      .hilal-boosts-zap-remove {
++        appearance: none;
++        background: transparent;
++        border: 0;
++        color: #ff4757;
++        font-size: 14px;
++        font-weight: 700;
++        cursor: pointer;
++        padding: 0 4px;
++        line-height: 1;
++      }
++      .hilal-boosts-zap-remove:hover {
++        background: rgba(255, 71, 87, 0.1);
++        border-radius: 4px;
++      }
++      .hilal-boosts-zap-placeholder {
++        font-size: 11px;
++        color: var(--panel-description-color, #888);
++        text-align: center;
++        padding: 8px 0;
++      }
++    </html:style>
++    <box class="panel-header" style="align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--panel-separator-color, rgba(0,0,0,0.08));">
++      <vbox flex="1" style="min-width: 0;">
++        <hbox align="center" style="gap: 6px; align-items: center;">
++          <html:span style="font-weight: 700; font-size: 13.5px; color: var(--arrowpanel-color, #000);">Site Customizer</html:span>
++          <html:span style="font-size: 8px; font-weight: 800; text-transform: uppercase; background: #007aff; color: #fff; padding: 1px 4px; border-radius: 3px; letter-spacing: 0.5px; line-height: 1.2;">Beta</html:span>
++        </hbox>
++        <html:span id="hilal-boosts-panel-title" style="font-size: 11px; color: var(--panel-description-color, #666); word-break: break-all; margin-top: 2px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; display: block;">example.com</html:span>
++      </vbox>
++      <hbox align="center" style="gap: 6px; align-items: center; margin-inline-start: 12px;">
++        <html:span style="font-size: 11px; font-weight: 600; color: var(--arrowpanel-color, #000);">Active</html:span>
++        <html:input type="checkbox" id="hilal-boosts-enable" onchange="gHilalBoosts.onPanelCommand(this);" style="cursor: pointer; width: 14px; height: 14px; margin: 0;"/>
++      </hbox>
++    </box>
++    <vbox class="panel-subview-body" style="padding: 14px; gap: 12px; max-height: 440px; overflow-y: auto;">
++      
++      <!-- Scale Adjuster -->
++      <vbox style="gap: 4px;">
++        <hbox style="justify-content: space-between; align-items: center;">
++          <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Font Scale</html:span>
++          <html:span id="hilal-boosts-scale-value" style="font-size: 11px; font-weight: 700; color: #007aff;">100%</html:span>
++        </hbox>
++        <html:input type="range" id="hilal-boosts-scale" min="50" max="200" step="10" oninput="gHilalBoosts.onPanelCommand(this);" style="width: 100%; cursor: pointer; margin: 4px 0;"/>
++      </vbox>
++
++      <!-- Font Family Override -->
++      <vbox style="gap: 4px;">
++        <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Font Family</html:span>
++        <html:select id="hilal-boosts-font" onchange="gHilalBoosts.onPanelCommand(this);" style="width: 100%; padding: 4px; border-radius: 6px; border: 1px solid var(--panel-separator-color, rgba(0,0,0,0.12)); background: var(--arrowpanel-background, #fff); color: var(--arrowpanel-color, #000); font-size: 11.5px; outline: none; cursor: pointer;">
++          <html:option value="">Use Site Default</html:option>
++          <html:option value="system-ui, -apple-system, sans-serif">System UI</html:option>
++          <html:option value="Inter, sans-serif">Inter</html:option>
++          <html:option value="Roboto, sans-serif">Roboto</html:option>
++          <html:option value="Georgia, serif">Georgia</html:option>
++          <html:option value="monospace">Monospace</html:option>
++        </html:select>
++      </vbox>
++
++      <!-- Text Transform Case Override -->
++      <vbox style="gap: 4px;">
++        <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Text Transform</html:span>
++        <html:select id="hilal-boosts-case" onchange="gHilalBoosts.onPanelCommand(this);" style="width: 100%; padding: 4px; border-radius: 6px; border: 1px solid var(--panel-separator-color, rgba(0,0,0,0.12)); background: var(--arrowpanel-background, #fff); color: var(--arrowpanel-color, #000); font-size: 11.5px; outline: none; cursor: pointer;">
++          <html:option value="none">No Override</html:option>
++          <html:option value="uppercase">ALL UPPERCASE</html:option>
++          <html:option value="lowercase">all lowercase</html:option>
++          <html:option value="capitalize">Capitalize Words</html:option>
++        </html:select>
++      </vbox>
++
++      <!-- Smart Invert (Force Dark Mode) Toggle -->
++      <hbox style="justify-content: space-between; align-items: center; padding: 2px 0;">
++        <vbox flex="1">
++          <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Smart Invert</html:span>
++          <html:span style="font-size: 10px; color: var(--panel-description-color, #777);">Force dark mode for page content</html:span>
++        </vbox>
++        <html:input type="checkbox" id="hilal-boosts-invert" onchange="gHilalBoosts.onPanelCommand(this);" style="cursor: pointer; width: 14px; height: 14px; margin: 0;"/>
++      </hbox>
++
++      <!-- Interactive Element Blocker (Zapper) -->
++      <hbox style="justify-content: space-between; align-items: center; padding: 4px 0;">
++        <vbox flex="1">
++          <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Element Blocker</html:span>
++          <html:span style="font-size: 10px; color: var(--panel-description-color, #777);">Click elements on page to hide them</html:span>
++        </vbox>
++        <button id="hilal-boosts-zap-btn" style="padding: 4px 10px; border-radius: 6px; border: 1px solid #ff4757; color: #ff4757; background: transparent; cursor: pointer; font-size: 10.5px; font-weight: 600;" onclick="gHilalBoosts.startZapMode();">Zap Element</button>
++      </hbox>
++
++      <!-- Active Zaps List -->
++      <vbox style="gap: 4px;">
++        <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Zapped Elements</html:span>
++        <vbox id="hilal-boosts-zaps-list" style="gap: 4px; max-height: 90px; overflow-y: auto; background: rgba(0, 0, 0, 0.02); padding: 6px; border-radius: 6px; border: 1px solid var(--panel-separator-color, rgba(0,0,0,0.06));">
++          <!-- Populated dynamically -->
++        </vbox>
++      </vbox>
++
++      <!-- Custom CSS Code Editor -->
++      <vbox style="gap: 4px;">
++        <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Custom CSS</html:span>
++        <html:textarea id="hilal-boosts-css" rows="3" placeholder="body { background: #000 !important; }" oninput="gHilalBoosts.onPanelCommand(this);" style="width: 100%; font-family: monospace; font-size: 10.5px; padding: 6px; border-radius: 6px; border: 1px solid var(--panel-separator-color, rgba(0,0,0,0.12)); background: var(--arrowpanel-background, #fff); color: var(--arrowpanel-color, #000); resize: vertical; box-sizing: border-box; outline: none;"/>
++      </vbox>
++
++    </vbox>
++  </panel>
+ </popupset>
+diff --git a/browser/base/content/navigator-toolbox.inc.xhtml b/browser/base/content/navigator-toolbox.inc.xhtml
+--- a/browser/base/content/navigator-toolbox.inc.xhtml
++++ b/browser/base/content/navigator-toolbox.inc.xhtml
+@@ -440,6 +440,13 @@
+               <image id="star-button"
+                       class="urlbar-icon"/>
+             </hbox>
++            <hbox id="hilal-boosts-button"
++                  class="urlbar-page-action"
++                  role="button"
++                  tooltiptext="Customize Site (Beta)"
++                  onclick="gHilalBoosts.populatePanel(); document.getElementById('hilal-boosts-panel').openPopup(this, 'bottomright topright', 0, 0, false, false);">
++              <image class="urlbar-icon" style="list-style-image: url('chrome://browser/skin/customize.svg');"/>
++            </hbox>
+           </hbox>
+           <html:div class="search-one-offs"
+               includecurrentengine="true"
+diff --git a/browser/base/jar.mn b/browser/base/jar.mn
+--- a/browser/base/jar.mn
++++ b/browser/base/jar.mn
+@@ -87,6 +87,9 @@ browser.jar:
+         content/browser/hilal/screenshots/welcome-toolbar-hidden.png (content/hilal/screenshots/welcome-toolbar-hidden.png)
+         content/browser/hilal/HilalKeyboardShortcuts.js     (content/hilal/HilalKeyboardShortcuts.js)
+         content/browser/hilal/HilalWorkspaces.js            (content/hilal/HilalWorkspaces.js)
++        content/browser/hilal/HilalBoosts.js                (content/hilal/HilalBoosts.js)
++        content/browser/hilal/HilalBoostsActorParent.sys.mjs (content/hilal/HilalBoostsActorParent.sys.mjs)
++        content/browser/hilal/HilalBoostsActorChild.sys.mjs  (content/hilal/HilalBoostsActorChild.sys.mjs)
+         content/browser/global-scripts.js                   (content/global-scripts.js)
+         content/browser/main-popupset.js                    (content/main-popupset.js)
+ *       content/browser/pageinfo/pageInfo.xhtml             (content/pageinfo/pageInfo.xhtml)
