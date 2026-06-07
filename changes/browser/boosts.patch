@@ -21,7 +21,7 @@ diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.x
 diff --git a/browser/base/content/main-popupset.inc.xhtml b/browser/base/content/main-popupset.inc.xhtml
 --- a/browser/base/content/main-popupset.inc.xhtml
 +++ b/browser/base/content/main-popupset.inc.xhtml
-@@ -932,4 +932,347 @@
+@@ -932,4 +932,144 @@
      <menuitem id="select-translations-panel-about-translations-menuitem"
                data-l10n-id="translations-panel-settings-about2"/>
    </menupopup>
@@ -30,162 +30,17 @@ diff --git a/browser/base/content/main-popupset.inc.xhtml b/browser/base/content
 +         type="arrow"
 +         orient="vertical"
 +         noautofocus="true"
++         hidden="true"
 +         flip="slide"
 +         position="bottomright topright"
 +         class="cui-widget-panel panel-no-padding"
-+         style="width: 360px; border-radius: 14px; background: color-mix(in srgb, var(--arrowpanel-background, #fff) 96%, transparent); box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);">
++         style="width: 320px; border-radius: 12px; background: color-mix(in srgb, var(--arrowpanel-background, #fff) 92%, transparent); backdrop-filter: blur(16px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);">
 +    <html:style>
 +      #hilal-boosts-button[active="true"] {
 +        color: var(--urlbar-icon-active-color, #007aff) !important;
 +      }
-+      #page-action-buttons > #hilal-boosts-button:not([hidden]) {
-+        display: flex !important;
-+        visibility: visible !important;
-+        pointer-events: auto !important;
-+        opacity: 1 !important;
-+        margin-inline-end: 0 !important;
-+        width: calc(var(--urlbar-min-height) - 2 * var(--urlbar-container-inset)) !important;
-+        height: calc(var(--urlbar-min-height) - 2 * var(--urlbar-container-inset)) !important;
-+        padding: var(--urlbar-icon-padding) !important;
-+      }
 +      #hilal-boosts-panel {
 +        --arrowpanel-padding: 0px !important;
-+        --hilal-boosts-accent: #7c5cff;
-+        --hilal-boosts-secondary: #00d4ff;
-+      }
-+      .hilal-boosts-panel-header {
-+        align-items: center;
-+        justify-content: space-between;
-+        padding: 13px 16px;
-+        border-bottom: 1px solid var(--panel-separator-color, rgba(0,0,0,0.08));
-+        background:
-+          linear-gradient(135deg, color-mix(in srgb, var(--hilal-boosts-accent) 10%, transparent), color-mix(in srgb, var(--hilal-boosts-secondary) 8%, transparent)),
-+          color-mix(in srgb, var(--arrowpanel-background, #fff) 98%, transparent);
-+      }
-+      .hilal-boosts-color-section {
-+        gap: 10px;
-+        padding: 12px;
-+        border-radius: 12px;
-+        border: 1px solid color-mix(in srgb, var(--hilal-boosts-accent) 22%, var(--panel-separator-color, rgba(0,0,0,0.1)));
-+        background:
-+          linear-gradient(145deg, color-mix(in srgb, var(--hilal-boosts-accent) 8%, transparent), color-mix(in srgb, var(--hilal-boosts-secondary) 7%, transparent)),
-+          color-mix(in srgb, var(--arrowpanel-color, #000) 3%, transparent);
-+      }
-+      #hilal-boosts-color-picker {
-+        --hilal-boosts-accent: #7c5cff;
-+        --hilal-boosts-secondary: #00d4ff;
-+        position: relative;
-+        height: 112px;
-+        border-radius: 12px;
-+        overflow: hidden;
-+        cursor: crosshair;
-+        border: 1px solid var(--panel-separator-color, rgba(0,0,0,0.12));
-+        background:
-+          linear-gradient(135deg, color-mix(in srgb, var(--hilal-boosts-accent) 28%, transparent), color-mix(in srgb, var(--hilal-boosts-secondary) 22%, transparent)),
-+          radial-gradient(circle at 50% 50%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.16) 45%, transparent 70%),
-+          conic-gradient(#ff0040, #ff9d00, #fff200, #59ff00, #00ff80, #00fff7, #0059ff, #6200ff, #cc00ff, #ff0090, #ff0040);
-+        box-shadow:
-+          inset 0 0 0 1px rgba(255,255,255,0.22),
-+          0 10px 24px color-mix(in srgb, var(--hilal-boosts-accent) 12%, transparent);
-+      }
-+      #hilal-boosts-color-picker::after {
-+        content: "";
-+        position: absolute;
-+        inset: 9px;
-+        border-radius: 10px;
-+        background-image: radial-gradient(color-mix(in srgb, var(--arrowpanel-color, #000) 18%, transparent) 0.5px, transparent 0);
-+        background-size: 5px 5px;
-+        pointer-events: none;
-+        opacity: 0.42;
-+      }
-+      #hilal-boosts-color-picker::before {
-+        content: "";
-+        position: absolute;
-+        inset: 0;
-+        background: linear-gradient(120deg, transparent 0%, color-mix(in srgb, #fff 22%, transparent) 45%, transparent 72%);
-+        pointer-events: none;
-+      }
-+      #hilal-boosts-color-dot,
-+      #hilal-boosts-color-dot-secondary {
-+        position: absolute;
-+        z-index: 2;
-+        width: 18px;
-+        height: 18px;
-+        border-radius: 50%;
-+        background: var(--hilal-boosts-accent);
-+        border: 3px solid #fff;
-+        box-shadow: 0 2px 8px rgba(0,0,0,0.28);
-+        transform: translate(-50%, -50%);
-+        pointer-events: none;
-+      }
-+      #hilal-boosts-color-dot-secondary {
-+        width: 14px;
-+        height: 14px;
-+        border-width: 2px;
-+        background: var(--hilal-boosts-secondary);
-+      }
-+      .hilal-boosts-gradient-row {
-+        display: grid;
-+        grid-template-columns: auto 1fr auto;
-+        gap: 8px;
-+        align-items: center;
-+      }
-+      #hilal-boosts-gradient-preview {
-+        --hilal-boosts-accent: #7c5cff;
-+        --hilal-boosts-secondary: #00d4ff;
-+        height: 26px;
-+        border-radius: 8px;
-+        border: 1px solid color-mix(in srgb, var(--arrowpanel-color, #000) 12%, transparent);
-+        background: linear-gradient(135deg, var(--hilal-boosts-accent), var(--hilal-boosts-secondary));
-+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.22);
-+      }
-+      .hilal-boosts-color-swatch {
-+        width: 32px;
-+        height: 26px;
-+        padding: 0;
-+        border: 0;
-+        background: transparent;
-+        cursor: pointer;
-+      }
-+      .hilal-boosts-color-presets {
-+        display: grid;
-+        grid-template-columns: repeat(8, 1fr);
-+        gap: 5px;
-+      }
-+      .hilal-boosts-color-preset {
-+        appearance: none;
-+        width: 100%;
-+        aspect-ratio: 1;
-+        min-width: 0;
-+        border-radius: 999px;
-+        border: 2px solid transparent;
-+        background: linear-gradient(135deg, var(--hilal-preset-color), color-mix(in srgb, var(--hilal-preset-color) 35%, #00d4ff));
-+        cursor: pointer;
-+        box-shadow: 0 1px 3px rgba(0,0,0,0.18);
-+      }
-+      .hilal-boosts-color-preset[active] {
-+        border-color: var(--arrowpanel-color, #000);
-+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--arrowpanel-background, #fff) 80%, transparent), 0 2px 6px rgba(0,0,0,0.24);
-+      }
-+      .hilal-boosts-zap-row {
-+        justify-content: space-between;
-+        align-items: center;
-+        padding: 10px;
-+        border-radius: 10px;
-+        border: 1px solid color-mix(in srgb, #ff4757 22%, var(--panel-separator-color, rgba(0,0,0,0.08)));
-+        background: linear-gradient(135deg, color-mix(in srgb, #ff4757 8%, transparent), color-mix(in srgb, var(--hilal-boosts-accent) 5%, transparent));
-+      }
-+      .hilal-boosts-zap-button {
-+        appearance: none;
-+        padding: 6px 11px;
-+        border-radius: 8px;
-+        border: 1px solid color-mix(in srgb, #ff4757 70%, transparent);
-+        color: #fff;
-+        background: linear-gradient(135deg, #ff4757, #ff8a5c);
-+        cursor: pointer;
-+        font-size: 10.5px;
-+        font-weight: 700;
-+        box-shadow: 0 8px 20px rgba(255, 71, 87, 0.2);
 +      }
 +      .hilal-boosts-zap-item {
 +        display: flex;
@@ -228,65 +83,20 @@ diff --git a/browser/base/content/main-popupset.inc.xhtml b/browser/base/content
 +        padding: 8px 0;
 +      }
 +    </html:style>
-+    <box class="panel-header hilal-boosts-panel-header">
++    <box class="panel-header" style="align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--panel-separator-color, rgba(0,0,0,0.08));">
 +      <vbox flex="1" style="min-width: 0;">
 +        <hbox align="center" style="gap: 6px; align-items: center;">
 +          <html:span style="font-weight: 700; font-size: 13.5px; color: var(--arrowpanel-color, #000);">Site Customizer</html:span>
-+          <html:span style="font-size: 8px; font-weight: 800; text-transform: uppercase; background: linear-gradient(135deg, #7c5cff, #00d4ff); color: #fff; padding: 1px 4px; border-radius: 3px; letter-spacing: 0; line-height: 1.2;">Beta</html:span>
++          <html:span style="font-size: 8px; font-weight: 800; text-transform: uppercase; background: #007aff; color: #fff; padding: 1px 4px; border-radius: 3px; letter-spacing: 0.5px; line-height: 1.2;">Beta</html:span>
 +        </hbox>
 +        <html:span id="hilal-boosts-panel-title" style="font-size: 11px; color: var(--panel-description-color, #666); word-break: break-all; margin-top: 2px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; display: block;">example.com</html:span>
 +      </vbox>
 +      <hbox align="center" style="gap: 6px; align-items: center; margin-inline-start: 12px;">
 +        <html:span style="font-size: 11px; font-weight: 600; color: var(--arrowpanel-color, #000);">Active</html:span>
-+        <html:input type="checkbox" id="hilal-boosts-enable" style="cursor: pointer; width: 14px; height: 14px; margin: 0;"/>
++        <html:input type="checkbox" id="hilal-boosts-enable" onchange="gHilalBoosts.onPanelCommand(this);" style="cursor: pointer; width: 14px; height: 14px; margin: 0;"/>
 +      </hbox>
 +    </box>
-+    <vbox class="panel-subview-body" style="padding: 14px; gap: 12px; max-height: 560px; overflow-y: auto;">
-+
-+      <vbox class="hilal-boosts-color-section">
-+        <hbox style="justify-content: space-between; align-items: center; padding: 2px 0;">
-+          <vbox flex="1">
-+            <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Color Boost</html:span>
-+            <html:span style="font-size: 10px; color: var(--panel-description-color, #777);">Gradient accent for this site</html:span>
-+          </vbox>
-+          <html:input type="checkbox" id="hilal-boosts-color-enable" style="cursor: pointer; width: 14px; height: 14px; margin: 0;"/>
-+        </hbox>
-+        <html:div id="hilal-boosts-color-picker">
-+          <html:div id="hilal-boosts-color-dot"></html:div>
-+          <html:div id="hilal-boosts-color-dot-secondary"></html:div>
-+        </html:div>
-+        <html:div class="hilal-boosts-color-presets">
-+          <html:button type="button" class="hilal-boosts-color-preset" data-color="#7c5cff" title="Violet" style="--hilal-preset-color: #7c5cff;"></html:button>
-+          <html:button type="button" class="hilal-boosts-color-preset" data-color="#2f80ed" title="Blue" style="--hilal-preset-color: #2f80ed;"></html:button>
-+          <html:button type="button" class="hilal-boosts-color-preset" data-color="#00a8a8" title="Teal" style="--hilal-preset-color: #00a8a8;"></html:button>
-+          <html:button type="button" class="hilal-boosts-color-preset" data-color="#27ae60" title="Green" style="--hilal-preset-color: #27ae60;"></html:button>
-+          <html:button type="button" class="hilal-boosts-color-preset" data-color="#f2c94c" title="Gold" style="--hilal-preset-color: #f2c94c;"></html:button>
-+          <html:button type="button" class="hilal-boosts-color-preset" data-color="#f2994a" title="Orange" style="--hilal-preset-color: #f2994a;"></html:button>
-+          <html:button type="button" class="hilal-boosts-color-preset" data-color="#eb5757" title="Red" style="--hilal-preset-color: #eb5757;"></html:button>
-+          <html:button type="button" class="hilal-boosts-color-preset" data-color="#ff3366" title="Pink" style="--hilal-preset-color: #ff3366;"></html:button>
-+        </html:div>
-+        <html:div class="hilal-boosts-gradient-row">
-+          <html:input type="color" id="hilal-boosts-color" class="hilal-boosts-color-swatch" value="#7c5cff" title="Primary color"/>
-+          <html:div id="hilal-boosts-gradient-preview"></html:div>
-+          <html:input type="color" id="hilal-boosts-color-secondary" class="hilal-boosts-color-swatch" value="#00d4ff" title="Secondary color"/>
-+        </html:div>
-+        <hbox style="gap: 8px; align-items: center;">
-+          <vbox flex="1" style="gap: 3px;">
-+            <hbox style="justify-content: space-between; align-items: center;">
-+              <html:span style="font-size: 10.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Intensity</html:span>
-+              <html:span id="hilal-boosts-color-intensity-value" style="font-size: 10px; font-weight: 700; color: #007aff;">35%</html:span>
-+            </hbox>
-+            <html:input type="range" id="hilal-boosts-color-intensity" min="0" max="100" step="1" value="35" style="width: 100%; cursor: pointer; margin: 0;"/>
-+          </vbox>
-+        </hbox>
-+        <vbox style="gap: 3px;">
-+          <hbox style="justify-content: space-between; align-items: center;">
-+            <html:span style="font-size: 10.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Brightness</html:span>
-+            <html:span id="hilal-boosts-color-brightness-value" style="font-size: 10px; font-weight: 700; color: #007aff;">100%</html:span>
-+          </hbox>
-+          <html:input type="range" id="hilal-boosts-color-brightness" min="80" max="120" step="1" value="100" style="width: 100%; cursor: pointer; margin: 0;"/>
-+        </vbox>
-+      </vbox>
++    <vbox class="panel-subview-body" style="padding: 14px; gap: 12px; max-height: 440px; overflow-y: auto;">
 +      
 +      <!-- Scale Adjuster -->
 +      <vbox style="gap: 4px;">
@@ -294,39 +104,26 @@ diff --git a/browser/base/content/main-popupset.inc.xhtml b/browser/base/content
 +          <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Font Scale</html:span>
 +          <html:span id="hilal-boosts-scale-value" style="font-size: 11px; font-weight: 700; color: #007aff;">100%</html:span>
 +        </hbox>
-+        <html:input type="range" id="hilal-boosts-scale" min="50" max="200" step="10" style="width: 100%; cursor: pointer; margin: 4px 0;"/>
++        <html:input type="range" id="hilal-boosts-scale" min="50" max="200" step="10" oninput="gHilalBoosts.onPanelCommand(this);" style="width: 100%; cursor: pointer; margin: 4px 0;"/>
 +      </vbox>
 +
 +      <!-- Font Family Override -->
 +      <vbox style="gap: 4px;">
 +        <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Font Family</html:span>
-+        <html:select id="hilal-boosts-font" style="width: 100%; padding: 4px; border-radius: 6px; border: 1px solid var(--panel-separator-color, rgba(0,0,0,0.12)); background: var(--arrowpanel-background, #fff); color: var(--arrowpanel-color, #000); font-size: 11.5px; outline: none; cursor: pointer;">
++        <html:select id="hilal-boosts-font" onchange="gHilalBoosts.onPanelCommand(this);" style="width: 100%; padding: 4px; border-radius: 6px; border: 1px solid var(--panel-separator-color, rgba(0,0,0,0.12)); background: var(--arrowpanel-background, #fff); color: var(--arrowpanel-color, #000); font-size: 11.5px; outline: none; cursor: pointer;">
 +          <html:option value="">Use Site Default</html:option>
 +          <html:option value="system-ui, -apple-system, sans-serif">System UI</html:option>
-+          <html:option value="-apple-system, BlinkMacSystemFont, sans-serif">SF Pro</html:option>
-+          <html:option value="Arial, Helvetica, sans-serif">Arial</html:option>
-+          <html:option value="Helvetica Neue, Helvetica, Arial, sans-serif">Helvetica Neue</html:option>
-+          <html:option value="Segoe UI, system-ui, sans-serif">Segoe UI</html:option>
 +          <html:option value="Inter, sans-serif">Inter</html:option>
 +          <html:option value="Roboto, sans-serif">Roboto</html:option>
-+          <html:option value="Open Sans, sans-serif">Open Sans</html:option>
-+          <html:option value="Lato, sans-serif">Lato</html:option>
-+          <html:option value="Poppins, sans-serif">Poppins</html:option>
-+          <html:option value="Montserrat, sans-serif">Montserrat</html:option>
-+          <html:option value="Nunito, sans-serif">Nunito</html:option>
 +          <html:option value="Georgia, serif">Georgia</html:option>
-+          <html:option value="Times New Roman, Times, serif">Times New Roman</html:option>
-+          <html:option value="Merriweather, Georgia, serif">Merriweather</html:option>
-+          <html:option value="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace">System Mono</html:option>
-+          <html:option value="JetBrains Mono, ui-monospace, monospace">JetBrains Mono</html:option>
-+          <html:option value="Fira Code, ui-monospace, monospace">Fira Code</html:option>
++          <html:option value="monospace">Monospace</html:option>
 +        </html:select>
 +      </vbox>
 +
 +      <!-- Text Transform Case Override -->
 +      <vbox style="gap: 4px;">
 +        <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Text Transform</html:span>
-+        <html:select id="hilal-boosts-case" style="width: 100%; padding: 4px; border-radius: 6px; border: 1px solid var(--panel-separator-color, rgba(0,0,0,0.12)); background: var(--arrowpanel-background, #fff); color: var(--arrowpanel-color, #000); font-size: 11.5px; outline: none; cursor: pointer;">
++        <html:select id="hilal-boosts-case" onchange="gHilalBoosts.onPanelCommand(this);" style="width: 100%; padding: 4px; border-radius: 6px; border: 1px solid var(--panel-separator-color, rgba(0,0,0,0.12)); background: var(--arrowpanel-background, #fff); color: var(--arrowpanel-color, #000); font-size: 11.5px; outline: none; cursor: pointer;">
 +          <html:option value="none">No Override</html:option>
 +          <html:option value="uppercase">ALL UPPERCASE</html:option>
 +          <html:option value="lowercase">all lowercase</html:option>
@@ -340,16 +137,16 @@ diff --git a/browser/base/content/main-popupset.inc.xhtml b/browser/base/content
 +          <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Smart Invert</html:span>
 +          <html:span style="font-size: 10px; color: var(--panel-description-color, #777);">Force dark mode for page content</html:span>
 +        </vbox>
-+        <html:input type="checkbox" id="hilal-boosts-invert" style="cursor: pointer; width: 14px; height: 14px; margin: 0;"/>
++        <html:input type="checkbox" id="hilal-boosts-invert" onchange="gHilalBoosts.onPanelCommand(this);" style="cursor: pointer; width: 14px; height: 14px; margin: 0;"/>
 +      </hbox>
 +
 +      <!-- Interactive Element Blocker (Zapper) -->
-+      <hbox class="hilal-boosts-zap-row">
++      <hbox style="justify-content: space-between; align-items: center; padding: 4px 0;">
 +        <vbox flex="1">
 +          <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Element Blocker</html:span>
 +          <html:span style="font-size: 10px; color: var(--panel-description-color, #777);">Click elements on page to hide them</html:span>
 +        </vbox>
-+        <html:button id="hilal-boosts-zap-btn" class="hilal-boosts-zap-button" type="button">Zap Element</html:button>
++        <button id="hilal-boosts-zap-btn" style="padding: 4px 10px; border-radius: 6px; border: 1px solid #ff4757; color: #ff4757; background: transparent; cursor: pointer; font-size: 10.5px; font-weight: 600;" onclick="gHilalBoosts.startZapMode();">Zap Element</button>
 +      </hbox>
 +
 +      <!-- Active Zaps List -->
@@ -363,7 +160,7 @@ diff --git a/browser/base/content/main-popupset.inc.xhtml b/browser/base/content
 +      <!-- Custom CSS Code Editor -->
 +      <vbox style="gap: 4px;">
 +        <html:span style="font-size: 11.5px; font-weight: 600; color: var(--arrowpanel-color, #000);">Custom CSS</html:span>
-+        <html:textarea id="hilal-boosts-css" rows="3" placeholder="body { background: #000 !important; }" style="width: 100%; font-family: monospace; font-size: 10.5px; padding: 6px; border-radius: 6px; border: 1px solid var(--panel-separator-color, rgba(0,0,0,0.12)); background: var(--arrowpanel-background, #fff); color: var(--arrowpanel-color, #000); resize: vertical; box-sizing: border-box; outline: none;"/>
++        <html:textarea id="hilal-boosts-css" rows="3" placeholder="body { background: #000 !important; }" oninput="gHilalBoosts.onPanelCommand(this);" style="width: 100%; font-family: monospace; font-size: 10.5px; padding: 6px; border-radius: 6px; border: 1px solid var(--panel-separator-color, rgba(0,0,0,0.12)); background: var(--arrowpanel-background, #fff); color: var(--arrowpanel-color, #000); resize: vertical; box-sizing: border-box; outline: none;"/>
 +      </vbox>
 +
 +    </vbox>
@@ -380,7 +177,7 @@ diff --git a/browser/base/content/navigator-toolbox.inc.xhtml b/browser/base/con
 +                  class="urlbar-page-action"
 +                  role="button"
 +                  tooltiptext="Customize Site (Beta)"
-+                  hidden="true">
++                  onclick="gHilalBoosts.populatePanel(); document.getElementById('hilal-boosts-panel').openPopup(this, 'bottomright topright', 0, 0, false, false);">
 +              <image class="urlbar-icon" style="list-style-image: url('chrome://browser/skin/customize.svg');"/>
 +            </hbox>
            </hbox>

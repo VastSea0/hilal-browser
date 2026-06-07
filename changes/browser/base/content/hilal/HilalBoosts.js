@@ -208,29 +208,49 @@
             css += `  body *:not(script, style) { text-transform: ${boost.textCase} !important; }\n`;
           }
 
-          if (boost.colorEnabled && this._isHexColor(boost.accentColor)) {
-            const intensity = this._clampNumber(boost.colorIntensity, 0, 100, 35);
-            const brightness = this._clampNumber(boost.colorBrightness, 80, 120, 100);
-            const accentColor = this._adjustHexBrightness(boost.accentColor, brightness);
-            const secondaryColor = this._adjustHexBrightness(boost.secondaryColor, brightness);
-            const pageMix = Math.round(2 + intensity * 0.12);
-            const surfaceMix = Math.round(2 + intensity * 0.08);
-            const controlMix = Math.round(3 + intensity * 0.1);
-            const linkMix = Math.round(28 + intensity * 0.22);
-            css += `  html { accent-color: ${accentColor} !important; background-color: color-mix(in srgb, Canvas ${100 - pageMix}%, ${accentColor} ${pageMix}%) !important; }\n`;
-            css += `  body { background-color: color-mix(in srgb, Canvas ${100 - pageMix}%, ${accentColor} ${pageMix}%) !important; color: color-mix(in srgb, CanvasText 96%, ${secondaryColor} 4%) !important; }\n`;
-            css += `  body ::selection { background: color-mix(in srgb, ${accentColor} ${Math.max(38, linkMix)}%, Highlight) !important; color: HighlightText !important; }\n`;
-            css += `  body :is(a, area, summary, [role="link"]) { color: color-mix(in srgb, ${accentColor} ${linkMix}%, LinkText) !important; text-decoration-color: color-mix(in srgb, ${secondaryColor} ${Math.max(24, linkMix - 8)}%, currentColor) !important; }\n`;
-            css += `  body :is(button, input, textarea, select, progress, meter, [role="button"], [role="tab"], [role="switch"]) { accent-color: ${accentColor} !important; background-color: color-mix(in srgb, Field ${100 - controlMix}%, ${accentColor} ${controlMix}%) !important; color: FieldText !important; }\n`;
-            css += `  body :is(dialog, [role="dialog"], [role="menu"], [role="listbox"], popover) { background-color: color-mix(in srgb, Canvas ${100 - surfaceMix}%, ${secondaryColor} ${surfaceMix}%) !important; color: CanvasText !important; }\n`;
+          // Dynamic GPU-accelerated page styling using CSS filters
+          let filters = [];
+          let inverseFilters = [];
+
+          if (boost.smartInvert) {
+            filters.push("invert(0.88)");
+            inverseFilters.unshift("invert(1)");
           }
 
-          // Smart invert (dark mode)
-          if (boost.smartInvert) {
-            css += `  html { color-scheme: dark !important; background: #101114 !important; }\n`;
-            css += `  body { background-color: #101114 !important; color: #f2f4f8 !important; }\n`;
-            css += `  body :is(input, textarea, select, button, dialog, [role="dialog"], [role="menu"], [role="listbox"]) { background-color: #1a1c22 !important; color: #f2f4f8 !important; }\n`;
-            css += `  body :is(a, [role="link"]) { color: #8ab4ff !important; }\n`;
+          if (boost.colorEnabled && this._isHexColor(boost.accentColor)) {
+            const accentHsl = this._hexToHsl(boost.accentColor);
+            // Rotate hue relative to page's default blue accent (~215deg)
+            const rotation = Math.round(accentHsl.h - 215);
+            if (Math.abs(rotation) > 5) {
+              filters.push(`hue-rotate(${rotation}deg)`);
+              inverseFilters.unshift(`hue-rotate(${-rotation}deg)`);
+            }
+
+            const intensity = this._clampNumber(boost.colorIntensity, 0, 100, 35);
+            if (intensity !== 35) {
+              const saturationFactor = (1 + (intensity - 35) / 100).toFixed(2);
+              filters.push(`saturate(${saturationFactor})`);
+            }
+
+            const brightness = this._clampNumber(boost.colorBrightness, 80, 120, 100);
+            if (brightness !== 100) {
+              const brightnessFactor = (brightness / 100).toFixed(2);
+              filters.push(`brightness(${brightnessFactor})`);
+              inverseFilters.unshift(`brightness(${(100 / brightness).toFixed(2)})`);
+            }
+          }
+
+          if (filters.length > 0) {
+            css += `  html { filter: ${filters.join(" ")} !important; background: ${boost.smartInvert ? "#121214" : "#fff"} !important; }\n`;
+            css += `  img, video, iframe, canvas, embed, object, [style*="background-image"] { filter: ${inverseFilters.join(" ")} !important; }\n`;
+          }
+
+          // Additional local element overrides to blend form controls and selection
+          if (boost.colorEnabled && this._isHexColor(boost.accentColor)) {
+            const accentColor = boost.accentColor;
+            css += `  html { accent-color: ${accentColor} !important; }\n`;
+            css += `  body ::selection { background: ${accentColor} !important; color: #fff !important; }\n`;
+            css += `  body :is(button, input, textarea, select, [role="button"], [role="tab"], [role="switch"]) { accent-color: ${accentColor} !important; }\n`;
           }
 
           // Zaps
@@ -652,16 +672,24 @@
       const angle = Math.atan2(dy, dx);
       const hue = (angle * 180 / Math.PI + 360) % 360;
       const saturation = Math.round(distance / radius * 100);
-      const color = this._hslToHex(hue, saturation, 55);
 
       const boost = this.getBoostForDomain(domain);
-      boost.accentColor = color;
-      boost.secondaryColor = this._rotateHexColor(color, 52);
+      if (this._dragTarget === "secondary") {
+        const accentHsl = this._hexToHsl(boost.accentColor);
+        boost.secondaryColor = this._hslToHex(hue, accentHsl.s, 48);
+      } else {
+        const prevAccentHsl = this._hexToHsl(boost.accentColor);
+        const prevSecondaryHsl = this._hexToHsl(boost.secondaryColor);
+        let diff = (prevSecondaryHsl.h - prevAccentHsl.h + 360) % 360;
+        if (diff === 0) diff = 52;
+        boost.accentColor = this._hslToHex(hue, saturation, 55);
+        boost.secondaryColor = this._hslToHex((hue + diff) % 360, saturation, 48);
+      }
       boost.colorEnabled = true;
       boost.enabled = true;
       document.getElementById("hilal-boosts-enable").checked = true;
       document.getElementById("hilal-boosts-color-enable").checked = true;
-      document.getElementById("hilal-boosts-color").value = color;
+      document.getElementById("hilal-boosts-color").value = boost.accentColor;
       document.getElementById("hilal-boosts-color-secondary").value = boost.secondaryColor;
       this._updateColorPickerVisuals(boost);
       this.saveBoostForDomain(domain, boost);
@@ -669,8 +697,9 @@
 
     _updateColorPickerVisuals(boost) {
       const picker = document.getElementById("hilal-boosts-color-picker");
-      const dot = document.getElementById("hilal-boosts-color-dot");
+      const dot = document.getElementById("hilal-boosts-color-dot-primary");
       const secondaryDot = document.getElementById("hilal-boosts-color-dot-secondary");
+      const circle = picker?.querySelector(".hilal-boosts-color-picker-circle");
       const preview = document.getElementById("hilal-boosts-gradient-preview");
       if (!picker || !dot || !secondaryDot) return;
 
@@ -678,10 +707,21 @@
       const secondaryColor = this._normalizeHexColor(boost.secondaryColor, DEFAULT_SECONDARY_COLOR);
       picker.style.setProperty("--hilal-boosts-accent", color);
       picker.style.setProperty("--hilal-boosts-secondary", secondaryColor);
+      
       this._positionColorDot(dot, color, 42);
-      this._positionColorDot(secondaryDot, secondaryColor, 36);
+      this._positionColorDot(secondaryDot, secondaryColor, 42);
       dot.style.backgroundColor = color;
       secondaryDot.style.backgroundColor = secondaryColor;
+
+      if (circle) {
+        const { s } = this._hexToHsl(color);
+        const diameter = s * 0.84;
+        circle.style.width = diameter + "%";
+        circle.style.height = diameter + "%";
+      }
+
+      this._updateArcFill(picker, color, secondaryColor);
+
       if (preview) {
         preview.style.setProperty("--hilal-boosts-accent", color);
         preview.style.setProperty("--hilal-boosts-secondary", secondaryColor);
@@ -697,6 +737,99 @@
       const distance = s / 100 * radiusScale;
       dot.style.left = (50 + Math.cos(angle) * distance) + "%";
       dot.style.top = (50 + Math.sin(angle) * distance) + "%";
+    }
+
+    _initArcSVG(picker) {
+      const NS = "http://www.w3.org/2000/svg";
+      const w = picker.clientWidth || 170;
+      const h = picker.clientHeight || 170;
+
+      const svg = document.createElementNS(NS, "svg");
+      svg.classList.add("zen-boost-color-picker-arc-svg");
+      svg.setAttribute("width", w);
+      svg.setAttribute("height", h);
+      svg.style.position = "absolute";
+      svg.style.top = "0";
+      svg.style.left = "0";
+      svg.style.pointerEvents = "none";
+      svg.style.zIndex = "3";
+
+      const defs = document.createElementNS(NS, "defs");
+      const grad = document.createElementNS(NS, "linearGradient");
+      grad.setAttribute("id", "hilal-arc-gradient");
+
+      const stop1 = document.createElementNS(NS, "stop");
+      stop1.setAttribute("offset", "0%");
+      stop1.setAttribute("id", "hilal-ag-stop1");
+
+      const stop2 = document.createElementNS(NS, "stop");
+      stop2.setAttribute("offset", "100%");
+      stop2.setAttribute("id", "hilal-ag-stop2");
+
+      grad.appendChild(stop1);
+      grad.appendChild(stop2);
+      defs.appendChild(grad);
+      svg.appendChild(defs);
+
+      const path = document.createElementNS(NS, "path");
+      path.classList.add("arc-fill");
+      path.setAttribute("fill", "url(#hilal-arc-gradient)");
+      svg.appendChild(path);
+
+      picker.appendChild(svg);
+      return svg;
+    }
+
+    _updateArcFill(picker, color1, color2) {
+      let svg = picker.querySelector(".zen-boost-color-picker-arc-svg");
+      if (!svg) {
+        svg = this._initArcSVG(picker);
+      }
+      if (!svg) return;
+
+      const w = picker.clientWidth || 170;
+      const h = picker.clientHeight || 170;
+      const cx = w / 2;
+      const cy = h / 2;
+      const radius = Math.min(w, h) * 0.42;
+
+      const hsl1 = this._hexToHsl(color1);
+      const hsl2 = this._hexToHsl(color2);
+
+      const angle1 = hsl1.h;
+      const angle2 = hsl2.h;
+      const r = (hsl1.s / 100) * radius;
+      const thickness = 2.5;
+
+      const toXY = (deg, ra) => {
+        const rad = (deg * Math.PI) / 180;
+        return [cx + ra * Math.cos(rad), cy + ra * Math.sin(rad)];
+      };
+
+      const [x1, y1] = toXY(angle1, r);
+      const [x2, y2] = toXY(angle2, r);
+
+      const grad = svg.querySelector("#hilal-arc-gradient");
+      if (grad) {
+        grad.querySelector("#hilal-ag-stop1").setAttribute("stop-color", color1);
+        grad.querySelector("#hilal-ag-stop2").setAttribute("stop-color", color2);
+        grad.setAttribute("x1", x1);
+        grad.setAttribute("y1", y1);
+        grad.setAttribute("x2", x2);
+        grad.setAttribute("y2", y2);
+      }
+
+      const outerR = r + thickness / 2;
+      const innerR = Math.max(r - thickness / 2, 1);
+      const delta = (angle2 - angle1 + 360) % 360;
+      const large = delta > 180 ? 1 : 0;
+      const [ox1, oy1] = toXY(angle1, outerR);
+      const [ox2, oy2] = toXY(angle2, outerR);
+      const [ix2, iy2] = toXY(angle2, innerR);
+      const [ix1, iy1] = toXY(angle1, innerR);
+
+      const d = `M ${ox1} ${oy1} A ${outerR} ${outerR} 0 ${large} 1 ${ox2} ${oy2} L ${ix2} ${iy2} A ${innerR} ${innerR} 0 ${large} 0 ${ix1} ${iy1} Z`;
+      svg.querySelector(".arc-fill").setAttribute("d", d);
     }
 
     _normalizeBoost(boost) {
