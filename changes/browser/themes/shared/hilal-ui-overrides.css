@@ -50,24 +50,34 @@
 /* Dynamic Workspace/Domain Site Customizer UI theme styling */
 :root[hilal-boosts-ui="true"] {
   /* Opaque Theme Variables (Windowed, Fullscreen, Maximize) */
-  --lwt-accent-color: color-mix(in srgb, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #121214) !important;
-  --toolbar-bgcolor: color-mix(in srgb, var(--hilal-boosts-ui-accent) calc(var(--hilal-boosts-ui-intensity, 12%) * 1.2), #1e1e20) !important;
+  --lwt-accent-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #121214) !important;
+  --toolbar-bgcolor: color-mix(in oklch, var(--hilal-boosts-ui-accent) calc(var(--hilal-boosts-ui-intensity, 12%) * 1.2), #1e1e20) !important;
   --tab-selected-bgcolor: var(--hilal-boosts-ui-accent) !important;
   --tab-line-color: var(--hilal-boosts-ui-accent) !important;
   --focus-outline-color: var(--hilal-boosts-ui-accent) !important;
 
   /* Glass/Transparent Theme Variables (macOS Vibrant Windowed) */
-  --hilal-glass-window-background: color-mix(in srgb, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), rgba(18, 19, 24, 0.36)) !important;
-  --hilal-glass-toolbar-background: color-mix(in srgb, var(--hilal-boosts-ui-accent) calc(var(--hilal-boosts-ui-intensity, 12%) * 1.2), rgba(28, 29, 34, 0.28)) !important;
-  --hilal-glass-border-color: color-mix(in srgb, var(--hilal-boosts-ui-accent) 15%, rgba(255, 255, 255, 0.16)) !important;
-  --sidebar-border-color: color-mix(in srgb, var(--hilal-boosts-ui-accent) 15%, rgba(255, 255, 255, 0.16)) !important;
-  --chrome-content-separator-color: color-mix(in srgb, var(--hilal-boosts-ui-accent) 15%, rgba(255, 255, 255, 0.16)) !important;
+  --hilal-glass-window-background: color-mix(in oklch, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), rgba(18, 19, 24, 0.36)) !important;
+  --hilal-glass-toolbar-background: color-mix(in oklch, var(--hilal-boosts-ui-accent) calc(var(--hilal-boosts-ui-intensity, 12%) * 1.2), rgba(28, 29, 34, 0.28)) !important;
+  --hilal-glass-border-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 15%, rgba(255, 255, 255, 0.16)) !important;
+  --sidebar-border-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 15%, rgba(255, 255, 255, 0.16)) !important;
+  --chrome-content-separator-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 15%, rgba(255, 255, 255, 0.16)) !important;
+
+  /* URL Bar & Fields */
+  --toolbar-field-background-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 6%, rgba(255, 255, 255, 0.05)) !important;
+  --toolbar-field-focus-background-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 12%, rgba(255, 255, 255, 0.12)) !important;
+  --toolbar-field-border-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 15%, rgba(255, 255, 255, 0.1)) !important;
+  
+  --urlbar-box-background-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 8%, rgba(255, 255, 255, 0.08)) !important;
+  --urlbar-box-background-color-hover: color-mix(in oklch, var(--hilal-boosts-ui-accent) 20%, rgba(255, 255, 255, 0.16)) !important;
+  --urlbar-box-background-color-active: color-mix(in oklch, var(--hilal-boosts-ui-accent) 30%, rgba(255, 255, 255, 0.24)) !important;
+  --urlbar-box-background-color-focus: color-mix(in oklch, var(--hilal-boosts-ui-accent) 15%, rgba(255, 255, 255, 0.12)) !important;
 
   /* Sidebar and Vertical Tabs overrides */
-  --hilal-sidebar-background: color-mix(in srgb, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #121214) !important;
-  --sidebar-background-color: color-mix(in srgb, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #121214) !important;
-  --sidebar-background: color-mix(in srgb, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #121214) !important;
-  --hilal-sidebar-border: color-mix(in srgb, var(--hilal-boosts-ui-accent) 15%, rgba(255, 255, 255, 0.08)) !important;
+  --hilal-sidebar-background: color-mix(in oklch, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #121214) !important;
+  --sidebar-background-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #121214) !important;
+  --sidebar-background: color-mix(in oklch, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #121214) !important;
+  --hilal-sidebar-border: color-mix(in oklch, var(--hilal-boosts-ui-accent) 15%, rgba(255, 255, 255, 0.08)) !important;
 
   /* Highlights & Active Indicator colors */
   --hilal-sidebar-highlight: var(--hilal-boosts-ui-accent) !important;
@@ -75,27 +85,37 @@
   --hilal-sidebar-highlight-text: #ffffff !important;
   --lwt-sidebar-highlight-text-color: #ffffff !important;
   --hilal-sidebar-text: #f8fafc !important;
-  --hilal-sidebar-muted: color-mix(in srgb, var(--hilal-sidebar-text) 58%, transparent) !important;
-  --hilal-sidebar-hover: color-mix(in srgb, var(--hilal-sidebar-text) 10%, transparent) !important;
+  --hilal-sidebar-muted: color-mix(in oklch, var(--hilal-sidebar-text) 58%, transparent) !important;
+  --hilal-sidebar-hover: color-mix(in oklch, var(--hilal-sidebar-text) 10%, transparent) !important;
 }
 
 :root[hilal-boosts-ui="true"]:not([brighttext]) {
   /* Opaque Theme Variables (Light Mode) */
-  --lwt-accent-color: color-mix(in srgb, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #f3f3f5) !important;
-  --toolbar-bgcolor: color-mix(in srgb, var(--hilal-boosts-ui-accent) calc(var(--hilal-boosts-ui-intensity, 12%) * 1.2), #ffffff) !important;
+  --lwt-accent-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #f3f3f5) !important;
+  --toolbar-bgcolor: color-mix(in oklch, var(--hilal-boosts-ui-accent) calc(var(--hilal-boosts-ui-intensity, 12%) * 1.2), #ffffff) !important;
 
   /* Glass/Transparent Theme Variables (Light Mode) */
-  --hilal-glass-window-background: color-mix(in srgb, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), rgba(246, 248, 252, 0.34)) !important;
-  --hilal-glass-toolbar-background: color-mix(in srgb, var(--hilal-boosts-ui-accent) calc(var(--hilal-boosts-ui-intensity, 12%) * 1.2), rgba(248, 250, 253, 0.28)) !important;
-  --hilal-glass-border-color: color-mix(in srgb, var(--hilal-boosts-ui-accent) 10%, rgba(30, 30, 36, 0.14)) !important;
-  --sidebar-border-color: color-mix(in srgb, var(--hilal-boosts-ui-accent) 10%, rgba(30, 30, 36, 0.14)) !important;
-  --chrome-content-separator-color: color-mix(in srgb, var(--hilal-boosts-ui-accent) 10%, rgba(30, 30, 36, 0.14)) !important;
+  --hilal-glass-window-background: color-mix(in oklch, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), rgba(246, 248, 252, 0.34)) !important;
+  --hilal-glass-toolbar-background: color-mix(in oklch, var(--hilal-boosts-ui-accent) calc(var(--hilal-boosts-ui-intensity, 12%) * 1.2), rgba(248, 250, 253, 0.28)) !important;
+  --hilal-glass-border-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 10%, rgba(30, 30, 36, 0.14)) !important;
+  --sidebar-border-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 10%, rgba(30, 30, 36, 0.14)) !important;
+  --chrome-content-separator-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 10%, rgba(30, 30, 36, 0.14)) !important;
+
+  /* URL Bar & Fields (Light Mode) */
+  --toolbar-field-background-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 5%, rgba(0, 0, 0, 0.04)) !important;
+  --toolbar-field-focus-background-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 10%, rgba(0, 0, 0, 0.08)) !important;
+  --toolbar-field-border-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 10%, rgba(0, 0, 0, 0.08)) !important;
+  
+  --urlbar-box-background-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 6%, rgba(0, 0, 0, 0.05)) !important;
+  --urlbar-box-background-color-hover: color-mix(in oklch, var(--hilal-boosts-ui-accent) 12%, rgba(0, 0, 0, 0.1)) !important;
+  --urlbar-box-background-color-active: color-mix(in oklch, var(--hilal-boosts-ui-accent) 18%, rgba(0, 0, 0, 0.15)) !important;
+  --urlbar-box-background-color-focus: color-mix(in oklch, var(--hilal-boosts-ui-accent) 10%, rgba(0, 0, 0, 0.08)) !important;
 
   /* Sidebar and Vertical Tabs overrides (Light Mode) */
-  --hilal-sidebar-background: color-mix(in srgb, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #f3f3f5) !important;
-  --sidebar-background-color: color-mix(in srgb, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #f3f3f5) !important;
-  --sidebar-background: color-mix(in srgb, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #f3f3f5) !important;
-  --hilal-sidebar-border: color-mix(in srgb, var(--hilal-boosts-ui-accent) 10%, rgba(0, 0, 0, 0.06)) !important;
+  --hilal-sidebar-background: color-mix(in oklch, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #f3f3f5) !important;
+  --sidebar-background-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #f3f3f5) !important;
+  --sidebar-background: color-mix(in oklch, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #f3f3f5) !important;
+  --hilal-sidebar-border: color-mix(in oklch, var(--hilal-boosts-ui-accent) 10%, rgba(0, 0, 0, 0.06)) !important;
   --hilal-sidebar-text: #1f2937 !important;
 }
 
@@ -126,6 +146,10 @@
 :root[hilal-boosts-ui="true"] #urlbar[focused] > #urlbar-background {
   outline: 2px solid var(--hilal-boosts-ui-accent) !important;
   border-color: transparent !important;
+}
+
+:root[hilal-boosts-ui="true"] #urlbar-input {
+  background-color: transparent !important;
 }
 
 :root[hilal-boosts-ui="true"] #sidebar-box {
