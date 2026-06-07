@@ -91,6 +91,14 @@ hilal-uifix-bottom-rounded =
 hilal-uifix-close-on-hover =
     .label = Sekme Kapatma Butonunu Yalnızca Üzerine Gelindiğinde Göster
 
+## Site Customizer & Dynamic Coloring
+
+hilal-boosts-header = Site Özelleştirici ve Dinamik Renklendirme
+hilal-boosts-auto-palette =
+    .label = Web sitesinin renk paletini otomatik olarak ayıkla ve tarayıcı arayüzüne uygula
+hilal-boosts-browser-ui =
+    .label = Site özelleştirici renklerini varsayılan olarak tarayıcı arayüzüne uygula
+
 ## Bangs
 
 hilal-bangs-header = Bang Özelliği

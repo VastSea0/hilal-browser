@@ -193,3 +193,8 @@ pref("hilal.workspaces.remember_host_mapping", false);
 
 // First-run toolbar initialization
 pref("hilal.toolbar.initialized", false);
+
+// Site Customizer and dynamic UI tinting preferences
+pref("hilal.boosts.auto_palette.enabled", false);
+pref("hilal.boosts.browser_ui.enabled", false);
+
