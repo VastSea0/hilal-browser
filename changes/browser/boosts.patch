@@ -801,7 +801,7 @@ diff --git a/layout/style/nsHilalBoostsBackend.cpp b/layout/style/nsHilalBoostsB
 new file mode 100644
 --- /dev/null
 +++ b/layout/style/nsHilalBoostsBackend.cpp
-@@ -0,0 +1,436 @@
+@@ -0,0 +1,434 @@
 +/* This Source Code Form is subject to the terms of the Mozilla Public
 + * License, v. 2.0. If a copy of the MPL was not distributed with this
 + * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -1181,20 +1181,18 @@ new file mode 100644
 +    *aIsInverted = presContext->HilalBoostsOverrideInverted();
 +    return;
 +  }
-+  const mozilla::dom::BrowsingContext* browsingContext = nullptr;
-+  if (auto* document = presContext->Document()) {
-+    browsingContext = document->GetBrowsingContext();
-+  }
-+  if (!browsingContext) {
++  mozilla::dom::Document* doc = presContext->Document();
++  if (!doc) {
 +    return;
 +  }
-+  browsingContext = browsingContext->Top();
++  mozilla::dom::Document* topDoc = doc;
++  while (mozilla::dom::Document* parent = topDoc->GetInProcessParentDocument()) {
++    topDoc = parent;
++  }
 +
 +  nsAutoCString host;
-+  if (mozilla::dom::Document* topDoc = browsingContext->GetExtantDocument()) {
-+    if (nsIURI* uri = topDoc->GetDocumentURI()) {
-+      uri->GetAsciiHost(host);
-+    }
++  if (nsIURI* uri = topDoc->GetDocumentURI()) {
++    uri->GetAsciiHost(host);
 +  }
 +
 +  if (host.IsEmpty()) {
@@ -1314,7 +1312,7 @@ new file mode 100644
 diff --git a/layout/svg/SVGImageContext.cpp b/layout/svg/SVGImageContext.cpp
 --- a/layout/svg/SVGImageContext.cpp
 +++ b/layout/svg/SVGImageContext.cpp
-@@ -15,9 +15,38 @@
+@@ -15,9 +15,37 @@
  #include "nsISVGPaintContext.h"
  #include "nsPresContext.h"
  #include "nsStyleStruct.h"
@@ -1328,24 +1326,23 @@ diff --git a/layout/svg/SVGImageContext.cpp b/layout/svg/SVGImageContext.cpp
 +void SVGImageContext::MaybeStoreHilalBoosts(SVGImageContext& aContext,
 +                                            const nsPresContext& aPresContext) {
 +  if (dom::Document* doc = aPresContext.Document()) {
-+    if (dom::BrowsingContext* bc = doc->GetBrowsingContext()) {
-+      bc = bc->Top();
-+      nsAutoCString host;
-+      if (dom::Document* topDoc = bc->GetExtantDocument()) {
-+        if (nsIURI* uri = topDoc->GetDocumentURI()) {
-+          uri->GetAsciiHost(host);
-+        }
++    dom::Document* topDoc = doc;
++    while (dom::Document* parent = topDoc->GetInProcessParentDocument()) {
++      topDoc = parent;
++    }
++    nsAutoCString host;
++    if (nsIURI* uri = topDoc->GetDocumentURI()) {
++      uri->GetAsciiHost(host);
++    }
++    if (!host.IsEmpty()) {
++      nscolor accent = 0;
++      float rotation = 0.0f;
++      bool inverted = false;
++      hilal::nsHilalBoostsBackend* backend = hilal::nsHilalBoostsBackend::GetInstance();
++      if (backend) {
++        backend->GetBoostForDomain(host, &accent, &rotation, &inverted);
 +      }
-+      if (!host.IsEmpty()) {
-+        nscolor accent = 0;
-+        float rotation = 0.0f;
-+        bool inverted = false;
-+        hilal::nsHilalBoostsBackend* backend = hilal::nsHilalBoostsBackend::GetInstance();
-+        if (backend) {
-+          backend->GetBoostForDomain(host, &accent, &rotation, &inverted);
-+        }
-+        aContext.SetHilalBoosts(accent, rotation, inverted);
-+      }
++      aContext.SetHilalBoosts(accent, rotation, inverted);
 +    }
 +  }
 +}
@@ -1353,7 +1350,7 @@ diff --git a/layout/svg/SVGImageContext.cpp b/layout/svg/SVGImageContext.cpp
  /* static */
  void SVGImageContext::MaybeStoreContextPaint(SVGImageContext& aContext,
                                               nsIFrame* aFromFrame,
-@@ -36,6 +65,8 @@ void SVGImageContext::MaybeStoreContextPaint(SVGImageContext& aContext,
+@@ -36,6 +64,8 @@ void SVGImageContext::MaybeStoreContextPaint(SVGImageContext& aContext,
      return;
    }
  

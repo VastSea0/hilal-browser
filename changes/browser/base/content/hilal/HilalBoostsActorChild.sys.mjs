@@ -368,9 +368,14 @@ export class HilalBoostsChild extends JSWindowActorChild {
 
   get hostWithoutPort() {
     try {
-      const host = this.browsingContext.topWindow?.location.host;
+      const host = this.contentWindow.top.location.host;
       return host?.split(":")[0];
-    } catch (e) {}
+    } catch (e) {
+      try {
+        const host = this.contentWindow.location.host;
+        return host?.split(":")[0];
+      } catch (err) {}
+    }
     return null;
   }
 
