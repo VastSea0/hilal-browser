@@ -186,7 +186,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2863,3 +2863,4 @@ hilal-bangs-trigger-label = Trigger:
+@@ -2871,3 +2871,4 @@ hilal-bangs-trigger-label = Trigger:
  hilal-bangs-searchurl-label = Search URL:
  hilal-bangs-homeurl-label = Home URL (optional):
  hilal-bangs-default-label = (default)

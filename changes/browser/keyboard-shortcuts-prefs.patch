@@ -422,7 +422,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2876,3 +2876,11 @@ hilal-language-header = Language Selection
+@@ -2884,3 +2884,11 @@ hilal-language-header = Language Selection
  hilal-language-description = Select the interface language for the browser. The browser must be restarted for changes to take effect.
  hilal-language-apply-button =
      .label = Apply and Restart

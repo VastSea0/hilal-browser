@@ -126,7 +126,7 @@ diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/b
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2760,3 +2760,106 @@ security-privacy-issue-warning-ech =
+@@ -2760,3 +2760,114 @@ security-privacy-issue-warning-ech =
  security-privacy-issue-warning-proxy-autodetection =
    .label = Proxy auto-configuration is enabled
    .description = Proxy auto-configuration could let untrusted networks to monitor your activity.
@@ -217,6 +217,14 @@ diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser
 +    .label = Rounded Bottom Tab Corners
 +hilal-uifix-close-on-hover =
 +    .label = Show Tab Close Button Only on Hover
++
++## Site Customizer & Dynamic Coloring
++
++hilal-boosts-header = Site Customizer & Dynamic Coloring
++hilal-boosts-auto-palette =
++    .label = Automatically extract and apply website color palette to browser UI
++hilal-boosts-browser-ui =
++    .label = Apply site customizer colors to browser UI by default
 +
 +## Bangs
 +

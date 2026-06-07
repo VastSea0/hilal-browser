@@ -21,7 +21,7 @@ diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.x
 diff --git a/browser/base/content/main-popupset.inc.xhtml b/browser/base/content/main-popupset.inc.xhtml
 --- a/browser/base/content/main-popupset.inc.xhtml
 +++ b/browser/base/content/main-popupset.inc.xhtml
-@@ -932,4 +932,735 @@
+@@ -932,4 +932,742 @@
      <menuitem id="select-translations-panel-about-translations-menuitem"
                data-l10n-id="translations-panel-settings-about2"/>
    </menupopup>
@@ -698,6 +698,13 @@ diff --git a/browser/base/content/main-popupset.inc.xhtml b/browser/base/content
 +        <!-- Dynamic Coloring Toggles -->
 +        <html:div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px; margin-top: 6px;">
 +          <html:div style="display: flex; justify-content: space-between; align-items: center;">
++            <html:span style="font-size: 12.5px; font-weight: 600; color: #e2e8f0;">Auto Accent from Site</html:span>
++            <html:label class="hilal-boosts-switch">
++              <html:input type="checkbox" id="hilal-boosts-auto-palette-enable" class="hilal-boosts-switch-checkbox"/>
++              <html:span class="hilal-boosts-switch-slider"></html:span>
++            </html:label>
++          </html:div>
++          <html:div style="display: flex; justify-content: space-between; align-items: center;">
 +            <html:span style="font-size: 12.5px; font-weight: 600; color: #e2e8f0;">Apply to Page</html:span>
 +            <html:label class="hilal-boosts-switch">
 +              <html:input type="checkbox" id="hilal-boosts-color-enable" class="hilal-boosts-switch-checkbox"/>
@@ -787,6 +794,46 @@ diff --git a/browser/base/jar.mn b/browser/base/jar.mn
          content/browser/global-scripts.js                   (content/global-scripts.js)
          content/browser/main-popupset.js                    (content/main-popupset.js)
  *       content/browser/pageinfo/pageInfo.xhtml             (content/pageinfo/pageInfo.xhtml)
+diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+--- a/browser/components/preferences/main.js
++++ b/browser/components/preferences/main.js
+@@ -2274,6 +2274,36 @@ var gHilalPane = {
+ 
+     updateHilalUiFixSubOptionsState();
+ 
++    // -- Hilal Site Customizer & Dynamic Coloring Settings --------------------
++    const hilalBoostsAutoPaletteCheckbox = document.getElementById("hilalBoostsAutoPalette");
++    const hilalBoostsBrowserUiCheckbox = document.getElementById("hilalBoostsBrowserUi");
++
++    if (hilalBoostsAutoPaletteCheckbox) {
++      hilalBoostsAutoPaletteCheckbox.checked = Services.prefs.getBoolPref(
++        "hilal.boosts.auto_palette.enabled",
++        false
++      );
++      hilalBoostsAutoPaletteCheckbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref(
++          "hilal.boosts.auto_palette.enabled",
++          hilalBoostsAutoPaletteCheckbox.checked
++        );
++      });
++    }
++
++    if (hilalBoostsBrowserUiCheckbox) {
++      hilalBoostsBrowserUiCheckbox.checked = Services.prefs.getBoolPref(
++        "hilal.boosts.browser_ui.enabled",
++        false
++      );
++      hilalBoostsBrowserUiCheckbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref(
++          "hilal.boosts.browser_ui.enabled",
++          hilalBoostsBrowserUiCheckbox.checked
++        );
++      });
++    }
++
+     // -- Hilal Bangs Customization -------------------------------------------
+     const { HilalBangs } = ChromeUtils.importESModule(
+       "resource:///modules/HilalBangs.sys.mjs"
 diff --git a/gfx/layers/AnimationInfo.cpp b/gfx/layers/AnimationInfo.cpp
 --- a/gfx/layers/AnimationInfo.cpp
 +++ b/gfx/layers/AnimationInfo.cpp
