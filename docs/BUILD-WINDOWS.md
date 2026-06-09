@@ -28,10 +28,27 @@ the Visual Studio installation.
 
 ## Building Hilal
 
+### 1. Compile the Patch Manager (`hil`)
+
+Since the custom Rust patch manager `hil` is not distributed as pre-compiled binaries, you must compile it from source first.
+
+In **PowerShell** or **Git Bash**:
+
+```powershell
+# Build the patch manager tool using Cargo
+cargo build --release --manifest-path hil/Cargo.toml
+
+# Create the bin/ folder and copy the compiled binary
+if (-not (Test-Path bin)) { New-Item -ItemType Directory -Path bin }
+Copy-Item hil\target\release\hil.exe -Destination bin\hil.exe
+```
+
+### 2. Fetch Firefox and Build
+
 From the repo root in **Git Bash** (or any bash shell):
 
 ```bash
-# One-time: fetch Firefox into ./engine
+# Fetch Firefox into ./engine (one-time)
 ./bin/hil setup
 
 # Apply patches + branding overlays
@@ -45,6 +62,13 @@ cd engine && ./mach build
 
 # Run
 ./mach run
+```
+
+Alternatively, you can run the building steps via our convenience PowerShell script:
+
+```powershell
+# Setup, apply, and build automatically:
+.\scripts\build-windows.ps1 -Package -Run
 ```
 
 ## Faster iteration

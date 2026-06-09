@@ -1,12 +1,48 @@
 Hilal Browser is a patch-and-overlay layer on top of upstream Firefox, not a fork.
 
+### Quick Start (macOS / Linux)
+
+First, make sure you have Rust installed, then compile and bootstrap the patch manager (`hil`):
+
 ```bash
+# Clone the repository
 git clone https://github.com/VastSea0/hilal-browser.git
 cd hilal-browser
+
+# Build and install the patch manager
+cargo build --release --manifest-path hil/Cargo.toml
+mkdir -p bin
+cp hil/target/release/hil bin/hil
+
+# Setup the pinned Firefox checkout and apply patches
 ./bin/hil setup
 ./bin/hil apply
+
+# Compile and run
 scripts/build-macos.sh
 (cd engine && ./mach run)
+```
+
+### Quick Start (Windows)
+
+Ensure you have Rust, Visual Studio, and MozillaBuild installed, then run in Git Bash or PowerShell:
+
+```powershell
+# Clone the repository
+git clone https://github.com/VastSea0/hilal-browser.git
+cd hilal-browser
+
+# Build and install the patch manager
+cargo build --release --manifest-path hil/Cargo.toml
+if (-not (Test-Path bin)) { New-Item -ItemType Directory -Path bin }
+Copy-Item hil\target\release\hil.exe -Destination bin\hil.exe
+
+# Setup the pinned Firefox checkout and apply patches
+.\bin\hil.exe setup
+.\bin\hil.exe apply
+
+# Compile and run (PowerShell convenience script)
+.\scripts\build-windows.ps1 -Run
 ```
 
 ## Workspace Layout

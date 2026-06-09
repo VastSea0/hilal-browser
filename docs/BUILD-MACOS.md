@@ -15,19 +15,24 @@ That installs Xcode CLT, the build sysroot, `mozbuild`/`mach` dependencies,
 
 ## Building Hilal
 
-From the repo root:
+From the repo root, first compile and bootstrap the `hil` patch manager:
 
 ```bash
-# One-time: fetch Firefox into ./engine
+# 1. Compile the hil patch manager tool
+cargo build --release --manifest-path hil/Cargo.toml
+mkdir -p bin
+cp hil/target/release/hil bin/hil
+
+# 2. Fetch Firefox into ./engine (one-time)
 ./bin/hil setup
 
-# Apply patches + branding overlays
+# 3. Apply patches + branding overlays
 ./bin/hil apply
 
-# Full build (10-40 minutes on first run)
+# 4. Full build (10-40 minutes on first run)
 scripts/build-macos.sh
 
-# Run
+# 5. Run
 (cd engine && ./mach run)
 ```
 

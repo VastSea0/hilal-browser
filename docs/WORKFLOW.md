@@ -23,11 +23,23 @@ hilal-browser/  ─────────────►  engine/         (bui
 
 ## First-time Setup
 
+Because the `hil` patch manager is a custom Rust helper tool, it is not distributed as pre-compiled binaries and must be compiled from source first:
+
 ```bash
+# 1. Clone repository
 git clone https://github.com/VastSea0/hilal-browser.git
 cd hilal-browser
+
+# 2. Build the hil manager tool (requires Rust compiler)
+cargo build --release --manifest-path hil/Cargo.toml
+mkdir -p bin
+cp hil/target/release/hil bin/hil  # on Windows: copy hil\target\release\hil.exe bin\hil.exe
+
+# 3. Setup workspace and apply patches
 ./bin/hil setup            # Clones Firefox into ./engine and checks out the pinned commit
 ./bin/hil apply            # Stamps Hilal changes onto ./engine
+
+# 4. Compile the browser
 scripts/build-macos.sh      # Delegates to ./mach build
 ```
 
