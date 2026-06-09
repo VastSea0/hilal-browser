@@ -127,12 +127,32 @@ if ($mozBuild) {
     Write-Step "MozillaBuild: $mozBuild"
     $env:MOZILLABUILD = $mozBuild
     # Add NSIS to PATH so mach package can find makensis.exe to build the Windows installer
-    $nsisPath = Join-Path $mozBuild "nsis"
-    if (Test-Path $nsisPath) {
+    $nsisPath = $null
+    $nsisDirs = Get-ChildItem -Path $mozBuild -Directory -Filter "nsis*" -ErrorAction SilentlyContinue
+    foreach ($dir in $nsisDirs) {
+        if (Test-Path (Join-Path $dir.FullName "makensis.exe")) {
+            $nsisPath = $dir.FullName
+            break
+        }
+        $binPath = Join-Path $dir.FullName "Bin"
+        if (Test-Path (Join-Path $binPath "makensis.exe")) {
+            $nsisPath = $binPath
+            break
+        }
+    }
+
+    if ($nsisPath) {
         Write-Step "Adding NSIS to PATH: $nsisPath"
         $env:PATH = "$nsisPath;$env:PATH"
     } else {
-        Write-Warn "NSIS directory not found in MozillaBuild: $nsisPath"
+        # Fallback to legacy "nsis" path
+        $nsisPath = Join-Path $mozBuild "nsis"
+        if (Test-Path $nsisPath) {
+            Write-Step "Adding NSIS to PATH: $nsisPath"
+            $env:PATH = "$nsisPath;$env:PATH"
+        } else {
+            Write-Warn "makensis.exe not found under $mozBuild"
+        }
     }
 } else {
     Write-Warn "MozillaBuild not found."
@@ -231,14 +251,24 @@ if (Test-Path $mozconfigSrc) {
     Write-Warn "mozconfigs/windows not found; using default Firefox build config."
 }
 
-if ($Sccache) {
-    $sccacheCmd = Get-Command sccache -ErrorAction SilentlyContinue
-    if ($sccacheCmd) {
+# Enable sccache for compiler caching if installed (either requested or automatically found in PATH)
+$sccacheCmd = Get-Command sccache -ErrorAction SilentlyContinue
+if ($sccacheCmd) {
+    $hasSccache = $false
+    if (Test-Path $mozconfigDst) {
+        $content = Get-Content -Path $mozconfigDst
+        if ($content -match "ac_add_options --with-ccache=sccache") {
+            $hasSccache = $true
+        }
+    }
+    if (-not $hasSccache) {
         Add-Content -Path $mozconfigDst -Value "ac_add_options --with-ccache=sccache"
         Write-Step "Enabled sccache in engine/mozconfig"
     } else {
-        Write-Warn "Sccache requested but not found on PATH; continuing without it."
+        Write-Step "Sccache already enabled in engine/mozconfig"
     }
+} elseif ($Sccache) {
+    Write-Warn "Sccache requested but not found on PATH; continuing without it."
 }
 
 # --- 8. Optional clobber -----------------------------------------------------

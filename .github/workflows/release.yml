@@ -125,6 +125,9 @@ jobs:
       - name: Setup Firefox source
         run: ./bin/hil setup
 
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.8
+
       - name: Apply patches
         run: ./bin/hil apply --force
 
@@ -154,6 +157,8 @@ jobs:
           rm -f "$CERT_PATH"
 
       - name: Build and package
+        env:
+          SCCACHE_GHA_ENABLED: "true"
         run: |
           export CODESIGN_IDENTITY="$HAS_CODESIGN"
           scripts/build-macos.sh package --no-symlinks
@@ -275,11 +280,7 @@ jobs:
           sudo wget -O /usr/local/bin/appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           sudo chmod +x /usr/local/bin/appimagetool
 
-      - name: Install sccache
-        run: |
-          curl -L https://github.com/mozilla/sccache/releases/download/v0.8.0/sccache-v0.8.0-x86_64-unknown-linux-musl.tar.gz | tar xz
-          sudo mv sccache-v0.8.0-x86_64-unknown-linux-musl/sccache /usr/local/bin/sccache
-          sudo chmod +x /usr/local/bin/sccache
+
 
       - name: Cache cargo
         uses: actions/cache@v4
@@ -312,20 +313,15 @@ jobs:
       - name: Setup Firefox source
         run: ./bin/hil setup
 
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.8
+
       - name: Apply patches
         run: ./bin/hil apply --force
 
-      - name: Cache sccache
-        uses: actions/cache@v4
-        with:
-          path: .sccache
-          key: ${{ runner.os }}-sccache-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-sccache-
-
       - name: Build and package (AppImage)
         env:
-          SCCACHE_DIR: ${{ github.workspace }}/.sccache
+          SCCACHE_GHA_ENABLED: "true"
         run: scripts/build-linux.sh build appimage-build
 
       - name: Check Linux package outputs
@@ -401,12 +397,17 @@ jobs:
         shell: pwsh
         run: .\bin\hil.exe setup
 
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.8
+
       - name: Apply patches
         shell: pwsh
         run: .\bin\hil.exe apply --force
 
       - name: Build and Package
         shell: pwsh
+        env:
+          SCCACHE_GHA_ENABLED: "true"
         run: .\scripts\build-windows.ps1 -Package -Clobber
 
       - name: Check Windows package outputs
