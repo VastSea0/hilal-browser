@@ -766,7 +766,9 @@
     }
 
     _tabOrientationHTML() {
-      const prefix = this._compactSelected ? "welcome-compact" : "welcome-standard";
+      const prefix = this._compactSelected
+        ? "welcome-compact"
+        : "welcome-standard";
       return `
         <div class="hw-layout-grid">
           ${this._screenshotCardHTML(
@@ -928,30 +930,36 @@
     }
 
     _pinnedPreviewTabsHTML() {
-      return PINNED_SITE_PRESETS.map(site => {
-        const active = this._pinnedSitesSelected[site.key];
-        return `
-          <button type="button" class="hw-pinned-preview-tab${active ? " hw-pinned-preview-active" : ""}" data-pinned-site="${site.key}" aria-pressed="${active}" title="${this._escapeHTML(site.label)}">
+      return PINNED_SITE_PRESETS.filter(
+        site => this._pinnedSitesSelected[site.key]
+      )
+        .map(site => {
+          return `
+          <button type="button" class="hw-pinned-preview-tab hw-pinned-preview-active" data-pinned-site="${site.key}" aria-pressed="true" title="${this._escapeHTML(site.label)}">
             ${this._pinnedSiteIconHTML(site)}
           </button>
         `;
-      }).join("");
+        })
+        .join("");
     }
 
     _pinnedSiteChoicesHTML() {
-      return PINNED_SITE_PRESETS.map(site => {
-        const active = this._pinnedSitesSelected[site.key];
-        return `
-          <button type="button" class="hw-pinned-site-choice${active ? " hw-choice-active" : ""}" data-pinned-site="${site.key}" aria-pressed="${active}">
+      return PINNED_SITE_PRESETS.filter(
+        site => !this._pinnedSitesSelected[site.key]
+      )
+        .map(site => {
+          return `
+          <button type="button" class="hw-pinned-site-choice" data-pinned-site="${site.key}" aria-pressed="false">
             ${this._pinnedSiteIconHTML(site)}
             <span class="hw-pinned-site-copy">
               <span class="hw-choice-title">${this._escapeHTML(site.label)}</span>
               <span class="hw-choice-desc">${this._escapeHTML(site.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))}</span>
             </span>
-            <span class="hw-pinned-site-state" data-l10n-id="hilal-welcome-pinned-site-state-${active ? "selected" : "skipped"}">${active ? "Will be pinned" : "Not selected"}</span>
+            <span class="hw-pinned-site-state" data-l10n-id="hilal-welcome-pinned-site-state-skipped">Not selected</span>
           </button>
         `;
-      }).join("");
+        })
+        .join("");
     }
 
     _pinnedSiteIconHTML(site) {
@@ -1010,7 +1018,9 @@
       );
       const selectedPinnedSites = this._selectedPinnedSites();
       const pinnedTabsHTML = selectedPinnedSites.length
-        ? selectedPinnedSites.map(site => this._escapeHTML(site.label)).join(", ")
+        ? selectedPinnedSites
+            .map(site => this._escapeHTML(site.label))
+            .join(", ")
         : `<span data-l10n-id="hilal-welcome-summary-none">None</span>`;
       let workspacesHTML = `<span data-l10n-id="hilal-welcome-summary-off">Off</span>`;
       if (this._workspacesEnabledSelected) {
@@ -1123,33 +1133,44 @@
         });
       });
 
-      this._overlay.querySelectorAll(".hw-screenshot-card[data-layout-mode]").forEach(choice => {
-        choice.addEventListener("click", () => {
-          this._compactSelected = choice.dataset.layoutMode === "compact";
-          this._renderStage();
+      this._overlay
+        .querySelectorAll(".hw-screenshot-card[data-layout-mode]")
+        .forEach(choice => {
+          choice.addEventListener("click", () => {
+            this._compactSelected = choice.dataset.layoutMode === "compact";
+            this._renderStage();
+          });
         });
-      });
 
-      this._overlay.querySelectorAll(".hw-screenshot-card[data-tab-layout]").forEach(choice => {
-        choice.addEventListener("click", () => {
-          this._verticalTabsSelected = choice.dataset.tabLayout === "vertical";
-          this._renderStage();
+      this._overlay
+        .querySelectorAll(".hw-screenshot-card[data-tab-layout]")
+        .forEach(choice => {
+          choice.addEventListener("click", () => {
+            this._verticalTabsSelected =
+              choice.dataset.tabLayout === "vertical";
+            this._renderStage();
+          });
         });
-      });
 
-      this._overlay.querySelectorAll(".hw-screenshot-card[data-workspaces]").forEach(choice => {
-        choice.addEventListener("click", () => {
-          this._workspacesEnabledSelected = choice.dataset.workspaces === "on";
-          this._renderStage();
+      this._overlay
+        .querySelectorAll(".hw-screenshot-card[data-workspaces]")
+        .forEach(choice => {
+          choice.addEventListener("click", () => {
+            this._workspacesEnabledSelected =
+              choice.dataset.workspaces === "on";
+            this._renderStage();
+          });
         });
-      });
 
-      this._overlay.querySelectorAll(".hw-screenshot-card[data-toolbar]").forEach(choice => {
-        choice.addEventListener("click", () => {
-          this._compactHideToolboxSelected = choice.dataset.toolbar === "hidden";
-          this._renderStage();
+      this._overlay
+        .querySelectorAll(".hw-screenshot-card[data-toolbar]")
+        .forEach(choice => {
+          choice.addEventListener("click", () => {
+            this._compactHideToolboxSelected =
+              choice.dataset.toolbar === "hidden";
+            this._renderStage();
+          });
         });
-      });
 
       this._overlay.querySelectorAll(".hw-workspace-choice").forEach(choice => {
         choice.addEventListener("click", () => {
@@ -1395,13 +1416,17 @@
       let iconURL = engine.iconURL;
 
       if (name.includes("duckduckgo")) {
-        iconURL = "chrome://activity-stream/content/data/content/tippytop/images/duckduckgo-com@2x.svg";
+        iconURL =
+          "chrome://activity-stream/content/data/content/tippytop/images/duckduckgo-com@2x.svg";
       } else if (name.includes("google")) {
-        iconURL = "chrome://activity-stream/content/data/content/tippytop/images/google-com@2x.png";
+        iconURL =
+          "chrome://activity-stream/content/data/content/tippytop/images/google-com@2x.png";
       } else if (name.includes("bing")) {
-        iconURL = "chrome://activity-stream/content/data/content/tippytop/images/bing-com@2x.svg";
+        iconURL =
+          "chrome://activity-stream/content/data/content/tippytop/images/bing-com@2x.svg";
       } else if (name.includes("yandex")) {
-        iconURL = "chrome://activity-stream/content/data/content/tippytop/images/yandex-com@2x.png";
+        iconURL =
+          "chrome://activity-stream/content/data/content/tippytop/images/yandex-com@2x.png";
       }
 
       if (iconURL) {
