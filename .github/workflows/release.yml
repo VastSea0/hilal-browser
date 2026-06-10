@@ -330,6 +330,14 @@ jobs:
             hil/target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('hil/Cargo.toml') }}
 
+      - name: Cache sccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/sccache
+          key: ${{ runner.os }}-sccache-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-sccache-
+
       - name: Compile hil tool
         run: |
           cargo build --release --manifest-path hil/Cargo.toml
@@ -364,8 +372,6 @@ jobs:
       # failed even though every real step succeeded.
       - name: Setup sccache
         continue-on-error: true
-        env:
-          SCCACHE_GHA_ENABLED: "true"
         run: |
           # Check if sccache is already on PATH
           if command -v sccache >/dev/null 2>&1; then
@@ -403,8 +409,6 @@ jobs:
         run: ./bin/hil apply --force
 
       - name: Build and package (AppImage)
-        env:
-          SCCACHE_GHA_ENABLED: "true"
         run: scripts/build-linux.sh build appimage-build
 
       - name: Stop sccache
@@ -497,6 +501,14 @@ jobs:
             hil\target\
           key: ${{ runner.os }}-cargo-${{ hashFiles('hil/Cargo.toml') }}
 
+      - name: Cache sccache
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\Mozilla\sccache\cache
+          key: ${{ runner.os }}-sccache-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-sccache-
+
       - name: Compile hil tool
         shell: pwsh
         run: |
@@ -530,8 +542,6 @@ jobs:
       # Install sccache manually to avoid post-job hook failures.
       - name: Setup sccache
         continue-on-error: true
-        env:
-          SCCACHE_GHA_ENABLED: "true"
         shell: pwsh
         run: |
           $sccache = Get-Command sccache -ErrorAction SilentlyContinue
@@ -571,8 +581,6 @@ jobs:
 
       - name: Build and Package
         shell: pwsh
-        env:
-          SCCACHE_GHA_ENABLED: "true"
         run: .\scripts\build-windows.ps1 -Package -SkipApply
 
       - name: Stop sccache
