@@ -6,8 +6,18 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Git tag to build (e.g. v1.0.0)"
+        description: "Version tag to build (e.g. v0.3.0-alpha.3)"
         required: true
+        type: string
+      platforms:
+        description: "Target platforms"
+        required: true
+        type: choice
+        options:
+          - all
+          - linux-only
+          - windows-only
+        default: "all"
 
 permissions:
   contents: write
@@ -16,12 +26,16 @@ env:
   HILAL_FIREFOX_UPSTREAM: "https://github.com/mozilla-firefox/firefox.git"
 
 jobs:
-  create-release:
+  # --------------------------------------------------------------------------
+  # Prepare: determine tag, create draft release, decide which platforms run
+  # --------------------------------------------------------------------------
+  prepare:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.vars.outputs.tag }}
-      version: ${{ steps.release_meta.outputs.version }}
-      prerelease: ${{ steps.release_meta.outputs.prerelease }}
+      build_number: ${{ github.run_number }}
+      build_linux: ${{ steps.platforms.outputs.linux }}
+      build_windows: ${{ steps.platforms.outputs.windows }}
       has_secrets: ${{ steps.check_secrets.outputs.has_secrets }}
 
     steps:
@@ -34,6 +48,22 @@ jobs:
             TAG="${{ github.ref_name }}"
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Build #${{ github.run_number }} for tag: $TAG"
+
+      - name: Determine platforms
+        id: platforms
+        run: |
+          PLAT="${{ github.event.inputs.platforms || 'all' }}"
+          if [ "$PLAT" = "all" ] || [ "$PLAT" = "linux-only" ]; then
+            echo "linux=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "linux=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [ "$PLAT" = "all" ] || [ "$PLAT" = "windows-only" ]; then
+            echo "windows=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "windows=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Checkout release tag
         uses: actions/checkout@v4
@@ -66,17 +96,20 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.vars.outputs.tag }}
-          name: "Hilal Browser ${{ steps.vars.outputs.tag }}"
+          name: "Hilal Browser ${{ steps.vars.outputs.tag }} (build #${{ github.run_number }})"
           generate_release_notes: true
           draft: true
           prerelease: ${{ steps.release_meta.outputs.prerelease == 'true' }}
 
+  # --------------------------------------------------------------------------
+  # macOS: sign, notarize, DMG, MAR (only when signing secrets are available)
+  # --------------------------------------------------------------------------
   sign-macos:
-    needs: create-release
+    needs: prepare
     runs-on: macos-latest
     timeout-minutes: 120
 
-    if: ${{ needs.create-release.outputs.has_secrets == 'true' }}
+    if: ${{ needs.prepare.outputs.has_secrets == 'true' }}
 
     env:
       HAS_CODESIGN: ${{ secrets.CODESIGN_IDENTITY }}
@@ -90,7 +123,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.create-release.outputs.tag }}
+          ref: ${{ needs.prepare.outputs.tag }}
 
       - name: Cache cargo
         uses: actions/cache@v4
@@ -133,7 +166,7 @@ jobs:
         id: release_meta
         run: |
           node scripts/release-env.mjs \
-            --tag "${{ needs.create-release.outputs.tag }}" \
+            --tag "${{ needs.prepare.outputs.tag }}" \
             --firefox-src engine \
             --require-firefox-version \
             --github-output "$GITHUB_OUTPUT"
@@ -195,11 +228,11 @@ jobs:
           echo "$HILAL_SIGNING_DB_BASE64" | base64 -d > signing-db.tar.gz
           tar -xzf signing-db.tar.gz -C /tmp/signing-db
 
-          scripts/make-full-update.sh "${{ needs.create-release.outputs.tag }}" "dist/${{ steps.release_meta.outputs.macos_arm64_mar }}"
+          scripts/make-full-update.sh "${{ needs.prepare.outputs.tag }}" "dist/${{ steps.release_meta.outputs.macos_arm64_mar }}"
 
       - name: Generate update manifest
         run: |
-          TAG="${{ needs.create-release.outputs.tag }}"
+          TAG="${{ needs.prepare.outputs.tag }}"
 
           node scripts/generate-update-manifest.mjs \
             --version "$TAG" \
@@ -234,7 +267,7 @@ jobs:
       - name: Upload assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.create-release.outputs.tag }}
+          tag_name: ${{ needs.prepare.outputs.tag }}
           files: |
             dist/*.dmg
             dist/*.mar
@@ -242,8 +275,12 @@ jobs:
             dist/SHA256SUMS
             dist/hilal-browser-sbom.spdx.json
 
+  # --------------------------------------------------------------------------
+  # Linux: build, package, AppImage, tar.gz
+  # --------------------------------------------------------------------------
   build-linux:
-    needs: create-release
+    needs: prepare
+    if: ${{ needs.prepare.outputs.build_linux == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 180
 
@@ -263,7 +300,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.create-release.outputs.tag }}
+          ref: ${{ needs.prepare.outputs.tag }}
 
       - name: Install build dependencies
         run: |
@@ -299,7 +336,7 @@ jobs:
       - name: Upload hil tool to release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.create-release.outputs.tag }}
+          tag_name: ${{ needs.prepare.outputs.tag }}
           fail_on_unmatched_files: false
           files: bin/hil
 
@@ -316,22 +353,43 @@ jobs:
       - name: Setup Firefox source
         run: ./bin/hil setup
 
-      # Manual sccache setup: avoids the mozilla-actions/sccache-action post-job
-      # hook which exits with code 2 and marks the whole job as failed.
+      # Install sccache manually instead of using mozilla-actions/sccache-action.
+      # The action's post-job hook exits with code 2 and marks the entire job as
+      # failed even though every real step succeeded.
       - name: Setup sccache
         run: |
-          SCCACHE_VERSION="v0.10.0"
-          curl -fsSL "https://github.com/nicovank/sccache/releases/download/${SCCACHE_VERSION}/sccache-linux-x86_64" -o /tmp/sccache || \
-          curl -fsSL "https://github.com/mozilla/sccache/releases/download/${SCCACHE_VERSION}/sccache-${SCCACHE_VERSION}-x86_64-unknown-linux-musl.tar.gz" -o /tmp/sccache.tar.gz
-          if [ -f /tmp/sccache.tar.gz ]; then
-            tar -xzf /tmp/sccache.tar.gz -C /tmp
-            find /tmp -name sccache -type f -exec cp {} /usr/local/bin/sccache \;
-          elif [ -f /tmp/sccache ]; then
-            sudo cp /tmp/sccache /usr/local/bin/sccache
+          set +e
+          # sccache is pre-installed on GitHub-hosted runners in the tool cache
+          SCCACHE_BIN=""
+          # Check if already on PATH
+          if command -v sccache >/dev/null 2>&1; then
+            SCCACHE_BIN="$(command -v sccache)"
+          else
+            # Search the hosted tool cache
+            SCCACHE_BIN="$(find /opt/hostedtoolcache/sccache -name sccache -type f 2>/dev/null | head -1 || true)"
+            if [ -n "$SCCACHE_BIN" ]; then
+              SCCACHE_DIR="$(dirname "$SCCACHE_BIN")"
+              echo "$SCCACHE_DIR" >> "$GITHUB_PATH"
+              echo "Added $SCCACHE_DIR to PATH"
+            fi
           fi
-          sudo chmod +x /usr/local/bin/sccache || true
-          # If sccache binary is available via the action cache or system, just use it
-          which sccache && sccache --start-server || echo "sccache not available, building without cache"
+          # Fallback: download a known-good release
+          if [ -z "$SCCACHE_BIN" ] || [ ! -x "$SCCACHE_BIN" ]; then
+            echo "Downloading sccache v0.8.2..."
+            SCCACHE_ARCHIVE="sccache-v0.8.2-x86_64-unknown-linux-musl"
+            curl -fsSL "https://github.com/mozilla/sccache/releases/download/v0.8.2/${SCCACHE_ARCHIVE}.tar.gz" -o /tmp/sccache.tar.gz || true
+            if [ -f /tmp/sccache.tar.gz ]; then
+              tar -xzf /tmp/sccache.tar.gz -C /tmp
+              if [ -f "/tmp/${SCCACHE_ARCHIVE}/sccache" ]; then
+                sudo cp "/tmp/${SCCACHE_ARCHIVE}/sccache" /usr/local/bin/sccache
+                sudo chmod +x /usr/local/bin/sccache
+                echo "Installed sccache from release archive"
+              fi
+            fi
+          fi
+          # Start the server (non-fatal if it fails)
+          sccache --version 2>/dev/null && sccache --start-server 2>/dev/null || echo "sccache unavailable, building without compiler cache"
+          exit 0
 
       - name: Apply patches
         run: ./bin/hil apply --force
@@ -343,40 +401,41 @@ jobs:
 
       - name: Stop sccache
         if: always()
-        continue-on-error: true
-        run: sccache --stop-server || true
+        run: sccache --show-stats 2>/dev/null || true; sccache --stop-server 2>/dev/null || true
 
       - name: Upload Linux artifacts (safety net)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: linux-artifacts
+          name: linux-artifacts-build${{ github.run_number }}
           path: |
             dist/*.tar.gz
             dist/*.AppImage
           if-no-files-found: warn
           retention-days: 5
 
-      - name: Check Linux package outputs
-        continue-on-error: true
+      - name: List build outputs
+        if: always()
         run: |
-          echo "=== Listing dist/ ==="
-          ls -la dist/ 2>/dev/null || echo "dist/ does not exist"
-          test -n "$(find dist -maxdepth 1 -name '*.tar.gz' -print -quit 2>/dev/null)" && echo "tar.gz found" || echo "WARNING: tar.gz not found"
-          test -n "$(find dist -maxdepth 1 -name '*.AppImage' -print -quit 2>/dev/null)" && echo "AppImage found" || echo "WARNING: AppImage not found"
+          echo "=== dist/ contents ==="
+          ls -lah dist/ 2>/dev/null || echo "dist/ does not exist"
 
       - name: Upload Linux Assets to release
         if: always()
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.create-release.outputs.tag }}
+          tag_name: ${{ needs.prepare.outputs.tag }}
           fail_on_unmatched_files: false
           files: |
             dist/*.tar.gz
             dist/*.AppImage
 
+  # --------------------------------------------------------------------------
+  # Windows: build, package, installer + zip
+  # --------------------------------------------------------------------------
   build-windows:
-    needs: create-release
+    needs: prepare
+    if: ${{ needs.prepare.outputs.build_windows == 'true' }}
     runs-on: windows-latest
     timeout-minutes: 300
 
@@ -384,9 +443,8 @@ jobs:
       - name: Free disk space
         shell: pwsh
         run: |
-          Write-Host "Disk space before cleanup:"
+          Write-Host "=== Disk space before cleanup ==="
           Get-PSDrive -PSProvider FileSystem | Format-Table Name, @{n="Used(GB)";e={[math]::Round($_.Used/1GB,2)}}, @{n="Free(GB)";e={[math]::Round($_.Free/1GB,2)}}
-          # Remove large preinstalled tools that are not needed
           Remove-Item -Recurse -Force "C:\Program Files\dotnet" -ErrorAction SilentlyContinue
           Remove-Item -Recurse -Force "C:\Program Files (x86)\Microsoft SDKs\Azure" -ErrorAction SilentlyContinue
           Remove-Item -Recurse -Force "C:\Program Files\MongoDB" -ErrorAction SilentlyContinue
@@ -394,14 +452,13 @@ jobs:
           Remove-Item -Recurse -Force "C:\hostedtoolcache\CodeQL" -ErrorAction SilentlyContinue
           Remove-Item -Recurse -Force "C:\hostedtoolcache\Java*" -ErrorAction SilentlyContinue
           Remove-Item -Recurse -Force "C:\hostedtoolcache\go" -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force "C:\hostedtoolcache\Python" -ErrorAction SilentlyContinue
-          Write-Host "Disk space after cleanup:"
+          Write-Host "=== Disk space after cleanup ==="
           Get-PSDrive -PSProvider FileSystem | Format-Table Name, @{n="Used(GB)";e={[math]::Round($_.Used/1GB,2)}}, @{n="Free(GB)";e={[math]::Round($_.Free/1GB,2)}}
 
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.create-release.outputs.tag }}
+          ref: ${{ needs.prepare.outputs.tag }}
 
       - name: Install MozillaBuild
         shell: pwsh
@@ -440,7 +497,7 @@ jobs:
       - name: Upload hil.exe to release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.create-release.outputs.tag }}
+          tag_name: ${{ needs.prepare.outputs.tag }}
           fail_on_unmatched_files: false
           files: bin/hil.exe
 
@@ -458,52 +515,53 @@ jobs:
         shell: pwsh
         run: .\bin\hil.exe setup
 
-      # Manual sccache setup to avoid the post-job hook failure
+      # Install sccache manually to avoid post-job hook failures.
       - name: Setup sccache
         shell: pwsh
         run: |
           $sccache = Get-Command sccache -ErrorAction SilentlyContinue
-          if ($sccache) {
-            Write-Host "sccache found at: $($sccache.Source)"
-            sccache --start-server 2>$null
-          } else {
-            Write-Host "sccache not found, building without compiler cache"
+          if (-not $sccache) {
+            # Search the hosted tool cache
+            $found = Get-ChildItem -Path "C:\hostedtoolcache\sccache" -Recurse -Filter "sccache.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($found) {
+              $sccacheDir = $found.DirectoryName
+              Write-Host "Found sccache at: $sccacheDir"
+              echo "$sccacheDir" | Out-File -FilePath $env:GITHUB_PATH -Append
+            } else {
+              Write-Host "Downloading sccache v0.8.2..."
+              $archive = "sccache-v0.8.2-x86_64-pc-windows-msvc"
+              $url = "https://github.com/mozilla/sccache/releases/download/v0.8.2/${archive}.tar.gz"
+              try {
+                Invoke-WebRequest -Uri $url -OutFile "$env:TEMP\sccache.tar.gz" -UseBasicParsing
+                tar -xzf "$env:TEMP\sccache.tar.gz" -C "$env:TEMP"
+                Copy-Item "$env:TEMP\${archive}\sccache.exe" "C:\Windows\sccache.exe" -Force
+                Write-Host "Installed sccache from release archive"
+              } catch {
+                Write-Host "Failed to install sccache: $_"
+                Write-Host "Building without compiler cache"
+              }
+            }
           }
+          try { sccache --version } catch { Write-Host "sccache not available" }
+          try { sccache --start-server 2>$null } catch { Write-Host "sccache server start skipped" }
 
       - name: Apply patches
         shell: pwsh
         run: .\bin\hil.exe apply --force
 
-      - name: Build
+      - name: Build and Package
         shell: pwsh
         env:
           SCCACHE_GHA_ENABLED: "true"
-        run: |
-          .\scripts\build-windows.ps1 -SkipApply
-
-      - name: Upload build artifacts (safety net)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-build-artifacts
-          path: |
-            engine/obj-*/dist/*.exe
-            engine/obj-*/dist/install/**/*.exe
-            engine/obj-*/dist/*.zip
-            engine/obj-*/dist/**/*.tar.*
-          if-no-files-found: warn
-          retention-days: 5
-
-      - name: Package
-        shell: pwsh
-        run: |
-          .\scripts\build-windows.ps1 -Package -SkipApply
+        run: .\scripts\build-windows.ps1 -Package -SkipApply
 
       - name: Stop sccache
         if: always()
-        continue-on-error: true
         shell: pwsh
-        run: sccache --stop-server 2>$null; exit 0
+        run: |
+          try { sccache --show-stats } catch {}
+          try { sccache --stop-server } catch {}
+          exit 0
 
       - name: List build outputs
         if: always()
@@ -521,11 +579,11 @@ jobs:
             }
           }
 
-      - name: Upload Windows packaged artifacts (safety net)
+      - name: Upload Windows artifacts (safety net)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: windows-packaged-artifacts
+          name: windows-artifacts-build${{ github.run_number }}
           path: |
             engine/obj-*/dist/*.exe
             engine/obj-*/dist/install/**/*.exe
@@ -537,29 +595,32 @@ jobs:
         if: always()
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.create-release.outputs.tag }}
+          tag_name: ${{ needs.prepare.outputs.tag }}
           fail_on_unmatched_files: false
           files: |
             engine/obj-*/dist/*.exe
             engine/obj-*/dist/install/**/*.exe
             engine/obj-*/dist/*.zip
 
+  # --------------------------------------------------------------------------
+  # Publish: mark the draft release as live once at least one platform finished
+  # --------------------------------------------------------------------------
   publish-release:
-    needs: [create-release, sign-macos, build-linux, build-windows]
-    if: ${{ always() && !cancelled() && needs.create-release.result == 'success' && (needs.sign-macos.result == 'success' || needs.build-linux.result == 'success' || needs.build-windows.result == 'success') }}
+    needs: [prepare, sign-macos, build-linux, build-windows]
+    if: ${{ always() && !cancelled() && needs.prepare.result == 'success' && (needs.sign-macos.result == 'success' || needs.build-linux.result == 'success' || needs.build-windows.result == 'success') }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout release tooling
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.create-release.outputs.tag }}
+          ref: ${{ needs.prepare.outputs.tag }}
 
       - name: Check release assets before publishing
         if: ${{ needs.sign-macos.result == 'success' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ needs.create-release.outputs.tag }}
+          TAG: ${{ needs.prepare.outputs.tag }}
         run: |
           gh release view "$TAG" --json tagName,isDraft,isPrerelease,assets > release.json
           node scripts/check-release-assets.mjs \
@@ -570,6 +631,6 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ needs.create-release.outputs.tag }}
+          TAG: ${{ needs.prepare.outputs.tag }}
         run: |
           gh release edit "$TAG" --draft=false
