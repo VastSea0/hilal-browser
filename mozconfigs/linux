@@ -1,1 +1,3 @@
 . "$topsrcdir/../mozconfigs/base"
+
+ac_add_options --enable-linker=lld
