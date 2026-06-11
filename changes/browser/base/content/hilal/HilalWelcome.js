@@ -1141,7 +1141,7 @@
       if (typeof gBrowser === "undefined" || typeof gBrowser.addTrustedTab !== "function" || typeof gBrowser.pinTab !== "function") {
         return;
       }
-      const site = this._pinnedSites.find(s => s.key === key);
+      const site = PINNED_SITE_PRESETS.find(s => s.key === key);
       if (!site) {
         return;
       }

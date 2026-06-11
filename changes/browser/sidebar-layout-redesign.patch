@@ -138,19 +138,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    },
  
    uninit() {
-@@ -1071,6 +1076,11 @@ var SidebarController = {
-    * True if the sidebar is currently open.
-    */
-   get isOpen() {
-+    const workspacesEnabled = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
-+    const verticalTabsEnabled = Services.prefs.getBoolPref("sidebar.verticalTabs", false);
-+    if (workspacesEnabled || verticalTabsEnabled) {
-+      return this.sidebarContainer ? !this.sidebarContainer.hidden : false;
-+    }
-     return this._box ? !this._box.hidden : false;
-   },
- 
-@@ -1453,7 +1463,10 @@ var SidebarController = {
+@@ -1453,7 +1458,10 @@ var SidebarController = {
      if (!toolbarButton || this.inSingleTabWindow) {
        return;
      }
@@ -162,7 +150,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
        toolbarButton.dataset.l10nId = "show-sidebars";
        toolbarButton.checked = this.isOpen;
      } else {
-@@ -2113,7 +2126,19 @@ var SidebarController = {
+@@ -2113,7 +2121,19 @@ var SidebarController = {
        }
  
        this.selectMenuItem(commandID);
@@ -183,7 +171,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
  
        this._box.setAttribute("checked", "true");
        this._state.command = commandID;
-@@ -2782,3 +2807,171 @@ XPCOMUtils.defineLazyPreferenceGetter(
+@@ -2782,3 +2802,171 @@ XPCOMUtils.defineLazyPreferenceGetter(
      }
    }
  );

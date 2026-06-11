@@ -1273,24 +1273,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
-@@ -1076,8 +1076,14 @@ var SidebarController = {
-    * True if the sidebar is currently open.
-    */
-   get isOpen() {
--    const workspacesEnabled = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
--    const verticalTabsEnabled = Services.prefs.getBoolPref("sidebar.verticalTabs", false);
-+    const workspacesEnabled = Services.prefs.getBoolPref(
-+      "hilal.workspaces.enabled",
-+      true
-+    );
-+    const verticalTabsEnabled = Services.prefs.getBoolPref(
-+      "sidebar.verticalTabs",
-+      false
-+    );
-     if (workspacesEnabled || verticalTabsEnabled) {
-       return this.sidebarContainer ? !this.sidebarContainer.hidden : false;
-     }
-@@ -2126,14 +2132,20 @@ var SidebarController = {
+@@ -2121,14 +2121,20 @@ var SidebarController = {
        }
  
        this.selectMenuItem(commandID);
@@ -1314,7 +1297,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
          ].includes(commandID);
          this._box.hidden = this._splitter.hidden = !isStandardPanel;
        } else {
-@@ -2810,6 +2822,7 @@ XPCOMUtils.defineLazyPreferenceGetter(
+@@ -2805,6 +2811,7 @@ XPCOMUtils.defineLazyPreferenceGetter(
  
  var HilalCompactMode = {
    PREF: "hilal.compact.enabled",
@@ -1322,7 +1305,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    ATTR: "hilal-compact-mode",
  
    _prefObserver: null,
-@@ -2821,11 +2834,49 @@ var HilalCompactMode = {
+@@ -2816,11 +2823,49 @@ var HilalCompactMode = {
    _showDelayMs: 180,
    _leaveDelayMs: 400,
  
@@ -1374,7 +1357,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
      window.addEventListener("unload", () => this.uninit(), { once: true });
      this._apply(Services.prefs.getBoolPref(this.PREF, false));
    },
-@@ -2833,11 +2884,48 @@ var HilalCompactMode = {
+@@ -2828,11 +2873,48 @@ var HilalCompactMode = {
    uninit() {
      if (this._prefObserver) {
        Services.prefs.removeObserver(this.PREF, this._prefObserver);
@@ -1423,7 +1406,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    get enabled() {
      return Services.prefs.getBoolPref(this.PREF, false);
    },
-@@ -2847,14 +2935,53 @@ var HilalCompactMode = {
+@@ -2842,14 +2924,53 @@ var HilalCompactMode = {
    },
  
    _apply(compact) {
@@ -1480,7 +1463,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    },
  
    _syncToolbarButton(compact) {
-@@ -2886,57 +3013,178 @@ var HilalCompactMode = {
+@@ -2881,57 +3002,178 @@ var HilalCompactMode = {
        clearTimeout(this._mouseLeaveTimer);
        this._mouseLeaveTimer = null;
      }
@@ -1695,7 +1678,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
      }
    },
  
-@@ -2974,4 +3222,39 @@ var HilalCompactMode = {
+@@ -2969,4 +3211,39 @@ var HilalCompactMode = {
        this._mouseLeaveTimer = null;
      }
    },
