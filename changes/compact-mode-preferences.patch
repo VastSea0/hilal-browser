@@ -1322,7 +1322,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    ATTR: "hilal-compact-mode",
  
    _prefObserver: null,
-@@ -2821,11 +2834,33 @@ var HilalCompactMode = {
+@@ -2821,11 +2834,49 @@ var HilalCompactMode = {
    _showDelayMs: 180,
    _leaveDelayMs: 400,
  
@@ -1355,10 +1355,26 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +    Services.prefs.addObserver("sidebar.verticalTabs", this._prefObserver);
 +    window.addEventListener("popupshown", this, true);
 +    window.addEventListener("popuphidden", this, true);
++
++    this._welcomeObserver = new MutationObserver(mutations => {
++      for (const mutation of mutations) {
++        if (
++          mutation.type === "attributes" &&
++          mutation.attributeName === "hilal-welcome-stage"
++        ) {
++          this._apply(Services.prefs.getBoolPref(this.PREF, false));
++        }
++      }
++    });
++    this._welcomeObserver.observe(document.documentElement, {
++      attributes: true,
++      attributeFilter: ["hilal-welcome-stage"],
++    });
++
      window.addEventListener("unload", () => this.uninit(), { once: true });
      this._apply(Services.prefs.getBoolPref(this.PREF, false));
    },
-@@ -2833,11 +2868,44 @@ var HilalCompactMode = {
+@@ -2833,11 +2884,48 @@ var HilalCompactMode = {
    uninit() {
      if (this._prefObserver) {
        Services.prefs.removeObserver(this.PREF, this._prefObserver);
@@ -1370,6 +1386,10 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      Services.prefs.removeObserver("sidebar.verticalTabs", this._prefObserver);
        this._prefObserver = null;
      }
++    if (this._welcomeObserver) {
++      this._welcomeObserver.disconnect();
++      this._welcomeObserver = null;
++    }
 +    window.removeEventListener("popupshown", this, true);
 +    window.removeEventListener("popuphidden", this, true);
 +    this._openPopups = null;
@@ -1403,10 +1423,13 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    get enabled() {
      return Services.prefs.getBoolPref(this.PREF, false);
    },
-@@ -2847,14 +2915,44 @@ var HilalCompactMode = {
+@@ -2847,14 +2935,47 @@ var HilalCompactMode = {
    },
  
    _apply(compact) {
+-    document.documentElement.toggleAttribute(this.ATTR, compact);
+-    this._syncToolbarButton(compact);
+-    if (compact) {
 +    const workspacesEnabled = Services.prefs.getBoolPref(
 +      "hilal.workspaces.enabled",
 +      true
@@ -1416,11 +1439,14 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      false
 +    );
 +    const isSidebarActive = workspacesEnabled || verticalTabsEnabled;
-+    const compactSidebar = compact && isSidebarActive;
-+    const hideToolbox =
-+      compact && Services.prefs.getBoolPref(this.HIDE_TOOLBOX_PREF, true);
++    const isWelcomeStage = document.documentElement.hasAttribute("hilal-welcome-stage");
++    const actualCompact = compact && !isWelcomeStage;
 +
-     document.documentElement.toggleAttribute(this.ATTR, compact);
++    const compactSidebar = actualCompact && isSidebarActive;
++    const hideToolbox =
++      actualCompact && Services.prefs.getBoolPref(this.HIDE_TOOLBOX_PREF, true);
++
++    document.documentElement.toggleAttribute(this.ATTR, actualCompact);
 +    document.documentElement.toggleAttribute(
 +      "hilal-compact-sidebar",
 +      compactSidebar
@@ -1430,8 +1456,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      hideToolbox
 +    );
 +
-     this._syncToolbarButton(compact);
--    if (compact) {
++    this._syncToolbarButton(actualCompact);
 +
 +    const needMouseListeners = compactSidebar || hideToolbox;
 +    if (needMouseListeners) {
@@ -1449,7 +1474,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    },
  
    _syncToolbarButton(compact) {
-@@ -2886,57 +2984,178 @@ var HilalCompactMode = {
+@@ -2886,57 +3007,178 @@ var HilalCompactMode = {
        clearTimeout(this._mouseLeaveTimer);
        this._mouseLeaveTimer = null;
      }
@@ -1580,7 +1605,9 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +              }
 +            }
 +          }, this._showDelayMs);
-+        }
+         }
+-      }, this._showDelayMs);
+-    } else if (this._sidebarVisible) {
 +      } else if (this._toolboxVisible) {
 +        const toolboxRect = toolbox.getBoundingClientRect();
 +        const isInsideToolbox =
@@ -1590,9 +1617,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +          this._scheduleToolboxHide();
 +        } else {
 +          this._cancelToolboxHide();
-         }
--      }, this._showDelayMs);
--    } else if (this._sidebarVisible) {
++        }
 +      } else if (!isNearTopEdge && this._toolboxShowTimer) {
 +        clearTimeout(this._toolboxShowTimer);
 +        this._toolboxShowTimer = null;
@@ -1664,7 +1689,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
      }
    },
  
-@@ -2974,4 +3193,39 @@ var HilalCompactMode = {
+@@ -2974,4 +3216,39 @@ var HilalCompactMode = {
        this._mouseLeaveTimer = null;
      }
    },
