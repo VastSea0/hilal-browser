@@ -1423,7 +1423,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    get enabled() {
      return Services.prefs.getBoolPref(this.PREF, false);
    },
-@@ -2847,14 +2935,47 @@ var HilalCompactMode = {
+@@ -2847,14 +2935,53 @@ var HilalCompactMode = {
    },
  
    _apply(compact) {
@@ -1471,10 +1471,16 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +    if (!hideToolbox) {
 +      this._hideToolbox();
 +    }
++
++    if (isWelcomeStage) {
++      SidebarController._state.launcherVisible = true;
++    } else {
++      SidebarController._state.updateVisibility();
++    }
    },
  
    _syncToolbarButton(compact) {
-@@ -2886,57 +3007,178 @@ var HilalCompactMode = {
+@@ -2886,57 +3013,178 @@ var HilalCompactMode = {
        clearTimeout(this._mouseLeaveTimer);
        this._mouseLeaveTimer = null;
      }
@@ -1689,7 +1695,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
      }
    },
  
-@@ -2974,4 +3216,39 @@ var HilalCompactMode = {
+@@ -2974,4 +3222,39 @@ var HilalCompactMode = {
        this._mouseLeaveTimer = null;
      }
    },

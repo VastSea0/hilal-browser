@@ -11,6 +11,20 @@
 :root[hilal-welcome-stage] {
   min-width: 760px;
   min-height: 520px;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+:root[hilal-welcome-stage] #browser,
+:root[hilal-welcome-stage] #tabbrowser-tabbox {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+:root[hilal-welcome-stage] #tabbrowser-tabpanels {
+  background-color: transparent !important;
+  background-image: none !important;
+  opacity: 0 !important;
 }
 
 /* ============================================================

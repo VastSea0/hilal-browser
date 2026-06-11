@@ -933,6 +933,7 @@
         .forEach(choice => {
           choice.addEventListener("click", () => {
             this._compactSelected = choice.dataset.layoutMode === "compact";
+            Services.prefs.setBoolPref(PREF_COMPACT_ENABLED, this._compactSelected);
             this._renderStage();
           });
         });
@@ -943,6 +944,9 @@
           choice.addEventListener("click", () => {
             this._verticalTabsSelected =
               choice.dataset.tabLayout === "vertical";
+            Services.prefs.setBoolPref(PREF_VERTICAL_TABS, this._verticalTabsSelected);
+            const isSidebarActive = this._verticalTabsSelected || this._workspacesEnabledSelected;
+            Services.prefs.setBoolPref("sidebar.revamp", isSidebarActive);
             this._renderStage();
           });
         });
@@ -953,6 +957,9 @@
           choice.addEventListener("click", () => {
             this._workspacesEnabledSelected =
               choice.dataset.workspaces === "on";
+            Services.prefs.setBoolPref(PREF_WORKSPACES_ENABLED, this._workspacesEnabledSelected);
+            const isSidebarActive = this._verticalTabsSelected || this._workspacesEnabledSelected;
+            Services.prefs.setBoolPref("sidebar.revamp", isSidebarActive);
             this._renderStage();
           });
         });
@@ -963,6 +970,7 @@
           choice.addEventListener("click", () => {
             this._compactHideToolboxSelected =
               choice.dataset.toolbar === "hidden";
+            Services.prefs.setBoolPref(PREF_COMPACT_HIDE_TOOLBOX, this._compactHideToolboxSelected);
             this._renderStage();
           });
         });
