@@ -189,6 +189,7 @@
       this._pinnedSitesSelected = Object.fromEntries(
         PINNED_SITE_PRESETS.map(site => [site.key, false])
       );
+      this._pinnedSiteTabs = {};
       this._workspacesSelected = { personal: true, work: true, social: true };
     }
 
@@ -1120,13 +1121,21 @@
       const userContextId = this._workspaces?.activeContainerId || 0;
       for (const site of selectedSites) {
         try {
-          let tab = this._findExistingTabForURL(site.url);
+          let tab = this._pinnedSiteTabs[site.key];
+          if (tab && !gBrowser.tabs.includes(tab)) {
+            tab = null;
+            this._pinnedSiteTabs[site.key] = null;
+          }
+          if (!tab) {
+            tab = this._findExistingTabForURL(site.url);
+          }
           if (!tab) {
             tab = gBrowser.addTrustedTab(site.url, {
               inBackground: true,
               createLazyBrowser: true,
               userContextId,
             });
+            this._pinnedSiteTabs[site.key] = tab;
           }
           if (tab && !tab.pinned) {
             gBrowser.pinTab(tab);
@@ -1145,18 +1154,24 @@
       if (!site) {
         return;
       }
-      const tab = this._findExistingTabForURL(site.url);
+      let tab = this._pinnedSiteTabs[key];
+      if (tab && !gBrowser.tabs.includes(tab)) {
+        tab = null;
+        this._pinnedSiteTabs[key] = null;
+      }
+
       if (selected) {
         if (!tab) {
           const userContextId = this._workspaces?.activeContainerId || 0;
           try {
-            const newTab = gBrowser.addTrustedTab(site.url, {
+            tab = gBrowser.addTrustedTab(site.url, {
               inBackground: true,
               createLazyBrowser: true,
               userContextId,
             });
-            if (newTab) {
-              gBrowser.pinTab(newTab);
+            if (tab) {
+              gBrowser.pinTab(tab);
+              this._pinnedSiteTabs[key] = tab;
             }
           } catch (e) {
             console.error(`HilalWelcome: failed to pin ${site.label}`, e);
@@ -1167,6 +1182,7 @@
       } else {
         if (tab) {
           gBrowser.removeTab(tab);
+          this._pinnedSiteTabs[key] = null;
         }
       }
     }
