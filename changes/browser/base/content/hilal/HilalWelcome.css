@@ -27,6 +27,34 @@
   opacity: 0 !important;
 }
 
+/* Force toolbar and sidebar to remain visible and layout normally (not auto-hidden/collapsed) during welcome stage */
+:root[hilal-welcome-stage] #navigator-toolbox {
+  position: relative !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  width: auto !important;
+  left: auto !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  border: none !important;
+}
+
+:root[hilal-welcome-stage] #sidebar-main {
+  position: relative !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  width: 280px !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
 /* ============================================================
    Overlay — translucent scrim over the live browser chrome
    ============================================================ */
@@ -58,8 +86,7 @@
   align-items: center;
   justify-content: center;
   /* Translucent scrim — real browser chrome visible behind */
-  background: rgba(8, 10, 12, 0.55);
-  backdrop-filter: blur(2px);
+  background: rgba(0, 0, 0, 0.12);
   color: var(--hw-ink);
   color-scheme: dark;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;

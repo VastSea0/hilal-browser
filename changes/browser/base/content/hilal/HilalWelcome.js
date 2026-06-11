@@ -989,6 +989,7 @@
       if (pinnedPublicToggle) {
         pinnedPublicToggle.addEventListener("change", event => {
           this._pinnedPublicSelected = event.target.checked;
+          Services.prefs.setBoolPref(PREF_PINNED_PUBLIC, this._pinnedPublicSelected);
         });
       }
 
@@ -996,6 +997,7 @@
         choice.addEventListener("click", () => {
           const key = choice.dataset.pinnedSite;
           this._pinnedSitesSelected[key] = !this._pinnedSitesSelected[key];
+          this._togglePinnedSite(key, this._pinnedSitesSelected[key]);
           this._renderStage();
         });
       });
@@ -1131,6 +1133,40 @@
           }
         } catch (e) {
           console.error(`HilalWelcome: failed to pin ${site.label}`, e);
+        }
+      }
+    }
+
+    _togglePinnedSite(key, selected) {
+      if (typeof gBrowser === "undefined" || typeof gBrowser.addTrustedTab !== "function" || typeof gBrowser.pinTab !== "function") {
+        return;
+      }
+      const site = this._pinnedSites.find(s => s.key === key);
+      if (!site) {
+        return;
+      }
+      const tab = this._findExistingTabForURL(site.url);
+      if (selected) {
+        if (!tab) {
+          const userContextId = this._workspaces?.activeContainerId || 0;
+          try {
+            const newTab = gBrowser.addTrustedTab(site.url, {
+              inBackground: true,
+              createLazyBrowser: true,
+              userContextId,
+            });
+            if (newTab) {
+              gBrowser.pinTab(newTab);
+            }
+          } catch (e) {
+            console.error(`HilalWelcome: failed to pin ${site.label}`, e);
+          }
+        } else if (!tab.pinned) {
+          gBrowser.pinTab(tab);
+        }
+      } else {
+        if (tab) {
+          gBrowser.removeTab(tab);
         }
       }
     }

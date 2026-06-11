@@ -1440,7 +1440,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +    );
 +    const isSidebarActive = workspacesEnabled || verticalTabsEnabled;
 +    const isWelcomeStage = document.documentElement.hasAttribute("hilal-welcome-stage");
-+    const actualCompact = compact && !isWelcomeStage;
++    const actualCompact = compact;
 +
 +    const compactSidebar = actualCompact && isSidebarActive;
 +    const hideToolbox =
