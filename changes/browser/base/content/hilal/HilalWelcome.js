@@ -36,12 +36,6 @@
   ];
   const STAGE_TOOLBAR = 4;
 
-  const CHROME_TO_HIDE = [
-    "#navigator-toolbox",
-    "#browser",
-    "#sidebar-main",
-    "#sidebar-box",
-  ];
   const PREF_COMPACT_ENABLED = "hilal.compact.enabled";
   const PREF_COMPACT_HIDE_TOOLBOX = "hilal.compact.hide_toolbox";
   const PREF_VERTICAL_TABS = "sidebar.verticalTabs";
@@ -59,39 +53,28 @@
       key: "standard",
       label: "Balanced",
       badge: "Everyday",
-      description:
-        "RFP, strict tracking protection, HTTPS-only, URL cleanup, WebGL off, and cookie/cache cleanup on close.",
-      detail:
-        "WebRTC stays enabled for compatibility, with local leak surfaces reduced.",
+      description: "RFP, strict tracking protection, HTTPS-only, URL cleanup, WebGL off, cookie/cache cleanup on close.",
       l10nLabel: "hilal-welcome-privacy-standard-label",
       l10nBadge: "hilal-welcome-privacy-standard-badge",
       l10nDesc: "hilal-welcome-privacy-standard-desc",
-      l10nDetail: "hilal-welcome-privacy-standard-detail",
     },
     {
       key: "strict",
       label: "Strict",
       badge: "Less exposed",
-      description:
-        "Adds First Party Isolation on top of Balanced and disables WebRTC entirely.",
-      detail: "Video calls and some sign-in flows may break.",
+      description: "Adds First Party Isolation on top of Balanced. WebRTC is disabled.",
       l10nLabel: "hilal-welcome-privacy-strict-label",
       l10nBadge: "hilal-welcome-privacy-strict-badge",
       l10nDesc: "hilal-welcome-privacy-strict-desc",
-      l10nDetail: "hilal-welcome-privacy-strict-detail",
     },
     {
       key: "extreme",
       label: "Maximum",
       badge: "Local only",
-      description:
-        "Adds JavaScript, camera, microphone, location, and history blocking on top of Strict.",
-      detail:
-        "Does not hide your IP address; many modern sites may not work as expected.",
+      description: "Adds JavaScript, camera, microphone, location, and history blocking on top of Strict.",
       l10nLabel: "hilal-welcome-privacy-extreme-label",
       l10nBadge: "hilal-welcome-privacy-extreme-badge",
       l10nDesc: "hilal-welcome-privacy-extreme-desc",
-      l10nDetail: "hilal-welcome-privacy-extreme-detail",
     },
   ];
 
@@ -100,21 +83,18 @@
       key: "personal",
       label: "Personal",
       icon: "home",
-      colorClass: "blue",
       workspaceColor: "blue",
     },
     {
       key: "work",
       label: "Work",
       icon: "folder",
-      colorClass: "amber",
       workspaceColor: "orange",
     },
     {
       key: "social",
       label: "Social",
       icon: "star",
-      colorClass: "rose",
       workspaceColor: "pink",
     },
   ];
@@ -210,9 +190,6 @@
         PINNED_SITE_PRESETS.map(site => [site.key, false])
       );
       this._workspacesSelected = { personal: true, work: true, social: true };
-      this._hiddenChrome = new Map();
-      this._chromeObserver = null;
-      this._chromeSyncScheduled = false;
     }
 
     async start() {
@@ -243,90 +220,10 @@
 
     _enterWelcomeStage() {
       document.documentElement.setAttribute("hilal-welcome-stage", "true");
-      this._closeBrowserChrome();
-      this._syncHiddenChrome();
-
-      if (!this._chromeObserver) {
-        this._chromeObserver = new MutationObserver(() => {
-          this._scheduleChromeSync();
-        });
-        this._chromeObserver.observe(document.documentElement, {
-          subtree: true,
-          childList: true,
-          attributes: true,
-          attributeFilter: ["style", "hidden", "collapsed", "open", "focused"],
-        });
-      }
-    }
-
-    _scheduleChromeSync() {
-      if (this._chromeSyncScheduled) {
-        return;
-      }
-      this._chromeSyncScheduled = true;
-      window.requestAnimationFrame(() => {
-        this._chromeSyncScheduled = false;
-        if (!this._overlay) {
-          return;
-        }
-        this._closeBrowserChrome();
-        this._syncHiddenChrome();
-      });
-    }
-
-    _closeBrowserChrome() {
-      try {
-        gURLBar?.view?.close?.();
-        gURLBar?.blur?.();
-        document.getElementById("PopupAutoCompleteRichResult")?.hidePopup?.();
-      } catch (e) {
-        console.error("HilalWelcome: failed to close chrome panels", e);
-      }
-    }
-
-    _syncHiddenChrome() {
-      for (const selector of CHROME_TO_HIDE) {
-        const element = document.querySelector(selector);
-        if (!element) {
-          continue;
-        }
-        this._hideChromeElement(element);
-      }
-    }
-
-    _hideChromeElement(element) {
-      if (!this._hiddenChrome.has(element)) {
-        this._hiddenChrome.set(element, {
-          display: element.style.display,
-          pointerEvents: element.style.pointerEvents,
-          visibility: element.style.visibility,
-        });
-      }
-      if (element.style.display !== "none") {
-        element.style.display = "none";
-      }
-      if (element.style.pointerEvents !== "none") {
-        element.style.pointerEvents = "none";
-      }
-      if (element.style.visibility !== "hidden") {
-        element.style.visibility = "hidden";
-      }
     }
 
     _leaveWelcomeStage() {
-      if (this._chromeObserver) {
-        this._chromeObserver.disconnect();
-        this._chromeObserver = null;
-      }
-      this._chromeSyncScheduled = false;
       document.documentElement.removeAttribute("hilal-welcome-stage");
-
-      for (const [element, styles] of this._hiddenChrome) {
-        element.style.display = styles.display;
-        element.style.pointerEvents = styles.pointerEvents;
-        element.style.visibility = styles.visibility;
-      }
-      this._hiddenChrome.clear();
     }
 
     async _fetchEngines() {
@@ -457,19 +354,17 @@
       }
 
       const markup = `
-        <section class="hw-intro" role="dialog" aria-modal="true" aria-labelledby="hw-intro-title" xmlns="http://www.w3.org/1999/xhtml">
-          <div class="hw-intro-mark">
+        <div class="hw-card hw-intro-card" role="dialog" aria-modal="true" aria-labelledby="hw-intro-title" xmlns="http://www.w3.org/1999/xhtml">
+          <div class="hw-intro-logo">
             ${this._logoHTML()}
           </div>
-          <h1 class="hw-intro-title" id="hw-intro-title">
-            <span data-l10n-id="hilal-welcome-intro-line-1">Hilal starts here</span>
-            <span data-l10n-id="hilal-welcome-intro-line-2">Keep the window quiet</span>
-          </h1>
-          <button type="button" class="hw-intro-button hw-btn-primary" id="hw-start-btn">
-            <span data-l10n-id="hilal-welcome-action-start">Set up</span>
+          <h1 class="hw-intro-title" id="hw-intro-title" data-l10n-id="hilal-welcome-intro-title">Set up Hilal</h1>
+          <p class="hw-intro-sub" data-l10n-id="hilal-welcome-intro-sub">A few quick choices to make the browser yours.</p>
+          <button type="button" class="hw-btn-primary" id="hw-start-btn">
+            <span data-l10n-id="hilal-welcome-action-start">Begin</span>
             <span class="hw-icon hw-icon-arrow-right"></span>
           </button>
-        </section>
+        </div>
       `;
       this._overlay.replaceChildren(MozXULElement.parseXULToFragment(markup));
       document.getElementById("hw-start-btn")?.addEventListener("click", () => {
@@ -500,35 +395,32 @@
       }
 
       const markup = `
-        <div class="hw-flow" role="dialog" aria-modal="true" aria-labelledby="hw-stage-title" data-stage="${this._stage}" xmlns="http://www.w3.org/1999/xhtml">
-          <header class="hw-flow-top">
+        <div class="hw-card hw-flow-card" role="dialog" aria-modal="true" aria-labelledby="hw-stage-title" data-stage="${this._stage}" xmlns="http://www.w3.org/1999/xhtml">
+          <header class="hw-card-header">
             <div class="hw-brand">
               <span class="hw-brand-mark">${this._logoHTML()}</span>
-              <span class="hw-brand-text" data-l10n-id="hilal-welcome-brand-text">Hilal Browser</span>
+              <span class="hw-brand-name" data-l10n-id="hilal-welcome-brand-text">Hilal Browser</span>
             </div>
-            <div class="hw-progress" aria-hidden="true">
-              ${this._stepsHTML()}
-            </div>
-            <button type="button" class="hw-skip" id="hw-skip-btn">
+            <button type="button" class="hw-skip-btn" id="hw-skip-btn">
               <span data-l10n-id="hilal-welcome-skip">Skip</span>
               <span class="hw-icon hw-icon-close"></span>
             </button>
           </header>
-          <main class="hw-stage">
-            <section class="hw-stage-copy">
-              ${this._stageCopyHTML()}
-            </section>
-            <section class="hw-stage-panel">
-              ${this._stageHTML()}
-            </section>
-          </main>
-          <footer class="hw-flow-actions">
+          <div class="hw-progress" aria-hidden="true">
+            ${this._stepsHTML()}
+          </div>
+          <section class="hw-stage-head">
+            ${this._stageCopyHTML()}
+          </section>
+          <section class="hw-stage-body" id="hw-stage-body">
+            ${this._stageHTML()}
+          </section>
+          <footer class="hw-card-footer">
             ${this._actionsHTML()}
           </footer>
         </div>
       `;
       this._overlay.replaceChildren(MozXULElement.parseXULToFragment(markup));
-      this._syncHiddenChrome();
       this._attachListeners();
     }
 
@@ -569,101 +461,66 @@
         {
           kicker: "First choices",
           title: "Choose what starts with Hilal.",
-          subtitle:
-            "Bring only the data you need and decide whether links from the system should open here.",
+          subtitle: "Bring data from another browser and set Hilal as your default.",
         },
         {
           kicker: "Layout",
           title: "Pick a density.",
-          subtitle:
-            "Standard keeps the toolbar visible at all times. Compact hides it until you need it.",
+          subtitle: "Standard keeps the toolbar fixed. Compact hides it until you need it.",
         },
         {
           kicker: "Tabs",
           title: "Choose a tab direction.",
-          subtitle:
-            "Vertical tabs sit in a sidebar. Horizontal tabs line up across the top of the window.",
+          subtitle: "Vertical tabs sit in a sidebar. Horizontal tabs line up across the top.",
         },
         {
           kicker: "Spaces",
           title: "Separate your contexts.",
-          subtitle:
-            "Spaces keep personal, work, and social tabs in their own groups so they never mix.",
+          subtitle: "Spaces keep personal, work, and social tabs in their own groups.",
         },
         {
           kicker: "Toolbar",
           title: "Control the toolbar.",
-          subtitle:
-            "Auto-hide reveals the address bar only when you hover the top edge. Always visible keeps it fixed.",
+          subtitle: "Auto-hide reveals the address bar on hover. Always visible keeps it fixed.",
         },
         {
           kicker: "Privacy",
-          title: "Pick a protection posture.",
-          subtitle:
-            "Hilal can stay comfortable for daily browsing or tighten the surfaces that websites use to recognize you.",
+          title: "Pick a protection level.",
+          subtitle: "Hilal can stay comfortable for daily browsing or tighten site tracking surfaces.",
         },
         {
           kicker: "Search",
           title: "Choose the address-bar engine.",
-          subtitle:
-            "This is the engine Hilal uses when you type into the bar. You can change it whenever the browser is open.",
+          subtitle: "Used when you type into the bar. You can change it any time.",
         },
         {
           kicker: "Pinned tabs",
           title: "Keep essentials one click away.",
-          subtitle:
-            "Choose the sites Hilal should pin at startup. Netflix, Spotify, YouTube, GitHub, Reddit, Notion, and Gemini are ready to add.",
+          subtitle: "Select sites to pin at startup. They stay in the sidebar across sessions.",
         },
         {
-          kicker: "Spaces",
-          title: "Start with fewer mixed tabs.",
-          subtitle:
-            "Create a small set of spaces now, or leave the browser empty and shape it later.",
+          kicker: "Spaces setup",
+          title: "Start with a few spaces.",
+          subtitle: "Create spaces now, or skip and shape it later.",
         },
         {
-          kicker: "Finish",
-          title: "Ready for a clean window.",
-          subtitle:
-            "Your choices are saved locally. Hilal will leave the setup layer and return the browser chrome.",
+          kicker: "Done",
+          title: "Ready.",
+          subtitle: "Your choices are saved. Hilal will close this setup and open the browser.",
         },
       ];
       const copy = stageCopies[this._stage];
-      const visibleIndex = this._visibleStageIndex();
-      const visibleTotal = this._visibleStages().length;
       return `
         <p class="hw-kicker" data-l10n-id="hilal-welcome-stage-${this._stage}-kicker">${copy.kicker}</p>
         <h1 class="hw-title" id="hw-stage-title" data-l10n-id="hilal-welcome-stage-${this._stage}-title">${copy.title}</h1>
         <p class="hw-sub" data-l10n-id="hilal-welcome-stage-${this._stage}-subtitle">${copy.subtitle}</p>
-        <span class="hw-step-count" data-l10n-id="hilal-welcome-step-count" data-l10n-args='{"current": ${visibleIndex + 1}, "total": ${visibleTotal}}'>Step ${visibleIndex + 1}/${visibleTotal}</span>
       `;
     }
 
     _stageHTML() {
       switch (this._stage) {
         case 0:
-          return `
-            <div class="hw-choice-stack">
-              <label class="hw-line-choice" for="hw-default-browser-toggle">
-                <span class="hw-line-icon hw-icon hw-icon-check"></span>
-                <span class="hw-line-copy">
-                  <span class="hw-line-title" data-l10n-id="hilal-welcome-default-browser-label">Default browser</span>
-                  <span class="hw-line-desc" data-l10n-id="hilal-welcome-default-browser-desc">Use Hilal when the system opens web links.</span>
-                </span>
-                <span class="hw-toggle">
-                  <input type="checkbox" id="hw-default-browser-toggle"${this._defaultBrowserSelected ? ' checked="checked"' : ""}/>
-                  <span class="hw-toggle-track"></span>
-                </span>
-              </label>
-              <div class="hw-line-choice">
-                <span class="hw-line-icon hw-icon hw-icon-folder"></span>
-                <span class="hw-line-copy">
-                  <span class="hw-line-title" data-l10n-id="hilal-welcome-import-label">Browser data</span>
-                  <span class="hw-line-desc" data-l10n-id="hilal-welcome-import-desc">Bring bookmarks, history, and passwords from another browser.</span>
-                </span>
-                <button type="button" class="hw-btn-secondary" id="hw-import-btn" data-l10n-id="hilal-welcome-import-button">Import</button>
-              </div>
-            </div>
-          `;
+          return this._firstChoicesHTML();
         case 1:
           return this._layoutModeHTML();
         case 2:
@@ -673,31 +530,15 @@
         case 4:
           return this._hideToolbarHTML();
         case 5:
-          return `
-            <div class="hw-privacy-list">
-              ${this._privacyLevelsHTML()}
-            </div>
-          `;
+          return this._privacyLevelsHTML();
         case 6:
-          return `
-            <div class="hw-engine-list">
-              ${this._enginesHTML()}
-            </div>
-          `;
+          return this._enginesHTML();
         case 7:
           return this._pinnedTabsHTML();
         case 8:
-          return `
-            <div class="hw-workspace-list">
-              ${this._workspacesHTML()}
-            </div>
-          `;
+          return this._workspacesHTML();
         case 9:
-          return `
-            <div class="hw-summary">
-              ${this._summaryHTML()}
-            </div>
-          `;
+          return this._summaryHTML();
       }
       return "";
     }
@@ -726,64 +567,74 @@
       `;
     }
 
-    _screenshotURL(name) {
-      return `chrome://browser/content/hilal/screenshots/${name}.png`;
-    }
+    /* ----------------------------------------------------------
+       Stage HTML methods
+       ---------------------------------------------------------- */
 
-    _screenshotCardHTML(imageName, label, desc, active, attrs) {
+    _firstChoicesHTML() {
       return `
-        <button type="button" class="hw-screenshot-card${active ? " hw-choice-active" : ""}" ${attrs} aria-pressed="${active}">
-          <span class="hw-screenshot-frame">
-            <img class="hw-screenshot-img" src="${this._screenshotURL(imageName)}" alt="${this._escapeHTML(label)}" />
-          </span>
-          <span class="hw-layout-choice-copy">
-            <span class="hw-choice-title">${this._escapeHTML(label)}</span>
-            <span class="hw-choice-desc">${this._escapeHTML(desc)}</span>
-          </span>
-        </button>
+        <div class="hw-choice-stack">
+          <label class="hw-toggle-row" for="hw-default-browser-toggle">
+            <div class="hw-toggle-row-copy">
+              <span class="hw-toggle-row-title" data-l10n-id="hilal-welcome-default-browser-label">Default browser</span>
+              <span class="hw-toggle-row-desc" data-l10n-id="hilal-welcome-default-browser-desc">Open system web links in Hilal.</span>
+            </div>
+            <span class="hw-toggle">
+              <input type="checkbox" id="hw-default-browser-toggle"${this._defaultBrowserSelected ? ' checked="checked"' : ""}/>
+              <span class="hw-toggle-track"></span>
+            </span>
+          </label>
+          <div class="hw-import-row">
+            <span class="hw-import-row-icon hw-icon hw-icon-folder"></span>
+            <div class="hw-import-row-copy">
+              <span class="hw-toggle-row-title" data-l10n-id="hilal-welcome-import-label">Browser data</span>
+              <span class="hw-toggle-row-desc" data-l10n-id="hilal-welcome-import-desc">Bring bookmarks, history, and passwords from another browser.</span>
+            </div>
+            <button type="button" class="hw-btn-inline" id="hw-import-btn" data-l10n-id="hilal-welcome-import-button">Import</button>
+          </div>
+        </div>
       `;
     }
 
     _layoutModeHTML() {
+      const standard = !this._compactSelected;
+      const compact = this._compactSelected;
       return `
-        <div class="hw-layout-grid">
-          ${this._screenshotCardHTML(
-            "welcome-standard",
+        <div class="hw-choice-stack">
+          ${this._optionRowHTML(
+            "data-layout-mode=\"standard\"",
+            "layout",
             "Standard",
-            "Full toolbar, familiar spacing.",
-            !this._compactSelected,
-            'data-layout-mode="standard"'
+            "Full toolbar, always visible.",
+            standard
           )}
-          ${this._screenshotCardHTML(
-            "welcome-compact",
+          ${this._optionRowHTML(
+            "data-layout-mode=\"compact\"",
+            "layout",
             "Compact",
-            "More page, less chrome.",
-            this._compactSelected,
-            'data-layout-mode="compact"'
+            "More page, less chrome. Toolbar on hover.",
+            compact
           )}
         </div>
       `;
     }
 
     _tabOrientationHTML() {
-      const prefix = this._compactSelected
-        ? "welcome-compact"
-        : "welcome-standard";
       return `
-        <div class="hw-layout-grid">
-          ${this._screenshotCardHTML(
-            `${prefix}-vertical`,
+        <div class="hw-choice-stack">
+          ${this._optionRowHTML(
+            "data-tab-layout=\"vertical\"",
+            "tabs",
             "Vertical",
             "Tabs sit in a sidebar panel.",
-            this._verticalTabsSelected,
-            'data-tab-layout="vertical"'
+            this._verticalTabsSelected
           )}
-          ${this._screenshotCardHTML(
-            `${prefix}-horizontal`,
+          ${this._optionRowHTML(
+            "data-tab-layout=\"horizontal\"",
+            "tabs",
             "Horizontal",
             "Tabs line up across the top.",
-            !this._verticalTabsSelected,
-            'data-tab-layout="horizontal"'
+            !this._verticalTabsSelected
           )}
         </div>
       `;
@@ -791,20 +642,20 @@
 
     _workspacesToggleHTML() {
       return `
-        <div class="hw-layout-grid">
-          ${this._screenshotCardHTML(
-            "welcome-workspaces-on",
+        <div class="hw-choice-stack">
+          ${this._optionRowHTML(
+            "data-workspaces=\"on\"",
+            "spaces",
             "Spaces on",
-            "Group tabs into separate workspaces.",
-            this._workspacesEnabledSelected,
-            'data-workspaces="on"'
+            "Group tabs into separate, isolated workspaces.",
+            this._workspacesEnabledSelected
           )}
-          ${this._screenshotCardHTML(
-            "welcome-workspaces-off",
+          ${this._optionRowHTML(
+            "data-workspaces=\"off\"",
+            "layout",
             "Spaces off",
-            "One clean browser window.",
-            !this._workspacesEnabledSelected,
-            'data-workspaces="off"'
+            "One clean browser window, no separation.",
+            !this._workspacesEnabledSelected
           )}
         </div>
       `;
@@ -812,23 +663,41 @@
 
     _hideToolbarHTML() {
       return `
-        <div class="hw-layout-grid">
-          ${this._screenshotCardHTML(
-            "welcome-toolbar-hidden",
+        <div class="hw-choice-stack">
+          ${this._optionRowHTML(
+            "data-toolbar=\"hidden\"",
+            "layout",
             "Auto-hide",
             "Reveal the toolbar by hovering the top edge.",
-            this._compactHideToolboxSelected,
-            'data-toolbar="hidden"'
+            this._compactHideToolboxSelected
           )}
-          ${this._screenshotCardHTML(
-            "welcome-toolbar-visible",
+          ${this._optionRowHTML(
+            "data-toolbar=\"visible\"",
+            "layout",
             "Always visible",
             "The toolbar stays fixed at the top.",
-            !this._compactHideToolboxSelected,
-            'data-toolbar="visible"'
+            !this._compactHideToolboxSelected
           )}
         </div>
       `;
+    }
+
+    _privacyLevelsHTML() {
+      return PRIVACY_LEVELS.map(level => {
+        const active = this._selectedPrivacyLevel === level.key;
+        return `
+          <button type="button" class="hw-option${active ? " hw-option-active" : ""}" data-privacy-level="${level.key}" aria-pressed="${active}">
+            <div class="hw-option-copy">
+              <span class="hw-option-title" data-l10n-id="${level.l10nLabel}">${level.label}</span>
+              <span class="hw-option-desc" data-l10n-id="${level.l10nDesc}">${level.description}</span>
+            </div>
+            <span class="hw-pill" data-l10n-id="${level.l10nBadge}">${level.badge}</span>
+            <span class="hw-option-check" aria-hidden="true">
+              ${active ? `<span class="hw-icon hw-icon-check"></span>` : ""}
+            </span>
+          </button>
+        `;
+      }).join("");
     }
 
     _enginesHTML() {
@@ -838,155 +707,71 @@
           const isActive = this._selectedEngine?.name === engine.name;
           const isDuckDuckGo = engine.name.toLowerCase().includes("duckduckgo");
           return `
-            <button type="button" class="hw-engine-choice${isActive ? " hw-choice-active" : ""}" data-idx="${index}" aria-pressed="${isActive}">
-              <span class="hw-engine-icon">
+            <button type="button" class="hw-option${isActive ? " hw-option-active" : ""}" data-idx="${index}" aria-pressed="${isActive}">
+              <span class="hw-option-icon hw-engine-icon">
                 ${this._engineIconHTML(engine)}
               </span>
-              <span class="hw-engine-name">${name}</span>
-              ${isDuckDuckGo ? `<span class="hw-pill" data-l10n-id="hilal-welcome-recommended">Recommended</span>` : ""}
+              <div class="hw-option-copy">
+                <span class="hw-option-title">${name}</span>
+              </div>
+              ${isDuckDuckGo ? `<span class="hw-recommended-pill" data-l10n-id="hilal-welcome-recommended">Recommended</span>` : ""}
+              <span class="hw-option-check" aria-hidden="true">
+                ${isActive ? `<span class="hw-icon hw-icon-check"></span>` : ""}
+              </span>
             </button>
           `;
         })
         .join("");
     }
 
-    _privacyLevelsHTML() {
-      return PRIVACY_LEVELS.map(level => {
-        const active = this._selectedPrivacyLevel === level.key;
-        return `
-          <button type="button" class="hw-privacy-choice${active ? " hw-choice-active" : ""}" data-privacy-level="${level.key}" aria-pressed="${active}">
-            <span class="hw-choice-top">
-              <span class="hw-choice-title" data-l10n-id="${level.l10nLabel}">${level.label}</span>
-              <span class="hw-pill" data-l10n-id="${level.l10nBadge}">${level.badge}</span>
-            </span>
-            <span class="hw-choice-desc" data-l10n-id="${level.l10nDesc}">${level.description}</span>
-            <span class="hw-choice-detail" data-l10n-id="${level.l10nDetail}">${level.detail}</span>
-          </button>
-        `;
-      }).join("");
-    }
-
-    _normalizePrivacyLevel(value) {
-      return PRIVACY_LEVELS.some(level => level.key === value)
-        ? value
-        : "standard";
-    }
-
-    _selectedPinnedSites() {
-      return PINNED_SITE_PRESETS.filter(
-        site => this._pinnedSitesSelected[site.key]
-      );
-    }
-
     _pinnedTabsHTML() {
+      const sites = PINNED_SITE_PRESETS;
       return `
-        <div class="hw-pinned-builder">
-          <div class="hw-pinned-preview" aria-label="Pinned tabs sidebar preview">
-            <div class="hw-pinned-window">
-              <aside class="hw-pinned-sidebar">
-                <div class="hw-window-dots" aria-hidden="true">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-                <div class="hw-pinned-section-label" data-l10n-id="hilal-welcome-pinned-preview-title">Pinned tabs</div>
-                <div class="hw-pinned-preview-grid">
-                  ${this._pinnedPreviewTabsHTML()}
-                </div>
-                <div class="hw-pinned-workspace-preview" aria-hidden="true">
-                  <span class="hw-pinned-workspace-row hw-pinned-workspace-active"></span>
-                  <span class="hw-pinned-workspace-row"></span>
-                  <span class="hw-pinned-workspace-row"></span>
-                </div>
-              </aside>
-              <div class="hw-pinned-page-preview">
-                <div class="hw-pinned-urlbar"></div>
-                <div class="hw-pinned-page-lines">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
+        <div class="hw-pinned-site-list">
+          <label class="hw-toggle-row" for="hw-pinned-public-toggle">
+            <div class="hw-toggle-row-copy">
+              <span class="hw-toggle-row-title" data-l10n-id="hilal-welcome-pinned-public-label">Show in every space</span>
+              <span class="hw-toggle-row-desc" data-l10n-id="hilal-welcome-pinned-public-desc">Pinned tabs stay visible when you switch workspaces.</span>
             </div>
-          </div>
-          <div class="hw-pinned-controls">
-            <label class="hw-line-choice" for="hw-pinned-public-toggle">
-              <span class="hw-line-icon hw-icon hw-icon-tabs"></span>
-              <span class="hw-line-copy">
-                <span class="hw-line-title" data-l10n-id="hilal-welcome-pinned-public-label">Show pinned tabs in every space</span>
-                <span class="hw-line-desc" data-l10n-id="hilal-welcome-pinned-public-desc">On by default so the sites you pin stay visible when you switch workspaces.</span>
-              </span>
-              <span class="hw-toggle">
-                <input type="checkbox" id="hw-pinned-public-toggle"${this._pinnedPublicSelected ? ' checked="checked"' : ""}/>
-                <span class="hw-toggle-track"></span>
-              </span>
-            </label>
-            <div class="hw-pinned-site-list">
-              ${this._pinnedSiteChoicesHTML()}
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    _pinnedPreviewTabsHTML() {
-      return PINNED_SITE_PRESETS.filter(
-        site => this._pinnedSitesSelected[site.key]
-      )
-        .map(site => {
-          return `
-          <button type="button" class="hw-pinned-preview-tab hw-pinned-preview-active" data-pinned-site="${site.key}" aria-pressed="true" title="${this._escapeHTML(site.label)}">
-            ${this._pinnedSiteIconHTML(site)}
-          </button>
-        `;
-        })
-        .join("");
-    }
-
-    _pinnedSiteChoicesHTML() {
-      return PINNED_SITE_PRESETS.filter(
-        site => !this._pinnedSitesSelected[site.key]
-      )
-        .map(site => {
-          return `
-          <button type="button" class="hw-pinned-site-choice" data-pinned-site="${site.key}" aria-pressed="false">
-            ${this._pinnedSiteIconHTML(site)}
-            <span class="hw-pinned-site-copy">
-              <span class="hw-choice-title">${this._escapeHTML(site.label)}</span>
-              <span class="hw-choice-desc">${this._escapeHTML(site.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))}</span>
+            <span class="hw-toggle">
+              <input type="checkbox" id="hw-pinned-public-toggle"${this._pinnedPublicSelected ? ' checked="checked"' : ""}/>
+              <span class="hw-toggle-track"></span>
             </span>
-            <span class="hw-pinned-site-state" data-l10n-id="hilal-welcome-pinned-site-state-skipped">Not selected</span>
-          </button>
-        `;
-        })
-        .join("");
-    }
-
-    _pinnedSiteIconHTML(site) {
-      const style = `style="--hw-pinned-color: ${this._escapeHTML(site.color)}"`;
-      if (site.iconURL) {
-        return `
-          <span class="hw-pinned-site-icon" ${style}>
-            <img src="${this._escapeHTML(site.iconURL)}" alt="" />
-          </span>
-        `;
-      }
-      return `
-        <span class="hw-pinned-site-icon" ${style}>
-          <span>${this._escapeHTML(site.initial)}</span>
-        </span>
+          </label>
+          ${sites.map(site => {
+            const active = this._pinnedSitesSelected[site.key];
+            const domain = site.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+            return `
+              <button type="button" class="hw-option${active ? " hw-option-active" : ""}" data-pinned-site="${site.key}" aria-pressed="${active}">
+                <span class="hw-option-icon" style="background: radial-gradient(circle at 30% 20%, color-mix(in srgb, ${this._escapeHTML(site.color)} 28%, transparent), transparent 60%), rgba(255,255,255,0.07); color: ${this._escapeHTML(site.color)};">
+                  ${site.iconURL
+                    ? `<img src="${this._escapeHTML(site.iconURL)}" alt="" style="width:22px;height:22px;object-fit:contain;" />`
+                    : `<span style="font-size:0.82rem;font-weight:780;">${this._escapeHTML(site.initial)}</span>`
+                  }
+                </span>
+                <div class="hw-option-copy">
+                  <span class="hw-option-title">${this._escapeHTML(site.label)}</span>
+                  <span class="hw-option-desc">${this._escapeHTML(domain)}</span>
+                </div>
+                <span class="hw-option-check" aria-hidden="true">
+                  ${active ? `<span class="hw-icon hw-icon-check"></span>` : ""}
+                </span>
+              </button>
+            `;
+          }).join("")}
+        </div>
       `;
     }
 
     _workspacesHTML() {
       if (!this._workspacesEnabledSelected) {
         return `
-          <div class="hw-workspace-disabled">
-            <span class="hw-workspace-disabled-icon hw-icon hw-icon-tabs"></span>
-            <span class="hw-workspace-disabled-copy">
-              <span class="hw-choice-title" data-l10n-id="hilal-welcome-workspaces-disabled-label">Spaces are off</span>
-              <span class="hw-choice-desc" data-l10n-id="hilal-welcome-workspaces-disabled-desc">Hilal will open with one clean browser space. You can turn spaces on later in Settings.</span>
-            </span>
+          <div class="hw-workspace-off-notice">
+            <span class="hw-icon hw-icon-tabs" style="--hw-icon-size:20px;width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,0.07);color:var(--hw-faint);"></span>
+            <div class="hw-workspace-off-notice-copy">
+              <span class="hw-option-title" data-l10n-id="hilal-welcome-workspaces-disabled-label">Spaces are off</span>
+              <span class="hw-option-desc" data-l10n-id="hilal-welcome-workspaces-disabled-desc">Hilal will open with one clean browser space. You can turn spaces on in Settings later.</span>
+            </div>
           </div>
         `;
       }
@@ -994,12 +779,17 @@
       return WORKSPACE_PRESETS.map(item => {
         const active = this._workspacesSelected[item.key];
         return `
-          <button type="button" class="hw-workspace-choice hw-workspace-${item.colorClass}${active ? " hw-choice-active" : ""}" data-workspace="${item.key}" aria-pressed="${active}">
-            <span class="hw-workspace-icon">
-              <span class="hw-icon hw-icon-${item.icon}"></span>
+          <button type="button" class="hw-option${active ? " hw-option-active" : ""}" data-workspace="${item.key}" aria-pressed="${active}">
+            <span class="hw-option-icon">
+              <span class="hw-icon hw-icon-${item.icon}" style="--hw-icon-size:17px;color:var(--hw-muted);"></span>
             </span>
-            <span class="hw-workspace-label" data-l10n-id="hilal-welcome-workspace-label-${item.key}">${item.label}</span>
-            <span class="hw-workspace-state" data-l10n-id="hilal-welcome-workspace-state-${active ? "added" : "skipped"}">${active ? "Will be created" : "Skipped"}</span>
+            <div class="hw-option-copy">
+              <span class="hw-option-title" data-l10n-id="hilal-welcome-workspace-label-${item.key}">${item.label}</span>
+              <span class="hw-option-desc" data-l10n-id="hilal-welcome-workspace-state-${active ? "added" : "skipped"}">${active ? "Will be created" : "Skipped"}</span>
+            </div>
+            <span class="hw-option-check" aria-hidden="true">
+              ${active ? `<span class="hw-icon hw-icon-check"></span>` : ""}
+            </span>
           </button>
         `;
       }).join("");
@@ -1013,62 +803,67 @@
         PRIVACY_LEVELS.find(
           level => level.key === this._selectedPrivacyLevel
         ) || PRIVACY_LEVELS[0];
+      const selectedPinnedSites = this._selectedPinnedSites();
+      const pinnedTabsText = selectedPinnedSites.length
+        ? selectedPinnedSites.map(site => this._escapeHTML(site.label)).join(", ")
+        : "None";
+
       const activePresets = WORKSPACE_PRESETS.filter(
         item => this._workspacesSelected[item.key]
       );
-      const selectedPinnedSites = this._selectedPinnedSites();
-      const pinnedTabsHTML = selectedPinnedSites.length
-        ? selectedPinnedSites
-            .map(site => this._escapeHTML(site.label))
-            .join(", ")
-        : `<span data-l10n-id="hilal-welcome-summary-none">None</span>`;
-      let workspacesHTML = `<span data-l10n-id="hilal-welcome-summary-off">Off</span>`;
+      let workspacesText = "Off";
       if (this._workspacesEnabledSelected) {
-        workspacesHTML = activePresets.length
-          ? activePresets
-              .map(
-                item =>
-                  `<span data-l10n-id="hilal-welcome-workspace-label-${item.key}">${item.label}</span>`
-              )
-              .join(", ")
-          : `<span data-l10n-id="hilal-welcome-summary-none">None</span>`;
+        workspacesText = activePresets.length
+          ? activePresets.map(item => item.label).join(", ")
+          : "None";
       }
 
+      const rows = [
+        { label: "Layout", value: this._compactSelected ? "Compact" : "Standard", l10nKey: "hilal-welcome-summary-layout", l10nValue: `hilal-welcome-summary-layout-${this._compactSelected ? "compact" : "standard"}` },
+        { label: "Tabs", value: this._verticalTabsSelected ? "Vertical" : "Horizontal", l10nKey: "hilal-welcome-summary-tabs", l10nValue: `hilal-welcome-summary-tabs-${this._verticalTabsSelected ? "vertical" : "horizontal"}` },
+        { label: "Search", value: engineName, l10nKey: "hilal-welcome-summary-search", l10nValue: null },
+        { label: "Privacy", value: this._escapeHTML(privacyLevel.label), l10nKey: "hilal-welcome-summary-privacy", l10nValue: null },
+        { label: "Pinned tabs", value: pinnedTabsText, l10nKey: "hilal-welcome-summary-pinned-tabs", l10nValue: null },
+        { label: "Spaces", value: workspacesText, l10nKey: "hilal-welcome-summary-workspaces", l10nValue: null },
+        { label: "Default browser", value: this._defaultBrowserSelected ? "Set as default" : "No change", l10nKey: "hilal-welcome-summary-default-browser", l10nValue: `hilal-welcome-summary-default-${this._defaultBrowserSelected ? "set" : "no-change"}` },
+      ];
+
       return `
-        <div class="hw-summary-row">
-          <span data-l10n-id="hilal-welcome-summary-layout">Layout</span>
-          <strong data-l10n-id="hilal-welcome-summary-layout-${this._compactSelected ? "compact" : "standard"}">${this._compactSelected ? "Compact" : "Standard"}</strong>
-        </div>
-        <div class="hw-summary-row">
-          <span data-l10n-id="hilal-welcome-summary-tabs">Tabs</span>
-          <strong data-l10n-id="hilal-welcome-summary-tabs-${this._verticalTabsSelected ? "vertical" : "horizontal"}">${this._verticalTabsSelected ? "Vertical" : "Horizontal"}</strong>
-        </div>
-        <div class="hw-summary-row">
-          <span data-l10n-id="hilal-welcome-summary-search">Search</span>
-          <strong>${engineName}</strong>
-        </div>
-        <div class="hw-summary-row">
-          <span data-l10n-id="hilal-welcome-summary-privacy">Privacy</span>
-          <strong>${this._escapeHTML(privacyLevel.label)}</strong>
-        </div>
-        <div class="hw-summary-row">
-          <span data-l10n-id="hilal-welcome-summary-pinned-tabs">Pinned tabs</span>
-          <strong>${pinnedTabsHTML}</strong>
-        </div>
-        <div class="hw-summary-row">
-          <span data-l10n-id="hilal-welcome-summary-pinned-everywhere">Pinned tabs in every space</span>
-          <strong data-l10n-id="hilal-welcome-summary-${this._pinnedPublicSelected ? "on" : "off"}">${this._pinnedPublicSelected ? "On" : "Off"}</strong>
-        </div>
-        <div class="hw-summary-row">
-          <span data-l10n-id="hilal-welcome-summary-workspaces">Spaces</span>
-          <strong>${workspacesHTML}</strong>
-        </div>
-        <div class="hw-summary-row">
-          <span data-l10n-id="hilal-welcome-summary-default-browser">Default browser</span>
-          <strong data-l10n-id="hilal-welcome-summary-default-${this._defaultBrowserSelected ? "set" : "no-change"}">${this._defaultBrowserSelected ? "Set as default" : "No change"}</strong>
+        <div class="hw-summary">
+          ${rows.map(row => `
+            <div class="hw-summary-row">
+              <span class="hw-summary-label" data-l10n-id="${row.l10nKey}">${row.label}</span>
+              <span class="hw-summary-value"${row.l10nValue ? ` data-l10n-id="${row.l10nValue}"` : ""}>${row.value}</span>
+            </div>
+          `).join("")}
         </div>
       `;
     }
+
+    /* ----------------------------------------------------------
+       Shared option row builder
+       ---------------------------------------------------------- */
+
+    _optionRowHTML(attrs, iconName, title, desc, active) {
+      return `
+        <button type="button" class="hw-option${active ? " hw-option-active" : ""}" ${attrs} aria-pressed="${active}">
+          <span class="hw-option-icon">
+            <span class="hw-icon hw-icon-${iconName}" style="--hw-icon-size:17px;color:var(--hw-muted);"></span>
+          </span>
+          <div class="hw-option-copy">
+            <span class="hw-option-title">${this._escapeHTML(title)}</span>
+            <span class="hw-option-desc">${this._escapeHTML(desc)}</span>
+          </div>
+          <span class="hw-option-check" aria-hidden="true">
+            ${active ? `<span class="hw-icon hw-icon-check"></span>` : ""}
+          </span>
+        </button>
+      `;
+    }
+
+    /* ----------------------------------------------------------
+       Event listeners
+       ---------------------------------------------------------- */
 
     _attachListeners() {
       const onClick = (id, fn) => {
@@ -1116,7 +911,7 @@
         }
       });
 
-      this._overlay.querySelectorAll(".hw-engine-choice").forEach(choice => {
+      this._overlay.querySelectorAll(".hw-option[data-idx]").forEach(choice => {
         choice.addEventListener("click", () => {
           const index = parseInt(choice.dataset.idx, 10);
           this._selectedEngine = this._engines[index];
@@ -1124,7 +919,7 @@
         });
       });
 
-      this._overlay.querySelectorAll(".hw-privacy-choice").forEach(choice => {
+      this._overlay.querySelectorAll(".hw-option[data-privacy-level]").forEach(choice => {
         choice.addEventListener("click", () => {
           this._selectedPrivacyLevel = this._normalizePrivacyLevel(
             choice.dataset.privacyLevel
@@ -1134,7 +929,7 @@
       });
 
       this._overlay
-        .querySelectorAll(".hw-screenshot-card[data-layout-mode]")
+        .querySelectorAll(".hw-option[data-layout-mode]")
         .forEach(choice => {
           choice.addEventListener("click", () => {
             this._compactSelected = choice.dataset.layoutMode === "compact";
@@ -1143,7 +938,7 @@
         });
 
       this._overlay
-        .querySelectorAll(".hw-screenshot-card[data-tab-layout]")
+        .querySelectorAll(".hw-option[data-tab-layout]")
         .forEach(choice => {
           choice.addEventListener("click", () => {
             this._verticalTabsSelected =
@@ -1153,7 +948,7 @@
         });
 
       this._overlay
-        .querySelectorAll(".hw-screenshot-card[data-workspaces]")
+        .querySelectorAll(".hw-option[data-workspaces]")
         .forEach(choice => {
           choice.addEventListener("click", () => {
             this._workspacesEnabledSelected =
@@ -1163,7 +958,7 @@
         });
 
       this._overlay
-        .querySelectorAll(".hw-screenshot-card[data-toolbar]")
+        .querySelectorAll(".hw-option[data-toolbar]")
         .forEach(choice => {
           choice.addEventListener("click", () => {
             this._compactHideToolboxSelected =
@@ -1172,7 +967,7 @@
           });
         });
 
-      this._overlay.querySelectorAll(".hw-workspace-choice").forEach(choice => {
+      this._overlay.querySelectorAll(".hw-option[data-workspace]").forEach(choice => {
         choice.addEventListener("click", () => {
           const key = choice.dataset.workspace;
           this._workspacesSelected[key] = !this._workspacesSelected[key];
@@ -1189,7 +984,7 @@
         });
       }
 
-      this._overlay.querySelectorAll("[data-pinned-site]").forEach(choice => {
+      this._overlay.querySelectorAll(".hw-option[data-pinned-site]").forEach(choice => {
         choice.addEventListener("click", () => {
           const key = choice.dataset.pinnedSite;
           this._pinnedSitesSelected[key] = !this._pinnedSitesSelected[key];
@@ -1197,6 +992,10 @@
         });
       });
     }
+
+    /* ----------------------------------------------------------
+       Navigation
+       ---------------------------------------------------------- */
 
     _shouldSkipStage(stage) {
       return stage === STAGE_TOOLBAR && !this._compactSelected;
@@ -1221,6 +1020,10 @@
         this._renderStage();
       }
     }
+
+    /* ----------------------------------------------------------
+       Finish / dismiss / teardown
+       ---------------------------------------------------------- */
 
     async _finish() {
       this._saveLayoutPrefs();
@@ -1371,6 +1174,12 @@
       }
     }
 
+    _selectedPinnedSites() {
+      return PINNED_SITE_PRESETS.filter(
+        site => this._pinnedSitesSelected[site.key]
+      );
+    }
+
     _dismiss() {
       this._markSeen();
       this._teardown();
@@ -1407,6 +1216,16 @@
       }
     }
 
+    /* ----------------------------------------------------------
+       Utilities
+       ---------------------------------------------------------- */
+
+    _normalizePrivacyLevel(value) {
+      return PRIVACY_LEVELS.some(level => level.key === value)
+        ? value
+        : "standard";
+    }
+
     _logoHTML() {
       return `<img class="hw-logo-mark" src="chrome://branding/content/about-logo.svg" alt="" />`;
     }
@@ -1430,9 +1249,9 @@
       }
 
       if (iconURL) {
-        return `<img class="hw-engine-image" src="${this._escapeHTML(iconURL)}" alt="" />`;
+        return `<img src="${this._escapeHTML(iconURL)}" alt="" />`;
       }
-      return `<span class="hw-icon hw-icon-search"></span>`;
+      return `<span class="hw-icon hw-icon-search" style="--hw-icon-size:18px;color:var(--hw-muted);"></span>`;
     }
 
     _escapeHTML(value) {
