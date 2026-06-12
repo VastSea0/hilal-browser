@@ -769,6 +769,18 @@ sidebar-main,
     visibility 0s 0.3s !important;
 }
 
+/* Keep macOS traffic lights absolutely positioned at the top left
+   so they ignore the padding-inline-start of #nav-bar */
+:root[hilal-compact-mode] .titlebar-buttonbox-container {
+  position: absolute !important;
+  left: 12px !important;
+  top: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  z-index: 1003 !important;
+}
+
 /* Visible state when hovering the toolbox */
 :root[hilal-compact-mode][hilal-compact-hide-toolbox] #navigator-toolbox.hilal-compact-visible #nav-bar {
   opacity: 1 !important;
