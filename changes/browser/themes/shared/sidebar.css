@@ -654,6 +654,13 @@ sidebar-main,
   padding: 0 !important;
 }
 
+/* Push left sidebar content down to leave space for the traffic lights at the top-left of the window */
+:root[hilal-compact-sidebar] #sidebar-main:not([sidebar-positionend]) sidebar-main,
+:root[hilal-compact-sidebar] #sidebar-main:not([sidebar-positionend]) html\:sidebar-main {
+  padding-top: 38px !important;
+  box-sizing: border-box !important;
+}
+
 /* Custom styling for compact workspace-only sidebar (vertical tabs closed) */
 :root[hilal-compact-sidebar] sidebar-main:not([vertical-tabs]),
 :root[hilal-compact-sidebar] html\:sidebar-main:not([vertical-tabs]) {
@@ -766,7 +773,7 @@ sidebar-main,
 
   /* Premium aesthetic: unified floating glassmorphism card */
   color-scheme: light dark !important;
-  background-color: light-dark(rgba(255, 255, 255, 0.85), rgba(30, 30, 46, 0.85)) !important;
+  background-color: var(--hilal-sidebar-background, var(--sidebar-background-color, light-dark(rgba(255, 255, 255, 0.85), rgba(30, 30, 46, 0.85)))) !important;
   backdrop-filter: blur(20px) !important;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.4),
@@ -799,45 +806,135 @@ sidebar-main,
   --hilal-compact-sidebar-width: 280px;
 }
 
-/* When the compact sidebar (left side) and the compact toolbar are both visible
- * at the same time, shift the toolbar's left edge to start after the sidebar so
- * they never overlap. The macOS traffic lights are OS-rendered and will appear
- * naturally at the top of the sidebar card — no need to push the sidebar down.
+/* When compact sidebar (left) and compact toolbar are both visible:
  *
- * The 12px right margin from the base toolbox rule is preserved on the right. */
-:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox.hilal-compact-visible {
-  left: calc(var(--hilal-compact-sidebar-width) + 12px) !important;
-  width: calc(100vw - var(--hilal-compact-sidebar-width) - 24px) !important;
-}
+ * The macOS traffic lights are native AppKit NSView buttons that sit ABOVE the
+ * web content CALayer in the NSView hierarchy. They always render on top of all
+ * CSS elements regardless of z-index. This means we cannot "move" them to the
+ * sidebar with CSS — their position is determined by where Firefox's XUL
+ * #titlebar element is in the layout, and XUL ignores CSS position:absolute
+ * on the native button bounds calculation.
+ *
+ * Correct approach:
+ *  1. Keep the toolbar at full width (left: 12px) so #titlebar is at the window's
+ *     left edge, rendering the traffic lights naturally inside the sidebar card area.
+ *  2. Keep #navigator-toolbox visible (but transparent, click-through) whenever the
+ *     sidebar is visible. This ensures the #titlebar and the traffic lights do not
+ *     get hidden or translated off-screen when the toolbar is inactive.
+ *  3. Raise the sidebar z-index so the sidebar card renders behind the traffic lights
+ *     but in front of the toolbar content.
+ *  4. Animate/hide #nav-bar directly rather than translating the entire toolbox.
+ *  5. Push #nav-bar content (URL bar, nav buttons) to start after the sidebar
+ *     with padding-inline-start. */
 
-/* Detach #titlebar from the shifted toolbar and anchor it back at the window's
- * left edge so the macOS traffic lights appear inside the sidebar card.
- * #titlebar on macOS is transparent — only the native AppKit NSView traffic
- * light buttons are visible. position:absolute removes it from the flex flow so
- * #nav-bar starts cleanly at the toolbar card's left edge. The toolbox is
- * overflow:visible when shown, so the element can paint to the left of the card. */
-:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox.hilal-compact-visible #titlebar {
-  position: absolute !important;
-  inset-inline-start: calc(-1 * (var(--hilal-compact-sidebar-width) + 12px)) !important;
-  inset-block-start: 0 !important;
-  width: var(--hilal-compact-sidebar-width) !important;
-  height: 100% !important;
-  background: transparent !important;
+/* Keep #navigator-toolbox positioned and visible whenever the sidebar is visible,
+   allowing the native traffic lights in #titlebar to render in the sidebar.
+   This only applies when the toolbox is NOT active/hovered. */
+:root[hilal-compact-mode][hilal-compact-hide-toolbox][hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox:not(.hilal-compact-visible) {
+  position: fixed !important;
+  top: 0 !important;
+  left: 12px !important;
+  width: calc(100vw - 24px) !important;
+  transform: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
   pointer-events: none !important;
-  z-index: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  overflow: visible !important;
+  clip-path: none !important;
 }
 
-/* Allow the native traffic light buttons to receive clicks even though
- * #titlebar itself has pointer-events:none. The .titlebar-buttonbox-container
- * wraps the native NSView and must remain interactive. */
-:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox.hilal-compact-visible .titlebar-buttonbox-container {
+/* Ensure the titlebar is visible and allows pointer events for the traffic lights. */
+:root[hilal-compact-mode][hilal-compact-hide-toolbox][hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox #titlebar {
+  visibility: visible !important;
+  opacity: 1 !important;
   pointer-events: auto !important;
+  background: transparent !important;
 }
 
-/* Right sidebar: narrow the toolbar from the right side instead. */
+/* Keep #nav-bar itself visible but transparent/click-through when the toolbox is inactive,
+   so that its child .titlebar-buttonbox-container (traffic lights) remains visible. */
+:root[hilal-compact-mode][hilal-compact-hide-toolbox][hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox:not(.hilal-compact-visible) #nav-bar {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Hide all other children of #nav-bar (URL bar, navigation buttons) when the toolbox is inactive. */
+:root[hilal-compact-mode][hilal-compact-hide-toolbox][hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox:not(.hilal-compact-visible) #nav-bar > *:not(.titlebar-buttonbox-container),
+:root[hilal-compact-mode][hilal-compact-hide-toolbox][hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox:not(.hilal-compact-visible) #PersonalToolbar {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translate3d(0, -50px, 0) !important;
+  transition:
+    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.2s ease-out,
+    visibility 0s 0.3s !important;
+}
+
+/* Sidebar floats in front of the toolbar so it covers any toolbar backgrounds. */
+:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible):has(#navigator-toolbox.hilal-compact-visible) #sidebar-main:not([sidebar-positionend]).hilal-compact-visible {
+  z-index: 1002 !important;
+}
+
+/* Position the traffic lights absolutely at left: 12px inside #nav-bar so that they
+ * remain at the top-left of the window (inside the sidebar card) instead of being
+ * pushed/shifted to the right by #nav-bar's padding-inline-start. */
+:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #nav-bar > .titlebar-buttonbox-container {
+  position: absolute !important;
+  left: 12px !important;
+  top: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  z-index: 1003 !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Push the nav-bar content (URL bar, nav buttons) to start after the sidebar
+ * so none of the interactive toolbar content is hidden behind the sidebar card. */
+:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox.hilal-compact-visible #nav-bar {
+  padding-inline-start: calc(var(--hilal-compact-sidebar-width) - 12px) !important;
+  box-sizing: border-box !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+/* Also animate/show all children of #nav-bar when the toolbox becomes active. */
+:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox.hilal-compact-visible #nav-bar > *:not(.titlebar-buttonbox-container) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: translate3d(0, 0, 0) !important;
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease-out,
+    visibility 0s 0s !important;
+}
+
+/* Right sidebar: narrow toolbar's right side so it doesn't overlap the sidebar. */
 :root[hilal-compact-sidebar]:has(#sidebar-main[sidebar-positionend].hilal-compact-visible) #navigator-toolbox.hilal-compact-visible {
   width: calc(100vw - var(--hilal-compact-sidebar-width) - 24px) !important;
 }
+
+:root[hilal-compact-sidebar]:has(#sidebar-main[sidebar-positionend].hilal-compact-visible):has(#navigator-toolbox.hilal-compact-visible) #sidebar-main[sidebar-positionend].hilal-compact-visible {
+  z-index: 1002 !important;
+}
+
+
 
 
 
