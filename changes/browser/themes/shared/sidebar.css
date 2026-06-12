@@ -757,16 +757,17 @@ sidebar-main,
   box-sizing: border-box !important;
 
   /* Animation defaults (Hidden state: slides UP off the screen) */
-  opacity: 0 !important;
-  visibility: hidden !important;
   pointer-events: none !important;
   transform: translate3d(0, -100%, 0) !important; 
+  box-shadow: none !important;
   
-  will-change: transform, opacity;
+  will-change: transform, left, width, padding-inline-start;
   transition:
     transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-    opacity 0.2s ease-out,
-    visibility 0s 0.3s !important;
+    left 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    padding-inline-start 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 0.3s ease-out !important;
 }
 
 /* Keep macOS traffic lights absolutely positioned at the top left
@@ -781,17 +782,48 @@ sidebar-main,
   z-index: 1003 !important;
 }
 
+/* Default hidden state for traffic lights in compact mode */
+:root[hilal-compact-mode][hilal-compact-hide-toolbox] .titlebar-buttonbox-container {
+  transform: translate3d(0, -100%, 0) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition:
+    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.2s ease-out !important;
+}
+
+/* Show traffic lights when the top toolbar is visible */
+:root[hilal-compact-mode][hilal-compact-hide-toolbox]:has(#navigator-toolbox.hilal-compact-visible) .titlebar-buttonbox-container {
+  transform: translate3d(0, 0, 0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease-out !important;
+}
+
+/* Show traffic lights when the compact sidebar is visible */
+:root[hilal-compact-mode][hilal-compact-hide-toolbox]:has(#sidebar-main.hilal-compact-visible) .titlebar-buttonbox-container {
+  transform: translate3d(0, 0, 0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease-out !important;
+}
+
 /* Visible state when hovering the toolbox */
 :root[hilal-compact-mode][hilal-compact-hide-toolbox] #navigator-toolbox.hilal-compact-visible #nav-bar {
-  opacity: 1 !important;
-  visibility: visible !important;
   pointer-events: auto !important;
   transform: translate3d(0, 0, 0) !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.1) !important;
   
   transition:
     transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 0.3s ease-out,
-    visibility 0s 0s !important;
+    left 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    padding-inline-start 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 0.45s ease-out !important;
 }
 
 /* Fix URL bar opacity (due to top-layer rendering in modern Firefox) */
@@ -837,30 +869,29 @@ sidebar-main,
   --hilal-compact-sidebar-width: 280px;
 }
 
-/* When the compact sidebar is visible, ensure #nav-bar content is pushed out of the way */
+/* When the compact sidebar is visible on the left, offset #nav-bar to avoid overlap */
 :root[hilal-compact-mode][hilal-compact-hide-toolbox][hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #nav-bar {
-  padding-inline-start: max(80px, calc(var(--hilal-compact-sidebar-width) + 12px)) !important;
-  transition:
-    padding-inline-start 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 0.3s ease-out,
-    visibility 0s 0s !important;
+  left: var(--hilal-compact-sidebar-width) !important;
+  width: calc(100vw - var(--hilal-compact-sidebar-width)) !important;
+  padding-inline-start: 12px !important;
 }
 
-/* Sidebar right position: */
+/* When the compact sidebar is visible on the right, offset #nav-bar to avoid overlap */
 :root[hilal-compact-mode][hilal-compact-hide-toolbox][hilal-compact-sidebar]:has(#sidebar-main[sidebar-positionend].hilal-compact-visible) #nav-bar {
-  padding-inline-end: calc(var(--hilal-compact-sidebar-width) + 12px) !important;
-  padding-inline-start: 80px !important; /* Restore normal left padding for traffic lights */
-  transition:
-    padding-inline-end 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 0.3s ease-out,
-    visibility 0s 0s !important;
+  left: 0 !important;
+  width: calc(100vw - var(--hilal-compact-sidebar-width)) !important;
+  padding-inline-start: 80px !important; /* Keep left padding for traffic lights */
 }
 
-/* Clear all the old z-index and clip-path overrides that caused issues */
-:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible):has(#navigator-toolbox.hilal-compact-visible) #sidebar-main:not([sidebar-positionend]).hilal-compact-visible {
-  z-index: 1002 !important;
+/* When both top toolbar and compact sidebar are visible, square the top corner where they meet */
+:root[hilal-compact-mode][hilal-compact-hide-toolbox][hilal-compact-sidebar]:has(#navigator-toolbox.hilal-compact-visible) #sidebar-main:not([sidebar-positionend]).hilal-compact-visible sidebar-main,
+:root[hilal-compact-mode][hilal-compact-hide-toolbox][hilal-compact-sidebar]:has(#navigator-toolbox.hilal-compact-visible) #sidebar-main:not([sidebar-positionend]).hilal-compact-visible html\:sidebar-main {
+  border-radius: 0 0 16px 0 !important;
+}
+
+:root[hilal-compact-mode][hilal-compact-hide-toolbox][hilal-compact-sidebar]:has(#navigator-toolbox.hilal-compact-visible) #sidebar-main[sidebar-positionend].hilal-compact-visible sidebar-main,
+:root[hilal-compact-mode][hilal-compact-hide-toolbox][hilal-compact-sidebar]:has(#navigator-toolbox.hilal-compact-visible) #sidebar-main[sidebar-positionend].hilal-compact-visible html\:sidebar-main {
+  border-radius: 0 0 0 16px !important;
 }
 
 
