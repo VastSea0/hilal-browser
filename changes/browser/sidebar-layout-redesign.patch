@@ -346,7 +346,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
 --- a/browser/components/sidebar/sidebar-main.css
 +++ b/browser/components/sidebar/sidebar-main.css
-@@ -17,6 +17,522 @@
+@@ -17,6 +17,536 @@
    width: 100%;
  }
  
@@ -375,12 +375,13 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +}
 +
 +:host([hilal-sidebar]:not([vertical-tabs])) {
-+  inline-size: 52px;
-+  min-inline-size: 52px;
-+  max-inline-size: 52px;
++  inline-size: 68px;
++  min-inline-size: 68px;
++  max-inline-size: 68px;
 +}
 +
 +.hilal-sidebar-layout {
++  position: relative;
 +  background: transparent;
 +  block-size: 100%;
 +  box-sizing: border-box;
@@ -390,17 +391,30 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +  padding-block-start: var(--hilal-sidebar-top-padding, 0px);
 +}
 +
++.hilal-sidebar-layout::before {
++  content: "";
++  position: absolute;
++  top: 0;
++  left: 0;
++  right: 0;
++  height: var(--hilal-sidebar-top-padding, 0px);
++  -moz-window-dragging: drag !important;
++  z-index: 10;
++  pointer-events: auto;
++  border-bottom: var(--hilal-sidebar-top-border, none);
++}
++
 +.hilal-workspace-rail {
 +  align-items: center;
 +  background: transparent;
 +  border-inline-end: 1px solid var(--hilal-sidebar-border);
 +  box-sizing: border-box;
 +  display: flex;
-+  flex: 0 0 52px;
++  flex: 0 0 68px;
 +  flex-direction: column;
 +  gap: 8px;
-+  min-inline-size: 52px;
-+  padding: 10px 8px;
++  min-inline-size: 68px;
++  padding: 20px 8px 10px 8px;
 +}
 +
 +.hilal-workspace-list {
@@ -502,7 +516,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +  flex: 1 1 auto;
 +  flex-direction: column;
 +  min-inline-size: 0;
-+  padding: 14px 14px 0;
++  padding: 20px 14px 0;
 +}
 +
 +.hilal-panel-header {
@@ -869,7 +883,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
  .wrapper {
    display: grid;
    grid-template-rows: auto min-content min-content;
-@@ -185,3 +701,24 @@
+@@ -185,3 +715,24 @@
  .bottom-actions {
    align-self: end;
  }
