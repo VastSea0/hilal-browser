@@ -1678,7 +1678,20 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
      }
    },
  
-@@ -2969,4 +3211,39 @@ var HilalCompactMode = {
+@@ -2960,6 +3202,12 @@ var HilalCompactMode = {
+     this._mouseLeaveTimer = setTimeout(() => {
+       this._mouseLeaveTimer = null;
+       this._hideSidebar();
++      // If the toolbar is also visible, hide it in the same callback so both
++      // animate out in the same frame and do not stagger visually.
++      if (this._toolboxVisible) {
++        this._cancelToolboxHide();
++        this._hideToolbox();
++      }
+     }, this._leaveDelayMs);
+   },
+ 
+@@ -2969,4 +3217,45 @@ var HilalCompactMode = {
        this._mouseLeaveTimer = null;
      }
    },
@@ -1708,6 +1721,12 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +    this._toolboxLeaveTimer = setTimeout(() => {
 +      this._toolboxLeaveTimer = null;
 +      this._hideToolbox();
++      // If the sidebar is also visible, hide it in the same callback so both
++      // animate out in the same frame and do not stagger visually.
++      if (this._sidebarVisible) {
++        this._cancelHide();
++        this._hideSidebar();
++      }
 +    }, this._leaveDelayMs);
 +  },
 +

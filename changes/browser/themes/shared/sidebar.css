@@ -707,8 +707,9 @@ sidebar-main,
   border: none !important;
   padding: 0 !important;
 
-  /* Slide out of screen and hide by default relative to its own natural height */
-  overflow: visible !important;
+  /* overflow:hidden clips URL bar icons and text that would otherwise bleed
+   * outside the sliding toolbox bounds during the hide animation. */
+  overflow: hidden !important;
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
@@ -727,6 +728,8 @@ sidebar-main,
   visibility: visible !important;
   pointer-events: auto !important;
   transform: translate3d(0, 0, 0) !important;
+  /* Restore visible overflow when shown so URL bar autocomplete dropdowns appear */
+  overflow: visible !important;
 
   /* Premium aesthetic: unified floating glassmorphism card */
   color-scheme: light dark !important;
@@ -753,6 +756,33 @@ sidebar-main,
   background: transparent !important;
   box-shadow: none !important;
   border: none !important;
+}
+
+/* When both the sidebar and the toolbar float into view at the same time, they
+ * overlap in the top corner where the macOS traffic lights live. Offset the
+ * sidebar top downward so it starts below the visible toolbar. The 64px value
+ * covers the ~28px titlebar + ~36px nav-bar height that the floating card
+ * occupies when visible. The `top` transition matches the sidebar show curve. */
+:root[hilal-compact-sidebar]:has(#navigator-toolbox.hilal-compact-visible) #sidebar-main:not([sidebar-positionend]).hilal-compact-visible {
+  top: 64px !important;
+  border-radius: 0 16px 16px 0 !important;
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease-out,
+    visibility 0s 0s,
+    top 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    border-radius 0.3s ease !important;
+}
+
+:root[hilal-compact-sidebar]:has(#navigator-toolbox.hilal-compact-visible) #sidebar-main[sidebar-positionend].hilal-compact-visible {
+  top: 64px !important;
+  border-radius: 16px 0 0 16px !important;
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease-out,
+    visibility 0s 0s,
+    top 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    border-radius 0.3s ease !important;
 }
 
 /* Hilal Workspace Vertical Tabs Styling Overrides */
