@@ -643,30 +643,31 @@ sidebar-main,
   min-width: 280px !important;
   max-width: 280px !important;
   height: 100% !important;
-  background-color: var(--hilal-sidebar-background, var(--sidebar-background-color, #1e1e2e)) !important;
+  background-color: light-dark(rgba(255, 255, 255, 0.72), rgba(28, 28, 30, 0.72)) !important;
+  backdrop-filter: blur(20px) saturate(190%) !important;
   box-shadow:
-    4px 0 32px 0 rgba(0, 0, 0, 0.35),
-    0 4px 16px 0 rgba(0, 0, 0, 0.25) !important;
+    4px 0 32px 0 rgba(0, 0, 0, 0.15),
+    0 4px 16px 0 rgba(0, 0, 0, 0.1) !important;
   border-radius: 0 16px 16px 0 !important;
-  border-inline-end: 1px solid var(--hilal-sidebar-border, rgba(255, 255, 255, 0.1)) !important;
+  border-inline-end: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08)) !important;
   border-inline-start: none !important;
   margin: 0 !important;
   padding: 0 !important;
+  transition: border-radius 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-/* Push left sidebar content down to leave space for the traffic lights at the top-left of the window */
+/* Push left sidebar content down via custom property to leave space for the traffic lights at the top-left of the window */
 :root[hilal-compact-sidebar] #sidebar-main:not([sidebar-positionend]) sidebar-main,
 :root[hilal-compact-sidebar] #sidebar-main:not([sidebar-positionend]) html\:sidebar-main {
-  padding-top: 38px !important;
-  box-sizing: border-box !important;
+  --hilal-sidebar-top-padding: 44px !important;
 }
 
 /* Custom styling for compact workspace-only sidebar (vertical tabs closed) */
 :root[hilal-compact-sidebar] sidebar-main:not([vertical-tabs]),
 :root[hilal-compact-sidebar] html\:sidebar-main:not([vertical-tabs]) {
-  width: 52px !important;
-  min-width: 52px !important;
-  max-width: 52px !important;
+  width: 68px !important;
+  min-width: 68px !important;
+  max-width: 68px !important;
 }
 
 /* Round left corners instead if sidebar is on the right side */
@@ -773,13 +774,14 @@ sidebar-main,
 
   /* Premium aesthetic: unified floating glassmorphism card */
   color-scheme: light dark !important;
-  background-color: var(--hilal-sidebar-background, var(--sidebar-background-color, light-dark(rgba(255, 255, 255, 0.85), rgba(30, 30, 46, 0.85)))) !important;
-  backdrop-filter: blur(20px) !important;
+  background-color: light-dark(rgba(255, 255, 255, 0.72), rgba(28, 28, 30, 0.72)) !important;
+  background-image: none !important;
+  backdrop-filter: blur(20px) saturate(190%) !important;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 2px 12px rgba(0, 0, 0, 0.2) !important;
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    0 2px 12px rgba(0, 0, 0, 0.1) !important;
   border-radius: 0 0 16px 16px !important;
-  border: 1px solid var(--sidebar-border-color, var(--hilal-sidebar-border, light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.1)))) !important;
+  border: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08)) !important;
   border-top: none !important;
 
   transition:
@@ -800,7 +802,7 @@ sidebar-main,
 
 /* Sidebar width token used for toolbar offset calculations below. */
 :root[hilal-compact-sidebar] {
-  --hilal-compact-sidebar-width: 52px;
+  --hilal-compact-sidebar-width: 68px;
 }
 :root[hilal-compact-sidebar]:has(sidebar-main[vertical-tabs]) {
   --hilal-compact-sidebar-width: 280px;
@@ -890,7 +892,7 @@ sidebar-main,
  * pushed/shifted to the right by #nav-bar's padding-inline-start. */
 :root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #nav-bar > .titlebar-buttonbox-container {
   position: absolute !important;
-  left: 12px !important;
+  left: 0px !important;
   top: 0 !important;
   height: 100% !important;
   display: flex !important;
@@ -925,6 +927,16 @@ sidebar-main,
     visibility 0s 0s !important;
 }
 
+:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible):has(#navigator-toolbox.hilal-compact-visible) #sidebar-main:not([sidebar-positionend]) sidebar-main,
+:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible):has(#navigator-toolbox.hilal-compact-visible) #sidebar-main:not([sidebar-positionend]) html\:sidebar-main {
+  border-radius: 0 0 16px 0 !important;
+}
+
+:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox.hilal-compact-visible {
+  border-radius: 0 0 16px 0 !important;
+  border-left: none !important;
+}
+
 /* Right sidebar: narrow toolbar's right side so it doesn't overlap the sidebar. */
 :root[hilal-compact-sidebar]:has(#sidebar-main[sidebar-positionend].hilal-compact-visible) #navigator-toolbox.hilal-compact-visible {
   width: calc(100vw - var(--hilal-compact-sidebar-width) - 24px) !important;
@@ -933,9 +945,6 @@ sidebar-main,
 :root[hilal-compact-sidebar]:has(#sidebar-main[sidebar-positionend].hilal-compact-visible):has(#navigator-toolbox.hilal-compact-visible) #sidebar-main[sidebar-positionend].hilal-compact-visible {
   z-index: 1002 !important;
 }
-
-
-
 
 
 

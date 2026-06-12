@@ -346,7 +346,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
 --- a/browser/components/sidebar/sidebar-main.css
 +++ b/browser/components/sidebar/sidebar-main.css
-@@ -17,6 +17,521 @@
+@@ -17,6 +17,522 @@
    width: 100%;
  }
  
@@ -387,6 +387,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +  display: flex;
 +  inline-size: 100%;
 +  overflow: hidden;
++  padding-block-start: var(--hilal-sidebar-top-padding, 0px);
 +}
 +
 +.hilal-workspace-rail {
@@ -868,7 +869,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
  .wrapper {
    display: grid;
    grid-template-rows: auto min-content min-content;
-@@ -185,3 +700,24 @@
+@@ -185,3 +701,24 @@
  .bottom-actions {
    align-self: end;
  }
