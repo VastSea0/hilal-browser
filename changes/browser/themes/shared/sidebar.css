@@ -727,7 +727,33 @@ sidebar-main,
     visibility 0s 0.3s !important;
 }
 
-/* Compact Top Toolbar Visible state */
+/* The URL bar (.urlbar / #urlbar) in Nova-mode Firefox is a <panel popover>
+ * rendered in the browser's top layer. Top-layer elements are completely immune
+ * to ancestor transform, clip-path, overflow and opacity — they always render at
+ * their layout position regardless of what the parent does. `clip-path: inset(0)`
+ * and `overflow: hidden` on the toolbox therefore have no effect on the URL bar.
+ *
+ * The fix: target #nav-bar and .urlbar directly so their opacity is forced to 0
+ * while the toolbox is in its hidden state. The 0.15s duration is intentionally
+ * shorter than the toolbox's 0.3s slide so the content fully fades out before
+ * the toolbox finishes moving, eliminating any ghost-content frame. */
+:root[hilal-compact-mode][hilal-compact-hide-toolbox] #navigator-toolbox:not(.hilal-compact-visible) #nav-bar {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.15s ease-out !important;
+}
+
+:root[hilal-compact-mode][hilal-compact-hide-toolbox] #navigator-toolbox:not(.hilal-compact-visible) .urlbar,
+:root[hilal-compact-mode][hilal-compact-hide-toolbox] #navigator-toolbox:not(.hilal-compact-visible) #urlbar-container {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition:
+    opacity 0.15s ease-out,
+    visibility 0s 0.15s !important;
+}
+
+
 :root[hilal-compact-mode][hilal-compact-hide-toolbox] #navigator-toolbox.hilal-compact-visible {
   opacity: 1 !important;
   visibility: visible !important;
