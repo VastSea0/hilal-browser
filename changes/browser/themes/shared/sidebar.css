@@ -772,10 +772,26 @@ sidebar-main,
   transform: translateY(-0.5px) !important;
 }
 
+#sidebar-main[hilal-sidebar] .tabbrowser-tab .tab-stack {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+}
+
 #sidebar-main[hilal-sidebar] .tabbrowser-tab .tab-background {
   border-radius: 8px !important;
   border: 1px solid transparent !important;
-  margin-inline: 0 !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease !important;
