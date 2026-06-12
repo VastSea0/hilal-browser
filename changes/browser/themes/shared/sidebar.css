@@ -878,6 +878,7 @@ sidebar-main,
 #sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tab-stack {
   width: 100% !important;
   height: 100% !important;
+  position: relative !important;
 }
 
 #sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tab-content {
@@ -917,11 +918,17 @@ sidebar-main,
 
 #sidebar-main[hilal-sidebar] #pinned-tabs-container[orient="vertical"] .tabbrowser-tab .tab-background {
   border-radius: 8px !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
   height: 100% !important;
   min-height: 100% !important;
   max-height: 100% !important;
-  margin-block: 0 !important;
-  margin-inline: 0 !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* Unified Split View tab groupings outline */
