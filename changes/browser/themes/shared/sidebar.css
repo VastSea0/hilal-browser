@@ -659,8 +659,8 @@ sidebar-main,
 /* Push left sidebar content down via custom property to leave space for the traffic lights at the top-left of the window */
 :root[hilal-compact-sidebar] #sidebar-main:not([sidebar-positionend]) sidebar-main,
 :root[hilal-compact-sidebar] #sidebar-main:not([sidebar-positionend]) html\:sidebar-main {
-  --hilal-sidebar-top-padding: 38px !important;
-  --hilal-sidebar-top-padding-inner: 10px !important;
+  --hilal-sidebar-top-padding: 40px !important;
+  --hilal-sidebar-top-padding-inner: 6px !important;
   --hilal-sidebar-top-border: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08)) !important;
 }
 
@@ -681,6 +681,9 @@ sidebar-main,
   box-shadow:
     -4px 0 32px 0 rgba(0, 0, 0, 0.35),
     0 4px 16px 0 rgba(0, 0, 0, 0.25) !important;
+  --hilal-sidebar-top-padding: 40px !important;
+  --hilal-sidebar-top-padding-inner: 6px !important;
+  --hilal-sidebar-top-border: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08)) !important;
 }
 
 :root[hilal-compact-sidebar] #sidebar-launcher-splitter,
@@ -738,6 +741,8 @@ sidebar-main,
   top: 0 !important;
   left: 0 !important;
   width: 100vw !important;
+  height: 40px !important;
+  box-sizing: border-box !important;
   
   /* Traditional toolbar background but glassmorphic */
   color-scheme: light dark !important;
@@ -774,43 +779,45 @@ sidebar-main,
 /* Keep macOS traffic lights absolutely positioned at the top left
    so they ignore the padding-inline-start of #nav-bar */
 :root[hilal-compact-mode] .titlebar-buttonbox-container {
-  position: fixed !important;
+  position: absolute !important;
   left: 12px !important;
   top: 0 !important;
-  height: 38px !important;
+  height: 40px !important;
   display: flex !important;
   align-items: center !important;
   z-index: 1003 !important;
+  
+  will-change: transform, left, opacity;
+  transition:
+    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    left 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.3s ease-out !important;
 }
 
 /* Default hidden state for traffic lights in compact mode */
-:root[hilal-compact-mode][hilal-compact-hide-toolbox] .titlebar-buttonbox-container {
-  transform: translate3d(0, -100%, 0) !important;
+:root[hilal-compact-mode][hilal-compact-hide-toolbox]:not(:has(#navigator-toolbox.hilal-compact-visible)):not(:has(#sidebar-main.hilal-compact-visible)) .titlebar-buttonbox-container {
+  transform: translate3d(0, 0, 0) !important;
   opacity: 0 !important;
   pointer-events: none !important;
-  transition:
-    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-    opacity 0.2s ease-out !important;
 }
 
-/* Show traffic lights when the top toolbar is visible */
+/* When the top toolbar is hidden but the compact sidebar is visible, apply inverse translation to keep lights on screen */
+:root[hilal-compact-mode][hilal-compact-hide-toolbox]:has(#sidebar-main.hilal-compact-visible):not(:has(#navigator-toolbox.hilal-compact-visible)) .titlebar-buttonbox-container {
+  transform: translate3d(0, 100%, 0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* When the top toolbar is visible, restore standard translation */
 :root[hilal-compact-mode][hilal-compact-hide-toolbox]:has(#navigator-toolbox.hilal-compact-visible) .titlebar-buttonbox-container {
   transform: translate3d(0, 0, 0) !important;
   opacity: 1 !important;
   pointer-events: auto !important;
-  transition:
-    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 0.3s ease-out !important;
 }
 
-/* Show traffic lights when the compact sidebar is visible */
-:root[hilal-compact-mode][hilal-compact-hide-toolbox]:has(#sidebar-main.hilal-compact-visible) .titlebar-buttonbox-container {
-  transform: translate3d(0, 0, 0) !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  transition:
-    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 0.3s ease-out !important;
+/* Dynamic offset to keep traffic lights fixed on the left of the window when the sidebar shifts #nav-bar to the right */
+:root[hilal-compact-mode][hilal-compact-hide-toolbox][hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) .titlebar-buttonbox-container {
+  left: calc(12px - var(--hilal-compact-sidebar-width)) !important;
 }
 
 /* Visible state when hovering the toolbox */
