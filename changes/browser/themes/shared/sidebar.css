@@ -659,7 +659,8 @@ sidebar-main,
 /* Push left sidebar content down via custom property to leave space for the traffic lights at the top-left of the window */
 :root[hilal-compact-sidebar] #sidebar-main:not([sidebar-positionend]) sidebar-main,
 :root[hilal-compact-sidebar] #sidebar-main:not([sidebar-positionend]) html\:sidebar-main {
-  --hilal-sidebar-top-padding: 44px !important;
+  --hilal-sidebar-top-padding: 38px !important;
+  --hilal-sidebar-top-padding-inner: 10px !important;
   --hilal-sidebar-top-border: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08)) !important;
 }
 
@@ -773,10 +774,10 @@ sidebar-main,
 /* Keep macOS traffic lights absolutely positioned at the top left
    so they ignore the padding-inline-start of #nav-bar */
 :root[hilal-compact-mode] .titlebar-buttonbox-container {
-  position: absolute !important;
+  position: fixed !important;
   left: 12px !important;
   top: 0 !important;
-  height: 100% !important;
+  height: 38px !important;
   display: flex !important;
   align-items: center !important;
   z-index: 1003 !important;

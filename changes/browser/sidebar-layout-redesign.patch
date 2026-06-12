@@ -414,7 +414,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +  flex-direction: column;
 +  gap: 8px;
 +  min-inline-size: 68px;
-+  padding: 20px 8px 10px 8px;
++  padding: var(--hilal-sidebar-top-padding-inner, 20px) 8px 10px 8px;
 +}
 +
 +.hilal-workspace-list {
@@ -516,7 +516,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +  flex: 1 1 auto;
 +  flex-direction: column;
 +  min-inline-size: 0;
-+  padding: 20px 14px 0;
++  padding: var(--hilal-sidebar-top-padding-inner, 20px) 14px 0;
 +}
 +
 +.hilal-panel-header {
