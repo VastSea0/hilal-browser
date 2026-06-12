@@ -791,32 +791,31 @@ sidebar-main,
   border: none !important;
 }
 
-/* When both the sidebar and the toolbar float into view at the same time, they
- * overlap in the top corner where the macOS traffic lights live. Offset the
- * sidebar top downward so it starts below the visible toolbar. The 64px value
- * covers the ~28px titlebar + ~36px nav-bar height that the floating card
- * occupies when visible. The `top` transition matches the sidebar show curve. */
-:root[hilal-compact-sidebar]:has(#navigator-toolbox.hilal-compact-visible) #sidebar-main:not([sidebar-positionend]).hilal-compact-visible {
-  top: 64px !important;
-  border-radius: 0 16px 16px 0 !important;
-  transition:
-    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 0.3s ease-out,
-    visibility 0s 0s,
-    top 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-    border-radius 0.3s ease !important;
+/* Sidebar width token used for toolbar offset calculations below. */
+:root[hilal-compact-sidebar] {
+  --hilal-compact-sidebar-width: 52px;
+}
+:root[hilal-compact-sidebar]:has(sidebar-main[vertical-tabs]) {
+  --hilal-compact-sidebar-width: 280px;
 }
 
-:root[hilal-compact-sidebar]:has(#navigator-toolbox.hilal-compact-visible) #sidebar-main[sidebar-positionend].hilal-compact-visible {
-  top: 64px !important;
-  border-radius: 16px 0 0 16px !important;
-  transition:
-    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 0.3s ease-out,
-    visibility 0s 0s,
-    top 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-    border-radius 0.3s ease !important;
+/* When the compact sidebar (left side) and the compact toolbar are both visible
+ * at the same time, shift the toolbar's left edge to start after the sidebar so
+ * they never overlap. The macOS traffic lights are OS-rendered and will appear
+ * naturally at the top of the sidebar card — no need to push the sidebar down.
+ *
+ * The 12px right margin from the base toolbox rule is preserved on the right. */
+:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox.hilal-compact-visible {
+  left: calc(var(--hilal-compact-sidebar-width) + 12px) !important;
+  width: calc(100vw - var(--hilal-compact-sidebar-width) - 24px) !important;
 }
+
+/* Right sidebar: narrow the toolbar from the right side instead. */
+:root[hilal-compact-sidebar]:has(#sidebar-main[sidebar-positionend].hilal-compact-visible) #navigator-toolbox.hilal-compact-visible {
+  width: calc(100vw - var(--hilal-compact-sidebar-width) - 24px) !important;
+}
+
+
 
 /* Hilal Workspace Vertical Tabs Styling Overrides */
 #sidebar-main[hilal-sidebar] .tabbrowser-tab {
