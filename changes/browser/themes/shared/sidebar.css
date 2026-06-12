@@ -707,9 +707,14 @@ sidebar-main,
   border: none !important;
   padding: 0 !important;
 
-  /* overflow:hidden clips URL bar icons and text that would otherwise bleed
-   * outside the sliding toolbox bounds during the hide animation. */
+  /* The URL bar has `will-change: translate` which promotes it to its own GPU
+   * compositing layer. `overflow:hidden` alone cannot clip promoted child layers
+   * at the compositor level — the URL bar content would linger on screen after the
+   * toolbox starts sliding. `clip-path: inset(0)` creates a compositor-level mask
+   * that correctly clips ALL child layers (including the URL bar's promoted layer)
+   * so text and icons disappear in sync with the toolbox slide animation. */
   overflow: hidden !important;
+  clip-path: inset(0) !important;
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
@@ -728,7 +733,9 @@ sidebar-main,
   visibility: visible !important;
   pointer-events: auto !important;
   transform: translate3d(0, 0, 0) !important;
-  /* Restore visible overflow when shown so URL bar autocomplete dropdowns appear */
+  /* Remove clip-path and restore visible overflow so URL bar autocomplete
+   * dropdowns and other popovers that extend below the toolbox are not cut off. */
+  clip-path: none !important;
   overflow: visible !important;
 
   /* Premium aesthetic: unified floating glassmorphism card */
