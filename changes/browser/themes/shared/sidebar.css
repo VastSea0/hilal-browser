@@ -810,10 +810,36 @@ sidebar-main,
   width: calc(100vw - var(--hilal-compact-sidebar-width) - 24px) !important;
 }
 
+/* Detach #titlebar from the shifted toolbar and anchor it back at the window's
+ * left edge so the macOS traffic lights appear inside the sidebar card.
+ * #titlebar on macOS is transparent — only the native AppKit NSView traffic
+ * light buttons are visible. position:absolute removes it from the flex flow so
+ * #nav-bar starts cleanly at the toolbar card's left edge. The toolbox is
+ * overflow:visible when shown, so the element can paint to the left of the card. */
+:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox.hilal-compact-visible #titlebar {
+  position: absolute !important;
+  inset-inline-start: calc(-1 * (var(--hilal-compact-sidebar-width) + 12px)) !important;
+  inset-block-start: 0 !important;
+  width: var(--hilal-compact-sidebar-width) !important;
+  height: 100% !important;
+  background: transparent !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+/* Allow the native traffic light buttons to receive clicks even though
+ * #titlebar itself has pointer-events:none. The .titlebar-buttonbox-container
+ * wraps the native NSView and must remain interactive. */
+:root[hilal-compact-sidebar]:has(#sidebar-main:not([sidebar-positionend]).hilal-compact-visible) #navigator-toolbox.hilal-compact-visible .titlebar-buttonbox-container {
+  pointer-events: auto !important;
+}
+
 /* Right sidebar: narrow the toolbar from the right side instead. */
 :root[hilal-compact-sidebar]:has(#sidebar-main[sidebar-positionend].hilal-compact-visible) #navigator-toolbox.hilal-compact-visible {
   width: calc(100vw - var(--hilal-compact-sidebar-width) - 24px) !important;
 }
+
+
 
 
 
