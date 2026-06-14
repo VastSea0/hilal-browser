@@ -745,7 +745,7 @@ sidebar-main,
   
   /* Traditional toolbar background but glassmorphic */
   color-scheme: light dark !important;
-  background-color: light-dark(rgba(255, 255, 255, 0.72), rgba(28, 28, 30, 0.72)) !important;
+  background-color: light-dark(rgba(255, 255, 255, 0.94), rgba(28, 28, 30, 0.94)) !important;
   background-image: none !important;
   box-shadow: 0 1px 0 rgba(0,0,0,0.1) !important;
   

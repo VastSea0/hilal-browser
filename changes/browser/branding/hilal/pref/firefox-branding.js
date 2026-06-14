@@ -43,6 +43,8 @@ pref("hilal.browser.transparent-chrome.enabled", true);
 pref("browser.tabs.allow_transparent_browser", true);
 pref("widget.macos.sidebar-blend-mode.behind-window", true);
 pref("widget.macos.titlebar-blend-mode.behind-window", true);
+pref("gfx.webrender.opaque-backdrop-fallback", false);
+
 
 // Privacy-first Hilal defaults, informed by Betterfox and arkenfox.
 // These are default prefs rather than locked prefs, so users can still opt in.
