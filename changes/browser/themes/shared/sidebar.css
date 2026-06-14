@@ -639,9 +639,9 @@ sidebar-main,
 :root[hilal-compact-sidebar] sidebar-main,
 :root[hilal-compact-sidebar] html\:sidebar-main {
   display: block !important;
-  width: 280px !important;
-  min-width: 280px !important;
-  max-width: 280px !important;
+  width: var(--hilal-compact-sidebar-width, 280px) !important;
+  min-width: var(--hilal-compact-sidebar-width, 280px) !important;
+  max-width: var(--hilal-compact-sidebar-width, 280px) !important;
   height: calc(100% - 2 * var(--hilal-safari-window-gap, 8px)) !important;
   background-color: var(--hilal-safari-sidebar-bg) !important;
   background-image: linear-gradient(180deg, var(--hilal-safari-sidebar-bg-strong), transparent 48%) !important;
@@ -654,6 +654,13 @@ sidebar-main,
   margin: var(--hilal-safari-window-gap, 8px) !important;
   padding: 0 !important;
   transition: border-radius 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+/* Explicitly style the light DOM vertical-tabs box inside #sidebar-main to match the compact width */
+:root[hilal-compact-sidebar] #sidebar-main[vertical-tabs] #vertical-tabs {
+  width: var(--hilal-compact-sidebar-width, 280px) !important;
+  min-width: var(--hilal-compact-sidebar-width, 280px) !important;
+  max-width: var(--hilal-compact-sidebar-width, 280px) !important;
 }
 
 /* Push left sidebar content down via custom property to leave space for the traffic lights at the top-left of the window */
