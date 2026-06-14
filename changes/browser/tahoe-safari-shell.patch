@@ -447,7 +447,7 @@ diff --git a/browser/components/sidebar/SidebarManager.sys.mjs b/browser/compone
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
-@@ -574,6 +574,31 @@ var SidebarController = {
+@@ -574,6 +574,48 @@ var SidebarController = {
      }
  
      HilalCompactMode.init();
@@ -476,10 +476,27 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      this.updateTahoeOffsets();
 +    };
 +    window.gBrowser.tabContainer.addEventListener("TabSelect", this._tabSelectListener);
++
++    this._tahoeGeometryListener = () => {
++      this.scheduleTahoeGeometryUpdate();
++    };
++    window.addEventListener("resize", this._tahoeGeometryListener);
++    if (typeof ResizeObserver == "function") {
++      this._tahoeGeometryResizeObserver = new ResizeObserver(
++        this._tahoeGeometryListener
++      );
++      for (let id of ["navigator-toolbox", "tabbrowser-tabbox", "sidebar-main"]) {
++        let element = document.getElementById(id);
++        if (element) {
++          this._tahoeGeometryResizeObserver.observe(element);
++        }
++      }
++    }
++    this.scheduleTahoeGeometryUpdate();
    },
  
    uninit() {
-@@ -608,6 +633,11 @@ var SidebarController = {
+@@ -608,6 +650,23 @@ var SidebarController = {
      delete this._aiWindowObserverAdded;
      delete this._windowRestoredObserverAdded;
  
@@ -487,11 +504,23 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      window.gBrowser.tabContainer.removeEventListener("TabSelect", this._tabSelectListener);
 +      this._tabSelectListener = null;
 +    }
++    if (this._tahoeGeometryListener) {
++      window.removeEventListener("resize", this._tahoeGeometryListener);
++      this._tahoeGeometryListener = null;
++    }
++    if (this._tahoeGeometryResizeObserver) {
++      this._tahoeGeometryResizeObserver.disconnect();
++      this._tahoeGeometryResizeObserver = null;
++    }
++    if (this._tahoeGeometryFrame) {
++      cancelAnimationFrame(this._tahoeGeometryFrame);
++      this._tahoeGeometryFrame = 0;
++    }
 +
      CustomizableUI.removeListener(this);
  
      if (this._observer) {
-@@ -2071,6 +2101,7 @@ var SidebarController = {
+@@ -2071,6 +2130,7 @@ var SidebarController = {
        this.updateToolbarButton();
        this.dismissSidebarBadge(commandID);
  
@@ -499,7 +528,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
        this._fireFocusedEvent();
        return true;
      });
-@@ -2095,6 +2126,7 @@ var SidebarController = {
+@@ -2095,6 +2155,7 @@ var SidebarController = {
      }
      return this._show(commandID).then(() => {
        this._loadSidebarExtension(commandID);
@@ -507,7 +536,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
        return true;
      });
    },
-@@ -2278,6 +2310,7 @@ var SidebarController = {
+@@ -2278,6 +2339,7 @@ var SidebarController = {
        updateToggleControlLabel(triggerNode);
      }
      this.updateToolbarButton();
@@ -515,7 +544,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    },
  
    /**
-@@ -2374,7 +2407,9 @@ var SidebarController = {
+@@ -2374,7 +2436,9 @@ var SidebarController = {
    },
  
    toggleTabstrip() {
@@ -526,11 +555,12 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
      let tabStrip = gBrowser.tabContainer;
      let arrowScrollbox = tabStrip.arrowScrollbox;
      let currentScrollOrientation = arrowScrollbox.getAttribute("orient");
-@@ -2414,6 +2449,20 @@ var SidebarController = {
+@@ -2414,6 +2478,47 @@ var SidebarController = {
      }
    },
  
 +  updateTahoeOffsets() {
++    this.scheduleTahoeGeometryUpdate();
 +    let browser = window.gBrowser.selectedBrowser;
 +    if (browser && browser.browsingContext) {
 +      try {
@@ -542,6 +572,32 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +        // Ignore "doesn't match remote type" errors
 +      }
 +    }
++  },
++
++  scheduleTahoeGeometryUpdate() {
++    if (this._tahoeGeometryFrame) {
++      return;
++    }
++    this._tahoeGeometryFrame = requestAnimationFrame(() => {
++      this._tahoeGeometryFrame = 0;
++      this.updateTahoeGeometry();
++    });
++  },
++
++  updateTahoeGeometry() {
++    let tabbox = document.getElementById("tabbrowser-tabbox");
++    if (!tabbox) {
++      return;
++    }
++
++    let rect = tabbox.getBoundingClientRect();
++    let top = Math.max(0, Math.round(rect.top));
++    let bottom = Math.max(0, Math.round(window.innerHeight - rect.bottom));
++    let height = Math.max(0, Math.round(rect.height));
++    let docEl = document.documentElement;
++    docEl.style.setProperty("--hilal-safari-content-top", `${top}px`);
++    docEl.style.setProperty("--hilal-safari-content-bottom", `${bottom}px`);
++    docEl.style.setProperty("--hilal-safari-content-height", `${height}px`);
 +  },
 +
    debouncedMouseEnter() {
@@ -732,11 +788,11 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +  /* Safari header layout */
 +  .safari-sidebar-header {
 +    display: flex;
-+    align-items: center;
++    align-items: flex-start;
 +    justify-content: flex-end;
-+    padding-inline: 88px 18px;
-+    height: 76px;
-+    min-height: 76px;
++    padding: 18px 18px 0 88px;
++    height: 58px;
++    min-height: 58px;
 +    box-sizing: border-box;
 +  }
 +
@@ -754,9 +810,9 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +    display: flex;
 +    align-items: center;
 +    justify-content: center;
-+    width: 28px;
-+    height: 28px;
-+    border-radius: 6px;
++    width: 34px;
++    height: 34px;
++    border-radius: 9px;
 +    padding: 0;
 +    transition:
 +      background-color 0.15s ease,
@@ -769,8 +825,8 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +  }
 +
 +  .safari-icon-button svg {
-+    width: 16px;
-+    height: 16px;
++    width: 18px;
++    height: 18px;
 +  }
 +
 +  /* Layout and scroll panel */
