@@ -222,8 +222,8 @@
         linear-gradient(
           90deg,
           var(--hilal-safari-page-bg) 0,
-          var(--hilal-safari-page-bg) calc(var(--hilal-safari-sidebar-width) + var(--hilal-safari-window-gap)),
-          transparent calc(var(--hilal-safari-sidebar-width) + var(--hilal-safari-window-gap))
+          var(--hilal-safari-page-bg) var(--hilal-safari-sidebar-width),
+          transparent var(--hilal-safari-sidebar-width)
         ),
         var(--hilal-tahoe-window-tint);
     }
@@ -562,10 +562,12 @@
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabbox {
-      margin: 0 10px 10px var(--hilal-safari-window-gap) !important;
-      border-radius: 22px !important;
-      border-inline-start: 1px solid var(--hilal-safari-separator) !important;
-      border-color: var(--hilal-safari-separator) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 0 0 22px 0 !important;
+      outline: 0 !important;
+      background-color: var(--hilal-safari-page-bg) !important;
       box-shadow: none !important;
     }
 
