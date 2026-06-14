@@ -55,7 +55,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
 --- a/browser/components/sidebar/sidebar-main.css
 +++ b/browser/components/sidebar/sidebar-main.css
-@@ -547,6 +547,172 @@
+@@ -547,6 +547,415 @@
    text-align: start;
  }
  
@@ -216,11 +216,254 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +  }
 +
 +  #hilal-tabs-section {
-+    min-height: 240px;
++    min-height: unset !important;
 +  }
 +
 +  .hilal-tabstrip-container {
 +    gap: 2px;
++  }
++
++  /* Safari header layout */
++  .safari-sidebar-header {
++    display: flex;
++    align-items: center;
++    justify-content: flex-end;
++    padding-inline: 16px;
++    height: 52px;
++    min-height: 52px;
++    box-sizing: border-box;
++  }
++
++  .safari-header-buttons {
++    display: flex;
++    align-items: center;
++    gap: 12px;
++  }
++
++  .safari-icon-button {
++    background: transparent;
++    border: none;
++    color: var(--hilal-sidebar-muted);
++    cursor: pointer;
++    display: flex;
++    align-items: center;
++    justify-content: center;
++    width: 28px;
++    height: 28px;
++    border-radius: 6px;
++    padding: 0;
++    transition: background-color 0.15s ease, color 0.15s ease;
++  }
++
++  .safari-icon-button:hover {
++    background-color: var(--hilal-sidebar-hover);
++    color: var(--sidebar-text-color);
++  }
++
++  .safari-icon-button svg {
++    width: 16px;
++    height: 16px;
++  }
++
++  /* Layout and scroll panel */
++  .safari-sidebar-layout {
++    display: flex;
++    flex-direction: column;
++    height: 100%;
++    box-sizing: border-box;
++    padding-block-start: 12px !important;
++  }
++
++  .safari-panel {
++    flex: 1 1 auto;
++    display: flex;
++    flex-direction: column;
++    min-height: 0;
++    padding: 0 16px 0 16px !important;
++  }
++
++  .safari-scroll {
++    flex: 1 1 auto;
++    overflow-y: auto;
++    scrollbar-width: none;
++    padding-block-end: 24px;
++  }
++
++  .safari-scroll::-webkit-scrollbar {
++    display: none;
++  }
++
++  /* Section heading buttons (collapsible Tabs section) */
++  .safari-section-heading-btn {
++    background: transparent;
++    border: none;
++    color: var(--hilal-sidebar-muted);
++    font: inherit;
++    font-size: 13px;
++    font-weight: 700;
++    display: flex;
++    align-items: center;
++    gap: 8px;
++    padding: 6px 0;
++    width: 100%;
++    cursor: pointer;
++    text-align: start;
++    user-select: none;
++  }
++
++  .safari-section-heading-btn:hover {
++    color: var(--sidebar-text-color);
++  }
++
++  .safari-chevron {
++    transition: transform 0.2s ease;
++    transform: rotate(0deg);
++    opacity: 0.7;
++    margin-inline-start: 2px;
++  }
++
++  .safari-chevron-collapsed {
++    transform: rotate(-90deg);
++  }
++
++  .safari-heading-icon {
++    width: 16px;
++    height: 16px;
++    opacity: 0.85;
++  }
++
++  .safari-heading-text {
++    flex: 1 1 auto;
++  }
++
++  /* Section headers like Tab Groups / Saved */
++  .safari-section {
++    margin-block-end: 20px;
++    display: flex;
++    flex-direction: column;
++    gap: 4px;
++  }
++
++  .safari-section-heading {
++    display: flex;
++    align-items: center;
++    justify-content: space-between;
++    height: 28px;
++    padding-inline: 4px;
++    color: var(--hilal-sidebar-muted);
++    font-size: 11px;
++    font-weight: 700;
++    text-transform: uppercase;
++    letter-spacing: 0.5px;
++    user-select: none;
++  }
++
++  .safari-heading-title {
++    flex: 1 1 auto;
++  }
++
++  .safari-section-add-btn {
++    background: transparent;
++    border: none;
++    color: inherit;
++    cursor: pointer;
++    display: flex;
++    align-items: center;
++    justify-content: center;
++    width: 20px;
++    height: 20px;
++    border-radius: 4px;
++    padding: 0;
++    opacity: 0;
++    transition: opacity 0.15s ease, background-color 0.15s ease;
++  }
++
++  .safari-section:hover .safari-section-add-btn {
++    opacity: 1;
++  }
++
++  .safari-section-add-btn:hover {
++    background-color: var(--hilal-sidebar-hover);
++    color: var(--sidebar-text-color);
++  }
++
++  /* Safari Rows List & Items */
++  .safari-row-list {
++    display: flex;
++    flex-direction: column;
++    gap: 2px;
++  }
++
++  .safari-row {
++    background: transparent;
++    border: none;
++    color: var(--sidebar-text-color);
++    font: inherit;
++    font-size: 13px;
++    font-weight: 500;
++    display: flex;
++    align-items: center;
++    gap: 10px;
++    width: 100%;
++    min-height: 30px;
++    height: 30px;
++    padding-inline: 8px;
++    border-radius: 8px;
++    cursor: pointer;
++    text-align: start;
++    transition: background-color 0.15s ease, color 0.15s ease;
++    user-select: none;
++    box-sizing: border-box;
++  }
++
++  .safari-row:hover {
++    background-color: var(--hilal-sidebar-hover);
++  }
++
++  .safari-row-active {
++    background-color: var(--hilal-sidebar-highlight) !important;
++    font-weight: 600;
++  }
++
++  .safari-row-emoji {
++    font-size: 14px;
++    line-height: 1;
++    display: inline-block;
++    width: 16px;
++    text-align: center;
++  }
++
++  .safari-row-icon {
++    width: 16px;
++    height: 16px;
++    color: var(--hilal-sidebar-muted);
++  }
++
++  .safari-row-active .safari-row-icon {
++    color: var(--sidebar-text-color);
++  }
++
++  .safari-row-title {
++    flex: 1 1 auto;
++    overflow: hidden;
++    text-overflow: ellipsis;
++    white-space: nowrap;
++  }
++
++  .safari-bookmarks-sublist {
++    padding-inline-start: 16px;
++    display: flex;
++    flex-direction: column;
++    gap: 2px;
++    margin-block: 2px;
++  }
++
++  .safari-bookmarks-sublist .hilal-row {
++    font-size: 12.5px;
++    height: 28px;
++    min-height: 28px;
++    padding-inline: 8px;
++    border-radius: 6px;
 +  }
 +}
 +}
@@ -228,6 +471,307 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
  .wrapper {
    display: grid;
    grid-template-rows: auto min-content min-content;
+diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/sidebar/sidebar-main.mjs
+--- a/browser/components/sidebar/sidebar-main.mjs
++++ b/browser/components/sidebar/sidebar-main.mjs
+@@ -55,8 +55,13 @@ export default class SidebarMain extends MozLitElement {
+     hilalFooterPrivacy: { type: Boolean },
+     hilalFooterSettings: { type: Boolean },
+     hilalCustomItems: { type: Array },
++    isTabsExpanded: { type: Boolean },
+   };
+ 
++  get isTahoeEnabled() {
++    return Services.prefs.getBoolPref("hilal.tahoe.enabled", true);
++  }
++
+   static queries = {
+     allButtons: { all: "moz-button" },
+     extensionButtons: { all: ".tools-and-extensions > moz-button[extension]" },
+@@ -110,6 +115,7 @@ export default class SidebarMain extends MozLitElement {
+     };
+     this.shouldShowOverflowButton = false;
+     this.overflowMenuOpen = false;
++    this.isTabsExpanded = true;
+   }
+ 
+   tooltips = {
+@@ -176,6 +182,7 @@ export default class SidebarMain extends MozLitElement {
+     window.addEventListener("SidebarItemRemoved", this);
+ 
+     Services.prefs.addObserver("sidebar.verticalTabs", this._hilalPrefObserver);
++    Services.prefs.addObserver("hilal.tahoe.enabled", this._hilalPrefObserver);
+     Services.prefs.addObserver("hilal.workspaces.", this._hilalPrefObserver);
+     Services.prefs.addObserver(
+       "hilal.sidebar.footer.",
+@@ -210,6 +217,10 @@ export default class SidebarMain extends MozLitElement {
+       "sidebar.verticalTabs",
+       this._hilalPrefObserver
+     );
++    Services.prefs.removeObserver(
++      "hilal.tahoe.enabled",
++      this._hilalPrefObserver
++    );
+     Services.prefs.removeObserver("hilal.workspaces.", this._hilalPrefObserver);
+     Services.prefs.removeObserver(
+       "hilal.sidebar.footer.",
+@@ -361,7 +372,7 @@ export default class SidebarMain extends MozLitElement {
+         } else {
+           this.requestUpdate();
+         }
+-      } else if (data === "hilal.workspaces.enabled") {
++      } else if (data === "hilal.workspaces.enabled" || data === "hilal.tahoe.enabled") {
+         const workspacesEnabled = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
+         const verticalTabsEnabled = Services.prefs.getBoolPref("sidebar.verticalTabs", false);
+         const shouldBeActive = window.gHilalWorkspaces && (workspacesEnabled || verticalTabsEnabled);
+@@ -2018,8 +2029,247 @@ export default class SidebarMain extends MozLitElement {
+     `;
+   }
+ 
++  tahoeSidebarTemplate() {
++    const activeWorkspace = this.activeHilalWorkspace;
++    const workspaceFallback = this.fluentStrings.formatValueSync(
++      "hilal-sidebar-workspace-fallback"
++    );
++    const railLabel = this.fluentStrings.formatValueSync(
++      "hilal-sidebar-workspaces-nav-label"
++    );
++    const panelLabel = this.fluentStrings.formatValueSync(
++      "hilal-sidebar-panel-label"
++    );
++
++    return html`
++      <link
++        rel="stylesheet"
++        href="chrome://browser/content/sidebar/sidebar.css"
++      />
++      <link
++        rel="stylesheet"
++        href="chrome://browser/content/sidebar/sidebar-main.css"
++      />
++      <div class="wrapper" hidden></div>
++      <div class="hilal-sidebar-layout safari-sidebar-layout">
++        <!-- Top Header with buttons matching Safari -->
++        <header class="safari-sidebar-header">
++          <div class="safari-header-buttons">
++            <button
++              class="safari-icon-button safari-grid-button"
++              type="button"
++              title=${this.fluentStrings.formatValueSync("hilal-sidebar-search-button")}
++              @click=${() => this.toggleHilalSearch()}
++            >
++              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
++                <rect x="2" y="3" width="5" height="10" rx="1.2" />
++                <rect x="9" y="3" width="5" height="10" rx="1.2" />
++              </svg>
++            </button>
++            <button
++              class="safari-icon-button safari-toggle-button"
++              type="button"
++              title="Hide Sidebar"
++              @click=${() => window.SidebarController.toggle()}
++            >
++              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
++                <rect x="2" y="2" width="12" height="12" rx="2" />
++                <line x1="6" y1="2" x2="6" y2="14" />
++              </svg>
++            </button>
++          </div>
++        </header>
++
++        ${when(
++          this.hilalSearchOpen,
++          () => html`
++            <input
++              id="hilal-sidebar-search"
++              type="search"
++              data-l10n-id="hilal-sidebar-search-input"
++              .value=${this.hilalSearchQuery}
++              @input=${event => {
++                this.hilalSearchQuery = event.target.value;
++              }}
++            />
++          `
++        )}
++
++        <section class="hilal-sidebar-panel safari-panel" aria-label=${panelLabel}>
++          <div class="hilal-panel-scroll safari-scroll">
++            
++            <!-- Open Tabs / N Tabs Section -->
++            <section class="hilal-section safari-section" id="hilal-tabs-section">
++              <button
++                class="safari-section-heading-btn"
++                type="button"
++                @click=${() => { this.isTabsExpanded = !this.isTabsExpanded; }}
++              >
++                <!-- Arrow / chevron indicator -->
++                <svg
++                  class=${classMap({
++                    "safari-chevron": true,
++                    "safari-chevron-collapsed": !this.isTabsExpanded,
++                  })}
++                  width="10"
++                  height="10"
++                  viewBox="0 0 10 10"
++                  fill="none"
++                  stroke="currentColor"
++                  stroke-width="1.3"
++                  stroke-linecap="round"
++                  stroke-linejoin="round"
++                >
++                  <path d="M2 3l3 3 3-3" />
++                </svg>
++                
++                <!-- Window/Tabs Icon -->
++                <svg class="safari-heading-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
++                  <rect x="2" y="3" width="12" height="10" rx="1.5" />
++                  <line x1="2" y1="6" x2="14" y2="6" />
++                </svg>
++
++                <span class="safari-heading-text">${this.hilalTabs.length} Tabs</span>
++              </button>
++
++              <div class="hilal-tabstrip-container" ?hidden=${!this.isTabsExpanded}>
++                <slot name="tabstrip"></slot>
++              </div>
++            </section>
++
++            <!-- Tab Groups (Workspaces) Section -->
++            <section class="hilal-section safari-section">
++              <div class="safari-section-heading">
++                <span class="safari-heading-title">Tab Groups</span>
++                <button
++                  class="safari-section-add-btn"
++                  type="button"
++                  title="New Tab Group"
++                  @click=${() => this.showHilalCreateWorkspace()}
++                >
++                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
++                    <line x1="8" y1="3" x2="8" y2="13" />
++                    <line x1="3" y1="8" x2="13" y2="8" />
++                  </svg>
++                </button>
++              </div>
++
++              <div class="safari-row-list">
++                ${repeat(
++                  this.hilalWorkspaces,
++                  workspace => workspace.id,
++                  workspace => {
++                    const active = workspace.id === this.hilalActiveId;
++                    return html`
++                      <button
++                        class=${classMap({
++                          "safari-row": true,
++                          "safari-row-active": active,
++                        })}
++                        type="button"
++                        draggable="true"
++                        @click=${() => this.switchHilalWorkspace(workspace)}
++                        @contextmenu=${event => this.showHilalWorkspaceMenu(workspace, event)}
++                        @dragstart=${event => this.handleWorkspaceDragStart(workspace, event)}
++                        @dragend=${event => this.handleWorkspaceDragEnd(event)}
++                        @dragover=${event => this.handleWorkspaceDragOver(workspace, event)}
++                        @dragleave=${event => this.handleWorkspaceDragLeave(event)}
++                        @drop=${event => this.handleWorkspaceDrop(workspace, event)}
++                      >
++                        <!-- Workspace Icon or Emoji -->
++                        ${workspace.emoji
++                          ? html`<span class="safari-row-emoji" aria-hidden="true">${workspace.emoji}</span>`
++                          : html`
++                              <svg class="safari-row-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
++                                <rect x="2" y="4" width="8" height="8" rx="1.5" />
++                                <rect x="5" y="2" width="8" height="8" rx="1.5" />
++                              </svg>
++                            `
++                        }
++                        <span class="safari-row-title">${workspace.name}</span>
++                      </button>
++                    `;
++                  }
++                )}
++              </div>
++            </section>
++
++            <!-- Saved Section -->
++            <section class="hilal-section safari-section">
++              <div class="safari-section-heading">
++                <span class="safari-heading-title">Saved</span>
++              </div>
++
++              <div class="safari-row-list">
++                <!-- Bookmarks Row -->
++                <button
++                  class=${classMap({
++                    "safari-row": true,
++                    "safari-row-active": this.hilalShowBookmarks,
++                  })}
++                  type="button"
++                  @click=${() => {
++                    this.hilalShowBookmarks = !this.hilalShowBookmarks;
++                    Services.prefs.setBoolPref("hilal.workspaces.showBookmarks", this.hilalShowBookmarks);
++                  }}
++                >
++                  <svg class="safari-row-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
++                    <path d="M2 3h4a2 2 0 0 1 2 2v9a2 2 0 0 0-2-2H2z" />
++                    <path d="M14 3h-4a2 2 0 0 0-2 2v9a2 2 0 0 1 2-2h4z" />
++                  </svg>
++                  <span class="safari-row-title">Bookmarks</span>
++                </button>
++
++                <!-- Bookmarks Sub-list if expanded -->
++                ${when(
++                  this.hilalShowBookmarks,
++                  () => html`
++                    <div class="safari-bookmarks-sublist">
++                      ${repeat(
++                        this.filteredHilalBookmarks,
++                        bookmark => bookmark.guid,
++                        bookmark => this.hilalBookmarkTemplate(bookmark)
++                      )}
++                    </div>
++                  `
++                )}
++
++                <!-- Reading List Row -->
++                <button class="safari-row" type="button">
++                  <svg class="safari-row-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
++                    <circle cx="4.5" cy="8.5" r="2.5" />
++                    <circle cx="11.5" cy="8.5" r="2.5" />
++                    <path d="M7 8.5h2" />
++                    <path d="M2 8.5C2 5.5 3 4.5 4 4.5" />
++                    <path d="M14 8.5C14 5.5 13 4.5 12 4.5" />
++                  </svg>
++                  <span class="safari-row-title">Reading List</span>
++                </button>
++
++                <!-- Shared with You Row -->
++                <button class="safari-row" type="button">
++                  <svg class="safari-row-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
++                    <path d="M12 14v-1a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v1" />
++                    <circle cx="6" cy="6" r="3" />
++                    <path d="M14 14v-1a2 2 0 0 0-1.2-1.8" />
++                    <path d="M10 3.1a3 3 0 0 1 0 5.8" />
++                  </svg>
++                  <span class="safari-row-title">Shared with You</span>
++                </button>
++              </div>
++            </section>
++
++          </div>
++        </section>
++      </div>
++    `;
++  }
++
+   render() {
+     if (this.hilalSidebarActive) {
++      if (this.isTahoeEnabled) {
++        return this.tahoeSidebarTemplate();
++      }
+       return this.hilalSidebarTemplate();
+     }
+     /* Add 1 to tools and extensions count for "Customize sidebar" option */
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
