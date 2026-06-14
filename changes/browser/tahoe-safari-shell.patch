@@ -20,42 +20,29 @@ diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
  pref("hilal.uifix.enabled", true);
  // Theme Default Options
  pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
-diff --git a/browser/branding/hilal/pref/firefox-branding.js b/browser/branding/hilal/pref/firefox-branding.js
---- a/browser/branding/hilal/pref/firefox-branding.js
-+++ b/browser/branding/hilal/pref/firefox-branding.js
-@@ -36,6 +36,7 @@ pref("devtools.selfxss.count", 5);
- // Sidebar and vertical tabs are enabled by default in Hilal.
- pref("sidebar.revamp", true);
- pref("sidebar.verticalTabs", true);
-+pref("sidebar.verticalTabs.showHorizontal", false);
- pref("sidebar.visibility", "always-show");
- 
- // Use transparent macOS chrome surfaces for Hilal's Tahoe-style glass look.
-@@ -43,6 +44,8 @@ pref("hilal.browser.transparent-chrome.enabled", true);
- pref("browser.tabs.allow_transparent_browser", true);
- pref("widget.macos.sidebar-blend-mode.behind-window", true);
- pref("widget.macos.titlebar-blend-mode.behind-window", true);
-+pref("gfx.webrender.opaque-backdrop-fallback", false);
-+
- 
- // Privacy-first Hilal defaults, informed by Betterfox and arkenfox.
- // These are default prefs rather than locked prefs, so users can still opt in.
 diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/components/customizableui/CustomizableUI.sys.mjs
 --- a/browser/components/customizableui/CustomizableUI.sys.mjs
 +++ b/browser/components/customizableui/CustomizableUI.sys.mjs
-@@ -37,6 +37,11 @@ const kPrefCustomizationHorizontalTabsBackup =
+@@ -37,6 +37,18 @@ const kPrefCustomizationHorizontalTabsBackup =
    "browser.uiCustomization.horizontalTabsBackup";
  const kPrefCustomizationNavBarWhenVerticalTabs =
    "browser.uiCustomization.navBarWhenVerticalTabs";
-+const kHilalHorizontalTabToolbarWidgets = [
++const kHilalHorizontalTabToolbarWidgets = ["new-tab-button"];
++const kHilalHorizontalTabToolbarExcludedWidgets = [
 +  "firefox-view-button",
++  "alltabs-button",
++];
++const kHilalHorizontalTabstripDefaultPlacements = ["tabbrowser-tabs"];
++const kHilalDefaultTabstripPlacements = [
++  "firefox-view-button",
++  "tabbrowser-tabs",
 +  "new-tab-button",
 +  "alltabs-button",
 +];
  const kPrefCustomizationAutoAdd = "browser.uiCustomization.autoAdd";
  const kPrefCustomizationDebug = "browser.uiCustomization.debug";
  const kPrefDrawInTitlebar = "browser.tabs.inTitlebar";
-@@ -251,6 +256,19 @@ XPCOMUtils.defineLazyPreferenceGetter(
+@@ -251,6 +263,19 @@ XPCOMUtils.defineLazyPreferenceGetter(
    }
  );
  
@@ -75,7 +62,48 @@ diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/
  XPCOMUtils.defineLazyPreferenceGetter(
    lazy,
    "horizontalPlacementsPref",
-@@ -445,6 +463,10 @@ var CustomizableUIInternal = {
+@@ -357,6 +382,9 @@ var CustomizableUIInternal = {
+       false
+     );
+ 
++    let useHilalHorizontalTabsToolbar =
++      Services.prefs.getBoolPref("sidebar.verticalTabs", false) &&
++      Services.prefs.getBoolPref("sidebar.verticalTabs.showHorizontal", false);
+     let navbarPlacements = [
+       lazy.sidebarRevampEnabled ? "sidebar-button" : null,
+       "back-button",
+@@ -375,6 +403,14 @@ var CustomizableUIInternal = {
+       "fxa-toolbar-menu-button",
+       lazy.resetPBMToolbarButtonEnabled ? "reset-pbm-toolbar-button" : null,
+     ].filter(name => name);
++    if (useHilalHorizontalTabsToolbar) {
++      let newTabIndex = navbarPlacements.indexOf("downloads-button");
++      navbarPlacements.splice(
++        newTabIndex >= 0 ? newTabIndex + 1 : navbarPlacements.length,
++        0,
++        "new-tab-button"
++      );
++    }
+ 
+     this.registerArea(
+       CustomizableUI.AREA_NAVBAR,
+@@ -407,12 +443,9 @@ var CustomizableUIInternal = {
+       CustomizableUI.AREA_TABSTRIP,
+       {
+         type: CustomizableUI.TYPE_TOOLBAR,
+-        defaultPlacements: [
+-          "firefox-view-button",
+-          "tabbrowser-tabs",
+-          "new-tab-button",
+-          "alltabs-button",
+-        ],
++        defaultPlacements: useHilalHorizontalTabsToolbar
++          ? kHilalHorizontalTabstripDefaultPlacements
++          : kHilalDefaultTabstripPlacements,
+         verticalTabsDefaultPlacements: [],
+         defaultCollapsed: null,
+       },
+@@ -445,6 +478,11 @@ var CustomizableUIInternal = {
      // we'll enable revamp rather than disable vertical tabs.
      this.reconcileSidebarPrefs(kPrefSidebarVerticalTabsEnabled);
  
@@ -83,10 +111,46 @@ diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/
 +    lazy.verticalTabsPref;
 +    lazy.verticalTabsShowHorizontalPref;
 +
++    this.updateHilalHorizontalTabToolbarDefaults();
      this.initializeForTabsOrientation(CustomizableUI.verticalTabsEnabled);
  
      Services.obs.addObserver(this, "browser-set-toolbar-visibility");
-@@ -5094,14 +5116,19 @@ var CustomizableUIInternal = {
+@@ -4466,10 +4504,17 @@ var CustomizableUIInternal = {
+    */
+   reset() {
+     gResetting = true;
+-    // CUI reset also implies resetting verticalTabs back to false.
+-    // We do this before the rest of the reset so widgets are reset to their non-vertical
+-    // positions.
+-    Services.prefs.setBoolPref("sidebar.verticalTabs", false);
++    if (Services.prefs.getBoolPref("hilal.tahoe.enabled", true)) {
++      Services.prefs.setStringPref("sidebar.visibility", "hide-sidebar");
++      Services.prefs.setBoolPref("sidebar.verticalTabs.showHorizontal", true);
++      Services.prefs.setBoolPref("sidebar.verticalTabs", true);
++    } else {
++      // CUI reset also implies resetting verticalTabs back to false.
++      // We do this before the rest of the reset so widgets are reset to their non-vertical
++      // positions.
++      Services.prefs.setBoolPref("sidebar.verticalTabs", false);
++    }
++    this.updateHilalHorizontalTabToolbarDefaults();
+     this._resetUIState();
+ 
+     // Rebuild each registered area (across windows) to reflect the state that
+@@ -5075,6 +5120,12 @@ var CustomizableUIInternal = {
+ 
+     if (aTopic === "nsPref:changed") {
+       this.reconcileSidebarPrefs(aData);
++      if (
++        aData === kPrefSidebarVerticalTabsEnabled ||
++        aData === "sidebar.verticalTabs.showHorizontal"
++      ) {
++        this.updateHilalHorizontalTabToolbarDefaults();
++      }
+     }
+   },
+ 
+@@ -5094,14 +5145,19 @@ var CustomizableUIInternal = {
          "initializeForTabsOrientation, savedPlacements",
          savedPlacements
        );
@@ -109,7 +173,7 @@ diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/
        gCurrentVerticalTabs = false;
        return;
      }
-@@ -5285,6 +5312,9 @@ var CustomizableUIInternal = {
+@@ -5285,6 +5341,9 @@ var CustomizableUIInternal = {
        return;
      }
      let toVertical = CustomizableUI.verticalTabsEnabled;
@@ -119,7 +183,7 @@ diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/
      if (toVertical === gCurrentVerticalTabs) {
        lazy.log.debug("early return as the value hasn't changed");
        return;
-@@ -5378,6 +5408,7 @@ var CustomizableUIInternal = {
+@@ -5378,6 +5437,7 @@ var CustomizableUIInternal = {
        this.saveNavBarWhenVerticalTabsState();
        // We're switching to vertical in this session; pull saved state from pref and update placements
        this.restoreSavedHorizontalTabStripState();
@@ -127,10 +191,48 @@ diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/
      }
      // Give the sidebar a chance to adjust before we show/hide the toolbars
      lazy.log.debug("CustomizableUI notifying tabstrip-orientation-change");
-@@ -5396,5 +5427,50 @@ var CustomizableUIInternal = {
+@@ -5396,6 +5456,96 @@ var CustomizableUIInternal = {
        win.TabBarVisibility.update(true);
      }
    },
++
++  updateHilalHorizontalTabToolbarDefaults() {
++    if (
++      !gAreas.get(CustomizableUI.AREA_TABSTRIP) ||
++      !gAreas.get(CustomizableUI.AREA_NAVBAR)
++    ) {
++      return;
++    }
++
++    let useHilalHorizontalTabsToolbar =
++      lazy.verticalTabsPref && lazy.verticalTabsShowHorizontalPref;
++
++    let tabstripProps = gAreas.get(CustomizableUI.AREA_TABSTRIP);
++    tabstripProps.set(
++      "defaultPlacements",
++      useHilalHorizontalTabsToolbar
++        ? [...kHilalHorizontalTabstripDefaultPlacements]
++        : [...kHilalDefaultTabstripPlacements]
++    );
++
++    let navbarProps = gAreas.get(CustomizableUI.AREA_NAVBAR);
++    let navbarDefaults = navbarProps
++      .get("defaultPlacements")
++      .filter(
++        id =>
++          !kHilalHorizontalTabToolbarWidgets.includes(id) &&
++          !kHilalHorizontalTabToolbarExcludedWidgets.includes(id)
++      );
++    if (useHilalHorizontalTabsToolbar) {
++      let insertIndex = navbarDefaults.indexOf("downloads-button");
++      navbarDefaults.splice(
++        insertIndex >= 0 ? insertIndex + 1 : navbarDefaults.length,
++        0,
++        ...kHilalHorizontalTabToolbarWidgets
++      );
++    }
++    navbarProps.set("defaultPlacements", navbarDefaults);
++  },
 +
 +  updateHilalHorizontalTabToolbarState(isInitializing = false) {
 +    if (!lazy.verticalTabsPref || !lazy.verticalTabsShowHorizontalPref) {
@@ -152,33 +254,41 @@ diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/
 +        ? insertIndex + 1
 +        : gPlacements.get(CustomizableUI.AREA_NAVBAR).length;
 +
++    this.updateHilalHorizontalTabToolbarDefaults();
 +    CustomizableUI.beginBatchUpdate();
-+    for (let widgetId of kHilalHorizontalTabToolbarWidgets) {
-+      let navbarPlacements = gPlacements.get(CustomizableUI.AREA_NAVBAR);
-+      let placement = this.getPlacementOfWidget(widgetId, false, true);
-+      if (!placement) {
-+        continue;
++    try {
++      for (let widgetId of kHilalHorizontalTabToolbarExcludedWidgets) {
++        let placement = this.getPlacementOfWidget(widgetId, false, true);
++        if (placement?.area === CustomizableUI.AREA_NAVBAR) {
++          this.removeWidgetFromArea(widgetId);
++        }
 +      }
 +
-+      let currentIndex = navbarPlacements.indexOf(widgetId);
-+      if (
-+        placement.area !== CustomizableUI.AREA_NAVBAR ||
-+        currentIndex !== insertIndex
-+      ) {
-+        this.addWidgetToArea(
-+          widgetId,
-+          CustomizableUI.AREA_NAVBAR,
-+          insertIndex,
-+          isInitializing
-+        );
++      for (let widgetId of kHilalHorizontalTabToolbarWidgets) {
++        let navbarPlacements = gPlacements.get(CustomizableUI.AREA_NAVBAR);
++        let placement = this.getPlacementOfWidget(widgetId, false, true);
++        let currentIndex = navbarPlacements.indexOf(widgetId);
++        if (
++          placement?.area !== CustomizableUI.AREA_NAVBAR ||
++          currentIndex !== insertIndex
++        ) {
++          this.addWidgetToArea(
++            widgetId,
++            CustomizableUI.AREA_NAVBAR,
++            insertIndex,
++            isInitializing
++          );
++        }
++        insertIndex++;
 +      }
-+      insertIndex++;
++    } finally {
++      CustomizableUI.endBatchUpdate();
 +    }
-+    CustomizableUI.endBatchUpdate();
 +  },
  };
  Object.freeze(CustomizableUIInternal);
-@@ -5500,7 +5576,7 @@ export var CustomizableUI = {
+ 
+@@ -5500,7 +5650,7 @@ export var CustomizableUI = {
    },
  
    get verticalTabsEnabled() {
@@ -282,6 +392,25 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
      if (hilalUiFixCheckbox) {
        hilalUiFixCheckbox.checked = Services.prefs.getBoolPref(
          "hilal.uifix.enabled",
+diff --git a/browser/components/sidebar/SidebarManager.sys.mjs b/browser/components/sidebar/SidebarManager.sys.mjs
+--- a/browser/components/sidebar/SidebarManager.sys.mjs
++++ b/browser/components/sidebar/SidebarManager.sys.mjs
+@@ -236,6 +236,15 @@ class SidebarManager extends EventTarget {
+       }
+       Services.prefs.setStringPref(VISIBILITY_SETTING_PREF, "hide-sidebar");
+     } else if (resetVisibility) {
++      if (
++        Services.prefs.getBoolPref(
++          "sidebar.verticalTabs.showHorizontal",
++          false
++        )
++      ) {
++        Services.prefs.setStringPref(VISIBILITY_SETTING_PREF, "hide-sidebar");
++        return;
++      }
+       if (this.#savedVisibility) {
+         Services.prefs.setStringPref(
+           VISIBILITY_SETTING_PREF,
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
@@ -944,7 +1073,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
        if (draggedWsId && draggedWsId !== workspace.id) {
          event.preventDefault();
          this._hilalManager?.reorderWorkspaces?.(draggedWsId, workspace.id);
-@@ -789,8 +846,19 @@ export default class SidebarMain extends MozLitElement {
+@@ -789,8 +846,44 @@ export default class SidebarMain extends MozLitElement {
      }
    }
  
@@ -955,7 +1084,32 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
 +  }
 +
 +  toggleSafariSidebar() {
-+    window.SidebarController?.toggle?.(window.SidebarController.lastOpenedId);
++    const controller = window.SidebarController;
++    if (
++      !controller ||
++      !controller._state ||
++      controller.inSingleTabWindow ||
++      controller.uninitializing
++    ) {
++      return;
++    }
++
++    const shouldShow = !controller.launcherVisible;
++    if (
++      Services.prefs.getStringPref("sidebar.visibility", "always-show") !==
++      "hide-sidebar"
++    ) {
++      Services.prefs.setStringPref("sidebar.visibility", "hide-sidebar");
++      controller._state.revampVisibility = "hide-sidebar";
++    }
++    if (controller._animationEnabled && !window.gReduceMotion) {
++      controller._animateSidebarMain();
++    }
++    controller._state.updateVisibility(shouldShow, shouldShow);
++    if (!shouldShow) {
++      controller.hide({ dismissPanel: false });
++    }
++    controller.updateToolbarButton();
 +  }
 +
    openHilalFooterItem(item) {
@@ -965,7 +1119,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
      if (typeof item === "object" && item !== null) {
        const url = this.normalizeHilalShortcutUrl(item.url);
        if (url === "viewBookmarksSidebar" || url === "about:bookmarks") {
-@@ -813,13 +881,18 @@ export default class SidebarMain extends MozLitElement {
+@@ -813,13 +906,18 @@ export default class SidebarMain extends MozLitElement {
          if (isCompact) {
            window.openTrustedLinkIn("about:logins", "tab", {
              userContextId: 0,
@@ -986,7 +1140,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
            window.DownloadsPanel.showPanel(true);
          } else {
            window.BrowserCommands.downloadsUI();
-@@ -866,14 +939,19 @@ export default class SidebarMain extends MozLitElement {
+@@ -866,14 +964,19 @@ export default class SidebarMain extends MozLitElement {
          if (isCompact) {
            window.openTrustedLinkIn("about:logins", "tab", {
              userContextId: 0,
@@ -1008,7 +1162,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
            window.DownloadsPanel.showPanel(true);
          } else {
            window.BrowserCommands.downloadsUI();
-@@ -1677,6 +1755,154 @@ export default class SidebarMain extends MozLitElement {
+@@ -1677,6 +1780,154 @@ export default class SidebarMain extends MozLitElement {
      `;
    }
  
@@ -1163,7 +1317,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
  
    hilalBookmarkTemplate(bookmark) {
      const badge = this.getHilalBookmarkBadge(bookmark);
-@@ -1860,14 +2086,23 @@ export default class SidebarMain extends MozLitElement {
+@@ -1860,14 +2111,23 @@ export default class SidebarMain extends MozLitElement {
                    `
                  )}
                  <span class="hilal-panel-title">
@@ -1190,7 +1344,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
                    @click=${() => this.openHilalNewTab()}
                  >
                    ${this.hilalIcon("plus")}
-@@ -1888,7 +2123,8 @@ export default class SidebarMain extends MozLitElement {
+@@ -1888,7 +2148,8 @@ export default class SidebarMain extends MozLitElement {
                        class="hilal-icon-button"
                        type="button"
                        data-l10n-id="hilal-sidebar-workspace-menu"
@@ -1200,7 +1354,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
                      >
                        ${this.hilalIcon("menu")}
                      </button>
-@@ -1922,7 +2158,20 @@ export default class SidebarMain extends MozLitElement {
+@@ -1922,7 +2183,20 @@ export default class SidebarMain extends MozLitElement {
                      >
                    </div>
                    <div class="hilal-tabstrip-container">
@@ -1222,7 +1376,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
                    </div>
                  </section>
                  ${when(
-@@ -2018,8 +2267,308 @@ export default class SidebarMain extends MozLitElement {
+@@ -2018,8 +2292,308 @@ export default class SidebarMain extends MozLitElement {
      `;
    }
  
