@@ -152,7 +152,7 @@
   color: #ffffff !important;
 }
 
-:root[hilal-boosts-ui="true"] #urlbar[focused] > #urlbar-background {
+:root[hilal-boosts-ui="true"] #urlbar[focused] > .urlbar-background {
   outline: 2px solid var(--hilal-boosts-ui-accent) !important;
   border-color: transparent !important;
 }

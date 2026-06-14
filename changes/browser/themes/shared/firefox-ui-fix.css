@@ -9556,18 +9556,8 @@
   #urlbar[open] > .urlbarView > .urlbarView-body-outer > .urlbarView-body-inner {
     border-color: transparent !important;
   }
-  #urlbar[open] > .urlbarView > .urlbarView-body-outer > .urlbarView-body-inner::before {
-    content: "";
-    position: absolute;
-    border-top: 1px solid var(--autocomplete-popup-separator-color);
-    transform: translate(-50%, -1px);
-    left: 50%;
-  }
-  #urlbar[open] > .urlbarView > .urlbarView-body-outer > .urlbarView-body-inner::before,
   .urlbarView .search-one-offs {
     width: calc(100% + 2px - var(--uc-urlView-padding-double)) !important;
-  }
-  .urlbarView .search-one-offs {
     margin-inline: var(--uc-urlView-full-width-padding) !important;
   }
   .urlbarView-row-inner {
@@ -25064,16 +25054,8 @@
   #urlbar[open] > .urlbarView > .urlbarView-body-outer > .urlbarView-body-inner {
     border-color: transparent !important;
   }
-  #urlbar[open] > .urlbarView > .urlbarView-body-outer > .urlbarView-body-inner::before {
-    content: "";
-    position: absolute;
-    border-top: 1px solid var(--autocomplete-popup-separator-color);
-    transform: translate(-50%, -1px);
-    left: 50%;
-  }
 }
 @media (-moz-bool-pref: "userChrome.urlView.full_width_padding") {
-  #urlbar[open] > .urlbarView > .urlbarView-body-outer > .urlbarView-body-inner::before,
   .urlbarView .search-one-offs {
     width: calc(100% + 2px - var(--uc-urlView-padding-double)) !important;
   }
