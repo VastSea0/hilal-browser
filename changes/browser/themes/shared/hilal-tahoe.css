@@ -195,10 +195,8 @@
     border-color: transparent !important;
   }
 }
-}
 
-@media -moz-pref("hilal.tahoe.enabled") {
-@media (-moz-platform: macos) {
+@media -moz-pref("hilal.tahoe.enabled") and (-moz-platform: macos) {
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) {
     --hilal-safari-sidebar-width: 260px;
     --hilal-safari-toolbox-height: 86px;
@@ -224,7 +222,7 @@
     box-sizing: border-box !important;
     inline-size: calc(100vw - var(--hilal-safari-sidebar-width) - var(--hilal-safari-window-gap)) !important;
     margin-inline-start: var(--hilal-safari-sidebar-width) !important;
-    padding: 8px 10px 4px 10px !important;
+    padding: 8px 10px 6px 10px !important;
   }
 
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #navigator-toolbox {
@@ -241,6 +239,10 @@
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #toolbar-menubar {
+    order: 0 !important;
   }
 
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #TabsToolbar {
@@ -265,9 +267,59 @@
     overflow: clip !important;
   }
 
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #TabsToolbar-customization-target {
+    align-items: center !important;
+    min-height: 36px !important;
+  }
+
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] {
+    --tab-min-height: 32px !important;
+    --tab-block-margin: 2px !important;
+    --tab-inline-padding: 10px !important;
+    --tab-selected-outline-color: transparent !important;
+    --tab-selected-shadow: none !important;
     opacity: 1 !important;
     visibility: visible !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab {
+    max-height: 32px !important;
+    padding-block: 2px !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tab-stack,
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tab-content {
+    min-height: 28px !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tab-content {
+    padding-inline: 12px !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tab-background {
+    min-height: 28px !important;
+    margin-block: 0 !important;
+    border-radius: 999px !important;
+    background-image: none !important;
+    box-shadow: none !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:hover > .tab-stack > .tab-background:not([selected], [multiselected]) {
+    background-color: color-mix(in srgb, var(--hilal-safari-control-bg-hover) 74%, transparent) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:is([visuallyselected], [multiselected]) > .tab-stack > .tab-background {
+    background-color: color-mix(in srgb, var(--hilal-safari-control-bg-hover) 92%, transparent) !important;
+    border-color: var(--hilal-safari-separator) !important;
+    box-shadow:
+      inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.08)),
+      0 1px 3px light-dark(rgba(30, 34, 42, 0.09), rgba(0, 0, 0, 0.24)) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tab-context-line,
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tab-line,
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tab-loading-burst {
+    display: none !important;
   }
 
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #nav-bar-customization-target {

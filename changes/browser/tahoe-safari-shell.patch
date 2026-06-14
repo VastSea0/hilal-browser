@@ -397,9 +397,9 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +    display: flex;
 +    align-items: center;
 +    justify-content: flex-end;
-+    padding-inline: 16px;
-+    height: 52px;
-+    min-height: 52px;
++    padding-inline: 88px 18px;
++    height: 76px;
++    min-height: 76px;
 +    box-sizing: border-box;
 +  }
 +
@@ -442,7 +442,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +    flex-direction: column;
 +    height: 100%;
 +    box-sizing: border-box;
-+    padding-block-start: 12px !important;
++    padding-block-start: 8px !important;
 +  }
 +
 +  .safari-panel {
@@ -525,7 +525,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +    font-size: 11px;
 +    font-weight: 700;
 +    text-transform: uppercase;
-+    letter-spacing: 0.5px;
++    letter-spacing: 0;
 +    user-select: none;
 +  }
 +
@@ -858,7 +858,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
        if (draggedWsId && draggedWsId !== workspace.id) {
          event.preventDefault();
          this._hilalManager?.reorderWorkspaces?.(draggedWsId, workspace.id);
-@@ -789,8 +846,15 @@ export default class SidebarMain extends MozLitElement {
+@@ -789,8 +846,19 @@ export default class SidebarMain extends MozLitElement {
      }
    }
  
@@ -868,6 +868,10 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
 +    Services.prefs.setBoolPref(prefName, !current);
 +  }
 +
++  toggleSafariSidebar() {
++    window.SidebarController?.toggle?.(window.SidebarController.lastOpenedId);
++  }
++
    openHilalFooterItem(item) {
 -    const isCompact = document.documentElement.hasAttribute("hilal-compact-mode");
 +    const isCompact =
@@ -875,7 +879,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
      if (typeof item === "object" && item !== null) {
        const url = this.normalizeHilalShortcutUrl(item.url);
        if (url === "viewBookmarksSidebar" || url === "about:bookmarks") {
-@@ -813,13 +877,18 @@ export default class SidebarMain extends MozLitElement {
+@@ -813,13 +881,18 @@ export default class SidebarMain extends MozLitElement {
          if (isCompact) {
            window.openTrustedLinkIn("about:logins", "tab", {
              userContextId: 0,
@@ -896,7 +900,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
            window.DownloadsPanel.showPanel(true);
          } else {
            window.BrowserCommands.downloadsUI();
-@@ -866,14 +935,19 @@ export default class SidebarMain extends MozLitElement {
+@@ -866,14 +939,19 @@ export default class SidebarMain extends MozLitElement {
          if (isCompact) {
            window.openTrustedLinkIn("about:logins", "tab", {
              userContextId: 0,
@@ -918,7 +922,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
            window.DownloadsPanel.showPanel(true);
          } else {
            window.BrowserCommands.downloadsUI();
-@@ -1677,6 +1751,153 @@ export default class SidebarMain extends MozLitElement {
+@@ -1677,6 +1755,154 @@ export default class SidebarMain extends MozLitElement {
      `;
    }
  
@@ -940,11 +944,12 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
 +        draggable="true"
 +        title=${title}
 +        @click=${() => {
-+          window.gBrowser.selectedTab = tab;
++          this.selectHilalTab(tab);
 +        }}
 +        @keydown=${event => {
 +          if (event.key === " " || event.key === "Enter") {
-+            window.gBrowser.selectedTab = tab;
++            event.preventDefault();
++            this.selectHilalTab(tab);
 +          }
 +        }}
 +        @mouseenter=${event => this.handleTabMouseEnter(tab, event)}
@@ -957,6 +962,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
 +          event.stopPropagation();
 +          const contextMenu = document.getElementById("tabContextMenu");
 +          if (contextMenu) {
++            event.currentTarget.tab = tab;
 +            contextMenu.openPopup(
 +              event.currentTarget,
 +              "after_start",
@@ -982,7 +988,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
 +              class="safari-row-audio"
 +              @click=${e => {
 +                e.stopPropagation();
-+                tab.toggleMute();
++                tab.toggleMuteAudio();
 +                this.scheduleHilalRefresh();
 +              }}
 +            >
@@ -1048,8 +1054,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
 +          type="button"
 +          title="Close Tab"
 +          @click=${e => {
-+            e.stopPropagation();
-+            window.gBrowser.removeTab(tab);
++            this.closeHilalTab(tab, e);
 +          }}
 +        >
 +          <svg
@@ -1072,7 +1077,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
  
    hilalBookmarkTemplate(bookmark) {
      const badge = this.getHilalBookmarkBadge(bookmark);
-@@ -1860,14 +2081,23 @@ export default class SidebarMain extends MozLitElement {
+@@ -1860,14 +2086,23 @@ export default class SidebarMain extends MozLitElement {
                    `
                  )}
                  <span class="hilal-panel-title">
@@ -1099,7 +1104,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
                    @click=${() => this.openHilalNewTab()}
                  >
                    ${this.hilalIcon("plus")}
-@@ -1888,7 +2118,8 @@ export default class SidebarMain extends MozLitElement {
+@@ -1888,7 +2123,8 @@ export default class SidebarMain extends MozLitElement {
                        class="hilal-icon-button"
                        type="button"
                        data-l10n-id="hilal-sidebar-workspace-menu"
@@ -1109,7 +1114,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
                      >
                        ${this.hilalIcon("menu")}
                      </button>
-@@ -1922,7 +2153,20 @@ export default class SidebarMain extends MozLitElement {
+@@ -1922,7 +2158,20 @@ export default class SidebarMain extends MozLitElement {
                      >
                    </div>
                    <div class="hilal-tabstrip-container">
@@ -1131,7 +1136,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
                    </div>
                  </section>
                  ${when(
-@@ -2018,8 +2262,308 @@ export default class SidebarMain extends MozLitElement {
+@@ -2018,8 +2267,330 @@ export default class SidebarMain extends MozLitElement {
      `;
    }
  
@@ -1162,10 +1167,32 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
 +        <header class="safari-sidebar-header">
 +          <div class="safari-header-buttons">
 +            <button
++              class="safari-icon-button safari-new-group-button"
++              type="button"
++              title="New Tab Group"
++              @click=${() => this.showHilalCreateWorkspace()}
++            >
++              <svg
++                width="16"
++                height="16"
++                viewBox="0 0 16 16"
++                fill="none"
++                stroke="currentColor"
++                stroke-width="1.3"
++                stroke-linecap="round"
++                stroke-linejoin="round"
++              >
++                <rect x="2" y="5" width="8" height="8" rx="1.6" />
++                <rect x="6" y="2" width="8" height="8" rx="1.6" />
++                <path d="M10 5.2v3.6" />
++                <path d="M8.2 7h3.6" />
++              </svg>
++            </button>
++            <button
 +              class="safari-icon-button safari-toggle-button"
 +              type="button"
-+              title="Toggle Compact Mode"
-+              @click=${() => this.toggleCompactMode()}
++              title="Toggle Sidebar"
++              @click=${() => this.toggleSafariSidebar()}
 +            >
 +              <svg
 +                width="16"
