@@ -365,6 +365,7 @@
   }
 
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #sidebar-main[hilal-sidebar] {
+    position: relative !important;
     inline-size: var(--hilal-safari-sidebar-width) !important;
     min-inline-size: var(--hilal-safari-sidebar-width) !important;
     max-inline-size: var(--hilal-safari-sidebar-width) !important;
@@ -376,6 +377,9 @@
     block-size: calc(100% + var(--hilal-safari-toolbox-height) - var(--hilal-safari-window-gap-top) - var(--hilal-safari-window-gap)) !important;
     z-index: 1100 !important;
     background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 26px !important;
   }
 
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #sidebar-main[hilal-sidebar] sidebar-main,

@@ -642,15 +642,16 @@ sidebar-main,
   width: 280px !important;
   min-width: 280px !important;
   max-width: 280px !important;
-  height: 100% !important;
-  background-color: light-dark(rgba(255, 255, 255, 0.72), rgba(28, 28, 30, 0.72)) !important;
+  height: calc(100% - 2 * var(--hilal-safari-window-gap, 8px)) !important;
+  background-color: var(--hilal-safari-sidebar-bg) !important;
+  background-image: linear-gradient(180deg, var(--hilal-safari-sidebar-bg-strong), transparent 48%) !important;
+  backdrop-filter: blur(34px) saturate(185%) !important;
   box-shadow:
     4px 0 32px 0 rgba(0, 0, 0, 0.15),
     0 4px 16px 0 rgba(0, 0, 0, 0.1) !important;
-  border-radius: 0 16px 16px 0 !important;
-  border-inline-end: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08)) !important;
-  border-inline-start: none !important;
-  margin: 0 !important;
+  border-radius: 20px !important;
+  border: 1px solid var(--hilal-safari-separator) !important;
+  margin: var(--hilal-safari-window-gap, 8px) !important;
   padding: 0 !important;
   transition: border-radius 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
@@ -674,9 +675,8 @@ sidebar-main,
 /* Round left corners instead if sidebar is on the right side */
 :root[hilal-compact-sidebar] #sidebar-main[sidebar-positionend] sidebar-main,
 :root[hilal-compact-sidebar] #sidebar-main[sidebar-positionend] html\:sidebar-main {
-  border-radius: 16px 0 0 16px !important;
-  border-inline-start: 1px solid var(--hilal-sidebar-border, rgba(255, 255, 255, 0.1)) !important;
-  border-inline-end: none !important;
+  border-radius: 20px !important;
+  border: 1px solid var(--hilal-safari-separator) !important;
   box-shadow:
     -4px 0 32px 0 rgba(0, 0, 0, 0.35),
     0 4px 16px 0 rgba(0, 0, 0, 0.25) !important;
