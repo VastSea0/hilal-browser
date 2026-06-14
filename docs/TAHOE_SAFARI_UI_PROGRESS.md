@@ -6,8 +6,8 @@
 - Decisions locked:
   - V1 ships as a Tahoe visual shell, not a full Safari layout clone.
   - `hilal.tahoe.enabled` defaults to `true`.
-  - Hilal workspace rail remains in place.
-  - Top horizontal Safari tab strip is deferred to V2.
+  - Hilal workspace/tab architecture remains in place.
+  - Tahoe mode may hide the visible workspace rail when Safari parity is the stronger product goal.
 - Completed tasks:
   - Add repo-visible plan and progress documents.
   - Add a pref-gated Tahoe CSS layer.
@@ -19,3 +19,51 @@
 - Passed: `./bin/hil validate`.
 - Passed: `scripts/build-macos.sh faster`.
 - Skipped (disabled in build config): `(cd engine && ./mach test browser/base/content/test/hilal/browser_compact_mode.js)`.
+
+## 2026-06-14 Safari Match Follow-up
+
+- Status: toolbar/sidebar visual match tightened after screenshot review.
+- Updated direction:
+  - Tahoe mode now prioritizes Safari parity for toolbar and sidebar over preserving the visible Hilal workspace rail.
+  - The workspace rail is hidden in Tahoe mode so the left side reads as a single Safari-like sidebar panel.
+  - The toolbar is offset to the right of the sidebar, with macOS traffic lights positioned in the sidebar area.
+  - Navigation controls, URL bar, and tab strip are styled as separate Safari-like bands where the Firefox chrome structure allows it.
+- Pending: refresh patches and rerun lightweight validation after these follow-up CSS changes.
+- Passed: `./bin/hil validate` after Safari match follow-up.
+- Passed: `scripts/build-macos.sh faster` after Safari match follow-up.
+- Still skipped: `(cd engine && ./mach test browser/base/content/test/hilal/browser_compact_mode.js)` because this build is compiled with `--disable-tests`.
+
+## 2026-06-14 Glass Sidebar Follow-up
+
+- Status: implementation and lightweight validation complete.
+- Updated direction:
+  - Sidebar material must remain translucent/glass rather than becoming an opaque dark panel.
+  - Tahoe mode must keep both the vertical sidebar tab list and the horizontal top tab strip visible at the same time.
+  - Sidebar width, top chrome alignment, and panel header position are being tuned toward the Safari reference screenshots.
+- Completed:
+  - Lowered Tahoe sidebar and chrome material opacity and restored blur/saturation glass treatment.
+  - Kept the horizontal tab strip explicitly visible while retaining vertical sidebar tabs.
+  - Tuned sidebar width, panel header placement, and section heading scale toward the Safari screenshots.
+- Passed: `./bin/hil validate`.
+- Passed: `git diff --check`.
+- Passed: `scripts/build-macos.sh faster`.
+- Still skipped: `(cd engine && ./mach test browser/base/content/test/hilal/browser_compact_mode.js)` because this build is compiled with `--disable-tests`.
+
+## 2026-06-14 Sidebar Layout Revert
+
+- Status: bad layout direction reverted and lightweight validation complete.
+- Reverted:
+  - Removed the Tahoe-only mock `N Tabs`, `Tab Groups`, and `Saved` render structure.
+  - Removed mock Safari sidebar buttons whose semantics did not match the real controls.
+  - Removed the aggressive Tahoe-only tabstrip row override from `sidebar.css`.
+- Updated direction:
+  - Continue from the working glass sidebar base.
+  - Do not add mock rows or non-working Safari placeholders.
+  - Match Safari next through geometry, inset spacing, material, border radius, and real control placement.
+- Completed:
+  - Kept the real Hilal sidebar render path and existing controls.
+  - Added only a real shell geometry adjustment: inset glass sidebar, four-corner radius, and a content gap.
+- Passed: `./bin/hil validate`.
+- Passed: `git diff --check`.
+- Passed: `scripts/build-macos.sh faster`.
+- Still skipped: `(cd engine && ./mach test browser/base/content/test/hilal/browser_compact_mode.js)` because this build is compiled with `--disable-tests`.

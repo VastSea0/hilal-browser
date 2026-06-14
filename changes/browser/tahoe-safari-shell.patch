@@ -55,7 +55,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
 --- a/browser/components/sidebar/sidebar-main.css
 +++ b/browser/components/sidebar/sidebar-main.css
-@@ -547,6 +547,149 @@
+@@ -547,6 +547,172 @@
    text-align: start;
  }
  
@@ -69,24 +69,28 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +    --hilal-sidebar-highlight-text: var(--hilal-sidebar-text);
 +    --hilal-sidebar-blue: light-dark(#0a84ff, #64a7ff);
 +    --hilal-sidebar-border: transparent;
-+    inline-size: 268px;
++    inline-size: 356px;
++    max-inline-size: 356px;
++    min-inline-size: 356px;
 +  }
 +
 +  :host([hilal-sidebar]:not([vertical-tabs])) {
-+    inline-size: 68px;
-+    max-inline-size: 68px;
-+    min-inline-size: 68px;
++    inline-size: 356px;
++    max-inline-size: 356px;
++    min-inline-size: 356px;
 +  }
 +
 +  .hilal-sidebar-layout {
-+    background:
-+      linear-gradient(180deg, light-dark(rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.05)), transparent 38%);
++    background: transparent;
++    padding-block-start: var(--hilal-sidebar-top-padding, 82px);
++  }
++
++  .hilal-sidebar-layout::before {
++    border-bottom: 0;
 +  }
 +
 +  .hilal-workspace-rail {
-+    border-inline-end: none !important;
-+    gap: 9px;
-+    padding: var(--hilal-sidebar-top-padding-inner, 18px) 9px 12px;
++    display: none;
 +  }
 +
 +  .hilal-workspace-list {
@@ -124,23 +128,29 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +  }
 +
 +  .hilal-sidebar-panel {
-+    padding: var(--hilal-sidebar-top-padding-inner, 18px) 13px 0;
++    padding: 0 13px 0 26px;
 +  }
 +
 +  .hilal-panel-header {
-+    gap: 8px;
-+    min-block-size: 34px;
++    position: absolute;
++    top: 22px;
++    right: 12px;
++    z-index: 12;
++    justify-content: flex-end;
++    gap: 6px;
++    min-block-size: 32px;
++    margin: 0;
 +  }
 +
++  .hilal-panel-workspace-icon,
 +  .hilal-panel-title {
-+    font-size: 13px;
-+    font-weight: 680;
++    display: none;
 +  }
 +
 +  .hilal-icon-button {
-+    block-size: 28px;
++    block-size: 30px;
 +    border-radius: 999px;
-+    inline-size: 28px;
++    inline-size: 30px;
 +  }
 +
 +  #hilal-sidebar-search {
@@ -158,16 +168,25 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +
 +  .hilal-panel-scroll {
 +    padding-block-end: 18px;
++    scrollbar-width: none;
++  }
++
++  .hilal-panel-scroll::-webkit-scrollbar {
++    display: none;
 +  }
 +
 +  .hilal-section {
-+    gap: 7px;
-+    margin-block-end: 18px;
++    gap: 8px;
++    margin-block-end: 20px;
 +  }
 +
 +  .hilal-section-heading {
-+    font-size: 11px;
-+    font-weight: 760;
++    color: var(--hilal-sidebar-muted);
++    font-size: 13px;
++    font-weight: 700;
++    min-block-size: 26px;
++    padding-inline: 0 8px;
++    text-transform: none;
 +  }
 +
 +  .hilal-row,
@@ -176,7 +195,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +  }
 +
 +  .hilal-row {
-+    min-block-size: 32px;
++    min-block-size: 28px;
 +    padding-inline: 8px;
 +  }
 +
@@ -198,6 +217,10 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +
 +  #hilal-tabs-section {
 +    min-height: 240px;
++  }
++
++  .hilal-tabstrip-container {
++    gap: 2px;
 +  }
 +}
 +}
