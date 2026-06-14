@@ -196,9 +196,10 @@
 @media -moz-pref("hilal.tahoe.enabled") {
 @media (-moz-platform: macos) {
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) {
-    --hilal-safari-sidebar-width: 356px;
+    --hilal-safari-sidebar-width: 260px;
     --hilal-safari-toolbox-height: 86px;
     --hilal-safari-window-gap: 8px;
+    --hilal-safari-window-gap-top: 0px;
     --hilal-safari-control-bg: light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.045));
     --hilal-safari-control-bg-hover: light-dark(rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.085));
     --hilal-safari-chrome-bg: light-dark(rgba(244, 246, 250, 0.48), rgba(15, 17, 22, 0.42));
@@ -370,9 +371,9 @@
     min-width: var(--hilal-safari-sidebar-width) !important;
     max-width: var(--hilal-safari-sidebar-width) !important;
     box-sizing: border-box !important;
-    margin-block-start: calc(-1 * var(--hilal-safari-toolbox-height) + var(--hilal-safari-window-gap)) !important;
+    margin-block-start: calc(-1 * var(--hilal-safari-toolbox-height) + var(--hilal-safari-window-gap-top)) !important;
     padding: 0 var(--hilal-safari-window-gap) var(--hilal-safari-window-gap) var(--hilal-safari-window-gap) !important;
-    block-size: calc(100% + var(--hilal-safari-toolbox-height) - var(--hilal-safari-window-gap)) !important;
+    block-size: calc(100% + var(--hilal-safari-toolbox-height) - var(--hilal-safari-window-gap-top) - var(--hilal-safari-window-gap)) !important;
     z-index: 1100 !important;
     background: transparent !important;
   }

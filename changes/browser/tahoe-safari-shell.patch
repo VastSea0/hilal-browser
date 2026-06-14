@@ -1,3 +1,14 @@
+diff --git a/browser/app/Makefile.in b/browser/app/Makefile.in
+--- a/browser/app/Makefile.in
++++ b/browser/app/Makefile.in
+@@ -90,6 +90,6 @@ ifdef MOZ_UPDATER
+ 	cp -f '$(dist_dest)/Contents/MacOS/updater.app/Contents/MacOS/org.mozilla.updater' '$(dist_dest)/Contents/Library/LaunchServices'
+ endif
+ 	$(MKDIR) -p '$(dist_dest)/Contents/Frameworks'
+-	mv '$(dist_dest)/Contents/Resources/ChannelPrefs.framework' '$(dist_dest)/Contents/Frameworks'
++	-mv '$(dist_dest)/Contents/Resources/ChannelPrefs.framework' '$(dist_dest)/Contents/Frameworks'
+ 	printf APPLMOZB > '$(dist_dest)/Contents/PkgInfo'
+ endif
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
@@ -524,7 +535,20 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
          const workspacesEnabled = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
          const verticalTabsEnabled = Services.prefs.getBoolPref("sidebar.verticalTabs", false);
          const shouldBeActive = window.gHilalWorkspaces && (workspacesEnabled || verticalTabsEnabled);
-@@ -2018,8 +2029,247 @@ export default class SidebarMain extends MozLitElement {
+@@ -789,6 +800,12 @@ export default class SidebarMain extends MozLitElement {
+     }
+   }
+ 
++  toggleCompactMode() {
++    const prefName = "hilal.compact.enabled";
++    const current = Services.prefs.getBoolPref(prefName, false);
++    Services.prefs.setBoolPref(prefName, !current);
++  }
++
+   openHilalFooterItem(item) {
+     const isCompact = document.documentElement.hasAttribute("hilal-compact-mode");
+     if (typeof item === "object" && item !== null) {
+@@ -2018,8 +2035,247 @@ export default class SidebarMain extends MozLitElement {
      `;
    }
  
@@ -568,8 +592,8 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
 +            <button
 +              class="safari-icon-button safari-toggle-button"
 +              type="button"
-+              title="Hide Sidebar"
-+              @click=${() => window.SidebarController.toggle()}
++              title="Toggle Compact Mode"
++              @click=${() => this.toggleCompactMode()}
 +            >
 +              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
 +                <rect x="2" y="2" width="12" height="12" rx="2" />
