@@ -197,7 +197,7 @@
   @media (-moz-platform: macos) {
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) {
       --hilal-safari-sidebar-width: 356px;
-      --hilal-safari-toolbox-height: 86px;
+      --hilal-safari-toolbox-height: 94px;
       --hilal-safari-window-gap: 8px;
       --hilal-safari-sidebar-radius: 26px;
       --hilal-safari-page-bg: light-dark(#ffffff, #1c1c1e);
@@ -218,6 +218,7 @@
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #hilal-browser-background::after {
+      inset: var(--hilal-safari-toolbox-height) 0 0 0;
       background:
         linear-gradient(
           90deg,
@@ -569,6 +570,11 @@
       outline: 0 !important;
       background-color: var(--hilal-safari-page-bg) !important;
       box-shadow: none !important;
+    }
+
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabpanels,
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) .browserStack {
+      border-radius: 0 0 22px 0 !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #sidebar-main[hilal-sidebar] .tabbrowser-tab {
