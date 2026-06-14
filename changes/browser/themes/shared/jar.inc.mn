@@ -359,6 +359,7 @@
   skin/classic/browser/hilal-ui-fix.css                      (../shared/hilal-ui-fix.css)
   skin/classic/browser/firefox-ui-fix.css                    (../shared/firefox-ui-fix.css)
   skin/classic/browser/hilal-ui-overrides.css                (../shared/hilal-ui-overrides.css)
+  skin/classic/browser/hilal-tahoe.css                       (../shared/hilal-tahoe.css)
   skin/classic/browser/icons/add-device.svg                                (../shared/icons/add-device.svg)
   skin/classic/browser/icons/addons-logo.svg                               (../shared/icons/addons-logo.svg)
   skin/classic/browser/icons/align-distribute-top.svg                      (../shared/icons/align-distribute-top.svg)

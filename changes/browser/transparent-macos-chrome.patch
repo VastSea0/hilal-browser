@@ -206,18 +206,6 @@ diff --git a/toolkit/content/xul.css b/toolkit/content/xul.css
    -moz-control-character-visibility: visible;
    -moz-box-collapse: legacy;
    width: 100%;
-diff --git a/widget/cocoa/VibrancyManager.mm b/widget/cocoa/VibrancyManager.mm
---- a/widget/cocoa/VibrancyManager.mm
-+++ b/widget/cocoa/VibrancyManager.mm
-@@ -36,7 +36,7 @@ static NSVisualEffectMaterial VisualEffectMaterialForVibrancyType(
-     VibrancyType aType) {
-   switch (aType) {
-     case VibrancyType::Sidebar:
--      return NSVisualEffectMaterialSidebar;
-+      return NSVisualEffectMaterialHUDWindow;
-     case VibrancyType::Titlebar:
-       return NSVisualEffectMaterialTitlebar;
-   }
 diff --git a/widget/cocoa/nsCocoaWindow.mm b/widget/cocoa/nsCocoaWindow.mm
 --- a/widget/cocoa/nsCocoaWindow.mm
 +++ b/widget/cocoa/nsCocoaWindow.mm

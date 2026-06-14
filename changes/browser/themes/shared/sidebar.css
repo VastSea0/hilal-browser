@@ -644,7 +644,6 @@ sidebar-main,
   max-width: 280px !important;
   height: 100% !important;
   background-color: light-dark(rgba(255, 255, 255, 0.72), rgba(28, 28, 30, 0.72)) !important;
-  backdrop-filter: blur(20px) saturate(190%) !important;
   box-shadow:
     4px 0 32px 0 rgba(0, 0, 0, 0.15),
     0 4px 16px 0 rgba(0, 0, 0, 0.1) !important;
@@ -748,7 +747,6 @@ sidebar-main,
   color-scheme: light dark !important;
   background-color: light-dark(rgba(255, 255, 255, 0.72), rgba(28, 28, 30, 0.72)) !important;
   background-image: none !important;
-  backdrop-filter: blur(20px) saturate(190%) !important;
   box-shadow: 0 1px 0 rgba(0,0,0,0.1) !important;
   
   /* Remove border radius for a clean flush look at the top */

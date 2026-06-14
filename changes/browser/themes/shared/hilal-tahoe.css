@@ -1,0 +1,184 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+@media -moz-pref("hilal.tahoe.enabled") {
+@media (-moz-platform: macos) {
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) {
+    --hilal-tahoe-accent: light-dark(#0a84ff, #64a7ff);
+    --hilal-tahoe-window-tint: light-dark(rgba(238, 242, 248, 0.52), rgba(8, 11, 17, 0.44));
+    --hilal-tahoe-window-sheen: light-dark(rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.05));
+    --hilal-tahoe-toolbar-material: light-dark(rgba(248, 250, 253, 0.66), rgba(31, 33, 39, 0.62));
+    --hilal-tahoe-toolbar-material-strong: light-dark(rgba(255, 255, 255, 0.82), rgba(43, 45, 53, 0.78));
+    --hilal-tahoe-field-material: light-dark(rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.08));
+    --hilal-tahoe-field-material-hover: light-dark(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.12));
+    --hilal-tahoe-border: light-dark(rgba(34, 43, 58, 0.14), rgba(255, 255, 255, 0.14));
+    --hilal-tahoe-border-soft: light-dark(rgba(34, 43, 58, 0.08), rgba(255, 255, 255, 0.08));
+    --hilal-tahoe-shadow: light-dark(0 18px 42px rgba(28, 39, 56, 0.16), 0 18px 44px rgba(0, 0, 0, 0.36));
+    --hilal-tahoe-toolbar-radius: 19px;
+    --hilal-tahoe-control-radius: 999px;
+    --hilal-tahoe-content-radius: 20px;
+    --hilal-glass-window-background: var(--hilal-tahoe-window-tint);
+    --hilal-glass-toolbar-background: var(--hilal-tahoe-toolbar-material);
+    --hilal-glass-border-color: var(--hilal-tahoe-border);
+    --toolbar-field-background-color: var(--hilal-tahoe-field-material);
+    --toolbar-field-focus-background-color: var(--hilal-tahoe-toolbar-material-strong);
+    --toolbar-field-border-color: var(--hilal-tahoe-border-soft);
+    --urlbar-box-focus-bgcolor: color-mix(in srgb, var(--hilal-tahoe-accent) 12%, transparent);
+    --button-border-radius: var(--hilal-tahoe-control-radius);
+    --toolbarbutton-border-radius: var(--hilal-tahoe-control-radius);
+    --toolbarbutton-hover-background: color-mix(in srgb, currentColor 10%, transparent);
+    --toolbarbutton-active-background: color-mix(in srgb, currentColor 15%, transparent);
+    --sidebar-border-color: var(--hilal-tahoe-border-soft);
+    --sidebar-background-color: transparent;
+    --sidebar-text-color: light-dark(#172033, #f4f7fb);
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background::before {
+    background:
+      radial-gradient(circle at 18% 0%, light-dark(rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.08)), transparent 34%),
+      linear-gradient(135deg, var(--hilal-tahoe-window-sheen), transparent 52%);
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background::after {
+    background: var(--hilal-tahoe-window-tint);
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]) #navigator-toolbox {
+    background: transparent !important;
+    border: 0 !important;
+    margin: 0 !important;
+    padding: 7px 10px 5px !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]) #nav-bar {
+    min-height: 44px !important;
+    padding-block: 5px !important;
+    padding-inline: 78px 10px !important;
+    border: 1px solid var(--hilal-tahoe-border) !important;
+    border-radius: var(--hilal-tahoe-toolbar-radius) !important;
+    background-color: var(--hilal-tahoe-toolbar-material) !important;
+    background-image: none !important;
+    box-shadow:
+      0 1px 0 light-dark(rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.08)) inset,
+      var(--hilal-tahoe-shadow) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #nav-bar-customization-target {
+    align-items: center !important;
+    gap: 3px !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #urlbar-container {
+    flex: 1 1 560px !important;
+    max-width: 680px !important;
+    min-width: 260px !important;
+    margin-inline: 12px !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #urlbar {
+    min-height: 32px !important;
+    color: inherit !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #urlbar-background {
+    border: 1px solid var(--hilal-tahoe-border-soft) !important;
+    border-radius: var(--hilal-tahoe-control-radius) !important;
+    background-color: var(--hilal-tahoe-field-material) !important;
+    background-image: none !important;
+    box-shadow:
+      0 1px 0 light-dark(rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0.08)) inset,
+      0 1px 2px light-dark(rgba(28, 39, 56, 0.08), rgba(0, 0, 0, 0.18)) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #urlbar:not([focused], [open]):hover > #urlbar-background {
+    background-color: var(--hilal-tahoe-field-material-hover) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #urlbar:is([focused], [open]) > #urlbar-background {
+    border-color: color-mix(in srgb, var(--hilal-tahoe-accent) 34%, var(--hilal-tahoe-border)) !important;
+    background-color: var(--hilal-tahoe-toolbar-material-strong) !important;
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--hilal-tahoe-accent) 18%, transparent),
+      0 10px 26px light-dark(rgba(28, 39, 56, 0.18), rgba(0, 0, 0, 0.38)) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #urlbar:not([focused], [open]) #urlbar-input {
+    text-align: center !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #urlbar-input {
+    font-weight: 650 !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #nav-bar .toolbarbutton-1 > .toolbarbutton-icon,
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #nav-bar .toolbarbutton-1 > .toolbarbutton-badge-stack {
+    border-radius: var(--hilal-tahoe-control-radius) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #TabsToolbar {
+    margin-inline: 10px !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #tabbrowser-tabs[orient="horizontal"] .tab-background {
+    border-radius: var(--hilal-tahoe-control-radius) !important;
+    border: 1px solid transparent !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:is([visuallyselected], [multiselected]) .tab-background {
+    border-color: var(--hilal-tahoe-border-soft) !important;
+    background-color: var(--hilal-tahoe-field-material-hover) !important;
+    box-shadow: 0 1px 4px light-dark(rgba(28, 39, 56, 0.12), rgba(0, 0, 0, 0.24)) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]) #tabbrowser-tabbox {
+    margin: 0 10px 10px !important;
+    border: 1px solid var(--hilal-tahoe-border) !important;
+    border-radius: var(--hilal-tahoe-content-radius) !important;
+    background-color: light-dark(rgba(255, 255, 255, 0.82), rgba(9, 11, 15, 0.9)) !important;
+    box-shadow: 0 20px 48px light-dark(rgba(28, 39, 56, 0.14), rgba(0, 0, 0, 0.34)) !important;
+    overflow: clip !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #tabbrowser-tabpanels,
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) .browserStack {
+    border-radius: inherit !important;
+    overflow: clip !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #sidebar-main[hilal-sidebar] {
+    --sidebar-background-color: transparent !important;
+    --sidebar-border-color: var(--hilal-tahoe-border-soft) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #sidebar-main[hilal-sidebar] sidebar-main,
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #sidebar-main[hilal-sidebar] html\:sidebar-main {
+    background-color: var(--hilal-tahoe-toolbar-material) !important;
+    border-color: var(--hilal-tahoe-border) !important;
+    box-shadow:
+      0 1px 0 light-dark(rgba(255, 255, 255, 0.56), rgba(255, 255, 255, 0.08)) inset,
+      8px 0 32px light-dark(rgba(28, 39, 56, 0.12), rgba(0, 0, 0, 0.26)) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #sidebar-main[sidebar-positionend][hilal-sidebar] sidebar-main,
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #sidebar-main[sidebar-positionend][hilal-sidebar] html\:sidebar-main {
+    box-shadow:
+      0 1px 0 light-dark(rgba(255, 255, 255, 0.56), rgba(255, 255, 255, 0.08)) inset,
+      -8px 0 32px light-dark(rgba(28, 39, 56, 0.12), rgba(0, 0, 0, 0.3)) !important;
+  }
+
+  :root[windowtype="navigator:browser"][hilal-compact-sidebar]:not([macOSNativeFullscreen]):not([customizing]) #sidebar-main:not([sidebar-positionend]) sidebar-main,
+  :root[windowtype="navigator:browser"][hilal-compact-sidebar]:not([macOSNativeFullscreen]):not([customizing]) #sidebar-main:not([sidebar-positionend]) html\:sidebar-main {
+    --hilal-sidebar-top-padding: 42px !important;
+    --hilal-sidebar-top-padding-inner: 8px !important;
+    --hilal-sidebar-top-border: 1px solid var(--hilal-tahoe-border-soft) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):is([customizing], [sizemode="fullscreen"]) #tabbrowser-tabbox {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+}
+}

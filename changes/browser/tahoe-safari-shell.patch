@@ -1,0 +1,224 @@
+diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+--- a/browser/app/profile/firefox.js
++++ b/browser/app/profile/firefox.js
+@@ -3618,6 +3618,7 @@ pref("distribution.mozillaonline.ignore", true);
+ pref("hilal.privacy.initialized", false);
+ pref("hilal.bangs.custom", "[]");
+ // Hilal Browser - UI Fix Integration
++pref("hilal.tahoe.enabled", true);
+ pref("hilal.uifix.enabled", true);
+ // Theme Default Options
+ pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+--- a/browser/components/preferences/main.js
++++ b/browser/components/preferences/main.js
+@@ -2124,12 +2124,19 @@ var gHilalPane = {
+         if (hilalSidebarCompactHideToolbarCheckbox) {
+           hilalSidebarCompactHideToolbarCheckbox.checked = true;
+         }
++        const hilalTahoeCheckbox = document.getElementById("hilalTahoeEnabled");
++        if (hilalTahoeCheckbox) {
++          hilalTahoeCheckbox.checked = true;
++        }
+         if (hilalPrivacyLevelRadioGroup) {
+           hilalPrivacyLevelRadioGroup.value = "standard";
+         }
+       }
+     });
+ 
++    const hilalTahoeCheckbox = /** @type {HTMLInputElement|null} */ (
++      document.getElementById("hilalTahoeEnabled")
++    );
+     const hilalUiFixCheckbox = /** @type {HTMLInputElement|null} */ (
+       document.getElementById("hilalUiFixEnabled")
+     );
+@@ -2183,6 +2190,19 @@ var gHilalPane = {
+       }
+     };
+ 
++    if (hilalTahoeCheckbox) {
++      hilalTahoeCheckbox.checked = Services.prefs.getBoolPref(
++        "hilal.tahoe.enabled",
++        true
++      );
++      hilalTahoeCheckbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref(
++          "hilal.tahoe.enabled",
++          hilalTahoeCheckbox.checked
++        );
++      });
++    }
++
+     if (hilalUiFixCheckbox) {
+       hilalUiFixCheckbox.checked = Services.prefs.getBoolPref(
+         "hilal.uifix.enabled",
+diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
+--- a/browser/components/sidebar/sidebar-main.css
++++ b/browser/components/sidebar/sidebar-main.css
+@@ -547,6 +547,148 @@
+   text-align: start;
+ }
+ 
++@media -moz-pref("hilal.tahoe.enabled") {
++@media (-moz-platform: macos) {
++  :host([hilal-sidebar]) {
++    --hilal-sidebar-muted: color-mix(in srgb, var(--hilal-sidebar-text) 62%, transparent);
++    --hilal-sidebar-faint: light-dark(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.07));
++    --hilal-sidebar-hover: light-dark(rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0.09));
++    --hilal-sidebar-highlight: light-dark(rgba(10, 132, 255, 0.16), rgba(100, 167, 255, 0.22));
++    --hilal-sidebar-highlight-text: light-dark(#0b3d75, #f7fbff);
++    --hilal-sidebar-blue: light-dark(#0a84ff, #64a7ff);
++    inline-size: 268px;
++  }
++
++  :host([hilal-sidebar]:not([vertical-tabs])) {
++    inline-size: 68px;
++    max-inline-size: 68px;
++    min-inline-size: 68px;
++  }
++
++  .hilal-sidebar-layout {
++    background:
++      linear-gradient(180deg, light-dark(rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.05)), transparent 38%);
++  }
++
++  .hilal-workspace-rail {
++    border-inline-end-color: color-mix(in srgb, var(--hilal-sidebar-text) 10%, transparent);
++    gap: 9px;
++    padding: var(--hilal-sidebar-top-padding-inner, 18px) 9px 12px;
++  }
++
++  .hilal-workspace-list {
++    gap: 9px;
++  }
++
++  .hilal-workspace-button,
++  #hilal-workspace-add {
++    block-size: 36px;
++    border-radius: 11px;
++    flex-basis: 36px;
++    inline-size: 36px;
++    transition:
++      background-color 0.16s ease,
++      border-color 0.16s ease,
++      transform 0.12s ease;
++  }
++
++  .hilal-workspace-button:hover,
++  #hilal-workspace-add:hover {
++    transform: translateY(-0.5px);
++  }
++
++  .hilal-workspace-active {
++    background: var(--hilal-sidebar-highlight);
++    border-color: color-mix(in srgb, var(--hilal-sidebar-blue) 24%, transparent);
++    box-shadow:
++      0 1px 0 light-dark(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.08)) inset,
++      0 6px 16px color-mix(in srgb, var(--hilal-sidebar-blue) 18%, transparent);
++  }
++
++  #hilal-workspace-add {
++    border-style: solid;
++    color: var(--hilal-sidebar-muted);
++  }
++
++  .hilal-sidebar-panel {
++    padding: var(--hilal-sidebar-top-padding-inner, 18px) 13px 0;
++  }
++
++  .hilal-panel-header {
++    gap: 8px;
++    min-block-size: 34px;
++  }
++
++  .hilal-panel-title {
++    font-size: 13px;
++    font-weight: 680;
++  }
++
++  .hilal-icon-button {
++    block-size: 28px;
++    border-radius: 999px;
++    inline-size: 28px;
++  }
++
++  #hilal-sidebar-search {
++    background: var(--hilal-sidebar-faint);
++    border-color: color-mix(in srgb, var(--hilal-sidebar-text) 10%, transparent);
++    border-radius: 999px;
++    min-block-size: 30px;
++    padding-inline: 10px;
++  }
++
++  #hilal-sidebar-search:focus {
++    border-color: color-mix(in srgb, var(--hilal-sidebar-blue) 34%, transparent);
++    box-shadow: 0 0 0 3px color-mix(in srgb, var(--hilal-sidebar-blue) 16%, transparent);
++  }
++
++  .hilal-panel-scroll {
++    padding-block-end: 18px;
++  }
++
++  .hilal-section {
++    gap: 7px;
++    margin-block-end: 18px;
++  }
++
++  .hilal-section-heading {
++    font-size: 11px;
++    font-weight: 760;
++  }
++
++  .hilal-row,
++  .hilal-footer-row {
++    border-radius: 10px;
++  }
++
++  .hilal-row {
++    min-block-size: 32px;
++    padding-inline: 8px;
++  }
++
++  .hilal-footer-row {
++    min-block-size: 30px;
++    padding-inline: 9px;
++  }
++
++  .hilal-count-badge {
++    background: light-dark(rgba(255, 255, 255, 0.44), rgba(255, 255, 255, 0.08));
++    border: 1px solid color-mix(in srgb, var(--hilal-sidebar-text) 8%, transparent);
++  }
++
++  .hilal-footer-group,
++  .hilal-sidebar-footer,
++  .hilal-workspace-add-wrap {
++    border-color: color-mix(in srgb, var(--hilal-sidebar-text) 10%, transparent);
++  }
++
++  #hilal-tabs-section {
++    min-height: 240px;
++  }
++}
++}
++
+ .wrapper {
+   display: grid;
+   grid-template-rows: auto min-content min-content;
+diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
+--- a/browser/locales/en-US/browser/preferences/preferences.ftl
++++ b/browser/locales/en-US/browser/preferences/preferences.ftl
+@@ -2840,6 +2840,9 @@ hilal-privacy-extreme =
+ ## UI Enhancements
+ 
+ hilal-uifix-header = UI Enhancements
++hilal-tahoe-enabled =
++    .label = Enable Tahoe Safari shell
++hilal-tahoe-enabled-desc = Uses a macOS Tahoe-inspired Liquid Glass toolbar, sidebar, URL pill, and rounded content frame.
+ hilal-uifix-enabled =
+     .label = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
+ hilal-uifix-connect-to-window =
+@@ -2891,4 +2894,3 @@ hilal-shortcuts-header = Keyboard Shortcuts
+ hilal-shortcuts-description = Customize keyboard shortcuts for Hilal actions and native browser functions.
+ hilal-shortcuts-reset =
+     .label = Restore Defaults
+-

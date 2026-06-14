@@ -161,3 +161,7 @@ reason = "Hilal keyboard shortcuts preferences logic"
 [[patches]]
 path   = "browser/boosts.patch"
 reason = "Hilal boosts feature (Site Customizer and Element Zapper)"
+
+[[patches]]
+path   = "browser/tahoe-safari-shell.patch"
+reason = "Tahoe Safari-inspired shell preference and sidebar refinements"
