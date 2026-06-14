@@ -196,7 +196,7 @@
 @media -moz-pref("hilal.tahoe.enabled") {
   @media (-moz-platform: macos) {
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) {
-      --hilal-safari-sidebar-width: 312px;
+      --hilal-safari-sidebar-width: 300px;
       --hilal-safari-toolbox-height: 94px;
       --hilal-safari-window-gap: 8px;
       --hilal-safari-sidebar-radius: 28px;
@@ -538,23 +538,24 @@
       min-width: var(--hilal-safari-sidebar-width) !important;
       max-width: var(--hilal-safari-sidebar-width) !important;
       box-sizing: border-box !important;
-      margin-block-start: calc(-1 * var(--hilal-safari-content-top, var(--hilal-safari-toolbox-height)) + var(--hilal-safari-window-gap)) !important;
-      padding: var(--hilal-safari-window-gap) !important;
-      block-size: calc(100% + var(--hilal-safari-content-top, var(--hilal-safari-toolbox-height)) - var(--hilal-safari-window-gap)) !important;
+      margin-block-start: calc(-1 * var(--hilal-safari-content-top, var(--hilal-safari-toolbox-height))) !important;
+      padding: 0 !important;
+      block-size: calc(100% + var(--hilal-safari-content-top, var(--hilal-safari-toolbox-height)) + var(--hilal-safari-content-bottom, 0px)) !important;
       z-index: 1100 !important;
       background: transparent !important;
       border: none !important;
       border-radius: var(--hilal-safari-sidebar-radius) !important;
       box-shadow: none !important;
-      overflow: hidden !important;
+      overflow: visible !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #sidebar-main[hilal-sidebar] sidebar-main,
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #sidebar-main[hilal-sidebar] html\:sidebar-main {
-      inline-size: calc(var(--hilal-safari-sidebar-width) - var(--hilal-safari-window-gap) - var(--hilal-safari-window-gap)) !important;
-      min-inline-size: calc(var(--hilal-safari-sidebar-width) - var(--hilal-safari-window-gap) - var(--hilal-safari-window-gap)) !important;
-      max-inline-size: calc(var(--hilal-safari-sidebar-width) - var(--hilal-safari-window-gap) - var(--hilal-safari-window-gap)) !important;
-      block-size: calc(100% - var(--hilal-safari-window-gap) - var(--hilal-safari-window-gap)) !important;
+      inline-size: 100% !important;
+      min-inline-size: 100% !important;
+      max-inline-size: 100% !important;
+      block-size: 100% !important;
+      box-sizing: border-box !important;
       background-color: var(--hilal-safari-sidebar-bg) !important;
       background-image:
         linear-gradient(180deg, var(--hilal-safari-sidebar-bg-strong), transparent 54%),
