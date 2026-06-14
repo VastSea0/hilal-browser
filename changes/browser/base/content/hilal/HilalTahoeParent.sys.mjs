@@ -5,22 +5,24 @@
 export class HilalTahoeParent extends JSWindowActorParent {
   receiveMessage(aMessage) {
     if (aMessage.name === "HilalTahoe:GetOffsets") {
-      let chromeWin = this.browsingContext.topChromeWindow;
-      if (!chromeWin) {
-        return { top: 0, left: 0 };
-      }
-      
-      let sidebarOpen = chromeWin.SidebarController?.isOpen && 
-                        Services.prefs.getBoolPref("hilal.tahoe.enabled", true);
-      if (sidebarOpen) {
-        let docEl = chromeWin.document.documentElement;
-        let style = chromeWin.getComputedStyle(docEl);
-        let top = parseFloat(style.getPropertyValue("--hilal-safari-webview-top-underlap")) || 92;
-        let left = parseFloat(style.getPropertyValue("--hilal-safari-sidebar-content-underlap")) || 84;
-        return { top, left };
-      }
       return { top: 0, left: 0 };
     }
+
+    if (aMessage.name === "HilalTahoe:PageStyle") {
+      let chromeWin = this.browsingContext.topChromeWindow;
+      if (!chromeWin?.document) {
+        return null;
+      }
+      let color = aMessage.data?.backgroundColor;
+      let docEl = chromeWin.document.documentElement;
+      if (color) {
+        docEl.style.setProperty("--hilal-safari-page-bg", color);
+      } else {
+        docEl.style.removeProperty("--hilal-safari-page-bg");
+      }
+      return null;
+    }
+
     return null;
   }
 }

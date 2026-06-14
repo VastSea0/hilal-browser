@@ -10,43 +10,46 @@ export class HilalTahoeChild extends JSWindowActorChild {
       aEvent.type === "pageshow"
     ) {
       if (this.browsingContext.parent === null) {
-        this.updateOffsets();
+        this.updatePageBackground();
       }
     }
   }
 
   receiveMessage(aMessage) {
     if (aMessage.name === "HilalTahoe:UpdateOffsets") {
-      this.applyOffsets(aMessage.data.top, aMessage.data.left);
+      this.updatePageBackground();
     }
   }
 
   async updateOffsets() {
-    try {
-      let offsets = await this.sendQuery("HilalTahoe:GetOffsets");
-      this.applyOffsets(offsets.top, offsets.left);
-    } catch (e) {
-      // Ignore errors when browsing context or page gets unloaded
-    }
+    this.updatePageBackground();
   }
 
-  applyOffsets(top, left) {
-    let docEl = this.document?.documentElement;
-    if (!docEl) return;
-    if (top > 0) {
-      docEl.style.setProperty("padding-top", `${top}px`, "important");
-      docEl.style.setProperty("box-sizing", "border-box", "important");
-    } else {
-      docEl.style.removeProperty("padding-top");
+  updatePageBackground() {
+    let doc = this.document;
+    let docEl = doc?.documentElement;
+    if (!docEl) {
+      return;
     }
-    if (left > 0) {
-      docEl.style.setProperty("padding-left", `${left}px`, "important");
-      docEl.style.setProperty("box-sizing", "border-box", "important");
-    } else {
-      docEl.style.removeProperty("padding-left");
+
+    let color = this.readVisibleBackground(docEl);
+    this.sendAsyncMessage("HilalTahoe:PageStyle", {
+      backgroundColor: color,
+    });
+  }
+
+  readVisibleBackground(docEl) {
+    let win = this.contentWindow;
+    let body = this.document.body;
+    for (let element of [body, docEl]) {
+      if (!element) {
+        continue;
+      }
+      let color = win.getComputedStyle(element).backgroundColor;
+      if (color && color !== "transparent" && color !== "rgba(0, 0, 0, 0)") {
+        return color;
+      }
     }
-    if (top <= 0 && left <= 0) {
-      docEl.style.removeProperty("box-sizing");
-    }
+    return "";
   }
 }
