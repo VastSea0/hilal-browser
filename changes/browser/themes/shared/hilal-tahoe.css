@@ -655,5 +655,44 @@
         max-width: none !important;
       }
     }
+
+    /* Horizontal tab drag and drop styles matching vertical liquid glass theme */
+    #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[dragtarget] .tab-background,
+    #tabbrowser-tabs[orient="horizontal"] tab-split-view-wrapper[dragtarget] .tab-background {
+      background-color: light-dark(rgba(255, 255, 255, 0.42), rgba(28, 28, 30, 0.45)) !important;
+      background-image: none !important;
+      backdrop-filter: blur(24px) !important;
+      -webkit-backdrop-filter: blur(24px) !important;
+      border: 1px solid light-dark(rgba(0, 0, 0, 0.12), rgba(255, 255, 255, 0.22)) !important;
+      box-shadow: 0 10px 30px light-dark(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.45)),
+                  0 1px 0 light-dark(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1)) inset !important;
+      opacity: 1 !important;
+    }
+
+    #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[dragtarget] .tab-stack,
+    #tabbrowser-tabs[orient="horizontal"] tab-split-view-wrapper[dragtarget] .tab-stack {
+      transform: scale(0.97) !important;
+      transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    }
+
+    #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[tabdrop-samewindow] .tab-stack,
+    #tabbrowser-tabs[orient="horizontal"] tab-split-view-wrapper[tabdrop-samewindow] .tab-stack {
+      transform: scale(1) !important;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+
+    #tabbrowser-tabs[orient="horizontal"][movingtab] .tabbrowser-tab {
+      transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    }
+
+    #tabbrowser-tabs[orient="horizontal"][movingtab] .tabbrowser-tab[dragtarget],
+    #tabbrowser-tabs[orient="horizontal"][movingtab] tab-split-view-wrapper[dragtarget] {
+      transition: none !important;
+    }
+
+    #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[tabdrop-samewindow],
+    #tabbrowser-tabs[orient="horizontal"] tab-split-view-wrapper[tabdrop-samewindow] {
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
   }
 }
