@@ -2,8 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-@media -moz-pref("hilal.tahoe.enabled") {
-@media (-moz-platform: macos) {
+@media -moz-pref("hilal.tahoe.enabled") and (-moz-platform: macos) {
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) {
     --hilal-tahoe-accent: light-dark(#0a84ff, #64a7ff);
     --hilal-tahoe-window-tint: transparent;
@@ -440,5 +439,4 @@
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #sidebar-main[hilal-sidebar] .tabbrowser-tab .tab-loading-burst {
     display: none !important;
   }
-}
 }

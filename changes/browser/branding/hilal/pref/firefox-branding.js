@@ -36,6 +36,7 @@ pref("devtools.selfxss.count", 5);
 // Sidebar and vertical tabs are enabled by default in Hilal.
 pref("sidebar.revamp", true);
 pref("sidebar.verticalTabs", true);
+pref("sidebar.verticalTabs.showHorizontal", false);
 pref("sidebar.visibility", "always-show");
 
 // Use transparent macOS chrome surfaces for Hilal's Tahoe-style glass look.
