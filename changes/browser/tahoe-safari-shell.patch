@@ -20,6 +20,39 @@ diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
  pref("hilal.uifix.enabled", true);
  // Theme Default Options
  pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+diff --git a/browser/base/jar.mn b/browser/base/jar.mn
+--- a/browser/base/jar.mn
++++ b/browser/base/jar.mn
+@@ -90,6 +90,8 @@ browser.jar:
+         content/browser/hilal/HilalBoosts.js                (content/hilal/HilalBoosts.js)
+         content/browser/hilal/HilalBoostsActorParent.sys.mjs (content/hilal/HilalBoostsActorParent.sys.mjs)
+         content/browser/hilal/HilalBoostsActorChild.sys.mjs  (content/hilal/HilalBoostsActorChild.sys.mjs)
++        content/browser/hilal/HilalTahoeParent.sys.mjs      (content/hilal/HilalTahoeParent.sys.mjs)
++        content/browser/hilal/HilalTahoeChild.sys.mjs       (content/hilal/HilalTahoeChild.sys.mjs)
+         content/browser/global-scripts.js                   (content/global-scripts.js)
+         content/browser/main-popupset.js                    (content/main-popupset.js)
+ *       content/browser/pageinfo/pageInfo.xhtml             (content/pageinfo/pageInfo.xhtml)
+diff --git a/browser/branding/hilal/pref/firefox-branding.js b/browser/branding/hilal/pref/firefox-branding.js
+--- a/browser/branding/hilal/pref/firefox-branding.js
++++ b/browser/branding/hilal/pref/firefox-branding.js
+@@ -36,13 +36,16 @@ pref("devtools.selfxss.count", 5);
+ // Sidebar and vertical tabs are enabled by default in Hilal.
+ pref("sidebar.revamp", true);
+ pref("sidebar.verticalTabs", true);
+-pref("sidebar.visibility", "always-show");
++pref("sidebar.verticalTabs.showHorizontal", true);
++pref("sidebar.visibility", "hide-sidebar");
+ 
+ // Use transparent macOS chrome surfaces for Hilal's Tahoe-style glass look.
+ pref("hilal.browser.transparent-chrome.enabled", true);
+ pref("browser.tabs.allow_transparent_browser", true);
+ pref("widget.macos.sidebar-blend-mode.behind-window", true);
+ pref("widget.macos.titlebar-blend-mode.behind-window", true);
++pref("gfx.webrender.opaque-backdrop-fallback", false);
++
+ 
+ // Privacy-first Hilal defaults, informed by Betterfox and arkenfox.
+ // These are default prefs rather than locked prefs, so users can still opt in.
 diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/components/customizableui/CustomizableUI.sys.mjs
 --- a/browser/components/customizableui/CustomizableUI.sys.mjs
 +++ b/browser/components/customizableui/CustomizableUI.sys.mjs
@@ -414,7 +447,75 @@ diff --git a/browser/components/sidebar/SidebarManager.sys.mjs b/browser/compone
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
-@@ -2374,7 +2374,9 @@ var SidebarController = {
+@@ -574,6 +574,31 @@ var SidebarController = {
+     }
+ 
+     HilalCompactMode.init();
++
++    try {
++      ChromeUtils.registerWindowActor("HilalTahoe", {
++        parent: {
++          esModuleURI: "chrome://browser/content/hilal/HilalTahoeParent.sys.mjs",
++        },
++        child: {
++          esModuleURI: "chrome://browser/content/hilal/HilalTahoeChild.sys.mjs",
++          events: {
++            DOMDocElementInserted: {},
++            DOMContentLoaded: {},
++            pageshow: {},
++          },
++        },
++        allFrames: false,
++        remoteTypes: ["web", "file"],
++      });
++    } catch (e) {
++      // Already registered
++    }
++
++    this._tabSelectListener = () => {
++      this.updateTahoeOffsets();
++    };
++    window.gBrowser.tabContainer.addEventListener("TabSelect", this._tabSelectListener);
+   },
+ 
+   uninit() {
+@@ -608,6 +633,11 @@ var SidebarController = {
+     delete this._aiWindowObserverAdded;
+     delete this._windowRestoredObserverAdded;
+ 
++    if (this._tabSelectListener) {
++      window.gBrowser.tabContainer.removeEventListener("TabSelect", this._tabSelectListener);
++      this._tabSelectListener = null;
++    }
++
+     CustomizableUI.removeListener(this);
+ 
+     if (this._observer) {
+@@ -2071,6 +2101,7 @@ var SidebarController = {
+       this.updateToolbarButton();
+       this.dismissSidebarBadge(commandID);
+ 
++      this.updateTahoeOffsets(true);
+       this._fireFocusedEvent();
+       return true;
+     });
+@@ -2095,6 +2126,7 @@ var SidebarController = {
+     }
+     return this._show(commandID).then(() => {
+       this._loadSidebarExtension(commandID);
++      this.updateTahoeOffsets(true);
+       return true;
+     });
+   },
+@@ -2278,6 +2310,7 @@ var SidebarController = {
+       updateToggleControlLabel(triggerNode);
+     }
+     this.updateToolbarButton();
++    this.updateTahoeOffsets(false);
+   },
+ 
+   /**
+@@ -2374,7 +2407,9 @@ var SidebarController = {
    },
  
    toggleTabstrip() {
@@ -425,6 +526,35 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
      let tabStrip = gBrowser.tabContainer;
      let arrowScrollbox = tabStrip.arrowScrollbox;
      let currentScrollOrientation = arrowScrollbox.getAttribute("orient");
+@@ -2414,6 +2449,28 @@ var SidebarController = {
+     }
+   },
+ 
++  updateTahoeOffsets(sidebarOpen = this.isOpen) {
++    let browser = window.gBrowser.selectedBrowser;
++    if (browser && browser.browsingContext) {
++      try {
++        let actor = browser.browsingContext.currentWindowGlobal?.getActor("HilalTahoe");
++        if (actor) {
++          let top = 0;
++          let left = 0;
++          if (sidebarOpen && Services.prefs.getBoolPref("hilal.tahoe.enabled", true)) {
++            let docEl = document.documentElement;
++            let style = window.getComputedStyle(docEl);
++            top = parseFloat(style.getPropertyValue("--hilal-safari-webview-top-underlap")) || 92;
++            left = parseFloat(style.getPropertyValue("--hilal-safari-sidebar-content-underlap")) || 84;
++          }
++          actor.sendAsyncMessage("HilalTahoe:UpdateOffsets", { top, left });
++        }
++      } catch (e) {
++        // Ignore "doesn't match remote type" errors
++      }
++    }
++  },
++
+   debouncedMouseEnter() {
+     const contentArea = document.getElementById("tabbrowser-tabbox");
+     this._box.toggleAttribute("sidebar-launcher-hovered", true);
 diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
 --- a/browser/components/sidebar/sidebar-main.css
 +++ b/browser/components/sidebar/sidebar-main.css
