@@ -618,7 +618,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
  }
  
  .hilal-pinned-card:hover {
-@@ -547,6 +550,484 @@
+@@ -547,6 +550,510 @@
    text-align: start;
  }
  
@@ -962,7 +962,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +
 +  .safari-row {
 +    background: transparent;
-+    border: none;
++    border: 1px solid transparent;
 +    color: var(--sidebar-text-color);
 +    font: inherit;
 +    font-size: 13px;
@@ -973,7 +973,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +    width: 100%;
 +    min-height: 30px;
 +    height: 30px;
-+    padding-inline: 8px;
++    padding-inline: 7px;
 +    border-radius: 8px;
 +    cursor: pointer;
 +    text-align: start;
@@ -981,7 +981,9 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +      background-color 0.15s ease,
 +      color 0.15s ease,
 +      opacity 0.15s ease,
-+      transform 0.18s var(--animation-easing-function);
++      border-color 0.15s ease,
++      box-shadow 0.15s ease,
++      transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 +    user-select: none;
 +    box-sizing: border-box;
 +  }
@@ -995,15 +997,39 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +    font-weight: 600;
 +  }
 +
-+  .safari-tab-row[dragging] {
-+    opacity: 0.96 !important;
-+    visibility: visible !important;
-+    transform: scale(0.985);
++  .safari-row.hilal-ws-drop-target {
++    background-color: var(--hilal-sidebar-highlight) !important;
++    border-color: light-dark(rgba(0, 0, 0, 0.15), rgba(255, 255, 255, 0.25)) !important;
++    box-shadow: 0 0 0 1.5px var(--hilal-sidebar-blue) !important;
 +  }
 +
-+  .safari-tab-row[dragover] {
-+    background-color: var(--hilal-sidebar-hover);
-+    transform: translateY(2px);
++  .safari-tab-row.dragging-active {
++    position: relative;
++    z-index: 10000 !important;
++    background-color: light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.15)) !important;
++    backdrop-filter: blur(24px) !important;
++    -webkit-backdrop-filter: blur(24px) !important;
++    border-color: light-dark(rgba(0, 0, 0, 0.12), rgba(255, 255, 255, 0.22)) !important;
++    box-shadow: 0 10px 30px light-dark(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.45)),
++                0 1px 0 light-dark(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1)) inset !important;
++    transition: none !important;
++    pointer-events: none;
++  }
++
++  .safari-tab-row.dropping-active {
++    position: relative;
++    z-index: 10000 !important;
++    background-color: light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.15)) !important;
++    backdrop-filter: blur(24px) !important;
++    -webkit-backdrop-filter: blur(24px) !important;
++    border-color: light-dark(rgba(0, 0, 0, 0.12), rgba(255, 255, 255, 0.22)) !important;
++    box-shadow: 0 4px 12px light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.2)),
++                0 1px 0 light-dark(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1)) inset !important;
++    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
++                box-shadow 0.4s ease, 
++                background-color 0.4s ease, 
++                border-color 0.4s ease, 
++                backdrop-filter 0.4s ease !important;
 +  }
 +
 +  @media (prefers-reduced-motion: reduce) {
@@ -1121,8 +1147,13 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
    static queries = {
      allButtons: { all: "moz-button" },
      extensionButtons: { all: ".tools-and-extensions > moz-button[extension]" },
-@@ -110,6 +116,8 @@ export default class SidebarMain extends MozLitElement {
+@@ -108,8 +114,13 @@ export default class SidebarMain extends MozLitElement {
+     this._hilalPrefObserver = (_subject, topic, data) => {
+       this.observe(_subject, topic, data);
      };
++    this._onTabPointerMove = this.handleTabPointerMove.bind(this);
++    this._onTabPointerUp = this.handleTabPointerUp.bind(this);
++    this._onTabPointerCancel = this.handleTabPointerCancel.bind(this);
      this.shouldShowOverflowButton = false;
      this.overflowMenuOpen = false;
 +    this.isTabsExpanded = true;
@@ -1130,7 +1161,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
    }
  
    tooltips = {
-@@ -176,6 +184,11 @@ export default class SidebarMain extends MozLitElement {
+@@ -176,6 +187,11 @@ export default class SidebarMain extends MozLitElement {
      window.addEventListener("SidebarItemRemoved", this);
  
      Services.prefs.addObserver("sidebar.verticalTabs", this._hilalPrefObserver);
@@ -1142,7 +1173,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
      Services.prefs.addObserver("hilal.workspaces.", this._hilalPrefObserver);
      Services.prefs.addObserver(
        "hilal.sidebar.footer.",
-@@ -210,6 +223,14 @@ export default class SidebarMain extends MozLitElement {
+@@ -210,6 +226,14 @@ export default class SidebarMain extends MozLitElement {
        "sidebar.verticalTabs",
        this._hilalPrefObserver
      );
@@ -1157,7 +1188,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
      Services.prefs.removeObserver("hilal.workspaces.", this._hilalPrefObserver);
      Services.prefs.removeObserver(
        "hilal.sidebar.footer.",
-@@ -246,8 +267,14 @@ export default class SidebarMain extends MozLitElement {
+@@ -246,8 +270,14 @@ export default class SidebarMain extends MozLitElement {
        return true;
      }
      const manager = window.gHilalWorkspaces;
@@ -1174,7 +1205,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
      if (!manager || (!workspacesEnabled && !verticalTabsEnabled)) {
        return false;
      }
-@@ -343,15 +370,22 @@ export default class SidebarMain extends MozLitElement {
+@@ -343,15 +373,22 @@ export default class SidebarMain extends MozLitElement {
  
    observe(_subject, topic, data) {
      if (topic === "nsPref:changed") {
@@ -1200,7 +1231,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
          if (shouldBeActive !== this.hilalSidebarActive) {
            if (shouldBeActive) {
              this.maybeInitHilalSidebar();
-@@ -359,12 +393,22 @@ export default class SidebarMain extends MozLitElement {
+@@ -359,12 +396,22 @@ export default class SidebarMain extends MozLitElement {
              this.uninitHilalSidebar();
            }
          } else {
@@ -1228,7 +1259,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
          if (shouldBeActive !== this.hilalSidebarActive) {
            if (shouldBeActive) {
              this.maybeInitHilalSidebar();
-@@ -403,6 +447,10 @@ export default class SidebarMain extends MozLitElement {
+@@ -403,6 +450,10 @@ export default class SidebarMain extends MozLitElement {
      this.hilalWorkspaces = [...(manager._workspaces || [])];
      this.hilalActiveId = manager._activeId || this.hilalWorkspaces[0]?.id || "";
      this.hilalTabs = this.getHilalWorkspaceTabs(this.hilalActiveId);
@@ -1239,9 +1270,294 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
      this.hilalShowBookmarks = Services.prefs.getBoolPref(
        "hilal.workspaces.showBookmarks",
        false
-@@ -531,37 +579,69 @@ export default class SidebarMain extends MozLitElement {
+@@ -530,38 +581,354 @@ export default class SidebarMain extends MozLitElement {
+     tab.dispatchEvent(new CustomEvent("TabHoverEnd", { bubbles: true }));
    }
  
++  handleTabPointerDown(tab, event) {
++    if (event.button !== 0) {
++      return;
++    }
++    const target = event.target;
++    if (target.closest(".safari-row-close-btn") || target.closest(".safari-row-audio")) {
++      return;
++    }
++
++    this._dragTab = tab;
++    this._dragElement = event.currentTarget;
++    this._activePointerId = event.pointerId;
++    this._startX = event.clientX;
++    this._startY = event.clientY;
++    this._isDragging = false;
++    this._hoveredWorkspaceRow = null;
++    this._targetWorkspaceId = null;
++
++    this._dragElement.setPointerCapture(event.pointerId);
++    this._dragElement.addEventListener("pointermove", this._onTabPointerMove);
++    this._dragElement.addEventListener("pointerup", this._onTabPointerUp);
++    this._dragElement.addEventListener("pointercancel", this._onTabPointerCancel);
++
++    event.stopPropagation();
++  }
++
++  handleTabPointerMove(event) {
++    if (event.pointerId !== this._activePointerId) {
++      return;
++    }
++
++    const clientX = event.clientX;
++    const clientY = event.clientY;
++
++    if (!this._isDragging) {
++      const dx = clientX - this._startX;
++      const dy = clientY - this._startY;
++      if (Math.sqrt(dx * dx + dy * dy) > 4) {
++        this._isDragging = true;
++
++        const container = this.shadowRoot.querySelector(".safari-row-list");
++        if (!container) {
++          this.handleTabPointerCancel(event);
++          return;
++        }
++
++        this._containerRect = container.getBoundingClientRect();
++        this._tabElements = Array.from(container.querySelectorAll(".safari-tab-row"));
++        this._tabPositions = [];
++        this._tabHeights = [];
++        this._dragIndex = -1;
++
++        for (let i = 0; i < this._tabElements.length; i++) {
++          const el = this._tabElements[i];
++          const rect = el.getBoundingClientRect();
++          this._tabPositions.push({
++            left: rect.left - this._containerRect.left,
++            top: rect.top - this._containerRect.top,
++            height: rect.height,
++            width: rect.width,
++          });
++          this._tabHeights.push(rect.height);
++          if (el === this._dragElement) {
++            this._dragIndex = i;
++          }
++        }
++
++        if (this._dragIndex === -1) {
++          this.handleTabPointerCancel(event);
++          return;
++        }
++
++        const dragRect = this._dragElement.getBoundingClientRect();
++        this._dragOffset = {
++          x: this._startX - dragRect.left,
++          y: this._startY - dragRect.top,
++        };
++
++        this._dragElement.classList.add("dragging-active");
++        this._targetIndex = this._dragIndex;
++
++        try {
++          this._dragTab.dispatchEvent(new CustomEvent("TabHoverEnd", { bubbles: true }));
++        } catch (e) {}
++      }
++      return;
++    }
++
++    event.preventDefault();
++    event.stopPropagation();
++
++    const originalPos = this._tabPositions[this._dragIndex];
++    const tx = (clientX - this._dragOffset.x - this._containerRect.left) - originalPos.left;
++    const ty = (clientY - this._dragOffset.y - this._containerRect.top) - originalPos.top;
++
++    this._dragElement.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(0.97)`;
++
++    const elementUnderPointer = this.shadowRoot.elementFromPoint(clientX, clientY);
++    const workspaceRow = elementUnderPointer?.closest(".safari-row");
++    const isWorkspace = workspaceRow && !workspaceRow.classList.contains("safari-tab-row");
++
++    if (isWorkspace) {
++      const wsId = workspaceRow.dataset.workspaceId;
++      if (this._hoveredWorkspaceRow !== workspaceRow) {
++        this._hoveredWorkspaceRow?.classList.remove("hilal-ws-drop-target");
++        this._hoveredWorkspaceRow = workspaceRow;
++        workspaceRow.classList.add("hilal-ws-drop-target");
++      }
++      this._targetWorkspaceId = wsId;
++      this._targetIndex = -1;
++
++      for (let j = 0; j < this._tabElements.length; j++) {
++        if (j !== this._dragIndex) {
++          this._tabElements[j].style.transform = "";
++        }
++      }
++      return;
++    }
++
++    if (this._hoveredWorkspaceRow) {
++      this._hoveredWorkspaceRow.classList.remove("hilal-ws-drop-target");
++      this._hoveredWorkspaceRow = null;
++    }
++    this._targetWorkspaceId = null;
++
++    const h = originalPos.height;
++    const y_top = clientY - this._dragOffset.y - this._containerRect.top;
++    const y_center = y_top + h / 2;
++
++    let computedTarget = 0;
++    let minDiff = Infinity;
++
++    for (let k = 0; k < this._tabPositions.length; k++) {
++      let slotTop = this._tabPositions[k].top;
++      if (k > this._dragIndex) {
++        slotTop -= this._tabHeights[this._dragIndex];
++      }
++      const slotCenter = slotTop + this._tabHeights[this._dragIndex] / 2;
++      const diff = Math.abs(y_center - slotCenter);
++      if (diff < minDiff) {
++        minDiff = diff;
++        computedTarget = k;
++      }
++    }
++
++    this._targetIndex = computedTarget;
++
++    for (let j = 0; j < this._tabElements.length; j++) {
++      if (j === this._dragIndex) {
++        continue;
++      }
++      const isShifted = (this._targetIndex <= j && j < this._dragIndex) || 
++                        (this._dragIndex < j && j <= this._targetIndex);
++      if (isShifted) {
++        const shiftY = j < this._dragIndex ? this._tabHeights[this._dragIndex] : -this._tabHeights[this._dragIndex];
++        const shiftX = 8;
++        this._tabElements[j].style.transform = `translate3d(${shiftX}px, ${shiftY}px, 0)`;
++      } else {
++        this._tabElements[j].style.transform = "";
++      }
++    }
++  }
++
++  handleTabPointerUp(event) {
++    if (event.pointerId !== this._activePointerId) {
++      return;
++    }
++
++    const element = this._dragElement;
++    element.releasePointerCapture(event.pointerId);
++    element.removeEventListener("pointermove", this._onTabPointerMove);
++    element.removeEventListener("pointerup", this._onTabPointerUp);
++    element.removeEventListener("pointercancel", this._onTabPointerCancel);
++
++    this._activePointerId = null;
++
++    if (!this._isDragging) {
++      this.selectHilalTab(this._dragTab);
++      this._dragTab = null;
++      this._dragElement = null;
++      return;
++    }
++
++    const draggedTab = this._dragTab;
++    const dragIndex = this._dragIndex;
++    const targetIndex = this._targetIndex;
++    const targetWorkspaceId = this._targetWorkspaceId;
++
++    this._hoveredWorkspaceRow?.classList.remove("hilal-ws-drop-target");
++    this._hoveredWorkspaceRow = null;
++
++    element.classList.remove("dragging-active");
++
++    if (targetWorkspaceId) {
++      this.cleanupDragStyles();
++      this._hilalManager?._moveTabToWorkspace?.(draggedTab, targetWorkspaceId);
++      this.scheduleHilalRefresh();
++      return;
++    }
++
++    if (dragIndex === -1 || targetIndex === -1 || targetIndex === dragIndex) {
++      element.classList.add("dropping-active");
++      element.style.transform = "translate3d(0, 0, 0) scale(1)";
++      setTimeout(() => {
++        this.cleanupDragStyles();
++        this.scheduleHilalRefresh();
++      }, 400);
++      return;
++    }
++
++    element.classList.add("dropping-active");
++    const finalTy = this._tabPositions[targetIndex].top - this._tabPositions[dragIndex].top;
++    element.style.transform = `translate3d(0px, ${finalTy}px, 0) scale(1)`;
++
++    setTimeout(() => {
++      const targetTab = this.filteredHilalTabs[targetIndex];
++      if (draggedTab && targetTab && draggedTab !== targetTab) {
++        if (draggedTab.pinned && !targetTab.pinned) {
++          window.gBrowser.unpinTab(draggedTab);
++        } else if (!draggedTab.pinned && targetTab.pinned) {
++          window.gBrowser.pinTab(draggedTab);
++        }
++        window.gBrowser.moveTabTo(draggedTab, targetTab._tPos);
++      }
++      this.cleanupDragStyles();
++      this.scheduleHilalRefresh();
++    }, 400);
++  }
++
++  handleTabPointerCancel(event) {
++    if (event.pointerId !== this._activePointerId) {
++      return;
++    }
++
++    const element = this._dragElement;
++    if (element) {
++      element.releasePointerCapture(event.pointerId);
++      element.removeEventListener("pointermove", this._onTabPointerMove);
++      element.removeEventListener("pointerup", this._onTabPointerUp);
++      element.removeEventListener("pointercancel", this._onTabPointerCancel);
++    }
++
++    this._activePointerId = null;
++    this._hoveredWorkspaceRow?.classList.remove("hilal-ws-drop-target");
++    this._hoveredWorkspaceRow = null;
++
++    if (this._isDragging) {
++      element?.classList.remove("dragging-active");
++      element?.classList.add("dropping-active");
++      if (element) {
++        element.style.transform = "translate3d(0, 0, 0) scale(1)";
++      }
++      setTimeout(() => {
++        this.cleanupDragStyles();
++        this.scheduleHilalRefresh();
++      }, 400);
++    } else {
++      this._dragTab = null;
++      this._dragElement = null;
++    }
++  }
++
++  cleanupDragStyles() {
++    if (this._dragElement) {
++      this._dragElement.classList.remove("dragging-active");
++      this._dragElement.classList.remove("dropping-active");
++      this._dragElement.style.transform = "";
++    }
++    if (this._tabElements) {
++      for (const el of this._tabElements) {
++        el.style.transform = "";
++      }
++    }
++    this._dragTab = null;
++    this._dragElement = null;
++    this._tabElements = [];
++    this._tabPositions = [];
++    this._tabHeights = [];
++    this._isDragging = false;
++    this._dragIndex = -1;
++    this._targetIndex = -1;
++    this._targetWorkspaceId = null;
++  }
++
    handleTabDragStart(tab, event) {
 +    this.clearHilalTabDragState();
      this._draggedTab = tab;
@@ -1316,7 +1632,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
      this.scheduleHilalRefresh();
    }
  
-@@ -575,15 +655,16 @@ export default class SidebarMain extends MozLitElement {
+@@ -575,15 +942,16 @@ export default class SidebarMain extends MozLitElement {
  
    handlePinnedContainerDrop(event) {
      event.preventDefault();
@@ -1337,7 +1653,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
      this.scheduleHilalRefresh();
    }
  
-@@ -597,21 +678,22 @@ export default class SidebarMain extends MozLitElement {
+@@ -597,21 +965,22 @@ export default class SidebarMain extends MozLitElement {
  
    handleUnpinnedContainerDrop(event) {
      event.preventDefault();
@@ -1365,7 +1681,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
      this.scheduleHilalRefresh();
    }
  
-@@ -705,7 +787,11 @@ export default class SidebarMain extends MozLitElement {
+@@ -705,7 +1074,11 @@ export default class SidebarMain extends MozLitElement {
  
    handleWorkspaceDragOver(workspace, event) {
      const types = event.dataTransfer.types;
@@ -1378,7 +1694,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
        event.preventDefault();
        event.dataTransfer.dropEffect = "move";
        event.currentTarget.classList.add("hilal-ws-drop-target");
-@@ -720,22 +806,28 @@ export default class SidebarMain extends MozLitElement {
+@@ -720,22 +1093,28 @@ export default class SidebarMain extends MozLitElement {
      event.currentTarget.classList.remove("hilal-ws-drop-target");
  
      if (this._draggedTab) {
@@ -1411,7 +1727,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
        if (draggedWsId && draggedWsId !== workspace.id) {
          event.preventDefault();
          this._hilalManager?.reorderWorkspaces?.(draggedWsId, workspace.id);
-@@ -789,8 +881,44 @@ export default class SidebarMain extends MozLitElement {
+@@ -789,8 +1168,44 @@ export default class SidebarMain extends MozLitElement {
      }
    }
  
@@ -1457,7 +1773,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
      if (typeof item === "object" && item !== null) {
        const url = this.normalizeHilalShortcutUrl(item.url);
        if (url === "viewBookmarksSidebar" || url === "about:bookmarks") {
-@@ -813,13 +941,18 @@ export default class SidebarMain extends MozLitElement {
+@@ -813,13 +1228,18 @@ export default class SidebarMain extends MozLitElement {
          if (isCompact) {
            window.openTrustedLinkIn("about:logins", "tab", {
              userContextId: 0,
@@ -1478,7 +1794,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
            window.DownloadsPanel.showPanel(true);
          } else {
            window.BrowserCommands.downloadsUI();
-@@ -866,14 +999,19 @@ export default class SidebarMain extends MozLitElement {
+@@ -866,14 +1286,19 @@ export default class SidebarMain extends MozLitElement {
          if (isCompact) {
            window.openTrustedLinkIn("about:logins", "tab", {
              userContextId: 0,
@@ -1500,7 +1816,15 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
            window.DownloadsPanel.showPanel(true);
          } else {
            window.BrowserCommands.downloadsUI();
-@@ -1677,6 +1815,155 @@ export default class SidebarMain extends MozLitElement {
+@@ -1657,6 +2082,7 @@ export default class SidebarMain extends MozLitElement {
+           "hilal-workspace-button": true,
+           "hilal-workspace-active": active,
+         })}
++        data-workspace-id=${workspace.id}
+         type="button"
+         title=${tooltip}
+         aria-label=${ariaLabel}
+@@ -1677,6 +2103,155 @@ export default class SidebarMain extends MozLitElement {
      `;
    }
  
@@ -1519,10 +1843,13 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
 +        })}
 +        role="button"
 +        tabindex="0"
-+        draggable="true"
++        draggable="false"
 +        title=${title}
-+        @click=${() => {
-+          this.selectHilalTab(tab);
++        @click=${event => {
++          if (this._isDragging) {
++            event.preventDefault();
++            event.stopPropagation();
++          }
 +        }}
 +        @keydown=${event => {
 +          if (event.key === " " || event.key === "Enter") {
@@ -1532,10 +1859,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
 +        }}
 +        @mouseenter=${event => this.handleTabMouseEnter(tab, event)}
 +        @mouseleave=${event => this.handleTabMouseLeave(tab, event)}
-+        @dragstart=${event => this.handleTabDragStart(tab, event)}
-+        @dragover=${event => this.handleTabDragOver(tab, event)}
-+        @dragend=${event => this.handleTabDragEnd(event)}
-+        @drop=${event => this.handleTabDrop(tab, event)}
++        @pointerdown=${event => this.handleTabPointerDown(tab, event)}
 +        @contextmenu=${event => {
 +          event.preventDefault();
 +          event.stopPropagation();
@@ -1656,7 +1980,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
  
    hilalBookmarkTemplate(bookmark) {
      const badge = this.getHilalBookmarkBadge(bookmark);
-@@ -1860,14 +2147,23 @@ export default class SidebarMain extends MozLitElement {
+@@ -1860,14 +2435,23 @@ export default class SidebarMain extends MozLitElement {
                    `
                  )}
                  <span class="hilal-panel-title">
@@ -1683,7 +2007,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
                    @click=${() => this.openHilalNewTab()}
                  >
                    ${this.hilalIcon("plus")}
-@@ -1888,7 +2184,8 @@ export default class SidebarMain extends MozLitElement {
+@@ -1888,7 +2472,8 @@ export default class SidebarMain extends MozLitElement {
                        class="hilal-icon-button"
                        type="button"
                        data-l10n-id="hilal-sidebar-workspace-menu"
@@ -1693,7 +2017,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
                      >
                        ${this.hilalIcon("menu")}
                      </button>
-@@ -1922,7 +2219,20 @@ export default class SidebarMain extends MozLitElement {
+@@ -1922,7 +2507,20 @@ export default class SidebarMain extends MozLitElement {
                      >
                    </div>
                    <div class="hilal-tabstrip-container">
@@ -1715,7 +2039,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
                    </div>
                  </section>
                  ${when(
-@@ -2018,8 +2328,308 @@ export default class SidebarMain extends MozLitElement {
+@@ -2018,8 +2616,309 @@ export default class SidebarMain extends MozLitElement {
      `;
    }
  
@@ -1898,6 +2222,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
 +                          "safari-row": true,
 +                          "safari-row-active": active,
 +                        })}
++                        data-workspace-id=${workspace.id}
 +                        type="button"
 +                        draggable="true"
 +                        @click=${() => this.switchHilalWorkspace(workspace)}
