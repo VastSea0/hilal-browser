@@ -196,7 +196,7 @@
 @media -moz-pref("hilal.tahoe.enabled") {
   @media (-moz-platform: macos) {
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) {
-      --hilal-safari-sidebar-width: 356px;
+      --hilal-safari-sidebar-width: 324px;
       --hilal-safari-toolbox-height: 94px;
       --hilal-safari-window-gap: 8px;
       --hilal-safari-sidebar-radius: 26px;
@@ -523,6 +523,8 @@
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #browser {
       background: transparent !important;
+      gap: 0 !important;
+      padding: 0 !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #sidebar-main[hilal-sidebar] {
@@ -532,9 +534,9 @@
       min-width: var(--hilal-safari-sidebar-width) !important;
       max-width: var(--hilal-safari-sidebar-width) !important;
       box-sizing: border-box !important;
-      margin-block-start: calc(-1 * var(--hilal-safari-toolbox-height) + var(--hilal-safari-window-gap)) !important;
+      margin-block-start: calc(-1 * var(--hilal-safari-toolbox-height)) !important;
       padding: 0 var(--hilal-safari-window-gap) var(--hilal-safari-window-gap) var(--hilal-safari-window-gap) !important;
-      block-size: calc(100% + var(--hilal-safari-toolbox-height) - var(--hilal-safari-window-gap)) !important;
+      block-size: calc(100% + var(--hilal-safari-toolbox-height)) !important;
       z-index: 1100 !important;
       background: transparent !important;
       border: none !important;
@@ -566,15 +568,20 @@
       margin: 0 !important;
       padding: 0 !important;
       border: 0 !important;
-      border-radius: 0 0 22px 0 !important;
+      border-radius: 0 !important;
       outline: 0 !important;
       background-color: var(--hilal-safari-page-bg) !important;
       box-shadow: none !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabpanels,
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) .browserSidebarContainer,
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) .browserContainer,
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) .browserStack {
-      border-radius: 0 0 22px 0 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      outline: 0 !important;
+      box-shadow: none !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #sidebar-main[hilal-sidebar] .tabbrowser-tab {
