@@ -180,5 +180,15 @@
     border: 0 !important;
     box-shadow: none !important;
   }
+
+  /* Sidebar vertical tabs styling overrides for clean Safari look */
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #sidebar-main[hilal-sidebar] .tabbrowser-tab[selected="true"] > .tab-stack > .tab-background {
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #sidebar-main[hilal-sidebar] .tabbrowser-tab:hover > .tab-stack > .tab-background:not([selected]) {
+    border-color: transparent !important;
+  }
 }
 }

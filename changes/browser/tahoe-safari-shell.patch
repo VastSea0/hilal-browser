@@ -55,7 +55,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
 --- a/browser/components/sidebar/sidebar-main.css
 +++ b/browser/components/sidebar/sidebar-main.css
-@@ -547,6 +547,148 @@
+@@ -547,6 +547,149 @@
    text-align: start;
  }
  
@@ -63,11 +63,12 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +@media (-moz-platform: macos) {
 +  :host([hilal-sidebar]) {
 +    --hilal-sidebar-muted: color-mix(in srgb, var(--hilal-sidebar-text) 62%, transparent);
-+    --hilal-sidebar-faint: light-dark(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.07));
-+    --hilal-sidebar-hover: light-dark(rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0.09));
-+    --hilal-sidebar-highlight: light-dark(rgba(10, 132, 255, 0.16), rgba(100, 167, 255, 0.22));
-+    --hilal-sidebar-highlight-text: light-dark(#0b3d75, #f7fbff);
++    --hilal-sidebar-faint: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.05));
++    --hilal-sidebar-hover: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.06));
++    --hilal-sidebar-highlight: light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08));
++    --hilal-sidebar-highlight-text: var(--hilal-sidebar-text);
 +    --hilal-sidebar-blue: light-dark(#0a84ff, #64a7ff);
++    --hilal-sidebar-border: transparent;
 +    inline-size: 268px;
 +  }
 +
@@ -83,7 +84,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +  }
 +
 +  .hilal-workspace-rail {
-+    border-inline-end-color: color-mix(in srgb, var(--hilal-sidebar-text) 10%, transparent);
++    border-inline-end: none !important;
 +    gap: 9px;
 +    padding: var(--hilal-sidebar-top-padding-inner, 18px) 9px 12px;
 +  }
