@@ -272,6 +272,11 @@
     min-height: 36px !important;
   }
 
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #TabsToolbar :is(#firefox-view-button, #new-tab-button, #alltabs-button),
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs :is(#tabs-newtab-button, #vertical-tabs-newtab-button) {
+    display: none !important;
+  }
+
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] {
     --tab-min-height: 32px !important;
     --tab-block-margin: 2px !important;
@@ -327,19 +332,24 @@
     align-items: center !important;
     gap: 8px !important;
     min-height: 42px !important;
+    min-width: 0 !important;
   }
 
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #nav-bar-customization-target > toolbarspring {
-    flex: 1 1 72px !important;
-    min-width: 18px !important;
-    max-width: none !important;
+    flex: 1 1 32px !important;
+    min-width: 0 !important;
+    max-width: 64px !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #vertical-spacer {
+    display: none !important;
   }
 
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar-container {
-    flex: 1 1 760px !important;
-    max-width: 860px !important;
-    min-width: 320px !important;
-    margin-inline: 52px !important;
+    flex: 1 1 620px !important;
+    max-width: min(760px, 56vw) !important;
+    min-width: 220px !important;
+    margin-inline: clamp(8px, 2vw, 28px) !important;
   }
 
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar {
@@ -359,6 +369,70 @@
     font-size: 13px !important;
     font-weight: 700 !important;
     text-align: center !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar[breakout][breakout-extend] {
+    height: auto !important;
+    margin-inline: 0 !important;
+    width: 100% !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar[breakout][breakout-extend] > #urlbar-background {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar[breakout][breakout-extend] > .urlbar-input-container {
+    min-height: 36px !important;
+    height: 36px !important;
+    padding: 1px 12px !important;
+    border: 1px solid color-mix(in srgb, var(--hilal-safari-separator) 92%, transparent) !important;
+    border-radius: 999px !important;
+    background-color: color-mix(in srgb, var(--hilal-safari-control-bg) 90%, transparent) !important;
+    backdrop-filter: blur(28px) saturate(185%) !important;
+    box-shadow:
+      inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.08)),
+      0 1px 2px light-dark(rgba(30, 34, 42, 0.08), rgba(0, 0, 0, 0.24)) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar[focused][breakout][breakout-extend] > .urlbar-input-container {
+    border-color: color-mix(in srgb, var(--hilal-tahoe-accent) 46%, var(--hilal-safari-separator)) !important;
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--hilal-tahoe-accent) 18%, transparent),
+      0 10px 26px light-dark(rgba(28, 39, 56, 0.16), rgba(0, 0, 0, 0.34)) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar[open] > .urlbarView {
+    margin-block-start: 10px !important;
+    padding: 10px !important;
+    border: 1px solid var(--hilal-safari-separator) !important;
+    border-radius: 22px !important;
+    background-color: color-mix(in srgb, var(--hilal-safari-chrome-bg) 86%, transparent) !important;
+    backdrop-filter: blur(34px) saturate(190%) !important;
+    box-shadow:
+      inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.07)),
+      0 22px 48px light-dark(rgba(28, 39, 56, 0.22), rgba(0, 0, 0, 0.42)) !important;
+    overflow: clip !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar[open] .urlbarView-body-inner {
+    margin-inline: 0 !important;
+    width: 100% !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar[open] .urlbarView-results {
+    padding: 0 !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar[open] .urlbarView-row {
+    border-radius: 12px !important;
+    border-color: transparent !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar[open] .urlbarView-row:is([selected], :hover) {
+    background-color: color-mix(in srgb, var(--hilal-safari-control-bg-hover) 74%, transparent) !important;
   }
 
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #back-button,
@@ -393,12 +467,57 @@
     inline-size: 34px !important;
     block-size: 34px !important;
     border-radius: 999px !important;
-    background-color: transparent !important;
+    background-color: color-mix(in srgb, var(--hilal-safari-control-bg) 72%, transparent) !important;
+    border: 1px solid color-mix(in srgb, var(--hilal-safari-separator) 82%, transparent) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    box-shadow: inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.06)) !important;
   }
 
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #nav-bar .toolbarbutton-1:not(#back-button, #forward-button):hover > .toolbarbutton-icon,
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #nav-bar .toolbarbutton-1:not(#back-button, #forward-button):hover > .toolbarbutton-badge-stack {
     background-color: var(--hilal-safari-control-bg-hover) !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #nav-bar :is(toolbarbutton, toolbaritem) {
+    flex-shrink: 0 !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #nav-bar :is(#firefox-view-button, #new-tab-button, #alltabs-button) {
+    margin-inline: 0 !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #PanelUI-button {
+    padding-inline: 0 !important;
+    margin-inline-start: 2px !important;
+  }
+
+  @media (max-width: 1180px) {
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #nav-bar-customization-target {
+      gap: 5px !important;
+    }
+
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #nav-bar-customization-target > toolbarspring {
+      max-width: 24px !important;
+    }
+
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar-container {
+      min-width: 190px !important;
+      margin-inline: 8px !important;
+      max-width: min(620px, 52vw) !important;
+    }
+
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #nav-bar .toolbarbutton-1:not(#back-button, #forward-button) > .toolbarbutton-icon,
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #nav-bar .toolbarbutton-1:not(#back-button, #forward-button) > .toolbarbutton-badge-stack {
+      inline-size: 32px !important;
+      block-size: 32px !important;
+    }
+  }
+
+  @media (max-width: 940px) {
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar-container {
+      min-width: 160px !important;
+      max-width: 46vw !important;
+    }
   }
 
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) .titlebar-buttonbox-container {

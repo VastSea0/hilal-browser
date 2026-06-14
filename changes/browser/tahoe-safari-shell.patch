@@ -43,7 +43,19 @@ diff --git a/browser/branding/hilal/pref/firefox-branding.js b/browser/branding/
 diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/components/customizableui/CustomizableUI.sys.mjs
 --- a/browser/components/customizableui/CustomizableUI.sys.mjs
 +++ b/browser/components/customizableui/CustomizableUI.sys.mjs
-@@ -251,6 +251,19 @@ XPCOMUtils.defineLazyPreferenceGetter(
+@@ -37,6 +37,11 @@ const kPrefCustomizationHorizontalTabsBackup =
+   "browser.uiCustomization.horizontalTabsBackup";
+ const kPrefCustomizationNavBarWhenVerticalTabs =
+   "browser.uiCustomization.navBarWhenVerticalTabs";
++const kHilalHorizontalTabToolbarWidgets = [
++  "firefox-view-button",
++  "new-tab-button",
++  "alltabs-button",
++];
+ const kPrefCustomizationAutoAdd = "browser.uiCustomization.autoAdd";
+ const kPrefCustomizationDebug = "browser.uiCustomization.debug";
+ const kPrefDrawInTitlebar = "browser.tabs.inTitlebar";
+@@ -251,6 +256,19 @@ XPCOMUtils.defineLazyPreferenceGetter(
    }
  );
  
@@ -63,7 +75,7 @@ diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/
  XPCOMUtils.defineLazyPreferenceGetter(
    lazy,
    "horizontalPlacementsPref",
-@@ -445,6 +458,10 @@ var CustomizableUIInternal = {
+@@ -445,6 +463,10 @@ var CustomizableUIInternal = {
      // we'll enable revamp rather than disable vertical tabs.
      this.reconcileSidebarPrefs(kPrefSidebarVerticalTabsEnabled);
  
@@ -74,7 +86,7 @@ diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/
      this.initializeForTabsOrientation(CustomizableUI.verticalTabsEnabled);
  
      Services.obs.addObserver(this, "browser-set-toolbar-visibility");
-@@ -5094,10 +5111,14 @@ var CustomizableUIInternal = {
+@@ -5094,14 +5116,19 @@ var CustomizableUIInternal = {
          "initializeForTabsOrientation, savedPlacements",
          savedPlacements
        );
@@ -92,7 +104,81 @@ diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/
          this.restoreSavedHorizontalTabStripState(savedPlacements, true);
        } else {
          // This is the default state and normal initialization will do everything necessary
-@@ -5500,7 +5521,7 @@ export var CustomizableUI = {
+       }
++      this.updateHilalHorizontalTabToolbarState(true);
+       gCurrentVerticalTabs = false;
+       return;
+     }
+@@ -5285,6 +5312,9 @@ var CustomizableUIInternal = {
+       return;
+     }
+     let toVertical = CustomizableUI.verticalTabsEnabled;
++    if (!toVertical) {
++      this.updateHilalHorizontalTabToolbarState();
++    }
+     if (toVertical === gCurrentVerticalTabs) {
+       lazy.log.debug("early return as the value hasn't changed");
+       return;
+@@ -5378,6 +5408,7 @@ var CustomizableUIInternal = {
+       this.saveNavBarWhenVerticalTabsState();
+       // We're switching to vertical in this session; pull saved state from pref and update placements
+       this.restoreSavedHorizontalTabStripState();
++      this.updateHilalHorizontalTabToolbarState();
+     }
+     // Give the sidebar a chance to adjust before we show/hide the toolbars
+     lazy.log.debug("CustomizableUI notifying tabstrip-orientation-change");
+@@ -5396,5 +5427,50 @@ var CustomizableUIInternal = {
+       win.TabBarVisibility.update(true);
+     }
+   },
++
++  updateHilalHorizontalTabToolbarState(isInitializing = false) {
++    if (!lazy.verticalTabsPref || !lazy.verticalTabsShowHorizontalPref) {
++      return;
++    }
++
++    if (
++      !gPlacements.get(CustomizableUI.AREA_TABSTRIP) ||
++      !gPlacements.get(CustomizableUI.AREA_NAVBAR)
++    ) {
++      return;
++    }
++
++    let insertIndex = gPlacements
++      .get(CustomizableUI.AREA_NAVBAR)
++      .indexOf("downloads-button");
++    insertIndex =
++      insertIndex >= 0
++        ? insertIndex + 1
++        : gPlacements.get(CustomizableUI.AREA_NAVBAR).length;
++
++    CustomizableUI.beginBatchUpdate();
++    for (let widgetId of kHilalHorizontalTabToolbarWidgets) {
++      let navbarPlacements = gPlacements.get(CustomizableUI.AREA_NAVBAR);
++      let placement = this.getPlacementOfWidget(widgetId, false, true);
++      if (!placement) {
++        continue;
++      }
++
++      let currentIndex = navbarPlacements.indexOf(widgetId);
++      if (
++        placement.area !== CustomizableUI.AREA_NAVBAR ||
++        currentIndex !== insertIndex
++      ) {
++        this.addWidgetToArea(
++          widgetId,
++          CustomizableUI.AREA_NAVBAR,
++          insertIndex,
++          isInitializing
++        );
++      }
++      insertIndex++;
++    }
++    CustomizableUI.endBatchUpdate();
++  },
+ };
+ Object.freeze(CustomizableUIInternal);
+@@ -5500,7 +5576,7 @@ export var CustomizableUI = {
    },
  
    get verticalTabsEnabled() {
@@ -1136,7 +1222,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
                    </div>
                  </section>
                  ${when(
-@@ -2018,8 +2267,330 @@ export default class SidebarMain extends MozLitElement {
+@@ -2018,8 +2267,308 @@ export default class SidebarMain extends MozLitElement {
      `;
    }
  
@@ -1166,28 +1252,6 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
 +        <!-- Top Header with buttons matching Safari -->
 +        <header class="safari-sidebar-header">
 +          <div class="safari-header-buttons">
-+            <button
-+              class="safari-icon-button safari-new-group-button"
-+              type="button"
-+              title="New Tab Group"
-+              @click=${() => this.showHilalCreateWorkspace()}
-+            >
-+              <svg
-+                width="16"
-+                height="16"
-+                viewBox="0 0 16 16"
-+                fill="none"
-+                stroke="currentColor"
-+                stroke-width="1.3"
-+                stroke-linecap="round"
-+                stroke-linejoin="round"
-+              >
-+                <rect x="2" y="5" width="8" height="8" rx="1.6" />
-+                <rect x="6" y="2" width="8" height="8" rx="1.6" />
-+                <path d="M10 5.2v3.6" />
-+                <path d="M8.2 7h3.6" />
-+              </svg>
-+            </button>
 +            <button
 +              class="safari-icon-button safari-toggle-button"
 +              type="button"
