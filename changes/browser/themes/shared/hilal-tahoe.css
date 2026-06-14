@@ -199,6 +199,8 @@
       --hilal-safari-sidebar-width: 300px;
       --hilal-safari-toolbox-height: 94px;
       --hilal-safari-window-gap: 8px;
+      --hilal-safari-sidebar-inline-gap: 6px;
+      --hilal-safari-sidebar-block-gap: 5px;
       --hilal-safari-sidebar-radius: 28px;
       --hilal-safari-page-bg: light-dark(#ffffff, #1c1c1e);
       --hilal-safari-control-bg: light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.045));
@@ -235,15 +237,15 @@
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #navigator-toolbox {
       box-sizing: border-box !important;
-      inline-size: calc(100vw - var(--hilal-safari-sidebar-width) - var(--hilal-safari-window-gap)) !important;
+      inline-size: calc(100vw - var(--hilal-safari-sidebar-width)) !important;
       margin-inline-start: var(--hilal-safari-sidebar-width) !important;
-      padding: 8px 10px 4px 10px !important;
+      padding: 0 10px !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #navigator-toolbox {
       display: flex !important;
       flex-direction: column !important;
-      gap: 4px !important;
+      gap: 0 !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #nav-bar {
@@ -258,7 +260,7 @@
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #TabsToolbar {
       order: 2 !important;
-      min-height: 36px !important;
+      min-height: 34px !important;
       margin: 0 !important;
       padding: 0 !important;
       border: 0 !important;
@@ -270,19 +272,19 @@
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #TabsToolbar>.toolbar-items {
       align-items: center !important;
-      min-height: 36px !important;
-      border-radius: 999px !important;
-      background-color: color-mix(in srgb, var(--hilal-safari-control-bg) 78%, transparent) !important;
-      backdrop-filter: blur(28px) saturate(180%) !important;
-      box-shadow: inset 0 0 0 1px var(--hilal-safari-separator) !important;
-      overflow: clip !important;
+      min-height: 34px !important;
+      border-radius: 0 !important;
+      background-color: transparent !important;
+      backdrop-filter: none !important;
+      box-shadow: none !important;
+      overflow: visible !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] {
       --tab-min-height: 32px !important;
       --tab-min-width: 78px !important;
       --tab-max-width: none !important;
-      --tab-block-margin: 2px !important;
+      --tab-block-margin: 0 !important;
       --tab-inline-padding: 10px !important;
       --tab-selected-outline-color: transparent !important;
       --tab-selected-shadow: none !important;
@@ -294,7 +296,7 @@
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab {
       max-height: 32px !important;
-      padding-block: 2px !important;
+      padding-block: 0 !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[fadein]:not([pinned]) {
@@ -551,10 +553,12 @@
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #sidebar-main[hilal-sidebar] sidebar-main,
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #sidebar-main[hilal-sidebar] html\:sidebar-main {
-      inline-size: 100% !important;
-      min-inline-size: 100% !important;
-      max-inline-size: 100% !important;
-      block-size: 100% !important;
+      margin-block: var(--hilal-safari-sidebar-block-gap) !important;
+      margin-inline-start: var(--hilal-safari-sidebar-inline-gap) !important;
+      inline-size: calc(100% - var(--hilal-safari-sidebar-inline-gap)) !important;
+      min-inline-size: calc(100% - var(--hilal-safari-sidebar-inline-gap)) !important;
+      max-inline-size: calc(100% - var(--hilal-safari-sidebar-inline-gap)) !important;
+      block-size: calc(100% - var(--hilal-safari-sidebar-block-gap) - var(--hilal-safari-sidebar-block-gap)) !important;
       box-sizing: border-box !important;
       background-color: var(--hilal-safari-sidebar-bg) !important;
       background-image:
