@@ -1241,8 +1241,8 @@
         overlay.style.boxShadow =
           `inset 0 0 0 1px ${this._hexToRgba(secondaryColor, 0.24)}, ` +
           `0 0 22px ${this._hexToRgba(accentColor, 0.16)}`;
-        wave.style.borderTopColor = this._hexToRgba(secondaryColor, 0.82);
-        wave.style.borderRightColor = this._hexToRgba(accentColor, 0.72);
+        wave.style.borderColor = this._hexToRgba(accentColor, 0.64);
+        wave.style.boxShadow = `0 0 12px ${this._hexToRgba(accentColor, 0.36)}`;
 
         overlay.getAnimations().forEach(animation => animation.cancel());
         wave.getAnimations().forEach(animation => animation.cancel());
@@ -1256,9 +1256,9 @@
         );
         wave.animate(
           [
-            { opacity: 0, transform: "rotate(-16deg)" },
-            { opacity: 1, transform: "rotate(4deg)", offset: 0.28 },
-            { opacity: 0, transform: "rotate(32deg)" },
+            { opacity: 0, transform: "scale(1.0)" },
+            { opacity: 1, transform: "scale(1.003)", offset: 0.28 },
+            { opacity: 0, transform: "scale(1.008)" },
           ],
           { duration: 760, easing: "cubic-bezier(.2,.8,.2,1)" }
         );
