@@ -1445,3 +1445,19 @@ toolbar[inactive="true"] .urlbar,
     top: -999px;
   }
 }
+
+#userContext-label {
+  display: none !important;
+}
+
+@media -moz-pref("hilal.urlbar.showWorkspaceName") {
+  #userContext-label {
+    display: -moz-box !important;
+  }
+  @media (max-width: 770px) {
+    #userContext-label {
+      display: none !important;
+    }
+  }
+}
+

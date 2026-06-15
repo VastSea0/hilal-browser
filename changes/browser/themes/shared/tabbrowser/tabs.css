@@ -3102,3 +3102,8 @@ toolbar:not(#TabsToolbar) #firefox-view-button {
   white-space: nowrap;
   width: 100%;
 }
+
+.tab-context-line {
+  display: none !important;
+}
+

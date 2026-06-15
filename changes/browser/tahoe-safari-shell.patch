@@ -331,15 +331,37 @@ diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -1798,6 +1798,7 @@ var gHilalPane = {
+@@ -1796,8 +1796,10 @@ var gHilalPane = {
+     const hilalWsCheckbox = document.getElementById("hilalWorkspacesEnabled");
+     const hilalWsPinnedPublicCheckbox = document.getElementById("hilalWorkspacesPinnedPublic");
      const hilalWsGroupsPublicCheckbox = document.getElementById("hilalWorkspacesGroupsPublic");
++    const hilalUrlbarShowWorkspaceNameCheckbox = document.getElementById("hilalUrlbarShowWorkspaceName");
      const hilalSidebarCompactCheckbox = document.getElementById("hilalSidebarCompactEnabled");
      const hilalSidebarCompactHideToolbarCheckbox = document.getElementById("hilalSidebarCompactHideToolbar");
 +    const hilalSidebarShowHorizontalCheckbox = document.getElementById("hilalSidebarShowHorizontalTabs");
      const hilalPrivacyLevelRadioGroup = /** @type {HTMLElement|null} */ (
        document.getElementById("hilalPrivacyLevel")
      );
-@@ -1887,6 +1888,18 @@ var gHilalPane = {
+@@ -1863,6 +1865,18 @@ var gHilalPane = {
+         );
+       });
+     }
++    if (hilalUrlbarShowWorkspaceNameCheckbox) {
++      hilalUrlbarShowWorkspaceNameCheckbox.checked = Services.prefs.getBoolPref(
++        "hilal.urlbar.showWorkspaceName",
++        false
++      );
++      hilalUrlbarShowWorkspaceNameCheckbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref(
++          "hilal.urlbar.showWorkspaceName",
++          hilalUrlbarShowWorkspaceNameCheckbox.checked
++        );
++      });
++    }
+     if (hilalSidebarCompactCheckbox) {
+       hilalSidebarCompactCheckbox.checked = Services.prefs.getBoolPref(
+         "hilal.compact.enabled",
+@@ -1887,6 +1901,18 @@ var gHilalPane = {
          );
        });
      }
@@ -358,7 +380,24 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
  
      const hilalSidebarFooterCheckboxes = [
        ["hilalSidebarFooterBookmarks", "hilal.sidebar.footer.bookmarks", false],
-@@ -2124,12 +2137,19 @@ var gHilalPane = {
+@@ -2106,6 +2132,7 @@ var gHilalPane = {
+         Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
+         Services.prefs.setBoolPref("hilal.workspaces.pinned.public", true);
+         Services.prefs.setBoolPref("hilal.workspaces.groups.public", false);
++        Services.prefs.setBoolPref("hilal.urlbar.showWorkspaceName", false);
+         Services.prefs.setBoolPref("hilal.compact.enabled", false);
+         Services.prefs.setBoolPref("hilal.compact.hide_toolbox", true);
+         Services.prefs.setStringPref("hilal.privacy.level", "standard");
+@@ -2118,18 +2145,28 @@ var gHilalPane = {
+         if (hilalWsGroupsPublicCheckbox) {
+           hilalWsGroupsPublicCheckbox.checked = false;
+         }
++        if (hilalUrlbarShowWorkspaceNameCheckbox) {
++          hilalUrlbarShowWorkspaceNameCheckbox.checked = false;
++        }
+         if (hilalSidebarCompactCheckbox) {
+           hilalSidebarCompactCheckbox.checked = false;
+         }
          if (hilalSidebarCompactHideToolbarCheckbox) {
            hilalSidebarCompactHideToolbarCheckbox.checked = true;
          }
@@ -378,7 +417,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
      const hilalUiFixCheckbox = /** @type {HTMLInputElement|null} */ (
        document.getElementById("hilalUiFixEnabled")
      );
-@@ -2183,6 +2203,19 @@ var gHilalPane = {
+@@ -2183,6 +2220,19 @@ var gHilalPane = {
        }
      };
  
@@ -779,7 +818,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    debouncedMouseEnter() {
      const contentArea = document.getElementById("tabbrowser-tabbox");
      this._box.toggleAttribute("sidebar-launcher-hovered", true);
-@@ -2933,9 +3230,10 @@ var HilalCompactMode = {
+@@ -2933,9 +3241,10 @@ var HilalCompactMode = {
        false
      );
      const isSidebarActive = workspacesEnabled || verticalTabsEnabled;
@@ -2699,7 +2738,16 @@ diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/compo
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2787,6 +2787,8 @@ hilal-sidebar-compact-enabled =
+@@ -2773,6 +2773,8 @@ hilal-workspaces-pinned-public =
+     .label = Make pinned tabs visible in all workspaces
+ hilal-workspaces-groups-public =
+     .label = Make tab groups visible in all workspaces
++hilal-urlbar-show-workspace-name =
++    .label = Show workspace name in URL bar
+ hilal-workspaces-reset-description = Reset all workspace data (cannot be undone).
+ hilal-workspaces-reset-button =
+     .label = Reset Workspaces
+@@ -2787,6 +2789,8 @@ hilal-sidebar-compact-enabled =
  hilal-sidebar-compact-hide-toolbar =
      .label = Auto-hide top toolbar in compact mode
  hilal-sidebar-compact-hide-toolbar-desc = When enabled, the top toolbar containing the address bar and tabs is automatically hidden in compact mode. Hovering near the top edge reveals it with a gorgeous premium glassmorphic slide-down animation. When disabled, the top toolbar remains permanently visible.
@@ -2708,7 +2756,7 @@ diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser
  hilal-sidebar-footer-items-label = Standard Footer Items:
  hilal-sidebar-footer-bookmarks =
      .label = Bookmarks
-@@ -2840,6 +2842,9 @@ hilal-privacy-extreme =
+@@ -2840,6 +2844,9 @@ hilal-privacy-extreme =
  ## UI Enhancements
  
  hilal-uifix-header = UI Enhancements
@@ -2718,7 +2766,7 @@ diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser
  hilal-uifix-enabled =
      .label = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
  hilal-uifix-connect-to-window =
-@@ -2891,4 +2896,3 @@ hilal-shortcuts-header = Keyboard Shortcuts
+@@ -2891,4 +2898,3 @@ hilal-shortcuts-header = Keyboard Shortcuts
  hilal-shortcuts-description = Customize keyboard shortcuts for Hilal actions and native browser functions.
  hilal-shortcuts-reset =
      .label = Restore Defaults
