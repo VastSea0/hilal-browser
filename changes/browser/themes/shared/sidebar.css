@@ -644,13 +644,13 @@ sidebar-main,
   max-width: var(--hilal-compact-sidebar-width, 280px) !important;
   height: calc(100% - 2 * var(--hilal-safari-window-gap, 8px)) !important;
   background-color: var(--hilal-safari-sidebar-bg) !important;
-  background-image: linear-gradient(180deg, var(--hilal-safari-sidebar-bg-strong), transparent 48%) !important;
-  backdrop-filter: blur(34px) saturate(185%) !important;
+  background-image: linear-gradient(180deg, color-mix(in srgb, var(--hilal-safari-sidebar-bg-strong, transparent) 70%, transparent), transparent 60%) !important;
+  backdrop-filter: blur(36px) saturate(170%) !important;
   box-shadow:
-    4px 0 32px 0 rgba(0, 0, 0, 0.15),
-    0 4px 16px 0 rgba(0, 0, 0, 0.1) !important;
+    inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.045)),
+    0 12px 30px light-dark(rgba(28, 39, 56, 0.06), rgba(0, 0, 0, 0.16)) !important;
   border-radius: 20px !important;
-  border: 1px solid var(--hilal-safari-separator) !important;
+  border: 1px solid color-mix(in srgb, var(--hilal-safari-separator, rgba(0, 0, 0, 0.12)) 72%, transparent) !important;
   margin: var(--hilal-safari-window-gap, 8px) !important;
   padding: 0 !important;
   transition: border-radius 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
@@ -692,10 +692,10 @@ sidebar-main,
   min-width: var(--hilal-compact-sidebar-end-width, 248px) !important;
   max-width: var(--hilal-compact-sidebar-end-width, 248px) !important;
   border-radius: 20px !important;
-  border: 1px solid var(--hilal-safari-separator) !important;
+  border: 1px solid color-mix(in srgb, var(--hilal-safari-separator, rgba(0, 0, 0, 0.12)) 72%, transparent) !important;
   box-shadow:
-    -4px 0 32px 0 rgba(0, 0, 0, 0.35),
-    0 4px 16px 0 rgba(0, 0, 0, 0.25) !important;
+    inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.045)),
+    0 12px 30px light-dark(rgba(28, 39, 56, 0.06), rgba(0, 0, 0, 0.16)) !important;
   --hilal-sidebar-top-padding: 40px !important;
   --hilal-sidebar-top-padding-inner: 6px !important;
   --hilal-sidebar-top-border: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08)) !important;
@@ -761,25 +761,24 @@ sidebar-main,
   
   /* Traditional toolbar background but glassmorphic */
   color-scheme: light dark !important;
-  background-color: light-dark(rgba(255, 255, 255, 0.94), rgba(28, 28, 30, 0.94)) !important;
+  background-color: var(--hilal-safari-chrome-bg, light-dark(rgba(244, 246, 250, 0.42), rgba(15, 17, 22, 0.38))) !important;
   background-image: none !important;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.1) !important;
+  backdrop-filter: blur(36px) saturate(170%) !important;
+  box-shadow: none !important;
   
   /* Remove border radius for a clean flush look at the top */
   border-radius: 0 !important;
   border-top: none !important;
   border-left: none !important;
   border-right: none !important;
-  border-bottom: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08)) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--hilal-safari-separator, rgba(0, 0, 0, 0.12)) 60%, transparent) !important;
   
   /* Make sure traffic lights aren't overlapped by buttons by adding padding */
   padding-inline-start: 80px !important;
-  box-sizing: border-box !important;
 
   /* Animation defaults (Hidden state: slides UP off the screen) */
   pointer-events: none !important;
   transform: translate3d(0, -100%, 0) !important; 
-  box-shadow: none !important;
   
   will-change: transform, left, width, padding-inline-start;
   transition:
@@ -838,7 +837,7 @@ sidebar-main,
 :root[hilal-compact-mode][hilal-compact-hide-toolbox] #navigator-toolbox.hilal-compact-visible #nav-bar {
   pointer-events: auto !important;
   transform: translate3d(0, 0, 0) !important;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.1) !important;
+  box-shadow: none !important;
   
   transition:
     transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),

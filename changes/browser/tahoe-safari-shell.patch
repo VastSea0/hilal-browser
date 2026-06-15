@@ -596,6 +596,18 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +    if (!browser || browser.browsingContext !== browsingContext) {
 +      return;
 +    }
++    if (!this.isTahoeSafariLayoutActive()) {
++      this.clearTahoeScrollReflection();
++      return;
++    }
++
++    let top = this.readTahoeContentTop();
++    let scrollY = Math.max(0, Math.round(scrollState?.scrollY || 0));
++    let pageBackgroundTop = Math.max(0, top - Math.min(top, scrollY));
++    document.documentElement.style.setProperty(
++      "--hilal-safari-page-bg-top",
++      `${pageBackgroundTop}px`
++    );
 +
 +    this._lastTahoeScrollState = scrollState;
 +    this._lastTahoeScrollBrowsingContext = browsingContext;
@@ -646,6 +658,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      let tabboxRect = tabbox.getBoundingClientRect();
 +      let width = Math.max(1, Math.round(tabboxRect.width));
 +      let left = Math.max(0, Math.round(tabboxRect.left));
++      let pageBackground = getComputedStyle(tabbox).backgroundColor;
 +      // The reflection is heavily blurred, so a 1x snapshot keeps scrolling responsive.
 +      let scale = 1;
 +      let canvas = this.ensureTahoeScrollReflectionCanvas();
@@ -691,6 +704,10 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      let dstHeight = Math.round(captureHeight * scale);
 +      let ctx = canvas.getContext("2d");
 +      ctx.clearRect(0, 0, canvas.width, canvas.height);
++      if (pageBackground.startsWith("rgb")) {
++        ctx.fillStyle = pageBackground;
++        ctx.fillRect(0, 0, canvas.width, canvas.height);
++      }
 +      ctx.drawImage(image, 0, dstY, canvas.width, dstHeight);
 +      image.close?.();
 +      document.documentElement.toggleAttribute(
@@ -752,10 +769,9 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +  },
 +
 +  clearTahoeScrollReflection() {
-+    document.documentElement.toggleAttribute(
-+      "hilal-safari-reflection-active",
-+      false
-+    );
++    let docEl = document.documentElement;
++    docEl.toggleAttribute("hilal-safari-reflection-active", false);
++    docEl.style.removeProperty("--hilal-safari-page-bg-top");
 +    let canvas = document.getElementById("hilal-safari-scroll-reflection");
 +    canvas?.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
 +  },
@@ -763,7 +779,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    debouncedMouseEnter() {
      const contentArea = document.getElementById("tabbrowser-tabbox");
      this._box.toggleAttribute("sidebar-launcher-hovered", true);
-@@ -2933,9 +3241,10 @@ var HilalCompactMode = {
+@@ -2933,9 +3230,10 @@ var HilalCompactMode = {
        false
      );
      const isSidebarActive = workspacesEnabled || verticalTabsEnabled;

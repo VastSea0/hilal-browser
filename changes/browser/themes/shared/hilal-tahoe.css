@@ -205,10 +205,12 @@
       --hilal-safari-page-bg: light-dark(#ffffff, #1c1c1e);
       --hilal-safari-control-bg: light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.045));
       --hilal-safari-control-bg-hover: light-dark(rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.085));
-      --hilal-safari-chrome-bg: light-dark(rgba(244, 246, 250, 0.48), rgba(15, 17, 22, 0.42));
-      --hilal-safari-sidebar-bg: light-dark(rgba(244, 246, 250, 0.34), rgba(14, 17, 22, 0.34));
-      --hilal-safari-sidebar-bg-strong: light-dark(rgba(244, 246, 250, 0.5), rgba(14, 17, 22, 0.48));
-      --hilal-safari-separator: light-dark(rgba(40, 45, 55, 0.13), rgba(255, 255, 255, 0.09));
+      --hilal-safari-glass-bg: light-dark(rgba(244, 246, 250, 0.42), rgba(15, 17, 22, 0.38));
+      --hilal-safari-glass-bg-strong: light-dark(rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.055));
+      --hilal-safari-chrome-bg: var(--hilal-safari-glass-bg);
+      --hilal-safari-sidebar-bg: var(--hilal-safari-glass-bg);
+      --hilal-safari-sidebar-bg-strong: var(--hilal-safari-glass-bg-strong);
+      --hilal-safari-separator: light-dark(rgba(40, 45, 55, 0.09), rgba(255, 255, 255, 0.06));
       --hilal-safari-text: light-dark(#1c2330, #f5f6f8);
       --hilal-safari-muted: light-dark(rgba(28, 35, 48, 0.62), rgba(245, 246, 248, 0.58));
       --hilal-tahoe-toolbar-material: var(--hilal-safari-chrome-bg);
@@ -221,7 +223,7 @@
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #hilal-browser-background::after {
       inset:
-        var(--hilal-safari-content-top, var(--hilal-safari-toolbox-height))
+        var(--hilal-safari-page-bg-top, var(--hilal-safari-content-top, var(--hilal-safari-toolbox-height)))
         0
         var(--hilal-safari-content-bottom, 0px)
         0;
@@ -229,10 +231,10 @@
         linear-gradient(
           90deg,
           var(--hilal-safari-page-bg) 0,
-          var(--hilal-safari-page-bg) calc(var(--hilal-safari-sidebar-width) - 72px),
-          color-mix(in srgb, var(--hilal-safari-page-bg) 72%, transparent) calc(var(--hilal-safari-sidebar-width) - 28px),
-          color-mix(in srgb, var(--hilal-safari-page-bg) 34%, transparent) calc(var(--hilal-safari-sidebar-width) + 28px),
-          transparent calc(var(--hilal-safari-sidebar-width) + 88px)
+          var(--hilal-safari-page-bg) calc(var(--hilal-safari-sidebar-width) - 24px),
+          color-mix(in srgb, var(--hilal-safari-page-bg) 84%, transparent) calc(var(--hilal-safari-sidebar-width) + 8px),
+          color-mix(in srgb, var(--hilal-safari-page-bg) 36%, transparent) calc(var(--hilal-safari-sidebar-width) + 56px),
+          transparent calc(var(--hilal-safari-sidebar-width) + 112px)
         ),
         var(--hilal-tahoe-window-tint);
     }
@@ -240,8 +242,8 @@
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #hilal-safari-scroll-reflection {
       position: fixed;
       inset-block-start: 0;
-      inset-inline-start: 0;
-      inline-size: 100vw;
+      inset-inline-start: var(--hilal-safari-sidebar-width);
+      inline-size: calc(100vw - var(--hilal-safari-sidebar-width));
       block-size: var(--hilal-safari-content-top, var(--hilal-safari-toolbox-height));
       z-index: 1;
       opacity: 0;
@@ -368,9 +370,7 @@
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:is([visuallyselected], [multiselected])>.tab-stack>.tab-background {
       background-color: color-mix(in srgb, var(--hilal-safari-control-bg-hover) 92%, transparent) !important;
       border-color: var(--hilal-safari-separator) !important;
-      box-shadow:
-        inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.08)),
-        0 1px 3px light-dark(rgba(30, 34, 42, 0.09), rgba(0, 0, 0, 0.24)) !important;
+      box-shadow: inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.06)) !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #tabbrowser-tabs[orient="horizontal"] .tab-context-line,
@@ -412,9 +412,7 @@
       background-color: var(--hilal-safari-control-bg) !important;
       border-color: var(--hilal-safari-separator) !important;
       backdrop-filter: blur(26px) saturate(180%) !important;
-      box-shadow:
-        inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0.07)),
-        0 1px 2px light-dark(rgba(30, 34, 42, 0.06), rgba(0, 0, 0, 0.22)) !important;
+      box-shadow: inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.06)) !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #urlbar-input {
@@ -448,9 +446,7 @@
       border-radius: 18px !important;
       background-color: color-mix(in srgb, var(--hilal-safari-control-bg) 90%, transparent) !important;
       backdrop-filter: blur(28px) saturate(185%) !important;
-      box-shadow:
-        inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.08)),
-        0 1px 2px light-dark(rgba(30, 34, 42, 0.08), rgba(0, 0, 0, 0.24)) !important;
+      box-shadow: inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.06)) !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #urlbar[focused][breakout][breakout-extend]>.urlbar-input-container {
@@ -602,15 +598,13 @@
       block-size: calc(100% - var(--hilal-safari-sidebar-block-gap) - var(--hilal-safari-sidebar-block-gap)) !important;
       box-sizing: border-box !important;
       background-color: var(--hilal-safari-sidebar-bg) !important;
-      background-image:
-        linear-gradient(180deg, var(--hilal-safari-sidebar-bg-strong), transparent 54%),
-        linear-gradient(90deg, color-mix(in srgb, var(--hilal-safari-sidebar-bg) 92%, transparent), transparent 108%) !important;
-      backdrop-filter: blur(34px) saturate(185%) !important;
-      border: 1px solid var(--hilal-safari-separator) !important;
+      background-image: linear-gradient(180deg, color-mix(in srgb, var(--hilal-safari-sidebar-bg-strong) 70%, transparent), transparent 60%) !important;
+      backdrop-filter: blur(36px) saturate(170%) !important;
+      border: 1px solid color-mix(in srgb, var(--hilal-safari-separator) 72%, transparent) !important;
       border-radius: var(--hilal-safari-sidebar-radius) !important;
       box-shadow:
-        inset -1px 0 0 var(--hilal-safari-separator),
-        0 18px 42px light-dark(rgba(28, 39, 56, 0.12), rgba(0, 0, 0, 0.22)) !important;
+        inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.045)),
+        0 12px 30px light-dark(rgba(28, 39, 56, 0.06), rgba(0, 0, 0, 0.16)) !important;
       overflow: hidden !important;
     }
 
