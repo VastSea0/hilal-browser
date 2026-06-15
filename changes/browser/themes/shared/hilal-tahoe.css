@@ -229,8 +229,10 @@
         linear-gradient(
           90deg,
           var(--hilal-safari-page-bg) 0,
-          var(--hilal-safari-page-bg) var(--hilal-safari-sidebar-width),
-          transparent var(--hilal-safari-sidebar-width)
+          var(--hilal-safari-page-bg) calc(var(--hilal-safari-sidebar-width) - 72px),
+          color-mix(in srgb, var(--hilal-safari-page-bg) 72%, transparent) calc(var(--hilal-safari-sidebar-width) - 28px),
+          color-mix(in srgb, var(--hilal-safari-page-bg) 34%, transparent) calc(var(--hilal-safari-sidebar-width) + 28px),
+          transparent calc(var(--hilal-safari-sidebar-width) + 88px)
         ),
         var(--hilal-tahoe-window-tint);
     }
@@ -245,7 +247,7 @@
       opacity: 0;
       pointer-events: none;
       filter: blur(18px) saturate(165%);
-      clip-path: inset(0);
+      mask-image: linear-gradient(to bottom, black 0, black calc(100% - 18px), rgba(0, 0, 0, 0.9) 100%);
       transform: scaleX(1.04);
       transform-origin: top center;
       transition: opacity 120ms ease-out;
@@ -467,12 +469,23 @@
       border: 1px solid var(--hilal-safari-separator) !important;
       border-top: 1px solid rgba(255, 255, 255, 0.35) !important;
       border-bottom: 1px solid rgba(0, 0, 0, 0.2) !important;
-      background-color: color-mix(in srgb, var(--hilal-safari-chrome-bg) 82%, transparent) !important;
-      backdrop-filter: url(#liquid-glass-refraction) blur(34px) saturate(190%) !important;
+      background-color: transparent !important;
+      backdrop-filter: none !important;
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
         0 20px 48px light-dark(rgba(28, 39, 56, 0.22), rgba(0, 0, 0, 0.45)) !important;
       overflow: auto !important;
+      position: relative !important;
+    }
+
+    .urlbarView-glass-canvas {
+      position: absolute !important;
+      inset: 0 !important;
+      pointer-events: none !important;
+      z-index: -1 !important;
+      border-radius: inherit !important;
+      width: 100% !important;
+      height: 100% !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #urlbar[open] .urlbarView-body-outer,
