@@ -245,8 +245,8 @@
       opacity: 0;
       pointer-events: none;
       filter: blur(18px) saturate(165%);
-      mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
-      transform: scale(1.04);
+      clip-path: inset(0);
+      transform: scaleX(1.04);
       transform-origin: top center;
       transition: opacity 120ms ease-out;
       will-change: opacity, transform;
