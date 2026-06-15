@@ -545,7 +545,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
      let tabStrip = gBrowser.tabContainer;
      let arrowScrollbox = tabStrip.arrowScrollbox;
      let currentScrollOrientation = arrowScrollbox.getAttribute("orient");
-@@ -2414,6 +2495,220 @@ var SidebarController = {
+@@ -2414,6 +2495,233 @@ var SidebarController = {
      }
    },
  
@@ -646,9 +646,15 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      let tabboxRect = tabbox.getBoundingClientRect();
 +      let width = Math.max(1, Math.round(tabboxRect.width));
 +      let left = Math.max(0, Math.round(tabboxRect.left));
-+      let scale = Math.max(1, window.devicePixelRatio || 1);
++      let viewportWidth = Math.max(
++        1,
++        Math.round(window.innerWidth || 0),
++        left + width
++      );
++      // The reflection is heavily blurred, so a 1x snapshot keeps scrolling responsive.
++      let scale = 1;
 +      let canvas = this.ensureTahoeScrollReflectionCanvas();
-+      let canvasWidth = Math.max(1, Math.round(width * scale));
++      let canvasWidth = Math.max(1, Math.round(viewportWidth * scale));
 +      let canvasHeight = Math.max(1, Math.round(top * scale));
 +      if (canvas.width !== canvasWidth) {
 +        canvas.width = canvasWidth;
@@ -656,8 +662,8 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      if (canvas.height !== canvasHeight) {
 +        canvas.height = canvasHeight;
 +      }
-+      canvas.style.insetInlineStart = `${left}px`;
-+      canvas.style.inlineSize = `${width}px`;
++      canvas.style.insetInlineStart = "0";
++      canvas.style.inlineSize = `${viewportWidth}px`;
 +      canvas.style.blockSize = `${top}px`;
 +
 +      let captureWidth = Math.max(
@@ -686,15 +692,22 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +        return;
 +      }
 +
++      let dstY = Math.round((top - captureHeight) * scale);
++      let dstHeight = Math.round(captureHeight * scale);
++      let dstX = Math.round(left * scale);
++      let dstWidth = Math.round(width * scale);
 +      let ctx = canvas.getContext("2d");
 +      ctx.clearRect(0, 0, canvas.width, canvas.height);
-+      ctx.drawImage(
-+        image,
-+        0,
-+        Math.round((top - captureHeight) * scale),
-+        canvas.width,
-+        Math.round(captureHeight * scale)
-+      );
++      if (dstX > 0) {
++        ctx.save();
++        ctx.beginPath();
++        ctx.rect(0, dstY, dstX, dstHeight);
++        ctx.clip();
++        ctx.globalAlpha = 0.6;
++        ctx.drawImage(image, 0, dstY, dstWidth, dstHeight);
++        ctx.restore();
++      }
++      ctx.drawImage(image, dstX, dstY, dstWidth, dstHeight);
 +      image.close?.();
 +      document.documentElement.toggleAttribute(
 +        "hilal-safari-reflection-active",
@@ -766,7 +779,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    debouncedMouseEnter() {
      const contentArea = document.getElementById("tabbrowser-tabbox");
      this._box.toggleAttribute("sidebar-launcher-hovered", true);
-@@ -2933,7 +3228,8 @@ var HilalCompactMode = {
+@@ -2933,9 +3241,10 @@ var HilalCompactMode = {
        false
      );
      const isSidebarActive = workspacesEnabled || verticalTabsEnabled;
@@ -777,6 +790,8 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
      const actualCompact = compact;
 -
      const compactSidebar = actualCompact && isSidebarActive;
+     const hideToolbox =
+       actualCompact && Services.prefs.getBoolPref(this.HIDE_TOOLBOX_PREF, true);
 diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
 --- a/browser/components/sidebar/sidebar-main.css
 +++ b/browser/components/sidebar/sidebar-main.css

@@ -238,8 +238,8 @@
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #hilal-safari-scroll-reflection {
       position: fixed;
       inset-block-start: 0;
-      inset-inline-start: var(--hilal-safari-sidebar-width);
-      inline-size: calc(100vw - var(--hilal-safari-sidebar-width));
+      inset-inline-start: 0;
+      inline-size: 100vw;
       block-size: var(--hilal-safari-content-top, var(--hilal-safari-toolbox-height));
       z-index: 1;
       opacity: 0;
@@ -249,7 +249,7 @@
       transform: scale(1.04);
       transform-origin: top center;
       transition: opacity 120ms ease-out;
-      will-change: filter, opacity;
+      will-change: opacity, transform;
     }
 
     :root[windowtype="navigator:browser"][hilal-safari-reflection-active]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #hilal-safari-scroll-reflection {

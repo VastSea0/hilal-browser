@@ -663,6 +663,12 @@ sidebar-main,
   max-width: var(--hilal-compact-sidebar-width, 280px) !important;
 }
 
+:root[hilal-compact-sidebar] #sidebar-main[sidebar-positionend][vertical-tabs] #vertical-tabs {
+  width: var(--hilal-compact-sidebar-end-width, 248px) !important;
+  min-width: var(--hilal-compact-sidebar-end-width, 248px) !important;
+  max-width: var(--hilal-compact-sidebar-end-width, 248px) !important;
+}
+
 /* Push left sidebar content down via custom property to leave space for the traffic lights at the top-left of the window */
 :root[hilal-compact-sidebar] #sidebar-main:not([sidebar-positionend]) sidebar-main,
 :root[hilal-compact-sidebar] #sidebar-main:not([sidebar-positionend]) html\:sidebar-main {
@@ -682,6 +688,9 @@ sidebar-main,
 /* Round left corners instead if sidebar is on the right side */
 :root[hilal-compact-sidebar] #sidebar-main[sidebar-positionend] sidebar-main,
 :root[hilal-compact-sidebar] #sidebar-main[sidebar-positionend] html\:sidebar-main {
+  width: var(--hilal-compact-sidebar-end-width, 248px) !important;
+  min-width: var(--hilal-compact-sidebar-end-width, 248px) !important;
+  max-width: var(--hilal-compact-sidebar-end-width, 248px) !important;
   border-radius: 20px !important;
   border: 1px solid var(--hilal-safari-separator) !important;
   box-shadow:
@@ -877,9 +886,11 @@ sidebar-main,
 /* Sidebar Width token */
 :root[hilal-compact-sidebar] {
   --hilal-compact-sidebar-width: 68px;
+  --hilal-compact-sidebar-end-width: 60px;
 }
 :root[hilal-compact-sidebar]:has(sidebar-main[vertical-tabs]) {
   --hilal-compact-sidebar-width: 280px;
+  --hilal-compact-sidebar-end-width: 248px;
 }
 
 /* When the compact sidebar is visible on the left, offset #nav-bar to avoid overlap */
@@ -892,7 +903,7 @@ sidebar-main,
 /* When the compact sidebar is visible on the right, offset #nav-bar to avoid overlap */
 :root[hilal-compact-mode][hilal-compact-hide-toolbox][hilal-compact-sidebar]:has(#sidebar-main[sidebar-positionend].hilal-compact-visible) #nav-bar {
   left: 0 !important;
-  width: calc(100vw - var(--hilal-compact-sidebar-width)) !important;
+  width: calc(100vw - var(--hilal-compact-sidebar-end-width, var(--hilal-compact-sidebar-width))) !important;
   padding-inline-start: 80px !important; /* Keep left padding for traffic lights */
 }
 
