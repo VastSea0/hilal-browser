@@ -23,6 +23,15 @@ export class HilalTahoeParent extends JSWindowActorParent {
       return null;
     }
 
+    if (aMessage.name === "HilalTahoe:ScrollState") {
+      let chromeWin = this.browsingContext.topChromeWindow;
+      chromeWin?.SidebarController?.updateTahoeScrollReflection(
+        aMessage.data,
+        this.browsingContext
+      );
+      return null;
+    }
+
     return null;
   }
 }

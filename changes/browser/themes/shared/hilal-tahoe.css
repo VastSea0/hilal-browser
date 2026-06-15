@@ -235,11 +235,30 @@
         var(--hilal-tahoe-window-tint);
     }
 
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #hilal-safari-scroll-reflection {
+      position: fixed;
+      inset-block-start: 0;
+      inset-inline-start: var(--hilal-safari-sidebar-width);
+      inline-size: calc(100vw - var(--hilal-safari-sidebar-width));
+      block-size: var(--hilal-safari-content-top, var(--hilal-safari-toolbox-height));
+      z-index: 1;
+      opacity: 0;
+      pointer-events: none;
+      mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+      transition: opacity 120ms ease-out;
+    }
+
+    :root[windowtype="navigator:browser"][hilal-safari-reflection-active]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #hilal-safari-scroll-reflection {
+      opacity: 1;
+    }
+
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #navigator-toolbox {
       box-sizing: border-box !important;
       inline-size: calc(100vw - var(--hilal-safari-sidebar-width)) !important;
       margin-inline-start: var(--hilal-safari-sidebar-width) !important;
       padding: 0 10px !important;
+      position: relative !important;
+      z-index: 1200 !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]):not([sizemode="fullscreen"]):has(#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])) #navigator-toolbox {

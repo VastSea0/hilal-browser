@@ -420,7 +420,7 @@ diff --git a/browser/components/sidebar/SidebarManager.sys.mjs b/browser/compone
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
-@@ -574,6 +574,48 @@ var SidebarController = {
+@@ -574,6 +574,57 @@ var SidebarController = {
      }
  
      HilalCompactMode.init();
@@ -428,7 +428,8 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +    try {
 +      ChromeUtils.registerWindowActor("HilalTahoe", {
 +        parent: {
-+          esModuleURI: "chrome://browser/content/hilal/HilalTahoeParent.sys.mjs",
++          esModuleURI:
++            "chrome://browser/content/hilal/HilalTahoeParent.sys.mjs",
 +        },
 +        child: {
 +          esModuleURI: "chrome://browser/content/hilal/HilalTahoeChild.sys.mjs",
@@ -436,6 +437,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +            DOMDocElementInserted: {},
 +            DOMContentLoaded: {},
 +            pageshow: {},
++            scroll: { capture: true },
 +          },
 +        },
 +        allFrames: false,
@@ -448,7 +450,10 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +    this._tabSelectListener = () => {
 +      this.updateTahoeOffsets();
 +    };
-+    window.gBrowser.tabContainer.addEventListener("TabSelect", this._tabSelectListener);
++    window.gBrowser.tabContainer.addEventListener(
++      "TabSelect",
++      this._tabSelectListener
++    );
 +
 +    this._tahoeGeometryListener = () => {
 +      this.scheduleTahoeGeometryUpdate();
@@ -458,7 +463,11 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      this._tahoeGeometryResizeObserver = new ResizeObserver(
 +        this._tahoeGeometryListener
 +      );
-+      for (let id of ["navigator-toolbox", "tabbrowser-tabbox", "sidebar-main"]) {
++      for (let id of [
++        "navigator-toolbox",
++        "tabbrowser-tabbox",
++        "sidebar-main",
++      ]) {
 +        let element = document.getElementById(id);
 +        if (element) {
 +          this._tahoeGeometryResizeObserver.observe(element);
@@ -469,12 +478,15 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    },
  
    uninit() {
-@@ -608,6 +650,23 @@ var SidebarController = {
+@@ -608,6 +659,31 @@ var SidebarController = {
      delete this._aiWindowObserverAdded;
      delete this._windowRestoredObserverAdded;
  
 +    if (this._tabSelectListener) {
-+      window.gBrowser.tabContainer.removeEventListener("TabSelect", this._tabSelectListener);
++      window.gBrowser.tabContainer.removeEventListener(
++        "TabSelect",
++        this._tabSelectListener
++      );
 +      this._tabSelectListener = null;
 +    }
 +    if (this._tahoeGeometryListener) {
@@ -489,11 +501,16 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      cancelAnimationFrame(this._tahoeGeometryFrame);
 +      this._tahoeGeometryFrame = 0;
 +    }
++    if (this._tahoeReflectionFrame) {
++      cancelAnimationFrame(this._tahoeReflectionFrame);
++      this._tahoeReflectionFrame = 0;
++    }
++    this.clearTahoeScrollReflection();
 +
      CustomizableUI.removeListener(this);
  
      if (this._observer) {
-@@ -2071,6 +2130,7 @@ var SidebarController = {
+@@ -2071,6 +2147,7 @@ var SidebarController = {
        this.updateToolbarButton();
        this.dismissSidebarBadge(commandID);
  
@@ -501,7 +518,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
        this._fireFocusedEvent();
        return true;
      });
-@@ -2095,6 +2155,7 @@ var SidebarController = {
+@@ -2095,6 +2172,7 @@ var SidebarController = {
      }
      return this._show(commandID).then(() => {
        this._loadSidebarExtension(commandID);
@@ -509,7 +526,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
        return true;
      });
    },
-@@ -2278,6 +2339,7 @@ var SidebarController = {
+@@ -2278,6 +2356,7 @@ var SidebarController = {
        updateToggleControlLabel(triggerNode);
      }
      this.updateToolbarButton();
@@ -517,7 +534,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    },
  
    /**
-@@ -2374,7 +2436,9 @@ var SidebarController = {
+@@ -2374,7 +2453,9 @@ var SidebarController = {
    },
  
    toggleTabstrip() {
@@ -528,7 +545,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
      let tabStrip = gBrowser.tabContainer;
      let arrowScrollbox = tabStrip.arrowScrollbox;
      let currentScrollOrientation = arrowScrollbox.getAttribute("orient");
-@@ -2414,6 +2478,47 @@ var SidebarController = {
+@@ -2414,6 +2495,220 @@ var SidebarController = {
      }
    },
  
@@ -537,7 +554,8 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +    let browser = window.gBrowser.selectedBrowser;
 +    if (browser && browser.browsingContext) {
 +      try {
-+        let actor = browser.browsingContext.currentWindowGlobal?.getActor("HilalTahoe");
++        let actor =
++          browser.browsingContext.currentWindowGlobal?.getActor("HilalTahoe");
 +        if (actor) {
 +          actor.sendAsyncMessage("HilalTahoe:UpdateOffsets", {});
 +        }
@@ -573,9 +591,192 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +    docEl.style.setProperty("--hilal-safari-content-height", `${height}px`);
 +  },
 +
++  updateTahoeScrollReflection(scrollState, browsingContext) {
++    let browser = window.gBrowser?.selectedBrowser;
++    if (!browser || browser.browsingContext !== browsingContext) {
++      return;
++    }
++
++    this._lastTahoeScrollState = scrollState;
++    this._lastTahoeScrollBrowsingContext = browsingContext;
++    this._tahoeReflectionDirty = true;
++    this.scheduleTahoeScrollReflectionUpdate();
++  },
++
++  scheduleTahoeScrollReflectionUpdate() {
++    if (this._tahoeReflectionFrame || this._tahoeReflectionPending) {
++      return;
++    }
++    this._tahoeReflectionFrame = requestAnimationFrame(() => {
++      this._tahoeReflectionFrame = 0;
++      this.updateTahoeScrollReflectionCanvas();
++    });
++  },
++
++  async updateTahoeScrollReflectionCanvas() {
++    if (this._tahoeReflectionPending) {
++      return;
++    }
++
++    this._tahoeReflectionPending = true;
++    this._tahoeReflectionDirty = false;
++
++    try {
++      let scrollState = this._lastTahoeScrollState;
++      let browser = window.gBrowser?.selectedBrowser;
++      if (
++        !scrollState ||
++        !browser ||
++        browser.browsingContext !== this._lastTahoeScrollBrowsingContext ||
++        !this.isTahoeSafariLayoutActive()
++      ) {
++        this.clearTahoeScrollReflection();
++        return;
++      }
++
++      let top = this.readTahoeContentTop();
++      let scrollY = Math.max(0, Math.round(scrollState.scrollY || 0));
++      let captureHeight = Math.min(top, scrollY);
++      if (captureHeight <= 0) {
++        this.clearTahoeScrollReflection();
++        return;
++      }
++
++      let tabbox = document.getElementById("tabbrowser-tabbox");
++      let tabboxRect = tabbox.getBoundingClientRect();
++      let width = Math.max(1, Math.round(tabboxRect.width));
++      let left = Math.max(0, Math.round(tabboxRect.left));
++      let scale = Math.max(1, window.devicePixelRatio || 1);
++      let canvas = this.ensureTahoeScrollReflectionCanvas();
++      let canvasWidth = Math.max(1, Math.round(width * scale));
++      let canvasHeight = Math.max(1, Math.round(top * scale));
++      if (canvas.width !== canvasWidth) {
++        canvas.width = canvasWidth;
++      }
++      if (canvas.height !== canvasHeight) {
++        canvas.height = canvasHeight;
++      }
++      canvas.style.insetInlineStart = `${left}px`;
++      canvas.style.inlineSize = `${width}px`;
++      canvas.style.blockSize = `${top}px`;
++
++      let captureWidth = Math.max(
++        1,
++        Math.round(scrollState.innerWidth || browser.clientWidth || width)
++      );
++      let captureX = Math.max(0, Math.round(scrollState.scrollX || 0));
++      let captureY = Math.max(0, scrollY - captureHeight);
++      let serial = (this._tahoeReflectionSerial || 0) + 1;
++      this._tahoeReflectionSerial = serial;
++      let image = await browser.drawSnapshot(
++        captureX,
++        captureY,
++        captureWidth,
++        captureHeight,
++        scale,
++        "transparent",
++        false
++      );
++      if (
++        !image ||
++        serial !== this._tahoeReflectionSerial ||
++        browser !== window.gBrowser?.selectedBrowser
++      ) {
++        image?.close?.();
++        return;
++      }
++
++      let ctx = canvas.getContext("2d");
++      ctx.clearRect(0, 0, canvas.width, canvas.height);
++      ctx.drawImage(
++        image,
++        0,
++        Math.round((top - captureHeight) * scale),
++        canvas.width,
++        Math.round(captureHeight * scale)
++      );
++      image.close?.();
++      document.documentElement.toggleAttribute(
++        "hilal-safari-reflection-active",
++        true
++      );
++    } catch (e) {
++      this.clearTahoeScrollReflection();
++    } finally {
++      this._tahoeReflectionPending = false;
++      if (this._tahoeReflectionDirty) {
++        this.scheduleTahoeScrollReflectionUpdate();
++      }
++    }
++  },
++
++  isTahoeSafariLayoutActive() {
++    if (!Services.prefs.getBoolPref("hilal.tahoe.enabled", true)) {
++      return false;
++    }
++    let docEl = document.documentElement;
++    return (
++      !docEl.hasAttribute("macOSNativeFullscreen") &&
++      !docEl.hasAttribute("customizing") &&
++      docEl.getAttribute("sizemode") !== "fullscreen" &&
++      !!document.querySelector(
++        "#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])"
++      )
++    );
++  },
++
++  readTahoeContentTop() {
++    let value = parseFloat(
++      getComputedStyle(document.documentElement).getPropertyValue(
++        "--hilal-safari-content-top"
++      )
++    );
++    if (!Number.isFinite(value) || value <= 0) {
++      value = parseFloat(
++        getComputedStyle(document.documentElement).getPropertyValue(
++          "--hilal-safari-toolbox-height"
++        )
++      );
++    }
++    return Math.max(1, Math.round(value || 94));
++  },
++
++  ensureTahoeScrollReflectionCanvas() {
++    let canvas = document.getElementById("hilal-safari-scroll-reflection");
++    if (canvas) {
++      return canvas;
++    }
++
++    canvas = document.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
++    canvas.id = "hilal-safari-scroll-reflection";
++    canvas.className = "hilal-safari-scroll-reflection";
++    document.getElementById("hilal-browser-background")?.appendChild(canvas);
++    return canvas;
++  },
++
++  clearTahoeScrollReflection() {
++    document.documentElement.toggleAttribute(
++      "hilal-safari-reflection-active",
++      false
++    );
++    let canvas = document.getElementById("hilal-safari-scroll-reflection");
++    canvas?.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
++  },
++
    debouncedMouseEnter() {
      const contentArea = document.getElementById("tabbrowser-tabbox");
      this._box.toggleAttribute("sidebar-launcher-hovered", true);
+@@ -2933,7 +3228,8 @@ var HilalCompactMode = {
+       false
+     );
+     const isSidebarActive = workspacesEnabled || verticalTabsEnabled;
+-    const isWelcomeStage = document.documentElement.hasAttribute("hilal-welcome-stage");
++    const isWelcomeStage = document.documentElement.hasAttribute(
++      "hilal-welcome-stage"
++    );
+     const actualCompact = compact;
+-
+     const compactSidebar = actualCompact && isSidebarActive;
 diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
 --- a/browser/components/sidebar/sidebar-main.css
 +++ b/browser/components/sidebar/sidebar-main.css
