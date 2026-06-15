@@ -2322,6 +2322,151 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
        return this.hilalSidebarTemplate();
      }
      /* Add 1 to tools and extensions count for "Customize sidebar" option */
+diff --git a/browser/components/tabbrowser/content/drag-and-drop.js b/browser/components/tabbrowser/content/drag-and-drop.js
+--- a/browser/components/tabbrowser/content/drag-and-drop.js
++++ b/browser/components/tabbrowser/content/drag-and-drop.js
+@@ -1179,69 +1179,81 @@
+         canvas.mozOpaque = true;
+       }
+ 
+-      canvas.width = 160 * scale;
+-      canvas.height = 90 * scale;
+-      let toDrag = canvas;
+-      let dragImageOffset = -16;
+-      let splitViewTab;
+-      if (isSplitViewWrapper(tab)) {
+-        splitViewTab = tab.tabs.find(t => t.selected);
+-      }
+-      let browser = splitViewTab
+-        ? splitViewTab.linkedBrowser
+-        : isTab(tab) && tab.linkedBrowser;
+-      if (isTabGroupLabel(tab)) {
+-        toDrag = tab;
+-      } else if (gMultiProcessBrowser) {
+-        var context = canvas.getContext("2d");
+-        context.fillStyle = "white";
+-        context.fillRect(0, 0, canvas.width, canvas.height);
+-
+-        let captureListener;
+-        let platform = AppConstants.platform;
+-        // On Windows and Mac we can update the drag image during a drag
+-        // using updateDragImage. On Linux, we can use a panel.
+-        if (platform == "win" || platform == "macosx") {
+-          captureListener = function () {
+-            dt.updateDragImage(canvas, dragImageOffset, dragImageOffset);
+-          };
+-        } else {
+-          // Create a panel to use it in setDragImage
+-          // which will tell xul to render a panel that follows
+-          // the pointer while a dnd session is on.
+-          if (!this._tabbrowserTabs._dndPanel) {
+-            this._tabbrowserTabs._dndCanvas = canvas;
+-            this._tabbrowserTabs._dndPanel = document.createXULElement("panel");
+-            this._tabbrowserTabs._dndPanel.className = "dragfeedback-tab";
+-            this._tabbrowserTabs._dndPanel.setAttribute("type", "drag");
+-            let wrapper = document.createElementNS(
+-              "http://www.w3.org/1999/xhtml",
+-              "div"
+-            );
+-            wrapper.style.width = "160px";
+-            wrapper.style.height = "90px";
+-            wrapper.appendChild(canvas);
+-            this._tabbrowserTabs._dndPanel.appendChild(wrapper);
+-            document.documentElement.appendChild(
+-              this._tabbrowserTabs._dndPanel
+-            );
++      let useTabDragImage = false;
++      try {
++        useTabDragImage = Services.prefs.getBoolPref("hilal.tahoe.enabled", true);
++      } catch (e) {}
++
++      if (useTabDragImage && !isTabGroupLabel(tab)) {
++        let rect = tab.getBoundingClientRect();
++        let xOffset = event.clientX - rect.left;
++        let yOffset = event.clientY - rect.top;
++        dt.setDragImage(tab, xOffset, yOffset);
++      } else {
++        canvas.width = 160 * scale;
++        canvas.height = 90 * scale;
++        let toDrag = canvas;
++        let dragImageOffset = -16;
++        let splitViewTab;
++        if (isSplitViewWrapper(tab)) {
++          splitViewTab = tab.tabs.find(t => t.selected);
++        }
++        let browser = splitViewTab
++          ? splitViewTab.linkedBrowser
++          : isTab(tab) && tab.linkedBrowser;
++        if (isTabGroupLabel(tab)) {
++          toDrag = tab;
++        } else if (gMultiProcessBrowser) {
++          var context = canvas.getContext("2d");
++          context.fillStyle = "white";
++          context.fillRect(0, 0, canvas.width, canvas.height);
++
++          let captureListener;
++          let platform = AppConstants.platform;
++          // On Windows and Mac we can update the drag image during a drag
++          // using updateDragImage. On Linux, we can use a panel.
++          if (platform == "win" || platform == "macosx") {
++            captureListener = function () {
++              dt.updateDragImage(canvas, dragImageOffset, dragImageOffset);
++            };
++          } else {
++            // Create a panel to use it in setDragImage
++            // which will tell xul to render a panel that follows
++            // the pointer while a dnd session is on.
++            if (!this._tabbrowserTabs._dndPanel) {
++              this._tabbrowserTabs._dndCanvas = canvas;
++              this._tabbrowserTabs._dndPanel = document.createXULElement("panel");
++              this._tabbrowserTabs._dndPanel.className = "dragfeedback-tab";
++              this._tabbrowserTabs._dndPanel.setAttribute("type", "drag");
++              let wrapper = document.createElementNS(
++                "http://www.w3.org/1999/xhtml",
++                "div"
++              );
++              wrapper.style.width = "160px";
++              wrapper.style.height = "90px";
++              wrapper.appendChild(canvas);
++              this._tabbrowserTabs._dndPanel.appendChild(wrapper);
++              document.documentElement.appendChild(
++                this._tabbrowserTabs._dndPanel
++              );
++            }
++            toDrag = this._tabbrowserTabs._dndPanel;
+           }
+-          toDrag = this._tabbrowserTabs._dndPanel;
++          // PageThumb is async with e10s but that's fine
++          // since we can update the image during the dnd.
++          PageThumbs.captureToCanvas(browser, canvas)
++            .then(captureListener)
++            .catch(e => console.error(e));
++        } else {
++          // For the non e10s case we can just use PageThumbs
++          // sync, so let's use the canvas for setDragImage.
++          PageThumbs.captureToCanvas(browser, canvas).catch(e =>
++            console.error(e)
++          );
++          dragImageOffset = dragImageOffset * scale;
+         }
+-        // PageThumb is async with e10s but that's fine
+-        // since we can update the image during the dnd.
+-        PageThumbs.captureToCanvas(browser, canvas)
+-          .then(captureListener)
+-          .catch(e => console.error(e));
+-      } else {
+-        // For the non e10s case we can just use PageThumbs
+-        // sync, so let's use the canvas for setDragImage.
+-        PageThumbs.captureToCanvas(browser, canvas).catch(e =>
+-          console.error(e)
+-        );
+-        dragImageOffset = dragImageOffset * scale;
++        dt.setDragImage(toDrag, dragImageOffset, dragImageOffset);
+       }
+-      dt.setDragImage(toDrag, dragImageOffset, dragImageOffset);
+ 
+       // _dragData.offsetX/Y give the coordinates that the mouse should be
+       // positioned relative to the corner of the new window created upon
 diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/components/tabbrowser/content/tabbrowser.js
 --- a/browser/components/tabbrowser/content/tabbrowser.js
 +++ b/browser/components/tabbrowser/content/tabbrowser.js
