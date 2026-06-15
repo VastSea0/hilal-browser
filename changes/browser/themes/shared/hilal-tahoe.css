@@ -469,23 +469,13 @@
       border: 1px solid var(--hilal-safari-separator) !important;
       border-top: 1px solid rgba(255, 255, 255, 0.35) !important;
       border-bottom: 1px solid rgba(0, 0, 0, 0.2) !important;
-      background-color: transparent !important;
-      backdrop-filter: none !important;
+      background-color: color-mix(in srgb, var(--hilal-safari-chrome-bg) 82%, transparent) !important;
+      backdrop-filter: blur(34px) saturate(190%) !important;
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
         0 20px 48px light-dark(rgba(28, 39, 56, 0.22), rgba(0, 0, 0, 0.45)) !important;
       overflow: auto !important;
       position: relative !important;
-    }
-
-    .urlbarView-glass-canvas {
-      position: absolute !important;
-      inset: 0 !important;
-      pointer-events: none !important;
-      z-index: -1 !important;
-      border-radius: inherit !important;
-      width: 100% !important;
-      height: 100% !important;
     }
 
     :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]):not([customizing]) #urlbar[open] .urlbarView-body-outer,
