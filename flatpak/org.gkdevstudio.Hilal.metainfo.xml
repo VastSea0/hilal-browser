@@ -26,7 +26,7 @@
   </description>
 
   <releases>
-    <release version="0.3.0-alpha.3" date="2026-06-09" type="development"/>
+    <release version="0.3.0-alpha.4" date="2026-06-16" type="development"/>
   </releases>
 
   <content_rating type="oars-1.1"/>
@@ -51,11 +51,11 @@
 
   <screenshots>
     <screenshot type="default">
-      <image type="source">https://raw.githubusercontent.com/VastSea0/hilal-browser/v0.3.0-alpha.3/prefs/browser/base/content/hilal/black-white.png</image>
+      <image type="source">https://raw.githubusercontent.com/VastSea0/hilal-browser/v0.3.0-alpha.4/changes/browser/base/content/hilal/black-white.png</image>
       <caption>Hilal Browser main window with vertical tabs and workspace controls</caption>
     </screenshot>
     <screenshot>
-      <image type="source">https://raw.githubusercontent.com/VastSea0/hilal-browser/v0.3.0-alpha.3/prefs/browser/base/content/hilal/welcome-home-preview.png</image>
+      <image type="source">https://raw.githubusercontent.com/VastSea0/hilal-browser/v0.3.0-alpha.4/changes/browser/base/content/hilal/welcome-home-preview.png</image>
       <caption>Hilal welcome experience</caption>
     </screenshot>
   </screenshots>

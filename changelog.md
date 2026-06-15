@@ -2,6 +2,26 @@
 
 ---
 
+## [0.3.0-alpha.4] - 2026-06-16
+
+### Added
+- **Tahoe Safari-Inspired Shell**: Introduced Safari-style vertical and horizontal sidebar layout options, custom page-bleed parameters, and synchronized underlap offsets.
+- **Dynamic Scroll Reflection**: Added content scroll reflection backgrounds for Tahoe mode using WindowActor signaling and canvas snapshotting.
+- **Hilal Boosts (Site Customizer & Element Zapper)**: Integrated interactive tools for custom website style customizers and dynamic element removal.
+- **Workspace Reordering**: Added drag-and-drop workspace sorting, tab-to-workspace drop support, and workspace context-menus.
+- **Custom Keyboard Shortcuts Table**: Replaced static JSON override files with preference-based shortcut storage and built a settings UI panel.
+- **Onboarding Personalization**: Rewrote onboarding welcome stages, persistent container configuration, and welcome layout presets.
+
+### Changed
+- **V2 Classic Slide-Up Toolbar**: Switched compact toolbar hide behaviors to slide-up layout animations with centered browser chrome controls.
+- **macOS Window Integration**: Constrained native traffic lights layout positioning in compact sidebar/toolbar modes to prevent control overlaps.
+
+### Fixed
+- **Compact Layout Transitions**: Fixed URL bar ghosting, layout heights, and icon flickering during transitions.
+- **Onboarding Duplicate Pins**: Prevented duplicate pinned site creation when finalizing the onboarding flow.
+
+---
+
 ## [0.2.0-alpha.5] - 2026-05-29
 
 ### Added
