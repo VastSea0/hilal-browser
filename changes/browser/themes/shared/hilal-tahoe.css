@@ -465,7 +465,7 @@
       border: 1px solid var(--hilal-safari-separator) !important;
       border-top: 1px solid rgba(255, 255, 255, 0.35) !important;
       border-bottom: 1px solid rgba(0, 0, 0, 0.2) !important;
-      background-color: color-mix(in srgb, var(--hilal-safari-chrome-bg) 82%, transparent) !important;
+      background-color: light-dark(rgba(244, 246, 250, 0.92), rgba(28, 28, 32, 0.90)) !important;
       backdrop-filter: blur(34px) saturate(190%) !important;
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
