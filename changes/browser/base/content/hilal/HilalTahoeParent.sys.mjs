@@ -20,6 +20,7 @@ export class HilalTahoeParent extends JSWindowActorParent {
       } else {
         docEl.style.removeProperty("--hilal-safari-page-bg");
       }
+      chromeWin.gHilalBoosts?.refreshTahoeBoostedPageBackground?.();
       return null;
     }
 

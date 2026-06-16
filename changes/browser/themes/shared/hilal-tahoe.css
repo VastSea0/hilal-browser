@@ -203,6 +203,7 @@
       --hilal-safari-sidebar-block-gap: 5px;
       --hilal-safari-sidebar-radius: 28px;
       --hilal-safari-page-bg: light-dark(#ffffff, #1c1c1e);
+      --hilal-safari-effective-page-bg: var(--hilal-safari-boosted-page-bg, var(--hilal-safari-page-bg));
       --hilal-safari-control-bg: light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.045));
       --hilal-safari-control-bg-hover: light-dark(rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.085));
       --hilal-safari-glass-bg: light-dark(rgba(244, 246, 250, 0.42), rgba(15, 17, 22, 0.38));
@@ -230,10 +231,10 @@
       background:
         linear-gradient(
           90deg,
-          var(--hilal-safari-page-bg) 0,
-          var(--hilal-safari-page-bg) calc(var(--hilal-safari-sidebar-width) - 24px),
-          color-mix(in srgb, var(--hilal-safari-page-bg) 84%, transparent) calc(var(--hilal-safari-sidebar-width) + 8px),
-          color-mix(in srgb, var(--hilal-safari-page-bg) 36%, transparent) calc(var(--hilal-safari-sidebar-width) + 56px),
+          var(--hilal-safari-effective-page-bg) 0,
+          var(--hilal-safari-effective-page-bg) calc(var(--hilal-safari-sidebar-width) - 24px),
+          color-mix(in srgb, var(--hilal-safari-effective-page-bg) 84%, transparent) calc(var(--hilal-safari-sidebar-width) + 8px),
+          color-mix(in srgb, var(--hilal-safari-effective-page-bg) 36%, transparent) calc(var(--hilal-safari-sidebar-width) + 56px),
           transparent calc(var(--hilal-safari-sidebar-width) + 112px)
         ),
         var(--hilal-tahoe-window-tint);
@@ -614,7 +615,7 @@
       border: 0 !important;
       border-radius: 0 !important;
       outline: 0 !important;
-      background-color: var(--hilal-safari-page-bg) !important;
+      background-color: var(--hilal-safari-effective-page-bg) !important;
       box-shadow: none !important;
     }
 

@@ -216,7 +216,8 @@
                   if (!tabDomain || (targetDomain && tabDomain !== targetDomain)) {
                     continue;
                   }
-                  const actor = browser.browsingContext.currentWindowGlobal?.getActor("HilalBoosts");
+                  const windowGlobal = browser.browsingContext.currentWindowGlobal;
+                  const actor = windowGlobal?.getActor("HilalBoosts");
                   if (!actor) {
                     continue;
                   }
@@ -226,6 +227,9 @@
                   } else {
                     actor.sendAsyncMessage("HilalBoosts:ClearBoost");
                   }
+                  windowGlobal
+                    ?.getActor("HilalTahoe")
+                    ?.sendAsyncMessage("HilalTahoe:UpdateOffsets", {});
                 } catch (e) {}
               }
             }
@@ -402,8 +406,11 @@
 
       if (!this._enabled) {
         this._clearBrowserUIColors();
+        this._clearTahoeBoostedPageBackground();
         return;
       }
+
+      this._updateTahoeBoostedPageBackground(boost);
 
       const globalAutoPalette = Services.prefs.getBoolPref(PREF_AUTO_PALETTE, false);
       const isAutoPalette = boost && boost.enabled
@@ -433,6 +440,18 @@
       }
     }
 
+    refreshTahoeBoostedPageBackground() {
+      if (!this._enabled) {
+        this._clearTahoeBoostedPageBackground();
+        return;
+      }
+
+      const domain = this.activeDomain;
+      this._updateTahoeBoostedPageBackground(
+        domain ? this.getBoostForDomain(domain) : null
+      );
+    }
+
     _clearBrowserUIColors() {
       const docEl = document.documentElement;
       docEl.removeAttribute("hilal-boosts-ui");
@@ -440,6 +459,112 @@
       docEl.style.removeProperty("--hilal-boosts-ui-secondary");
       docEl.style.removeProperty("--hilal-boosts-ui-intensity");
       docEl.style.removeProperty("--hilal-boosts-ui-brightness");
+    }
+
+    _updateTahoeBoostedPageBackground(boost) {
+      const docEl = document.documentElement;
+      if (!boost?.enabled || !boost.colorEnabled || !this._isHexColor(boost.accentColor)) {
+        this._clearTahoeBoostedPageBackground();
+        return;
+      }
+
+      const accentColor = this._adjustHexBrightness(
+        boost.accentColor,
+        boost.colorBrightness
+      );
+      const pageColor =
+        this._parseCssRgbColor(
+          getComputedStyle(docEl).getPropertyValue("--hilal-safari-page-bg")
+        ) || this._fallbackTahoePageRgb();
+      const accentRgb = this._parseCssRgbColor(accentColor) || pageColor;
+      const accentWeight = Math.min(
+        78,
+        Math.max(0, Math.round(boost.colorIntensity * 1.35))
+      );
+      if (!accentWeight) {
+        this._clearTahoeBoostedPageBackground();
+        return;
+      }
+
+      const boostedRgb = this._mixRgbChannels(
+        pageColor,
+        accentRgb,
+        accentWeight / 100
+      );
+      docEl.style.setProperty(
+        "--hilal-safari-boosted-page-bg",
+        `rgb(${boostedRgb.join(", ")})`
+      );
+    }
+
+    _clearTahoeBoostedPageBackground() {
+      document.documentElement.style.removeProperty(
+        "--hilal-safari-boosted-page-bg"
+      );
+    }
+
+    _fallbackTahoePageRgb() {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? [28, 28, 30]
+        : [255, 255, 255];
+    }
+
+    _mixRgbChannels(baseRgb, accentRgb, accentWeight) {
+      return baseRgb.map((channel, index) =>
+        Math.round(channel * (1 - accentWeight) + accentRgb[index] * accentWeight)
+      );
+    }
+
+    _parseCssRgbColor(value) {
+      if (!value) {
+        return null;
+      }
+
+      const color = value.trim();
+      const lightDarkMatch = color.match(/^light-dark\((.*),(.*)\)$/i);
+      if (lightDarkMatch) {
+        return this._parseCssRgbColor(
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? lightDarkMatch[2]
+            : lightDarkMatch[1]
+        );
+      }
+
+      const hexMatch = color.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+      if (hexMatch) {
+        let hex = hexMatch[1];
+        if (hex.length === 3) {
+          hex = hex
+            .split("")
+            .map(channel => channel + channel)
+            .join("");
+        }
+        return [0, 2, 4].map(index => parseInt(hex.slice(index, index + 2), 16));
+      }
+
+      const rgbMatch = color.match(/^rgba?\((.*)\)$/i);
+      if (rgbMatch) {
+        const channels = rgbMatch[1]
+          .replace("/", " ")
+          .split(/[,\s]+/)
+          .filter(Boolean)
+          .slice(0, 3)
+          .map(channel => Math.round(parseFloat(channel)));
+        return channels.length === 3 && channels.every(Number.isFinite)
+          ? channels.map(channel => Math.min(255, Math.max(0, channel)))
+          : null;
+      }
+
+      const srgbMatch = color.match(
+        /^color\(srgb\s+([.\d]+)\s+([.\d]+)\s+([.\d]+)/i
+      );
+      if (srgbMatch) {
+        return [1, 2, 3].map(index =>
+          Math.min(255, Math.max(0, Math.round(parseFloat(srgbMatch[index]) * 255)))
+        );
+      }
+
+      return null;
     }
 
     _updatePanelUI() {
