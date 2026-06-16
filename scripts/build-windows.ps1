@@ -166,13 +166,18 @@ if ($mozBuild) {
 # --- 4. Find a compatible Python (3.11 or 3.12) -----------------------------
 
 $pythonExe = $null
-$pythonCandidates = @(
-    @("py", @("-3.12", "--version")),
-    @("py", @("-3.11", "--version")),
-    @("python3.12", @("--version")),
-    @("python3.11", @("--version")),
-    @("python", @("--version"))
-)
+$pythonCandidates = @()
+if ($mozBuild) {
+    $mozBuildPy = Join-Path $mozBuild "python3\python.exe"
+    if (Test-Path $mozBuildPy) {
+        $pythonCandidates += ,@($mozBuildPy, @("--version"))
+    }
+}
+$pythonCandidates += ,@("py", @("-3.12", "--version"))
+$pythonCandidates += ,@("py", @("-3.11", "--version"))
+$pythonCandidates += ,@("python3.12", @("--version"))
+$pythonCandidates += ,@("python3.11", @("--version"))
+$pythonCandidates += ,@("python", @("--version"))
 
 foreach ($c in $pythonCandidates) {
     $exe = $c[0]

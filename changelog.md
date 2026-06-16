@@ -2,6 +2,13 @@
 
 ---
 
+## [0.3.0-alpha.5] - 2026-06-16
+
+### Fixed
+- Fixed release workflow build and packaging configurations for Linux (AppImage dependency resolution) and Windows (MozillaBuild Python execution pathway).
+
+---
+
 ## [0.3.0-alpha.4] - 2026-06-16
 
 ### Added
