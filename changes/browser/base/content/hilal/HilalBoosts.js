@@ -1263,16 +1263,18 @@
       picker.style.setProperty("--hilal-boosts-accent", color);
       picker.style.setProperty("--hilal-boosts-secondary", secondaryColor);
       
-      this._positionColorDot(dot, color, 42);
-      this._positionColorDot(secondaryDot, secondaryColor, 42);
+      this._positionColorDot(picker, dot, color);
+      this._positionColorDot(picker, secondaryDot, secondaryColor);
       dot.style.backgroundColor = color;
       secondaryDot.style.backgroundColor = secondaryColor;
 
       if (circle) {
-        const { s } = this._hexToHsl(color);
-        const diameter = s * 0.84;
-        circle.style.width = diameter + "%";
-        circle.style.height = diameter + "%";
+        const point = this._colorPickerPoint(picker, color);
+        const diameter = point.distance * 2;
+        circle.style.left = `${point.cx}px`;
+        circle.style.top = `${point.cy}px`;
+        circle.style.width = `${diameter}px`;
+        circle.style.height = `${diameter}px`;
       }
 
       this._updateArcFill(picker, color, secondaryColor);
@@ -1286,28 +1288,56 @@
       }
     }
 
-    _positionColorDot(dot, color, radiusScale) {
+    _positionColorDot(picker, dot, color) {
+      const point = this._colorPickerPoint(picker, color);
+      dot.style.left = `${point.x}px`;
+      dot.style.top = `${point.y}px`;
+    }
+
+    _colorPickerPoint(picker, color) {
+      const geometry = this._colorPickerGeometry(picker);
       const { h, s } = this._hexToHsl(color);
-      const angle = h * Math.PI / 180;
-      const distance = s / 100 * radiusScale;
-      dot.style.left = (50 + Math.cos(angle) * distance) + "%";
-      dot.style.top = (50 + Math.sin(angle) * distance) + "%";
+      const angle = (h * Math.PI) / 180;
+      const distance = (s / 100) * geometry.radius;
+      return {
+        ...geometry,
+        angle,
+        hue: h,
+        saturation: s,
+        distance,
+        x: geometry.cx + Math.cos(angle) * distance,
+        y: geometry.cy + Math.sin(angle) * distance,
+      };
+    }
+
+    _colorPickerGeometry(picker) {
+      const width = picker.clientWidth || 170;
+      const height = picker.clientHeight || 170;
+      return {
+        width,
+        height,
+        cx: width / 2,
+        cy: height / 2,
+        radius: Math.min(width, height) * 0.42,
+      };
     }
 
     _initArcSVG(picker) {
       const NS = "http://www.w3.org/2000/svg";
-      const w = picker.clientWidth || 170;
-      const h = picker.clientHeight || 170;
+      const geometry = this._colorPickerGeometry(picker);
 
       const svg = document.createElementNS(NS, "svg");
       svg.classList.add("zen-boost-color-picker-arc-svg");
-      svg.setAttribute("width", w);
-      svg.setAttribute("height", h);
+      svg.setAttribute("width", geometry.width);
+      svg.setAttribute("height", geometry.height);
+      svg.setAttribute("viewBox", `0 0 ${geometry.width} ${geometry.height}`);
       svg.style.position = "absolute";
       svg.style.top = "0";
       svg.style.left = "0";
+      svg.style.width = "100%";
+      svg.style.height = "100%";
       svg.style.pointerEvents = "none";
-      svg.style.zIndex = "3";
+      svg.style.zIndex = "4";
 
       const defs = document.createElementNS(NS, "defs");
       const grad = document.createElementNS(NS, "linearGradient");
@@ -1328,7 +1358,11 @@
 
       const path = document.createElementNS(NS, "path");
       path.classList.add("arc-fill");
-      path.setAttribute("fill", "url(#hilal-arc-gradient)");
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", "url(#hilal-arc-gradient)");
+      path.setAttribute("stroke-width", "5");
+      path.setAttribute("stroke-linecap", "round");
+      path.setAttribute("stroke-linejoin", "round");
       svg.appendChild(path);
 
       picker.appendChild(svg);
@@ -1342,48 +1376,47 @@
       }
       if (!svg) return;
 
-      const w = picker.clientWidth || 170;
-      const h = picker.clientHeight || 170;
-      const cx = w / 2;
-      const cy = h / 2;
-      const radius = Math.min(w, h) * 0.42;
+      const geometry = this._colorPickerGeometry(picker);
+      svg.setAttribute("width", geometry.width);
+      svg.setAttribute("height", geometry.height);
+      svg.setAttribute("viewBox", `0 0 ${geometry.width} ${geometry.height}`);
 
-      const hsl1 = this._hexToHsl(color1);
-      const hsl2 = this._hexToHsl(color2);
-
-      const angle1 = hsl1.h;
-      const angle2 = hsl2.h;
-      const r = (hsl1.s / 100) * radius;
-      const thickness = 2.5;
-
-      const toXY = (deg, ra) => {
-        const rad = (deg * Math.PI) / 180;
-        return [cx + ra * Math.cos(rad), cy + ra * Math.sin(rad)];
-      };
-
-      const [x1, y1] = toXY(angle1, r);
-      const [x2, y2] = toXY(angle2, r);
+      const point1 = this._colorPickerPoint(picker, color1);
+      const point2 = this._colorPickerPoint(picker, color2);
 
       const grad = svg.querySelector("#hilal-arc-gradient");
       if (grad) {
         grad.querySelector("#hilal-ag-stop1").setAttribute("stop-color", color1);
         grad.querySelector("#hilal-ag-stop2").setAttribute("stop-color", color2);
-        grad.setAttribute("x1", x1);
-        grad.setAttribute("y1", y1);
-        grad.setAttribute("x2", x2);
-        grad.setAttribute("y2", y2);
+        grad.setAttribute("gradientUnits", "userSpaceOnUse");
+        grad.setAttribute("x1", point1.x);
+        grad.setAttribute("y1", point1.y);
+        grad.setAttribute("x2", point2.x);
+        grad.setAttribute("y2", point2.y);
       }
 
-      const outerR = r + thickness / 2;
-      const innerR = Math.max(r - thickness / 2, 1);
-      const delta = (angle2 - angle1 + 360) % 360;
-      const large = delta > 180 ? 1 : 0;
-      const [ox1, oy1] = toXY(angle1, outerR);
-      const [ox2, oy2] = toXY(angle2, outerR);
-      const [ix2, iy2] = toXY(angle2, innerR);
-      const [ix1, iy1] = toXY(angle1, innerR);
-
-      const d = `M ${ox1} ${oy1} A ${outerR} ${outerR} 0 ${large} 1 ${ox2} ${oy2} L ${ix2} ${iy2} A ${innerR} ${innerR} 0 ${large} 0 ${ix1} ${iy1} Z`;
+      let delta = point2.angle - point1.angle;
+      if (delta > Math.PI) {
+        delta -= Math.PI * 2;
+      } else if (delta < -Math.PI) {
+        delta += Math.PI * 2;
+      }
+      const direction = delta >= 0 ? 1 : -1;
+      const tangent1 = {
+        x: -Math.sin(point1.angle) * direction,
+        y: Math.cos(point1.angle) * direction,
+      };
+      const tangent2 = {
+        x: -Math.sin(point2.angle) * direction,
+        y: Math.cos(point2.angle) * direction,
+      };
+      const chord = Math.hypot(point2.x - point1.x, point2.y - point1.y);
+      const controlLength = Math.min(geometry.radius * 0.68, chord * 0.72);
+      const c1x = point1.x + tangent1.x * controlLength;
+      const c1y = point1.y + tangent1.y * controlLength;
+      const c2x = point2.x - tangent2.x * controlLength;
+      const c2y = point2.y - tangent2.y * controlLength;
+      const d = `M ${point1.x} ${point1.y} C ${c1x} ${c1y} ${c2x} ${c2y} ${point2.x} ${point2.y}`;
       svg.querySelector(".arc-fill").setAttribute("d", d);
     }
 
