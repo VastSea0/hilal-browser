@@ -468,29 +468,16 @@
         return;
       }
 
-      const accentColor = this._adjustHexBrightness(
-        boost.accentColor,
-        boost.colorBrightness
-      );
       const pageColor =
         this._parseCssRgbColor(
           getComputedStyle(docEl).getPropertyValue("--hilal-safari-page-bg")
         ) || this._fallbackTahoePageRgb();
-      const accentRgb = this._parseCssRgbColor(accentColor) || pageColor;
-      const accentWeight = Math.min(
-        78,
-        Math.max(0, Math.round(boost.colorIntensity * 1.35))
-      );
-      if (!accentWeight) {
+      const boostedRgb = this._applyHilalBoostToRgb(pageColor, boost);
+      if (!boostedRgb) {
         this._clearTahoeBoostedPageBackground();
         return;
       }
 
-      const boostedRgb = this._mixRgbChannels(
-        pageColor,
-        accentRgb,
-        accentWeight / 100
-      );
       docEl.style.setProperty(
         "--hilal-safari-boosted-page-bg",
         `rgb(${boostedRgb.join(", ")})`
@@ -504,15 +491,223 @@
     }
 
     _fallbackTahoePageRgb() {
-      return window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? [28, 28, 30]
-        : [255, 255, 255];
+      return [255, 255, 255];
     }
 
-    _mixRgbChannels(baseRgb, accentRgb, accentWeight) {
-      return baseRgb.map((channel, index) =>
-        Math.round(channel * (1 - accentWeight) + accentRgb[index] * accentWeight)
+    _applyHilalBoostToRgb(rgb, boost) {
+      const blendFactor = this._boostBlendFactor(boost);
+      if (!blendFactor) {
+        return null;
+      }
+
+      const accentRgb = this._boostAccentRgb(
+        boost.accentColor,
+        boost.colorBrightness
       );
+      const rotation = boost.secondaryColor
+        ? this._boostRotationDelta(boost.accentColor, boost.secondaryColor)
+        : 52;
+      const accent = this._precomputeHilalBoostAccent(accentRgb, blendFactor);
+      const complementary = this._rotateHilalBoostAccent(accent, rotation);
+      let boostedRgb = this._filterHilalBoostColor(rgb, accent, complementary);
+      if (boost.smartInvert) {
+        boostedRgb = this._invertHilalBoostRgb(boostedRgb);
+      }
+      return boostedRgb;
+    }
+
+    _boostBlendFactor(boost) {
+      const contrast = Math.min(
+        255,
+        Math.max(0, Math.round(boost.colorIntensity * 2.55))
+      );
+      return contrast / 255;
+    }
+
+    _boostAccentRgb(hexColor, brightness) {
+      const hsl = this._hexToHsl(hexColor);
+      return this._hslToRgbChannels(
+        hsl.h / 360,
+        hsl.s / 100,
+        0.1 + 0.9 * (brightness / 200)
+      );
+    }
+
+    _boostRotationDelta(accentHex, secondaryHex) {
+      const accentHsl = this._hexToHsl(accentHex);
+      const secondaryHsl = this._hexToHsl(secondaryHex);
+      let diff = (secondaryHsl.h - accentHsl.h + 360) % 360;
+      if (diff > 180) {
+        diff -= 360;
+      }
+      return diff;
+    }
+
+    _hslToRgbChannels(h, s, l) {
+      let r;
+      let g;
+      let b;
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = this._hueToRgb(p, q, h + 1 / 3);
+        g = this._hueToRgb(p, q, h);
+        b = this._hueToRgb(p, q, h - 1 / 3);
+      }
+      return [r, g, b].map(channel =>
+        Math.min(255, Math.max(0, Math.round(channel * 255)))
+      );
+    }
+
+    _hueToRgb(p, q, t) {
+      if (t < 0) {
+        t += 1;
+      }
+      if (t > 1) {
+        t -= 1;
+      }
+      if (t < 1 / 6) {
+        return p + (q - p) * 6 * t;
+      }
+      if (t < 1 / 2) {
+        return q;
+      }
+      if (t < 2 / 3) {
+        return p + (q - p) * (2 / 3 - t) * 6;
+      }
+      return p;
+    }
+
+    _precomputeHilalBoostAccent(rgb, blendFactor) {
+      return {
+        ...this._rgbToOklab(rgb),
+        contrastFactor: blendFactor,
+      };
+    }
+
+    _rotateHilalBoostAccent(accent, rotationDegrees) {
+      const angle = (rotationDegrees * Math.PI) / 180;
+      const cosR = Math.cos(angle);
+      const sinR = Math.sin(angle);
+      return {
+        l: accent.l,
+        a: accent.a * cosR - accent.b * sinR,
+        b: accent.a * sinR + accent.b * cosR,
+        contrastFactor: accent.contrastFactor,
+      };
+    }
+
+    _filterHilalBoostColor(rgb, accent, complementary) {
+      const blendFactor = accent.contrastFactor;
+      const original = this._rgbToOklab(rgb);
+      const halfWidth = this._clampFloat(
+        0.5 - blendFactor * 0.45,
+        0.05,
+        0.5
+      );
+      let t = this._clampFloat(
+        (original.l - (0.5 - halfWidth)) / (2 * halfWidth),
+        0,
+        1
+      );
+      t = t * t * (3 - 2 * t);
+
+      const selectedA = accent.a + (complementary.a - accent.a) * t;
+      const selectedB = accent.b + (complementary.b - accent.b) * t;
+      const selectedL = accent.l + (complementary.l - accent.l) * t;
+      const selectedContrastFactor =
+        accent.contrastFactor +
+        (complementary.contrastFactor - accent.contrastFactor) * t;
+
+      const mixedA = original.a + (selectedA - original.a) * blendFactor;
+      const mixedB = original.b + (selectedB - original.b) * blendFactor;
+      const luminanceDelta = selectedL - original.l;
+      const finalL =
+        original.l +
+        luminanceDelta * (blendFactor * selectedContrastFactor * 0.5);
+
+      const rotationAngle =
+        (luminanceDelta > 0 ? -1 : 1) *
+        blendFactor *
+        selectedContrastFactor *
+        0.25;
+      const cosR = Math.cos(rotationAngle);
+      const sinR = Math.sin(rotationAngle);
+      return this._oklabToRgb(
+        finalL,
+        mixedA * cosR - mixedB * sinR,
+        mixedA * sinR + mixedB * cosR
+      );
+    }
+
+    _rgbToOklab(rgb) {
+      const lr = this._srgbToLinear(rgb[0] / 255);
+      const lg = this._srgbToLinear(rgb[1] / 255);
+      const lb = this._srgbToLinear(rgb[2] / 255);
+      const l = Math.cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb);
+      const m = Math.cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb);
+      const s = Math.cbrt(0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb);
+      return {
+        l: 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+        a: 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+        b: 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+      };
+    }
+
+    _oklabToRgb(l, a, b) {
+      const l2 = l + 0.3963377774 * a + 0.2158037573 * b;
+      const m2 = l - 0.1055613458 * a - 0.0638541728 * b;
+      const s2 = l - 0.0894841775 * a - 1.291485548 * b;
+      const l3 = l2 * l2 * l2;
+      const m3 = m2 * m2 * m2;
+      const s3 = s2 * s2 * s2;
+      return [
+        4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3,
+        -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3,
+        -0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3,
+      ].map(channel =>
+        Math.min(
+          255,
+          Math.max(0, Math.floor(this._linearToSrgb(channel) * 255 + 0.5))
+        )
+      );
+    }
+
+    _srgbToLinear(channel) {
+      return channel <= 0.04045
+        ? channel / 12.92
+        : Math.pow((channel + 0.055) / 1.055, 2.4);
+    }
+
+    _linearToSrgb(channel) {
+      const clamped = Math.max(0, channel);
+      return clamped <= 0.0031308
+        ? 12.92 * clamped
+        : 1.055 * Math.pow(clamped, 1 / 2.4) - 0.055;
+    }
+
+    _invertHilalBoostRgb(rgb) {
+      const inverted = rgb.map(channel => 255 - channel);
+      const max = Math.max(...inverted);
+      const min = Math.min(...inverted);
+      const sum = max + min;
+      const shifted = inverted.map(channel => sum - channel);
+      const luma = (shifted[0] * 54 + shifted[1] * 183 + shifted[2] * 19) >> 8;
+      if (luma > 127) {
+        return shifted;
+      }
+
+      const channelFloor = 40;
+      const range = 255 - channelFloor;
+      return shifted.map(channel =>
+        Math.min(255, Math.max(0, Math.floor(channelFloor + (channel * range) / 255)))
+      );
+    }
+
+    _clampFloat(value, min, max) {
+      return Math.min(max, Math.max(min, value));
     }
 
     _parseCssRgbColor(value) {
@@ -523,11 +718,7 @@
       const color = value.trim();
       const lightDarkMatch = color.match(/^light-dark\((.*),(.*)\)$/i);
       if (lightDarkMatch) {
-        return this._parseCssRgbColor(
-          window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? lightDarkMatch[2]
-            : lightDarkMatch[1]
-        );
+        return this._parseCssRgbColor(lightDarkMatch[1]);
       }
 
       const hexMatch = color.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
