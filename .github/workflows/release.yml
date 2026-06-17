@@ -286,7 +286,7 @@ jobs:
     needs: prepare
     if: ${{ needs.prepare.outputs.build_linux == 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 360
 
     steps:
       - name: Free disk space
@@ -298,7 +298,13 @@ jobs:
           sudo rm -rf /usr/share/swift
           sudo rm -rf /usr/lib/jvm
           sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /opt/hostedtoolcache/Ruby
+          sudo rm -rf /opt/hostedtoolcache/PyPy
+          sudo rm -rf /usr/local/cuda-*
+          sudo rm -rf /usr/share/miniconda
           sudo apt-get clean
+          docker system prune -af 2>/dev/null || true
           df -h
 
       - name: Checkout
@@ -334,9 +340,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/sccache
-          key: ${{ runner.os }}-sccache-${{ github.run_id }}
+          key: ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-sccache-
+            ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-
+            ${{ runner.os }}-sccache-v2-
 
       - name: Compile hil tool
         run: |
@@ -353,16 +360,6 @@ jobs:
           tag_name: ${{ needs.prepare.outputs.tag }}
           fail_on_unmatched_files: false
           files: bin/hil
-
-      - name: Cache Firefox source checkout
-        uses: actions/cache@v4
-        with:
-          path: |
-            engine
-            !engine/obj-*
-          key: ${{ runner.os }}-firefox-${{ hashFiles('upstream.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-firefox-
 
       - name: Setup Firefox source
         run: ./bin/hil setup
@@ -409,6 +406,8 @@ jobs:
         run: ./bin/hil apply --force
 
       - name: Build and package (AppImage)
+        env:
+          SCCACHE_GHA_ENABLED: "true"
         run: scripts/build-linux.sh build appimage-build
 
       - name: Stop sccache
@@ -505,9 +504,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~\AppData\Local\Mozilla\sccache\cache
-          key: ${{ runner.os }}-sccache-${{ github.run_id }}
+          key: ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-sccache-
+            ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-
+            ${{ runner.os }}-sccache-v2-
 
       - name: Compile hil tool
         shell: pwsh
@@ -524,16 +524,6 @@ jobs:
           tag_name: ${{ needs.prepare.outputs.tag }}
           fail_on_unmatched_files: false
           files: bin/hil.exe
-
-      - name: Cache Firefox source checkout
-        uses: actions/cache@v4
-        with:
-          path: |
-            engine
-            !engine/obj-*
-          key: ${{ runner.os }}-firefox-${{ hashFiles('upstream.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-firefox-
 
       - name: Setup Firefox source
         shell: pwsh
