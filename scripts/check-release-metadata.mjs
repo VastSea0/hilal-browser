@@ -25,6 +25,10 @@ const paths = {
   flatpakManifest: "org.gkdevstudio.Hilal.yml",
   flatpakMetainfo: "flatpak/org.gkdevstudio.Hilal.metainfo.xml",
   updateManifest: "dist/hilal-update-manifest.json",
+  releaseWorkflow: ".github/workflows/release.yml",
+  verifyWorkflow: ".github/workflows/verify-patches.yml",
+  linuxMozconfig: "mozconfigs/linux",
+  windowsMozconfig: "mozconfigs/windows",
 };
 
 const metadata = {
@@ -52,6 +56,7 @@ checkHilCliVersionOutput();
 checkUpdateGeneratorSourcePath();
 checkStaleFirefoxFallbacks();
 checkFlatpakScreenshotTags();
+checkCiBuildConfiguration();
 
 if (metadata.displayVersion && metadata.flatpakRelease?.version) {
   compareOrWarn(
@@ -411,6 +416,63 @@ function checkFlatpakScreenshotTags() {
       errors.push(
         `Flatpak screenshot URL uses ${match[1]}, expected ${expectedTag}.`
       );
+    }
+  }
+}
+
+function checkCiBuildConfiguration() {
+  const requiredPatterns = [
+    [
+      paths.linuxMozconfig,
+      /MOZ_MAKE_FLAGS="-j2"/,
+      "Linux CI build must remain capped at two parallel jobs.",
+    ],
+    [
+      paths.linuxMozconfig,
+      /ac_add_options --disable-debug-symbols/,
+      "Linux CI build must disable unpublished debug symbols.",
+    ],
+    [
+      paths.windowsMozconfig,
+      /MOZ_MAKE_FLAGS="-j1"/,
+      "Windows CI build must remain single-threaded to avoid rustc/clang OOM failures.",
+    ],
+    [
+      paths.windowsMozconfig,
+      /ac_add_options --disable-debug-symbols/,
+      "Windows CI build must disable unpublished debug symbols.",
+    ],
+    [
+      paths.releaseWorkflow,
+      /name: Configure build swap/,
+      "Linux release workflow must configure swap before the Firefox build.",
+    ],
+  ];
+
+  for (const [file, pattern, message] of requiredPatterns) {
+    if (!existsSync(abs(file)) || !pattern.test(readText(file))) {
+      errors.push(message);
+    }
+  }
+
+  const obsoleteActions = [
+    "actions/checkout@v4",
+    "actions/cache@v4",
+    "actions/upload-artifact@v4",
+    "actions/download-artifact@v4",
+    "softprops/action-gh-release@v2",
+    "mozilla-actions/sccache-action@v0.0.8",
+  ];
+
+  for (const file of [paths.releaseWorkflow, paths.verifyWorkflow]) {
+    if (!existsSync(abs(file))) {
+      continue;
+    }
+    const workflow = readText(file);
+    for (const action of obsoleteActions) {
+      if (workflow.includes(action)) {
+        errors.push(`${file} still uses the Node 20 action ${action}.`);
+      }
     }
   }
 }

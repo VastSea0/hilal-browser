@@ -21,10 +21,10 @@ jobs:
 
     steps:
       - name: Checkout Hilal Browser
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Cache cargo
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/bin/
@@ -51,7 +51,7 @@ jobs:
         run: node scripts/check-release-metadata.mjs --hil-bin ./bin/hil
 
       - name: Upload hil tool
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: hil-cli
           path: bin/hil
@@ -64,10 +64,10 @@ jobs:
 
     steps:
       - name: Checkout Hilal Browser
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download hil tool
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: hil-cli
           path: bin
@@ -76,7 +76,7 @@ jobs:
         run: chmod +x bin/hil
 
       - name: Cache Firefox source checkout
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: engine
           key: firefox-${{ hashFiles('upstream.lock') }}

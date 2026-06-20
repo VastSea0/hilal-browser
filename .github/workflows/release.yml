@@ -66,7 +66,7 @@ jobs:
           fi
 
       - name: Checkout release tag
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ steps.vars.outputs.tag }}
 
@@ -93,7 +93,7 @@ jobs:
           fi
 
       - name: Create GitHub release (DRAFT)
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -123,12 +123,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.prepare.outputs.tag }}
 
       - name: Cache cargo
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/bin/
@@ -146,7 +146,7 @@ jobs:
           strip bin/hil
 
       - name: Cache Firefox source checkout
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             engine
@@ -159,7 +159,7 @@ jobs:
         run: ./bin/hil setup
 
       - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.8
+        uses: mozilla-actions/sccache-action@v0.0.10
 
       - name: Apply patches
         run: ./bin/hil apply --force
@@ -267,7 +267,7 @@ jobs:
           output-file: 'dist/hilal-browser-sbom.spdx.json'
 
       - name: Upload assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -308,7 +308,7 @@ jobs:
           df -h
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.prepare.outputs.tag }}
 
@@ -326,7 +326,7 @@ jobs:
           sudo chmod +x /usr/local/bin/appimagetool
 
       - name: Cache cargo
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/bin/
@@ -337,7 +337,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('hil/Cargo.toml') }}
 
       - name: Cache sccache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/sccache
           key: ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
@@ -353,7 +353,7 @@ jobs:
           strip bin/hil
 
       - name: Upload hil tool to release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -405,6 +405,22 @@ jobs:
       - name: Apply patches
         run: ./bin/hil apply --force
 
+      - name: Configure build swap
+        run: |
+          if [ -z "$(swapon --show --noheadings)" ]; then
+            sudo fallocate -l 8G /swapfile
+            sudo chmod 600 /swapfile
+            sudo mkswap /swapfile
+            if sudo swapon /swapfile; then
+              sudo sysctl vm.swappiness=10
+            else
+              sudo rm -f /swapfile
+              echo "Swap could not be enabled; continuing with reduced parallelism."
+            fi
+          fi
+          free -h
+          swapon --show
+
       - name: Build and package (AppImage)
         env:
           SCCACHE_GHA_ENABLED: "true"
@@ -416,7 +432,7 @@ jobs:
 
       - name: Upload Linux artifacts (safety net)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linux-artifacts-build${{ github.run_number }}
           path: |
@@ -433,7 +449,7 @@ jobs:
 
       - name: Upload Linux Assets to release
         if: always()
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -469,7 +485,7 @@ jobs:
           Get-PSDrive -PSProvider FileSystem | Format-Table Name, @{n="Used(GB)";e={[math]::Round($_.Used/1GB,2)}}, @{n="Free(GB)";e={[math]::Round($_.Free/1GB,2)}}
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.prepare.outputs.tag }}
 
@@ -490,7 +506,7 @@ jobs:
           }
 
       - name: Cache cargo
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~\.cargo\bin\
@@ -501,7 +517,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('hil/Cargo.toml') }}
 
       - name: Cache sccache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~\AppData\Local\Mozilla\sccache\cache
           key: ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
@@ -517,7 +533,7 @@ jobs:
           Copy-Item hil/target/release/hil.exe bin/hil.exe
 
       - name: Upload hil.exe to release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -599,7 +615,7 @@ jobs:
 
       - name: Upload Windows artifacts (safety net)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows-artifacts-build${{ github.run_number }}
           path: |
@@ -611,7 +627,7 @@ jobs:
 
       - name: Upload Windows Assets to release
         if: always()
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -632,7 +648,7 @@ jobs:
 
     steps:
       - name: Checkout release tooling
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.prepare.outputs.tag }}
 

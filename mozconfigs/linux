@@ -1,6 +1,10 @@
 . "$topsrcdir/../mozconfigs/base"
 
 ac_add_options --enable-linker=lld
-# GitHub Actions ubuntu-latest: 4 cores, 16 GB RAM.
-# Unconstrained linking OOMs the runner; cap at 3 parallel jobs.
-mk_add_options MOZ_MAKE_FLAGS="-j3"
+
+if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+  # Keep peak memory below the hosted runner limit and avoid generating
+  # debug data that is not published by the release workflow.
+  mk_add_options MOZ_MAKE_FLAGS="-j2"
+  ac_add_options --disable-debug-symbols
+fi
