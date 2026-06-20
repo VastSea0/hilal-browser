@@ -15,19 +15,44 @@
   <img src="changes/browser/base/content/hilal/black-white.png" alt="Hilal Browser interface" width="800" />
 </p>
 
-Hilal is an experimental desktop browser built on Firefox, focused on vertical tabs, isolated workspaces, and practical defaults. It uses Gecko and remains compatible with Firefox extensions.
+Hilal is an experimental desktop browser built on Firefox. It combines isolated workspaces, a compact sidebar-first interface, per-site customization, and configurable privacy profiles while retaining Gecko and Firefox extension compatibility.
 
 The project is in alpha and was previously developed as Huma Browser.
 
-## Highlights
+## Features
 
-- Collapsible vertical tabs
-- Workspaces with separate container contexts
+### Interface
+
+- Vertical sidebar tabs and an optional horizontal tab strip
+- Tahoe interface with a translucent sidebar, floating toolbar, and site-aware window colors
+- Compact mode with an auto-hiding toolbar and support for left- or right-aligned sidebars
+- Drag and drop across the sidebar and horizontal tab strip
+- Customizable sidebar footer with built-in actions and user-defined links
+
+### Workspaces
+
+- Separate container context for each workspace
+- Optional shared pinned tabs and tab groups
+- Workspace creation, switching, and visibility controls
+- First-run setup for tab layout, workspaces, pinned sites, toolbar behavior, and privacy level
+
+### Site Customizer
+
+- Per-site font, text scale, capitalization, smart invert, and custom CSS
+- Element Zapper for hiding selected page elements
+- Accent and gradient controls with automatic color extraction from websites
+- Optional browser chrome tinting and Tahoe page-color blending
+
+### Browser controls
+
+- Custom and built-in search bangs in the address bar
+- Editable keyboard shortcuts for Hilal actions and Firefox commands
+- Balanced, Strict, and Maximum local privacy profiles
 - uBlock Origin included by default
-- Search bangs in the address bar
 - Telemetry disabled by default
-- Compact mode and per-site CSS tools
-- Native translucent chrome on macOS
+- In-browser language selection and Turkish localization
+
+Privacy profiles are hardening presets, not anonymity modes; they do not hide your public IP address.
 
 ## Download
 
