@@ -2,6 +2,13 @@
 
 ---
 
+## [0.3.0-alpha.6] - 2026-06-21
+
+### Added
+- Integrated zoom-aware scroll reflection and automatic background synchronization updates for Tahoe mode.
+
+---
+
 ## [0.3.0-alpha.5] - 2026-06-16
 
 ### Fixed
