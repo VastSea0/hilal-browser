@@ -10,17 +10,12 @@ export class HilalTahoeParent extends JSWindowActorParent {
 
     if (aMessage.name === "HilalTahoe:PageStyle") {
       let chromeWin = this.browsingContext.topChromeWindow;
-      if (!chromeWin?.document) {
+      let browser = this.browsingContext.top.embedderElement;
+      if (!chromeWin?.document || !browser) {
         return null;
       }
       let color = aMessage.data?.backgroundColor;
-      let docEl = chromeWin.document.documentElement;
-      if (color) {
-        docEl.style.setProperty("--hilal-safari-page-bg", color);
-      } else {
-        docEl.style.removeProperty("--hilal-safari-page-bg");
-      }
-      chromeWin.gHilalBoosts?.refreshTahoeBoostedPageBackground?.();
+      chromeWin.SidebarController?.updateTahoePageBackground(color, browser);
       return null;
     }
 

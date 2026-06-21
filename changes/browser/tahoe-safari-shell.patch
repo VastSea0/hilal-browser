@@ -459,7 +459,7 @@ diff --git a/browser/components/sidebar/SidebarManager.sys.mjs b/browser/compone
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
-@@ -574,6 +574,57 @@ var SidebarController = {
+@@ -574,6 +574,68 @@ var SidebarController = {
      }
  
      HilalCompactMode.init();
@@ -494,6 +494,17 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      this._tabSelectListener
 +    );
 +
++    this._tahoeZoomListener = event => {
++      let browser = event.originalTarget;
++      if (browser !== window.gBrowser?.selectedBrowser) {
++        return;
++      }
++      this.invalidateTahoeScrollReflection();
++      this.updateTahoeOffsets();
++    };
++    window.addEventListener("FullZoomChange", this._tahoeZoomListener);
++    window.addEventListener("TextZoomChange", this._tahoeZoomListener);
++
 +    this._tahoeGeometryListener = () => {
 +      this.scheduleTahoeGeometryUpdate();
 +    };
@@ -517,7 +528,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    },
  
    uninit() {
-@@ -608,6 +659,31 @@ var SidebarController = {
+@@ -608,6 +670,36 @@ var SidebarController = {
      delete this._aiWindowObserverAdded;
      delete this._windowRestoredObserverAdded;
  
@@ -527,6 +538,11 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +        this._tabSelectListener
 +      );
 +      this._tabSelectListener = null;
++    }
++    if (this._tahoeZoomListener) {
++      window.removeEventListener("FullZoomChange", this._tahoeZoomListener);
++      window.removeEventListener("TextZoomChange", this._tahoeZoomListener);
++      this._tahoeZoomListener = null;
 +    }
 +    if (this._tahoeGeometryListener) {
 +      window.removeEventListener("resize", this._tahoeGeometryListener);
@@ -549,7 +565,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
      CustomizableUI.removeListener(this);
  
      if (this._observer) {
-@@ -2071,6 +2147,7 @@ var SidebarController = {
+@@ -2071,6 +2163,7 @@ var SidebarController = {
        this.updateToolbarButton();
        this.dismissSidebarBadge(commandID);
  
@@ -557,7 +573,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
        this._fireFocusedEvent();
        return true;
      });
-@@ -2095,6 +2172,7 @@ var SidebarController = {
+@@ -2095,6 +2188,7 @@ var SidebarController = {
      }
      return this._show(commandID).then(() => {
        this._loadSidebarExtension(commandID);
@@ -565,7 +581,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
        return true;
      });
    },
-@@ -2278,6 +2356,7 @@ var SidebarController = {
+@@ -2278,6 +2372,7 @@ var SidebarController = {
        updateToggleControlLabel(triggerNode);
      }
      this.updateToolbarButton();
@@ -573,7 +589,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    },
  
    /**
-@@ -2374,7 +2453,9 @@ var SidebarController = {
+@@ -2374,7 +2469,9 @@ var SidebarController = {
    },
  
    toggleTabstrip() {
@@ -584,13 +600,14 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
      let tabStrip = gBrowser.tabContainer;
      let arrowScrollbox = tabStrip.arrowScrollbox;
      let currentScrollOrientation = arrowScrollbox.getAttribute("orient");
-@@ -2414,6 +2495,233 @@ var SidebarController = {
+@@ -2414,6 +2511,276 @@ var SidebarController = {
      }
    },
  
 +  updateTahoeOffsets() {
 +    this.scheduleTahoeGeometryUpdate();
 +    let browser = window.gBrowser.selectedBrowser;
++    this.applyTahoePageBackground(browser);
 +    if (browser && browser.browsingContext) {
 +      try {
 +        let actor =
@@ -602,6 +619,29 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +        // Ignore "doesn't match remote type" errors
 +      }
 +    }
++  },
++
++  updateTahoePageBackground(backgroundColor, browser) {
++    if (!browser) {
++      return;
++    }
++
++    this._tahoePageBackgrounds ??= new WeakMap();
++    this._tahoePageBackgrounds.set(browser, backgroundColor || "");
++    if (browser === window.gBrowser?.selectedBrowser) {
++      this.applyTahoePageBackground(browser);
++    }
++  },
++
++  applyTahoePageBackground(browser = window.gBrowser?.selectedBrowser) {
++    let docEl = document.documentElement;
++    let color = browser ? this._tahoePageBackgrounds?.get(browser) || "" : "";
++    if (color) {
++      docEl.style.setProperty("--hilal-safari-page-bg", color);
++    } else {
++      docEl.style.removeProperty("--hilal-safari-page-bg");
++    }
++    window.gHilalBoosts?.refreshTahoeBoostedPageBackground?.();
 +  },
 +
 +  scheduleTahoeGeometryUpdate() {
@@ -641,8 +681,8 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +    }
 +
 +    let top = this.readTahoeContentTop();
-+    let scrollY = Math.max(0, Math.round(scrollState?.scrollY || 0));
-+    let pageBackgroundTop = Math.max(0, top - Math.min(top, scrollY));
++    let scrollY = Math.max(0, Number(scrollState?.scrollY) || 0);
++    let pageBackgroundTop = scrollY > 0 ? 0 : top;
 +    document.documentElement.style.setProperty(
 +      "--hilal-safari-page-bg-top",
 +      `${pageBackgroundTop}px`
@@ -662,6 +702,13 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      this._tahoeReflectionFrame = 0;
 +      this.updateTahoeScrollReflectionCanvas();
 +    });
++  },
++
++  invalidateTahoeScrollReflection() {
++    this._tahoeReflectionSerial = (this._tahoeReflectionSerial || 0) + 1;
++    this._tahoeReflectionDirty = false;
++    let canvas = document.getElementById("hilal-safari-scroll-reflection");
++    canvas?.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
 +  },
 +
 +  async updateTahoeScrollReflectionCanvas() {
@@ -686,8 +733,18 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      }
 +
 +      let top = this.readTahoeContentTop();
-+      let scrollY = Math.max(0, Math.round(scrollState.scrollY || 0));
-+      let captureHeight = Math.min(top, scrollY);
++      let rawScrollY = Math.max(0, Number(scrollState.scrollY) || 0);
++      let scrollY = rawScrollY > 0 ? Math.max(1, Math.round(rawScrollY)) : 0;
++      let fullZoom = Number(scrollState.fullZoom) || 1;
++      let textZoom = Number(scrollState.textZoom) || 1;
++      if (
++        Math.abs(browser.fullZoom - fullZoom) > 0.001 ||
++        Math.abs(browser.textZoom - textZoom) > 0.001
++      ) {
++        this.updateTahoeOffsets();
++        return;
++      }
++      let captureHeight = Math.min(top / fullZoom, scrollY);
 +      if (captureHeight <= 0) {
 +        this.clearTahoeScrollReflection();
 +        return;
@@ -698,11 +755,11 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      let width = Math.max(1, Math.round(tabboxRect.width));
 +      let left = Math.max(0, Math.round(tabboxRect.left));
 +      let pageBackground = getComputedStyle(tabbox).backgroundColor;
-+      // The reflection is heavily blurred, so a 1x snapshot keeps scrolling responsive.
-+      let scale = 1;
++      // Content rects use page CSS pixels; fullZoom converts them to chrome CSS pixels.
++      let scale = fullZoom;
 +      let canvas = this.ensureTahoeScrollReflectionCanvas();
-+      let canvasWidth = Math.max(1, Math.round(width * scale));
-+      let canvasHeight = Math.max(1, Math.round(top * scale));
++      let canvasWidth = Math.max(1, Math.round(width));
++      let canvasHeight = Math.max(1, Math.round(top));
 +      if (canvas.width !== canvasWidth) {
 +        canvas.width = canvasWidth;
 +      }
@@ -733,13 +790,15 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +      if (
 +        !image ||
 +        serial !== this._tahoeReflectionSerial ||
-+        browser !== window.gBrowser?.selectedBrowser
++        browser !== window.gBrowser?.selectedBrowser ||
++        Math.abs(browser.fullZoom - fullZoom) > 0.001 ||
++        Math.abs(browser.textZoom - textZoom) > 0.001
 +      ) {
 +        image?.close?.();
 +        return;
 +      }
 +
-+      let dstY = Math.round((top - captureHeight) * scale);
++      let dstY = Math.round(top - captureHeight * scale);
 +      let dstHeight = Math.round(captureHeight * scale);
 +      let ctx = canvas.getContext("2d");
 +      ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -818,7 +877,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
    debouncedMouseEnter() {
      const contentArea = document.getElementById("tabbrowser-tabbox");
      this._box.toggleAttribute("sidebar-launcher-hovered", true);
-@@ -2933,9 +3241,10 @@ var HilalCompactMode = {
+@@ -2933,9 +3300,10 @@ var HilalCompactMode = {
        false
      );
      const isSidebarActive = workspacesEnabled || verticalTabsEnabled;

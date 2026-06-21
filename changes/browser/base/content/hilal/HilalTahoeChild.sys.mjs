@@ -65,6 +65,8 @@ export class HilalTahoeChild extends JSWindowActorChild {
       scrollY: win.scrollY,
       innerWidth: win.innerWidth,
       innerHeight: win.innerHeight,
+      fullZoom: win.browsingContext.fullZoom,
+      textZoom: win.browsingContext.textZoom,
     });
   }
 
