@@ -4,6 +4,6 @@ if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
   # A release Rust staticlib build uses LTO even when cross-language LTO is
   # disabled. Run one build job at a time so rustc and clang do not exhaust
   # the hosted runner's memory together.
-  mk_add_options MOZ_MAKE_FLAGS="-j1"
+  mk_add_options MOZ_MAKE_FLAGS="-j2"
   ac_add_options --disable-debug-symbols
 fi

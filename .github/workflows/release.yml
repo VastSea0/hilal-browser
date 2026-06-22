@@ -288,6 +288,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 360
 
+    env:
+      SCCACHE_DIR: ${{ github.workspace }}/.sccache
+
     steps:
       - name: Free disk space
         run: |
@@ -339,7 +342,7 @@ jobs:
       - name: Cache sccache
         uses: actions/cache@v5
         with:
-          path: ~/.cache/sccache
+          path: .sccache
           key: ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-
@@ -360,6 +363,16 @@ jobs:
           tag_name: ${{ needs.prepare.outputs.tag }}
           fail_on_unmatched_files: false
           files: bin/hil
+
+      - name: Cache Firefox source checkout
+        uses: actions/cache@v5
+        with:
+          path: |
+            engine
+            !engine/obj-*
+          key: ${{ runner.os }}-firefox-${{ hashFiles('upstream.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-firefox-
 
       - name: Setup Firefox source
         run: ./bin/hil setup
@@ -468,6 +481,9 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 300
 
+    env:
+      SCCACHE_DIR: ${{ github.workspace }}/.sccache
+
     steps:
       - name: Free disk space
         shell: pwsh
@@ -519,7 +535,7 @@ jobs:
       - name: Cache sccache
         uses: actions/cache@v5
         with:
-          path: ~\AppData\Local\Mozilla\sccache\cache
+          path: .sccache
           key: ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-
@@ -540,6 +556,16 @@ jobs:
           tag_name: ${{ needs.prepare.outputs.tag }}
           fail_on_unmatched_files: false
           files: bin/hil.exe
+
+      - name: Cache Firefox source checkout
+        uses: actions/cache@v5
+        with:
+          path: |
+            engine
+            !engine/obj-*
+          key: ${{ runner.os }}-firefox-${{ hashFiles('upstream.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-firefox-
 
       - name: Setup Firefox source
         shell: pwsh
