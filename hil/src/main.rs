@@ -35,6 +35,33 @@ enum Commands {
     Validate,
     #[command(about = "Verify upstream tarball checksum")]
     Verify,
+    #[command(about = "Build the Hilal Browser natively")]
+    Build {
+        #[arg(
+            long,
+            help = "Target platform (windows, linux, macos). Defaults to host platform."
+        )]
+        platform: Option<String>,
+        #[arg(long, short, help = "Build front-end only (JS/HTML/CSS)")]
+        faster: bool,
+        #[arg(long, short, help = "Build C++/Rust binaries only")]
+        binaries: bool,
+        #[arg(long, short, help = "Launch the browser after building")]
+        run: bool,
+        #[arg(long, short, help = "Package the browser after building")]
+        package: bool,
+        #[arg(long, short, help = "Clean build directory before starting")]
+        clobber: bool,
+        #[arg(long, help = "Skip applying patches and overlays before building")]
+        skip_apply: bool,
+    },
+    #[command(
+        about = "Check if the build environment is ready and diagnose potential build issues"
+    )]
+    Doctor {
+        #[arg(long, help = "Treat warnings as errors and fail the check")]
+        strict: bool,
+    },
 }
 
 #[derive(Deserialize)]
@@ -89,6 +116,30 @@ fn main() -> Result<()> {
         }
         Commands::Verify => {
             verify(&repo_root)?;
+        }
+        Commands::Build {
+            platform,
+            faster,
+            binaries,
+            run,
+            package,
+            clobber,
+            skip_apply,
+        } => {
+            build(
+                &repo_root,
+                &engine_path,
+                platform,
+                faster,
+                binaries,
+                run,
+                package,
+                clobber,
+                skip_apply,
+            )?;
+        }
+        Commands::Doctor { strict } => {
+            doctor(&repo_root, strict)?;
         }
     }
 
@@ -787,5 +838,408 @@ fn verify(repo_root: &Path) -> Result<()> {
             current_sha
         );
     }
+    Ok(())
+}
+
+fn build(
+    repo_root: &Path,
+    engine_path: &Path,
+    platform: Option<String>,
+    faster: bool,
+    binaries: bool,
+    run_after: bool,
+    package_after: bool,
+    clobber: bool,
+    skip_apply: bool,
+) -> Result<()> {
+    let target_platform = match platform.as_deref() {
+        Some("windows") => "windows",
+        Some("linux") => "linux",
+        Some("macos") => "macos",
+        Some(other) => bail!("Unsupported platform: {}", other),
+        None => {
+            if cfg!(target_os = "windows") {
+                "windows"
+            } else if cfg!(target_os = "macos") {
+                "macos"
+            } else if cfg!(target_os = "linux") {
+                "linux"
+            } else {
+                bail!("Unsupported host OS. Please specify --platform explicitly.");
+            }
+        }
+    };
+
+    println!("[hil] Target platform: {}", target_platform);
+
+    // Call environment diagnostics check before starting build
+    doctor(repo_root, false)?;
+
+    if !skip_apply {
+        println!("[hil] Applying patches and overlays...");
+        apply(repo_root, engine_path, false, false)?;
+    }
+
+    let config_src = repo_root.join("mozconfigs").join(target_platform);
+    let config_dst = engine_path.join("mozconfig");
+    if config_src.exists() {
+        if let Some(parent) = config_dst.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::copy(&config_src, &config_dst).context(format!(
+            "Failed to copy mozconfig from {:?} to {:?}",
+            config_src, config_dst
+        ))?;
+        println!(
+            "[hil] Copied mozconfig from {:?} to {:?}",
+            config_src, config_dst
+        );
+    } else {
+        println!(
+            "[hil] Warning: target mozconfig not found at {:?}. Using default.",
+            config_src
+        );
+    }
+
+    let mut cmd = if target_platform == "windows" {
+        let script_path = repo_root.join("scripts").join("build-windows.ps1");
+        let script_str = script_path
+            .to_str()
+            .ok_or_else(|| anyhow::anyhow!("Invalid script path"))?;
+        let mut c = Command::new("powershell.exe");
+        c.args(&["-ExecutionPolicy", "Bypass", "-File", script_str]);
+        if faster {
+            c.arg("-Faster");
+        }
+        if binaries {
+            c.arg("-Binaries");
+        }
+        if run_after {
+            c.arg("-Run");
+        }
+        if package_after {
+            c.arg("-Package");
+        }
+        if clobber {
+            c.arg("-Clobber");
+        }
+        c.arg("-SkipApply");
+        c
+    } else {
+        let script_name = if target_platform == "macos" {
+            "build-macos.sh"
+        } else {
+            "build-linux.sh"
+        };
+        let mut c = Command::new("bash");
+        c.arg(repo_root.join("scripts").join(script_name));
+        if faster {
+            c.arg("faster");
+        } else if binaries {
+            c.arg("binaries");
+        } else if run_after {
+            c.arg("run");
+        } else if package_after {
+            c.arg("package");
+        }
+        c
+    };
+
+    cmd.current_dir(repo_root);
+    cmd.stdout(std::process::Stdio::inherit());
+    cmd.stderr(std::process::Stdio::inherit());
+    cmd.stdin(std::process::Stdio::inherit());
+
+    println!("[hil] Running build script...");
+    let status = cmd
+        .status()
+        .context("Failed to spawn build script process")?;
+
+    if !status.success() {
+        bail!(
+            "Build failed with exit code: {}",
+            status.code().unwrap_or(-1)
+        );
+    }
+
+    println!("[hil] Build completed successfully.");
+    Ok(())
+}
+
+fn doctor(repo_root: &Path, strict: bool) -> Result<()> {
+    println!("[hil] Starting build environment diagnostic check...");
+    let mut errors = 0;
+    let mut warnings = 0;
+
+    // 1. Path spaces check
+    let path_str = repo_root.to_string_lossy();
+    if path_str.contains(' ') {
+        println!("[ERROR] Repository path contains spaces: '{}'", path_str);
+        println!("        Firefox build system DOES NOT support spaces in build directory paths.");
+        errors += 1;
+    } else {
+        println!("[OK] Repository path has no spaces.");
+    }
+
+    // Windows checks
+    if cfg!(target_os = "windows") {
+        // 2. Windows registry LongPathsEnabled
+        let reg_check = Command::new("reg")
+            .args(&[
+                "query",
+                "HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem",
+                "/v",
+                "LongPathsEnabled",
+            ])
+            .output();
+        match reg_check {
+            Ok(output) => {
+                let out_str = String::from_utf8_lossy(&output.stdout);
+                if out_str.contains("0x1") || out_str.contains("1") {
+                    println!("[OK] Windows Long Paths are enabled in registry.");
+                } else {
+                    println!("[ERROR] Windows Long Paths are NOT enabled in registry (LongPathsEnabled = 0).");
+                    println!("        Firefox builds will fail midway due to deep folder structures.");
+                    println!("        Enable via elevated PowerShell:");
+                    println!("        New-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem\" -Name \"LongPathsEnabled\" -Value 1 -PropertyType DWORD -Force");
+                    errors += 1;
+                }
+            }
+            Err(_) => {
+                println!("[WARNING] Failed to query registry for LongPathsEnabled.");
+                warnings += 1;
+            }
+        }
+
+        // 3. Git long paths check
+        let git_long = Command::new("git")
+            .args(&["config", "--get", "core.longpaths"])
+            .output();
+        match git_long {
+            Ok(output) => {
+                let out_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                if out_str == "true" {
+                    println!("[OK] Git core.longpaths is set to true.");
+                } else {
+                    println!("[ERROR] Git core.longpaths is NOT enabled.");
+                    println!("        Run: git config --global core.longpaths true");
+                    errors += 1;
+                }
+            }
+            Err(_) => {
+                println!("[WARNING] Failed to run git config for core.longpaths.");
+                warnings += 1;
+            }
+        }
+
+        // 4. Git autocrlf line endings check
+        let git_crlf = Command::new("git")
+            .args(&["config", "--get", "core.autocrlf"])
+            .output();
+        match git_crlf {
+            Ok(output) => {
+                let out_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                if out_str == "true" {
+                    println!("[WARNING] Git core.autocrlf is set to true.");
+                    println!("          This will checkout shell scripts with Windows CRLF endings, causing build script failures.");
+                    println!("          Recommended fix: git config --global core.autocrlf false");
+                    warnings += 1;
+                } else {
+                    println!("[OK] Git core.autocrlf is not set to true ('{}').", out_str);
+                }
+            }
+            Err(_) => {
+                println!("[WARNING] Failed to query Git core.autocrlf.");
+                warnings += 1;
+            }
+        }
+
+        // 5. Disk Space Check
+        let disk_check = Command::new("powershell")
+            .args(&[
+                "-NoProfile",
+                "-Command",
+                "$drive = ((Get-Location).Path -split ':')[0]; $free = (Get-PSDrive -Name $drive).Free / 1GB; [Math]::Round($free, 1)"
+            ])
+            .output();
+        match disk_check {
+            Ok(output) => {
+                let out_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                if let Ok(free_gb) = out_str.parse::<f64>() {
+                    if free_gb >= 40.0 {
+                        println!("[OK] Free disk space: {} GB (requires >= 40 GB).", free_gb);
+                    } else if free_gb >= 20.0 {
+                        println!("[WARNING] Free disk space is low: {} GB. Build requires ~40 GB and may fail.", free_gb);
+                        warnings += 1;
+                    } else {
+                        println!("[ERROR] Extremely low disk space: {} GB. Firefox build WILL fail due to out-of-disk-space.", free_gb);
+                        errors += 1;
+                    }
+                } else {
+                    println!("[WARNING] Failed to parse disk space output: '{}'", out_str);
+                    warnings += 1;
+                }
+            }
+            Err(_) => {
+                println!("[WARNING] Failed to query disk space via PowerShell.");
+                warnings += 1;
+            }
+        }
+
+        // 6. Python check
+        let mut py_version_ok = false;
+        let mut found_py_str = String::new();
+        let py_candidates = ["py", "python", "python3"];
+        for candidate in &py_candidates {
+            if let Ok(output) = Command::new(candidate).args(&["--version"]).output() {
+                let out_str = String::from_utf8_lossy(&output.stdout);
+                let err_str = String::from_utf8_lossy(&output.stderr);
+                let combined = format!("{}{}", out_str, err_str);
+                if combined.contains("3.11") || combined.contains("3.12") {
+                    py_version_ok = true;
+                    found_py_str = combined.trim().to_string();
+                    break;
+                }
+            }
+        }
+        if py_version_ok {
+            println!(
+                "[OK] Python version: {} (requires exactly 3.11 or 3.12).",
+                found_py_str
+            );
+        } else {
+            println!("[ERROR] Python 3.11 or 3.12 was not found. Other versions (e.g. 3.10, 3.13) will fail building Firefox.");
+            errors += 1;
+        }
+
+        // 7. Visual Studio 2022 VC++ Workload
+        let vs_where = std::env::var("ProgramFiles(x86)")
+            .map(|p| {
+                PathBuf::from(p)
+                    .join("Microsoft Visual Studio")
+                    .join("Installer")
+                    .join("vswhere.exe")
+            })
+            .unwrap_or_default();
+        if vs_where.exists() {
+            let vs_check = Command::new(&vs_where)
+                .args(&[
+                    "-version",
+                    "[17.0,18.0)",
+                    "-products",
+                    "*",
+                    "-requires",
+                    "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+                    "-format",
+                    "json",
+                ])
+                .output();
+            match vs_check {
+                Ok(output) => {
+                    let out_str = String::from_utf8_lossy(&output.stdout);
+                    if out_str.trim() == "[]" || out_str.trim().is_empty() {
+                        println!("[ERROR] Visual Studio 2022 C++ build tools are missing.");
+                        println!("        Make sure 'Desktop development with C++' workload is installed.");
+                        errors += 1;
+                    } else {
+                        println!("[OK] Visual Studio 2022 with C++ Build Tools is installed.");
+                    }
+                }
+                Err(_) => {
+                    println!("[WARNING] Failed to run vswhere check.");
+                    warnings += 1;
+                }
+            }
+        } else {
+            println!("[WARNING] vswhere.exe was not found. Cannot verify Visual Studio workload components.");
+            warnings += 1;
+        }
+
+        // 8. Rust targets check
+        let rust_check = Command::new("rustc")
+            .args(&["--print", "target-list"])
+            .output();
+        match rust_check {
+            Ok(output) => {
+                let out_str = String::from_utf8_lossy(&output.stdout);
+                if out_str.contains("x86_64-pc-windows-msvc") {
+                    println!("[OK] Rust target 'x86_64-pc-windows-msvc' is installed.");
+                } else {
+                    println!("[ERROR] Rust target 'x86_64-pc-windows-msvc' is missing.");
+                    println!("        Add via: rustup target add x86_64-pc-windows-msvc");
+                    errors += 1;
+                }
+            }
+            Err(_) => {
+                println!("[WARNING] rustc compiler not found in PATH.");
+                warnings += 1;
+            }
+        }
+
+        // 9. MozillaBuild existence
+        let mut mb_exists = false;
+        let mb_paths = ["C:\\mozilla-build", "C:\\mozilla-build\\bin"];
+        for p in &mb_paths {
+            if Path::new(p).exists() {
+                mb_exists = true;
+                break;
+            }
+        }
+        if mb_exists {
+            println!("[OK] MozillaBuild is installed.");
+        } else {
+            println!("[ERROR] MozillaBuild is missing. Install to C:\\mozilla-build.");
+            errors += 1;
+        }
+    } else {
+        // macOS or Linux checks
+        println!(
+            "[OK] Platform checks: Running on non-Windows host ({}). Checking basic tools...",
+            std::env::consts::OS
+        );
+
+        // Basic tools check
+        let git_check = Command::new("git").arg("--version").output();
+        if git_check.is_ok() && git_check.unwrap().status.success() {
+            println!("[OK] Git is installed.");
+        } else {
+            println!("[ERROR] Git is not installed or not in PATH.");
+            errors += 1;
+        }
+
+        let clang_check = Command::new("clang").arg("--version").output();
+        if clang_check.is_ok() && clang_check.unwrap().status.success() {
+            println!("[OK] Clang is installed.");
+        } else {
+            println!("[ERROR] Clang compiler is missing.");
+            errors += 1;
+        }
+
+        let python_check = Command::new("python3").arg("--version").output();
+        if python_check.is_ok() && python_check.unwrap().status.success() {
+            println!("[OK] Python 3 is installed.");
+        } else {
+            println!("[ERROR] python3 is missing.");
+            errors += 1;
+        }
+    }
+
+    println!("\nDiagnostics Complete:");
+    println!("  - Errors: {}", errors);
+    println!("  - Warnings: {}", warnings);
+
+    if strict && warnings > 0 {
+        println!("  - Strict mode enabled: treating warnings as errors.");
+        errors += warnings;
+    }
+
+    if errors > 0 {
+        bail!(
+            "Build diagnostics failed with {} error(s). Please fix the issues before building.",
+            errors
+        );
+    }
+
+    println!("[hil] Ready to build! No potential build blockages detected.");
     Ok(())
 }

@@ -43,28 +43,34 @@ if (-not (Test-Path bin)) { New-Item -ItemType Directory -Path bin }
 Copy-Item hil\target\release\hil.exe -Destination bin\hil.exe
 ```
 
-### 2. Fetch Firefox and Build
+### 2. Diagnose Environment Readiness
 
-From the repo root in **Git Bash** (or any bash shell):
+Before compiling the browser, you should run the built-in diagnostic tool to ensure your Windows environment is correctly configured (checking for long path registries, spaces in repository path, disk space, Python version, VC++ workload components, Git settings, and Rust targets):
 
 ```bash
-# Fetch Firefox into ./engine (one-time)
-./bin/hil setup
-
-# Apply patches + branding overlays
-./bin/hil apply
-
-# Configure mozconfig for Windows
-cp mozconfigs/windows engine/mozconfig
-
-# Full build (1-3 hours on first run)
-cd engine && ./mach build
-
-# Run
-./mach run
+# Run build diagnostics
+./bin/hil doctor
 ```
 
-Alternatively, you can run the building steps via our convenience PowerShell script:
+### 3. Fetch Firefox and Build
+
+You can now fetch, patch, and build the browser automatically using the unified entry points in `hil`:
+
+```bash
+# 1. Fetch Firefox into ./engine (one-time setup)
+./bin/hil setup
+
+# 2. Build the browser (this automatically copies the correct mozconfig, applies patches/overlays, and starts compiling)
+./bin/hil build
+
+# 3. Build and package the browser (generate zip/installer)
+./bin/hil build --package
+
+# 4. Build and launch the browser
+./bin/hil build --run
+```
+
+Alternatively, you can run the building steps via our convenience PowerShell wrapper:
 
 ```powershell
 # Setup, apply, and build automatically:
