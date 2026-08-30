@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  Sun,
-  Moon,
-  Github,
-  ChevronDown,
   Download,
   Terminal,
   ExternalLink,
@@ -18,7 +14,10 @@ import {
   Sparkles,
   Lock,
   Cpu,
-  Boxes
+  Boxes,
+  Compass,
+  ChevronDown,
+  Github
 } from "lucide-react";
 import { SiDiscord } from "react-icons/si";
 
@@ -32,9 +31,9 @@ import {
   formatBytes
 } from "./utils/github";
 
+import Navbar from "./components/Navbar";
 import DownloadModal from "./components/DownloadModal";
 
-// M3 Expressive Spring Motion Physics
 const springTransition = {
   type: "spring",
   stiffness: 380,
@@ -117,7 +116,7 @@ export default function App() {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
-  const scrollToId = (id: string) => {
+  const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -138,64 +137,62 @@ export default function App() {
 
   const isDark = theme === "dark";
 
+  // Comprehensive, user-resonant copywriting (TR & EN)
   const t = {
     tr: {
-      nav: {
-        features: "Özellikler",
-        architecture: "Mimari",
-        download: "İndir",
-        github: "GitHub",
-        getHilal: "Hilal'i Edin",
-      },
       hero: {
-        chip: "Açık Kaynak • Alpha Sürümü",
-        tagline: "Web sizin olsun.",
+        chip: "Açık Kaynak • Alpha 0.2",
+        title: "İnternet, sizin kurallarınızla.",
         subtitle:
-          "Gözetimsiz, kısıtlamasız ve bağımsız bir masaüstü tarayıcısı. Yarı saydam Tahoe kenar çubuğu, izole konteyner çalışma alanları ve dahili gizlilik kalkanı ile internette tam kontrolü yeniden kazanın.",
+          "Daha hızlı, daha sessiz ve tamamen özgür. Hilal; yarı saydam Tahoe kenar çubuğu, izole konteyner çalışma alanları ve dahili reklam engellemesiyle Firefox'un gücünü saf bir deneyime dönüştürür.",
         downloadBtn: {
           macos: "macOS için İndir",
           windows: "Windows için İndir",
           linux: "Linux için İndir",
-          other: "Alpha İndir",
+          other: "Hemen İndir",
         },
         viewAllDownloads: "Tüm platformlar (.dmg, .exe, .deb, .zip)",
       },
       stories: [
         {
-          chip: "Tahoe Arayüzü",
-          title: "Sayfalara alan açan, yarı saydam ve akıcı arayüz.",
+          tabLabel: "Tahoe Arayüzü",
+          chip: "01 / ODAK VE ZARAFET",
+          title: "Sayfalar ön planda, araç çubuğu geri planda.",
           description:
-            "Sekmeler solda, dikkatiniz tam merkezde. Web sayfasının renk tonlarına usulca uyum sağlayan yarı saydam kenar çubuğu ve kalabalığı ortadan kaldıran kompakt araç çubuğu.",
+            "Dikey sekmeler dikkatinizi dağıtmadan solda düzenli durur, araç çubuğu yalnızca ihtiyaç duyduğunuzda görünür. Web sitelerinin renk tonlarına zarifçe uyum sağlayan yarı saydam Tahoe kenar çubuğu ile web sayfaları tüm genişliğiyle parlar.",
           image: isDark ? "/welcome-compact-vertical.png" : "/welcome-standard-vertical.png",
           alt: "Hilal Tahoe Sidebar Arayüzü",
         },
         {
-          chip: "İzole Konteynerler",
-          title: "İş, kişisel yaşam ve projeleriniz. Tamamen ayrı.",
+          tabLabel: "Çalışma Alanları",
+          chip: "02 / İZOLE ALANLAR",
+          title: "İş, okul ve kişisel hayat tek bir pencerede.",
           description:
-            "Sekmeler sadece görünüşte ayrılmaz; Multi-Account Containers sayesinde her çalışma alanı bağımsız çerezler ve oturumlar barındırır. Farklı hesaplar için onlarca pencere açma karmaşasına son verin.",
+            "Sekmeler sadece görsel olarak gruplanmaz; Multi-Account Containers sayesinde her çalışma alanı bağımsız çerezler ve oturumlar barındırır. İş ve kişisel hesaplarınıza aynı anda giriş yapın, onlarca ayrı pencere açma karmaşasını unutun.",
           image: "/welcome-workspaces-on.png",
           alt: "Hilal İzole Konteyner Çalışma Alanları",
         },
         {
-          chip: "Sıfır Gözetim",
-          title: "Dahili uBlock Origin ve Element Zapper kalkanı.",
+          tabLabel: "Dahili Gizlilik",
+          chip: "03 / TAVİZSİZ GİZLİLİK",
+          title: "Sıfır izleyici. Dahili uBlock kalkanı.",
           description:
-            "uBlock Origin varsayılan olarak dahildir; telemetri ve arka plan izleyicileri kökten engellenir. Element Zapper ile dikkatinizi dağıtan her türlü banner veya öğeyi tek tıkla sonsuza dek yok edin.",
+            "Reklamlar ve veri toplayıcılar tarayıcı seviyesinde engellenir. Telemetri tamamen kapalıdır. Sayfadaki rahatsız edici öğeleri Element Zapper ile tek tıkla sonsuza dek yok edin.",
           image: "/welcome-toolbar-hidden.png",
           alt: "Hilal Minimalist Kompakt Mod",
         },
         {
-          chip: "Firefox Gecko Katmanı",
-          title: "Bağımsız bir katman. Güvenilir Gecko motoru.",
+          tabLabel: "Firefox Motoru",
+          chip: "04 / GÜVENİLİR MOTOR",
+          title: "Bozulmayan, açık ve şeffaf bir Firefox katmanı.",
           description:
-            "Hilal, upstream Firefox Gecko motoru üzerine inşa edilen şeffaf ve açık kaynaklı bir yama katmanıdır. Tüm Firefox eklentileriniz (AMO) ve güvenlik güncellemeleri gecikmeksizin eksiksiz çalışır.",
+            "Hilal, Firefox'tan kopan hantal bir fork değildir. Gecko motoru üzerinde bağımsız bir yama katmanı olarak çalışır; tüm Firefox eklentilerinizle (AMO) tam uyumludur ve güvenlik güncellemelerini anında alır.",
           image: "/welcome-home-preview.png",
           alt: "Hilal Gecko Mimari Yapısı",
         },
       ],
       openSourceSection: {
-        chip: "Açık Kaynak & Mimari",
+        chip: "Açık Kaynak Mimarisi",
         title: "Kopan bir fork değil; deklaratif bir Firefox katmanı.",
         description:
           "Hilal, upstream Firefox Gecko motoru üzerinde açık kaynaklı ve deklaratif patch katmanı olarak çalışır. Güvenlik güncellemelerini anında alır ve tüm Firefox eklentileriyle kusursuz uyumludur.",
@@ -203,22 +200,22 @@ export default function App() {
       },
       downloadSection: {
         chip: "Resmi Derlemeler",
-        title: "Hilal'i Deneyin.",
-        subtitle: "Özgür, hızlı ve sizin kontrolünüzde bir internet deneyimi.",
+        title: "Tarayıcınızı Özgürleştirin.",
+        subtitle: "Açık kaynaklı, hızlı ve sizin kontrolünüzde bir internet deneyimi.",
         platforms: [
           {
             name: "macOS",
-            spec: "Apple Silicon & Intel • Universal .dmg",
+            spec: "Apple Silicon (M1–M4) ve Intel • Evrensel DMG",
             icon: <Apple className="w-6 h-6" />,
           },
           {
             name: "Windows",
-            spec: "Windows 10/11 • 64-bit .exe & Taşınabilir .zip",
+            spec: "Windows 10 ve 11 • 64-bit Kurulum veya Taşınabilir ZIP",
             icon: <Laptop className="w-6 h-6" />,
           },
           {
             name: "Linux",
-            spec: "Ubuntu / Debian .deb • AppImage • Tarball",
+            spec: "Ubuntu / Debian (.deb) • Evrensel AppImage • Tarball",
             icon: <Terminal className="w-6 h-6" />,
           },
         ],
@@ -229,20 +226,20 @@ export default function App() {
         title: "Sıkça Sorulan Sorular",
         items: [
           {
-            q: "Hilal Browser nedir ve geleneksel çatallamalardan (fork) farkı nedir?",
-            a: "Hilal, Firefox kod tabanından kopan hantal bir fork değildir. Upstream Firefox Gecko motoru üzerine Rust ile yazılmış `hil` aracıyla deklaratif patch ve overlay dosyaları uygular. Bu sayede Firefox'un en son güvenlik yamalarını ve performans güncellemelerini gecikmeksizin alır.",
+            q: "Hilal Browser diğer tarayıcılardan nasıl ayrışır?",
+            a: "Hilal, Chromium tekeline karşı Firefox Gecko motorunu savunur. Yarı saydam dikey sekmeler, konteyner bazlı izole çalışma alanları ve sıfır telemetri politikasıyla hem gizliliği hem de modern arayüzü tek çatı altında sunar.",
           },
           {
-            q: "Mevcut Firefox eklentilerimi ve şifrelerimi kullanabilir miyim?",
-            a: "Evet. Hilal standart Firefox Add-ons mağazası (AMO) ve Gecko eklenti ekosistemiyle %100 uyumludur. uBlock Origin varsayılan olarak dahildir; Bitwarden, Dark Reader ve sevdiğiniz tüm eklentileri tek tıkla yükleyebilirsiniz.",
+            q: "Mevcut Firefox eklentilerim ve şifrelerim çalışır mı?",
+            a: "Evet. Firefox Add-ons mağazasındaki (AMO) tüm eklentiler (uBlock Origin, Bitwarden, Dark Reader vb.) tam uyumlulukla çalışır. uBlock Origin varsayılan olarak paketlenmiştir.",
           },
           {
-            q: "Çalışma Alanları (Workspaces) oturumları nasıl ayırır?",
-            a: "Her çalışma alanı Firefox Multi-Account Containers altyapısını kullanarak çerezleri ve oturumları izole eder. İş, okul ve kişisel hesaplarınıza aynı tarayıcı penceresinde birbirine karışmadan giriş yapabilirsiniz.",
+            q: "Çalışma Alanları (Workspaces) oturumları nasıl birbirinden ayırır?",
+            a: "Her çalışma alanı Multi-Account Containers altyapısını kullanarak çerezleri ve oturumları izole eder. İş, okul ve kişisel hesaplarınıza aynı tarayıcı penceresinde birbirine karışmadan giriş yapabilirsiniz.",
           },
           {
-            q: "Verilerim güvende mi? Telemetri toplanıyor mu?",
-            a: "Sıfır telemetri politikası uygulanır. Mozilla'nın tüm analitik, telemetri ve hata raporlama sunucuları patch seviyesinde engellenmiştir. Hiçbir veriniz asla kaydedilmez ve dışarıya aktarılmaz.",
+            q: "Telemetri ve veri toplama durumu nedir?",
+            a: "Hilal Browser'da hiçbir telemetri, analitik veya kullanıcı verisi toplanmaz. Tüm arka plan raporlama modülleri patch seviyesinde tamamen kapatılmıştır.",
           },
         ],
       },
@@ -255,18 +252,11 @@ export default function App() {
       },
     },
     en: {
-      nav: {
-        features: "Features",
-        architecture: "Architecture",
-        download: "Download",
-        github: "GitHub",
-        getHilal: "Get Hilal",
-      },
       hero: {
-        chip: "Open Source • Alpha Build",
-        tagline: "The web, on your terms.",
+        chip: "Open Source • Alpha 0.2",
+        title: "The web, on your terms.",
         subtitle:
-          "An uncompromised, surveillance-free desktop browser built on Firefox Gecko. Featuring translucent Tahoe sidebars, isolated multi-account workspaces, and built-in tracking protection.",
+          "Fast, quiet, and uncompromisingly private. Hilal reimagines Firefox Gecko with a distraction-free translucent Tahoe sidebar, isolated container workspaces, and built-in ad blocking—putting total control back in your hands.",
         downloadBtn: {
           macos: "Download for macOS",
           windows: "Download for Windows",
@@ -277,34 +267,38 @@ export default function App() {
       },
       stories: [
         {
-          chip: "Tahoe Interface",
-          title: "A translucent Tahoe sidebar that gets out of your way.",
+          tabLabel: "Tahoe Interface",
+          chip: "01 / FOCUS & ELEGANCE",
+          title: "Content in the spotlight. Chrome out of the way.",
           description:
-            "Tabs on the left, your focus on the center. A clean window that softly adapts to the website's color palette, paired with an auto-hiding compact toolbar.",
+            "Vertical tabs keep your headspace clear while the toolbar hides until summoned. A translucent sidebar softly adapts to dominant page colors, letting web content shine across the entire display.",
           image: isDark ? "/welcome-compact-vertical.png" : "/welcome-standard-vertical.png",
           alt: "Hilal Tahoe Sidebar Interface",
         },
         {
-          chip: "Container Workspaces",
-          title: "Work, dev, and personal life. Strictly partitioned.",
+          tabLabel: "Workspaces",
+          chip: "02 / ISOLATED WORKSPACES",
+          title: "Work, dev, and personal life in one calm window.",
           description:
-            "Tabs aren't just visually grouped; each workspace runs in a true container context with isolated cookies and logins. No need to juggle dozens of separate windows.",
+            "Tabs aren't just colored pills; each workspace partitions cookies and sessions via Multi-Account Containers. Sign into multiple accounts simultaneously without juggling a clutter of windows.",
           image: "/welcome-workspaces-on.png",
           alt: "Hilal Multi-Account Workspaces",
         },
         {
-          chip: "Zero Surveillance",
-          title: "Built-in uBlock Origin & Element Zapper shield.",
+          tabLabel: "Built-in Privacy",
+          chip: "03 / UNCOMPROMISED PRIVACY",
+          title: "Zero surveillance. Built-in shield.",
           description:
-            "Pre-packaged with uBlock Origin to neutralize intrusive ads and trackers. Zero telemetry. Vaporize annoying banners with a single click using the Element Zapper.",
+            "uBlock Origin is baked in by default, and telemetry is killed at the engine level. Vaporize annoying cookie banners and intrusive elements forever with the Element Zapper.",
           image: "/welcome-toolbar-hidden.png",
           alt: "Hilal Compact Focused Mode",
         },
         {
-          chip: "Gecko Core Layer",
-          title: "An open source layer. The Gecko engine you trust.",
+          tabLabel: "Gecko Core",
+          chip: "04 / DEPENDABLE ENGINE",
+          title: "An open, declarative Firefox patch layer.",
           description:
-            "Hilal runs on top of upstream Firefox Gecko as an auditable, text-only patch layer. Retaining instant security tracking and 100% Firefox add-on compatibility.",
+            "Hilal isn't a stale hard fork that rots away. It runs as an auditable patch layer on upstream Gecko—retaining 100% Firefox add-on compatibility and instant security patches.",
           image: "/welcome-home-preview.png",
           alt: "Hilal Gecko Architecture",
         },
@@ -318,22 +312,22 @@ export default function App() {
       },
       downloadSection: {
         chip: "Official Artifacts",
-        title: "Meet Hilal.",
-        subtitle: "Uncompromised, fast, and tranquil browsing.",
+        title: "Free Your Browsing.",
+        subtitle: "Open source, fast, and tranquil browsing tailored for you.",
         platforms: [
           {
             name: "macOS",
-            spec: "Apple Silicon & Intel • Universal .dmg",
+            spec: "Apple Silicon (M1–M4) & Intel • Universal .dmg",
             icon: <Apple className="w-6 h-6" />,
           },
           {
             name: "Windows",
-            spec: "Windows 10/11 • 64-bit .exe & Portable .zip",
+            spec: "Windows 10/11 • 64-bit Installer & Portable .zip",
             icon: <Laptop className="w-6 h-6" />,
           },
           {
             name: "Linux",
-            spec: "Ubuntu / Debian .deb • AppImage • Tarball",
+            spec: "Ubuntu / Debian (.deb) • Universal AppImage • Tarball",
             icon: <Terminal className="w-6 h-6" />,
           },
         ],
@@ -344,20 +338,20 @@ export default function App() {
         title: "Frequently Asked Questions",
         items: [
           {
-            q: "What is Hilal Browser and how does it differ from a hard fork?",
-            a: "Hilal is not a detached codebase copy. It applies declarative patch files onto upstream Firefox via the native `hil` Rust patch manager. This guarantees instant security tracking and zero fork rot.",
+            q: "How does Hilal differ from traditional browsers?",
+            a: "Hilal champions the independent Gecko engine against the Chromium monoculture. Combining vertical sidebars, isolated container workspaces, and a strict zero-telemetry policy.",
           },
           {
-            q: "Can I use standard Firefox extensions?",
-            a: "Yes. Hilal maintains full compatibility with the Firefox Add-ons ecosystem (AMO) and Gecko engine. uBlock Origin is pre-installed out of the box.",
+            q: "Can I use all standard Firefox add-ons?",
+            a: "Yes. Full compatibility with the Firefox Add-ons ecosystem (AMO) is guaranteed. uBlock Origin comes pre-installed out of the box.",
           },
           {
-            q: "How do Workspaces isolate sessions?",
-            a: "Each workspace uses Firefox Multi-Account Containers to strictly partition cookies, logins, and storage between different contexts.",
+            q: "How do Workspaces isolate my logins?",
+            a: "Each workspace runs inside a distinct Multi-Account Container, strictly partitioning cookies, storage, and sessions.",
           },
           {
-            q: "Is there any telemetry or tracking?",
-            a: "Zero telemetry. Mozilla telemetry endpoints and background analytics pingers are killed at the engine and preference level.",
+            q: "What is the telemetry policy?",
+            a: "Strict zero telemetry. All Mozilla tracking pings, metrics, and error reporting endpoints are killed at the engine level.",
           },
         ],
       },
@@ -382,101 +376,25 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-m3-surface text-[var(--md-sys-color-on-surface)] selection:bg-[var(--md-sys-color-primary-container)] selection:text-[var(--md-sys-color-on-primary-container)]">
-      {/* 1. M3 Expressive Floating Top App Bar */}
-      <nav className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 pointer-events-none">
-        <div className="mx-auto max-w-5xl pointer-events-auto h-16 rounded-full bg-m3-container/85 backdrop-blur-xl border border-[var(--md-sys-color-outline-variant)]/35 px-4 sm:px-6 flex items-center justify-between shadow-lg shadow-black/10 transition-colors">
-          {/* Logo & Name */}
-          <motion.div
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="flex items-center gap-3 cursor-pointer"
-          >
-            <div className="w-9 h-9 rounded-full bg-[var(--md-sys-color-primary-container)] flex items-center justify-center p-1.5">
-              <img
-                src="/default128.png"
-                alt="Hilal Logo"
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <span className="text-base font-bold tracking-tight text-[var(--md-sys-color-on-surface)]">
-              Hilal
-            </span>
-          </motion.div>
+      {/* 1. Dedicated, Completely Rewritten Navbar */}
+      <Navbar
+        lang={lang}
+        setLang={setLang}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        onOpenDownload={() => setIsDownloadOpen(true)}
+        scrollToSection={scrollToSection}
+      />
 
-          {/* Center Navigation Segmented Pills */}
-          <div className="hidden md:flex items-center gap-1.5 p-1 rounded-full bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/25">
-            <button
-              onClick={() => scrollToId("features")}
-              className="px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors"
-            >
-              {activeT.nav.features}
-            </button>
-            <button
-              onClick={() => scrollToId("architecture")}
-              className="px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors"
-            >
-              {activeT.nav.architecture}
-            </button>
-            <button
-              onClick={() => scrollToId("download")}
-              className="px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors"
-            >
-              {activeT.nav.download}
-            </button>
-            <a
-              href="https://github.com/VastSea0/hilal-browser"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors"
-            >
-              {activeT.nav.github}
-            </a>
-          </div>
-
-          {/* Right Utilities */}
-          <div className="flex items-center gap-2">
-            {/* Lang Chip */}
-            <button
-              onClick={() => setLang(lang === "tr" ? "en" : "tr")}
-              className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-mono font-bold bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/30 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)] transition-colors m3-state-layer"
-              title={lang === "tr" ? "Switch to English" : "Türkçe'ye Geç"}
-            >
-              {lang === "tr" ? "EN" : "TR"}
-            </button>
-
-            {/* Theme Chip */}
-            <button
-              onClick={toggleTheme}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/30 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)] transition-colors m3-state-layer"
-              aria-label="Theme Toggle"
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-
-            {/* M3 Filled CTA Pill Button */}
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => setIsDownloadOpen(true)}
-              className="h-10 px-5 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-semibold text-xs transition-shadow shadow-md hover:shadow-lg flex items-center gap-2"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>{activeT.nav.getHilal}</span>
-            </motion.button>
-          </div>
-        </div>
-      </nav>
-
-      {/* 2. M3 Expressive Hero Section */}
-      <section className="pt-36 sm:pt-44 pb-20 px-4 sm:px-6 max-w-5xl mx-auto text-center">
+      {/* 2. Hero Section */}
+      <section className="pt-36 sm:pt-48 pb-20 px-4 sm:px-6 max-w-5xl mx-auto text-center">
         <motion.div
           variants={m3Stagger}
           initial="hidden"
           animate="visible"
           className="space-y-6"
         >
-          {/* M3 Assist Chip */}
+          {/* Version Chip */}
           <motion.div
             variants={m3FadeIn}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] text-xs font-semibold tracking-wide"
@@ -485,16 +403,15 @@ export default function App() {
             <span>{activeT.hero.chip}</span>
           </motion.div>
 
-          {/* M3 Emphasized Display Large Tagline */}
+          {/* Emphasized Title */}
           <motion.h1
             variants={m3FadeIn}
-            className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-[var(--md-sys-color-on-surface)] leading-[1.05]"
-            style={{ fontStretch: "110%" }}
+            className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-[var(--md-sys-color-on-surface)] leading-[1.04]"
           >
-            {activeT.hero.tagline}
+            {activeT.hero.title}
           </motion.h1>
 
-          {/* M3 Body Large Subtitle */}
+          {/* Subtitle */}
           <motion.p
             variants={m3FadeIn}
             className="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-[var(--md-sys-color-on-surface-variant)] leading-relaxed font-normal"
@@ -502,13 +419,13 @@ export default function App() {
             {activeT.hero.subtitle}
           </motion.p>
 
-          {/* M3 Actions (Filled & Tonal Pill Buttons) */}
+          {/* CTA Actions */}
           <motion.div
             variants={m3FadeIn}
             className="pt-4 flex flex-col items-center gap-4"
           >
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {/* Primary Filled Button */}
+              {/* Primary Action Button */}
               <motion.button
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
@@ -521,7 +438,7 @@ export default function App() {
                 <span>{getDynamicBtnLabel()}</span>
               </motion.button>
 
-              {/* Tonal Outlined Button */}
+              {/* Source Link Button */}
               <motion.a
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
@@ -535,7 +452,7 @@ export default function App() {
               </motion.a>
             </div>
 
-            {/* Supporting artifact note */}
+            {/* Platform indicator */}
             {recommendedAsset && (
               <p className="text-xs font-mono text-[var(--md-sys-color-on-surface-variant)]">
                 {recommendedAsset.name} • {formatBytes(recommendedAsset.size)}
@@ -544,7 +461,7 @@ export default function App() {
           </motion.div>
         </motion.div>
 
-        {/* M3 Expressive Hero Container (32px rounded) */}
+        {/* Hero Visual Container */}
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
@@ -561,20 +478,19 @@ export default function App() {
         </motion.div>
       </section>
 
-      {/* 3. M3 Expressive Interactive Stories Showcase */}
+      {/* 3. Interactive Pillar Showcase */}
       <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6" id="features">
-        <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)] text-xs font-semibold">
-            <Layers className="w-3.5 h-3.5" />
-            <span>{lang === "tr" ? "Öne Çıkan Özellikler" : "Key Highlights"}</span>
-          </div>
+        <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
+          <span className="px-3.5 py-1 rounded-full bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)] text-xs font-semibold inline-block">
+            {lang === "tr" ? "Temel Yetenekler" : "Key Pillars"}
+          </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)]">
-            {lang === "tr" ? "Temel Yetenekler." : "Core Pillars."}
+            {lang === "tr" ? "Neden Hilal Browser?" : "Why Hilal Browser?"}
           </h2>
         </div>
 
-        {/* M3 Segmented Navigation Bar */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
+        {/* Segmented Navigation Bar */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
           {activeT.stories.map((story, idx) => (
             <motion.button
               key={idx}
@@ -586,12 +502,12 @@ export default function App() {
                   : "bg-m3-container text-[var(--md-sys-color-on-surface-variant)] hover:bg-m3-container-high"
               }`}
             >
-              <span>{story.chip}</span>
+              <span>{story.tabLabel}</span>
             </motion.button>
           ))}
         </div>
 
-        {/* Active Tab Story Showcase Container */}
+        {/* Active Tab Story Card */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -601,9 +517,9 @@ export default function App() {
             transition={springTransition}
             className="p-6 sm:p-10 rounded-[36px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/40 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center shadow-xl"
           >
-            {/* Story Text Side */}
+            {/* Story Text */}
             <div className="lg:col-span-5 space-y-4 text-left">
-              <span className="px-3.5 py-1 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-xs font-semibold inline-block">
+              <span className="px-3.5 py-1 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-xs font-bold inline-block">
                 {activeT.stories[activeTab].chip}
               </span>
               <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)] leading-snug">
@@ -614,7 +530,7 @@ export default function App() {
               </p>
             </div>
 
-            {/* Story Visual Side */}
+            {/* Story Visual */}
             <div className="lg:col-span-7 rounded-[26px] overflow-hidden bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/30 shadow-md">
               <img
                 src={activeT.stories[activeTab].image}
@@ -626,7 +542,7 @@ export default function App() {
         </AnimatePresence>
       </section>
 
-      {/* 4. M3 Expressive Architecture & Terminal Section */}
+      {/* 4. Architecture & Terminal Section */}
       <section className="py-20 max-w-5xl mx-auto px-4 sm:px-6" id="architecture">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -648,7 +564,7 @@ export default function App() {
             {activeT.openSourceSection.description}
           </p>
 
-          {/* M3 Tonal Interactive Terminal Card */}
+          {/* Terminal Command Line */}
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/40 text-xs font-mono text-[var(--md-sys-color-on-surface)] shadow-inner">
               <span className="text-[var(--md-sys-color-primary)] font-bold">$</span>
@@ -667,7 +583,7 @@ export default function App() {
         </motion.div>
       </section>
 
-      {/* 5. M3 Expressive Platform Download Center */}
+      {/* 5. Download Center */}
       <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6 text-center" id="download">
         <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-xs font-semibold mb-3">
           <Boxes className="w-3.5 h-3.5" />
@@ -681,7 +597,7 @@ export default function App() {
           {activeT.downloadSection.subtitle}
         </p>
 
-        {/* 3 M3 Tonal Container Cards */}
+        {/* 3 Platform Cards */}
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
           {activeT.downloadSection.platforms.map((p, idx) => (
             <motion.div
@@ -712,8 +628,8 @@ export default function App() {
         </div>
       </section>
 
-      {/* 6. M3 Expressive S.S.S. (FAQ) */}
-      <section className="py-20 max-w-3xl mx-auto px-4 sm:px-6">
+      {/* 6. FAQ Section */}
+      <section className="py-20 max-w-3xl mx-auto px-4 sm:px-6" id="faq">
         <div className="text-center mb-10 space-y-2">
           <span className="px-3.5 py-1 rounded-full bg-m3-container text-[var(--md-sys-color-on-surface-variant)] text-xs font-semibold inline-block">
             {activeT.faq.chip}
@@ -805,7 +721,7 @@ export default function App() {
         </div>
       </footer>
 
-      {/* M3 Expressive Download Dialog */}
+      {/* Download Dialog */}
       <DownloadModal
         isOpen={isDownloadOpen}
         onClose={() => setIsDownloadOpen(false)}
