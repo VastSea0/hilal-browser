@@ -1,0 +1,805 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* ==========================================================================
+   Hilal Browser — Material 3 Expressive (M3E) Complete Shell
+   Unified Design Tokens from www (Hilal Web Core) & Google M3E Specs
+   Strict Enforcement: Pure Tonal Surfaces, Zero Glassmorphism, Unified Layout
+   ========================================================================== */
+
+@media -moz-pref("hilal.m3e.enabled") {
+  /* --------------------------------------------------------------------------
+     1. M3E Design Tokens (Directly Aligned with Hilal www/src/index.css)
+     -------------------------------------------------------------------------- */
+  :root {
+    /* M3 Typography Scale */
+    --md-sys-font-family: "Roboto Flex", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --md-sys-typescale-body-font: var(--md-sys-font-family);
+    --md-sys-typescale-label-font: var(--md-sys-font-family);
+
+    /* M3 Corner Shapes (Expressive Scale) */
+    --md-sys-shape-corner-none: 0px;
+    --md-sys-shape-corner-extra-small: 4px;
+    --md-sys-shape-corner-small: 8px;
+    --md-sys-shape-corner-medium: 12px;
+    --md-sys-shape-corner-large: 16px;
+    --md-sys-shape-corner-large-increased: 20px;
+    --md-sys-shape-corner-extra-large: 28px;
+    --md-sys-shape-corner-full: 9999px;
+
+    /* M3 Motion & Transitions */
+    --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --md-sys-motion-easing-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+    --md-sys-motion-duration-short: 150ms;
+    --md-sys-motion-duration-medium: 250ms;
+
+    /* M3 Light Palette */
+    --md-sys-color-surface: #f8f9ff;
+    --md-sys-color-surface-dim: #d9dae1;
+    --md-sys-color-surface-bright: #f8f9ff;
+    --md-sys-color-surface-container-lowest: #ffffff;
+    --md-sys-color-surface-container-low: #f2f3fa;
+    --md-sys-color-surface-container: #eceef5;
+    --md-sys-color-surface-container-high: #e6e8ef;
+    --md-sys-color-surface-container-highest: #e0e2e9;
+    
+    --md-sys-color-on-surface: #181c22;
+    --md-sys-color-on-surface-variant: #43474e;
+    
+    --md-sys-color-primary: #0b57d0;
+    --md-sys-color-on-primary: #ffffff;
+    --md-sys-color-primary-container: #d3e3fd;
+    --md-sys-color-on-primary-container: #041e49;
+    
+    --md-sys-color-secondary: #555f6f;
+    --md-sys-color-on-secondary: #ffffff;
+    --md-sys-color-secondary-container: #d9e3f5;
+    --md-sys-color-on-secondary-container: #121c2a;
+    
+    --md-sys-color-tertiary: #6f5575;
+    --md-sys-color-on-tertiary: #ffffff;
+    --md-sys-color-tertiary-container: #f9d8fe;
+    --md-sys-color-on-tertiary-container: #28132f;
+    
+    --md-sys-color-outline: #73777f;
+    --md-sys-color-outline-variant: #c3c7cf;
+
+    --md-sys-color-state-hover: rgba(24, 28, 34, 0.08);
+    --md-sys-color-state-active: rgba(24, 28, 34, 0.14);
+
+    /* Firefox Variables Override */
+    --lwt-accent-color: var(--md-sys-color-surface-container) !important;
+    --toolbar-bgcolor: var(--md-sys-color-surface-container) !important;
+    --toolbar-color: var(--md-sys-color-on-surface) !important;
+    --toolbar-field-background-color: var(--md-sys-color-surface-container-high) !important;
+    --toolbar-field-color: var(--md-sys-color-on-surface) !important;
+    --toolbar-field-focus-background-color: var(--md-sys-color-surface-container-lowest) !important;
+    --toolbar-field-focus-color: var(--md-sys-color-on-surface) !important;
+    --toolbar-field-border-color: transparent !important;
+    --toolbarbutton-icon-fill: var(--md-sys-color-on-surface-variant) !important;
+    --toolbarbutton-hover-background: transparent !important;
+    --toolbarbutton-active-background: transparent !important;
+    --sidebar-background-color: var(--md-sys-color-surface-container-low) !important;
+    --sidebar-text-color: var(--md-sys-color-on-surface) !important;
+    --sidebar-border-color: var(--md-sys-color-outline-variant) !important;
+
+    --hilal-sidebar-bg: var(--md-sys-color-surface-container-low) !important;
+    --hilal-sidebar-text: var(--md-sys-color-on-surface) !important;
+    --hilal-sidebar-muted: var(--md-sys-color-on-surface-variant) !important;
+    --hilal-sidebar-border: var(--md-sys-color-outline-variant) !important;
+    --hilal-sidebar-hover: var(--md-sys-color-state-hover) !important;
+    --hilal-sidebar-highlight: var(--md-sys-color-secondary-container) !important;
+    --hilal-sidebar-highlight-text: var(--md-sys-color-on-secondary-container) !important;
+    --hilal-safari-sidebar-bg: var(--md-sys-color-surface-container-low) !important;
+    --hilal-safari-sidebar-bg-strong: var(--md-sys-color-surface-container) !important;
+    --hilal-safari-chrome-bg: var(--md-sys-color-surface-container) !important;
+    --hilal-safari-separator: var(--md-sys-color-outline-variant) !important;
+    --hilal-safari-page-bg: var(--md-sys-color-surface) !important;
+    --hilal-glass-window-background: var(--md-sys-color-surface-container) !important;
+    --hilal-glass-toolbar-background: var(--md-sys-color-surface-container) !important;
+    --hilal-glass-content-background: var(--md-sys-color-surface) !important;
+    --hilal-glass-border-color: transparent !important;
+    --hilal-glass-shadow: none !important;
+    --hilal-content-frame-gap: 0px !important;
+    --hilal-content-frame-radius: 0px !important;
+  }
+
+  /* M3 Dark Palette (Canonical from www) */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --md-sys-color-surface: #101319;
+      --md-sys-color-surface-dim: #0a0d13;
+      --md-sys-color-surface-bright: #363940;
+      --md-sys-color-surface-container-lowest: #0b0e14;
+      --md-sys-color-surface-container-low: #181c22;
+      --md-sys-color-surface-container: #1c2027;
+      --md-sys-color-surface-container-high: #262b32;
+      --md-sys-color-surface-container-highest: #31363e;
+      
+      --md-sys-color-on-surface: #e1e2e9;
+      --md-sys-color-on-surface-variant: #c3c7cf;
+      
+      --md-sys-color-primary: #a8c7fa;
+      --md-sys-color-on-primary: #042f66;
+      --md-sys-color-primary-container: #0842a0;
+      --md-sys-color-on-primary-container: #d3e3fd;
+      
+      --md-sys-color-secondary: #bec7d8;
+      --md-sys-color-on-secondary: #28313e;
+      --md-sys-color-secondary-container: #3e4756;
+      --md-sys-color-on-secondary-container: #dae3f5;
+      
+      --md-sys-color-tertiary: #dcbce1;
+      --md-sys-color-on-tertiary: #3e2845;
+      --md-sys-color-tertiary-container: #563e5d;
+      --md-sys-color-on-tertiary-container: #f9d8fe;
+      
+      --md-sys-color-outline: #8c9199;
+      --md-sys-color-outline-variant: #43474e;
+
+      --md-sys-color-state-hover: rgba(225, 226, 233, 0.08);
+      --md-sys-color-state-active: rgba(225, 226, 233, 0.14);
+
+      --lwt-accent-color: var(--md-sys-color-surface-container) !important;
+      --toolbar-bgcolor: var(--md-sys-color-surface-container) !important;
+      --toolbar-color: var(--md-sys-color-on-surface) !important;
+      --toolbar-field-background-color: var(--md-sys-color-surface-container-high) !important;
+      --toolbar-field-color: var(--md-sys-color-on-surface) !important;
+      --toolbar-field-focus-background-color: var(--md-sys-color-surface-container-lowest) !important;
+      --toolbar-field-focus-color: var(--md-sys-color-on-surface) !important;
+      --sidebar-background-color: var(--md-sys-color-surface-container-low) !important;
+      --sidebar-text-color: var(--md-sys-color-on-surface) !important;
+      --sidebar-border-color: var(--md-sys-color-outline-variant) !important;
+
+      --hilal-sidebar-bg: var(--md-sys-color-surface-container-low) !important;
+      --hilal-sidebar-text: var(--md-sys-color-on-surface) !important;
+      --hilal-sidebar-muted: var(--md-sys-color-on-surface-variant) !important;
+      --hilal-sidebar-border: var(--md-sys-color-outline-variant) !important;
+      --hilal-sidebar-hover: var(--md-sys-color-state-hover) !important;
+      --hilal-sidebar-highlight: var(--md-sys-color-secondary-container) !important;
+      --hilal-sidebar-highlight-text: var(--md-sys-color-on-secondary-container) !important;
+      --hilal-safari-sidebar-bg: var(--md-sys-color-surface-container-low) !important;
+      --hilal-safari-sidebar-bg-strong: var(--md-sys-color-surface-container) !important;
+      --hilal-safari-chrome-bg: var(--md-sys-color-surface-container) !important;
+      --hilal-safari-separator: var(--md-sys-color-outline-variant) !important;
+      --hilal-safari-page-bg: var(--md-sys-color-surface) !important;
+      --hilal-glass-window-background: var(--md-sys-color-surface-container) !important;
+      --hilal-glass-toolbar-background: var(--md-sys-color-surface-container) !important;
+      --hilal-glass-content-background: var(--md-sys-color-surface) !important;
+      --hilal-glass-border-color: transparent !important;
+      --hilal-glass-shadow: none !important;
+      --hilal-content-frame-gap: 0px !important;
+      --hilal-content-frame-radius: 0px !important;
+    }
+  }
+
+  /* --------------------------------------------------------------------------
+     2. Strict Elimination of Glassmorphism, Blurs, and Ghost Borders
+     -------------------------------------------------------------------------- */
+  #main-window,
+  :root,
+  body,
+  #browser,
+  #appcontent,
+  #tabbrowser-tabbox,
+  #tabbrowser-tabpanels,
+  .browserSidebarContainer,
+  .browserStack,
+  .browserContainer,
+  browser[type="content"],
+  #navigator-toolbox,
+  #nav-bar,
+  #TabsToolbar,
+  #sidebar-box,
+  #sidebar-main,
+  sidebar-main {
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+  }
+
+  #hilal-browser-background::before,
+  #hilal-browser-background::after,
+  #hilal-safari-scroll-reflection {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  #main-window,
+  :root {
+    background-color: var(--md-sys-color-surface-container) !important;
+  }
+
+  /* --------------------------------------------------------------------------
+     3. Top App Bar, Horizontal Tabs, & Navigation Toolbar
+     -------------------------------------------------------------------------- */
+  #navigator-toolbox {
+    display: flex !important;
+    flex-direction: column !important;
+    position: static !important;
+    width: 100% !important;
+    top: auto !important;
+    left: auto !important;
+    z-index: 100 !important;
+    pointer-events: auto !important;
+    background-color: var(--md-sys-color-surface-container) !important;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant) !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #titlebar {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Horizontal Tabstrip (Row 1 when horizontal tabs are used) */
+  #TabsToolbar {
+    background-color: var(--md-sys-color-surface-container) !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    border: none !important;
+    box-shadow: none !important;
+    display: flex !important;
+    position: static !important;
+    width: 100% !important;
+    align-items: flex-end !important;
+    padding-inline-end: 8px !important;
+  }
+
+  @media (-moz-platform: macos) {
+    #TabsToolbar:not([collapsed="true"]) {
+      padding-inline-start: 86px !important;
+    }
+  }
+
+  #tabbrowser-tabs[orient="horizontal"] {
+    --tab-min-height: 36px !important;
+    margin-block-end: 0 !important;
+  }
+
+  #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab {
+    height: 36px !important;
+    min-height: 36px !important;
+    margin-inline: 2px !important;
+    padding-inline: 6px !important;
+    font-family: var(--md-sys-font-family) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: var(--md-sys-color-on-surface-variant) !important;
+    border-radius: var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) 0 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    transition: background-color var(--md-sys-motion-duration-short) ease, color var(--md-sys-motion-duration-short) ease !important;
+  }
+
+  #tabbrowser-tabs[orient="horizontal"] .tab-stack {
+    height: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  #tabbrowser-tabs[orient="horizontal"] .tab-background {
+    border-radius: var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) 0 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:hover:not([selected="true"]) {
+    background-color: var(--md-sys-color-state-hover) !important;
+    color: var(--md-sys-color-on-surface) !important;
+  }
+
+  #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[selected="true"] {
+    background-color: var(--md-sys-color-surface-container-high) !important;
+    color: var(--md-sys-color-on-surface) !important;
+    font-weight: 600 !important;
+  }
+
+  #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab .tab-icon-image {
+    width: 16px !important;
+    height: 16px !important;
+    margin-inline-end: 8px !important;
+  }
+
+  #tabbrowser-tabs[orient="horizontal"] .tab-close-button {
+    border-radius: 50% !important;
+    width: 18px !important;
+    height: 18px !important;
+    padding: 2px !important;
+    margin-inline-start: 6px !important;
+    opacity: 0 !important;
+    transition: opacity var(--md-sys-motion-duration-short) ease, background-color var(--md-sys-motion-duration-short) ease !important;
+  }
+
+  #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:hover .tab-close-button,
+  #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[selected="true"] .tab-close-button {
+    opacity: 0.7 !important;
+  }
+
+  #tabbrowser-tabs[orient="horizontal"] .tab-close-button:hover {
+    opacity: 1 !important;
+    background-color: var(--md-sys-color-state-hover) !important;
+  }
+
+  /* Navigation Bar (Row 2 or Main Toolbar) */
+  #nav-bar {
+    background-color: var(--md-sys-color-surface-container) !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding-inline: 12px !important;
+    padding-block: 4px !important;
+    min-height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  /* macOS Traffic Light Spacing */
+  @media (-moz-platform: macos) {
+    /* If horizontal tabs are visible, traffic lights are on the TabsToolbar, so nav-bar needs standard 12px */
+    #TabsToolbar:not([collapsed="true"]) ~ #nav-bar {
+      padding-inline-start: 12px !important;
+    }
+
+    /* If horizontal tabs are hidden (Sidebar mode), nav-bar is at the top-left and needs 88px */
+    #TabsToolbar[collapsed="true"] ~ #nav-bar,
+    :root:not(:has(#TabsToolbar:not([collapsed="true"]))) #nav-bar {
+      padding-inline-start: 88px !important;
+    }
+  }
+
+  /* --------------------------------------------------------------------------
+     4. M3 Omnibox (Search & Address Bar)
+     -------------------------------------------------------------------------- */
+  #urlbar-container {
+    padding-block: 0 !important;
+    height: 38px !important;
+    flex: 1 !important;
+    max-width: 720px !important;
+    margin-inline: auto !important;
+  }
+
+  #urlbar {
+    --urlbar-min-height: 38px !important;
+    --urlbar-height: 38px !important;
+    --urlbar-toolbar-height: 38px !important;
+    font-family: var(--md-sys-font-family) !important;
+    font-size: 13.5px !important;
+    top: 0 !important;
+  }
+
+  #urlbar-background {
+    background-color: var(--md-sys-color-surface-container-high) !important;
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    border: 1px solid transparent !important;
+    box-shadow: none !important;
+    transition:
+      background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized),
+      border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
+  }
+
+  #urlbar:hover:not([focused="true"]) > #urlbar-background {
+    background-color: var(--md-sys-color-surface-container-highest) !important;
+  }
+
+  #urlbar[focused="true"] > #urlbar-background {
+    background-color: var(--md-sys-color-surface-container-lowest) !important;
+    border-color: var(--md-sys-color-primary) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 30%, transparent) !important;
+  }
+
+  #urlbar-input {
+    color: var(--md-sys-color-on-surface) !important;
+    font-family: var(--md-sys-font-family) !important;
+    font-size: 13.5px !important;
+    padding-inline: 8px !important;
+  }
+
+  #urlbar-input::placeholder {
+    color: var(--md-sys-color-on-surface-variant) !important;
+    opacity: 0.75 !important;
+  }
+
+  #identity-box {
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    margin-inline-start: 4px !important;
+    margin-inline-end: 4px !important;
+    padding-inline: 8px 6px !important;
+    background-color: transparent !important;
+    transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
+  }
+
+  #identity-box:hover {
+    background-color: var(--md-sys-color-state-hover) !important;
+  }
+
+  #userContext-indicator,
+  #userContext-icons {
+    display: none !important;
+  }
+
+  .urlbar-page-action,
+  .urlbar-addon-page-action {
+    border-radius: 50% !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    padding: 0 !important;
+    margin-inline: 2px !important;
+    background-color: transparent !important;
+    color: var(--md-sys-color-on-surface-variant) !important;
+    transition: background-color var(--md-sys-motion-duration-short) ease !important;
+  }
+
+  .urlbar-page-action:hover,
+  .urlbar-addon-page-action:hover {
+    background-color: var(--md-sys-color-state-hover) !important;
+    color: var(--md-sys-color-on-surface) !important;
+  }
+
+  /* Omnibox Search Dropdown (#urlbarView) */
+  #urlbar[open] {
+    border-radius: 20px 20px 0 0 !important;
+  }
+
+  #urlbar[open] > #urlbar-background {
+    border-radius: 20px 20px 0 0 !important;
+    background-color: var(--md-sys-color-surface-container-high) !important;
+    border: 1px solid var(--md-sys-color-outline-variant) !important;
+    border-bottom: none !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .urlbarView {
+    background-color: var(--md-sys-color-surface-container-high) !important;
+    border: 1px solid var(--md-sys-color-outline-variant) !important;
+    border-top: 1px solid var(--md-sys-color-outline-variant) !important;
+    border-radius: 0 0 20px 20px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+    margin-inline: 0 !important;
+    padding: 6px 8px !important;
+  }
+
+  .urlbarView-row {
+    border-radius: var(--md-sys-shape-corner-medium) !important;
+    margin: 2px 4px !important;
+    padding: 8px 12px !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    transition: background-color var(--md-sys-motion-duration-short) ease !important;
+  }
+
+  .urlbarView-row:hover,
+  .urlbarView-row[selected] {
+    background-color: var(--md-sys-color-state-hover) !important;
+  }
+
+  .urlbarView-row[selected] {
+    background-color: var(--md-sys-color-secondary-container) !important;
+    color: var(--md-sys-color-on-secondary-container) !important;
+  }
+
+  .urlbarView-title {
+    font-family: var(--md-sys-font-family) !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    color: var(--md-sys-color-on-surface) !important;
+  }
+
+  .urlbarView-url {
+    font-family: var(--md-sys-font-family) !important;
+    font-size: 12.5px !important;
+    color: var(--md-sys-color-primary) !important;
+  }
+
+  /* --------------------------------------------------------------------------
+     5. M3 Circular Action Buttons (Single State Layer)
+     -------------------------------------------------------------------------- */
+  .toolbarbutton-1 > .toolbarbutton-icon,
+  .toolbarbutton-1 > .toolbarbutton-badge-stack,
+  .toolbarbutton-1 > .toolbarbutton-text {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+    padding: 0 !important;
+  }
+
+  .toolbarbutton-1 {
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    background-color: transparent !important;
+    margin-inline: 2px !important;
+    padding: 0 !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: var(--md-sys-color-on-surface-variant) !important;
+    fill: var(--md-sys-color-on-surface-variant) !important;
+    transition:
+      background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized),
+      transform 100ms cubic-bezier(0.2, 0, 0, 1) !important;
+  }
+
+  .toolbarbutton-1 > .toolbarbutton-icon {
+    width: 18px !important;
+    height: 18px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .toolbarbutton-1:hover:not([disabled="true"]) {
+    background-color: var(--md-sys-color-state-hover) !important;
+    color: var(--md-sys-color-on-surface) !important;
+    fill: var(--md-sys-color-on-surface) !important;
+  }
+
+  .toolbarbutton-1:active:not([disabled="true"]) {
+    background-color: var(--md-sys-color-state-active) !important;
+    transform: scale(0.92) !important;
+  }
+
+  /* --------------------------------------------------------------------------
+     6. Navigation Rail & Sidebar Drawer (Vertical Tabs)
+     -------------------------------------------------------------------------- */
+  #sidebar-box,
+  #sidebar-main,
+  #sidebar-main[hilal-sidebar],
+  sidebar-main,
+  html\:sidebar-main {
+    background-color: var(--md-sys-color-surface-container-low) !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    border-inline-end: 1px solid var(--md-sys-color-outline-variant) !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    font-family: var(--md-sys-font-family) !important;
+  }
+
+  /* Pinned Tabs Grid */
+  #pinned-tabs-container,
+  #sidebar-main[hilal-sidebar] #pinned-tabs-container {
+    background: transparent !important;
+    padding: 6px 8px !important;
+  }
+
+  #pinned-tabs-container .tabbrowser-tab,
+  #sidebar-main[hilal-sidebar] #pinned-tabs-container .tabbrowser-tab {
+    border-radius: var(--md-sys-shape-corner-medium) !important;
+    background-color: var(--md-sys-color-surface-container-high) !important;
+    border: 1px solid var(--md-sys-color-outline-variant) !important;
+    box-shadow: none !important;
+    margin: 3px !important;
+    transition: background-color var(--md-sys-motion-duration-short) ease !important;
+  }
+
+  #pinned-tabs-container .tabbrowser-tab:hover:not([selected="true"]),
+  #sidebar-main[hilal-sidebar] #pinned-tabs-container .tabbrowser-tab:hover:not([selected="true"]) {
+    background-color: var(--md-sys-color-surface-container-highest) !important;
+  }
+
+  #pinned-tabs-container .tabbrowser-tab[selected="true"],
+  #sidebar-main[hilal-sidebar] #pinned-tabs-container .tabbrowser-tab[selected="true"] {
+    background-color: var(--md-sys-color-secondary-container) !important;
+    color: var(--md-sys-color-on-secondary-container) !important;
+    border-color: transparent !important;
+  }
+
+  /* Eliminate all magenta, purple, and yellow context lines */
+  .tab-context-line,
+  .tab-line,
+  .tab-bottom-line,
+  #sidebar-main[hilal-sidebar] .tab-context-line,
+  #pinned-tabs-container .tab-context-line {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  /* Vertical Tabs List */
+  #sidebar-main[hilal-sidebar] .tabbrowser-tab {
+    height: 40px !important;
+    margin-inline: 8px !important;
+    margin-block: 2px !important;
+    padding-inline: 12px 6px !important;
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    color: var(--md-sys-color-on-surface-variant) !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    animation: none !important;
+    transition: background-color var(--md-sys-motion-duration-short) ease, color var(--md-sys-motion-duration-short) ease !important;
+  }
+
+  #sidebar-main[hilal-sidebar] .tabbrowser-tab .tab-stack,
+  #sidebar-main[hilal-sidebar] .tabbrowser-tab .tab-background {
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    animation: none !important;
+  }
+
+  #sidebar-main[hilal-sidebar] .tabbrowser-tab:hover:not([selected="true"]) {
+    background-color: var(--md-sys-color-state-hover) !important;
+    color: var(--md-sys-color-on-surface) !important;
+  }
+
+  #sidebar-main[hilal-sidebar] .tabbrowser-tab[selected="true"] {
+    background-color: var(--md-sys-color-secondary-container) !important;
+    color: var(--md-sys-color-on-secondary-container) !important;
+    font-weight: 600 !important;
+  }
+
+  #sidebar-main[hilal-sidebar] .tabbrowser-tab .tab-icon-image {
+    width: 18px !important;
+    height: 18px !important;
+    margin-inline-end: 10px !important;
+    flex-shrink: 0 !important;
+  }
+
+  #sidebar-main[hilal-sidebar] .tab-close-button,
+  .hilal-tab-close {
+    border-radius: 50% !important;
+    width: 20px !important;
+    height: 20px !important;
+    padding: 2px !important;
+    margin-inline-start: auto !important;
+    background-color: transparent !important;
+    color: inherit !important;
+    opacity: 0 !important;
+    transition: opacity var(--md-sys-motion-duration-short) ease, background-color var(--md-sys-motion-duration-short) ease !important;
+  }
+
+  #sidebar-main[hilal-sidebar] .tabbrowser-tab:hover .tab-close-button,
+  #sidebar-main[hilal-sidebar] .tabbrowser-tab[selected="true"] .tab-close-button {
+    opacity: 0.7 !important;
+  }
+
+  #sidebar-main[hilal-sidebar] .tab-close-button:hover,
+  .hilal-tab-close:hover {
+    opacity: 1 !important;
+    background-color: var(--md-sys-color-state-hover) !important;
+  }
+
+  /* Eliminate crescent moon loading artifacts */
+  .tab-throbber,
+  #sidebar-main[hilal-sidebar] .tab-throbber {
+    display: none !important;
+  }
+
+  /* Clean New Tab Button */
+  #tabs-newtab-button,
+  .hilal-new-tab-button {
+    height: 36px !important;
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    margin: 6px 8px !important;
+    padding: 0 16px !important;
+    background-color: var(--md-sys-color-surface-container-high) !important;
+    color: var(--md-sys-color-on-surface) !important;
+    border: none !important;
+    box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    transition: background-color var(--md-sys-motion-duration-short) ease !important;
+  }
+
+  #tabs-newtab-button:hover,
+  .hilal-new-tab-button:hover {
+    background-color: var(--md-sys-color-surface-container-highest) !important;
+  }
+
+  /* --------------------------------------------------------------------------
+     7. Content Canvas (Solid Opaque Web View)
+     -------------------------------------------------------------------------- */
+  :root #browser,
+  :root #tabbrowser-tabbox,
+  :root #tabbrowser-tabpanels,
+  :root .browserSidebarContainer,
+  :root .browserStack,
+  :root .browserContainer,
+  :root browser[type="content"] {
+    background: var(--md-sys-color-surface) !important;
+    background-color: var(--md-sys-color-surface) !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  :root #tabbrowser-tabbox {
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: var(--md-sys-color-surface) !important;
+  }
+
+  :root .browserSidebarContainer {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background-color: var(--md-sys-color-surface) !important;
+  }
+
+  /* --------------------------------------------------------------------------
+     8. Popups, Menus, Panels & Dialogs (M3 Elevation & Headers)
+     -------------------------------------------------------------------------- */
+  menupopup,
+  panel,
+  .panel-arrowcontent,
+  .popup-notification-panel,
+  panelmultiview {
+    background-color: var(--md-sys-color-surface-container-high) !important;
+    color: var(--md-sys-color-on-surface) !important;
+    border-radius: var(--md-sys-shape-corner-large) !important;
+    border: 1px solid var(--md-sys-color-outline-variant) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  .panel-header,
+  .panel-subview-header {
+    border-bottom: 1px solid var(--md-sys-color-outline-variant) !important;
+    padding: 12px 16px !important;
+    font-weight: 600 !important;
+    color: var(--md-sys-color-on-surface) !important;
+  }
+
+  .panel-footer {
+    border-top: 1px solid var(--md-sys-color-outline-variant) !important;
+    padding: 8px 16px !important;
+  }
+
+  menuitem,
+  menumenu {
+    border-radius: var(--md-sys-shape-corner-small) !important;
+    margin: 2px 4px !important;
+    padding: 6px 12px !important;
+    color: var(--md-sys-color-on-surface) !important;
+  }
+
+  menuitem:hover,
+  menumenu:hover,
+  menuitem[_moz-menuactive="true"],
+  menumenu[_moz-menuactive="true"] {
+    background-color: var(--md-sys-color-state-hover) !important;
+  }
+
+  dialog,
+  .dialogBox {
+    border-radius: var(--md-sys-shape-corner-extra-large) !important;
+    background-color: var(--md-sys-color-surface-container-high) !important;
+    border: 1px solid var(--md-sys-color-outline-variant) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+    color: var(--md-sys-color-on-surface) !important;
+  }
+}

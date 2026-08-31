@@ -1,0 +1,347 @@
+diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+--- a/browser/app/profile/firefox.js
++++ b/browser/app/profile/firefox.js
+@@ -3619,7 +3619,8 @@ pref("hilal.privacy.initialized", false);
+ pref("hilal.bangs.custom", "[]");
+ // Hilal Browser - UI Fix Integration
+ pref("hilal.tahoe.enabled", false);
+-pref("hilal.uifix.enabled", true);
++pref("hilal.m3e.enabled", true);
++pref("hilal.uifix.enabled", false);
+ // Theme Default Options
+ pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+ pref("svg.context-properties.content.enabled", true);
+diff --git a/browser/base/content/hilal/HilalBoosts.js b/browser/base/content/hilal/HilalBoosts.js
+--- a/browser/base/content/hilal/HilalBoosts.js
++++ b/browser/base/content/hilal/HilalBoosts.js
+@@ -227,9 +227,11 @@
+                   } else {
+                     actor.sendAsyncMessage("HilalBoosts:ClearBoost");
+                   }
+-                  windowGlobal
+-                    ?.getActor("HilalTahoe")
+-                    ?.sendAsyncMessage("HilalTahoe:UpdateOffsets", {});
++                  if (Services.prefs.getBoolPref("hilal.tahoe.enabled", false)) {
++                    windowGlobal
++                      ?.getActor("HilalTahoe")
++                      ?.sendAsyncMessage("HilalTahoe:UpdateOffsets", {});
++                  }
+                 } catch (e) {}
+               }
+             }
+@@ -462,6 +464,10 @@
+     }
+ 
+     _updateTahoeBoostedPageBackground(boost) {
++      if (!Services.prefs.getBoolPref("hilal.tahoe.enabled", false)) {
++        this._clearTahoeBoostedPageBackground();
++        return;
++      }
+       const docEl = document.documentElement;
+       if (!boost?.enabled || !boost.colorEnabled || !this._isHexColor(boost.accentColor)) {
+         this._clearTahoeBoostedPageBackground();
+diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+--- a/browser/components/preferences/main.js
++++ b/browser/components/preferences/main.js
+@@ -2158,6 +2158,11 @@ var gHilalPane = {
+         if (hilalTahoeCheckbox) {
+           hilalTahoeCheckbox.checked = true;
+         }
++        const hilalM3eCheckbox = document.getElementById("hilalM3eEnabled");
++        if (hilalM3eCheckbox) {
++          hilalM3eCheckbox.checked = false;
++        }
++        Services.prefs.setBoolPref("hilal.m3e.enabled", false);
+         if (hilalPrivacyLevelRadioGroup) {
+           hilalPrivacyLevelRadioGroup.value = "standard";
+         }
+@@ -2167,6 +2172,9 @@ var gHilalPane = {
+     const hilalTahoeCheckbox = /** @type {HTMLInputElement|null} */ (
+       document.getElementById("hilalTahoeEnabled")
+     );
++    const hilalM3eCheckbox = /** @type {HTMLInputElement|null} */ (
++      document.getElementById("hilalM3eEnabled")
++    );
+     const hilalUiFixCheckbox = /** @type {HTMLInputElement|null} */ (
+       document.getElementById("hilalUiFixEnabled")
+     );
+@@ -2245,11 +2253,35 @@ var gHilalPane = {
+           "sidebar.verticalTabs.showHorizontal",
+           isTahoe
+         );
++        if (isTahoe && hilalM3eCheckbox && hilalM3eCheckbox.checked) {
++          hilalM3eCheckbox.checked = false;
++          Services.prefs.setBoolPref("hilal.m3e.enabled", false);
++        }
+         updateHilalCompactOptionsState();
+       });
+     }
+     updateHilalCompactOptionsState();
+ 
++    if (hilalM3eCheckbox) {
++      hilalM3eCheckbox.checked = Services.prefs.getBoolPref(
++        "hilal.m3e.enabled",
++        false
++      );
++      hilalM3eCheckbox.addEventListener("command", function () {
++        const isM3e = hilalM3eCheckbox.checked;
++        Services.prefs.setBoolPref(
++          "hilal.m3e.enabled",
++          isM3e
++        );
++        if (isM3e && hilalTahoeCheckbox && hilalTahoeCheckbox.checked) {
++          hilalTahoeCheckbox.checked = false;
++          Services.prefs.setBoolPref("hilal.tahoe.enabled", false);
++          Services.prefs.setBoolPref("sidebar.verticalTabs.showHorizontal", false);
++        }
++        updateHilalCompactOptionsState();
++      });
++    }
++
+     if (hilalUiFixCheckbox) {
+       hilalUiFixCheckbox.checked = Services.prefs.getBoolPref(
+         "hilal.uifix.enabled",
+diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
+--- a/browser/components/sidebar/sidebar-main.css
++++ b/browser/components/sidebar/sidebar-main.css
+@@ -1243,3 +1243,155 @@
+   flex: 1 1 auto;
+   min-height: 0;
+ }
++
++@media -moz-pref("hilal.m3e.enabled") {
++  :host([hilal-sidebar]) {
++    --hilal-sidebar-background: var(--md-sys-color-surface-container-low, #181c22) !important;
++    --hilal-sidebar-border: var(--md-sys-color-outline-variant, #43474e) !important;
++    --hilal-sidebar-text: var(--md-sys-color-on-surface, #e1e2e9) !important;
++    --hilal-sidebar-muted: var(--md-sys-color-on-surface-variant, #c3c7cf) !important;
++    --hilal-sidebar-hover: var(--md-sys-color-state-hover, rgba(225, 226, 233, 0.08)) !important;
++    --hilal-sidebar-highlight: var(--md-sys-color-secondary-container, #3e4756) !important;
++    --hilal-sidebar-highlight-text: var(--md-sys-color-on-secondary-container, #dae3f5) !important;
++    background-color: var(--md-sys-color-surface-container-low, #181c22) !important;
++    background-image: none !important;
++    backdrop-filter: none !important;
++    box-shadow: none !important;
++    border-radius: 0 !important;
++    margin: 0 !important;
++  }
++
++  .hilal-sidebar-layout {
++    background: transparent !important;
++    padding-block-start: var(--hilal-sidebar-top-padding, 0px) !important;
++  }
++
++  .hilal-workspace-rail {
++    background-color: var(--md-sys-color-surface-container, #1c2027) !important;
++    border-inline-end: 1px solid var(--md-sys-color-outline-variant, #43474e) !important;
++    flex: 0 0 68px !important;
++    min-inline-size: 68px !important;
++    padding: var(--hilal-sidebar-top-padding-inner, 16px) 8px 10px 8px !important;
++  }
++
++  .hilal-workspace-button {
++    block-size: 32px !important;
++    inline-size: 44px !important;
++    flex: 0 0 32px !important;
++    border-radius: 16px !important;
++    margin: 4px auto !important;
++    background: transparent !important;
++    border: none !important;
++    color: var(--md-sys-color-on-surface-variant, #c3c7cf) !important;
++    transition: background-color 150ms cubic-bezier(0.2, 0, 0, 1), color 150ms cubic-bezier(0.2, 0, 0, 1) !important;
++  }
++
++  .hilal-workspace-button:hover {
++    background-color: var(--md-sys-color-state-hover, rgba(225, 226, 233, 0.08)) !important;
++    color: var(--md-sys-color-on-surface, #e1e2e9) !important;
++  }
++
++  .hilal-workspace-active {
++    background-color: var(--md-sys-color-secondary-container, #3e4756) !important;
++    color: var(--md-sys-color-on-secondary-container, #dae3f5) !important;
++    border: none !important;
++  }
++
++  .hilal-workspace-add-wrap {
++    border-block-start: 1px solid var(--md-sys-color-outline-variant, #43474e) !important;
++    padding-block-start: 8px !important;
++  }
++
++  #hilal-workspace-add {
++    block-size: 32px !important;
++    inline-size: 32px !important;
++    flex: 0 0 32px !important;
++    border-radius: 50% !important;
++    border: none !important;
++    border-style: none !important;
++    background-color: var(--md-sys-color-surface-container-high, #262b32) !important;
++    color: var(--md-sys-color-on-surface-variant, #c3c7cf) !important;
++    transition: background-color 150ms cubic-bezier(0.2, 0, 0, 1) !important;
++  }
++
++  #hilal-workspace-add:hover {
++    background-color: var(--md-sys-color-surface-container-highest, #31363e) !important;
++    color: var(--md-sys-color-on-surface, #e1e2e9) !important;
++  }
++
++  .hilal-sidebar-panel {
++    background: transparent !important;
++    padding: var(--hilal-sidebar-top-padding-inner, 16px) 12px 0 !important;
++  }
++
++  .hilal-panel-header {
++    min-block-size: 36px !important;
++    margin-block-end: 8px !important;
++  }
++
++  .hilal-panel-title {
++    font-size: 14px !important;
++    font-weight: 600 !important;
++    color: var(--md-sys-color-on-surface, #e1e2e9) !important;
++  }
++
++  #hilal-sidebar-search {
++    border-radius: 9999px !important;
++    background-color: var(--md-sys-color-surface-container-high, #262b32) !important;
++    border: 1px solid var(--md-sys-color-outline-variant, #43474e) !important;
++    padding: 6px 12px !important;
++    color: var(--md-sys-color-on-surface, #e1e2e9) !important;
++    font-size: 13px !important;
++    outline: none !important;
++    box-shadow: none !important;
++  }
++
++  #hilal-sidebar-search:focus {
++    border-color: var(--md-sys-color-primary, #a8c7fa) !important;
++    background-color: var(--md-sys-color-surface-container-lowest, #0b0e14) !important;
++  }
++
++  .tab-context-line,
++  .tab-line,
++  .tab-bottom-line {
++    display: none !important;
++    opacity: 0 !important;
++    visibility: hidden !important;
++  }
++
++  .hilal-icon-button {
++    border-radius: 50% !important;
++    block-size: 28px !important;
++    inline-size: 28px !important;
++    background: transparent !important;
++    border: none !important;
++    color: var(--md-sys-color-on-surface-variant, #c3c7cf) !important;
++    transition: background-color 150ms cubic-bezier(0.2, 0, 0, 1) !important;
++  }
++
++  .hilal-icon-button:hover {
++    background-color: var(--md-sys-color-state-hover, rgba(225, 226, 233, 0.08)) !important;
++    color: var(--md-sys-color-on-surface, #e1e2e9) !important;
++  }
++
++  .hilal-footer-row,
++  .hilal-row {
++    border-radius: 8px !important;
++    block-size: 36px !important;
++    margin-block: 2px !important;
++    padding-inline: 12px !important;
++    background: transparent !important;
++    border: none !important;
++    color: var(--md-sys-color-on-surface-variant, #c3c7cf) !important;
++    font-size: 13px !important;
++    font-weight: 500 !important;
++    transition: background-color 150ms cubic-bezier(0.2, 0, 0, 1), color 150ms cubic-bezier(0.2, 0, 0, 1) !important;
++  }
++
++  .hilal-footer-row:hover,
++  .hilal-row:hover {
++    background-color: var(--md-sys-color-state-hover, rgba(225, 226, 233, 0.08)) !important;
++    color: var(--md-sys-color-on-surface, #e1e2e9) !important;
++  }
++}
++
+diff --git a/browser/extensions/newtab/css/activity-stream.css b/browser/extensions/newtab/css/activity-stream.css
+--- a/browser/extensions/newtab/css/activity-stream.css
++++ b/browser/extensions/newtab/css/activity-stream.css
+@@ -16081,3 +16081,68 @@ hr {
+ .nova-enabled .ds-card.ds-spoc .story-footer .ds-spoc-sponsored {
+   font-size: var(--font-size-small);
+ }
++
++@media -moz-pref("hilal.m3e.enabled") {
++  body,
++  .activity-stream {
++    background-color: var(--md-sys-color-surface, #101319) !important;
++    color: var(--md-sys-color-on-surface, #e1e2e9) !important;
++    font-family: "Roboto Flex", system-ui, -apple-system, sans-serif !important;
++  }
++
++  .search-wrapper .search-handoff-button,
++  .search-wrapper .search-inner-wrapper,
++  .search-inner-wrapper {
++    background-color: var(--md-sys-color-surface-container-high, #262b32) !important;
++    border-radius: 9999px !important;
++    border: 1px solid var(--md-sys-color-outline-variant, #43474e) !important;
++    box-shadow: none !important;
++    height: 52px !important;
++    transition: background-color 150ms ease, border-color 150ms ease !important;
++  }
++
++  .search-wrapper .search-handoff-button:hover,
++  .search-inner-wrapper:hover {
++    background-color: var(--md-sys-color-surface-container-highest, #31363e) !important;
++  }
++
++  .search-wrapper input {
++    color: var(--md-sys-color-on-surface, #e1e2e9) !important;
++    font-family: "Roboto Flex", system-ui, -apple-system, sans-serif !important;
++    font-size: 15px !important;
++  }
++
++  .top-site-outer {
++    border-radius: 16px !important;
++    padding: 12px !important;
++    transition: transform 150ms ease, background-color 150ms ease !important;
++  }
++
++  .top-site-outer:hover {
++    background-color: var(--md-sys-color-surface-container-high, #262b32) !important;
++    transform: translateY(-2px) !important;
++  }
++
++  .top-site-outer .tile {
++    border-radius: 14px !important;
++    background-color: var(--md-sys-color-surface-container-low, #181c22) !important;
++    border: 1px solid var(--md-sys-color-outline-variant, #43474e) !important;
++    box-shadow: none !important;
++    width: 56px !important;
++    height: 56px !important;
++  }
++
++  .top-site-outer .title {
++    color: var(--md-sys-color-on-surface, #e1e2e9) !important;
++    font-size: 12.5px !important;
++    font-weight: 500 !important;
++    margin-top: 8px !important;
++  }
++
++  .ds-card {
++    border-radius: 16px !important;
++    background-color: var(--md-sys-color-surface-container-low, #181c22) !important;
++    border: 1px solid var(--md-sys-color-outline-variant, #43474e) !important;
++  }
++}
++
+diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
+--- a/browser/locales/en-US/browser/preferences/preferences.ftl
++++ b/browser/locales/en-US/browser/preferences/preferences.ftl
+@@ -2847,6 +2847,9 @@ hilal-uifix-header = UI Enhancements
+ hilal-tahoe-enabled =
+     .label = Enable Tahoe Safari shell (Experimental / Deneysel)
+ hilal-tahoe-enabled-desc = Experimental macOS Tahoe & Safari Liquid Glass shell with combined top horizontal tab strip and vertical sidebar. (Deneysel özellik: Çift sekme düzeni ve Safari cam arayüzü sağlar.)
++hilal-m3e-enabled =
++    .label = Enable Material 3 Expressive shell (M3E)
++hilal-m3e-enabled-desc = Google Material 3 Expressive (Material You) shell with Chrome-style rounded pill Omnibox, circular action buttons, and tonal elevation.
+ hilal-uifix-enabled =
+     .label = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
+ hilal-uifix-connect-to-window =

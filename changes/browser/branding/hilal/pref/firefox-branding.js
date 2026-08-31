@@ -39,13 +39,15 @@ pref("sidebar.verticalTabs", true);
 pref("sidebar.verticalTabs.showHorizontal", false);
 pref("sidebar.visibility", "always-show");
 pref("hilal.tahoe.enabled", false);
+pref("hilal.m3e.enabled", true);
+pref("hilal.uifix.enabled", false);
 
-// Use transparent macOS chrome surfaces for Hilal's Tahoe-style glass look.
-pref("hilal.browser.transparent-chrome.enabled", true);
-pref("browser.tabs.allow_transparent_browser", true);
-pref("widget.macos.sidebar-blend-mode.behind-window", true);
-pref("widget.macos.titlebar-blend-mode.behind-window", true);
-pref("gfx.webrender.opaque-backdrop-fallback", false);
+// Use transparent macOS chrome surfaces for Hilal's Tahoe-style glass look (disabled in M3E).
+pref("hilal.browser.transparent-chrome.enabled", false);
+pref("browser.tabs.allow_transparent_browser", false);
+pref("widget.macos.sidebar-blend-mode.behind-window", false);
+pref("widget.macos.titlebar-blend-mode.behind-window", false);
+pref("gfx.webrender.opaque-backdrop-fallback", true);
 
 
 // Privacy-first Hilal defaults, informed by Betterfox and arkenfox.

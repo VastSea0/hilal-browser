@@ -165,3 +165,7 @@ reason = "Hilal boosts feature (Site Customizer and Element Zapper)"
 [[patches]]
 path   = "browser/tahoe-safari-shell.patch"
 reason = "Tahoe Safari-inspired shell preference and sidebar refinements"
+
+[[patches]]
+path   = "browser/material3-expressive-shell.patch"
+reason = "Material 3 Expressive (M3E) shell preferences and layout integration"

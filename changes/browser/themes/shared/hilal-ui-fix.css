@@ -1,5 +1,4 @@
-/* Hilal Browser UI fix entry — gates Firefox-UI-Fix behind hilal.uifix.enabled.
- * Upstream: https://github.com/black7375/Firefox-UI-Fix (MPL 2.0)
+/* Hilal Browser UI fix entry
+ * Note: firefox-ui-fix.css (31k lines of Lepton layout hacks) disabled to prevent titlebar/tabstrip breakage.
  */
-@import url("chrome://browser/skin/firefox-ui-fix.css");
 @import url("chrome://browser/skin/hilal-ui-overrides.css");
