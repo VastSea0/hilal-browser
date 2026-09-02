@@ -263,13 +263,18 @@ body {
     }
 
     /* Don't make the toolbox vibrant when in full-screen. macOS fullscreen has a
-     * native titlebar outside of the window (revealed on hover) anyways. */
+     * native titlebar outside of the window (revealed on hover) anyways.
+     * Also skip vibrancy in M3E mode — solid surfaces only. */
     :root[customtitlebar]:not([lwtheme], [macOSNativeFullscreen]) & {
-      background-color: transparent;
+      @media not -moz-pref("hilal.m3e.enabled") {
+        background-color: transparent;
+      }
 
       &::after {
-        -moz-default-appearance: -moz-window-titlebar;
-        appearance: auto;
+        @media not -moz-pref("hilal.m3e.enabled") {
+          -moz-default-appearance: -moz-window-titlebar;
+          appearance: auto;
+        }
       }
     }
   }
@@ -297,7 +302,7 @@ body {
   }
 }
 
-@media (-moz-platform: macos) {
+@media (-moz-platform: macos) and (not -moz-pref("hilal.m3e.enabled")) {
   :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) {
     background: transparent !important;
   }

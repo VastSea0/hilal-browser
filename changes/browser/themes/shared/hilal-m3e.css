@@ -4,71 +4,56 @@
 
 /* ==========================================================================
    Hilal Browser — Material 3 Expressive (M3E) Complete Shell
-   Unified Design Tokens from www (Hilal Web Core) & Google M3E Specs
-   Strict Enforcement: Pure Tonal Surfaces, Zero Glassmorphism, Unified Layout
+   Pure M3E tonal surfaces. Zero glassmorphism. Zero gradient.
+   Single-layer hover state. Unified surface colors across all chrome.
    ========================================================================== */
 
 @media -moz-pref("hilal.m3e.enabled") {
+
   /* --------------------------------------------------------------------------
-     1. M3E Design Tokens (Directly Aligned with Hilal www/src/index.css)
+     1. M3E Design Tokens
      -------------------------------------------------------------------------- */
   :root {
-    /* M3 Typography Scale */
+    /* Typography */
     --md-sys-font-family: "Roboto Flex", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    --md-sys-typescale-body-font: var(--md-sys-font-family);
-    --md-sys-typescale-label-font: var(--md-sys-font-family);
 
-    /* M3 Corner Shapes (Expressive Scale) */
+    /* Shape scale */
     --md-sys-shape-corner-none: 0px;
     --md-sys-shape-corner-extra-small: 4px;
     --md-sys-shape-corner-small: 8px;
     --md-sys-shape-corner-medium: 12px;
     --md-sys-shape-corner-large: 16px;
-    --md-sys-shape-corner-large-increased: 20px;
     --md-sys-shape-corner-extra-large: 28px;
     --md-sys-shape-corner-full: 9999px;
 
-    /* M3 Motion & Transitions */
+    /* Motion */
     --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
-    --md-sys-motion-easing-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
     --md-sys-motion-duration-short: 150ms;
     --md-sys-motion-duration-medium: 250ms;
 
-    /* M3 Light Palette */
+    /* Light palette */
     --md-sys-color-surface: #f8f9ff;
-    --md-sys-color-surface-dim: #d9dae1;
-    --md-sys-color-surface-bright: #f8f9ff;
     --md-sys-color-surface-container-lowest: #ffffff;
     --md-sys-color-surface-container-low: #f2f3fa;
     --md-sys-color-surface-container: #eceef5;
     --md-sys-color-surface-container-high: #e6e8ef;
     --md-sys-color-surface-container-highest: #e0e2e9;
-    
     --md-sys-color-on-surface: #181c22;
     --md-sys-color-on-surface-variant: #43474e;
-    
     --md-sys-color-primary: #0b57d0;
     --md-sys-color-on-primary: #ffffff;
     --md-sys-color-primary-container: #d3e3fd;
     --md-sys-color-on-primary-container: #041e49;
-    
     --md-sys-color-secondary: #555f6f;
     --md-sys-color-on-secondary: #ffffff;
     --md-sys-color-secondary-container: #d9e3f5;
     --md-sys-color-on-secondary-container: #121c2a;
-    
-    --md-sys-color-tertiary: #6f5575;
-    --md-sys-color-on-tertiary: #ffffff;
-    --md-sys-color-tertiary-container: #f9d8fe;
-    --md-sys-color-on-tertiary-container: #28132f;
-    
     --md-sys-color-outline: #73777f;
     --md-sys-color-outline-variant: #c3c7cf;
-
     --md-sys-color-state-hover: rgba(24, 28, 34, 0.08);
     --md-sys-color-state-active: rgba(24, 28, 34, 0.14);
 
-    /* Firefox Variables Override */
+    /* Override Firefox variables — all chrome uses surface-container */
     --lwt-accent-color: var(--md-sys-color-surface-container) !important;
     --toolbar-bgcolor: var(--md-sys-color-surface-container) !important;
     --toolbar-color: var(--md-sys-color-on-surface) !important;
@@ -77,25 +62,33 @@
     --toolbar-field-focus-background-color: var(--md-sys-color-surface-container-lowest) !important;
     --toolbar-field-focus-color: var(--md-sys-color-on-surface) !important;
     --toolbar-field-border-color: transparent !important;
+    /* Fix the teal/cyan focus outline — use M3E primary */
+    --focus-outline-color: var(--md-sys-color-primary) !important;
+    --toolbar-field-border-color-focus: var(--md-sys-color-primary) !important;
+    /* Separator between chrome and content — invisible */
+    --chrome-content-separator-color: transparent !important;
+    /* Toolbar button single-layer hover — upstream child layer must be transparent */
+    --toolbarbutton-background-color-hover: transparent !important;
+    --toolbarbutton-background-color-active: transparent !important;
+    --toolbarbutton-outline-color-hover: transparent !important;
+    --toolbarbutton-outline-color-active: transparent !important;
+    --toolbarbutton-outline-color-selected: transparent !important;
     --toolbarbutton-icon-fill: var(--md-sys-color-on-surface-variant) !important;
     --toolbarbutton-hover-background: transparent !important;
     --toolbarbutton-active-background: transparent !important;
+    /* Sidebar */
     --sidebar-background-color: var(--md-sys-color-surface-container-low) !important;
     --sidebar-text-color: var(--md-sys-color-on-surface) !important;
-    --sidebar-border-color: var(--md-sys-color-outline-variant) !important;
-
+    --sidebar-border-color: transparent !important;
+    /* Hilal sidebar vars */
     --hilal-sidebar-bg: var(--md-sys-color-surface-container-low) !important;
     --hilal-sidebar-text: var(--md-sys-color-on-surface) !important;
     --hilal-sidebar-muted: var(--md-sys-color-on-surface-variant) !important;
-    --hilal-sidebar-border: var(--md-sys-color-outline-variant) !important;
+    --hilal-sidebar-border: transparent !important;
     --hilal-sidebar-hover: var(--md-sys-color-state-hover) !important;
     --hilal-sidebar-highlight: var(--md-sys-color-secondary-container) !important;
     --hilal-sidebar-highlight-text: var(--md-sys-color-on-secondary-container) !important;
-    --hilal-safari-sidebar-bg: var(--md-sys-color-surface-container-low) !important;
-    --hilal-safari-sidebar-bg-strong: var(--md-sys-color-surface-container) !important;
-    --hilal-safari-chrome-bg: var(--md-sys-color-surface-container) !important;
-    --hilal-safari-separator: var(--md-sys-color-outline-variant) !important;
-    --hilal-safari-page-bg: var(--md-sys-color-surface) !important;
+    /* Glass vars disabled */
     --hilal-glass-window-background: var(--md-sys-color-surface-container) !important;
     --hilal-glass-toolbar-background: var(--md-sys-color-surface-container) !important;
     --hilal-glass-content-background: var(--md-sys-color-surface) !important;
@@ -103,44 +96,35 @@
     --hilal-glass-shadow: none !important;
     --hilal-content-frame-gap: 0px !important;
     --hilal-content-frame-radius: 0px !important;
+    /* Tab drag visual indicator uses M3E primary, not cyan */
+    --tab-dragover-outline-color: var(--md-sys-color-primary) !important;
   }
 
-  /* M3 Dark Palette (Canonical from www) */
   @media (prefers-color-scheme: dark) {
     :root {
+      /* Dark palette */
       --md-sys-color-surface: #101319;
-      --md-sys-color-surface-dim: #0a0d13;
-      --md-sys-color-surface-bright: #363940;
       --md-sys-color-surface-container-lowest: #0b0e14;
       --md-sys-color-surface-container-low: #181c22;
       --md-sys-color-surface-container: #1c2027;
       --md-sys-color-surface-container-high: #262b32;
       --md-sys-color-surface-container-highest: #31363e;
-      
       --md-sys-color-on-surface: #e1e2e9;
       --md-sys-color-on-surface-variant: #c3c7cf;
-      
       --md-sys-color-primary: #a8c7fa;
       --md-sys-color-on-primary: #042f66;
       --md-sys-color-primary-container: #0842a0;
       --md-sys-color-on-primary-container: #d3e3fd;
-      
       --md-sys-color-secondary: #bec7d8;
       --md-sys-color-on-secondary: #28313e;
       --md-sys-color-secondary-container: #3e4756;
       --md-sys-color-on-secondary-container: #dae3f5;
-      
-      --md-sys-color-tertiary: #dcbce1;
-      --md-sys-color-on-tertiary: #3e2845;
-      --md-sys-color-tertiary-container: #563e5d;
-      --md-sys-color-on-tertiary-container: #f9d8fe;
-      
       --md-sys-color-outline: #8c9199;
       --md-sys-color-outline-variant: #43474e;
-
       --md-sys-color-state-hover: rgba(225, 226, 233, 0.08);
       --md-sys-color-state-active: rgba(225, 226, 233, 0.14);
 
+      /* Re-apply all Firefox overrides for dark */
       --lwt-accent-color: var(--md-sys-color-surface-container) !important;
       --toolbar-bgcolor: var(--md-sys-color-surface-container) !important;
       --toolbar-color: var(--md-sys-color-on-surface) !important;
@@ -148,34 +132,31 @@
       --toolbar-field-color: var(--md-sys-color-on-surface) !important;
       --toolbar-field-focus-background-color: var(--md-sys-color-surface-container-lowest) !important;
       --toolbar-field-focus-color: var(--md-sys-color-on-surface) !important;
+      --toolbar-field-border-color: transparent !important;
+      --focus-outline-color: var(--md-sys-color-primary) !important;
+      --toolbar-field-border-color-focus: var(--md-sys-color-primary) !important;
+      --chrome-content-separator-color: transparent !important;
+      --toolbarbutton-background-color-hover: transparent !important;
+      --toolbarbutton-background-color-active: transparent !important;
+      --toolbarbutton-outline-color-hover: transparent !important;
+      --toolbarbutton-outline-color-active: transparent !important;
+      --toolbarbutton-outline-color-selected: transparent !important;
+      --toolbarbutton-hover-background: transparent !important;
+      --toolbarbutton-active-background: transparent !important;
       --sidebar-background-color: var(--md-sys-color-surface-container-low) !important;
       --sidebar-text-color: var(--md-sys-color-on-surface) !important;
-      --sidebar-border-color: var(--md-sys-color-outline-variant) !important;
-
+      --sidebar-border-color: transparent !important;
       --hilal-sidebar-bg: var(--md-sys-color-surface-container-low) !important;
-      --hilal-sidebar-text: var(--md-sys-color-on-surface) !important;
-      --hilal-sidebar-muted: var(--md-sys-color-on-surface-variant) !important;
-      --hilal-sidebar-border: var(--md-sys-color-outline-variant) !important;
+      --hilal-sidebar-border: transparent !important;
       --hilal-sidebar-hover: var(--md-sys-color-state-hover) !important;
       --hilal-sidebar-highlight: var(--md-sys-color-secondary-container) !important;
       --hilal-sidebar-highlight-text: var(--md-sys-color-on-secondary-container) !important;
-      --hilal-safari-sidebar-bg: var(--md-sys-color-surface-container-low) !important;
-      --hilal-safari-sidebar-bg-strong: var(--md-sys-color-surface-container) !important;
-      --hilal-safari-chrome-bg: var(--md-sys-color-surface-container) !important;
-      --hilal-safari-separator: var(--md-sys-color-outline-variant) !important;
-      --hilal-safari-page-bg: var(--md-sys-color-surface) !important;
-      --hilal-glass-window-background: var(--md-sys-color-surface-container) !important;
-      --hilal-glass-toolbar-background: var(--md-sys-color-surface-container) !important;
-      --hilal-glass-content-background: var(--md-sys-color-surface) !important;
-      --hilal-glass-border-color: transparent !important;
-      --hilal-glass-shadow: none !important;
-      --hilal-content-frame-gap: 0px !important;
-      --hilal-content-frame-radius: 0px !important;
+      --tab-dragover-outline-color: var(--md-sys-color-primary) !important;
     }
   }
 
   /* --------------------------------------------------------------------------
-     2. Strict Elimination of Glassmorphism, Blurs, and Ghost Borders
+     2. Eliminate all glassmorphism, blurs, gradients, ghost borders
      -------------------------------------------------------------------------- */
   #main-window,
   :root,
@@ -215,19 +196,16 @@
   }
 
   /* --------------------------------------------------------------------------
-     3. Top App Bar, Horizontal Tabs, & Navigation Toolbar
+     3. Navigator Toolbox — unified column layout, no separating border
      -------------------------------------------------------------------------- */
   #navigator-toolbox {
     display: flex !important;
     flex-direction: column !important;
     position: static !important;
     width: 100% !important;
-    top: auto !important;
-    left: auto !important;
-    z-index: 100 !important;
-    pointer-events: auto !important;
     background-color: var(--md-sys-color-surface-container) !important;
-    border-bottom: 1px solid var(--md-sys-color-outline-variant) !important;
+    /* No bottom border — content separator is transparent via token */
+    border: none !important;
     box-shadow: none !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -242,7 +220,22 @@
     background: transparent !important;
   }
 
-  /* Horizontal Tabstrip (Row 1 when horizontal tabs are used) */
+  /* Bookmarks toolbar — hide in M3E mode */
+  #PersonalToolbar,
+  #PersonalToolbar[collapsed="true"],
+  #PersonalToolbar:not([collapsed]) {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+  }
+
+  /* --------------------------------------------------------------------------
+     4. Horizontal Tabs (Row 1)
+     -------------------------------------------------------------------------- */
   #TabsToolbar {
     background-color: var(--md-sys-color-surface-container) !important;
     min-height: 44px !important;
@@ -294,6 +287,9 @@
     border: none !important;
     box-shadow: none !important;
     background: transparent !important;
+    /* Disable pop animation on tab-background so it does not interfere with hover */
+    animation: none !important;
+    transform: none !important;
   }
 
   #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:hover:not([selected="true"]) {
@@ -307,7 +303,7 @@
     font-weight: 600 !important;
   }
 
-  #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab .tab-icon-image {
+  #tabbrowser-tabs[orient="horizontal"] .tab-icon-image {
     width: 16px !important;
     height: 16px !important;
     margin-inline-end: 8px !important;
@@ -319,6 +315,7 @@
     height: 18px !important;
     padding: 2px !important;
     margin-inline-start: 6px !important;
+    background-color: transparent !important;
     opacity: 0 !important;
     transition: opacity var(--md-sys-motion-duration-short) ease, background-color var(--md-sys-motion-duration-short) ease !important;
   }
@@ -333,7 +330,9 @@
     background-color: var(--md-sys-color-state-hover) !important;
   }
 
-  /* Navigation Bar (Row 2 or Main Toolbar) */
+  /* --------------------------------------------------------------------------
+     5. Navigation Bar / Omnibox Row (Row 2 or sole toolbar in vertical tab mode)
+     -------------------------------------------------------------------------- */
   #nav-bar {
     background-color: var(--md-sys-color-surface-container) !important;
     box-shadow: none !important;
@@ -346,14 +345,12 @@
     gap: 4px !important;
   }
 
-  /* macOS Traffic Light Spacing */
   @media (-moz-platform: macos) {
-    /* If horizontal tabs are visible, traffic lights are on the TabsToolbar, so nav-bar needs standard 12px */
+    /* Horizontal tabs visible: traffic lights live in TabsToolbar, nav-bar needs standard padding */
     #TabsToolbar:not([collapsed="true"]) ~ #nav-bar {
       padding-inline-start: 12px !important;
     }
-
-    /* If horizontal tabs are hidden (Sidebar mode), nav-bar is at the top-left and needs 88px */
+    /* Vertical tab mode: nav-bar is leftmost, needs traffic light spacing */
     #TabsToolbar[collapsed="true"] ~ #nav-bar,
     :root:not(:has(#TabsToolbar:not([collapsed="true"]))) #nav-bar {
       padding-inline-start: 88px !important;
@@ -361,7 +358,7 @@
   }
 
   /* --------------------------------------------------------------------------
-     4. M3 Omnibox (Search & Address Bar)
+     6. M3 Omnibox (URL bar)
      -------------------------------------------------------------------------- */
   #urlbar-container {
     padding-block: 0 !important;
@@ -383,11 +380,11 @@
   #urlbar-background {
     background-color: var(--md-sys-color-surface-container-high) !important;
     border-radius: var(--md-sys-shape-corner-full) !important;
-    border: 1px solid transparent !important;
+    border: none !important;
+    outline: none !important;
     box-shadow: none !important;
     transition:
-      background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized),
-      border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
+      background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
   }
 
   #urlbar:hover:not([focused="true"]) > #urlbar-background {
@@ -396,8 +393,16 @@
 
   #urlbar[focused="true"] > #urlbar-background {
     background-color: var(--md-sys-color-surface-container-lowest) !important;
-    border-color: var(--md-sys-color-primary) !important;
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 30%, transparent) !important;
+    /* M3E primary focus ring, no cyan */
+    outline: 2px solid var(--md-sys-color-primary) !important;
+    outline-offset: -2px !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Suppress upstream teal focus outline on .urlbar wrapper itself */
+  #urlbar[focused]:not([suppress-focus-border]) > #urlbar-background {
+    outline: 2px solid var(--md-sys-color-primary) !important;
   }
 
   #urlbar-input {
@@ -450,23 +455,20 @@
     color: var(--md-sys-color-on-surface) !important;
   }
 
-  /* Omnibox Search Dropdown (#urlbarView) */
-  #urlbar[open] {
-    border-radius: 20px 20px 0 0 !important;
-  }
-
+  /* Omnibox dropdown */
   #urlbar[open] > #urlbar-background {
     border-radius: 20px 20px 0 0 !important;
     background-color: var(--md-sys-color-surface-container-high) !important;
     border: 1px solid var(--md-sys-color-outline-variant) !important;
     border-bottom: none !important;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+    outline: none !important;
   }
 
   .urlbarView {
     background-color: var(--md-sys-color-surface-container-high) !important;
     border: 1px solid var(--md-sys-color-outline-variant) !important;
-    border-top: 1px solid var(--md-sys-color-outline-variant) !important;
+    border-top: none !important;
     border-radius: 0 0 20px 20px !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
     margin-inline: 0 !important;
@@ -483,8 +485,7 @@
     transition: background-color var(--md-sys-motion-duration-short) ease !important;
   }
 
-  .urlbarView-row:hover,
-  .urlbarView-row[selected] {
+  .urlbarView-row:hover {
     background-color: var(--md-sys-color-state-hover) !important;
   }
 
@@ -507,20 +508,13 @@
   }
 
   /* --------------------------------------------------------------------------
-     5. M3 Circular Action Buttons (Single State Layer)
+     7. Toolbar Buttons — single-layer M3E hover (parent only)
+     The upstream toolbarbuttons.css applies hover to .toolbarbutton-icon child.
+     We kill that via --toolbarbutton-background-color-hover: transparent (set in :root).
+     The visible hover ring lives here on the parent .toolbarbutton-1.
      -------------------------------------------------------------------------- */
-  .toolbarbutton-1 > .toolbarbutton-icon,
-  .toolbarbutton-1 > .toolbarbutton-badge-stack,
-  .toolbarbutton-1 > .toolbarbutton-text {
-    background: transparent !important;
-    background-color: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
-    outline: none !important;
-    padding: 0 !important;
-  }
-
   .toolbarbutton-1 {
+    appearance: none !important;
     border-radius: var(--md-sys-shape-corner-full) !important;
     border: none !important;
     box-shadow: none !important;
@@ -537,9 +531,19 @@
     justify-content: center !important;
     color: var(--md-sys-color-on-surface-variant) !important;
     fill: var(--md-sys-color-on-surface-variant) !important;
-    transition:
-      background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized),
-      transform 100ms cubic-bezier(0.2, 0, 0, 1) !important;
+    transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
+  }
+
+  /* Zero out any child background/outline from upstream */
+  .toolbarbutton-1 > .toolbarbutton-icon,
+  .toolbarbutton-1 > .toolbarbutton-badge-stack,
+  .toolbarbutton-1 > .toolbarbutton-text {
+    background: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+    padding: 0 !important;
   }
 
   .toolbarbutton-1 > .toolbarbutton-icon {
@@ -549,25 +553,24 @@
     margin: 0 !important;
   }
 
+  /* Single hover ring on parent */
   .toolbarbutton-1:hover:not([disabled="true"]) {
     background-color: var(--md-sys-color-state-hover) !important;
     color: var(--md-sys-color-on-surface) !important;
     fill: var(--md-sys-color-on-surface) !important;
   }
 
-  .toolbarbutton-1:active:not([disabled="true"]) {
+  .toolbarbutton-1:active:not([disabled="true"]),
+  .toolbarbutton-1[open="true"]:not([disabled="true"]) {
     background-color: var(--md-sys-color-state-active) !important;
-    transform: scale(0.92) !important;
   }
 
   /* --------------------------------------------------------------------------
-     6. Navigation Rail & Sidebar Drawer (Vertical Tabs)
+     8. Sidebar & Navigation Rail — unified surface, no borders
      -------------------------------------------------------------------------- */
-  #sidebar-box,
   #sidebar-main,
-  #sidebar-main[hilal-sidebar],
   sidebar-main,
-  html\:sidebar-main {
+  #sidebar-box {
     background-color: var(--md-sys-color-surface-container-low) !important;
     background-image: none !important;
     backdrop-filter: none !important;
@@ -575,22 +578,48 @@
     box-shadow: none !important;
     border-radius: 0 !important;
     margin: 0 !important;
-    border-inline-end: 1px solid var(--md-sys-color-outline-variant) !important;
-    border-top: none !important;
-    border-bottom: none !important;
-    border-left: none !important;
+    /* No separating border */
+    border-inline-end: none !important;
+    border: none !important;
     font-family: var(--md-sys-font-family) !important;
   }
 
-  /* Pinned Tabs Grid */
+  /* The inline sidebar panel inherits same color */
+  #sidebar {
+    background-color: var(--md-sys-color-surface-container-low) !important;
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* Splitter between sidebar and content — invisible */
+  .sidebar-splitter {
+    background-color: transparent !important;
+    border: none !important;
+    width: 1px !important;
+    min-width: 1px !important;
+  }
+
+  /* --------------------------------------------------------------------------
+     9. Vertical Tabs (Sidebar rail tab list)
+     -------------------------------------------------------------------------- */
+  .tab-context-line,
+  .tab-line,
+  .tab-bottom-line,
+  .tab-throbber {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
   #pinned-tabs-container,
   #sidebar-main[hilal-sidebar] #pinned-tabs-container {
     background: transparent !important;
     padding: 6px 8px !important;
   }
 
-  #pinned-tabs-container .tabbrowser-tab,
-  #sidebar-main[hilal-sidebar] #pinned-tabs-container .tabbrowser-tab {
+  #pinned-tabs-container .tabbrowser-tab {
     border-radius: var(--md-sys-shape-corner-medium) !important;
     background-color: var(--md-sys-color-surface-container-high) !important;
     border: 1px solid var(--md-sys-color-outline-variant) !important;
@@ -599,30 +628,17 @@
     transition: background-color var(--md-sys-motion-duration-short) ease !important;
   }
 
-  #pinned-tabs-container .tabbrowser-tab:hover:not([selected="true"]),
-  #sidebar-main[hilal-sidebar] #pinned-tabs-container .tabbrowser-tab:hover:not([selected="true"]) {
+  #pinned-tabs-container .tabbrowser-tab:hover:not([selected="true"]) {
     background-color: var(--md-sys-color-surface-container-highest) !important;
   }
 
-  #pinned-tabs-container .tabbrowser-tab[selected="true"],
-  #sidebar-main[hilal-sidebar] #pinned-tabs-container .tabbrowser-tab[selected="true"] {
+  #pinned-tabs-container .tabbrowser-tab[selected="true"] {
     background-color: var(--md-sys-color-secondary-container) !important;
     color: var(--md-sys-color-on-secondary-container) !important;
     border-color: transparent !important;
   }
 
-  /* Eliminate all magenta, purple, and yellow context lines */
-  .tab-context-line,
-  .tab-line,
-  .tab-bottom-line,
-  #sidebar-main[hilal-sidebar] .tab-context-line,
-  #pinned-tabs-container .tab-context-line {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-  }
-
-  /* Vertical Tabs List */
+  /* Vertical tab items */
   #sidebar-main[hilal-sidebar] .tabbrowser-tab {
     height: 40px !important;
     margin-inline: 8px !important;
@@ -633,9 +649,16 @@
     background-color: transparent !important;
     border: none !important;
     box-shadow: none !important;
+    /* Disable all transforms/animations — these cause drag glitches */
     transform: none !important;
     animation: none !important;
     transition: background-color var(--md-sys-motion-duration-short) ease, color var(--md-sys-motion-duration-short) ease !important;
+  }
+
+  /* Disable drag-time active-state scale that causes visual glitching */
+  #sidebar-main[hilal-sidebar] .tabbrowser-tab:active {
+    transform: none !important;
+    transition: background-color var(--md-sys-motion-duration-short) ease !important;
   }
 
   #sidebar-main[hilal-sidebar] .tabbrowser-tab .tab-stack,
@@ -645,7 +668,14 @@
     box-shadow: none !important;
     background: transparent !important;
     background-color: transparent !important;
+    /* Disable pop/bounce animations on tab-background */
     animation: none !important;
+    transform: none !important;
+  }
+
+  #sidebar-main[hilal-sidebar] .tabbrowser-tab .tab-content {
+    animation: none !important;
+    transform: none !important;
   }
 
   #sidebar-main[hilal-sidebar] .tabbrowser-tab:hover:not([selected="true"]) {
@@ -666,8 +696,7 @@
     flex-shrink: 0 !important;
   }
 
-  #sidebar-main[hilal-sidebar] .tab-close-button,
-  .hilal-tab-close {
+  #sidebar-main[hilal-sidebar] .tab-close-button {
     border-radius: 50% !important;
     width: 20px !important;
     height: 20px !important;
@@ -684,21 +713,13 @@
     opacity: 0.7 !important;
   }
 
-  #sidebar-main[hilal-sidebar] .tab-close-button:hover,
-  .hilal-tab-close:hover {
+  #sidebar-main[hilal-sidebar] .tab-close-button:hover {
     opacity: 1 !important;
     background-color: var(--md-sys-color-state-hover) !important;
   }
 
-  /* Eliminate crescent moon loading artifacts */
-  .tab-throbber,
-  #sidebar-main[hilal-sidebar] .tab-throbber {
-    display: none !important;
-  }
-
-  /* Clean New Tab Button */
-  #tabs-newtab-button,
-  .hilal-new-tab-button {
+  /* New tab button in sidebar */
+  #tabs-newtab-button {
     height: 36px !important;
     border-radius: var(--md-sys-shape-corner-full) !important;
     margin: 6px 8px !important;
@@ -715,13 +736,12 @@
     transition: background-color var(--md-sys-motion-duration-short) ease !important;
   }
 
-  #tabs-newtab-button:hover,
-  .hilal-new-tab-button:hover {
+  #tabs-newtab-button:hover {
     background-color: var(--md-sys-color-surface-container-highest) !important;
   }
 
   /* --------------------------------------------------------------------------
-     7. Content Canvas (Solid Opaque Web View)
+     10. Content Canvas — solid opaque surface
      -------------------------------------------------------------------------- */
   :root #browser,
   :root #tabbrowser-tabbox,
@@ -738,21 +758,8 @@
     margin: 0 !important;
   }
 
-  :root #tabbrowser-tabbox {
-    padding: 0 !important;
-    margin: 0 !important;
-    background-color: var(--md-sys-color-surface) !important;
-  }
-
-  :root .browserSidebarContainer {
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    background-color: var(--md-sys-color-surface) !important;
-  }
-
   /* --------------------------------------------------------------------------
-     8. Popups, Menus, Panels & Dialogs (M3 Elevation & Headers)
+     11. Popups, Menus, Panels
      -------------------------------------------------------------------------- */
   menupopup,
   panel,
@@ -772,6 +779,8 @@
     padding: 12px 16px !important;
     font-weight: 600 !important;
     color: var(--md-sys-color-on-surface) !important;
+    background-color: var(--md-sys-color-surface-container-high) !important;
+    border-radius: var(--md-sys-shape-corner-large) var(--md-sys-shape-corner-large) 0 0 !important;
   }
 
   .panel-footer {
@@ -779,8 +788,7 @@
     padding: 8px 16px !important;
   }
 
-  menuitem,
-  menumenu {
+  menuitem {
     border-radius: var(--md-sys-shape-corner-small) !important;
     margin: 2px 4px !important;
     padding: 6px 12px !important;
@@ -788,9 +796,7 @@
   }
 
   menuitem:hover,
-  menumenu:hover,
-  menuitem[_moz-menuactive="true"],
-  menumenu[_moz-menuactive="true"] {
+  menuitem[_moz-menuactive="true"] {
     background-color: var(--md-sys-color-state-hover) !important;
   }
 
@@ -802,4 +808,68 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
     color: var(--md-sys-color-on-surface) !important;
   }
+
+  /* --------------------------------------------------------------------------
+     12. macOS Transparency Override
+     browser-shared.css sets :root, body, toolbars and sidebar to
+     background: transparent !important on macOS (for the glass/vibrancy look).
+     In M3E mode we do NOT want vibrancy — every surface must be a solid M3E
+     tonal color. These rules must come after all other M3E rules so they win.
+     -------------------------------------------------------------------------- */
+  @media (-moz-platform: macos) {
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) {
+      background: var(--md-sys-color-surface-container) !important;
+    }
+
+    :root:not([macOSNativeFullscreen]) body {
+      background: var(--md-sys-color-surface-container) !important;
+    }
+
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #browser {
+      background: var(--md-sys-color-surface) !important;
+    }
+
+    /* All toolbars solid */
+    :root:not([macOSNativeFullscreen]) #navigator-toolbox,
+    :root:not([macOSNativeFullscreen]) #titlebar,
+    :root:not([macOSNativeFullscreen]) #toolbar-menubar,
+    :root:not([macOSNativeFullscreen]) #TabsToolbar,
+    :root:not([macOSNativeFullscreen]) .browser-toolbar:not(.browser-titlebar) {
+      background: var(--md-sys-color-surface-container) !important;
+      background-image: none !important;
+    }
+
+    /* Sidebar solid */
+    :root:not([macOSNativeFullscreen]) #sidebar-main,
+    :root:not([macOSNativeFullscreen]) #sidebar-box,
+    :root:not([macOSNativeFullscreen]) .chrome-block {
+      background-color: var(--md-sys-color-surface-container-low) !important;
+      background-image: none !important;
+    }
+
+    /* URL bar unfocused — solid surface, not transparent */
+    :root:not([macOSNativeFullscreen]) .urlbar:not([focused], [open]) > .urlbar-background {
+      background-color: var(--md-sys-color-surface-container-high) !important;
+    }
+
+    /* URL bar focused — solid lowest surface + M3E primary outline */
+    :root:not([macOSNativeFullscreen]) .urlbar:is([focused], [open]) > .urlbar-background {
+      background-color: var(--md-sys-color-surface-container-lowest) !important;
+    }
+
+    /* Disable the hilal glass/vibrancy pseudo-element backgrounds */
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background::before,
+    :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background::after {
+      background: none !important;
+      opacity: 0 !important;
+    }
+
+    /* body::after is the macOS native vibrancy appearance — kill it in M3E */
+    :root:not([macOSNativeFullscreen]) body::after {
+      -moz-default-appearance: none !important;
+      appearance: none !important;
+      background-color: var(--md-sys-color-surface-container) !important;
+    }
+  }
 }
+
