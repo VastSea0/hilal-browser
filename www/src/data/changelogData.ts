@@ -30,11 +30,21 @@ export interface ReleaseGroup {
   compareUrl: string | null;
 }
 
-export const REPO_COMMITS_TOTAL = 451;
+export const REPO_COMMITS_TOTAL = 452;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "4611aae44c4ef4a5340e4ed4ab2591d13e16d995",
+    "shortHash": "4611aae",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T06:52:27+03:00",
+    "subject": "feat: implement automated changelog generation and display page for web documentation",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/4611aae44c4ef4a5340e4ed4ab2591d13e16d995"
+  },
   {
     "hash": "b454a46a46e4a871a66c7e33267d80983ba6f15e",
     "shortHash": "b454a46",
@@ -4552,9 +4562,19 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-06T06:42:13+03:00",
-    "commitCount": 10,
+    "date": "2026-09-06T06:52:27+03:00",
+    "commitCount": 11,
     "commits": [
+      {
+        "hash": "4611aae44c4ef4a5340e4ed4ab2591d13e16d995",
+        "shortHash": "4611aae",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T06:52:27+03:00",
+        "subject": "feat: implement automated changelog generation and display page for web documentation",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/4611aae44c4ef4a5340e4ed4ab2591d13e16d995"
+      },
       {
         "hash": "b454a46a46e4a871a66c7e33267d80983ba6f15e",
         "shortHash": "b454a46",
