@@ -14,7 +14,7 @@ const args = process.argv.slice(2);
 const options = {
   channel: "hilal-release",
   output: "dist/hilal-update-manifest.json",
-  detailsURL: "https://hilal.gkdevstudio.org/#surumler",
+  detailsURL: "https://hilal-browser.vercel.app/#surumler",
   mar: new Map(),
   marUrl: new Map(),
 };

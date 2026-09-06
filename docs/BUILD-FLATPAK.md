@@ -92,7 +92,7 @@ Before opening a human-authored Flathub PR:
 - Run `scripts/build-flatpak.sh check-ready`.
 - Run `scripts/build-flatpak.sh lint`.
 - Build and smoke-test both `x86_64` and `aarch64`.
-- Publish the Flathub verification token under `https://gkdevstudio.org/.well-known/org.flathub.VerifiedApps.txt` when Flathub requests it.
+- Publish the Flathub verification token under `https://hilal-browser.vercel.app/.well-known/org.flathub.VerifiedApps.txt` when Flathub requests it.
 
 Do not automate the Flathub pull request from this repo. A maintainer should
 open and review it.

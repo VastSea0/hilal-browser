@@ -17,9 +17,9 @@ pref("app.update.interval", 86400); // 24 hours
 // Give the user x seconds to react before showing the big UI. default=24 hours
 pref("app.update.promptWaitTime", 86400);
 // URL user can browse to manually if all update installation attempts fail.
-pref("app.update.url.manual", "https://hilal.gkdevstudio.org/download");
+pref("app.update.url.manual", "https://hilal-browser.vercel.app/download");
 // "More information about this update" link in the update wizard.
-pref("app.update.url.details", "https://hilal.gkdevstudio.org/releases");
+pref("app.update.url.details", "https://hilal-browser.vercel.app/releases");
 
 // The number of days a binary is permitted to be old without checking for
 // an update. This assumes that app.update.checkInstallTime is true.

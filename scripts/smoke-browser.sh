@@ -172,7 +172,7 @@ check_distribution() {
   local policies="$distribution_dir/policies.json"
   require_file "$policies"
 
-  if ! grep -q "updates.hilal.gkdevstudio.org" "$policies"; then
+  if ! grep -q "hilal-browser.vercel.app" "$policies"; then
     die "Packaged policies.json does not point app updates at Hilal infrastructure."
   fi
   if grep -q "aus5.mozilla.org" "$policies"; then

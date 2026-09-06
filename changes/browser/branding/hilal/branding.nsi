@@ -15,11 +15,11 @@
 # hardcoded to "Firefox"). Defining them here as well triggers a "!define
 # already defined" error in NSIS because branding.nsi is included before
 # defines.nsi by uninstaller.nsi/installer.nsi/stub.nsh.
-!define URLInfoAbout          "https://hilal.gkdevstudio.org"
-!define HelpLink              "https://hilal.gkdevstudio.org/support"
+!define URLInfoAbout          "https://hilal-browser.vercel.app"
+!define HelpLink              "https://hilal-browser.vercel.app/support"
 
-!define URLManualDownload     "https://hilal.gkdevstudio.org/download"
-!define URLSystemRequirements "https://hilal.gkdevstudio.org/system-requirements"
+!define URLManualDownload     "https://hilal-browser.vercel.app/download"
+!define URLSystemRequirements "https://hilal-browser.vercel.app/system-requirements"
 !define Channel               "release"
 
 # Dialog units are used so the UI displays correctly with the system's DPI

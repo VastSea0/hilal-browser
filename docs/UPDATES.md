@@ -71,7 +71,7 @@ production warning.
 The bundled policy requests:
 
 ```text
-https://updates.hilal.gkdevstudio.org/update/6/%PRODUCT%/%VERSION%/%BUILD_ID%/%BUILD_TARGET%/%LOCALE%/%CHANNEL%/%OS_VERSION%/%SYSTEM_CAPABILITIES%/%DISTRIBUTION%/%DISTRIBUTION_VERSION%/update.xml
+https://hilal-browser.vercel.app/update/6/%PRODUCT%/%VERSION%/%BUILD_ID%/%BUILD_TARGET%/%LOCALE%/%CHANNEL%/%OS_VERSION%/%SYSTEM_CAPABILITIES%/%DISTRIBUTION%/%DISTRIBUTION_VERSION%/update.xml
 ```
 
 The update server must return Firefox update XML with a complete MAR patch for
@@ -158,7 +158,7 @@ Optional:
 ```bash
 HILAL_UPDATE_BUILD_ID=20260524000000
 HILAL_UPDATE_FIREFOX_VERSION=153.0a1
-HILAL_UPDATE_DETAILS_URL=https://hilal.gkdevstudio.org/#surumler
+HILAL_UPDATE_DETAILS_URL=https://hilal-browser.vercel.app/#surumler
 HILAL_UPDATE_MACOS_MAR_HASH_FUNCTION=sha512
 HILAL_UPDATE_REPO=VastSea0/hilal-browser
 HILAL_UPDATE_MANIFEST_ASSET=hilal-update-manifest.json
@@ -167,7 +167,7 @@ HILAL_UPDATE_MANIFEST_ASSET=hilal-update-manifest.json
 The website also exposes release metadata for the downloads UI:
 
 ```text
-https://hilal.gkdevstudio.org/releases.json
+https://hilal-browser.vercel.app/releases.json
 ```
 
 The public release page renders a live release-notes timeline from that feed,
