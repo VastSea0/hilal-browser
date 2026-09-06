@@ -39,11 +39,21 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 456;
+export const REPO_COMMITS_TOTAL = 457;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "cbd8f3274531afad949586733cf2ccf9242bcaca",
+    "shortHash": "cbd8f32",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T06:58:08+03:00",
+    "subject": "feat(www): fetch and display real repository contributors on landing and changelog pages",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cbd8f3274531afad949586733cf2ccf9242bcaca"
+  },
   {
     "hash": "c1af69a30ce04d32c338d97d09b0dfd3ca4ddcd0",
     "shortHash": "c1af69a",
@@ -4611,9 +4621,19 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-06T06:56:18+03:00",
-    "commitCount": 15,
+    "date": "2026-09-06T06:58:08+03:00",
+    "commitCount": 16,
     "commits": [
+      {
+        "hash": "cbd8f3274531afad949586733cf2ccf9242bcaca",
+        "shortHash": "cbd8f32",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T06:58:08+03:00",
+        "subject": "feat(www): fetch and display real repository contributors on landing and changelog pages",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cbd8f3274531afad949586733cf2ccf9242bcaca"
+      },
       {
         "hash": "c1af69a30ce04d32c338d97d09b0dfd3ca4ddcd0",
         "shortHash": "c1af69a",
@@ -9433,7 +9453,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 444,
+    "contributions": 445,
     "role": "Lead Developer"
   },
   {
