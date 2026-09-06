@@ -20,12 +20,19 @@ enum Commands {
         #[arg(long, help = "Skip build dependency check")]
         skip_build_deps: bool,
     },
-    #[command(about = "Apply all patches and overlays sequentially")]
+    #[command(about = "Apply all patches and overlays")]
     Apply {
         #[arg(long, short, help = "Reset engine checkout to baseline first")]
         force: bool,
         #[arg(long, help = "Simulate patch application without modifying disk")]
         dry_run: bool,
+        #[arg(
+            long,
+            help = "Create individual git commits for each patch/overlay (slower, for refresh)"
+        )]
+        discrete_commits: bool,
+        #[arg(long, help = "Create a single git commit containing all changes")]
+        commit: bool,
     },
     #[command(about = "Refresh changes/ from adjustments in engine/")]
     Refresh,
@@ -102,8 +109,20 @@ fn main() -> Result<()> {
         Commands::Setup { skip_build_deps: _ } => {
             setup(&repo_root, &engine_path)?;
         }
-        Commands::Apply { force, dry_run } => {
-            apply(&repo_root, &engine_path, force, dry_run)?;
+        Commands::Apply {
+            force,
+            dry_run,
+            discrete_commits,
+            commit,
+        } => {
+            apply(
+                &repo_root,
+                &engine_path,
+                force,
+                dry_run,
+                discrete_commits,
+                commit,
+            )?;
         }
         Commands::Refresh => {
             refresh(&repo_root, &engine_path)?;
@@ -293,8 +312,115 @@ fn setup_git(commit: &str, engine_path: &Path, repo_root: &Path) -> Result<()> {
     Ok(())
 }
 
-fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Result<()> {
-    let lock = read_upstream_lock(repo_root)?;
+fn compute_changes_fingerprint(repo_root: &Path, manifest: &Manifest) -> Result<String> {
+    use sha2::{Digest, Sha256};
+    let mut hasher = Sha256::new();
+
+    let manifest_path = repo_root.join("manifest.toml");
+    if manifest_path.exists() {
+        hasher.update(&fs::read(&manifest_path)?);
+    }
+
+    for entry in &manifest.patches {
+        hasher.update(entry.path.as_bytes());
+        let src = repo_root.join("changes").join(&entry.path);
+        if !src.exists() {
+            continue;
+        }
+        hash_fs_entry(&src, &mut hasher)?;
+    }
+
+    Ok(format!("{:x}", hasher.finalize()))
+}
+
+fn hash_fs_entry(path: &Path, hasher: &mut sha2::Sha256) -> Result<()> {
+    use sha2::Digest;
+    let meta = fs::metadata(path)?;
+    hasher.update(&meta.len().to_le_bytes());
+    if let Ok(mtime) = meta.modified() {
+        if let Ok(duration) = mtime.duration_since(std::time::UNIX_EPOCH) {
+            hasher.update(&duration.as_nanos().to_le_bytes());
+        }
+    }
+    if meta.is_dir() {
+        let mut entries = Vec::new();
+        for entry in fs::read_dir(path)? {
+            entries.push(entry?);
+        }
+        entries.sort_by_key(|e| e.file_name());
+        for entry in entries {
+            let name = entry.file_name();
+            hasher.update(name.to_string_lossy().as_bytes());
+            hash_fs_entry(&entry.path(), hasher)?;
+        }
+    } else if path.extension().and_then(|s| s.to_str()) == Some("patch") {
+        let content = fs::read(path)?;
+        hasher.update(&content);
+    }
+    Ok(())
+}
+
+fn fast_sync_file(src: &Path, dst: &Path) -> Result<bool> {
+    if dst.exists() {
+        if let (Ok(s_meta), Ok(d_meta)) = (fs::metadata(src), fs::metadata(dst)) {
+            if s_meta.len() == d_meta.len() {
+                if let (Ok(s_bytes), Ok(d_bytes)) = (fs::read(src), fs::read(dst)) {
+                    if s_bytes == d_bytes {
+                        return Ok(false);
+                    }
+                }
+            }
+        }
+    }
+    if let Some(parent) = dst.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    fs::copy(src, dst)?;
+    Ok(true)
+}
+
+fn fast_sync_dir(src: &Path, dst: &Path) -> Result<()> {
+    fs::create_dir_all(dst)?;
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        let path = entry.path();
+        let target = dst.join(entry.file_name());
+        if path.is_dir() {
+            fast_sync_dir(&path, &target)?;
+        } else {
+            fast_sync_file(&path, &target)?;
+        }
+    }
+    Ok(())
+}
+
+fn ensure_ublock(repo_root: &Path, engine_path: &Path) -> Result<()> {
+    let ext_dir = engine_path.join("browser/app/distribution/extensions");
+    fs::create_dir_all(&ext_dir)?;
+    let ubo_path = ext_dir.join("uBlock0@raymondhill.net.xpi");
+
+    if ubo_path.exists() && fs::metadata(&ubo_path).map(|m| m.len() > 0).unwrap_or(false) {
+        return Ok(());
+    }
+
+    let local_src = repo_root.join("changes/browser/app/distribution/extensions/uBlock0@raymondhill.net.xpi");
+    if local_src.exists() {
+        fast_sync_file(&local_src, &ubo_path)?;
+        return Ok(());
+    }
+
+    download_ublock(engine_path)?;
+    Ok(())
+}
+
+fn apply(
+    repo_root: &Path,
+    engine_path: &Path,
+    force: bool,
+    dry_run: bool,
+    discrete_commits: bool,
+    commit: bool,
+) -> Result<()> {
     let manifest = read_manifest(repo_root)?;
 
     if !engine_path.exists() {
@@ -302,42 +428,42 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
     }
 
     let state_file = engine_path.join(".hilal-applied");
-    if state_file.exists() && !force {
-        println!("[hil] Patches are already applied. Use --force to re-apply.");
-        return Ok(());
-    }
+    let fingerprint_file = engine_path.join(".hilal-state");
+    let current_fingerprint = compute_changes_fingerprint(repo_root, &manifest)?;
 
-    // Set local git config for committing if not already set
-    let _ = run_cmd(&["git", "config", "user.name", "Hilal Tool"], engine_path);
-    let _ = run_cmd(
-        &["git", "config", "user.email", "hil-tool@hilal.browser"],
-        engine_path,
-    );
-
-    // Tag the current HEAD as upstream-base if it's missing
-    if run_cmd(&["git", "rev-parse", "upstream-base"], engine_path).is_err() {
-        let _ = run_cmd(
-            &["git", "tag", "-f", "upstream-base", &lock.commit],
-            engine_path,
-        );
+    if !force && fingerprint_file.exists() {
+        if let Ok(saved) = fs::read_to_string(&fingerprint_file) {
+            if saved.trim() == current_fingerprint {
+                println!("[hil] Patches and overlays are already up to date.");
+                return Ok(());
+            }
+        }
     }
 
     if force && !dry_run {
         println!("[hil] Force reset: resetting to upstream baseline...");
         run_cmd(&["git", "reset", "--hard", "upstream-base"], engine_path)?;
         run_cmd(&["git", "clean", "-fd"], engine_path)?;
-        if state_file.exists() {
-            fs::remove_file(&state_file)?;
-        }
+        let _ = fs::remove_file(&state_file);
+        let _ = fs::remove_file(&fingerprint_file);
     }
 
-    let mut applied = 0;
-    let mut copied = 0;
+    if discrete_commits {
+        let _ = run_cmd(&["git", "config", "user.name", "Hilal Tool"], engine_path);
+        let _ = run_cmd(
+            &["git", "config", "user.email", "hil-tool@hilal.browser"],
+            engine_path,
+        );
+    }
 
+    enum Action {
+        Overlay(String),
+        Patches(Vec<(String, PathBuf)>),
+    }
+
+    let mut actions: Vec<Action> = Vec::new();
     for entry in &manifest.patches {
         let src = repo_root.join("changes").join(&entry.path);
-        let dst = engine_path.join(&entry.path);
-
         if !src.exists() {
             bail!(
                 "Path declared in manifest does not exist: changes/{}",
@@ -346,99 +472,182 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
         }
 
         if entry.path.ends_with(".patch") {
-            // Check if already applied
-            let mut already_applied = false;
-            if !force {
-                let check = Command::new("git")
-                    .args(&["apply", "--check", "--reverse", src.to_str().unwrap()])
-                    .current_dir(engine_path)
-                    .output()?;
-                if check.status.success() {
-                    already_applied = true;
+            match actions.last_mut() {
+                Some(Action::Patches(ref mut list)) => {
+                    list.push((entry.path.clone(), src));
+                }
+                _ => {
+                    actions.push(Action::Patches(vec![(entry.path.clone(), src)]));
                 }
             }
-
-            if already_applied {
-                println!("[hil] Skip (already applied): {}", entry.path);
-                continue;
-            }
-
-            println!("[hil] Applying patch: {}", entry.path);
-            if !dry_run {
-                let apply = Command::new("git")
-                    .args(&["apply", "--whitespace=nowarn", src.to_str().unwrap()])
-                    .current_dir(engine_path)
-                    .output()?;
-                if !apply.status.success() {
-                    bail!(
-                        "Conflict: Failed to apply patch changes/{}. Error:\n{}",
-                        entry.path,
-                        String::from_utf8_lossy(&apply.stderr)
-                    );
-                }
-
-                // Commit the patch change
-                if std::env::var("GITHUB_ACTIONS").is_err() {
-                    let files = get_patch_files(&src)?;
-                    if !files.is_empty() {
-                        let mut args = vec!["git", "add"];
-                        for f in &files {
-                            args.push(f.as_str());
-                        }
-                        run_cmd(&args, engine_path)?;
-                    }
-                    Command::new("git")
-                        .args(&[
-                            "commit",
-                            "--allow-empty",
-                            "-m",
-                            &format!("Apply patch: {}", entry.path),
-                        ])
-                        .current_dir(engine_path)
-                        .output()?;
-                }
-            }
-            applied += 1;
         } else {
-            println!("[hil] Syncing overlay: {}", entry.path);
-            if !dry_run {
-                if src.is_dir() {
-                    fs::create_dir_all(&dst)?;
-                    copy_dir_recursive(&src, &dst)?;
-                } else {
-                    if let Some(parent) = dst.parent() {
-                        fs::create_dir_all(parent)?;
+            actions.push(Action::Overlay(entry.path.clone()));
+        }
+    }
+
+    let mut applied = 0;
+    let mut copied = 0;
+
+    for action in actions {
+        match action {
+            Action::Overlay(rel_path) => {
+                println!("[hil] Syncing overlay: {}", rel_path);
+                if !dry_run {
+                    let src = repo_root.join("changes").join(&rel_path);
+                    let dst = engine_path.join(&rel_path);
+                    if src.is_dir() {
+                        fast_sync_dir(&src, &dst)?;
+                    } else {
+                        fast_sync_file(&src, &dst)?;
                     }
-                    fs::copy(&src, &dst)?;
+
+                    if discrete_commits && std::env::var("GITHUB_ACTIONS").is_err() {
+                        run_cmd(&["git", "add", &rel_path], engine_path)?;
+                        let _ = Command::new("git")
+                            .args(&[
+                                "commit",
+                                "--allow-empty",
+                                "-m",
+                                &format!("Sync overlay: {}", rel_path),
+                            ])
+                            .current_dir(engine_path)
+                            .output();
+                    }
+                }
+                copied += 1;
+            }
+            Action::Patches(patch_list) => {
+                for (ref p, _) in &patch_list {
+                    println!("[hil] Applying patch: {}", p);
                 }
 
-                // Commit the overlay change
-                if std::env::var("GITHUB_ACTIONS").is_err() {
-                    run_cmd(&["git", "add", &entry.path], engine_path)?;
-                    Command::new("git")
-                        .args(&[
-                            "commit",
-                            "--allow-empty",
-                            "-m",
-                            &format!("Sync overlay: {}", entry.path),
-                        ])
-                        .current_dir(engine_path)
-                        .output()?;
+                if !dry_run {
+                    if patch_list.len() == 1 {
+                        let (ref rel_path, ref src) = patch_list[0];
+                        let out = Command::new("git")
+                            .args(&["apply", "--whitespace=nowarn", src.to_str().unwrap()])
+                            .current_dir(engine_path)
+                            .output()?;
+                        if !out.status.success() {
+                            bail!(
+                                "Conflict: Failed to apply patch changes/{}. Error:\n{}",
+                                rel_path,
+                                String::from_utf8_lossy(&out.stderr)
+                            );
+                        }
+                        if discrete_commits && std::env::var("GITHUB_ACTIONS").is_err() {
+                            let files = get_patch_files(src)?;
+                            if !files.is_empty() {
+                                let mut args = vec!["git", "add"];
+                                for f in &files {
+                                    args.push(f.as_str());
+                                }
+                                run_cmd(&args, engine_path)?;
+                            }
+                            let _ = Command::new("git")
+                                .args(&[
+                                    "commit",
+                                    "--allow-empty",
+                                    "-m",
+                                    &format!("Apply patch: {}", rel_path),
+                                ])
+                                .current_dir(engine_path)
+                                .output();
+                        }
+                    } else {
+                        let mut git_args = vec!["apply", "--whitespace=nowarn"];
+                        for (_, src) in &patch_list {
+                            git_args.push(src.to_str().unwrap());
+                        }
+                        let batch_out = Command::new("git")
+                            .args(&git_args)
+                            .current_dir(engine_path)
+                            .output()?;
+
+                        if batch_out.status.success() {
+                            if discrete_commits && std::env::var("GITHUB_ACTIONS").is_err() {
+                                for (ref rel_path, ref src) in &patch_list {
+                                    let files = get_patch_files(src)?;
+                                    if !files.is_empty() {
+                                        let mut args = vec!["git", "add"];
+                                        for f in &files {
+                                            args.push(f.as_str());
+                                        }
+                                        run_cmd(&args, engine_path)?;
+                                    }
+                                    let _ = Command::new("git")
+                                        .args(&[
+                                            "commit",
+                                            "--allow-empty",
+                                            "-m",
+                                            &format!("Apply patch: {}", rel_path),
+                                        ])
+                                        .current_dir(engine_path)
+                                        .output();
+                                }
+                            }
+                        } else {
+                            // Fallback to sequential application to pinpoint conflict
+                            for (ref rel_path, ref src) in &patch_list {
+                                let single_out = Command::new("git")
+                                    .args(&["apply", "--whitespace=nowarn", src.to_str().unwrap()])
+                                    .current_dir(engine_path)
+                                    .output()?;
+                                if !single_out.status.success() {
+                                    bail!(
+                                        "Conflict: Failed to apply patch changes/{}. Error:\n{}",
+                                        rel_path,
+                                        String::from_utf8_lossy(&single_out.stderr)
+                                    );
+                                }
+                                if discrete_commits && std::env::var("GITHUB_ACTIONS").is_err() {
+                                    let files = get_patch_files(src)?;
+                                    if !files.is_empty() {
+                                        let mut args = vec!["git", "add"];
+                                        for f in &files {
+                                            args.push(f.as_str());
+                                        }
+                                        run_cmd(&args, engine_path)?;
+                                    }
+                                    let _ = Command::new("git")
+                                        .args(&[
+                                            "commit",
+                                            "--allow-empty",
+                                            "-m",
+                                            &format!("Apply patch: {}", rel_path),
+                                        ])
+                                        .current_dir(engine_path)
+                                        .output();
+                                }
+                            }
+                        }
+                    }
                 }
+                applied += patch_list.len();
             }
-            copied += 1;
         }
     }
 
     if !dry_run {
-        // Download uBlock
-        download_ublock(engine_path)?;
+        if commit && !discrete_commits {
+            println!("[hil] Creating single unified git commit...");
+            run_cmd(&["git", "add", "-A"], engine_path)?;
+            let _ = Command::new("git")
+                .args(&[
+                    "commit",
+                    "--allow-empty",
+                    "-m",
+                    "Apply Hilal patches and overlays",
+                ])
+                .current_dir(engine_path)
+                .output();
+        }
 
-        // Merge Turkish translations
+        ensure_ublock(repo_root, engine_path)?;
         merge_locales(repo_root, engine_path)?;
 
-        // Mark patches as applied
         fs::write(&state_file, "applied")?;
+        fs::write(&fingerprint_file, &current_fingerprint)?;
     }
 
     println!(
@@ -448,21 +657,6 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
     Ok(())
 }
 
-fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<()> {
-    for entry in fs::read_dir(src)? {
-        let entry = entry?;
-        let path = entry.path();
-        let name = entry.file_name();
-        let target = dst.join(name);
-        if path.is_dir() {
-            fs::create_dir_all(&target)?;
-            copy_dir_recursive(&path, &target)?;
-        } else {
-            fs::copy(&path, &target)?;
-        }
-    }
-    Ok(())
-}
 
 fn download_ublock(engine_path: &Path) -> Result<()> {
     let ubo_version = "1.57.2";
@@ -704,6 +898,163 @@ path = "browser/example.patch"
         let _ = fs::remove_file(temp_patch);
         assert_eq!(files, vec!["browser/confvars.sh"]);
     }
+
+    struct TestDir {
+        path: PathBuf,
+    }
+
+    impl TestDir {
+        fn new(name: &str) -> Self {
+            let path = std::env::temp_dir().join(format!(
+                "hil_test_{}_{}_{}",
+                name,
+                std::process::id(),
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_nanos()
+            ));
+            let _ = fs::remove_dir_all(&path);
+            fs::create_dir_all(&path).unwrap();
+            Self { path }
+        }
+    }
+
+    impl Drop for TestDir {
+        fn drop(&mut self) {
+            let _ = fs::remove_dir_all(&self.path);
+        }
+    }
+
+    #[test]
+    fn fast_sync_file_skips_identical_and_updates_modified() {
+        let test_dir = TestDir::new("fast_sync");
+        let src = test_dir.path.join("src.txt");
+        let dst = test_dir.path.join("dst.txt");
+
+        fs::write(&src, "hello world").unwrap();
+        let copied1 = fast_sync_file(&src, &dst).unwrap();
+        assert!(copied1);
+        assert_eq!(fs::read_to_string(&dst).unwrap(), "hello world");
+
+        let copied2 = fast_sync_file(&src, &dst).unwrap();
+        assert!(!copied2, "Second sync should skip identical file");
+
+        fs::write(&src, "hello updated").unwrap();
+        let copied3 = fast_sync_file(&src, &dst).unwrap();
+        assert!(copied3, "Third sync should update changed file");
+        assert_eq!(fs::read_to_string(&dst).unwrap(), "hello updated");
+    }
+
+    #[test]
+    fn compute_changes_fingerprint_detects_patch_and_overlay_edits() {
+        let test_dir = TestDir::new("fingerprint");
+        let root = &test_dir.path;
+
+        let changes = root.join("changes");
+        fs::create_dir_all(&changes).unwrap();
+
+        let manifest_path = root.join("manifest.toml");
+        fs::write(
+            &manifest_path,
+            r#"
+[[patches]]
+path = "test.patch"
+
+[[patches]]
+path = "overlay.txt"
+"#,
+        )
+        .unwrap();
+
+        let patch_path = changes.join("test.patch");
+        fs::write(&patch_path, "diff --git a/file b/file\n").unwrap();
+
+        let overlay_path = changes.join("overlay.txt");
+        fs::write(&overlay_path, "original overlay").unwrap();
+
+        let manifest = read_manifest(root).unwrap();
+        let fp1 = compute_changes_fingerprint(root, &manifest).unwrap();
+
+        // Modifying patch must change fingerprint
+        fs::write(&patch_path, "diff --git a/file b/file\n+new line\n").unwrap();
+        let fp2 = compute_changes_fingerprint(root, &manifest).unwrap();
+        assert_ne!(fp1, fp2, "Fingerprint must change when patch content changes");
+
+        // Modifying overlay must change fingerprint
+        fs::write(&overlay_path, "modified overlay").unwrap();
+        let fp3 = compute_changes_fingerprint(root, &manifest).unwrap();
+        assert_ne!(fp2, fp3, "Fingerprint must change when overlay content changes");
+    }
+
+    #[test]
+    fn isolated_apply_batched_and_fast_cached() {
+        let test_dir = TestDir::new("isolated_apply");
+        let root = test_dir.path.join("repo");
+        let engine = test_dir.path.join("engine");
+
+        fs::create_dir_all(&root).unwrap();
+        fs::create_dir_all(&engine).unwrap();
+
+        // Initialize fake git repo in engine
+        Command::new("git").args(&["init"]).current_dir(&engine).output().unwrap();
+        Command::new("git").args(&["config", "user.name", "Test"]).current_dir(&engine).output().unwrap();
+        Command::new("git").args(&["config", "user.email", "test@example.com"]).current_dir(&engine).output().unwrap();
+
+        // Create base files and initial commit
+        fs::write(engine.join("file1.txt"), "hello from file1\n").unwrap();
+        fs::write(engine.join("file2.txt"), "hello from file2\n").unwrap();
+        Command::new("git").args(&["add", "."]).current_dir(&engine).output().unwrap();
+        Command::new("git").args(&["commit", "-m", "initial"]).current_dir(&engine).output().unwrap();
+        Command::new("git").args(&["tag", "upstream-base"]).current_dir(&engine).output().unwrap();
+
+        // Set up root changes/ and manifest.toml
+        let changes = root.join("changes");
+        fs::create_dir_all(&changes).unwrap();
+
+        let patch1_content = "diff --git a/file1.txt b/file1.txt\n--- a/file1.txt\n+++ b/file1.txt\n@@ -1 +1 @@\n-hello from file1\n+patched file1\n";
+        let patch2_content = "diff --git a/file2.txt b/file2.txt\n--- a/file2.txt\n+++ b/file2.txt\n@@ -1 +1 @@\n-hello from file2\n+patched file2\n";
+
+        fs::write(changes.join("patch1.patch"), patch1_content).unwrap();
+        fs::write(changes.join("patch2.patch"), patch2_content).unwrap();
+        fs::write(changes.join("overlay.txt"), "custom overlay content\n").unwrap();
+
+        fs::write(
+            root.join("manifest.toml"),
+            r#"
+[[patches]]
+path = "overlay.txt"
+
+[[patches]]
+path = "patch1.patch"
+
+[[patches]]
+path = "patch2.patch"
+"#,
+        )
+        .unwrap();
+
+        // 1. First apply: should apply patches and overlay
+        apply(&root, &engine, false, false, false, false).unwrap();
+
+        assert_eq!(fs::read_to_string(engine.join("file1.txt")).unwrap(), "patched file1\n");
+        assert_eq!(fs::read_to_string(engine.join("file2.txt")).unwrap(), "patched file2\n");
+        assert_eq!(fs::read_to_string(engine.join("overlay.txt")).unwrap(), "custom overlay content\n");
+        assert!(engine.join(".hilal-state").exists());
+
+        // 2. Second apply with index.lock present: MUST NOT fail because cache hits without touching git!
+        let dummy_lock = engine.join(".git/index.lock");
+        fs::write(&dummy_lock, "locked").unwrap();
+
+        let start = std::time::Instant::now();
+        apply(&root, &engine, false, false, false, false).unwrap();
+        let elapsed = start.elapsed();
+
+        assert!(elapsed.as_millis() < 50, "Cached apply should return in < 50ms, took {:?}", elapsed);
+
+        // Remove dummy lock
+        let _ = fs::remove_file(&dummy_lock);
+    }
 }
 
 fn refresh(repo_root: &Path, engine_path: &Path) -> Result<()> {
@@ -725,9 +1076,10 @@ fn refresh(repo_root: &Path, engine_path: &Path) -> Result<()> {
     let commits_str = run_cmd(
         &["git", "rev-list", "--reverse", "upstream-base..HEAD"],
         engine_path,
-    )?;
-    let commits: Vec<&str> = commits_str.lines().collect();
+    ).unwrap_or_default();
+    let commits: Vec<&str> = commits_str.lines().filter(|s| !s.trim().is_empty()).collect();
 
+    let use_working_tree_diff = commits.is_empty();
     let mut commit_index = 0;
 
     for entry in &manifest.patches {
@@ -735,19 +1087,30 @@ fn refresh(repo_root: &Path, engine_path: &Path) -> Result<()> {
         let dst = engine_path.join(&entry.path);
 
         if entry.path.ends_with(".patch") {
-            if commit_index >= commits.len() {
-                println!(
-                    "[hil] Warning: No commit found corresponding to patch changes/{}",
-                    entry.path
-                );
-                continue;
-            }
-            let commit_hash = commits[commit_index];
-            commit_index += 1;
+            let diff = if use_working_tree_diff {
+                let files = get_patch_files(&src)?;
+                if files.is_empty() {
+                    continue;
+                }
+                let mut diff_args = vec!["git", "diff", "upstream-base", "--"];
+                for f in &files {
+                    diff_args.push(f.as_str());
+                }
+                run_cmd(&diff_args, engine_path).unwrap_or_default()
+            } else {
+                if commit_index >= commits.len() {
+                    println!(
+                        "[hil] Warning: No commit found corresponding to patch changes/{}",
+                        entry.path
+                    );
+                    continue;
+                }
+                let commit_hash = commits[commit_index];
+                commit_index += 1;
 
-            // Get git diff for this commit
-            let parent = format!("{}~1", commit_hash);
-            let diff = run_cmd(&["git", "diff", &parent, commit_hash], engine_path)?;
+                let parent = format!("{}~1", commit_hash);
+                run_cmd(&["git", "diff", &parent, commit_hash], engine_path).unwrap_or_default()
+            };
 
             if !diff.trim().is_empty() {
                 // Read existing patch to preserve its header description
@@ -766,16 +1129,18 @@ fn refresh(repo_root: &Path, engine_path: &Path) -> Result<()> {
             }
         } else {
             // Overlay
-            commit_index += 1; // Overlays are also committed
+            if !use_working_tree_diff {
+                commit_index += 1;
+            }
             if dst.exists() {
                 if dst.is_dir() {
                     fs::create_dir_all(&src)?;
-                    copy_dir_recursive(&dst, &src)?;
+                    fast_sync_dir(&dst, &src)?;
                 } else {
                     if let Some(parent) = src.parent() {
                         fs::create_dir_all(parent)?;
                     }
-                    fs::copy(&dst, &src)?;
+                    fast_sync_file(&dst, &src)?;
                 }
                 println!("  Refreshed overlay: changes/{}", entry.path);
             }
@@ -877,7 +1242,7 @@ fn build(
 
     if !skip_apply {
         println!("[hil] Applying patches and overlays...");
-        apply(repo_root, engine_path, false, false)?;
+        apply(repo_root, engine_path, false, false, false, false)?;
     }
 
     let config_src = repo_root.join("mozconfigs").join(target_platform);
