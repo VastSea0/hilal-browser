@@ -111,6 +111,7 @@
       }
       this.initialized = true;
 
+      this.ensureTabContextMenuReady();
       this.createTopBar();
       this.createSidebar();
       this.bindBrowserEvents();
@@ -118,6 +119,25 @@
       this.renderWorkspaces();
       this.renderTabs();
       this.syncUrl();
+    },
+
+    ensureTabContextMenuReady() {
+      try {
+        if (window.gBrowser && typeof window.gBrowser.translateTabContextMenu === "function") {
+          window.gBrowser.translateTabContextMenu();
+        } else if (window.MozXULElement && typeof window.MozXULElement.insertFTLIfNeeded === "function") {
+          window.MozXULElement.insertFTLIfNeeded("browser/tabContextMenu.ftl");
+        }
+        const menu = document.getElementById("tabContextMenu");
+        if (menu) {
+          menu.querySelectorAll("[data-lazy-l10n-id]").forEach((el) => {
+            el.setAttribute("data-l10n-id", el.getAttribute("data-lazy-l10n-id"));
+            el.removeAttribute("data-lazy-l10n-id");
+          });
+        }
+      } catch (e) {
+        console.error("Hilal: Failed to translate tabContextMenu", e);
+      }
     },
 
     createTopBar() {
@@ -560,12 +580,18 @@
       pill.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         e.stopPropagation();
+
+        this.ensureTabContextMenuReady();
+
         const contextMenu = document.getElementById("tabContextMenu");
         if (contextMenu) {
           pill.tab = tab;
           if (typeof TabContextMenu !== "undefined") {
             TabContextMenu.contextTab = tab;
             TabContextMenu.contextTabs = [tab];
+            if (typeof TabContextMenu.updateContextMenu === "function") {
+              TabContextMenu.updateContextMenu(contextMenu);
+            }
           }
           contextMenu.triggerNode = tab;
           if (typeof contextMenu.openPopup === "function") {

@@ -22,6 +22,13 @@
   overflow: hidden !important;
   transition: background-color 300ms ease, color 300ms ease;
 
+  /* Force zero-border variables across gecko content canvas */
+  --chrome-content-separator-color: transparent !important;
+  --card-border-color: transparent !important;
+  --tabs-navbar-separator-color: transparent !important;
+  --focus-outline-color: transparent !important;
+  --chrome-window-gap: 0px !important;
+
   /* Material 3 Expressive Motion Physics Tokens */
   --md-sys-motion-spring-spatial: cubic-bezier(0.38, 1.21, 0.22, 1);
   --md-sys-motion-spring-effects: cubic-bezier(0.05, 0.7, 0.1, 1);
@@ -108,20 +115,25 @@
   color: var(--md-sys-color-on-surface-variant, #c3c7cf);
   cursor: pointer;
   padding: 0;
-  transition: background-color 0.15s ease, color 0.15s ease, transform 0.2s var(--md-sys-motion-spring-spatial);
+  transition: background-color 150ms ease,
+              color 150ms ease,
+              transform 250ms var(--md-sys-motion-spring-spatial),
+              border-radius 250ms var(--md-sys-motion-spring-spatial);
   -moz-window-dragging: no-drag;
 }
 
 .hilal-btn:hover:not([disabled]) {
   background-color: var(--md-sys-color-surface-container-high, #262b32);
   color: var(--md-sys-color-on-surface, #e1e2e9);
-  transform: scale(1.04);
+  transform: scale(1.06);
+  border-radius: 40%;
 }
 
 .hilal-btn:active:not([disabled]) {
   background-color: var(--md-sys-color-surface-container-highest, #31363e);
   color: var(--md-sys-color-primary, #a8c7fa);
-  transform: scale(0.92);
+  transform: scale(0.90) !important;
+  border-radius: 10px !important;
 }
 
 #hilal-sidebar-toggle-btn {
@@ -284,8 +296,8 @@
   white-space: nowrap;
   flex-shrink: 0;
   padding: 0;
-  transition: transform 250ms var(--md-sys-motion-spring-spatial),
-              border-radius 250ms var(--md-sys-motion-spring-spatial),
+  transition: transform 280ms var(--md-sys-motion-spring-spatial),
+              border-radius 280ms var(--md-sys-motion-spring-spatial),
               background-color 250ms ease,
               color 250ms ease;
 }
@@ -294,16 +306,18 @@
   background-color: var(--md-sys-color-surface-container-high, #262b32);
   color: var(--md-sys-color-on-surface, #e1e2e9);
   transform: scale(1.08);
+  border-radius: 40%;
 }
 
 .hilal-ws-chip:active {
-  transform: scale(0.92);
+  transform: scale(0.90) !important;
+  border-radius: 10px !important;
 }
 
 .hilal-ws-chip.active {
   background-color: var(--md-sys-color-primary-container, #0842a0);
   color: var(--md-sys-color-on-primary-container, #d3e3fd);
-  border-radius: 10px;
+  border-radius: 12px;
   transform: scale(1.08);
 }
 
@@ -312,12 +326,23 @@
   font-weight: 400;
   background: transparent;
   border: 1px dashed var(--md-sys-color-outline-variant, #31363e) !important;
+  transition: transform 280ms var(--md-sys-motion-spring-spatial),
+              border-radius 280ms var(--md-sys-motion-spring-spatial),
+              background-color 250ms ease,
+              border-color 250ms ease;
 }
 
 .hilal-ws-add:hover {
   background-color: var(--md-sys-color-surface-container-high, #262b32);
   border-color: var(--md-sys-color-primary, #a8c7fa) !important;
   color: var(--md-sys-color-primary, #a8c7fa);
+  transform: scale(1.08);
+  border-radius: 40%;
+}
+
+.hilal-ws-add:active {
+  transform: scale(0.90) !important;
+  border-radius: 10px !important;
 }
 
 /* Tabs Header */
@@ -484,18 +509,23 @@
   margin-top: 6px;
 }
 
-/* 6. Single Floating Webview Canvas */
+/* 6. Single Floating Webview Canvas (Zero-border, Rounded Card) */
 #tabbrowser-tabbox {
   flex: 1 !important;
   border-radius: var(--md-sys-shape-corner-large, 16px) !important;
-  border: none !important;
+  border: 0 !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
   padding: 0 !important;
   margin: 0 !important;
   background-color: var(--md-sys-color-surface, #101319) !important;
   box-shadow: none !important;
+  outline: none !important;
+  outline-width: 0 !important;
   overflow: hidden !important;
   clip-path: inset(0 round var(--md-sys-shape-corner-large, 16px)) !important;
-  transition: flex 380ms var(--md-sys-motion-spring-spatial);
+  transition: flex 380ms var(--md-sys-motion-spring-spatial), background-color 300ms ease;
 }
 
 #tabbrowser-tabpanels {
@@ -504,12 +534,17 @@
   flex: 1 !important;
   padding: 0 !important;
   margin: 0 !important;
-  border: none !important;
+  border: 0 !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
   border-radius: var(--md-sys-shape-corner-large, 16px) !important;
   background: transparent !important;
   overflow: hidden !important;
 }
 
+#tabbrowser-tabpanels > :not(.split-view-panel) .browserContainer,
+#tabbrowser-tabpanels .browserContainer,
 .browserSidebarContainer,
 .browserContainer,
 .browserStack,
@@ -518,12 +553,57 @@ browser[type="content"],
   height: 100% !important;
   width: 100% !important;
   flex: 1 !important;
-  border: none !important;
+  border: 0 !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
   border-radius: var(--md-sys-shape-corner-large, 16px) !important;
   padding: 0 !important;
   margin: 0 !important;
   box-shadow: none !important;
   outline: none !important;
+  outline-width: 0 !important;
   background: transparent !important;
   overflow: hidden !important;
+}
+
+/* 7. Material 3 Expressive Context Menu */
+#tabContextMenu {
+  appearance: none !important;
+  background-color: var(--md-sys-color-surface-container-high, #262b32) !important;
+  color: var(--md-sys-color-on-surface, #e1e2e9) !important;
+  border-radius: var(--md-sys-shape-corner-medium, 14px) !important;
+  border: 1px solid var(--md-sys-color-outline-variant, #31363e) !important;
+  padding: 6px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+#tabContextMenu menuitem,
+#tabContextMenu menu {
+  appearance: none !important;
+  border-radius: 8px !important;
+  padding: 6px 12px !important;
+  color: var(--md-sys-color-on-surface, #e1e2e9) !important;
+  font-size: 13px !important;
+  transition: background-color 150ms ease, transform 150ms var(--md-sys-motion-spring-spatial);
+}
+
+#tabContextMenu menuitem:hover:not([disabled="true"]),
+#tabContextMenu menu:hover:not([disabled="true"]) {
+  background-color: var(--md-sys-color-surface-container-highest, #31363e) !important;
+  color: var(--md-sys-color-primary, #a8c7fa) !important;
+  transform: translateX(2px);
+}
+
+#tabContextMenu menuitem[disabled="true"],
+#tabContextMenu menu[disabled="true"] {
+  opacity: 0.38 !important;
+}
+
+#tabContextMenu menuseparator {
+  appearance: none !important;
+  height: 1px !important;
+  background-color: var(--md-sys-color-outline-variant, #31363e) !important;
+  margin: 4px 6px !important;
+  border: none !important;
 }
