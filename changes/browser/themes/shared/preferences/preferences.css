@@ -4,28 +4,199 @@
 
 @namespace html "http://www.w3.org/1999/xhtml";
 
-/* Global rules */
+/* Global rules & Material 3 Expressive Design System */
 :root {
+  /* ==========================================================================
+     MATERIAL 3 EXPRESSIVE DESIGN SYSTEM TOKENS
+     Compliant with M3 Expressive, Navigation Drawer Specs (360dp, 56dp items),
+     Switch Overview (52x32dp, 24dp thumb with checkmark), Toolbars & Cards.
+     ========================================================================== */
+
+  /* --- M3 Color System: Light Mode Defaults --- */
+  --md-sys-color-primary: #6750a4;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #eaddff;
+  --md-sys-color-on-primary-container: #21005d;
+  --md-sys-color-secondary: #625b71;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #e8def8;
+  --md-sys-color-on-secondary-container: #1d192b;
+  --md-sys-color-tertiary: #7d5260;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #ffd8e4;
+  --md-sys-color-on-tertiary-container: #31111d;
+  --md-sys-color-error: #ba1a1a;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #ffdad6;
+  --md-sys-color-on-error-container: #410002;
+  --md-sys-color-surface: #fef7ff;
+  --md-sys-color-on-surface: #1d1b20;
+  --md-sys-color-surface-variant: #e7e0ec;
+  --md-sys-color-on-surface-variant: #49454f;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f7f2fa;
+  --md-sys-color-surface-container: #f3edf7;
+  --md-sys-color-surface-container-high: #ece6f0;
+  --md-sys-color-surface-container-highest: #e6e0e9;
+  --md-sys-color-outline: #79747e;
+  --md-sys-color-outline-variant: #cac4d0;
+  --md-sys-color-inverse-surface: #313033;
+  --md-sys-color-inverse-on-surface: #f4eff4;
+  --md-sys-color-inverse-primary: #d0bcff;
+
+  /* --- M3 Expressive Shapes --- */
+  --md-sys-shape-corner-none: 0px;
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-medium-increased: 16px;
+  --md-sys-shape-corner-large: 20px;
+  --md-sys-shape-corner-large-increased: 24px;
+  --md-sys-shape-corner-extra-large: 28px;
+  --md-sys-shape-corner-full: 9999px;
+
+  /* --- M3 Motion System --- */
+  --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --md-sys-motion-duration-short: 150ms;
+  --md-sys-motion-duration-medium: 250ms;
+  --md-sys-motion-duration-long: 400ms;
+
+  /* --- Firefox Core Token Mappings to M3 --- */
+  --background-color-canvas: var(--md-sys-color-surface);
+  --text-color: var(--md-sys-color-on-surface);
+  --text-color-deemphasized: var(--md-sys-color-on-surface-variant);
+  --border-color: var(--md-sys-color-outline-variant);
+  --color-accent-primary: var(--md-sys-color-primary);
+  --color-accent-primary-hover: color-mix(in srgb, var(--md-sys-color-primary) 85%, #000);
+  --color-accent-primary-active: color-mix(in srgb, var(--md-sys-color-primary) 70%, #000);
+
+  /* Card and Box System Overrides */
+  --card-background-color: var(--md-sys-color-surface-container);
+  --card-border-radius: var(--md-sys-shape-corner-large-increased);
+  --card-border: 1px solid var(--md-sys-color-outline-variant);
+  --card-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --card-padding-inline: 24px;
+  --card-padding-block: 24px;
+  --card-gap: 16px;
+  --card-gap-article: 16px;
+
+  --box-border-color: var(--md-sys-color-outline-variant);
+  --box-border-radius: var(--md-sys-shape-corner-large);
+  --box-button-background-color: var(--md-sys-color-surface-container-low);
+  --box-button-background-color-hover: color-mix(in srgb, currentColor 6%, transparent);
+  --box-padding: 14px 20px;
+
+  /* M3 Navigation Drawer Specifications (360dp width) */
+  --size-sidebar: 360px;
+  --categories-width: 360px;
+  --page-nav-margin-inline-start: 16px;
+  --page-nav-gap: 6px;
+  --page-nav-button-padding: 0 24px 0 16px;
+  --page-nav-button-border-radius: var(--md-sys-shape-corner-full);
+  --page-nav-button-border-radius-focused: var(--md-sys-shape-corner-full);
+  --page-nav-button-gap: 12px;
+  --page-nav-button-background-color: transparent;
+  --page-nav-button-background-color-hover: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+  --page-nav-button-background-color-active: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+  --page-nav-button-background-color-selected: var(--md-sys-color-secondary-container);
+  --page-nav-button-text-color: var(--md-sys-color-on-surface-variant);
+  --page-nav-button-text-color-hover: var(--md-sys-color-on-surface);
+  --page-nav-button-text-color-active: var(--md-sys-color-on-surface);
+  --page-nav-button-text-color-selected: var(--md-sys-color-on-secondary-container);
+  --page-nav-button-indicator-width: 0px;
+  --page-nav-button-indicator-background-color: transparent;
+  --icon-size: 24px;
+
+  /* M3 Switch Tokens (52px x 32px track, 24px thumb) */
+  --toggle-width: 52px;
+  --toggle-height: 32px;
+  --toggle-border-radius: var(--md-sys-shape-corner-full);
+  --toggle-border-width: 2px;
+  --toggle-border-color: var(--md-sys-color-outline);
+  --toggle-background-color: var(--md-sys-color-surface-container-highest);
+  --toggle-background-color-hover: var(--md-sys-color-surface-container-high);
+  --toggle-background-color-pressed: var(--md-sys-color-primary);
+  --toggle-background-color-pressed-hover: var(--md-sys-color-primary);
+  --toggle-border-color-pressed: transparent;
+  --toggle-dot-width: 16px;
+  --toggle-dot-height: 16px;
+  --toggle-dot-margin: 6px;
+  --toggle-dot-transform-x: 20px;
+  --toggle-dot-background-color: var(--md-sys-color-outline);
+  --toggle-dot-background-color-on-pressed: var(--md-sys-color-on-primary);
+
+  /* Button and Control Overrides */
+  --button-border-radius: var(--md-sys-shape-corner-full);
+  --select-max-width: 24rem;
+
   @media not -moz-pref("browser.settings-redesign.enabled") {
-    /**
-     * Pre-SRD, headings are 1 level higher than they should be. These overrides
-     * size them as if they were one level lower. With SRD on, the widgets
-     * already render the correct level, so we don't need these.
-     */
     --font-size-heading-xlarge: var(--font-size-xlarge);
     --font-size-heading-large: var(--font-size-large);
     --font-size-heading-medium: var(--font-size-medium);
   }
-  --select-max-width: 20rem;
-
-  --card-padding-inline: var(--space-xlarge);
-  --card-padding-block: var(--card-padding-inline);
-
-  @media -moz-pref("browser.settings-redesign.enabled") {
-    --background-color-canvas: light-dark(var(--color-gray-05), var(--color-gray-90));
-  }
 
   user-select: text;
+}
+
+/* --- M3 Color System: Dark Mode Scheme --- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --md-sys-color-primary: #d0bcff;
+    --md-sys-color-on-primary: #381e72;
+    --md-sys-color-primary-container: #4f378b;
+    --md-sys-color-on-primary-container: #eaddff;
+    --md-sys-color-secondary: #ccc2dc;
+    --md-sys-color-on-secondary: #332d41;
+    --md-sys-color-secondary-container: #4a4458;
+    --md-sys-color-on-secondary-container: #e8def8;
+    --md-sys-color-tertiary: #efb8c8;
+    --md-sys-color-on-tertiary: #492532;
+    --md-sys-color-tertiary-container: #633b48;
+    --md-sys-color-on-tertiary-container: #ffd8e4;
+    --md-sys-color-error: #ffb4ab;
+    --md-sys-color-on-error: #690005;
+    --md-sys-color-error-container: #93000a;
+    --md-sys-color-on-error-container: #ffdad6;
+    --md-sys-color-surface: #141218;
+    --md-sys-color-on-surface: #e6e0e9;
+    --md-sys-color-surface-variant: #49454f;
+    --md-sys-color-on-surface-variant: #cac4d0;
+    --md-sys-color-surface-container-lowest: #0f0d13;
+    --md-sys-color-surface-container-low: #1d1b20;
+    --md-sys-color-surface-container: #211f26;
+    --md-sys-color-surface-container-high: #2b2930;
+    --md-sys-color-surface-container-highest: #36343b;
+    --md-sys-color-outline: #938f99;
+    --md-sys-color-outline-variant: #49454f;
+    --md-sys-color-shadow: #000000;
+    --md-sys-color-scrim: #000000;
+    --md-sys-color-inverse-surface: #e6e0e9;
+    --md-sys-color-inverse-on-surface: #313033;
+    --md-sys-color-inverse-primary: #6750a4;
+
+    --background-color-canvas: var(--md-sys-color-surface);
+    --text-color: var(--md-sys-color-on-surface);
+    --text-color-deemphasized: var(--md-sys-color-on-surface-variant);
+    --border-color: var(--md-sys-color-outline-variant);
+    --color-accent-primary: var(--md-sys-color-primary);
+
+    --card-background-color: var(--md-sys-color-surface-container);
+    --card-border: 1px solid rgba(255, 255, 255, 0.08);
+
+    --box-border-color: rgba(255, 255, 255, 0.08);
+    --box-button-background-color: var(--md-sys-color-surface-container-low);
+
+    --page-nav-button-background-color-selected: var(--md-sys-color-secondary-container);
+    --page-nav-button-text-color-selected: var(--md-sys-color-on-secondary-container);
+
+    --toggle-border-color: var(--md-sys-color-outline);
+    --toggle-background-color: var(--md-sys-color-surface-container-highest);
+    --toggle-background-color-pressed: var(--md-sys-color-primary);
+    --toggle-dot-background-color: var(--md-sys-color-outline);
+    --toggle-dot-background-color-on-pressed: var(--md-sys-color-on-primary);
+  }
 }
 
 #preferences-root {
@@ -63,36 +234,144 @@
   min-height: 0;
 }
 
+/* Material 3 Expressive Navigation Drawer (360dp spec) */
 #categories {
-  width: calc(var(--size-sidebar) - 42px);
+  width: 360px !important;
+  min-width: 360px !important;
+  max-width: 360px !important;
+  box-sizing: border-box;
+  padding-block-start: 12px;
+  border-inline-end: 1px solid var(--md-sys-color-outline-variant);
+  background-color: var(--md-sys-color-surface);
 
   @media (max-width: 950px) {
-    width: auto;
+    width: auto !important;
+    min-width: unset !important;
+    max-width: unset !important;
   }
 }
 
+/* Material 3 Navigation Drawer Item (56dp height, 28dp pill indicator) */
+moz-page-nav-button {
+  min-height: 56px !important;
+  margin: 2px 12px !important;
+  box-sizing: border-box;
+  border-radius: var(--md-sys-shape-corner-full) !important;
+}
+
+moz-page-nav-button::part(button),
+moz-page-nav-button > button,
+moz-page-nav-button a {
+  min-height: 56px !important;
+  height: 56px !important;
+  border-radius: var(--md-sys-shape-corner-full) !important;
+  padding: 0 24px 0 16px !important;
+  gap: 12px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  transition: background-color 200ms var(--md-sys-motion-easing-emphasized),
+              color 200ms var(--md-sys-motion-easing-emphasized),
+              transform 150ms var(--md-sys-motion-easing-emphasized) !important;
+}
+
+moz-page-nav-button .page-nav-icon {
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  -moz-context-properties: fill;
+  fill: currentColor !important;
+}
+
+moz-page-nav-button[selected]::part(button),
+moz-page-nav-button button[selected] {
+  background-color: var(--md-sys-color-secondary-container) !important;
+  color: var(--md-sys-color-on-secondary-container) !important;
+  font-weight: 600 !important;
+}
+
+moz-page-nav-button[selected]::part(button) .page-nav-icon,
+moz-page-nav-button button[selected] .page-nav-icon {
+  fill: var(--md-sys-color-on-secondary-container) !important;
+}
+
+moz-page-nav-button button[selected]::before {
+  display: none !important;
+}
+
+moz-page-nav-button:not([selected]):hover::part(button),
+moz-page-nav-button button:not([selected]):hover,
+moz-page-nav-button a:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+
+moz-page-nav-button:active::part(button),
+moz-page-nav-button button:active,
+moz-page-nav-button a:active {
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent) !important;
+  transform: scale(0.98) !important;
+}
+
+/* Material 3 Top Search Bar & Sticky Header */
 #search-container {
   position: sticky;
   top: 0;
-  /* Bug 2026689 Negative margin is used here to hide the borders of setting-controls on scroll
-     as well as the shadow to the left of the searchbar */
-  margin-inline-start: -4px;
-  /* 4px of additional width to account for the -4px of margin defined above */
-  width: calc(100% + 4px);
-  /* z-index = 2 so that the search-tooltips don't appear when the user scrolls
-     up after searching. */
-  z-index: 2;
-  background-color: var(--background-color-canvas);
-  padding-top: 40px;
-  padding-bottom: var(--search-container-padding);
-  padding-inline: var(--focus-outline-offset);
-  /* Ensure focus indicators on elements below the search container
-     aren't obscured. */
-  margin-bottom: var(--search-container-margin);
+  margin-inline-start: 0;
+  width: 100%;
+  z-index: 10;
+  background-color: var(--md-sys-color-surface);
+  padding-top: 24px;
+  padding-bottom: 16px;
+  padding-inline: 0;
+  margin-bottom: 24px;
 }
 
-#searchInput {
+#searchInput,
+moz-input-search {
   width: 100%;
+  min-height: 52px !important;
+  height: 52px !important;
+  border-radius: var(--md-sys-shape-corner-full) !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  padding: 0 24px !important;
+  font-size: 15px !important;
+  color: var(--md-sys-color-on-surface) !important;
+  box-sizing: border-box !important;
+  transition: all 200ms var(--md-sys-motion-easing-emphasized) !important;
+}
+
+#searchInput::placeholder {
+  color: var(--md-sys-color-on-surface-variant) !important;
+}
+
+#searchInput:focus,
+moz-input-search:focus-within {
+  border-color: var(--md-sys-color-primary) !important;
+  outline: 2px solid var(--md-sys-color-primary) !important;
+  outline-offset: 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+}
+
+/* Material 3 Organization Policy Banner */
+#policies-container-content,
+#policies-container {
+  border-radius: var(--md-sys-shape-corner-large) !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  padding: 14px 20px !important;
+  margin-bottom: 16px !important;
+  color: var(--md-sys-color-on-surface) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
 }
 
 @media (max-width: 950px) {
@@ -106,10 +385,9 @@
   --search-container-margin: calc(var(--focus-outline-width) + var(--focus-outline-offset));
 
   contain: inline-size;
-  /* 72px matches moz-page-nav's --page-nav-margin-top, minus the 40px
-     padding-top already set in common-shared.css. */
-  margin-top: 32px;
+  margin-top: 0;
   padding-top: 0;
+  padding-inline: 48px;
   scroll-padding-top: calc(40px + var(--search-container-padding) + var(--search-container-margin) + 40px);
 
   @media (max-width: 950px) {
@@ -118,22 +396,32 @@
 }
 
 .pane-container {
-  /* A workaround to keep the container always float on the `top: 0` (Bug 1377009) */
   display: block;
-  width: min(100%, 600px);
+  width: min(100%, 780px) !important;
+  max-width: 780px !important;
   min-width: min-content;
-  /* Used to prevent cutting off the borders of the setting-controls */
-  margin-inline-start: 1px;
+  margin-inline-start: 0;
 }
 
 #mainPrefPane {
   width: 100%;
 }
 
+/* Material 3 Expressive Cards & Containers (24dp rounded corners) */
 html|div[data-category],
 groupbox[data-category],
-setting-group[data-category] {
-  margin: 0 0 var(--space-xlarge);
+setting-group[data-category],
+moz-card {
+  border-radius: var(--md-sys-shape-corner-large-increased) !important;
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  box-shadow: var(--card-box-shadow) !important;
+  margin: 0 0 20px !important;
+}
+
+groupbox[data-category],
+setting-group[data-category] > moz-card {
+  padding: 24px !important;
 }
 
 /* Bug 2002963 - payments and addresses are in a groupbox together, but they probably shouldn't be */
@@ -143,8 +431,21 @@ setting-group[data-category] {
   gap: 32px;
 }
 
+/* Material 3 Expressive Typography */
 html|h1 {
-  margin: 0 0 var(--space-large);
+  font-size: 32px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.5px !important;
+  color: var(--md-sys-color-on-surface) !important;
+  margin: 12px 0 24px 0 !important;
+}
+
+html|h2,
+#heading {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: var(--md-sys-color-on-surface) !important;
+  margin: 0 0 8px 0 !important;
 }
 
 html|h2 {
@@ -236,8 +537,449 @@ radio {
 }
 
 .accessory-button {
-  min-width: 150px;
+  min-width: 140px;
   margin: 4px 0;
+}
+
+/* ==========================================================================
+   MATERIAL 3 EXPRESSIVE SWITCHES (Official M3 Specification)
+   52px x 32px Track, 16px/24px Thumb with Embedded Checkmark Icon
+   ========================================================================== */
+
+moz-toggle,
+.toggle-button,
+html|button.toggle-button {
+  --toggle-width: 52px;
+  --toggle-height: 32px;
+  --toggle-border-radius: var(--md-sys-shape-corner-full);
+  --toggle-border-width: 2px;
+  --toggle-border-color: var(--md-sys-color-outline);
+  --toggle-background-color: var(--md-sys-color-surface-container-highest);
+  --toggle-background-color-pressed: var(--md-sys-color-primary);
+  --toggle-dot-width: 16px;
+  --toggle-dot-height: 16px;
+  --toggle-dot-margin: 6px;
+  --toggle-dot-transform-x: 20px;
+  --toggle-dot-background-color: var(--md-sys-color-outline);
+  --toggle-dot-background-color-on-pressed: var(--md-sys-color-on-primary);
+}
+
+.toggle-button,
+moz-toggle::part(button) {
+  appearance: none !important;
+  width: 52px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  padding: 0 !important;
+  border-radius: var(--md-sys-shape-corner-full) !important;
+  border: 2px solid var(--md-sys-color-outline) !important;
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  box-sizing: border-box !important;
+  cursor: pointer !important;
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  transition: background-color 200ms var(--md-sys-motion-easing-emphasized),
+              border-color 200ms var(--md-sys-motion-easing-emphasized),
+              box-shadow 150ms ease !important;
+}
+
+.toggle-button:focus-visible,
+moz-toggle:focus-visible::part(button) {
+  outline: 2px solid var(--md-sys-color-primary) !important;
+  outline-offset: 2px !important;
+}
+
+.toggle-button::before,
+moz-toggle::part(button)::before {
+  content: "" !important;
+  display: block !important;
+  width: 16px !important;
+  height: 16px !important;
+  margin: 6px !important;
+  border-radius: 50% !important;
+  background-color: var(--md-sys-color-outline) !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 14px 14px !important;
+  translate: 0 0 !important;
+  transition: translate 250ms var(--md-sys-motion-easing-emphasized),
+              width 200ms var(--md-sys-motion-easing-emphasized),
+              height 200ms var(--md-sys-motion-easing-emphasized),
+              margin 200ms var(--md-sys-motion-easing-emphasized),
+              background-color 200ms var(--md-sys-motion-easing-emphasized) !important;
+}
+
+.toggle-button:hover:not([aria-pressed="true"])::before,
+moz-toggle:hover:not([pressed])::part(button)::before {
+  background-color: var(--md-sys-color-on-surface-variant) !important;
+}
+
+.toggle-button:active::before,
+moz-toggle:active::part(button)::before {
+  width: 28px !important;
+}
+
+.toggle-button[aria-pressed="true"],
+moz-toggle[pressed]::part(button) {
+  background-color: var(--md-sys-color-primary) !important;
+  border-color: var(--md-sys-color-primary) !important;
+}
+
+.toggle-button[aria-pressed="true"]::before,
+moz-toggle[pressed]::part(button)::before {
+  width: 24px !important;
+  height: 24px !important;
+  margin: 2px !important;
+  translate: 20px 0 !important;
+  background-color: var(--md-sys-color-on-primary) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236750a4' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .toggle-button[aria-pressed="true"]::before,
+  moz-toggle[pressed]::part(button)::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23381e72' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  }
+}
+
+.toggle-button[aria-pressed="true"]:active::before,
+moz-toggle[pressed]:active::part(button)::before {
+  width: 28px !important;
+  translate: 16px 0 !important;
+}
+
+.toggle-button:dir(rtl)[aria-pressed="true"]::before,
+moz-toggle:dir(rtl)[pressed]::part(button)::before {
+  translate: -20px 0 !important;
+}
+
+/* ==========================================================================
+   MATERIAL 3 GROUPED BOX CONTAINERS & LIST ROWS
+   e.g. Search Engines list, Application Handlers, Settings Groups
+   ========================================================================== */
+
+moz-box-group,
+#handlersView,
+#translations-manage-install-list {
+  border-radius: var(--md-sys-shape-corner-large) !important;
+  background-color: var(--md-sys-color-surface-container-low) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  overflow: hidden !important;
+}
+
+moz-box-item,
+#handlersView > richlistitem,
+#translations-manage-install-list > .translations-manage-language {
+  min-height: 56px !important;
+  padding: 14px 20px !important;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant) !important;
+  box-sizing: border-box !important;
+  transition: background-color 150ms ease !important;
+}
+
+moz-box-item:last-child,
+#handlersView > richlistitem:last-child,
+#translations-manage-install-list > .translations-manage-language:last-child {
+  border-bottom: none !important;
+}
+
+moz-box-item:hover,
+#handlersView > richlistitem:hover,
+#translations-manage-install-list > .translations-manage-language:hover {
+  background-color: color-mix(in srgb, currentColor 5%, transparent) !important;
+}
+
+moz-box-item .handle {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background-color: transparent !important;
+  cursor: grab !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background-color 150ms ease !important;
+}
+
+moz-box-item .handle:hover {
+  background-color: color-mix(in srgb, currentColor 8%, transparent) !important;
+}
+
+/* M3 Icon Action Buttons inside rows (e.g. edit pencil, remove) */
+moz-box-item moz-button[icon],
+moz-box-item button[is="highlightable-button"],
+.actionsMenu {
+  min-width: 36px !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  cursor: pointer !important;
+  transition: background-color 150ms ease, transform 150ms ease !important;
+}
+
+moz-box-item moz-button[icon]:hover,
+moz-box-item button[is="highlightable-button"]:hover,
+.actionsMenu:hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  transform: scale(1.05) !important;
+}
+
+/* ==========================================================================
+   MATERIAL 3 BUTTONS (40dp Height, Pill Shape)
+   ========================================================================== */
+
+button,
+html|button,
+moz-button,
+.accessory-button,
+button[is="highlightable-button"] {
+  height: 40px !important;
+  min-height: 40px !important;
+  border-radius: var(--md-sys-shape-corner-full) !important;
+  padding: 0 24px !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1px !important;
+  cursor: pointer !important;
+  border: 1px solid transparent !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border-color: var(--md-sys-color-outline-variant) !important;
+  transition: background-color 150ms var(--md-sys-motion-easing-emphasized),
+              border-color 150ms var(--md-sys-motion-easing-emphasized),
+              color 150ms var(--md-sys-motion-easing-emphasized),
+              transform 100ms ease !important;
+}
+
+button:hover,
+html|button:hover,
+moz-button:hover,
+.accessory-button:hover,
+button[is="highlightable-button"]:hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+}
+
+button:active,
+html|button:active,
+moz-button:active,
+.accessory-button:active,
+button[is="highlightable-button"]:active {
+  transform: scale(0.98) !important;
+}
+
+/* M3 Filled Buttons (Primary Action) */
+button.primary,
+button[primary="true"],
+moz-button[type="primary"],
+#addEngineButton {
+  background-color: var(--md-sys-color-primary) !important;
+  color: var(--md-sys-color-on-primary) !important;
+  border: none !important;
+}
+
+button.primary:hover,
+button[primary="true"]:hover,
+moz-button[type="primary"]:hover,
+#addEngineButton:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 90%, #fff) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  button.primary:hover,
+  button[primary="true"]:hover,
+  moz-button[type="primary"]:hover,
+  #addEngineButton:hover {
+    background-color: color-mix(in srgb, var(--md-sys-color-primary) 85%, #000) !important;
+  }
+}
+
+/* ==========================================================================
+   MATERIAL 3 SELECT MENUS / DROPDOWNS & TEXT INPUTS
+   ========================================================================== */
+
+menulist,
+html|select,
+moz-select {
+  height: 44px !important;
+  min-height: 44px !important;
+  border-radius: var(--md-sys-shape-corner-medium-increased) !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  padding: 0 16px !important;
+  color: var(--md-sys-color-on-surface) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  box-sizing: border-box !important;
+  cursor: pointer !important;
+  transition: border-color 150ms ease, box-shadow 150ms ease !important;
+}
+
+menulist:hover,
+html|select:hover,
+moz-select:hover {
+  border-color: var(--md-sys-color-outline) !important;
+}
+
+menulist:focus,
+html|select:focus,
+moz-select:focus-within {
+  border-color: var(--md-sys-color-primary) !important;
+  outline: 2px solid var(--md-sys-color-primary) !important;
+  outline-offset: 0 !important;
+}
+
+html|input[type="text"],
+html|input[type="password"],
+html|input[type="url"],
+moz-input-text {
+  height: 44px !important;
+  min-height: 44px !important;
+  border-radius: var(--md-sys-shape-corner-medium-increased) !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  padding: 0 16px !important;
+  color: var(--md-sys-color-on-surface) !important;
+  font-size: 14px !important;
+  box-sizing: border-box !important;
+  transition: border-color 150ms ease, box-shadow 150ms ease !important;
+}
+
+html|input[type="text"]:focus,
+html|input[type="password"]:focus,
+html|input[type="url"]:focus,
+moz-input-text:focus-within {
+  border-color: var(--md-sys-color-primary) !important;
+  outline: 2px solid var(--md-sys-color-primary) !important;
+  outline-offset: 0 !important;
+}
+
+/* ==========================================================================
+   MATERIAL 3 CHECKBOXES & RADIO BUTTONS
+   ========================================================================== */
+
+checkbox,
+moz-checkbox,
+html|input[type="checkbox"]:not([switch]) {
+  cursor: pointer !important;
+}
+
+checkbox::part(box),
+moz-checkbox::part(box) {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  border-radius: 6px !important;
+  border: 2px solid var(--md-sys-color-outline) !important;
+  background-color: transparent !important;
+  box-sizing: border-box !important;
+  transition: background-color 150ms ease, border-color 150ms ease !important;
+}
+
+checkbox[checked]::part(box),
+moz-checkbox[checked]::part(box) {
+  border-color: var(--md-sys-color-primary) !important;
+  background-color: var(--md-sys-color-primary) !important;
+}
+
+radio,
+moz-radio,
+html|input[type="radio"] {
+  cursor: pointer !important;
+}
+
+radio::part(box),
+moz-radio::part(box) {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  border-radius: 50% !important;
+  border: 2px solid var(--md-sys-color-outline) !important;
+  background-color: transparent !important;
+  box-sizing: border-box !important;
+}
+
+radio[selected]::part(box),
+moz-radio[selected]::part(box) {
+  border-color: var(--md-sys-color-primary) !important;
+}
+
+/* ==========================================================================
+   MATERIAL 3 HILAL BROWSER PANELS (Workspaces, Sidebar, Privacy, Shortcuts)
+   ========================================================================== */
+
+#hilalWorkspacesGroup,
+#hilalSidebarGroup,
+#hilalPrivacyGroup,
+#hilalUiFixGroup,
+#hilalBoostsGroup,
+#hilalBangsGroup,
+#hilalLanguageGroup,
+#hilalShortcutsGroup {
+  border-radius: var(--md-sys-shape-corner-large-increased) !important;
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  padding: 24px !important;
+}
+
+.shortcuts-category-card {
+  background: var(--md-sys-color-surface-container-low) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: var(--md-sys-shape-corner-large) !important;
+  padding: 20px !important;
+}
+
+.shortcut-row:hover {
+  background-color: color-mix(in srgb, currentColor 6%, transparent) !important;
+}
+
+.shortcut-keycap {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  font-weight: 600 !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+
+.shortcut-action-btn {
+  height: 32px !important;
+  min-height: 32px !important;
+  border-radius: var(--md-sys-shape-corner-full) !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  font-weight: 600 !important;
+  padding: 0 16px !important;
+}
+
+.shortcut-action-btn.recording-active {
+  background: var(--md-sys-color-primary) !important;
+  color: var(--md-sys-color-on-primary) !important;
+}
+
+#hilalSidebarCustomForm,
+#hilalBangsForm {
+  border-radius: var(--md-sys-shape-corner-large) !important;
+  background-color: var(--md-sys-color-surface-container-low) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  padding: 20px !important;
 }
 
 @media not -moz-pref("browser.settings-redesign.enabled") {
@@ -1674,3 +2416,178 @@ setting-pane[onsearchpane] {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   MATERIAL 3 EXPRESSIVE OVERRIDES & FINAL REFINEMENTS
+   Ensures highest specificity for M3 Drawer, Switch, Cards, and Controls.
+   ========================================================================== */
+
+/* 1. M3 Navigation Drawer (Specs: 360dp, 56dp items, 28dp pill) */
+#categories.categories-list,
+#categories,
+html|moz-page-nav#categories {
+  width: 360px !important;
+  min-width: 360px !important;
+  max-width: 360px !important;
+  flex: 0 0 360px !important;
+  background-color: var(--md-sys-color-surface) !important;
+  border-inline-end: 1px solid var(--md-sys-color-outline-variant) !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 950px) {
+  #categories.categories-list,
+  #categories,
+  html|moz-page-nav#categories {
+    width: auto !important;
+    min-width: unset !important;
+    max-width: unset !important;
+    flex: none !important;
+  }
+}
+
+html|moz-page-nav-button,
+moz-page-nav-button {
+  min-height: 56px !important;
+  height: 56px !important;
+  margin: 2px 12px !important;
+  box-sizing: border-box !important;
+}
+
+html|moz-page-nav-button::part(button),
+moz-page-nav-button::part(button),
+moz-page-nav-button button {
+  min-height: 56px !important;
+  height: 56px !important;
+  border-radius: 9999px !important;
+  padding: 0 24px 0 16px !important;
+  gap: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
+  background-color: transparent !important;
+  border: none !important;
+  transition: background-color 200ms cubic-bezier(0.2, 0, 0, 1),
+              color 200ms cubic-bezier(0.2, 0, 0, 1),
+              transform 150ms cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+html|moz-page-nav-button[selected]::part(button),
+moz-page-nav-button[selected]::part(button),
+moz-page-nav-button button[selected] {
+  background-color: var(--md-sys-color-secondary-container) !important;
+  color: var(--md-sys-color-on-secondary-container) !important;
+  font-weight: 600 !important;
+}
+
+html|moz-page-nav-button[selected]::part(button)::before,
+moz-page-nav-button[selected]::part(button)::before,
+moz-page-nav-button button[selected]::before {
+  display: none !important;
+}
+
+html|moz-page-nav-button:not([selected]):hover::part(button),
+moz-page-nav-button:not([selected]):hover::part(button),
+moz-page-nav-button button:not([selected]):hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent) !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+
+/* 2. M3 Switch (52x32dp track, 24dp thumb with checkmark icon) */
+moz-toggle::part(button),
+.toggle-button {
+  width: 52px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  border-radius: 9999px !important;
+  border: 2px solid var(--md-sys-color-outline) !important;
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  box-sizing: border-box !important;
+  cursor: pointer !important;
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  transition: background-color 200ms cubic-bezier(0.2, 0, 0, 1),
+              border-color 200ms cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+moz-toggle::part(button)::before,
+.toggle-button::before {
+  content: "" !important;
+  display: block !important;
+  width: 16px !important;
+  height: 16px !important;
+  margin: 6px !important;
+  border-radius: 50% !important;
+  background-color: var(--md-sys-color-outline) !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 14px 14px !important;
+  translate: 0 0 !important;
+  transition: translate 250ms cubic-bezier(0.2, 0, 0, 1),
+              width 200ms cubic-bezier(0.2, 0, 0, 1),
+              height 200ms cubic-bezier(0.2, 0, 0, 1),
+              margin 200ms cubic-bezier(0.2, 0, 0, 1),
+              background-color 200ms cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+moz-toggle[pressed]::part(button),
+.toggle-button[aria-pressed="true"] {
+  background-color: var(--md-sys-color-primary) !important;
+  border-color: var(--md-sys-color-primary) !important;
+}
+
+moz-toggle[pressed]::part(button)::before,
+.toggle-button[aria-pressed="true"]::before {
+  width: 24px !important;
+  height: 24px !important;
+  margin: 2px !important;
+  translate: 20px 0 !important;
+  background-color: var(--md-sys-color-on-primary) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236750a4' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  moz-toggle[pressed]::part(button)::before,
+  .toggle-button[aria-pressed="true"]::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23381e72' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  }
+}
+
+moz-toggle[pressed]:active::part(button)::before,
+.toggle-button[aria-pressed="true"]:active::before {
+  width: 28px !important;
+  translate: 16px 0 !important;
+}
+
+/* 3. M3 Search Bar */
+#searchInput,
+moz-input-search {
+  min-height: 52px !important;
+  height: 52px !important;
+  border-radius: 9999px !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  padding: 0 24px !important;
+  font-size: 15px !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+
+#searchInput:focus,
+moz-input-search:focus-within {
+  border-color: var(--md-sys-color-primary) !important;
+  outline: 2px solid var(--md-sys-color-primary) !important;
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+}
+
+/* 4. M3 Expressive Cards */
+moz-card,
+setting-group:has(> moz-card),
+groupbox[data-category] {
+  border-radius: 24px !important;
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+}
+
