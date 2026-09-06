@@ -20,6 +20,13 @@
   color: var(--md-sys-color-on-surface, #e1e2e9) !important;
   font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif) !important;
   overflow: hidden !important;
+
+  /* Material 3 Expressive Motion Physics Tokens */
+  --md-sys-motion-spring-spatial: cubic-bezier(0.38, 1.21, 0.22, 1);
+  --md-sys-motion-spring-effects: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --md-sys-motion-duration-short: 150ms;
+  --md-sys-motion-duration-medium: 250ms;
+  --md-sys-motion-duration-long: 400ms;
 }
 
 /* 3. Hilal Topbar */
@@ -99,18 +106,31 @@
   color: var(--md-sys-color-on-surface-variant, #c3c7cf);
   cursor: pointer;
   padding: 0;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.2s var(--md-sys-motion-spring-spatial);
   -moz-window-dragging: no-drag;
 }
 
 .hilal-btn:hover:not([disabled]) {
   background-color: var(--md-sys-color-surface-container-high, #262b32);
   color: var(--md-sys-color-on-surface, #e1e2e9);
+  transform: scale(1.04);
 }
 
 .hilal-btn:active:not([disabled]) {
   background-color: var(--md-sys-color-surface-container-highest, #31363e);
   color: var(--md-sys-color-primary, #a8c7fa);
+  transform: scale(0.92);
+}
+
+#hilal-sidebar-toggle-btn {
+  transition: transform 250ms var(--md-sys-motion-spring-spatial),
+              background-color 150ms ease,
+              color 150ms ease;
+}
+
+#hilal-sidebar-toggle-btn.collapsed {
+  opacity: 0.6;
+  transform: scale(0.95);
 }
 
 .hilal-btn[disabled] {
@@ -201,12 +221,29 @@
   box-shadow: none !important;
   padding: 4px 6px 6px 2px;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   user-select: none;
+  transition: width 380ms var(--md-sys-motion-spring-spatial),
+              min-width 380ms var(--md-sys-motion-spring-spatial),
+              max-width 380ms var(--md-sys-motion-spring-spatial),
+              padding 380ms var(--md-sys-motion-spring-spatial),
+              margin 380ms var(--md-sys-motion-spring-spatial),
+              opacity 200ms var(--md-sys-motion-spring-effects),
+              transform 380ms var(--md-sys-motion-spring-spatial);
+  transform-origin: left center;
 }
 
 #hilal-sidebar[collapsed="true"] {
-  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+  transform: translateX(-24px) scaleX(0.92);
+  pointer-events: none !important;
+  overflow: hidden !important;
 }
 
 /* Workspaces rail */
@@ -218,10 +255,16 @@
   border-bottom: none !important;
   margin-bottom: 8px;
   overflow-x: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+
+#hilal-workspaces-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .hilal-ws-chip {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
@@ -232,18 +275,28 @@
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
   white-space: nowrap;
+  flex-shrink: 0;
+  transition: transform 200ms var(--md-sys-motion-spring-spatial),
+              background-color 200ms ease,
+              color 200ms ease,
+              padding 200ms var(--md-sys-motion-spring-spatial);
 }
 
 .hilal-ws-chip:hover {
   background-color: var(--md-sys-color-surface-container-high, #262b32);
   color: var(--md-sys-color-on-surface, #e1e2e9);
+  transform: translateY(-1px);
+}
+
+.hilal-ws-chip:active {
+  transform: scale(0.92);
 }
 
 .hilal-ws-chip.active {
   background-color: var(--md-sys-color-primary-container, #0842a0);
   color: var(--md-sys-color-on-primary-container, #d3e3fd);
+  transform: scale(1.02);
 }
 
 .hilal-ws-add {
@@ -297,16 +350,25 @@
   background-color: transparent;
   color: var(--md-sys-color-on-surface-variant, #c3c7cf);
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
   gap: 8px;
   position: relative;
   user-select: none;
   border: none !important;
+  transition: transform 220ms var(--md-sys-motion-spring-spatial),
+              background-color 160ms ease,
+              color 160ms ease,
+              border-radius 200ms var(--md-sys-motion-spring-spatial);
+  animation: hilal-tab-enter 280ms var(--md-sys-motion-spring-spatial) both;
 }
 
 .hilal-tab-pill:hover {
   background-color: var(--md-sys-color-surface-container, #1c2027);
   color: var(--md-sys-color-on-surface, #e1e2e9);
+  transform: translateX(2px);
+}
+
+.hilal-tab-pill:active {
+  transform: scale(0.97);
 }
 
 .hilal-tab-pill.active {
@@ -314,6 +376,18 @@
   color: var(--md-sys-color-primary, #a8c7fa);
   font-weight: 500;
   border: none !important;
+  border-radius: var(--md-sys-shape-corner-large, 16px);
+}
+
+@keyframes hilal-tab-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .hilal-tab-icon {
@@ -390,6 +464,7 @@
   box-shadow: none !important;
   overflow: hidden !important;
   clip-path: inset(0 round var(--md-sys-shape-corner-large, 16px)) !important;
+  transition: flex 380ms var(--md-sys-motion-spring-spatial);
 }
 
 #tabbrowser-tabpanels {

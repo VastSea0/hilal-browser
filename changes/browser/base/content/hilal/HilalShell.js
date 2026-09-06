@@ -21,6 +21,7 @@
       this.createTopBar();
       this.createSidebar();
       this.bindBrowserEvents();
+      this.hookWorkspaces();
       this.renderWorkspaces();
       this.renderTabs();
       this.syncUrl();
@@ -142,6 +143,7 @@
         if (sb) {
           const isCollapsed = sb.getAttribute("collapsed") === "true";
           sb.setAttribute("collapsed", isCollapsed ? "false" : "true");
+          sidebarToggle.classList.toggle("collapsed", !isCollapsed);
         }
       });
       rightGroup.appendChild(sidebarToggle);
@@ -219,43 +221,151 @@
       }
     },
 
+    hookWorkspaces() {
+      const sync = () => {
+        const manager = window.gHilalWorkspaces;
+        if (!manager) return;
+
+        if (!this._workspacesHooked) {
+          this._workspacesHooked = true;
+
+          const origSwitchTo = manager.switchTo.bind(manager);
+          manager.switchTo = (id) => {
+            origSwitchTo(id);
+            this.renderWorkspaces();
+            this.renderTabs();
+          };
+
+          const origCreate = manager.create.bind(manager);
+          manager.create = (...args) => {
+            origCreate(...args);
+            this.renderWorkspaces();
+            this.renderTabs();
+          };
+
+          if (manager.remove) {
+            const origRemove = manager.remove.bind(manager);
+            manager.remove = (...args) => {
+              origRemove(...args);
+              this.renderWorkspaces();
+              this.renderTabs();
+            };
+          }
+
+          if (manager.rename) {
+            const origRename = manager.rename.bind(manager);
+            manager.rename = (...args) => {
+              origRename(...args);
+              this.renderWorkspaces();
+              this.renderTabs();
+            };
+          }
+
+          const origApply = manager._apply.bind(manager);
+          manager._apply = (...args) => {
+            origApply(...args);
+            this.renderTabs();
+          };
+        }
+
+        this.renderWorkspaces();
+        this.renderTabs();
+      };
+
+      if (window.gHilalWorkspaces) {
+        sync();
+      } else {
+        let attempts = 0;
+        const interval = setInterval(() => {
+          attempts++;
+          if (window.gHilalWorkspaces) {
+            clearInterval(interval);
+            sync();
+          } else if (attempts > 30) {
+            clearInterval(interval);
+          }
+        }, 100);
+      }
+    },
+
     renderWorkspaces() {
       const wsBar = document.getElementById("hilal-workspaces-bar");
       if (!wsBar) return;
       wsBar.replaceChildren();
 
       const manager = window.gHilalWorkspaces;
-      if (manager && Array.isArray(manager._workspaces) && manager._workspaces.length > 0) {
-        manager._workspaces.forEach((ws) => {
-          const chip = document.createElement("button");
-          chip.className = "hilal-ws-chip" + (ws.id === manager._activeId ? " active" : "");
-          chip.textContent = (ws.emoji ? ws.emoji + " " : "") + (ws.name || ws.id);
-          chip.addEventListener("click", () => {
-            if (typeof manager.switchTo === "function") {
-              manager.switchTo(ws.id);
+      let workspaces = manager?._workspaces;
+
+      if ((!workspaces || workspaces.length === 0) && typeof Services !== "undefined") {
+        try {
+          const raw = Services.prefs.getStringPref("hilal.workspaces.data", "[]");
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            workspaces = parsed;
+          }
+        } catch (e) {}
+      }
+
+      if (!workspaces || workspaces.length === 0) {
+        workspaces = [{ id: "default", name: "Personal", emoji: "\u{1F4BC}", color: "blue" }];
+      }
+
+      const activeId = manager?._activeId ||
+        (typeof Services !== "undefined"
+          ? Services.prefs.getStringPref("hilal.workspaces.active", workspaces[0].id)
+          : workspaces[0].id);
+
+      workspaces.forEach((ws) => {
+        const chip = document.createElement("button");
+        chip.className = "hilal-ws-chip" + (ws.id === activeId ? " active" : "");
+        const emojiStr = ws.emoji ? ws.emoji + " " : "";
+        chip.textContent = emojiStr + (ws.name || ws.id);
+        chip.title = `${ws.name || ws.id} (Right click to edit)`;
+
+        chip.addEventListener("click", () => {
+          if (manager && typeof manager.switchTo === "function") {
+            manager.switchTo(ws.id);
+          } else if (typeof Services !== "undefined") {
+            Services.prefs.setStringPref("hilal.workspaces.active", ws.id);
+          }
+          this.renderWorkspaces();
+          this.renderTabs();
+        });
+
+        chip.addEventListener("contextmenu", (e) => {
+          e.preventDefault();
+          if (manager && typeof manager._showRenameDialog === "function") {
+            manager._showRenameDialog(ws);
+          }
+        });
+
+        wsBar.appendChild(chip);
+      });
+
+      const addWsBtn = document.createElement("button");
+      addWsBtn.className = "hilal-ws-chip hilal-ws-add";
+      addWsBtn.title = "New Workspace";
+      addWsBtn.textContent = "+";
+      addWsBtn.addEventListener("click", () => {
+        if (manager && typeof manager._showCreateDialog === "function") {
+          manager._showCreateDialog();
+        } else {
+          const name = prompt("Enter Workspace Name:", "Work");
+          if (name) {
+            if (manager && typeof manager.create === "function") {
+              manager.create(name);
+            } else if (typeof Services !== "undefined") {
+              const newId = "ws-" + Date.now();
+              workspaces.push({ id: newId, name, emoji: "\u{1F4C1}", color: "purple", containerId: 0 });
+              Services.prefs.setStringPref("hilal.workspaces.data", JSON.stringify(workspaces));
+              Services.prefs.setStringPref("hilal.workspaces.active", newId);
             }
             this.renderWorkspaces();
             this.renderTabs();
-          });
-          wsBar.appendChild(chip);
-        });
-
-        const addWsBtn = document.createElement("button");
-        addWsBtn.className = "hilal-ws-chip hilal-ws-add";
-        addWsBtn.title = "New Workspace";
-        addWsBtn.textContent = "+";
-        addWsBtn.addEventListener("click", () => {
-          if (typeof manager._showCreateDialog === "function") {
-            manager._showCreateDialog();
           }
-        });
-        wsBar.appendChild(addWsBtn);
-      } else {
-        const defaultChip = document.createElement("button");
-        defaultChip.className = "hilal-ws-chip active";
-        defaultChip.textContent = "Personal";
-        wsBar.appendChild(defaultChip);
-      }
+        }
+      });
+      wsBar.appendChild(addWsBtn);
     },
 
     navigate(rawUrl) {
@@ -288,10 +398,18 @@
       if (!window.gBrowser) return;
       try {
         const principal = Services.scriptSecurityManager.getSystemPrincipal();
-        window.gBrowser.addTab(url, {
+        const tab = window.gBrowser.addTab(url, {
           triggeringPrincipal: principal,
           inBackground: false,
         });
+
+        const manager = window.gHilalWorkspaces;
+        if (manager && manager._activeId && tab) {
+          manager._setTabWorkspace(tab, manager._activeId);
+        }
+
+        window.gBrowser.selectedTab = tab;
+        this.renderTabs();
       } catch (e) {
         console.error("Hilal openNewTab failed:", e);
       }
@@ -303,9 +421,21 @@
 
       container.replaceChildren();
       const tabs = Array.from(window.gBrowser.tabs || []);
+      const manager = window.gHilalWorkspaces;
+      const activeWsId = manager?._activeId;
 
       tabs.forEach((tab) => {
         if (tab.hidden) return;
+
+        // Filter tabs by active workspace
+        if (manager && activeWsId) {
+          const tabWs = typeof manager._getTabWorkspace === "function"
+            ? manager._getTabWorkspace(tab)
+            : tab.getAttribute("hilal-workspace");
+          if (tabWs && tabWs !== activeWsId && !tab.pinned) {
+            return;
+          }
+        }
 
         const isSelected = tab.selected || tab === window.gBrowser.selectedTab;
         const pill = document.createElement("div");
