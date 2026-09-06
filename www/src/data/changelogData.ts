@@ -30,11 +30,21 @@ export interface ReleaseGroup {
   compareUrl: string | null;
 }
 
-export const REPO_COMMITS_TOTAL = 454;
+export const REPO_COMMITS_TOTAL = 455;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "6e26f957cad9ad932487cac3fcd382a6ce7dd9a0",
+    "shortHash": "6e26f95",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T06:55:15+03:00",
+    "subject": "refactor(www): remove redundant nested card wrappers around screenshots",
+    "body": "",
+    "category": "refactor",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6e26f957cad9ad932487cac3fcd382a6ce7dd9a0"
+  },
   {
     "hash": "ed4a1390a4129f40c2c0bdb82ab52c674f048121",
     "shortHash": "ed4a139",
@@ -4582,9 +4592,19 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-06T06:53:40+03:00",
-    "commitCount": 13,
+    "date": "2026-09-06T06:55:15+03:00",
+    "commitCount": 14,
     "commits": [
+      {
+        "hash": "6e26f957cad9ad932487cac3fcd382a6ce7dd9a0",
+        "shortHash": "6e26f95",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T06:55:15+03:00",
+        "subject": "refactor(www): remove redundant nested card wrappers around screenshots",
+        "body": "",
+        "category": "refactor",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6e26f957cad9ad932487cac3fcd382a6ce7dd9a0"
+      },
       {
         "hash": "ed4a1390a4129f40c2c0bdb82ab52c674f048121",
         "shortHash": "ed4a139",

@@ -202,7 +202,7 @@ export default function App() {
         chip: "Açık Kaynak • Alpha Sürümü",
         tagline: "Web sizin olsun.",
         subtitle:
-          "Gözetimsiz, kısıtlamasız ve bağımsız bir masaüstü tarayıcısı. Yarı saydam Tahoe kenar çubuğu, izole konteyner çalışma alanları ve dahili gizlilik kalkanı ile internette tam kontrolü yeniden kazanın.",
+          "Gözetimsiz, kısıtlamasız ve bağımsız bir masaüstü tarayıcısı. Tamamen kişiselleştirilebilir esnek arayüz, dikey sekmeler, izole konteyner çalışma alanları ve dahili gizlilik kalkanı ile internette tam kontrolü yeniden kazanın.",
         downloadBtn: {
           macos: "macOS için İndir",
           windows: "Windows için İndir",
@@ -213,12 +213,12 @@ export default function App() {
       },
       stories: [
         {
-          chip: "Tahoe Arayüzü",
-          title: "Sayfalara alan açan, yarı saydam ve akıcı arayüz.",
+          chip: "Kişiselleştirilebilir Arayüz",
+          title: "İhtiyacınıza göre şekillenen, esnek ve akıcı arayüz.",
           description:
-            "Sekmeler solda, dikkatiniz tam merkezde. Web sayfasının renk tonlarına usulca uyum sağlayan yarı saydam kenar çubuğu ve kalabalığı ortadan kaldıran kompakt araç çubuğu.",
+            "Dikey sekmeler, kompakt araç çubuğu, kenar çubuğu konumlandırması ve tema seçenekleriyle tarayıcınızı tamamen kendi çalışma akışınıza göre özelleştirin.",
           image: isDark ? "/welcome-compact-vertical.png" : "/welcome-standard-vertical.png",
-          alt: "Hilal Tahoe Sidebar Arayüzü",
+          alt: "Hilal Kişiselleştirilebilir Arayüz",
         },
         {
           chip: "İzole Konteynerler",
@@ -318,7 +318,7 @@ export default function App() {
         chip: "Open Source • Alpha Build",
         tagline: "The web, on your terms.",
         subtitle:
-          "An uncompromised, surveillance-free desktop browser built on Firefox Gecko. Featuring translucent Tahoe sidebars, isolated multi-account workspaces, and built-in tracking protection.",
+          "An uncompromised, surveillance-free desktop browser built on Firefox Gecko. Featuring a fully customizable interface, vertical tabs, isolated multi-account workspaces, and built-in tracking protection.",
         downloadBtn: {
           macos: "Download for macOS",
           windows: "Download for Windows",
@@ -329,12 +329,12 @@ export default function App() {
       },
       stories: [
         {
-          chip: "Tahoe Interface",
-          title: "A translucent Tahoe sidebar that gets out of your way.",
+          chip: "Customizable Interface",
+          title: "An adaptable, flexible interface tailored to your workflow.",
           description:
-            "Tabs on the left, your focus on the center. A clean window that softly adapts to the website's color palette, paired with an auto-hiding compact toolbar.",
+            "Customize vertical tabs, compact toolbar layouts, sidebar positions, and theme styles to shape a browsing experience that fits the way you work.",
           image: isDark ? "/welcome-compact-vertical.png" : "/welcome-standard-vertical.png",
-          alt: "Hilal Tahoe Sidebar Interface",
+          alt: "Hilal Customizable Interface",
         },
         {
           chip: "Container Workspaces",
@@ -637,7 +637,7 @@ export default function App() {
             >
               <img
                 src={isDark ? "/welcome-home-preview-black.png" : "/welcome-home-preview.png"}
-                alt="Hilal Browser Tahoe Interface"
+                alt="Hilal Browser Interface"
                 className="w-full h-auto block select-none pointer-events-none rounded-2xl"
               />
             </motion.div>
