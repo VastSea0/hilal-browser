@@ -30,11 +30,21 @@ export interface ReleaseGroup {
   compareUrl: string | null;
 }
 
-export const REPO_COMMITS_TOTAL = 452;
+export const REPO_COMMITS_TOTAL = 453;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "de4bdb4c4a96e96b4cb9c235e2680bff4c85860f",
+    "shortHash": "de4bdb4",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T06:52:44+03:00",
+    "subject": "chore: update changelog data with latest feature commit and increment commit count",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/de4bdb4c4a96e96b4cb9c235e2680bff4c85860f"
+  },
   {
     "hash": "4611aae44c4ef4a5340e4ed4ab2591d13e16d995",
     "shortHash": "4611aae",
@@ -4562,9 +4572,19 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-06T06:52:27+03:00",
-    "commitCount": 11,
+    "date": "2026-09-06T06:52:44+03:00",
+    "commitCount": 12,
     "commits": [
+      {
+        "hash": "de4bdb4c4a96e96b4cb9c235e2680bff4c85860f",
+        "shortHash": "de4bdb4",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T06:52:44+03:00",
+        "subject": "chore: update changelog data with latest feature commit and increment commit count",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/de4bdb4c4a96e96b4cb9c235e2680bff4c85860f"
+      },
       {
         "hash": "4611aae44c4ef4a5340e4ed4ab2591d13e16d995",
         "shortHash": "4611aae",

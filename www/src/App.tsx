@@ -434,43 +434,39 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-m3-surface text-[var(--md-sys-color-on-surface)] selection:bg-[var(--md-sys-color-primary-container)] selection:text-[var(--md-sys-color-on-primary-container)]">
-      {/* 1. M3 Expressive Floating Top App Bar */}
+      {/* 1. M3 Floating Top App Bar */}
       <nav className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 pointer-events-none">
-        <div className="mx-auto max-w-5xl pointer-events-auto h-16 rounded-full bg-m3-container/85 backdrop-blur-xl border border-[var(--md-sys-color-outline-variant)]/35 px-4 sm:px-6 flex items-center justify-between shadow-lg shadow-black/10 transition-colors">
+        <div className="mx-auto max-w-5xl pointer-events-auto h-14 rounded-full bg-m3-surface/80 dark:bg-m3-container-low/80 backdrop-blur-xl border border-[var(--md-sys-color-outline-variant)]/20 px-4 sm:px-5 flex items-center justify-between shadow-md shadow-black/5 transition-all">
           {/* Logo & Name */}
           <motion.div
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => navigateTo("home")}
-            className="flex items-center gap-3 cursor-pointer"
+            className="flex items-center gap-2.5 cursor-pointer"
           >
-            <div className="w-9 h-9 rounded-full bg-[var(--md-sys-color-primary-container)] flex items-center justify-center p-1.5">
+            <div className="w-8 h-8 rounded-full bg-[var(--md-sys-color-primary-container)]/60 flex items-center justify-center p-1.5">
               <img
                 src="/default128.png"
                 alt="Hilal Logo"
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className="text-base font-bold tracking-tight text-[var(--md-sys-color-on-surface)]">
+            <span className="text-sm font-bold tracking-tight text-[var(--md-sys-color-on-surface)]">
               Hilal
             </span>
           </motion.div>
 
-          {/* Center Navigation Segmented Pills */}
-          <div className="hidden md:flex items-center gap-1.5 p-1 rounded-full bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/25">
+          {/* Center Nav Links - Clean & Unnested */}
+          <div className="hidden md:flex items-center gap-1">
             <button
               onClick={() => scrollToId("features")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
-                currentView === "home"
-                  ? "text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50"
-                  : "text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)]"
-              }`}
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors cursor-pointer"
             >
               {activeT.nav.features}
             </button>
             <button
               onClick={() => scrollToId("architecture")}
-              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors cursor-pointer"
             >
               {activeT.nav.architecture}
             </button>
@@ -478,8 +474,8 @@ export default function App() {
               onClick={() => navigateTo("changelog")}
               className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                 currentView === "changelog"
-                  ? "bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] shadow-sm"
-                  : "text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50"
+                  ? "bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]"
+                  : "text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8"
               }`}
             >
               <GitCommit className="w-3.5 h-3.5" />
@@ -487,7 +483,7 @@ export default function App() {
             </button>
             <button
               onClick={() => scrollToId("download")}
-              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors cursor-pointer"
             >
               {activeT.nav.download}
             </button>
@@ -495,7 +491,7 @@ export default function App() {
               href="https://github.com/VastSea0/hilal-browser"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors flex items-center gap-1"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors flex items-center gap-1.5"
             >
               <Github className="w-3.5 h-3.5" />
               <span>{activeT.nav.github}</span>
@@ -503,11 +499,11 @@ export default function App() {
           </div>
 
           {/* Right Utilities */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {/* Lang Chip */}
             <button
               onClick={() => setLang(lang === "tr" ? "en" : "tr")}
-              className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-mono font-bold bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/30 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)] transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-bold text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors cursor-pointer"
               title={lang === "tr" ? "Switch to English" : "Türkçe'ye Geç"}
             >
               {lang === "tr" ? "EN" : "TR"}
@@ -516,18 +512,18 @@ export default function App() {
             {/* Theme Chip */}
             <button
               onClick={toggleTheme}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/30 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)] transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors cursor-pointer"
               aria-label="Theme Toggle"
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            {/* M3 Filled CTA Pill Button */}
+            {/* CTA Pill Button */}
             <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setIsDownloadOpen(true)}
-              className="h-10 px-5 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-semibold text-xs transition-shadow shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer"
+              className="h-9 px-4 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-semibold text-xs transition-all shadow-sm hover:shadow flex items-center gap-1.5 cursor-pointer ml-1"
             >
               <Download className="w-3.5 h-3.5" />
               <span>{activeT.nav.getHilal}</span>
