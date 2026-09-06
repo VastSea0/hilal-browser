@@ -264,3 +264,38 @@ export function getRecommendedAsset(assets: GithubAsset[], os: DetectionOS): Git
   }
   return null;
 }
+
+export interface Contributor {
+  login: string;
+  name?: string;
+  avatar_url: string;
+  html_url: string;
+  contributions: number;
+}
+
+/**
+ * Fetch contributors from GitHub API with fallback
+ */
+export async function fetchGithubContributors(): Promise<Contributor[]> {
+  try {
+    const res = await fetch("https://api.github.com/repos/VastSea0/hilal-browser/contributors", {
+      headers: {
+        Accept: "application/vnd.github.v3+json",
+      },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return data.map((item: any) => ({
+          login: item.login || "",
+          name: item.name || item.login || "",
+          avatar_url: item.avatar_url || `https://github.com/${item.login}.png`,
+          html_url: item.html_url || `https://github.com/${item.login}`,
+          contributions: item.contributions || 0,
+        }));
+      }
+    }
+  } catch {}
+  return [];
+}
+

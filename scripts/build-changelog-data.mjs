@@ -215,7 +215,65 @@ for (let i = 0; i < releaseTags.length; i++) {
   });
 }
 
-// 5. Output file
+// 5. Parse Contributors
+const rawAuthors = execSync('git log --pretty=format:"%an%x09%ae"', {
+  cwd: repoRoot,
+  encoding: "utf8",
+})
+  .trim()
+  .split("\n")
+  .filter(Boolean);
+
+const authorCounts = {};
+for (const line of rawAuthors) {
+  const [name, email] = line.split("\t");
+  let key = name || "unknown";
+  let username = name || "unknown";
+  let cleanName = name || "unknown";
+  let role = "Contributor";
+
+  const lowerEmail = (email || "").toLowerCase();
+  const lowerName = (name || "").toLowerCase();
+
+  if (
+    lowerEmail.includes("vastsea") ||
+    lowerName.includes("vastsea") ||
+    lowerName.includes("egehan")
+  ) {
+    key = "VastSea0";
+    username = "VastSea0";
+    cleanName = "Egehan KAHRAMAN";
+    role = "Lead Developer";
+  } else if (lowerEmail.includes("greenkod") || lowerName.includes("greenkod")) {
+    key = "greenkod";
+    username = "greenkod";
+    cleanName = "GreenKod";
+    role = "Contributor";
+  } else if (lowerEmail.includes("mmapro12") || lowerName.includes("muhammed beshir")) {
+    key = "mmapro12";
+    username = "mmapro12";
+    cleanName = "Muhammed Beshir";
+    role = "Contributor";
+  }
+
+  if (!authorCounts[key]) {
+    authorCounts[key] = {
+      username,
+      name: cleanName,
+      avatarUrl: `https://github.com/${username}.png`,
+      githubUrl: `https://github.com/${username}`,
+      contributions: 0,
+      role,
+    };
+  }
+  authorCounts[key].contributions += 1;
+}
+
+const contributors = Object.values(authorCounts).sort(
+  (a, b) => b.contributions - a.contributions
+);
+
+// 6. Output file
 const outputTs = `// Generated automatically from real git repository commits and tags.
 // DO NOT EDIT MANUALLY.
 
@@ -248,6 +306,15 @@ export interface ReleaseGroup {
   compareUrl: string | null;
 }
 
+export interface ContributorItem {
+  username: string;
+  name: string;
+  avatarUrl: string;
+  githubUrl: string;
+  contributions: number;
+  role: string;
+}
+
 export const REPO_COMMITS_TOTAL = ${allCommits.length};
 export const REPO_RELEASES_TOTAL = ${releaseTags.length};
 export const LATEST_RELEASE_TAG = "${latestTag}";
@@ -255,13 +322,17 @@ export const LATEST_RELEASE_TAG = "${latestTag}";
 export const ALL_COMMITS: CommitEntry[] = ${JSON.stringify(allCommits, null, 2)};
 
 export const RELEASES_DATA: ReleaseGroup[] = ${JSON.stringify(releases, null, 2)};
+
+export const CONTRIBUTORS_DATA: ContributorItem[] = ${JSON.stringify(contributors, null, 2)};
 `;
 
 const outputDir = resolve(repoRoot, "www/src/data");
 mkdirSync(outputDir, { recursive: true });
 writeFileSync(resolve(outputDir, "changelogData.ts"), outputTs, "utf8");
 
-console.log(`Generated changelog data:`);
+console.log(`Generated changelog and contributor data:`);
 console.log(`- Total commits: ${allCommits.length}`);
 console.log(`- Total release groups: ${releases.length}`);
+console.log(`- Total contributors: ${contributors.length}`);
 console.log(`- Target: www/src/data/changelogData.ts`);
+

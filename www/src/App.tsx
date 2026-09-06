@@ -16,7 +16,8 @@ import {
   Sparkles,
   Cpu,
   Boxes,
-  GitCommit
+  GitCommit,
+  Users,
 } from "lucide-react";
 
 import { GithubRelease } from "./types";
@@ -31,6 +32,7 @@ import {
 
 import DownloadModal from "./components/DownloadModal";
 import ChangelogPage from "./components/ChangelogPage";
+import { CONTRIBUTORS_DATA } from "./data/changelogData";
 
 // M3 Expressive Spring Motion Physics
 const springTransition = {
@@ -744,6 +746,40 @@ export default function App() {
                   >
                     {copiedClone ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                   </button>
+                </div>
+              </div>
+
+              {/* Contributors Grid */}
+              <div className="pt-6 border-t border-[var(--md-sys-color-outline-variant)]/20">
+                <div className="flex flex-col items-center gap-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[var(--md-sys-color-on-surface-variant)] flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-[var(--md-sys-color-primary)]" />
+                    <span>{lang === "tr" ? "Projeye Katkıda Bulunanlar" : "Project Contributors"}</span>
+                  </span>
+                  <div className="flex flex-wrap items-center justify-center gap-2.5">
+                    {CONTRIBUTORS_DATA.map((c) => (
+                      <a
+                        key={c.username}
+                        href={c.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-m3-container-lowest hover:bg-m3-container-high border border-[var(--md-sys-color-outline-variant)]/30 text-xs transition-all hover:scale-105 group"
+                        title={`${c.name} (@${c.username}) • ${c.contributions} commit`}
+                      >
+                        <img
+                          src={c.avatarUrl}
+                          alt={c.name}
+                          className="w-5 h-5 rounded-full object-cover ring-1 ring-[var(--md-sys-color-outline-variant)]/40"
+                        />
+                        <span className="font-semibold text-[var(--md-sys-color-on-surface)] group-hover:text-[var(--md-sys-color-primary)] transition-colors">
+                          {c.name}
+                        </span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-m3-container text-[var(--md-sys-color-on-surface-variant)]">
+                          {c.contributions} commit
+                        </span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
             </motion.div>

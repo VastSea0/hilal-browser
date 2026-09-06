@@ -30,11 +30,30 @@ export interface ReleaseGroup {
   compareUrl: string | null;
 }
 
-export const REPO_COMMITS_TOTAL = 455;
+export interface ContributorItem {
+  username: string;
+  name: string;
+  avatarUrl: string;
+  githubUrl: string;
+  contributions: number;
+  role: string;
+}
+
+export const REPO_COMMITS_TOTAL = 456;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "c1af69a30ce04d32c338d97d09b0dfd3ca4ddcd0",
+    "shortHash": "c1af69a",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T06:56:18+03:00",
+    "subject": "docs(www): emphasize customizable interface over Tahoe theme",
+    "body": "",
+    "category": "docs",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c1af69a30ce04d32c338d97d09b0dfd3ca4ddcd0"
+  },
   {
     "hash": "6e26f957cad9ad932487cac3fcd382a6ce7dd9a0",
     "shortHash": "6e26f95",
@@ -4592,9 +4611,19 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-06T06:55:15+03:00",
-    "commitCount": 14,
+    "date": "2026-09-06T06:56:18+03:00",
+    "commitCount": 15,
     "commits": [
+      {
+        "hash": "c1af69a30ce04d32c338d97d09b0dfd3ca4ddcd0",
+        "shortHash": "c1af69a",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T06:56:18+03:00",
+        "subject": "docs(www): emphasize customizable interface over Tahoe theme",
+        "body": "",
+        "category": "docs",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c1af69a30ce04d32c338d97d09b0dfd3ca4ddcd0"
+      },
       {
         "hash": "6e26f957cad9ad932487cac3fcd382a6ce7dd9a0",
         "shortHash": "6e26f95",
@@ -9395,5 +9424,32 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     },
     "githubUrl": "https://github.com/VastSea0/hilal-browser/releases/tag/v0.1.0",
     "compareUrl": null
+  }
+];
+
+export const CONTRIBUTORS_DATA: ContributorItem[] = [
+  {
+    "username": "VastSea0",
+    "name": "Egehan KAHRAMAN",
+    "avatarUrl": "https://github.com/VastSea0.png",
+    "githubUrl": "https://github.com/VastSea0",
+    "contributions": 444,
+    "role": "Lead Developer"
+  },
+  {
+    "username": "greenkod",
+    "name": "GreenKod",
+    "avatarUrl": "https://github.com/greenkod.png",
+    "githubUrl": "https://github.com/greenkod",
+    "contributions": 11,
+    "role": "Contributor"
+  },
+  {
+    "username": "mmapro12",
+    "name": "Muhammed Beshir",
+    "avatarUrl": "https://github.com/mmapro12.png",
+    "githubUrl": "https://github.com/mmapro12",
+    "contributions": 1,
+    "role": "Contributor"
   }
 ];

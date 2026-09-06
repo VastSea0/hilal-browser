@@ -8,8 +8,9 @@ import {
   RefreshCw,
   CheckCircle2,
   GitBranch,
+  Users,
 } from "lucide-react";
-import { RELEASES_DATA } from "../data/changelogData";
+import { RELEASES_DATA, CONTRIBUTORS_DATA } from "../data/changelogData";
 
 interface ChangelogPageProps {
   lang: "tr" | "en";
@@ -112,6 +113,35 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
               ? "Hilal Browser için yayınlanan sürümler, yeni özellikler ve hata düzeltmelerinin kronolojik geçmişi."
               : "Chronological release history, new features, and bug fixes for Hilal Browser."}
           </motion.p>
+
+          {/* Contributors Group */}
+          <motion.div
+            variants={m3FadeIn}
+            className="pt-4 flex flex-wrap items-center justify-center gap-3"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-m3-container border border-[var(--md-sys-color-outline-variant)]/30 text-xs font-semibold text-[var(--md-sys-color-on-surface)]">
+              <Users className="w-3.5 h-3.5 text-[var(--md-sys-color-primary)]" />
+              <span>{lang === "tr" ? "Katkıda Bulunanlar:" : "Contributors:"}</span>
+              <div className="flex items-center -space-x-1.5 ml-1">
+                {CONTRIBUTORS_DATA.map((c) => (
+                  <a
+                    key={c.username}
+                    href={c.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={`${c.name} (@${c.username}) • ${c.contributions} commit`}
+                    className="w-6 h-6 rounded-full ring-2 ring-m3-surface overflow-hidden hover:scale-110 transition-transform"
+                  >
+                    <img
+                      src={c.avatarUrl}
+                      alt={c.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
 
         {/* Sequential Timeline List */}
