@@ -1,0 +1,32 @@
+diff --git a/ipc/chromium/src/chrome/common/ipc_channel_posix.cc b/ipc/chromium/src/chrome/common/ipc_channel_posix.cc
+index bfa6d607d3f4..3d0205f517de 100644
+--- a/ipc/chromium/src/chrome/common/ipc_channel_posix.cc
++++ b/ipc/chromium/src/chrome/common/ipc_channel_posix.cc
+@@ -924,6 +924,13 @@ static mozilla::UniqueMachSendRight BrokerExtractSendRight(
+   kern_return_t kr =
+       mach_port_extract_right(task, name, MACH_MSG_TYPE_MOVE_SEND,
+                               &extractedRight, &extractedRightType);
++  if (kr != KERN_SUCCESS) {
++    kr = mach_port_extract_right(task, name, MACH_MSG_TYPE_COPY_SEND,
++                                 &extractedRight, &extractedRightType);
++    if (kr == KERN_SUCCESS) {
++      mach_port_deallocate(task, name);
++    }
++  }
+   if (kr != KERN_SUCCESS) {
+     CHROMIUM_LOG(ERROR) << "failed to extract port right from other process. "
+                         << mach_error_string(kr);
+@@ -1043,7 +1050,12 @@ bool ChannelPosix::AcceptMachPorts(Message& msg) {
+         return false;
+     }
+     if (!right) {
+-      return false;
++      if (mode_ == MODE_BROKER_SERVER) {
++        CHROMIUM_LOG(WARNING)
++            << "failed to extract mach port from child; substituting null right";
++      } else {
++        return false;
++      }
+     }
+     rights.AppendElement(std::move(right));
+   }

@@ -43,6 +43,12 @@ pref("hilal.tahoe.enabled", false);
 // In-process GPU rendering and media decoding on macOS to avoid Mach port errors
 pref("layers.gpu-process.enabled", false);
 pref("media.gpu-process-decoder", false);
+pref("media.rdd-process.enabled", false);
+pref("media.utility-process.enabled", false);
+
+// macOS Darwin sandbox IPC fixes for local dev builds
+pref("security.sandbox.content.level", 0);
+pref("security.sandbox.gpu.level", 0);
 
 // Follow the OS language when a matching locale is installed; otherwise use en-US.
 pref("intl.locale.requested", "");

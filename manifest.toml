@@ -43,6 +43,10 @@ path   = "xpcom/io/macos-statfs.patch"
 reason = "Fix statfs struct inclusion on modern 64-bit macOS SDK"
 
 [[patches]]
+path   = "ipc/chromium/macos-mach-port-ipc.patch"
+reason = "Fix Mach port extraction and channel error crashes on macOS 15+"
+
+[[patches]]
 path   = "browser/modules/HilalBangs.sys.mjs"
 reason = "Hilal search bangs utility module"
 
