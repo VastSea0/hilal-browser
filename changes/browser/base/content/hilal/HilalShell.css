@@ -40,16 +40,43 @@
 
 /* Traffic lights spacer on macOS */
 #hilal-traffic-lights-spacer {
-  width: 76px;
-  min-width: 76px;
-  height: 100%;
-  -moz-window-dragging: drag;
+  display: flex !important;
+  align-items: center !important;
+  width: 72px !important;
+  min-width: 72px !important;
+  height: 100% !important;
+  -moz-window-dragging: drag !important;
+}
+
+#hilal-traffic-lights-spacer .titlebar-buttonbox-container {
+  display: flex !important;
+  visibility: visible !important;
+  align-items: center !important;
+  height: 100% !important;
+  -moz-window-dragging: no-drag !important;
+}
+
+#hilal-traffic-lights-spacer .titlebar-buttonbox {
+  display: flex !important;
+  visibility: visible !important;
+  appearance: auto !important;
+  -moz-default-appearance: -moz-window-button-box !important;
+  height: 16px !important;
+  width: 60px !important;
+  min-width: 60px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  -moz-window-dragging: no-drag !important;
 }
 
 @media not (-moz-platform: macos) {
   #hilal-traffic-lights-spacer {
     display: none !important;
   }
+}
+
+:root[inFullscreen] #hilal-traffic-lights-spacer {
+  display: none !important;
 }
 
 /* Navigation buttons */
@@ -156,9 +183,9 @@
   flex-direction: row !important;
   height: calc(100vh - 48px) !important;
   width: 100vw !important;
-  padding: 6px 12px 12px 12px !important;
+  padding: 0 10px 10px 10px !important;
   box-sizing: border-box !important;
-  gap: 12px !important;
+  gap: 8px !important;
 }
 
 /* 5. Material 3 Vertical Sidebar */
@@ -168,10 +195,11 @@
   max-width: 230px;
   display: flex;
   flex-direction: column;
-  background-color: var(--md-sys-color-surface-container-low, #181c22);
+  background-color: transparent !important;
   border: none !important;
-  border-radius: var(--md-sys-shape-corner-large, 16px);
-  padding: 10px;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 4px 6px 6px 2px;
   box-sizing: border-box;
   overflow: hidden;
   user-select: none;
@@ -358,7 +386,7 @@
   border: none !important;
   padding: 0 !important;
   margin: 0 !important;
-  background-color: var(--md-sys-color-surface-container-lowest, #0b0e14) !important;
+  background-color: var(--md-sys-color-surface, #101319) !important;
   box-shadow: none !important;
   overflow: hidden !important;
   clip-path: inset(0 round var(--md-sys-shape-corner-large, 16px)) !important;

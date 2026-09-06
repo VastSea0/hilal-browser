@@ -32,9 +32,27 @@
       const topbar = document.createElement("header");
       topbar.id = "hilal-topbar";
 
-      // Spacer for macOS traffic lights
+      // Spacer and mount for macOS traffic lights
       const spacer = document.createElement("div");
       spacer.id = "hilal-traffic-lights-spacer";
+
+      const nativeButtons =
+        document.querySelector("#TabsToolbar .titlebar-buttonbox-container") ||
+        document.querySelector(".titlebar-buttonbox-container");
+      if (nativeButtons) {
+        spacer.appendChild(nativeButtons);
+      } else {
+        const boxContainer = document.createXULElement
+          ? document.createXULElement("hbox")
+          : document.createElement("div");
+        boxContainer.className = "titlebar-buttonbox-container";
+        const box = document.createXULElement
+          ? document.createXULElement("hbox")
+          : document.createElement("div");
+        box.className = "titlebar-buttonbox";
+        boxContainer.appendChild(box);
+        spacer.appendChild(boxContainer);
+      }
       topbar.appendChild(spacer);
 
       // Nav group (Back, Forward, Reload)
