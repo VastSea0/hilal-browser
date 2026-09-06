@@ -39,6 +39,13 @@ pref("sidebar.verticalTabs", true);
 pref("sidebar.verticalTabs.showHorizontal", false);
 pref("sidebar.visibility", "always-show");
 pref("hilal.tahoe.enabled", false);
+pref("hilal.material3.enabled", true);
+
+// Follow the OS language when a matching locale is installed; otherwise use en-US.
+pref("intl.locale.requested", "");
+
+// Allow custom compiled unsigned language packs
+pref("extensions.langpacks.signatures.required", false);
 
 // Use transparent macOS chrome surfaces for Hilal's Tahoe-style glass look.
 pref("hilal.browser.transparent-chrome.enabled", true);

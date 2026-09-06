@@ -1,0 +1,132 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+:root {
+  /* Typography Tokens */
+  --font-sans: "Roboto Flex", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Material 3 Shape Tokens (Expressive Scale) */
+  --md-sys-shape-corner-none: 0px;
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-large-increased: 20px;
+  --md-sys-shape-corner-extra-large: 28px;
+  --md-sys-shape-corner-extra-large-increased: 32px;
+  --md-sys-shape-corner-extra-extra-large: 48px;
+  --md-sys-shape-corner-full: 9999px;
+
+  /* Material 3 Motion Tokens */
+  --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --md-sys-motion-duration-short: 150ms;
+  --md-sys-motion-duration-medium: 250ms;
+  --md-sys-motion-duration-long: 400ms;
+
+  /* Material 3 Color Tokens with light-dark() support */
+  /* Material 3 Color Tokens: Light Scheme (Default) */
+  --md-sys-color-surface: #f8f9ff;
+  --md-sys-color-surface-dim: #d9dae1;
+  --md-sys-color-surface-bright: #f8f9ff;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f2f3fa;
+  --md-sys-color-surface-container: #eceef5;
+  --md-sys-color-surface-container-high: #e6e8ef;
+  --md-sys-color-surface-container-highest: #e0e2e9;
+
+  --md-sys-color-on-surface: #181c22;
+  --md-sys-color-on-surface-variant: #43474e;
+
+  --md-sys-color-primary: #0b57d0;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #d3e3fd;
+  --md-sys-color-on-primary-container: #041e49;
+
+  --md-sys-color-secondary: #555f6f;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #d9e3f5;
+  --md-sys-color-on-secondary-container: #121c2a;
+
+  --md-sys-color-tertiary: #6f5575;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #f9d8fe;
+  --md-sys-color-on-tertiary-container: #28132f;
+
+  --md-sys-color-outline: #73777f;
+  --md-sys-color-outline-variant: #c3c7cf;
+
+  /* Elevation Shadows */
+  --md-sys-elevation-1: 0 1px 3px 1px rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.24);
+  --md-sys-elevation-2: 0 2px 6px 2px rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.24);
+  --md-sys-elevation-3: 0 4px 12px 3px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.24);
+}
+
+/* Material 3 Color Tokens: Dark Scheme (System or Theme preference) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --md-sys-color-surface: #101319;
+    --md-sys-color-surface-dim: #0a0d13;
+    --md-sys-color-surface-bright: #363940;
+    --md-sys-color-surface-container-lowest: #0b0e14;
+    --md-sys-color-surface-container-low: #181c22;
+    --md-sys-color-surface-container: #1c2027;
+    --md-sys-color-surface-container-high: #262b32;
+    --md-sys-color-surface-container-highest: #31363e;
+
+    --md-sys-color-on-surface: #e1e2e9;
+    --md-sys-color-on-surface-variant: #c3c7cf;
+
+    --md-sys-color-primary: #a8c7fa;
+    --md-sys-color-on-primary: #042f66;
+    --md-sys-color-primary-container: #0842a0;
+    --md-sys-color-on-primary-container: #d3e3fd;
+
+    --md-sys-color-secondary: #bec7d8;
+    --md-sys-color-on-secondary: #28313e;
+    --md-sys-color-secondary-container: #3e4756;
+    --md-sys-color-on-secondary-container: #dae3f5;
+
+    --md-sys-color-tertiary: #dcbce1;
+    --md-sys-color-on-tertiary: #3e2845;
+    --md-sys-color-tertiary-container: #563e5d;
+    --md-sys-color-on-tertiary-container: #f9d8fe;
+
+    --md-sys-color-outline: #8c9199;
+    --md-sys-color-outline-variant: #43474e;
+  }
+}
+
+:root[brighttext="true"] {
+  --md-sys-color-surface: #101319;
+  --md-sys-color-surface-dim: #0a0d13;
+  --md-sys-color-surface-bright: #363940;
+  --md-sys-color-surface-container-lowest: #0b0e14;
+  --md-sys-color-surface-container-low: #181c22;
+  --md-sys-color-surface-container: #1c2027;
+  --md-sys-color-surface-container-high: #262b32;
+  --md-sys-color-surface-container-highest: #31363e;
+
+  --md-sys-color-on-surface: #e1e2e9;
+  --md-sys-color-on-surface-variant: #c3c7cf;
+
+  --md-sys-color-primary: #a8c7fa;
+  --md-sys-color-on-primary: #042f66;
+  --md-sys-color-primary-container: #0842a0;
+  --md-sys-color-on-primary-container: #d3e3fd;
+
+  --md-sys-color-secondary: #bec7d8;
+  --md-sys-color-on-secondary: #28313e;
+  --md-sys-color-secondary-container: #3e4756;
+  --md-sys-color-on-secondary-container: #dae3f5;
+
+  --md-sys-color-tertiary: #dcbce1;
+  --md-sys-color-on-tertiary: #3e2845;
+  --md-sys-color-tertiary-container: #563e5d;
+  --md-sys-color-on-tertiary-container: #f9d8fe;
+
+  --md-sys-color-outline: #8c9199;
+  --md-sys-color-outline-variant: #43474e;
+}
