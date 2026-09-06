@@ -1,7 +1,7 @@
 diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/components/customizableui/CustomizableUI.sys.mjs
 --- a/browser/components/customizableui/CustomizableUI.sys.mjs
 +++ b/browser/components/customizableui/CustomizableUI.sys.mjs
-@@ -317,6 +317,11 @@ var CustomizableUIInternal = {
+@@ -320,6 +320,11 @@ var CustomizableUIInternal = {
    initialize() {
      lazy.log.debug("Initializing");
  
@@ -10,6 +10,8 @@ diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/
 +      Services.prefs.setBoolPref("hilal.toolbar.initialized", true);
 +    }
 +
+     this._setAutoTouchModeDefault();
+ 
      lazy.AddonManagerPrivate.databaseReady.then(async () => {
        lazy.AddonManager.addAddonListener(this);
  

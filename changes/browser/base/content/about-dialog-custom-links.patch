@@ -1,7 +1,7 @@
 diff --git a/browser/base/content/aboutDialog.xhtml b/browser/base/content/aboutDialog.xhtml
 --- a/browser/base/content/aboutDialog.xhtml
 +++ b/browser/base/content/aboutDialog.xhtml
-@@ -120,17 +120,17 @@
+@@ -120,15 +120,15 @@
            <vbox id="experimental" hidden="true">
              <description class="text-blurb" id="warningDesc" data-l10n-id="warningDesc-version"></description>
              <description class="text-blurb" id="communityExperimentalDesc" data-l10n-id="community-exp">
@@ -21,9 +21,7 @@ diff --git a/browser/base/content/aboutDialog.xhtml b/browser/base/content/about
 +            <label is="text-link" href="https://hilal-browser.vercel.app" data-l10n-name="helpus-donateLink"/>
 +            <label is="text-link" href="https://github.com/vastsea0/hilal-browser" data-l10n-name="helpus-getInvolvedLink"/>
            </description>
-         </vbox>
-       </vbox>
-@@ -138,8 +138,8 @@
+@@ -144,8 +144,8 @@
      <vbox id="bottomBox">
        <hbox pack="center">
          <label is="text-link" class="bottom-link" useoriginprincipal="true" href="about:license" data-l10n-id="bottomLinks-license"/>
@@ -37,8 +35,8 @@ diff --git a/browser/base/content/aboutDialog.xhtml b/browser/base/content/about
 diff --git a/browser/base/content/utilityOverlay.js b/browser/base/content/utilityOverlay.js
 --- a/browser/base/content/utilityOverlay.js
 +++ b/browser/base/content/utilityOverlay.js
-@@ -534,6 +534,9 @@ function makeURLAbsolute(aBase, aUrl) {
- 
+@@ -575,6 +575,9 @@ function makeURLAbsolute(aBase, aUrl) {
+
  function getHelpLinkURL(aHelpTopic) {
    var url = Services.urlFormatter.formatURLPref("app.support.baseURL");
 +  if (url.includes("github.com") || url.includes("hilal-browser.vercel.app")) {
@@ -46,4 +44,4 @@ diff --git a/browser/base/content/utilityOverlay.js b/browser/base/content/utili
 +  }
    return url + aHelpTopic;
  }
- 
+

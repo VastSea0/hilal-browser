@@ -1,16 +1,7 @@
 diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
 --- a/browser/base/content/browser.xhtml
 +++ b/browser/base/content/browser.xhtml
-@@ -75,6 +75,7 @@
-   <link rel="localization" href="browser/screenshots.ftl"/>
-   <link rel="localization" href="browser/search.ftl"/>
-   <link rel="localization" href="browser/sidebarMenu.ftl"/>
-+  <link rel="localization" href="browser/tabContextMenu.ftl"/>
-   <link rel="localization" href="browser/tabbrowser.ftl"/>
-   <link rel="localization" href="browser/taskbartabs.ftl"/>
-   <link rel="localization" href="browser/toolbarContextMenu.ftl"/>
-@@ -150,5 +151,8 @@
- 
+@@ -161,4 +161,7 @@
    <!-- Put it at the very end to make sure it's not covered by anything. -->
    <html:div id="fullscr-toggler" hidden="hidden"/>
 +

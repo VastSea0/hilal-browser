@@ -1,7 +1,7 @@
 diff --git a/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs b/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs
 --- a/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs
 +++ b/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs
-@@ -353,6 +353,9 @@ export class AsyncTabSwitcher {
+@@ -356,6 +356,9 @@ export class AsyncTabSwitcher {
    // This function is called after all the main state changes to
    // make sure we display the right tab.
    updateDisplay() {
@@ -11,7 +11,7 @@ diff --git a/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs b/browser/co
      let requestedTabState = this.getTabState(this.requestedTab);
      let requestedBrowser = this.requestedTab.linkedBrowser;
  
-@@ -618,11 +621,15 @@ export class AsyncTabSwitcher {
+@@ -621,11 +624,15 @@ export class AsyncTabSwitcher {
      this.assert(!this.loadTimer || this.loadingTab);
      this.assert(!this.loadingTab || this.loadTimer);
  
@@ -28,7 +28,7 @@ diff --git a/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs b/browser/co
        this.maybeClearLoadTimer("postActions");
      }
  
-@@ -1101,9 +1108,7 @@ export class AsyncTabSwitcher {
+@@ -1105,9 +1112,7 @@ export class AsyncTabSwitcher {
        this.setTimer(() => this.handleEvent(event, true), 0);
        return;
      }
@@ -39,20 +39,20 @@ diff --git a/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs b/browser/co
        return;
      }
      this._processing = true;
-diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/components/tabbrowser/content/tabbrowser.js
---- a/browser/components/tabbrowser/content/tabbrowser.js
-+++ b/browser/components/tabbrowser/content/tabbrowser.js
-@@ -8334,11 +8334,11 @@
-     }
- 
-     on_activate() {
--      this.selectedTab.updateLastSeenActive();
-+      this.selectedTab?.updateLastSeenActive();
-     }
- 
-     on_deactivate() {
--      this.selectedTab.updateLastSeenActive();
-+      this.selectedTab?.updateLastSeenActive();
-     }
- 
-     on_change() {
+diff --git a/browser/components/tabbrowser/Tabbrowser.sys.mjs b/browser/components/tabbrowser/Tabbrowser.sys.mjs
+--- a/browser/components/tabbrowser/Tabbrowser.sys.mjs
++++ b/browser/components/tabbrowser/Tabbrowser.sys.mjs
+@@ -9356,11 +9356,11 @@
+   }
+
+   on_activate() {
+-    this.selectedTab.updateLastSeenActive();
++    this.selectedTab?.updateLastSeenActive();
+   }
+
+   on_deactivate() {
+-    this.selectedTab.updateLastSeenActive();
++    this.selectedTab?.updateLastSeenActive();
+   }
+
+   on_change() {

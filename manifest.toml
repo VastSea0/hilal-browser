@@ -15,10 +15,6 @@ path   = "browser/branding-defaults.patch"
 reason = "Hilal Browser: switch default branding directory and app vendor"
 
 [[patches]]
-path   = "browser/transparent-macos-chrome.patch"
-reason = "Hilal transparent macOS chrome implementation"
-
-[[patches]]
 path   = "browser/base/workspaces.patch"
 reason = "Hilal workspace layout"
 
@@ -67,20 +63,8 @@ path   = "browser/config/version.patch"
 reason = "Hilal custom version displaying"
 
 [[patches]]
-path   = "browser/app/fix-macos-openrsync-dylib-copy.patch"
-reason = "Fix macOS openrsync dylib copy path"
-
-[[patches]]
 path   = "browser/themes/shared"
 reason = "Hilal custom UI styling and overrides"
-
-[[patches]]
-path   = "browser/ui-fix.patch"
-reason = "Hilal custom UI style fixes and overrides"
-
-[[patches]]
-path   = "browser/app/profile/system-locale-default.patch"
-reason = "Hilal system locale default preferences"
 
 [[patches]]
 path   = "browser/components/preferences/privacy-levels.patch"
@@ -103,10 +87,6 @@ path   = "browser/bang-customization.patch"
 reason = "Hilal search bang customization interface and backend"
 
 [[patches]]
-path   = "browser/sidebar-layout-redesign.patch"
-reason = "Redesigned sidebar panel layout and state manager"
-
-[[patches]]
 path   = "browser/workspace-context-isolation.patch"
 reason = "Isolate workspaces context for security"
 
@@ -117,10 +97,6 @@ reason = "Hilal about dialog version information"
 [[patches]]
 path   = "browser/components/preferences/language-selection.patch"
 reason = "Hilal settings language selection panel"
-
-[[patches]]
-path   = "compact-mode-preferences.patch"
-reason = "Compact mode preference toggles and styling"
 
 [[patches]]
 path   = "browser/components/preferences/sidebar-settings-wiring.patch"
@@ -157,11 +133,3 @@ reason = "Hilal browser chrome test scenarios"
 [[patches]]
 path   = "browser/keyboard-shortcuts-prefs.patch"
 reason = "Hilal keyboard shortcuts preferences logic"
-
-[[patches]]
-path   = "browser/boosts.patch"
-reason = "Hilal boosts feature (Site Customizer and Element Zapper)"
-
-[[patches]]
-path   = "browser/tahoe-safari-shell.patch"
-reason = "Tahoe Safari-inspired shell preference and sidebar refinements"

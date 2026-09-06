@@ -1,7 +1,7 @@
 diff --git a/browser/base/content/browser-sets.inc.xhtml b/browser/base/content/browser-sets.inc.xhtml
 --- a/browser/base/content/browser-sets.inc.xhtml
 +++ b/browser/base/content/browser-sets.inc.xhtml
-@@ -419,4 +419,13 @@
+@@ -422,4 +422,13 @@
           modifiers="accel,alt"
           internal="true"/>
  #endif
@@ -18,7 +18,7 @@ diff --git a/browser/base/content/browser-sets.inc.xhtml b/browser/base/content/
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -2534,9 +2534,400 @@ var gHilalPane = {
+@@ -2370,9 +2370,400 @@ var gHilalPane = {
          }
        });
      }
@@ -422,7 +422,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2884,3 +2884,11 @@ hilal-language-header = Language Selection
+@@ -2951,3 +2951,11 @@ hilal-language-header = Language Selection
  hilal-language-description = Select the interface language for the browser. The browser must be restarted for changes to take effect.
  hilal-language-apply-button =
      .label = Apply and Restart

@@ -1,7 +1,7 @@
 diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/browser/browser.ftl
 --- a/browser/locales/en-US/browser/browser.ftl
 +++ b/browser/locales/en-US/browser/browser.ftl
-@@ -1618,3 +1618,148 @@ reduced-protection-infobar-reload-button = Reload
+@@ -1693,3 +1693,148 @@
    .accesskey = R
  reduced-protection-infobar-never-show-button = Don’t show again
    .accesskey = D
@@ -153,10 +153,8 @@ diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/b
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2760,3 +2760,114 @@ security-privacy-issue-warning-ech =
- security-privacy-issue-warning-proxy-autodetection =
-   .label = Proxy auto-configuration is enabled
-   .description = Proxy auto-configuration could let untrusted networks to monitor your activity.
+@@ -2834,1 +2834,113 @@
+   .label = Share { -brand-product-name }
 +## Hilal Browser Settings
 +
 +hilal-settings-header = Hilal Browser
@@ -268,3 +266,4 @@ diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser
 +hilal-bangs-searchurl-label = Search URL:
 +hilal-bangs-homeurl-label = Home URL (optional):
 +hilal-bangs-default-label = (default)
++hilal-bangs-custom-label = (custom)
