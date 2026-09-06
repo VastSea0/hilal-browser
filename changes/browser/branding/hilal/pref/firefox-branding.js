@@ -33,26 +33,22 @@ pref("app.update.badgeWaitTime", 14400);
 // If this is less than 5, then pasting code into the web console is disabled.
 pref("devtools.selfxss.count", 5);
 
-// Sidebar and vertical tabs are enabled by default in Hilal.
-pref("sidebar.revamp", true);
-pref("sidebar.verticalTabs", true);
-pref("sidebar.verticalTabs.showHorizontal", false);
-pref("sidebar.visibility", "always-show");
-pref("hilal.tahoe.enabled", false);
+// Material 3 Expressive Shell defaults
 pref("hilal.material3.enabled", true);
+pref("sidebar.revamp", false);
+pref("sidebar.verticalTabs", false);
+pref("sidebar.visibility", "hide-sidebar");
+pref("hilal.tahoe.enabled", false);
+
+// In-process GPU rendering and media decoding on macOS to avoid Mach port errors
+pref("layers.gpu-process.enabled", false);
+pref("media.gpu-process-decoder", false);
 
 // Follow the OS language when a matching locale is installed; otherwise use en-US.
 pref("intl.locale.requested", "");
 
 // Allow custom compiled unsigned language packs
 pref("extensions.langpacks.signatures.required", false);
-
-// Use transparent macOS chrome surfaces for Hilal's Tahoe-style glass look.
-pref("hilal.browser.transparent-chrome.enabled", true);
-pref("browser.tabs.allow_transparent_browser", true);
-pref("widget.macos.sidebar-blend-mode.behind-window", true);
-pref("widget.macos.titlebar-blend-mode.behind-window", true);
-pref("gfx.webrender.opaque-backdrop-fallback", false);
 
 
 // Privacy-first Hilal defaults, informed by Betterfox and arkenfox.
