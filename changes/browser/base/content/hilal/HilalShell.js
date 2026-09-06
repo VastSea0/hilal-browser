@@ -5,10 +5,103 @@
 /* global gBrowser, Services, ChromeUtils */
 
 (function () {
-  "use strict";
+  const MaterialYouTheme = {
+    COLOR_MAP: {
+      blue: "#37adff",
+      turquoise: "#00c79a",
+      green: "#51cd00",
+      yellow: "#ffcb00",
+      orange: "#ff9f00",
+      red: "#ff613d",
+      pink: "#ff4bda",
+      purple: "#af51f5",
+    },
+
+    hexToRgb(hex) {
+      if (!hex) return null;
+      let clean = hex.trim();
+      if (this.COLOR_MAP[clean.toLowerCase()]) {
+        clean = this.COLOR_MAP[clean.toLowerCase()];
+      }
+      if (clean.startsWith("#")) {
+        clean = clean.slice(1);
+      }
+      if (clean.length === 3) {
+        clean = clean.split("").map((c) => c + c).join("");
+      }
+      if (clean.length !== 6) return null;
+      const num = parseInt(clean, 16);
+      if (isNaN(num)) return null;
+      return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+    },
+
+    srgbToOklch(r, g, b) {
+      const toLinear = (c) => {
+        c /= 255;
+        return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      };
+      const lr = toLinear(r);
+      const lg = toLinear(g);
+      const lb = toLinear(b);
+
+      const l_ = 0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb;
+      const m_ = 0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb;
+      const s_ = 0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb;
+
+      const l = Math.cbrt(l_);
+      const m = Math.cbrt(m_);
+      const s = Math.cbrt(s_);
+
+      const L = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s;
+      const a = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s;
+      const b_ = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s;
+
+      const C = Math.sqrt(a * a + b_ * b_);
+      let H = Math.atan2(b_, a) * (180 / Math.PI);
+      if (H < 0) H += 360;
+
+      return { L, C, H };
+    },
+
+    applyTheme(colorInput) {
+      const rgb = this.hexToRgb(colorInput) || [175, 81, 245];
+      const { C: rawChroma, H: hue } = this.srgbToOklch(rgb[0], rgb[1], rgb[2]);
+      const chroma = Math.max(rawChroma, 0.14);
+      const h = hue.toFixed(1);
+
+      const rootStyle = document.documentElement.style;
+
+      // Material 3 Dark Scheme Dynamic Tonal Tokens
+      rootStyle.setProperty("--md-sys-color-primary", `oklch(0.82 ${chroma.toFixed(3)} ${h})`);
+      rootStyle.setProperty("--md-sys-color-on-primary", `oklch(0.20 ${chroma.toFixed(3)} ${h})`);
+      rootStyle.setProperty("--md-sys-color-primary-container", `oklch(0.32 ${(chroma * 0.85).toFixed(3)} ${h})`);
+      rootStyle.setProperty("--md-sys-color-on-primary-container", `oklch(0.92 ${(chroma * 0.35).toFixed(3)} ${h})`);
+
+      // Surface tinting (M3 Expressive dark tones 6, 12, 17, 22)
+      rootStyle.setProperty("--md-sys-color-surface", `oklch(0.12 0.015 ${h})`);
+      rootStyle.setProperty("--md-sys-color-surface-dim", `oklch(0.09 0.012 ${h})`);
+      rootStyle.setProperty("--md-sys-color-surface-container-lowest", `oklch(0.08 0.010 ${h})`);
+      rootStyle.setProperty("--md-sys-color-surface-container-low", `oklch(0.14 0.014 ${h})`);
+      rootStyle.setProperty("--md-sys-color-surface-container", `oklch(0.17 0.018 ${h})`);
+      rootStyle.setProperty("--md-sys-color-surface-container-high", `oklch(0.21 0.022 ${h})`);
+      rootStyle.setProperty("--md-sys-color-surface-container-highest", `oklch(0.25 0.026 ${h})`);
+
+      // Text & outline
+      rootStyle.setProperty("--md-sys-color-on-surface", `oklch(0.92 0.008 ${h})`);
+      rootStyle.setProperty("--md-sys-color-on-surface-variant", `oklch(0.80 0.015 ${h})`);
+      rootStyle.setProperty("--md-sys-color-outline", `oklch(0.58 0.022 ${h})`);
+      rootStyle.setProperty("--md-sys-color-outline-variant", `oklch(0.32 0.020 ${h})`);
+
+      // Secondary & Tertiary
+      rootStyle.setProperty("--md-sys-color-secondary", `oklch(0.80 0.05 ${h})`);
+      rootStyle.setProperty("--md-sys-color-secondary-container", `oklch(0.30 0.05 ${h})`);
+    },
+  };
 
   const HilalShell = {
     initialized: false,
+    _draggedTab: null,
+    _draggedPill: null,
 
     init() {
       if (this.initialized) return;
@@ -231,6 +324,10 @@
 
           const origSwitchTo = manager.switchTo.bind(manager);
           manager.switchTo = (id) => {
+            const ws = manager._workspaces?.find((w) => w.id === id);
+            if (ws?.color) {
+              MaterialYouTheme.applyTheme(ws.color);
+            }
             origSwitchTo(id);
             this.renderWorkspaces();
             this.renderTabs();
@@ -315,14 +412,23 @@
           ? Services.prefs.getStringPref("hilal.workspaces.active", workspaces[0].id)
           : workspaces[0].id);
 
+      const activeWs = workspaces.find((w) => w.id === activeId) || workspaces[0];
+      if (activeWs?.color) {
+        MaterialYouTheme.applyTheme(activeWs.color);
+      }
+
       workspaces.forEach((ws) => {
         const chip = document.createElement("button");
         chip.className = "hilal-ws-chip" + (ws.id === activeId ? " active" : "");
-        const emojiStr = ws.emoji ? ws.emoji + " " : "";
-        chip.textContent = emojiStr + (ws.name || ws.id);
+        chip.textContent = ws.emoji || "\u{1F5C2}";
         chip.title = `${ws.name || ws.id} (Right click to edit)`;
+        chip.setAttribute("aria-label", ws.name || ws.id);
+        chip.dataset.workspaceId = ws.id;
 
         chip.addEventListener("click", () => {
+          if (ws.color) {
+            MaterialYouTheme.applyTheme(ws.color);
+          }
           if (manager && typeof manager.switchTo === "function") {
             manager.switchTo(ws.id);
           } else if (typeof Services !== "undefined") {
@@ -415,66 +521,200 @@
       }
     },
 
+    createTabPill(tab) {
+      const pill = document.createElement("div");
+      pill.className = "hilal-tab-pill";
+      pill._tab = tab;
+      pill.tab = tab;
+      pill.setAttribute("draggable", "true");
+
+      // Favicon container
+      const iconDiv = document.createElement("div");
+      iconDiv.className = "hilal-tab-icon";
+      const iconImg = document.createElement("img");
+      iconDiv.appendChild(iconImg);
+      pill.appendChild(iconDiv);
+
+      // Title container
+      const titleSpan = document.createElement("span");
+      titleSpan.className = "hilal-tab-title";
+      pill.appendChild(titleSpan);
+
+      // Close button
+      const closeBtn = document.createElement("button");
+      closeBtn.className = "hilal-tab-close-btn";
+      closeBtn.textContent = "\u00D7";
+      closeBtn.title = "Close Tab";
+      closeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.gBrowser.removeTab(tab);
+      });
+      pill.appendChild(closeBtn);
+
+      // Tab click -> Select
+      pill.addEventListener("click", () => {
+        window.gBrowser.selectedTab = tab;
+      });
+
+      // Tab Context Menu (native Firefox tabContextMenu integration)
+      pill.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const contextMenu = document.getElementById("tabContextMenu");
+        if (contextMenu) {
+          pill.tab = tab;
+          if (typeof TabContextMenu !== "undefined") {
+            TabContextMenu.contextTab = tab;
+            TabContextMenu.contextTabs = [tab];
+          }
+          contextMenu.triggerNode = tab;
+          if (typeof contextMenu.openPopup === "function") {
+            contextMenu.openPopup(pill, "after_start", 0, 0, true, false, e);
+          }
+        }
+      });
+
+      // Drag and Drop Vertical Reordering
+      pill.addEventListener("dragstart", (e) => {
+        this._draggedTab = tab;
+        this._draggedPill = pill;
+        pill.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", tab.getAttribute("data-tab-id") || "hilal-tab");
+      });
+
+      pill.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (!this._draggedTab || this._draggedTab === tab) return;
+
+        const rect = pill.getBoundingClientRect();
+        const mid = rect.top + rect.height / 2;
+        if (e.clientY < mid) {
+          pill.classList.add("drop-before");
+          pill.classList.remove("drop-after");
+        } else {
+          pill.classList.add("drop-after");
+          pill.classList.remove("drop-before");
+        }
+      });
+
+      pill.addEventListener("dragleave", () => {
+        pill.classList.remove("drop-before", "drop-after");
+      });
+
+      pill.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const dropAfter = pill.classList.contains("drop-after");
+        pill.classList.remove("drop-before", "drop-after");
+
+        if (!this._draggedTab || this._draggedTab === tab) return;
+
+        const allTabs = Array.from(window.gBrowser.tabs);
+        const targetIdx = allTabs.indexOf(tab);
+        const draggedIdx = allTabs.indexOf(this._draggedTab);
+
+        if (targetIdx !== -1 && draggedIdx !== -1) {
+          let finalIndex = targetIdx;
+          if (dropAfter && draggedIdx > targetIdx) {
+            finalIndex = targetIdx + 1;
+          } else if (!dropAfter && draggedIdx < targetIdx) {
+            finalIndex = targetIdx - 1;
+          }
+          window.gBrowser.moveTabTo(this._draggedTab, { tabIndex: Math.max(0, finalIndex) });
+          this.renderTabs();
+        }
+      });
+
+      pill.addEventListener("dragend", () => {
+        pill.classList.remove("dragging", "drop-before", "drop-after");
+        this._draggedTab = null;
+        this._draggedPill = null;
+      });
+
+      return pill;
+    },
+
+    updateTabPillContent(pill, tab) {
+      const iconImg = pill.querySelector(".hilal-tab-icon img");
+      if (iconImg) {
+        const favSrc = tab.image || tab.getAttribute("image");
+        const targetSrc = favSrc && !favSrc.startsWith("chrome://browser/skin/tabbrowser/loading")
+          ? favSrc
+          : "chrome://global/skin/icons/defaultFavicon.svg";
+        if (iconImg.src !== targetSrc) {
+          iconImg.src = targetSrc;
+        }
+      }
+
+      const titleSpan = pill.querySelector(".hilal-tab-title");
+      if (titleSpan) {
+        const newTitle = tab.label || tab.getAttribute("label") || "New Tab";
+        if (titleSpan.textContent !== newTitle) {
+          titleSpan.textContent = newTitle;
+        }
+      }
+    },
+
     renderTabs() {
       const container = document.getElementById("hilal-tab-list");
       if (!container || !window.gBrowser) return;
 
-      container.replaceChildren();
-      const tabs = Array.from(window.gBrowser.tabs || []);
+      const allTabs = Array.from(window.gBrowser.tabs || []);
       const manager = window.gHilalWorkspaces;
       const activeWsId = manager?._activeId;
 
-      tabs.forEach((tab) => {
-        if (tab.hidden) return;
-
-        // Filter tabs by active workspace
+      // Filter tabs by active workspace
+      const visibleTabs = allTabs.filter((tab) => {
+        if (tab.hidden) return false;
         if (manager && activeWsId) {
           const tabWs = typeof manager._getTabWorkspace === "function"
             ? manager._getTabWorkspace(tab)
             : tab.getAttribute("hilal-workspace");
           if (tabWs && tabWs !== activeWsId && !tab.pinned) {
-            return;
+            return false;
           }
         }
+        return true;
+      });
 
+      // Reconcile existing DOM pills
+      const existingPills = new Map();
+      for (const child of Array.from(container.children)) {
+        if (child._tab) {
+          existingPills.set(child._tab, child);
+        }
+      }
+
+      // Remove pills for tabs no longer visible
+      for (const [tab, pill] of existingPills.entries()) {
+        if (!visibleTabs.includes(tab)) {
+          pill.remove();
+          existingPills.delete(tab);
+        }
+      }
+
+      // Update or insert pills in correct visibleTabs order
+      visibleTabs.forEach((tab, index) => {
+        let pill = existingPills.get(tab);
         const isSelected = tab.selected || tab === window.gBrowser.selectedTab;
-        const pill = document.createElement("div");
-        pill.className = "hilal-tab-pill" + (isSelected ? " active" : "");
 
-        // Favicon
-        const iconDiv = document.createElement("div");
-        iconDiv.className = "hilal-tab-icon";
-        const iconImg = document.createElement("img");
-        const favSrc = tab.image || tab.getAttribute("image");
-        iconImg.src = favSrc && !favSrc.startsWith("chrome://browser/skin/tabbrowser/loading")
-          ? favSrc
-          : "chrome://global/skin/icons/defaultFavicon.svg";
-        iconDiv.appendChild(iconImg);
-        pill.appendChild(iconDiv);
+        if (!pill) {
+          pill = this.createTabPill(tab);
+          existingPills.set(tab, pill);
+          pill.classList.add("hilal-tab-entering");
+          pill.addEventListener("animationend", () => {
+            pill.classList.remove("hilal-tab-entering");
+          }, { once: true });
+        }
 
-        // Title
-        const titleSpan = document.createElement("span");
-        titleSpan.className = "hilal-tab-title";
-        titleSpan.textContent = tab.label || tab.getAttribute("label") || "New Tab";
-        pill.appendChild(titleSpan);
+        pill.classList.toggle("active", isSelected);
+        this.updateTabPillContent(pill, tab);
 
-        // Close button (pure unicode cross, XML safe)
-        const closeBtn = document.createElement("button");
-        closeBtn.className = "hilal-tab-close-btn";
-        closeBtn.textContent = "\u00D7";
-        closeBtn.title = "Close Tab";
-        closeBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          window.gBrowser.removeTab(tab);
-        });
-        pill.appendChild(closeBtn);
-
-        // Tab click -> Select
-        pill.addEventListener("click", () => {
-          window.gBrowser.selectedTab = tab;
-        });
-
-        container.appendChild(pill);
+        const currentChild = container.children[index];
+        if (currentChild !== pill) {
+          container.insertBefore(pill, currentChild || null);
+        }
       });
 
       this.updateNavButtons();
