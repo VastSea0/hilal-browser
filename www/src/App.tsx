@@ -628,20 +628,18 @@ export default function App() {
               </motion.div>
             </motion.div>
 
-            {/* M3 Expressive Hero Container */}
+            {/* Hero Screenshot */}
             <motion.div
               initial={{ opacity: 0, y: 32 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...springTransition, delay: 0.2 }}
-              className="mt-14 sm:mt-18 p-2 sm:p-3 rounded-[36px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/40 shadow-2xl overflow-hidden hover-lift"
+              className="mt-12 sm:mt-16 max-w-5xl mx-auto drop-shadow-2xl"
             >
-              <div className="rounded-[28px] overflow-hidden bg-m3-container-lowest">
-                <img
-                  src={isDark ? "/welcome-home-preview-black.png" : "/welcome-home-preview.png"}
-                  alt="Hilal Browser Tahoe Interface"
-                  className="w-full h-auto block select-none pointer-events-none"
-                />
-              </div>
+              <img
+                src={isDark ? "/welcome-home-preview-black.png" : "/welcome-home-preview.png"}
+                alt="Hilal Browser Tahoe Interface"
+                className="w-full h-auto block select-none pointer-events-none rounded-2xl"
+              />
             </motion.div>
           </section>
 
@@ -699,11 +697,11 @@ export default function App() {
                 </div>
 
                 {/* Story Visual Side */}
-                <div className="lg:col-span-7 rounded-[26px] overflow-hidden bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/30 shadow-md">
+                <div className="lg:col-span-7 drop-shadow-xl">
                   <img
                     src={activeT.stories[activeTab].image}
                     alt={activeT.stories[activeTab].alt}
-                    className="w-full h-auto block select-none"
+                    className="w-full h-auto block select-none pointer-events-none rounded-2xl"
                   />
                 </div>
               </motion.div>
