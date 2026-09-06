@@ -39,11 +39,121 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 465;
+export const REPO_COMMITS_TOTAL = 476;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "01e7f7baba21deaee5cb924796ed15e5043b2163",
+    "shortHash": "01e7f7b",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T02:46:29+03:00",
+    "subject": "feat(shell): add horizontal tabs, sound controls, and M3 Expressive shell updates",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/01e7f7baba21deaee5cb924796ed15e5043b2163"
+  },
+  {
+    "hash": "f0d5660b874086afcce8ce14a46a9f1308614bab",
+    "shortHash": "f0d5660",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T02:23:58+03:00",
+    "subject": "theme: redesign settings page with Material 3 Expressive UI",
+    "body": "",
+    "category": "style",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f0d5660b874086afcce8ce14a46a9f1308614bab"
+  },
+  {
+    "hash": "bd0749c828d5bb668ff9ef6a8974a1ba36c5da08",
+    "shortHash": "bd0749c",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T01:40:20+03:00",
+    "subject": "fix(ui): eliminate webview border, fix context menu l10n, and implement M3 Expressive shape morphing",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/bd0749c828d5bb668ff9ef6a8974a1ba36c5da08"
+  },
+  {
+    "hash": "d735189074a9426f8d56dd1ffce2b61164931e76",
+    "shortHash": "d735189",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T01:24:37+03:00",
+    "subject": "feat(ui): add Material You dynamic color theming, tab reconciliation, dnd, and compact workspaces",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d735189074a9426f8d56dd1ffce2b61164931e76"
+  },
+  {
+    "hash": "74f9dcc41e58206869cbc93ad69548423ebf2963",
+    "shortHash": "74f9dcc",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T00:54:02+03:00",
+    "subject": "feat(ui): implement M3 Expressive spring motion physics and dynamic workspaces",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/74f9dcc41e58206869cbc93ad69548423ebf2963"
+  },
+  {
+    "hash": "74b5defa8047591df3d9c3c1f2db1b9ff3fc937b",
+    "shortHash": "74b5def",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T00:38:38+03:00",
+    "subject": "fix(ui): restore macOS traffic lights and unify chrome surface background",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/74b5defa8047591df3d9c3c1f2db1b9ff3fc937b"
+  },
+  {
+    "hash": "c1aa7a126badb7b4ba7ea2f09e05edb31d664a9d",
+    "shortHash": "c1aa7a1",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T00:27:51+03:00",
+    "subject": "style(ui): remove double cards and noticeable borders across webview and sidebar",
+    "body": "",
+    "category": "style",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c1aa7a126badb7b4ba7ea2f09e05edb31d664a9d"
+  },
+  {
+    "hash": "6a0233c1a650ca2d63c82869f782c17ed58142ba",
+    "shortHash": "6a0233c",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T00:21:12+03:00",
+    "subject": "fix(ipc): resolve macOS Mach port extraction failures and tab crashes",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6a0233c1a650ca2d63c82869f782c17ed58142ba"
+  },
+  {
+    "hash": "2c13f5ad13ab286ad10c0a4f959859a7229d751d",
+    "shortHash": "2c13f5a",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T00:10:54+03:00",
+    "subject": "fix(branding): configure stable M3 shell prefs and disable crashing transparency hacks",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2c13f5ad13ab286ad10c0a4f959859a7229d751d"
+  },
+  {
+    "hash": "9e5699e5d5e83fcbd48568ed00bc80ec15df17a5",
+    "shortHash": "9e5699e",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T00:08:44+03:00",
+    "subject": "feat(ui): implement clean Material 3 Expressive shell replacing legacy XUL chrome",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9e5699e5d5e83fcbd48568ed00bc80ec15df17a5"
+  },
+  {
+    "hash": "f4dbe86e23561a58871ce43195e0efd0a2b8c9c0",
+    "shortHash": "f4dbe86",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T23:47:53+03:00",
+    "subject": "docs(www): rewrite website copy to position Hilal as an independent browser",
+    "body": "",
+    "category": "docs",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f4dbe86e23561a58871ce43195e0efd0a2b8c9c0"
+  },
   {
     "hash": "423255d060ee87709f6f514eeb856ff432629c40",
     "shortHash": "423255d",
@@ -4701,9 +4811,119 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-06T23:39:01+03:00",
-    "commitCount": 24,
+    "date": "2026-09-07T02:46:29+03:00",
+    "commitCount": 35,
     "commits": [
+      {
+        "hash": "01e7f7baba21deaee5cb924796ed15e5043b2163",
+        "shortHash": "01e7f7b",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T02:46:29+03:00",
+        "subject": "feat(shell): add horizontal tabs, sound controls, and M3 Expressive shell updates",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/01e7f7baba21deaee5cb924796ed15e5043b2163"
+      },
+      {
+        "hash": "f0d5660b874086afcce8ce14a46a9f1308614bab",
+        "shortHash": "f0d5660",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T02:23:58+03:00",
+        "subject": "theme: redesign settings page with Material 3 Expressive UI",
+        "body": "",
+        "category": "style",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f0d5660b874086afcce8ce14a46a9f1308614bab"
+      },
+      {
+        "hash": "bd0749c828d5bb668ff9ef6a8974a1ba36c5da08",
+        "shortHash": "bd0749c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T01:40:20+03:00",
+        "subject": "fix(ui): eliminate webview border, fix context menu l10n, and implement M3 Expressive shape morphing",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/bd0749c828d5bb668ff9ef6a8974a1ba36c5da08"
+      },
+      {
+        "hash": "d735189074a9426f8d56dd1ffce2b61164931e76",
+        "shortHash": "d735189",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T01:24:37+03:00",
+        "subject": "feat(ui): add Material You dynamic color theming, tab reconciliation, dnd, and compact workspaces",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d735189074a9426f8d56dd1ffce2b61164931e76"
+      },
+      {
+        "hash": "74f9dcc41e58206869cbc93ad69548423ebf2963",
+        "shortHash": "74f9dcc",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T00:54:02+03:00",
+        "subject": "feat(ui): implement M3 Expressive spring motion physics and dynamic workspaces",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/74f9dcc41e58206869cbc93ad69548423ebf2963"
+      },
+      {
+        "hash": "74b5defa8047591df3d9c3c1f2db1b9ff3fc937b",
+        "shortHash": "74b5def",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T00:38:38+03:00",
+        "subject": "fix(ui): restore macOS traffic lights and unify chrome surface background",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/74b5defa8047591df3d9c3c1f2db1b9ff3fc937b"
+      },
+      {
+        "hash": "c1aa7a126badb7b4ba7ea2f09e05edb31d664a9d",
+        "shortHash": "c1aa7a1",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T00:27:51+03:00",
+        "subject": "style(ui): remove double cards and noticeable borders across webview and sidebar",
+        "body": "",
+        "category": "style",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c1aa7a126badb7b4ba7ea2f09e05edb31d664a9d"
+      },
+      {
+        "hash": "6a0233c1a650ca2d63c82869f782c17ed58142ba",
+        "shortHash": "6a0233c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T00:21:12+03:00",
+        "subject": "fix(ipc): resolve macOS Mach port extraction failures and tab crashes",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6a0233c1a650ca2d63c82869f782c17ed58142ba"
+      },
+      {
+        "hash": "2c13f5ad13ab286ad10c0a4f959859a7229d751d",
+        "shortHash": "2c13f5a",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T00:10:54+03:00",
+        "subject": "fix(branding): configure stable M3 shell prefs and disable crashing transparency hacks",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2c13f5ad13ab286ad10c0a4f959859a7229d751d"
+      },
+      {
+        "hash": "9e5699e5d5e83fcbd48568ed00bc80ec15df17a5",
+        "shortHash": "9e5699e",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T00:08:44+03:00",
+        "subject": "feat(ui): implement clean Material 3 Expressive shell replacing legacy XUL chrome",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9e5699e5d5e83fcbd48568ed00bc80ec15df17a5"
+      },
+      {
+        "hash": "f4dbe86e23561a58871ce43195e0efd0a2b8c9c0",
+        "shortHash": "f4dbe86",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T23:47:53+03:00",
+        "subject": "docs(www): rewrite website copy to position Hilal as an independent browser",
+        "body": "",
+        "category": "docs",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f4dbe86e23561a58871ce43195e0efd0a2b8c9c0"
+      },
       {
         "hash": "423255d060ee87709f6f514eeb856ff432629c40",
         "shortHash": "423255d",
@@ -9613,7 +9833,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 453,
+    "contributions": 464,
     "role": "Lead Developer"
   },
   {

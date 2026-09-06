@@ -18,6 +18,7 @@ import {
   Boxes,
   GitCommit,
   Users,
+  BookOpen,
 } from "lucide-react";
 
 import { GithubRelease } from "./types";
@@ -32,6 +33,7 @@ import {
 
 import DownloadModal from "./components/DownloadModal";
 import ChangelogPage from "./components/ChangelogPage";
+import DocsPage from "./components/DocsPage";
 import { CONTRIBUTORS_DATA } from "./data/changelogData";
 
 // M3 Expressive Spring Motion Physics
@@ -72,10 +74,13 @@ export default function App() {
     return saved === "en" || saved === "tr" ? saved : "tr";
   });
 
-  const [currentView, setCurrentView] = useState<"home" | "changelog">(() => {
+  const [currentView, setCurrentView] = useState<"home" | "changelog" | "docs">(() => {
     if (typeof window !== "undefined") {
       const p = window.location.pathname;
       const h = window.location.hash;
+      if (p === "/docs" || h === "#docs" || h.startsWith("#docs/")) {
+        return "docs";
+      }
       if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
         return "changelog";
       }
@@ -96,7 +101,9 @@ export default function App() {
     const handleLocationChange = () => {
       const p = window.location.pathname;
       const h = window.location.hash;
-      if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
+      if (p === "/docs" || h === "#docs" || h.startsWith("#docs/")) {
+        setCurrentView("docs");
+      } else if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
         setCurrentView("changelog");
       } else {
         setCurrentView("home");
@@ -145,10 +152,13 @@ export default function App() {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
-  const navigateTo = (view: "home" | "changelog", targetId?: string) => {
+  const navigateTo = (view: "home" | "changelog" | "docs", targetId?: string) => {
     setCurrentView(view);
     if (view === "changelog") {
       window.history.pushState(null, "", "#changelog");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (view === "docs") {
+      window.history.pushState(null, "", targetId ? `#docs/${targetId}` : "#docs");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       window.history.pushState(null, "", "/");
@@ -195,6 +205,7 @@ export default function App() {
       nav: {
         features: "Özellikler",
         architecture: "Açık Kaynak",
+        docs: "Belgeler",
         changelog: "Sürüm Notları",
         download: "İndir",
         github: "GitHub",
@@ -303,6 +314,7 @@ export default function App() {
         copyright: "Hilal Browser Projesi. Mozilla Kamu Lisansı (MPL 2.0).",
         authorBy: "Egehan Kahraman",
         source: "Kaynak Kodu",
+        docs: "Belgeler",
         releases: "Sürüm Notları",
         discord: "Discord",
       },
@@ -311,6 +323,7 @@ export default function App() {
       nav: {
         features: "Features",
         architecture: "Open Source",
+        docs: "Docs",
         changelog: "Changelog",
         download: "Download",
         github: "GitHub",
@@ -419,6 +432,7 @@ export default function App() {
         copyright: "Hilal Browser Project. Mozilla Public License 2.0.",
         authorBy: "Egehan Kahraman",
         source: "Source Code",
+        docs: "Docs",
         releases: "Changelog",
         discord: "Discord",
       },
@@ -471,6 +485,17 @@ export default function App() {
               className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors cursor-pointer"
             >
               {activeT.nav.architecture}
+            </button>
+            <button
+              onClick={() => navigateTo("docs")}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                currentView === "docs"
+                  ? "bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]"
+                  : "text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8"
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>{activeT.nav.docs}</span>
             </button>
             <button
               onClick={() => navigateTo("changelog")}
@@ -535,7 +560,13 @@ export default function App() {
       </nav>
 
       {/* Main View Router */}
-      {currentView === "changelog" ? (
+      {currentView === "docs" ? (
+        <DocsPage
+          lang={lang}
+          onBack={() => navigateTo("home")}
+          onOpenDownload={() => setIsDownloadOpen(true)}
+        />
+      ) : currentView === "changelog" ? (
         <ChangelogPage
           lang={lang}
           onBack={() => navigateTo("home")}
@@ -683,7 +714,7 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -16 }}
                 transition={springTransition}
-                className="p-6 sm:p-10 rounded-[36px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/40 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center shadow-xl"
+                className="p-6 sm:p-10 rounded-[36px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/20 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center shadow-lg"
               >
                 {/* Story Text Side */}
                 <div className="lg:col-span-5 space-y-4 text-left">
@@ -717,7 +748,7 @@ export default function App() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={springTransition}
-              className="p-8 sm:p-12 rounded-[36px] bg-m3-container border border-[var(--md-sys-color-outline-variant)]/40 text-center space-y-6 shadow-xl"
+              className="p-8 sm:p-12 rounded-[36px] bg-m3-container border border-[var(--md-sys-color-outline-variant)]/20 text-center space-y-6 shadow-lg"
             >
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] text-xs font-semibold">
                 <Cpu className="w-3.5 h-3.5" />
@@ -734,7 +765,7 @@ export default function App() {
 
               {/* M3 Tonal Interactive Terminal Card */}
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/40 text-xs font-mono text-[var(--md-sys-color-on-surface)] shadow-inner">
+                <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/20 text-xs font-mono text-[var(--md-sys-color-on-surface)] shadow-inner">
                   <span className="text-[var(--md-sys-color-primary)] font-bold">$</span>
                   <span className="select-all truncate max-w-[260px] sm:max-w-md">
                     git clone https://github.com/VastSea0/hilal-browser.git && cd hilal-browser && ./bin/hil setup
@@ -807,7 +838,7 @@ export default function App() {
                   whileHover={{ y: -6, scale: 1.02 }}
                   transition={springTransition}
                   onClick={() => setIsDownloadOpen(true)}
-                  className="p-7 rounded-[32px] bg-m3-container-low hover:bg-m3-container border border-[var(--md-sys-color-outline-variant)]/40 transition-all text-left flex flex-col justify-between cursor-pointer group shadow-lg"
+                  className="p-7 rounded-[32px] bg-m3-container-low hover:bg-m3-container border border-[var(--md-sys-color-outline-variant)]/20 transition-all text-left flex flex-col justify-between cursor-pointer group shadow-lg"
                 >
                   <div>
                     <div className="w-12 h-12 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
@@ -847,7 +878,7 @@ export default function App() {
                 return (
                   <motion.div
                     key={idx}
-                    className="rounded-[24px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/35 overflow-hidden transition-colors"
+                    className="rounded-[24px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/20 overflow-hidden transition-colors"
                   >
                     <button
                       onClick={() => setActiveFaq(isOpen ? null : idx)}
@@ -905,6 +936,12 @@ export default function App() {
             >
               {activeT.footer.source}
             </a>
+            <button
+              onClick={() => navigateTo("docs")}
+              className="hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer"
+            >
+              {activeT.footer.docs}
+            </button>
             <button
               onClick={() => navigateTo("changelog")}
               className="hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer"

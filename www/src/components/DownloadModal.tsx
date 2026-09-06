@@ -109,7 +109,7 @@ export default function DownloadModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 16 }}
             transition={{ type: "spring", stiffness: 380, damping: 28 }}
-            className="relative w-full max-w-lg rounded-[32px] p-6 sm:p-8 bg-m3-container-high text-[var(--md-sys-color-on-surface)] shadow-2xl border border-[var(--md-sys-color-outline-variant)]/40 overflow-hidden"
+            className="relative w-full max-w-lg rounded-[32px] p-6 sm:p-8 bg-m3-container-high text-[var(--md-sys-color-on-surface)] shadow-2xl border border-[var(--md-sys-color-outline-variant)]/20 overflow-hidden"
           >
             {/* Header Icon + Close */}
             <div className="flex items-center justify-between mb-4">
@@ -173,7 +173,7 @@ export default function DownloadModal({
                       <button
                         key={asset.id}
                         onClick={() => handleDownload(asset)}
-                        className="w-full flex items-center justify-between p-4 rounded-[22px] bg-m3-container-lowest hover:bg-[var(--md-sys-color-secondary-container)]/30 border border-[var(--md-sys-color-outline-variant)]/30 transition-all text-left group cursor-pointer m3-state-layer"
+                        className="w-full flex items-center justify-between p-4 rounded-[22px] bg-m3-container-lowest hover:bg-[var(--md-sys-color-secondary-container)]/30 border border-[var(--md-sys-color-outline-variant)]/20 transition-all text-left group cursor-pointer m3-state-layer"
                       >
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-full bg-m3-container flex items-center justify-center text-[var(--md-sys-color-primary)] group-hover:bg-[var(--md-sys-color-primary-container)] group-hover:text-[var(--md-sys-color-on-primary-container)] transition-colors">
