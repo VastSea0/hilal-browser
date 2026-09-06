@@ -1,0 +1,23 @@
+diff --git a/xpcom/io/nsLocalFileUnix.cpp b/xpcom/io/nsLocalFileUnix.cpp
+--- a/xpcom/io/nsLocalFileUnix.cpp
++++ b/xpcom/io/nsLocalFileUnix.cpp
+@@ -23,7 +23,9 @@
+ #include "nsLocalFile.h"
+ #include "prtime.h"
+ 
+-#if defined(XP_MACOSX)
++#if defined(XP_MACOSX) || defined(XP_DARWIN)
++#  include <sys/param.h>
++#  include <sys/mount.h>
+ #  include <sys/xattr.h>
+ #endif
+ 
+@@ -96,7 +98,7 @@ extern "C" int statvfs(const char*, struct statvfs*);
+ #elif defined(HAVE_STATVFS) && (!defined(LINUX) && !defined(__osf__))
+ #  define STATFS statvfs
+ #  define F_BSIZE f_frsize
+-#elif defined(HAVE_STATFS64)
++#elif defined(HAVE_STATFS64) && !defined(XP_DARWIN)
+ #  define STATFS statfs64
+ #  define F_BSIZE f_bsize
+ #elif defined(HAVE_STATFS)
