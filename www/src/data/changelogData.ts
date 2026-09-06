@@ -39,11 +39,81 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 457;
+export const REPO_COMMITS_TOTAL = 464;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "2cbe874d1b248af9c870a0cf6b5a389f38c9aed9",
+    "shortHash": "2cbe874",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T23:01:23+03:00",
+    "subject": "fix(macos): resolve statfs struct inclusion on 64-bit macOS SDK",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2cbe874d1b248af9c870a0cf6b5a389f38c9aed9"
+  },
+  {
+    "hash": "987225527da8a96a9d725f8cf0da4a0b2e58c61d",
+    "shortHash": "9872255",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T08:11:21+03:00",
+    "subject": "feat(theme): implement Material 3 Expressive UI shell and design tokens",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/987225527da8a96a9d725f8cf0da4a0b2e58c61d"
+  },
+  {
+    "hash": "d9e9feaff6c7753ecec6b89c5626456b87426022",
+    "shortHash": "d9e9fea",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T08:09:52+03:00",
+    "subject": "chore: update and rebase Hilal patches for Firefox 157.0a1",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d9e9feaff6c7753ecec6b89c5626456b87426022"
+  },
+  {
+    "hash": "ad924224f0238896c7a552b52bd92ac6a5f4190a",
+    "shortHash": "ad92422",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T08:03:01+03:00",
+    "subject": "perf(hil): accelerate patch application with fingerprint caching and batched apply",
+    "body": "",
+    "category": "perf",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ad924224f0238896c7a552b52bd92ac6a5f4190a"
+  },
+  {
+    "hash": "565690bd3672f36035f8a1c2dfd8680f75145014",
+    "shortHash": "565690b",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T07:13:23+03:00",
+    "subject": "chore: update Firefox upstream version to 157.0a1",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/565690bd3672f36035f8a1c2dfd8680f75145014"
+  },
+  {
+    "hash": "1f1d74fdbef8c7e81a8d313927d62e5f3ba87df8",
+    "shortHash": "1f1d74f",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T07:12:08+03:00",
+    "subject": "remove obsolete project documentation",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1f1d74fdbef8c7e81a8d313927d62e5f3ba87df8"
+  },
+  {
+    "hash": "56915631df94bf7e1dc81d51a6f50e8a92a39eaf",
+    "shortHash": "5691563",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T07:00:55+03:00",
+    "subject": "docs(www): rewrite copy across landing page to be direct, natural, and authentic",
+    "body": "",
+    "category": "docs",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/56915631df94bf7e1dc81d51a6f50e8a92a39eaf"
+  },
   {
     "hash": "cbd8f3274531afad949586733cf2ccf9242bcaca",
     "shortHash": "cbd8f32",
@@ -4621,9 +4691,79 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-06T06:58:08+03:00",
-    "commitCount": 16,
+    "date": "2026-09-06T23:01:23+03:00",
+    "commitCount": 23,
     "commits": [
+      {
+        "hash": "2cbe874d1b248af9c870a0cf6b5a389f38c9aed9",
+        "shortHash": "2cbe874",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T23:01:23+03:00",
+        "subject": "fix(macos): resolve statfs struct inclusion on 64-bit macOS SDK",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2cbe874d1b248af9c870a0cf6b5a389f38c9aed9"
+      },
+      {
+        "hash": "987225527da8a96a9d725f8cf0da4a0b2e58c61d",
+        "shortHash": "9872255",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T08:11:21+03:00",
+        "subject": "feat(theme): implement Material 3 Expressive UI shell and design tokens",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/987225527da8a96a9d725f8cf0da4a0b2e58c61d"
+      },
+      {
+        "hash": "d9e9feaff6c7753ecec6b89c5626456b87426022",
+        "shortHash": "d9e9fea",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T08:09:52+03:00",
+        "subject": "chore: update and rebase Hilal patches for Firefox 157.0a1",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d9e9feaff6c7753ecec6b89c5626456b87426022"
+      },
+      {
+        "hash": "ad924224f0238896c7a552b52bd92ac6a5f4190a",
+        "shortHash": "ad92422",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T08:03:01+03:00",
+        "subject": "perf(hil): accelerate patch application with fingerprint caching and batched apply",
+        "body": "",
+        "category": "perf",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ad924224f0238896c7a552b52bd92ac6a5f4190a"
+      },
+      {
+        "hash": "565690bd3672f36035f8a1c2dfd8680f75145014",
+        "shortHash": "565690b",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T07:13:23+03:00",
+        "subject": "chore: update Firefox upstream version to 157.0a1",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/565690bd3672f36035f8a1c2dfd8680f75145014"
+      },
+      {
+        "hash": "1f1d74fdbef8c7e81a8d313927d62e5f3ba87df8",
+        "shortHash": "1f1d74f",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T07:12:08+03:00",
+        "subject": "remove obsolete project documentation",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1f1d74fdbef8c7e81a8d313927d62e5f3ba87df8"
+      },
+      {
+        "hash": "56915631df94bf7e1dc81d51a6f50e8a92a39eaf",
+        "shortHash": "5691563",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T07:00:55+03:00",
+        "subject": "docs(www): rewrite copy across landing page to be direct, natural, and authentic",
+        "body": "",
+        "category": "docs",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/56915631df94bf7e1dc81d51a6f50e8a92a39eaf"
+      },
       {
         "hash": "cbd8f3274531afad949586733cf2ccf9242bcaca",
         "shortHash": "cbd8f32",
@@ -9453,7 +9593,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 445,
+    "contributions": 452,
     "role": "Lead Developer"
   },
   {

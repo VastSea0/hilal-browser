@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -8,11 +8,16 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..");
 
 // 1. Get all tags
-const tagsOutput = execSync("git tag --list --sort=-creatordate", {
-  cwd: repoRoot,
-  encoding: "utf8",
-}).trim();
-const rawTags = tagsOutput.split("\n").filter(Boolean);
+let rawTags = [];
+try {
+  const tagsOutput = execSync("git tag --list --sort=-creatordate", {
+    cwd: repoRoot,
+    encoding: "utf8",
+  }).trim();
+  rawTags = tagsOutput.split("\n").filter(Boolean);
+} catch (e) {
+  console.warn("Notice: Could not query git tags:", e.message);
+}
 
 // Define standard release tags list
 const releaseTags = [
@@ -102,10 +107,15 @@ function parseChangelogSections(content) {
 const changelogHighlights = parseChangelogSections(changelogMd);
 
 // 3. Get all git commits
-const rawCommits = execSync(
-  "git log --date=iso-strict --pretty=format:\"%H%x09%h%x09%an%x09%ad%x09%s%x09%b%x1e\"",
-  { cwd: repoRoot, encoding: "utf8" }
-);
+let rawCommits = "";
+try {
+  rawCommits = execSync(
+    "git log --date=iso-strict --pretty=format:\"%H%x09%h%x09%an%x09%ad%x09%s%x09%b%x1e\"",
+    { cwd: repoRoot, encoding: "utf8" }
+  );
+} catch (e) {
+  console.warn("Notice: Could not retrieve git log:", e.message);
+}
 
 function categorizeCommit(subject) {
   const s = subject.toLowerCase().trim();
@@ -154,17 +164,45 @@ const allCommits = rawCommits
     };
   });
 
+// If git history is incomplete or shallow (common in Vercel/CI shallow clones)
+// and changelogData.ts already exists with data, preserve it and exit cleanly!
+const targetChangelogPath = resolve(repoRoot, "www/src/data/changelogData.ts");
+let existingChangelogSize = 0;
+try {
+  if (existsSync(targetChangelogPath)) {
+    existingChangelogSize = statSync(targetChangelogPath).size;
+  }
+} catch {}
+
+if (allCommits.length === 0) {
+  if (existingChangelogSize > 0) {
+    console.log("No git commits found. Preserving existing changelogData.ts.");
+    process.exit(0);
+  }
+} else if (allCommits.length < 50 && existingChangelogSize > 5000) {
+  console.log(
+    `Git history is shallow or incomplete (${allCommits.length} commits found). Preserving existing changelogData.ts (${existingChangelogSize} bytes).`
+  );
+  process.exit(0);
+}
+
 // 4. Map commits into Release Buckets
 const releases = [];
 
 // A. Unreleased / latest commits on main
 const latestTag = releaseTags[0];
-const unreleasedHashes = new Set(
-  execSync(`git rev-list ${latestTag}..HEAD`, { cwd: repoRoot, encoding: "utf8" })
-    .trim()
-    .split("\n")
-    .filter(Boolean)
-);
+let unreleasedHashes = new Set();
+try {
+  const unreleasedOutput = execSync(`git rev-list ${latestTag}..HEAD`, {
+    cwd: repoRoot,
+    encoding: "utf8",
+  }).trim();
+  if (unreleasedOutput) {
+    unreleasedHashes = new Set(unreleasedOutput.split("\n").filter(Boolean));
+  }
+} catch (e) {
+  console.warn(`Notice: Could not resolve git rev-list for ${latestTag}..HEAD:`, e.message);
+}
 
 const unreleasedCommits = allCommits.filter(c => unreleasedHashes.has(c.hash));
 if (unreleasedCommits.length > 0) {
@@ -216,13 +254,18 @@ for (let i = 0; i < releaseTags.length; i++) {
 }
 
 // 5. Parse Contributors
-const rawAuthors = execSync('git log --pretty=format:"%an%x09%ae"', {
-  cwd: repoRoot,
-  encoding: "utf8",
-})
-  .trim()
-  .split("\n")
-  .filter(Boolean);
+let rawAuthors = [];
+try {
+  rawAuthors = execSync('git log --pretty=format:"%an%x09%ae"', {
+    cwd: repoRoot,
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+} catch (e) {
+  console.warn("Notice: Could not parse git authors:", e.message);
+}
 
 const authorCounts = {};
 for (const line of rawAuthors) {
