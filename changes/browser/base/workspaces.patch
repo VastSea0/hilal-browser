@@ -1,18 +1,29 @@
 diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
 --- a/browser/base/content/browser.xhtml
 +++ b/browser/base/content/browser.xhtml
-@@ -161,4 +161,7 @@
+@@ -39,6 +39,7 @@
+     href="chrome://browser/content/usercontext/usercontext.css"
+   />
+   <link rel="stylesheet" href="chrome://browser/skin/" />
++  <link rel="stylesheet" href="chrome://browser/content/hilal/HilalShell.css" />
+ 
+   <link rel="stylesheet" href="chrome://browser/skin/controlcenter/panel.css" />
+   <link
+@@ -160,5 +161,10 @@
+ 
    <!-- Put it at the very end to make sure it's not covered by anything. -->
    <html:div id="fullscr-toggler" hidden="hidden"/>
 +
++  <script src="chrome://browser/content/hilal/HilalKeyboardShortcuts.js"></script>
 +  <script src="chrome://browser/content/hilal/HilalWelcome.js"></script>
 +  <script src="chrome://browser/content/hilal/HilalWorkspaces.js"></script>
++  <script src="chrome://browser/content/hilal/HilalShell.js"></script>
  </html:body>
  </html>
 diff --git a/browser/base/jar.mn b/browser/base/jar.mn
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
-@@ -72,6 +72,20 @@ browser.jar:
+@@ -66,6 +66,23 @@ browser.jar:
          content/browser/browser-unified-extensions.js       (content/browser-unified-extensions.js)
          content/browser/browser-graphics-utils.js           (content/browser-graphics-utils.js)
          content/browser/browser-webrtc.js                   (content/browser-webrtc.js)
@@ -29,7 +40,10 @@ diff --git a/browser/base/jar.mn b/browser/base/jar.mn
 +        content/browser/hilal/screenshots/welcome-workspaces-off.png (content/hilal/screenshots/welcome-workspaces-off.png)
 +        content/browser/hilal/screenshots/welcome-toolbar-visible.png (content/hilal/screenshots/welcome-toolbar-visible.png)
 +        content/browser/hilal/screenshots/welcome-toolbar-hidden.png (content/hilal/screenshots/welcome-toolbar-hidden.png)
++        content/browser/hilal/HilalKeyboardShortcuts.js     (content/hilal/HilalKeyboardShortcuts.js)
 +        content/browser/hilal/HilalWorkspaces.js            (content/hilal/HilalWorkspaces.js)
++        content/browser/hilal/HilalShell.js                 (content/hilal/HilalShell.js)
++        content/browser/hilal/HilalShell.css                (content/hilal/HilalShell.css)
          content/browser/global-scripts.js                   (content/global-scripts.js)
          content/browser/main-popupset.js                    (content/main-popupset.js)
  *       content/browser/pageinfo/pageInfo.xhtml             (content/pageinfo/pageInfo.xhtml)

@@ -27,10 +27,6 @@ path   = "browser/components/preferences/hilal.inc.xhtml"
 reason = "Hilal preferences panels inclusion template"
 
 [[patches]]
-path   = "browser/keyboard-shortcuts-core.patch"
-reason = "Hilal keyboard shortcuts core injection"
-
-[[patches]]
 path   = "browser/components/preferences.patch"
 reason = "Hilal preferences panels and tabs layout"
 
