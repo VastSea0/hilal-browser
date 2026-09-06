@@ -31,7 +31,7 @@
   max-height: 48px;
   padding: 0 16px;
   background-color: var(--md-sys-color-surface, #101319);
-  border-bottom: 1px solid var(--md-sys-color-surface-container-high, #262b32);
+  border-bottom: none !important;
   gap: 12px;
   z-index: 1000;
   -moz-window-dragging: drag;
@@ -105,7 +105,7 @@
   display: flex;
   align-items: center;
   background-color: var(--md-sys-color-surface-container-high, #262b32);
-  border: 1px solid var(--md-sys-color-outline-variant, #43474e);
+  border: none !important;
   border-radius: var(--md-sys-shape-corner-full, 9999px);
   height: 34px;
   padding: 0 14px;
@@ -117,8 +117,7 @@
 
 #hilal-url-container:focus-within {
   background-color: var(--md-sys-color-surface-container-highest, #31363e);
-  border-color: var(--md-sys-color-primary, #a8c7fa);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 2px var(--md-sys-color-primary, #a8c7fa);
 }
 
 #hilal-url-security-icon {
@@ -170,7 +169,7 @@
   display: flex;
   flex-direction: column;
   background-color: var(--md-sys-color-surface-container-low, #181c22);
-  border: 1px solid var(--md-sys-color-outline-variant, #43474e);
+  border: none !important;
   border-radius: var(--md-sys-shape-corner-large, 16px);
   padding: 10px;
   box-sizing: border-box;
@@ -188,7 +187,7 @@
   align-items: center;
   gap: 6px;
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--md-sys-color-surface-container-high, #262b32);
+  border-bottom: none !important;
   margin-bottom: 8px;
   overflow-x: auto;
 }
@@ -199,7 +198,7 @@
   gap: 4px;
   padding: 4px 10px;
   border-radius: var(--md-sys-shape-corner-full, 9999px);
-  border: 1px solid transparent;
+  border: none !important;
   background: transparent;
   color: var(--md-sys-color-on-surface-variant, #c3c7cf);
   font-size: 12px;
@@ -217,7 +216,6 @@
 .hilal-ws-chip.active {
   background-color: var(--md-sys-color-primary-container, #0842a0);
   color: var(--md-sys-color-on-primary-container, #d3e3fd);
-  border-color: var(--md-sys-color-primary, #a8c7fa);
 }
 
 .hilal-ws-add {
@@ -275,6 +273,7 @@
   gap: 8px;
   position: relative;
   user-select: none;
+  border: none !important;
 }
 
 .hilal-tab-pill:hover {
@@ -286,7 +285,7 @@
   background-color: var(--md-sys-color-surface-container-highest, #31363e);
   color: var(--md-sys-color-primary, #a8c7fa);
   font-weight: 500;
-  border: 1px solid var(--md-sys-color-outline-variant, #43474e);
+  border: none !important;
 }
 
 .hilal-tab-icon {
@@ -348,33 +347,49 @@
   align-items: center;
   justify-content: space-around;
   padding-top: 8px;
-  border-top: 1px solid var(--md-sys-color-surface-container-high, #262b32);
+  border-top: none !important;
   margin-top: 6px;
 }
 
-/* 6. Floating Webview Canvas */
+/* 6. Single Floating Webview Canvas */
 #tabbrowser-tabbox {
   flex: 1 !important;
   border-radius: var(--md-sys-shape-corner-large, 16px) !important;
-  border: 1px solid var(--md-sys-color-outline-variant, #43474e) !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
   background-color: var(--md-sys-color-surface-container-lowest, #0b0e14) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: none !important;
   overflow: hidden !important;
+  clip-path: inset(0 round var(--md-sys-shape-corner-large, 16px)) !important;
 }
 
 #tabbrowser-tabpanels {
   height: 100% !important;
   width: 100% !important;
   flex: 1 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: var(--md-sys-shape-corner-large, 16px) !important;
+  background: transparent !important;
   overflow: hidden !important;
 }
 
 .browserSidebarContainer,
 .browserContainer,
-browser[type="content"] {
+.browserStack,
+browser[type="content"],
+.split-view-panel {
   height: 100% !important;
   width: 100% !important;
   flex: 1 !important;
   border: none !important;
-  border-radius: 0 !important;
+  border-radius: var(--md-sys-shape-corner-large, 16px) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: transparent !important;
+  overflow: hidden !important;
 }
