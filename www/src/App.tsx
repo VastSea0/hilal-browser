@@ -204,7 +204,7 @@ export default function App() {
         chip: "Açık Kaynak • Alpha",
         tagline: "Web sizin kontrolünüzde.",
         subtitle:
-          "Gizlilik odaklı, dikey sekmeli ve konteyner destekli masaüstü web tarayıcısı. Açık kaynaklı, hızlı ve telemetrisiz.",
+          "Dikey sekmeler, izole çalışma alanları ve dahili reklam engelleyiciyle gelen açık kaynaklı masaüstü tarayıcısı. Telemetri yok.",
         downloadBtn: {
           macos: "macOS için İndir",
           windows: "Windows için İndir",
@@ -240,18 +240,18 @@ export default function App() {
         },
         {
           chip: "Eklentiler",
-          title: "Tüm Firefox eklentileriyle tam uyum.",
+          title: "Firefox eklenti ekosistemiyle tam uyumlu.",
           description:
-            "Gecko motoru sayesinde Firefox Add-ons mağazasındaki tüm eklentilerinizi doğrudan yükleyip kullanabilirsiniz.",
+            "Firefox Add-ons mağazasındaki tüm eklentilerinizi doğrudan yükleyip kullanabilirsiniz. uBlock Origin kutudan çıktığı gibi hazır.",
           image: "/welcome-home-preview.png",
-          alt: "Hilal Firefox Eklenti Uyumu",
+          alt: "Hilal Eklenti Uyumu",
         },
       ],
       openSourceSection: {
         chip: "Açık Kaynak",
-        title: "Firefox tabanında, yamalarla inşa edildi.",
+        title: "Tüm kaynak kodu açık.",
         description:
-          "Hilal bağımsız bir fork değildir; resmi Firefox kaynak kodu üzerine Rust tabanlı 'hil' aracıyla uygulanan açık kaynaklı bir yama katmanıdır.",
+          "Hilal tamamen açık kaynaklı bir projedir. Gecko altyapısını kullanır ve güvenlik güncellemelerini doğrudan alır. Kaynak kodunu inceleyebilir, derleyebilir ve katkıda bulunabilirsiniz.",
         commandLabel: "Depoyu klonlayıp derleyin:",
       },
       downloadSection: {
@@ -283,19 +283,19 @@ export default function App() {
         items: [
           {
             q: "Hilal Browser nedir?",
-            a: "Hilal, Firefox Gecko motoru üzerine geliştirilmiş açık kaynaklı bir web tarayıcısıdır. Çatallama (hard fork) yerine Rust tabanlı yama yöneticisiyle Firefox'un üzerine oturur, böylece güncellemeleri gecikmeksizin alır.",
+            a: "Hilal, kişiselleştirilebilir arayüzü, izole çalışma alanları ve gizlilik odaklı yapısıyla öne çıkan açık kaynaklı bir masaüstü web tarayıcısıdır. Altyapısında Gecko motorunu kullanır.",
           },
           {
             q: "Firefox eklentilerimi kullanabilir miyim?",
-            a: "Evet. Firefox Add-ons (AMO) mağazasındaki tüm eklentilerle %100 uyumludur. uBlock Origin hazır olarak gelir.",
+            a: "Evet. Firefox Add-ons (AMO) mağazasındaki tüm eklentilerle uyumludur. uBlock Origin hazır olarak gelir.",
           },
           {
-            q: "Çalışma Alanları (Workspaces) oturumları nasıl ayırır?",
-            a: "Firefox Multi-Account Containers altyapısıyla her çalışma alanında çerezler ve oturumlar izole edilir. Farklı profiller açmadan aynı tarayıcıda iş ve kişisel hesaplarınızı yönetebilirsiniz.",
+            q: "Çalışma Alanları oturumları nasıl ayırır?",
+            a: "Her çalışma alanında çerezler ve oturum bilgileri birbirinden izole edilir. Aynı tarayıcıda iş ve kişisel hesaplarınızı ayrı profiller açmadan yönetebilirsiniz.",
           },
           {
             q: "Telemetri veya veri toplanıyor mu?",
-            a: "Hayır. Tarayıcıda telemetri ve arka plan veri gönderimi tamamen devre dışı bırakılmıştır.",
+            a: "Hayır. Telemetri ve arka plan veri gönderimi tamamen devre dışıdır.",
           },
         ],
       },
@@ -320,7 +320,7 @@ export default function App() {
         chip: "Open Source • Alpha",
         tagline: "Browse on your terms.",
         subtitle:
-          "A privacy-focused desktop browser with vertical tabs, isolated workspaces, and zero telemetry. Built on Firefox Gecko.",
+          "An open-source desktop browser with vertical tabs, isolated workspaces, and a built-in ad blocker. No telemetry.",
         downloadBtn: {
           macos: "Download for macOS",
           windows: "Download for Windows",
@@ -356,18 +356,18 @@ export default function App() {
         },
         {
           chip: "Add-ons",
-          title: "Full Firefox add-on compatibility.",
+          title: "Compatible with the Firefox add-on ecosystem.",
           description:
-            "Powered by Gecko, Hilal supports the entire Firefox Add-ons (AMO) catalog with no workarounds required.",
+            "Install any extension from Firefox Add-ons (AMO) directly. uBlock Origin comes pre-installed out of the box.",
           image: "/welcome-home-preview.png",
           alt: "Hilal Add-on Compatibility",
         },
       ],
       openSourceSection: {
         chip: "Open Source",
-        title: "Built as a clean patch layer on Firefox.",
+        title: "Fully open source.",
         description:
-          "Hilal is not a divergent fork. It applies text-based patches to upstream Firefox Gecko using the 'hil' Rust manager, receiving security updates directly.",
+          "Hilal is a fully open-source project. It uses the Gecko engine under the hood and receives security updates directly. You can inspect the source, build it yourself, or contribute.",
         commandLabel: "Clone and build locally:",
       },
       downloadSection: {
@@ -399,19 +399,19 @@ export default function App() {
         items: [
           {
             q: "What is Hilal Browser?",
-            a: "Hilal is an open-source browser built on Firefox Gecko. Rather than maintaining a hard fork, it applies declarative patches to upstream Firefox using the 'hil' Rust manager, staying up to date with upstream security fixes.",
+            a: "Hilal is an open-source desktop browser focused on customization, privacy, and workspace isolation. It uses the Gecko engine under the hood.",
           },
           {
-            q: "Can I use standard Firefox extensions?",
-            a: "Yes. Hilal supports the full Firefox Add-ons (AMO) ecosystem, and uBlock Origin is pre-installed.",
+            q: "Can I use Firefox extensions?",
+            a: "Yes. Hilal is compatible with the full Firefox Add-ons (AMO) catalog. uBlock Origin is pre-installed.",
           },
           {
             q: "How do Workspaces isolate sessions?",
-            a: "Each workspace runs in an isolated Multi-Account Container, keeping cookies and logins strictly separated between contexts.",
+            a: "Each workspace keeps cookies and logins strictly separated. You can manage work and personal accounts side by side without opening separate profiles.",
           },
           {
             q: "Is there any telemetry or tracking?",
-            a: "No. All telemetry endpoints and background analytics pingers are disabled.",
+            a: "No. All telemetry and background analytics are disabled.",
           },
         ],
       },

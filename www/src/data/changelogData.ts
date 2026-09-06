@@ -39,11 +39,21 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 464;
+export const REPO_COMMITS_TOTAL = 465;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "423255d060ee87709f6f514eeb856ff432629c40",
+    "shortHash": "423255d",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T23:39:01+03:00",
+    "subject": "fix(www): handle shallow git clones in changelog build script and fix vercel deployment",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/423255d060ee87709f6f514eeb856ff432629c40"
+  },
   {
     "hash": "2cbe874d1b248af9c870a0cf6b5a389f38c9aed9",
     "shortHash": "2cbe874",
@@ -4691,9 +4701,19 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-06T23:01:23+03:00",
-    "commitCount": 23,
+    "date": "2026-09-06T23:39:01+03:00",
+    "commitCount": 24,
     "commits": [
+      {
+        "hash": "423255d060ee87709f6f514eeb856ff432629c40",
+        "shortHash": "423255d",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T23:39:01+03:00",
+        "subject": "fix(www): handle shallow git clones in changelog build script and fix vercel deployment",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/423255d060ee87709f6f514eeb856ff432629c40"
+      },
       {
         "hash": "2cbe874d1b248af9c870a0cf6b5a389f38c9aed9",
         "shortHash": "2cbe874",
@@ -9593,7 +9613,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 452,
+    "contributions": 453,
     "role": "Lead Developer"
   },
   {

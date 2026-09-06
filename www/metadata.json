@@ -1,6 +1,6 @@
 {
   "name": "Hilal Browser",
-  "description": "Firefox Gecko tabanlı, uBlock Origin entegrasyonlu, dikey sekmeler barındıran sade, hızlı ve güvenli web tarayıcısı.",
+  "description": "Gizlilik odaklı, dikey sekmeli ve çalışma alanı destekli açık kaynaklı masaüstü web tarayıcısı.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
