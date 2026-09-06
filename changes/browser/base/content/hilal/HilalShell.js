@@ -1374,12 +1374,12 @@
       document.body.appendChild(menu);
 
       const onDocClick = (e) => {
-        if (!menu.contains(e.target) && e.target !== anchor) {
+        if (!menu.contains(e.target) && !anchor.contains(e.target)) {
           menu.remove();
-          document.removeEventListener("click", onDocClick);
+          document.removeEventListener("mousedown", onDocClick);
         }
       };
-      setTimeout(() => document.addEventListener("click", onDocClick), 0);
+      setTimeout(() => document.addEventListener("mousedown", onDocClick), 0);
     },
 
     mountNativeToolbarElements() {
