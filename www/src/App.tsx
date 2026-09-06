@@ -7,20 +7,17 @@ import {
   ChevronDown,
   Download,
   Terminal,
-  ExternalLink,
   Apple,
   Laptop,
   Check,
   Copy,
   ArrowRight,
-  Shield,
   Layers,
   Sparkles,
-  Lock,
   Cpu,
-  Boxes
+  Boxes,
+  GitCommit
 } from "lucide-react";
-import { SiDiscord } from "react-icons/si";
 
 import { GithubRelease } from "./types";
 import {
@@ -33,6 +30,7 @@ import {
 } from "./utils/github";
 
 import DownloadModal from "./components/DownloadModal";
+import ChangelogPage from "./components/ChangelogPage";
 
 // M3 Expressive Spring Motion Physics
 const springTransition = {
@@ -72,6 +70,17 @@ export default function App() {
     return saved === "en" || saved === "tr" ? saved : "tr";
   });
 
+  const [currentView, setCurrentView] = useState<"home" | "changelog">(() => {
+    if (typeof window !== "undefined") {
+      const p = window.location.pathname;
+      const h = window.location.hash;
+      if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
+        return "changelog";
+      }
+    }
+    return "home";
+  });
+
   const [release, setRelease] = useState<GithubRelease | null>(null);
   const [isDownloadOpen, setIsDownloadOpen] = useState<boolean>(false);
   const [detectedOS, setDetectedOS] = useState<string>("other");
@@ -81,6 +90,23 @@ export default function App() {
 
   useEffect(() => {
     setDetectedOS(detectOS());
+
+    const handleLocationChange = () => {
+      const p = window.location.pathname;
+      const h = window.location.hash;
+      if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
+        setCurrentView("changelog");
+      } else {
+        setCurrentView("home");
+      }
+    };
+
+    window.addEventListener("popstate", handleLocationChange);
+    window.addEventListener("hashchange", handleLocationChange);
+    return () => {
+      window.removeEventListener("popstate", handleLocationChange);
+      window.removeEventListener("hashchange", handleLocationChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -117,7 +143,31 @@ export default function App() {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
+  const navigateTo = (view: "home" | "changelog", targetId?: string) => {
+    setCurrentView(view);
+    if (view === "changelog") {
+      window.history.pushState(null, "", "#changelog");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.history.pushState(null, "", "/");
+      if (targetId) {
+        setTimeout(() => {
+          const el = document.getElementById(targetId);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 50);
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+  };
+
   const scrollToId = (id: string) => {
+    if (currentView !== "home") {
+      navigateTo("home", id);
+      return;
+    }
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -143,6 +193,7 @@ export default function App() {
       nav: {
         features: "Özellikler",
         architecture: "Mimari",
+        changelog: "Sürüm Notları",
         download: "İndir",
         github: "GitHub",
         getHilal: "Hilal'i Edin",
@@ -250,7 +301,7 @@ export default function App() {
         copyright: "Hilal Browser Projesi. Mozilla Kamu Lisansı (MPL 2.0) ile korunmaktadır.",
         authorBy: "Egehan Kahraman tarafından geliştirilmiştir",
         source: "Kaynak Kodu",
-        releases: "Sürümler",
+        releases: "Sürümler & Değişiklikler",
         discord: "Discord",
       },
     },
@@ -258,6 +309,7 @@ export default function App() {
       nav: {
         features: "Features",
         architecture: "Architecture",
+        changelog: "Changelog",
         download: "Download",
         github: "GitHub",
         getHilal: "Get Hilal",
@@ -365,7 +417,7 @@ export default function App() {
         copyright: "Hilal Browser Project. Licensed under the Mozilla Public License 2.0.",
         authorBy: "Crafted by Egehan Kahraman",
         source: "Source Code",
-        releases: "Releases",
+        releases: "Releases & Changelog",
         discord: "Discord",
       },
     },
@@ -389,7 +441,7 @@ export default function App() {
           <motion.div
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() => navigateTo("home")}
             className="flex items-center gap-3 cursor-pointer"
           >
             <div className="w-9 h-9 rounded-full bg-[var(--md-sys-color-primary-container)] flex items-center justify-center p-1.5">
@@ -408,19 +460,34 @@ export default function App() {
           <div className="hidden md:flex items-center gap-1.5 p-1 rounded-full bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/25">
             <button
               onClick={() => scrollToId("features")}
-              className="px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors"
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                currentView === "home"
+                  ? "text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50"
+                  : "text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)]"
+              }`}
             >
               {activeT.nav.features}
             </button>
             <button
               onClick={() => scrollToId("architecture")}
-              className="px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors cursor-pointer"
             >
               {activeT.nav.architecture}
             </button>
             <button
+              onClick={() => navigateTo("changelog")}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                currentView === "changelog"
+                  ? "bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] shadow-sm"
+                  : "text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50"
+              }`}
+            >
+              <GitCommit className="w-3.5 h-3.5" />
+              <span>{activeT.nav.changelog}</span>
+            </button>
+            <button
               onClick={() => scrollToId("download")}
-              className="px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors cursor-pointer"
             >
               {activeT.nav.download}
             </button>
@@ -428,9 +495,10 @@ export default function App() {
               href="https://github.com/VastSea0/hilal-browser"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)]/50 transition-colors flex items-center gap-1"
             >
-              {activeT.nav.github}
+              <Github className="w-3.5 h-3.5" />
+              <span>{activeT.nav.github}</span>
             </a>
           </div>
 
@@ -439,7 +507,7 @@ export default function App() {
             {/* Lang Chip */}
             <button
               onClick={() => setLang(lang === "tr" ? "en" : "tr")}
-              className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-mono font-bold bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/30 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)] transition-colors m3-state-layer"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-mono font-bold bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/30 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)] transition-colors cursor-pointer"
               title={lang === "tr" ? "Switch to English" : "Türkçe'ye Geç"}
             >
               {lang === "tr" ? "EN" : "TR"}
@@ -448,7 +516,7 @@ export default function App() {
             {/* Theme Chip */}
             <button
               onClick={toggleTheme}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/30 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)] transition-colors m3-state-layer"
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/30 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-secondary-container)] transition-colors cursor-pointer"
               aria-label="Theme Toggle"
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -459,7 +527,7 @@ export default function App() {
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => setIsDownloadOpen(true)}
-              className="h-10 px-5 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-semibold text-xs transition-shadow shadow-md hover:shadow-lg flex items-center gap-2"
+              className="h-10 px-5 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-semibold text-xs transition-shadow shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>{activeT.nav.getHilal}</span>
@@ -468,298 +536,320 @@ export default function App() {
         </div>
       </nav>
 
-      {/* 2. M3 Expressive Hero Section */}
-      <section className="pt-36 sm:pt-44 pb-20 px-4 sm:px-6 max-w-5xl mx-auto text-center">
-        <motion.div
-          variants={m3Stagger}
-          initial="hidden"
-          animate="visible"
-          className="space-y-6"
-        >
-          {/* M3 Assist Chip */}
-          <motion.div
-            variants={m3FadeIn}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] text-xs font-semibold tracking-wide"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-[var(--md-sys-color-primary)]" />
-            <span>{activeT.hero.chip}</span>
-          </motion.div>
-
-          {/* M3 Emphasized Display Large Tagline */}
-          <motion.h1
-            variants={m3FadeIn}
-            className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-[var(--md-sys-color-on-surface)] leading-[1.05]"
-            style={{ fontStretch: "110%" }}
-          >
-            {activeT.hero.tagline}
-          </motion.h1>
-
-          {/* M3 Body Large Subtitle */}
-          <motion.p
-            variants={m3FadeIn}
-            className="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-[var(--md-sys-color-on-surface-variant)] leading-relaxed font-normal"
-          >
-            {activeT.hero.subtitle}
-          </motion.p>
-
-          {/* M3 Actions (Filled & Tonal Pill Buttons) */}
-          <motion.div
-            variants={m3FadeIn}
-            className="pt-4 flex flex-col items-center gap-4"
-          >
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              {/* Primary Filled Button */}
-              <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                onClick={() => setIsDownloadOpen(true)}
-                className="h-14 px-8 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-bold text-sm sm:text-base flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all"
-              >
-                {detectedOS === "macos" && <Apple className="w-5 h-5" />}
-                {detectedOS === "windows" && <Laptop className="w-5 h-5" />}
-                {detectedOS !== "macos" && detectedOS !== "windows" && <Download className="w-5 h-5" />}
-                <span>{getDynamicBtnLabel()}</span>
-              </motion.button>
-
-              {/* Tonal Outlined Button */}
-              <motion.a
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                href="https://github.com/VastSea0/hilal-browser"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="h-14 px-7 rounded-full bg-m3-container text-[var(--md-sys-color-on-surface)] border border-[var(--md-sys-color-outline-variant)]/50 font-semibold text-sm sm:text-base flex items-center gap-2.5 hover:bg-m3-container-high transition-colors"
-              >
-                <Github className="w-5 h-5" />
-                <span>GitHub Repo</span>
-              </motion.a>
-            </div>
-
-            {/* Supporting artifact note */}
-            {recommendedAsset && (
-              <p className="text-xs font-mono text-[var(--md-sys-color-on-surface-variant)]">
-                {recommendedAsset.name} • {formatBytes(recommendedAsset.size)}
-              </p>
-            )}
-          </motion.div>
-        </motion.div>
-
-        {/* M3 Expressive Hero Container (32px rounded) */}
-        <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ ...springTransition, delay: 0.2 }}
-          className="mt-14 sm:mt-18 p-2 sm:p-3 rounded-[36px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/40 shadow-2xl overflow-hidden hover-lift"
-        >
-          <div className="rounded-[28px] overflow-hidden bg-m3-container-lowest">
-            <img
-              src={isDark ? "/welcome-home-preview-black.png" : "/welcome-home-preview.png"}
-              alt="Hilal Browser Tahoe Interface"
-              className="w-full h-auto block select-none pointer-events-none"
-            />
-          </div>
-        </motion.div>
-      </section>
-
-      {/* 3. M3 Expressive Interactive Stories Showcase */}
-      <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6" id="features">
-        <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)] text-xs font-semibold">
-            <Layers className="w-3.5 h-3.5" />
-            <span>{lang === "tr" ? "Öne Çıkan Özellikler" : "Key Highlights"}</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)]">
-            {lang === "tr" ? "Temel Yetenekler." : "Core Pillars."}
-          </h2>
-        </div>
-
-        {/* M3 Segmented Navigation Bar */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
-          {activeT.stories.map((story, idx) => (
-            <motion.button
-              key={idx}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveTab(idx)}
-              className={`h-11 px-5 rounded-full text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 ${
-                activeTab === idx
-                  ? "bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] shadow-md"
-                  : "bg-m3-container text-[var(--md-sys-color-on-surface-variant)] hover:bg-m3-container-high"
-              }`}
-            >
-              <span>{story.chip}</span>
-            </motion.button>
-          ))}
-        </div>
-
-        {/* Active Tab Story Showcase Container */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={springTransition}
-            className="p-6 sm:p-10 rounded-[36px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/40 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center shadow-xl"
-          >
-            {/* Story Text Side */}
-            <div className="lg:col-span-5 space-y-4 text-left">
-              <span className="px-3.5 py-1 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-xs font-semibold inline-block">
-                {activeT.stories[activeTab].chip}
-              </span>
-              <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)] leading-snug">
-                {activeT.stories[activeTab].title}
-              </h3>
-              <p className="text-sm sm:text-base text-[var(--md-sys-color-on-surface-variant)] leading-relaxed font-normal">
-                {activeT.stories[activeTab].description}
-              </p>
-            </div>
-
-            {/* Story Visual Side */}
-            <div className="lg:col-span-7 rounded-[26px] overflow-hidden bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/30 shadow-md">
-              <img
-                src={activeT.stories[activeTab].image}
-                alt={activeT.stories[activeTab].alt}
-                className="w-full h-auto block select-none"
-              />
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </section>
-
-      {/* 4. M3 Expressive Architecture & Terminal Section */}
-      <section className="py-20 max-w-5xl mx-auto px-4 sm:px-6" id="architecture">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={springTransition}
-          className="p-8 sm:p-12 rounded-[36px] bg-m3-container border border-[var(--md-sys-color-outline-variant)]/40 text-center space-y-6 shadow-xl"
-        >
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] text-xs font-semibold">
-            <Cpu className="w-3.5 h-3.5" />
-            <span>{activeT.openSourceSection.chip}</span>
-          </div>
-
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-[var(--md-sys-color-on-surface)] max-w-2xl mx-auto">
-            {activeT.openSourceSection.title}
-          </h2>
-
-          <p className="text-sm sm:text-base md:text-lg text-[var(--md-sys-color-on-surface-variant)] max-w-2xl mx-auto leading-relaxed">
-            {activeT.openSourceSection.description}
-          </p>
-
-          {/* M3 Tonal Interactive Terminal Card */}
-          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/40 text-xs font-mono text-[var(--md-sys-color-on-surface)] shadow-inner">
-              <span className="text-[var(--md-sys-color-primary)] font-bold">$</span>
-              <span className="select-all truncate max-w-[260px] sm:max-w-md">
-                git clone https://github.com/VastSea0/hilal-browser.git && cd hilal-browser && ./bin/hil setup
-              </span>
-              <button
-                onClick={handleCopyCommand}
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-m3-container hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors"
-                title="Copy Command"
-              >
-                {copiedClone ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* 5. M3 Expressive Platform Download Center */}
-      <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6 text-center" id="download">
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-xs font-semibold mb-3">
-          <Boxes className="w-3.5 h-3.5" />
-          <span>{activeT.downloadSection.chip}</span>
-        </div>
-
-        <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-[var(--md-sys-color-on-surface)]">
-          {activeT.downloadSection.title}
-        </h2>
-        <p className="mt-2 text-base text-[var(--md-sys-color-on-surface-variant)]">
-          {activeT.downloadSection.subtitle}
-        </p>
-
-        {/* 3 M3 Tonal Container Cards */}
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {activeT.downloadSection.platforms.map((p, idx) => (
+      {/* Main View Router */}
+      {currentView === "changelog" ? (
+        <ChangelogPage
+          lang={lang}
+          onBack={() => navigateTo("home")}
+          onOpenDownload={() => setIsDownloadOpen(true)}
+        />
+      ) : (
+        <>
+          {/* 2. M3 Expressive Hero Section */}
+          <section className="pt-36 sm:pt-44 pb-20 px-4 sm:px-6 max-w-5xl mx-auto text-center">
             <motion.div
-              key={idx}
-              whileHover={{ y: -6, scale: 1.02 }}
-              transition={springTransition}
-              onClick={() => setIsDownloadOpen(true)}
-              className="p-7 rounded-[32px] bg-m3-container-low hover:bg-m3-container border border-[var(--md-sys-color-outline-variant)]/40 transition-all text-left flex flex-col justify-between cursor-pointer group shadow-lg"
+              variants={m3Stagger}
+              initial="hidden"
+              animate="visible"
+              className="space-y-6"
             >
-              <div>
-                <div className="w-12 h-12 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                  {p.icon}
-                </div>
-                <h3 className="text-xl font-bold text-[var(--md-sys-color-on-surface)]">
-                  {p.name}
-                </h3>
-                <p className="mt-1 text-xs text-[var(--md-sys-color-on-surface-variant)] font-normal">
-                  {p.spec}
-                </p>
-              </div>
+              {/* M3 Assist Chip */}
+              <motion.div
+                variants={m3FadeIn}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] text-xs font-semibold tracking-wide"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[var(--md-sys-color-primary)]" />
+                <span>{activeT.hero.chip}</span>
+              </motion.div>
 
-              <div className="mt-8 flex items-center gap-2 text-xs font-bold text-[var(--md-sys-color-primary)] group-hover:translate-x-1 transition-transform">
-                <span>{activeT.downloadSection.directDownload}</span>
-                <ArrowRight className="w-4 h-4" />
+              {/* M3 Emphasized Display Large Tagline */}
+              <motion.h1
+                variants={m3FadeIn}
+                className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-[var(--md-sys-color-on-surface)] leading-[1.05]"
+                style={{ fontStretch: "110%" }}
+              >
+                {activeT.hero.tagline}
+              </motion.h1>
+
+              {/* M3 Body Large Subtitle */}
+              <motion.p
+                variants={m3FadeIn}
+                className="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-[var(--md-sys-color-on-surface-variant)] leading-relaxed font-normal"
+              >
+                {activeT.hero.subtitle}
+              </motion.p>
+
+              {/* M3 Actions (Filled & Tonal Pill Buttons) */}
+              <motion.div
+                variants={m3FadeIn}
+                className="pt-4 flex flex-col items-center gap-4"
+              >
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  {/* Primary Filled Button */}
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => setIsDownloadOpen(true)}
+                    className="h-14 px-8 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-bold text-sm sm:text-base flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all cursor-pointer"
+                  >
+                    {detectedOS === "macos" && <Apple className="w-5 h-5" />}
+                    {detectedOS === "windows" && <Laptop className="w-5 h-5" />}
+                    {detectedOS !== "macos" && detectedOS !== "windows" && <Download className="w-5 h-5" />}
+                    <span>{getDynamicBtnLabel()}</span>
+                  </motion.button>
+
+                  {/* Changelog Pill Button */}
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => navigateTo("changelog")}
+                    className="h-14 px-7 rounded-full bg-m3-container text-[var(--md-sys-color-on-surface)] border border-[var(--md-sys-color-outline-variant)]/50 font-semibold text-sm sm:text-base flex items-center gap-2.5 hover:bg-m3-container-high transition-colors cursor-pointer"
+                  >
+                    <GitCommit className="w-5 h-5 text-[var(--md-sys-color-primary)]" />
+                    <span>{activeT.nav.changelog}</span>
+                  </motion.button>
+
+                  {/* GitHub Repo Button */}
+                  <motion.a
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    href="https://github.com/VastSea0/hilal-browser"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="h-14 px-7 rounded-full bg-m3-container text-[var(--md-sys-color-on-surface)] border border-[var(--md-sys-color-outline-variant)]/50 font-semibold text-sm sm:text-base flex items-center gap-2.5 hover:bg-m3-container-high transition-colors"
+                  >
+                    <Github className="w-5 h-5" />
+                    <span>GitHub Repo</span>
+                  </motion.a>
+                </div>
+
+                {/* Supporting artifact note */}
+                {recommendedAsset && (
+                  <p className="text-xs font-mono text-[var(--md-sys-color-on-surface-variant)]">
+                    {recommendedAsset.name} • {formatBytes(recommendedAsset.size)}
+                  </p>
+                )}
+              </motion.div>
+            </motion.div>
+
+            {/* M3 Expressive Hero Container */}
+            <motion.div
+              initial={{ opacity: 0, y: 32 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ ...springTransition, delay: 0.2 }}
+              className="mt-14 sm:mt-18 p-2 sm:p-3 rounded-[36px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/40 shadow-2xl overflow-hidden hover-lift"
+            >
+              <div className="rounded-[28px] overflow-hidden bg-m3-container-lowest">
+                <img
+                  src={isDark ? "/welcome-home-preview-black.png" : "/welcome-home-preview.png"}
+                  alt="Hilal Browser Tahoe Interface"
+                  className="w-full h-auto block select-none pointer-events-none"
+                />
               </div>
             </motion.div>
-          ))}
-        </div>
-      </section>
+          </section>
 
-      {/* 6. M3 Expressive S.S.S. (FAQ) */}
-      <section className="py-20 max-w-3xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-10 space-y-2">
-          <span className="px-3.5 py-1 rounded-full bg-m3-container text-[var(--md-sys-color-on-surface-variant)] text-xs font-semibold inline-block">
-            {activeT.faq.chip}
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)]">
-            {activeT.faq.title}
-          </h2>
-        </div>
+          {/* 3. M3 Expressive Interactive Stories Showcase */}
+          <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6" id="features">
+            <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)] text-xs font-semibold">
+                <Layers className="w-3.5 h-3.5" />
+                <span>{lang === "tr" ? "Öne Çıkan Özellikler" : "Key Highlights"}</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)]">
+                {lang === "tr" ? "Temel Yetenekler." : "Core Pillars."}
+              </h2>
+            </div>
 
-        <div className="space-y-3">
-          {activeT.faq.items.map((item, idx) => {
-            const isOpen = activeFaq === idx;
-            return (
-              <motion.div
-                key={idx}
-                className="rounded-[24px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/35 overflow-hidden transition-colors"
-              >
-                <button
-                  onClick={() => setActiveFaq(isOpen ? null : idx)}
-                  className="w-full flex items-center justify-between p-5 text-left text-base font-semibold text-[var(--md-sys-color-on-surface)] hover:text-[var(--md-sys-color-primary)] transition-colors"
+            {/* M3 Segmented Navigation Bar */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
+              {activeT.stories.map((story, idx) => (
+                <motion.button
+                  key={idx}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setActiveTab(idx)}
+                  className={`h-11 px-5 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === idx
+                      ? "bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] shadow-md"
+                      : "bg-m3-container text-[var(--md-sys-color-on-surface-variant)] hover:bg-m3-container-high"
+                  }`}
                 >
-                  <span>{item.q}</span>
-                  <div className={`w-8 h-8 rounded-full bg-m3-container flex items-center justify-center shrink-0 ml-4 transition-transform duration-200 ${isOpen ? "rotate-180 bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)]" : ""}`}>
-                    <ChevronDown className="w-4 h-4" />
-                  </div>
-                </button>
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={springTransition}
-                      className="overflow-hidden"
-                    >
-                      <p className="px-5 pb-5 pt-1 text-sm text-[var(--md-sys-color-on-surface-variant)] leading-relaxed border-t border-[var(--md-sys-color-outline-variant)]/20">
-                        {item.a}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                  <span>{story.chip}</span>
+                </motion.button>
+              ))}
+            </div>
+
+            {/* Active Tab Story Showcase Container */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={springTransition}
+                className="p-6 sm:p-10 rounded-[36px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/40 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center shadow-xl"
+              >
+                {/* Story Text Side */}
+                <div className="lg:col-span-5 space-y-4 text-left">
+                  <span className="px-3.5 py-1 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-xs font-semibold inline-block">
+                    {activeT.stories[activeTab].chip}
+                  </span>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)] leading-snug">
+                    {activeT.stories[activeTab].title}
+                  </h3>
+                  <p className="text-sm sm:text-base text-[var(--md-sys-color-on-surface-variant)] leading-relaxed font-normal">
+                    {activeT.stories[activeTab].description}
+                  </p>
+                </div>
+
+                {/* Story Visual Side */}
+                <div className="lg:col-span-7 rounded-[26px] overflow-hidden bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/30 shadow-md">
+                  <img
+                    src={activeT.stories[activeTab].image}
+                    alt={activeT.stories[activeTab].alt}
+                    className="w-full h-auto block select-none"
+                  />
+                </div>
               </motion.div>
-            );
-          })}
-        </div>
-      </section>
+            </AnimatePresence>
+          </section>
+
+          {/* 4. M3 Expressive Architecture & Terminal Section */}
+          <section className="py-20 max-w-5xl mx-auto px-4 sm:px-6" id="architecture">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={springTransition}
+              className="p-8 sm:p-12 rounded-[36px] bg-m3-container border border-[var(--md-sys-color-outline-variant)]/40 text-center space-y-6 shadow-xl"
+            >
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] text-xs font-semibold">
+                <Cpu className="w-3.5 h-3.5" />
+                <span>{activeT.openSourceSection.chip}</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-[var(--md-sys-color-on-surface)] max-w-2xl mx-auto">
+                {activeT.openSourceSection.title}
+              </h2>
+
+              <p className="text-sm sm:text-base md:text-lg text-[var(--md-sys-color-on-surface-variant)] max-w-2xl mx-auto leading-relaxed">
+                {activeT.openSourceSection.description}
+              </p>
+
+              {/* M3 Tonal Interactive Terminal Card */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/40 text-xs font-mono text-[var(--md-sys-color-on-surface)] shadow-inner">
+                  <span className="text-[var(--md-sys-color-primary)] font-bold">$</span>
+                  <span className="select-all truncate max-w-[260px] sm:max-w-md">
+                    git clone https://github.com/VastSea0/hilal-browser.git && cd hilal-browser && ./bin/hil setup
+                  </span>
+                  <button
+                    onClick={handleCopyCommand}
+                    className="w-8 h-8 rounded-full flex items-center justify-center bg-m3-container hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors cursor-pointer"
+                    title="Copy Command"
+                  >
+                    {copiedClone ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </section>
+
+          {/* 5. M3 Expressive Platform Download Center */}
+          <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6 text-center" id="download">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-xs font-semibold mb-3">
+              <Boxes className="w-3.5 h-3.5" />
+              <span>{activeT.downloadSection.chip}</span>
+            </div>
+
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-[var(--md-sys-color-on-surface)]">
+              {activeT.downloadSection.title}
+            </h2>
+            <p className="mt-2 text-base text-[var(--md-sys-color-on-surface-variant)]">
+              {activeT.downloadSection.subtitle}
+            </p>
+
+            {/* 3 M3 Tonal Container Cards */}
+            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {activeT.downloadSection.platforms.map((p, idx) => (
+                <motion.div
+                  key={idx}
+                  whileHover={{ y: -6, scale: 1.02 }}
+                  transition={springTransition}
+                  onClick={() => setIsDownloadOpen(true)}
+                  className="p-7 rounded-[32px] bg-m3-container-low hover:bg-m3-container border border-[var(--md-sys-color-outline-variant)]/40 transition-all text-left flex flex-col justify-between cursor-pointer group shadow-lg"
+                >
+                  <div>
+                    <div className="w-12 h-12 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                      {p.icon}
+                    </div>
+                    <h3 className="text-xl font-bold text-[var(--md-sys-color-on-surface)]">
+                      {p.name}
+                    </h3>
+                    <p className="mt-1 text-xs text-[var(--md-sys-color-on-surface-variant)] font-normal">
+                      {p.spec}
+                    </p>
+                  </div>
+
+                  <div className="mt-8 flex items-center gap-2 text-xs font-bold text-[var(--md-sys-color-primary)] group-hover:translate-x-1 transition-transform">
+                    <span>{activeT.downloadSection.directDownload}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+
+          {/* 6. M3 Expressive S.S.S. (FAQ) */}
+          <section className="py-20 max-w-3xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-10 space-y-2">
+              <span className="px-3.5 py-1 rounded-full bg-m3-container text-[var(--md-sys-color-on-surface-variant)] text-xs font-semibold inline-block">
+                {activeT.faq.chip}
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)]">
+                {activeT.faq.title}
+              </h2>
+            </div>
+
+            <div className="space-y-3">
+              {activeT.faq.items.map((item, idx) => {
+                const isOpen = activeFaq === idx;
+                return (
+                  <motion.div
+                    key={idx}
+                    className="rounded-[24px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/35 overflow-hidden transition-colors"
+                  >
+                    <button
+                      onClick={() => setActiveFaq(isOpen ? null : idx)}
+                      className="w-full flex items-center justify-between p-5 text-left text-base font-semibold text-[var(--md-sys-color-on-surface)] hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer"
+                    >
+                      <span>{item.q}</span>
+                      <div className={`w-8 h-8 rounded-full bg-m3-container flex items-center justify-center shrink-0 ml-4 transition-transform duration-200 ${isOpen ? "rotate-180 bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)]" : ""}`}>
+                        <ChevronDown className="w-4 h-4" />
+                      </div>
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={springTransition}
+                          className="overflow-hidden"
+                        >
+                          <p className="px-5 pb-5 pt-1 text-sm text-[var(--md-sys-color-on-surface-variant)] leading-relaxed border-t border-[var(--md-sys-color-outline-variant)]/20">
+                            {item.a}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </section>
+        </>
+      )}
 
       {/* 7. Footer */}
       <footer className="py-12 border-t border-[var(--md-sys-color-outline-variant)]/30 text-xs text-[var(--md-sys-color-on-surface-variant)] bg-m3-container-lowest">
@@ -785,14 +875,12 @@ export default function App() {
             >
               {activeT.footer.source}
             </a>
-            <a
-              href="https://github.com/VastSea0/hilal-browser/releases"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-[var(--md-sys-color-primary)] transition-colors"
+            <button
+              onClick={() => navigateTo("changelog")}
+              className="hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer"
             >
               {activeT.footer.releases}
-            </a>
+            </button>
             <a
               href="https://discord.gg/JZJ4tmPHFw"
               target="_blank"
