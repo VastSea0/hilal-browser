@@ -1,25 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  Sun,
-  Moon,
-  Github,
-  ChevronDown,
-  Download,
-  Terminal,
-  Apple,
-  Laptop,
-  Check,
-  Copy,
-  ArrowRight,
-  Layers,
-  Sparkles,
-  Cpu,
-  Boxes,
-  History,
-  Users,
-  BookOpen,
-} from "lucide-react";
+function GithubIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+    </svg>
+  );
+}
 
 import { GithubRelease } from "./types";
 import {
@@ -272,17 +259,17 @@ export default function App() {
           {
             name: "macOS",
             spec: "Apple Silicon & Intel • Universal .dmg",
-            icon: <Apple className="w-6 h-6" />,
+            iconName: "desktop_mac",
           },
           {
             name: "Windows",
             spec: "Windows 10/11 • 64-bit .exe & Taşınabilir .zip",
-            icon: <Laptop className="w-6 h-6" />,
+            iconName: "desktop_windows",
           },
           {
             name: "Linux",
             spec: "Ubuntu / Debian .deb • AppImage • Tarball",
-            icon: <Terminal className="w-6 h-6" />,
+            iconName: "terminal",
           },
         ],
         directDownload: "İndir",
@@ -390,17 +377,17 @@ export default function App() {
           {
             name: "macOS",
             spec: "Apple Silicon & Intel • Universal .dmg",
-            icon: <Apple className="w-6 h-6" />,
+            iconName: "desktop_mac",
           },
           {
             name: "Windows",
             spec: "Windows 10/11 • 64-bit .exe & Portable .zip",
-            icon: <Laptop className="w-6 h-6" />,
+            iconName: "desktop_windows",
           },
           {
             name: "Linux",
             spec: "Ubuntu / Debian .deb • AppImage • Tarball",
-            icon: <Terminal className="w-6 h-6" />,
+            iconName: "terminal",
           },
         ],
         directDownload: "Download",
@@ -545,7 +532,7 @@ export default function App() {
               className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 transition-colors cursor-pointer border-0 bg-transparent"
               aria-label="Theme Toggle"
             >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              <i className="text-lg">{isDark ? "light_mode" : "dark_mode"}</i>
             </button>
 
             {/* CTA Pill Button */}
@@ -555,7 +542,7 @@ export default function App() {
               onClick={() => setIsDownloadOpen(true)}
               className="h-9 px-4 rounded-full bg-[var(--primary)] text-[var(--on-primary)] font-semibold text-xs transition-all shadow-sm hover:shadow flex items-center gap-1.5 cursor-pointer ml-1 border-0"
             >
-              <Download className="w-3.5 h-3.5" />
+              <i className="text-base">download</i>
               <span>{activeT.nav.getHilal}</span>
             </motion.button>
           </div>
@@ -590,7 +577,7 @@ export default function App() {
                 variants={m3FadeIn}
                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--secondary-container)] text-[var(--on-secondary-container)] text-xs font-semibold tracking-wide"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[var(--primary)]" />
+                <i className="material-symbols-outlined text-[16px] text-[var(--primary)]">auto_awesome</i>
                 <span>{activeT.hero.chip}</span>
               </motion.div>
 
@@ -624,9 +611,9 @@ export default function App() {
                     onClick={() => setIsDownloadOpen(true)}
                     className="h-14 px-8 rounded-full bg-[var(--primary)] text-[var(--on-primary)] font-bold text-sm sm:text-base flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all cursor-pointer border-0"
                   >
-                    {detectedOS === "macos" && <Apple className="w-5 h-5" />}
-                    {detectedOS === "windows" && <Laptop className="w-5 h-5" />}
-                    {detectedOS !== "macos" && detectedOS !== "windows" && <Download className="w-5 h-5" />}
+                    <i className="text-xl">
+                      {detectedOS === "macos" ? "desktop_mac" : detectedOS === "windows" ? "desktop_windows" : "download"}
+                    </i>
                     <span>{getDynamicBtnLabel()}</span>
                   </motion.button>
 
@@ -637,7 +624,7 @@ export default function App() {
                     onClick={() => navigateTo("changelog")}
                     className="h-14 px-7 rounded-full bg-m3-container text-[var(--on-surface)] border border-[var(--outline-variant)]/50 font-semibold text-sm sm:text-base flex items-center gap-2.5 hover:bg-m3-container-high transition-colors cursor-pointer"
                   >
-                    <History className="w-5 h-5 text-[var(--primary)]" />
+                    <i className="text-xl text-[var(--primary)]">history</i>
                     <span>{activeT.nav.changelog}</span>
                   </motion.button>
 
@@ -650,7 +637,7 @@ export default function App() {
                     rel="noopener noreferrer"
                     className="h-14 px-7 rounded-full bg-m3-container text-[var(--on-surface)] border border-[var(--outline-variant)]/50 font-semibold text-sm sm:text-base flex items-center gap-2.5 hover:bg-m3-container-high transition-colors no-underline"
                   >
-                    <Github className="w-5 h-5" />
+                    <GithubIcon className="w-5 h-5" />
                     <span>GitHub Repo</span>
                   </motion.a>
                 </div>
@@ -683,7 +670,7 @@ export default function App() {
           <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6" id="features">
             <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--tertiary-container)] text-[var(--on-tertiary-container)] text-xs font-semibold">
-                <Layers className="w-3.5 h-3.5" />
+                <i className="material-symbols-outlined text-[14px]">layers</i>
                 <span>{lang === "tr" ? "Öne Çıkan Özellikler" : "Key Highlights"}</span>
               </div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[var(--on-surface)]">
@@ -754,7 +741,7 @@ export default function App() {
               className="p-8 sm:p-12 rounded-[36px] bg-m3-container border border-[var(--outline-variant)]/20 text-center space-y-6 shadow-lg"
             >
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--secondary-container)] text-[var(--on-secondary-container)] text-xs font-semibold">
-                <Cpu className="w-3.5 h-3.5" />
+                <i className="material-symbols-outlined text-[14px]">memory</i>
                 <span>{activeT.openSourceSection.chip}</span>
               </div>
 
@@ -779,7 +766,9 @@ export default function App() {
                     className="w-8 h-8 rounded-full flex items-center justify-center bg-m3-container hover:bg-[var(--primary-container)] hover:text-[var(--on-primary-container)] transition-colors cursor-pointer border-0"
                     title="Copy Command"
                   >
-                    {copiedClone ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                    <i className={`text-base ${copiedClone ? "text-emerald-500" : ""}`}>
+                      {copiedClone ? "check" : "content_copy"}
+                    </i>
                   </button>
                 </div>
               </div>
@@ -788,7 +777,7 @@ export default function App() {
               <div className="pt-6 border-t border-[var(--outline-variant)]/20">
                 <div className="flex flex-col items-center gap-3">
                   <span className="text-xs font-bold uppercase tracking-wider text-[var(--on-surface-variant)] flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-[var(--primary)]" />
+                    <i className="text-base text-[var(--primary)]">group</i>
                     <span>{lang === "tr" ? "Projeye Katkıda Bulunanlar" : "Project Contributors"}</span>
                   </span>
                   <div className="flex flex-wrap items-center justify-center gap-2.5">
@@ -823,7 +812,7 @@ export default function App() {
           {/* 5. M3 Expressive Platform Download Center */}
           <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6 text-center" id="download">
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--primary-container)] text-[var(--on-primary-container)] text-xs font-semibold mb-3">
-              <Boxes className="w-3.5 h-3.5" />
+              <i className="text-base">inventory_2</i>
               <span>{activeT.downloadSection.chip}</span>
             </div>
 
@@ -846,7 +835,7 @@ export default function App() {
                 >
                   <div>
                     <div className="w-12 h-12 rounded-full bg-[var(--primary-container)] text-[var(--on-primary-container)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                      {p.icon}
+                      <i className="text-2xl">{p.iconName}</i>
                     </div>
                     <h3 className="text-xl font-bold text-[var(--on-surface)]">
                       {p.name}
@@ -858,7 +847,7 @@ export default function App() {
 
                   <div className="mt-8 flex items-center gap-2 text-xs font-bold text-[var(--primary)] group-hover:translate-x-1 transition-transform">
                     <span>{activeT.downloadSection.directDownload}</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <i className="text-base">arrow_forward</i>
                   </div>
                 </motion.div>
               ))}
@@ -869,7 +858,7 @@ export default function App() {
           <section className="py-20 max-w-3xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-10 space-y-2">
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--secondary-container)] text-[var(--on-secondary-container)] text-xs font-semibold">
-                <Sparkles className="w-3.5 h-3.5" />
+                <i className="text-base">help_outline</i>
                 <span>{activeT.faq.chip}</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--on-surface)]">
@@ -885,7 +874,7 @@ export default function App() {
                 >
                   <summary className="flex items-center justify-between font-semibold text-sm sm:text-base text-[var(--on-surface)] list-none select-none">
                     <span>{item.q}</span>
-                    <ChevronDown className="w-4 h-4 text-[var(--on-surface-variant)] transition-transform duration-200 group-open:rotate-180" />
+                    <i className="text-xl text-[var(--on-surface-variant)] transition-transform duration-200 group-open:rotate-180">expand_more</i>
                   </summary>
                   <p className="mt-3 text-xs sm:text-sm text-[var(--on-surface-variant)] leading-relaxed pl-0">
                     {item.a}

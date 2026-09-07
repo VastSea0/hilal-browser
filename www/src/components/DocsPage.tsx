@@ -1,30 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  Search,
-  X,
-  Layers,
-  Terminal,
-  GitBranch,
-  FileCode,
-  Cpu,
-  Boxes,
-  RefreshCw,
-  Shield,
-  Check,
-  Copy,
-  ChevronRight,
-  ChevronLeft,
-  BookOpen,
-  ArrowUp,
-  Info,
-  AlertTriangle,
-  Sparkles,
-  Menu,
-  LucideIcon,
-  Hash,
-} from "lucide-react";
-
 import { DOCS_DATA, DocSection, DocSubSection } from "../data/docsData";
 
 interface DocsPageProps {
@@ -33,15 +8,15 @@ interface DocsPageProps {
   onOpenDownload?: () => void;
 }
 
-const SECTION_ICONS: Record<string, LucideIcon> = {
-  Layers,
-  Terminal,
-  GitBranch,
-  FileCode,
-  Cpu,
-  Boxes,
-  RefreshCw,
-  Shield,
+const SECTION_ICONS: Record<string, string> = {
+  Layers: "layers",
+  Terminal: "terminal",
+  GitBranch: "fork_right",
+  FileCode: "code",
+  Cpu: "memory",
+  Boxes: "inventory_2",
+  RefreshCw: "sync",
+  Shield: "shield",
 };
 
 // M3 Expressive Spring Motion Physics
@@ -85,17 +60,17 @@ function CodeBlock({
           {language || "sh"}
         </span>
         <button
-          className="transparent small text-xs"
+          className="transparent small text-xs cursor-pointer inline-flex items-center"
           onClick={() => onCopy(code)}
         >
           {copied ? (
             <>
-              <Check className="w-3.5 h-3.5 text-emerald-400 mr-1.5" />
+              <i className="text-sm text-emerald-400 mr-1.5">check</i>
               <span className="text-emerald-400 font-semibold">{copiedLabel}</span>
             </>
           ) : (
             <>
-              <Copy className="w-3.5 h-3.5 mr-1.5" />
+              <i className="text-sm mr-1.5">content_copy</i>
               <span>{copyLabel}</span>
             </>
           )}
@@ -182,11 +157,11 @@ function MarkdownContent({
               }`}
             >
               {isWarning ? (
-                <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                <i className="text-xl text-amber-500 shrink-0 mt-0.5">warning</i>
               ) : isTip ? (
-                <Sparkles className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                <i className="text-xl text-blue-500 shrink-0 mt-0.5">auto_awesome</i>
               ) : (
-                <Info className="w-5 h-5 text-[var(--md-sys-color-primary)] shrink-0 mt-0.5" />
+                <i className="text-xl text-[var(--md-sys-color-primary)] shrink-0 mt-0.5">info</i>
               )}
               <div
                 className="text-xs sm:text-sm leading-relaxed"
@@ -373,7 +348,7 @@ export default function DocsPage({ lang }: DocsPageProps) {
         <div className="mb-12 pb-8 border-b border-[var(--md-sys-color-outline-variant)]/20">
           <div className="flex flex-wrap items-center gap-2 mb-4">
             <div className="chip border elevate">
-              <BookOpen className="w-3.5 h-3.5 mr-1.5 text-[var(--primary)]" />
+              <i className="text-sm mr-1.5 text-[var(--primary)]">menu_book</i>
               <span>Hilal Documentation</span>
             </div>
             <div className="chip border">
@@ -402,10 +377,10 @@ export default function DocsPage({ lang }: DocsPageProps) {
             className="w-full flex items-center justify-between px-4 py-3 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] text-xs font-semibold cursor-pointer shadow-sm"
           >
             <div className="flex items-center gap-2.5">
-              <Menu className="w-4 h-4" />
+              <i className="text-base">menu</i>
               <span>{activeSection.title}</span>
             </div>
-            <ChevronRight className={`w-4 h-4 transition-transform ${isMobileMenuOpen ? "rotate-90" : ""}`} />
+            <i className={`text-base transition-transform ${isMobileMenuOpen ? "rotate-180" : ""}`}>expand_more</i>
           </button>
 
           <AnimatePresence>
@@ -417,7 +392,7 @@ export default function DocsPage({ lang }: DocsPageProps) {
                 className="mt-3 p-2 rounded-2xl bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/20 shadow-lg space-y-1 overflow-hidden"
               >
                 {sections.map((s) => {
-                  const IconComponent = SECTION_ICONS[s.iconName] || Layers;
+                  const iconName = SECTION_ICONS[s.iconName] || "layers";
                   const isSelected = s.id === activeSectionId;
                   return (
                     <button
@@ -429,7 +404,7 @@ export default function DocsPage({ lang }: DocsPageProps) {
                           : "text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-on-surface)]/8"
                       }`}
                     >
-                      <IconComponent className="w-4 h-4 shrink-0" />
+                      <i className="text-base shrink-0">{iconName}</i>
                       <span>{s.title}</span>
                     </button>
                   );
@@ -445,7 +420,7 @@ export default function DocsPage({ lang }: DocsPageProps) {
           <div className="hidden lg:block lg:col-span-4 sticky top-24 space-y-6">
             {/* Expressive Pill Search Bar */}
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--md-sys-color-on-surface-variant)]" />
+              <i className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-[var(--md-sys-color-on-surface-variant)]">search</i>
               <input
                 type="text"
                 value={searchQuery}
@@ -458,7 +433,7 @@ export default function DocsPage({ lang }: DocsPageProps) {
                   onClick={() => setSearchQuery("")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)]"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <i className="text-base">close</i>
                 </button>
               )}
             </div>
@@ -471,7 +446,7 @@ export default function DocsPage({ lang }: DocsPageProps) {
                 </div>
               ) : (
                 filteredSections.map((s) => {
-                  const IconComponent = SECTION_ICONS[s.iconName] || Layers;
+                  const iconName = SECTION_ICONS[s.iconName] || "layers";
                   const isSelected = s.id === activeSectionId;
                   return (
                     <button
@@ -484,7 +459,7 @@ export default function DocsPage({ lang }: DocsPageProps) {
                       }`}
                     >
                       <div className="flex items-center gap-3 truncate">
-                        <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? "text-[var(--md-sys-color-primary)]" : ""}`} />
+                        <i className={`text-base shrink-0 ${isSelected ? "text-[var(--md-sys-color-primary)]" : ""}`}>{iconName}</i>
                         <span className="truncate">{s.title}</span>
                       </div>
                       <span className="text-[10px] opacity-60 font-mono shrink-0 ml-2">
@@ -577,10 +552,10 @@ export default function DocsPage({ lang }: DocsPageProps) {
             <div className="pt-10 border-t border-[var(--md-sys-color-outline-variant)]/20 flex flex-wrap items-center justify-between gap-4">
               {prevSection ? (
                 <button
-                  className="secondary-container small"
+                  className="secondary-container small cursor-pointer inline-flex items-center"
                   onClick={() => handleSelectSection(prevSection.id)}
                 >
-                  <ChevronLeft className="w-4 h-4 mr-1.5" />
+                  <i className="text-base mr-1">chevron_left</i>
                   <span>{prevSection.title}</span>
                 </button>
               ) : (
@@ -589,18 +564,18 @@ export default function DocsPage({ lang }: DocsPageProps) {
 
               {nextSection ? (
                 <button
-                  className="primary small ml-auto"
+                  className="primary small ml-auto cursor-pointer inline-flex items-center"
                   onClick={() => handleSelectSection(nextSection.id)}
                 >
                   <span>{nextSection.title}</span>
-                  <ChevronRight className="w-4 h-4 ml-1.5" />
+                  <i className="text-base ml-1">chevron_right</i>
                 </button>
               ) : (
                 <button
-                  className="secondary-container small ml-auto"
+                  className="secondary-container small ml-auto cursor-pointer inline-flex items-center"
                   onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 >
-                  <ArrowUp className="w-4 h-4 mr-1.5" />
+                  <i className="text-base mr-1">arrow_upward</i>
                   <span>{lang === "tr" ? "Başa Dön" : "Back to Top"}</span>
                 </button>
               )}

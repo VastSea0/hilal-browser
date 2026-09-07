@@ -186,20 +186,38 @@ main {
 }
 
 /* Material Symbols Outlined Icon Styling */
-.material-symbols-outlined {
+@font-face {
   font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block;
+  src: url("beercss/dist/cdn/material-symbols-outlined.woff2") format("woff2");
+}
+
+:root {
+  --font-icon: 'Material Symbols Outlined', sans-serif;
+}
+
+i,
+.material-symbols-outlined {
+  font-family: var(--font-icon) !important;
   font-weight: normal;
   font-style: normal;
-  font-size: 24px;
+  font-size: var(--_size, 1.25rem);
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
+  font-feature-settings: 'liga';
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
+  user-select: none;
 }
 
 /* M3 Selection */

@@ -1,15 +1,4 @@
 import { motion } from "motion/react";
-import {
-  History,
-  Tag,
-  Calendar,
-  ExternalLink,
-  PlusCircle,
-  RefreshCw,
-  CheckCircle2,
-  GitBranch,
-  Users,
-} from "lucide-react";
 import { RELEASES_DATA, CONTRIBUTORS_DATA } from "../data/changelogData";
 
 interface ChangelogPageProps {
@@ -91,7 +80,7 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
         >
           <motion.div variants={m3FadeIn} className="flex justify-center">
             <div className="chip border elevate">
-              <History className="w-3.5 h-3.5 text-[var(--primary)] mr-2" />
+              <i className="text-base text-[var(--primary)] mr-1.5">history</i>
               <span>{lang === "tr" ? "Resmi Sürüm Notları" : "Official Release Notes"}</span>
             </div>
           </motion.div>
@@ -119,7 +108,7 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
             className="pt-4 flex flex-wrap items-center justify-center gap-3"
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-m3-container border border-[var(--outline-variant)]/30 text-xs font-semibold text-[var(--on-surface)]">
-              <Users className="w-3.5 h-3.5 text-[var(--primary)]" />
+              <i className="text-base text-[var(--primary)]">group</i>
               <span>{lang === "tr" ? "Katkıda Bulunanlar:" : "Contributors:"}</span>
               <div className="flex items-center -space-x-1.5 ml-1">
                 {CONTRIBUTORS_DATA.map((c) => (
@@ -165,11 +154,9 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
               >
                 {/* Timeline Node */}
                 <div className="absolute -left-[31px] sm:-left-[47px] top-6 w-6 h-6 rounded-full bg-m3-container-high border-2 border-[var(--primary)] text-[var(--primary)] flex items-center justify-center shadow-sm z-10">
-                  {rel.isDev ? (
-                    <GitBranch className="w-3 h-3" />
-                  ) : (
-                    <Tag className="w-3 h-3" />
-                  )}
+                  <i className="text-xs">
+                    {rel.isDev ? "fork_right" : "label"}
+                  </i>
                 </div>
 
                 <article className="border round w-full bg-m3-container-lowest p-6 sm:p-8 space-y-6 m-0 shadow-sm">
@@ -189,19 +176,19 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
                     <div className="flex items-center gap-3 text-xs text-[var(--on-surface-variant)] font-medium">
                       {rel.date && (
                         <span className="inline-flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 opacity-70" />
+                          <i className="text-sm opacity-70">calendar_today</i>
                           <time dateTime={rel.date}>{formatDate(rel.date)}</time>
                         </span>
                       )}
                       <span>•</span>
                       <a
-                        className="button border small"
+                        className="button border small inline-flex items-center gap-1"
                         href={rel.githubUrl}
                         target="_blank"
                         rel="noreferrer"
                       >
                         <span>{rel.isDev ? (lang === "tr" ? `${rel.commitCount} Commit` : `${rel.commitCount} Commits`) : "GitHub"}</span>
-                        <ExternalLink className="w-3 h-3 ml-1 opacity-70" />
+                        <i className="text-xs opacity-70">open_in_new</i>
                       </a>
                     </div>
                   </div>
@@ -212,7 +199,7 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
                       {rel.highlights.added.length > 0 && (
                         <div className="space-y-2.5">
                           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                            <PlusCircle className="w-3.5 h-3.5" />
+                            <i className="text-sm">add_circle</i>
                             <span>{lang === "tr" ? "Eklenenler" : "Added"}</span>
                           </div>
                           <ul className="list-disc pl-5 space-y-2 leading-relaxed text-[var(--on-surface)] marker:text-emerald-500">
@@ -231,7 +218,7 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
                       {rel.highlights.changed.length > 0 && (
                         <div className="space-y-2.5">
                           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                            <RefreshCw className="w-3.5 h-3.5" />
+                            <i className="text-sm">sync</i>
                             <span>{lang === "tr" ? "Değiştirilenler" : "Changed"}</span>
                           </div>
                           <ul className="list-disc pl-5 space-y-2 leading-relaxed text-[var(--on-surface)] marker:text-amber-500">
@@ -250,7 +237,7 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
                       {rel.highlights.fixed.length > 0 && (
                         <div className="space-y-2.5">
                           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <i className="text-sm">check_circle</i>
                             <span>{lang === "tr" ? "Düzeltmeler" : "Fixed"}</span>
                           </div>
                           <ul className="list-disc pl-5 space-y-2 leading-relaxed text-[var(--on-surface)] marker:text-rose-500">

@@ -39,11 +39,21 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 495;
+export const REPO_COMMITS_TOTAL = 496;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "84a8ff94e50eb3e982ba336271badc79a5286d00",
+    "shortHash": "84a8ff9",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-08T00:43:02+03:00",
+    "subject": "feat(www): adopt Beer CSS Material 3 Expressive, fix navbar centering and polish icons",
+    "body": "- Integrate Beer CSS and Google Material Symbols font assets\n- Fix navbar centering bug caused by Beer CSS grid-area hijacking on Docs and Changelog pages\n- Neutralize Beer CSS :has(> main) full-page grid layout override in index.css\n- Fix DocsPage sidebar button layout by switching nav container to vertical flex\n- Refine navigation and section icons across Hero, Navbar, Docs, and Changelog\n- Maintain official Hilal Blue brand accent color palette across light and dark themes",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/84a8ff94e50eb3e982ba336271badc79a5286d00"
+  },
   {
     "hash": "d75c03656f63b714512d1c50ff0fae24e5fbce33",
     "shortHash": "d75c036",
@@ -5001,9 +5011,19 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-08T00:09:40+03:00",
-    "commitCount": 54,
+    "date": "2026-09-08T00:43:02+03:00",
+    "commitCount": 55,
     "commits": [
+      {
+        "hash": "84a8ff94e50eb3e982ba336271badc79a5286d00",
+        "shortHash": "84a8ff9",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-08T00:43:02+03:00",
+        "subject": "feat(www): adopt Beer CSS Material 3 Expressive, fix navbar centering and polish icons",
+        "body": "- Integrate Beer CSS and Google Material Symbols font assets\n- Fix navbar centering bug caused by Beer CSS grid-area hijacking on Docs and Changelog pages\n- Neutralize Beer CSS :has(> main) full-page grid layout override in index.css\n- Fix DocsPage sidebar button layout by switching nav container to vertical flex\n- Refine navigation and section icons across Hero, Navbar, Docs, and Changelog\n- Maintain official Hilal Blue brand accent color palette across light and dark themes",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/84a8ff94e50eb3e982ba336271badc79a5286d00"
+      },
       {
         "hash": "d75c03656f63b714512d1c50ff0fae24e5fbce33",
         "shortHash": "d75c036",
@@ -10213,7 +10233,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 483,
+    "contributions": 484,
     "role": "Lead Developer"
   },
   {
