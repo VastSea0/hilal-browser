@@ -106,10 +106,20 @@ export default function App() {
 
   useEffect(() => {
     const root = window.document.documentElement;
+    const body = window.document.body;
     if (theme === "dark") {
       root.classList.add("dark");
+      body.classList.add("dark");
+      body.classList.remove("light");
     } else {
       root.classList.remove("dark");
+      body.classList.remove("dark");
+      body.classList.add("light");
+    }
+    if (typeof (window as any).ui === "function") {
+      try {
+        (window as any).ui("mode", theme);
+      } catch {}
     }
     localStorage.setItem("hilal-theme", theme);
   }, [theme]);

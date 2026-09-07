@@ -39,11 +39,41 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 497;
+export const REPO_COMMITS_TOTAL = 500;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "f034ab3f5d7377eddab7567470ef1b8afea2c812",
+    "shortHash": "f034ab3",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-08T01:22:58+03:00",
+    "subject": "feat: add Material Symbols Outlined font and increase Welcome window dimensions",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f034ab3f5d7377eddab7567470ef1b8afea2c812"
+  },
+  {
+    "hash": "1af0c37a6d14820ad0a04f67b1a6d26ed815c64f",
+    "shortHash": "1af0c37",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-08T01:22:46+03:00",
+    "subject": "feat(www): replace Lucide with Google Material Symbols, bundle local font, and fix DownloadModal interaction/layout issues",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1af0c37a6d14820ad0a04f67b1a6d26ed815c64f"
+  },
+  {
+    "hash": "398f5814b33337a6e3330fc7b1e53fadbf7744c5",
+    "shortHash": "398f581",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-08T01:22:28+03:00",
+    "subject": "feat: add HIL preview command to serve and test welcome/newtab pages locally",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/398f5814b33337a6e3330fc7b1e53fadbf7744c5"
+  },
   {
     "hash": "80ffff5fb58c4ba5d792fffc837d5683f4ac5447",
     "shortHash": "80ffff5",
@@ -5021,9 +5051,39 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-08T01:01:53+03:00",
-    "commitCount": 56,
+    "date": "2026-09-08T01:22:58+03:00",
+    "commitCount": 59,
     "commits": [
+      {
+        "hash": "f034ab3f5d7377eddab7567470ef1b8afea2c812",
+        "shortHash": "f034ab3",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-08T01:22:58+03:00",
+        "subject": "feat: add Material Symbols Outlined font and increase Welcome window dimensions",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f034ab3f5d7377eddab7567470ef1b8afea2c812"
+      },
+      {
+        "hash": "1af0c37a6d14820ad0a04f67b1a6d26ed815c64f",
+        "shortHash": "1af0c37",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-08T01:22:46+03:00",
+        "subject": "feat(www): replace Lucide with Google Material Symbols, bundle local font, and fix DownloadModal interaction/layout issues",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1af0c37a6d14820ad0a04f67b1a6d26ed815c64f"
+      },
+      {
+        "hash": "398f5814b33337a6e3330fc7b1e53fadbf7744c5",
+        "shortHash": "398f581",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-08T01:22:28+03:00",
+        "subject": "feat: add HIL preview command to serve and test welcome/newtab pages locally",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/398f5814b33337a6e3330fc7b1e53fadbf7744c5"
+      },
       {
         "hash": "80ffff5fb58c4ba5d792fffc837d5683f4ac5447",
         "shortHash": "80ffff5",
@@ -10253,7 +10313,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 485,
+    "contributions": 488,
     "role": "Lead Developer"
   },
   {
