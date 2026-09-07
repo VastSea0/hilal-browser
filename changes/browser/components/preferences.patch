@@ -124,10 +124,9 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
    InternalHandlerInfoWrapper,
    getFileDisplayName,
 diff --git a/browser/components/preferences/preferences.js b/browser/components/preferences/preferences.js
-index 1f77010aeb8e..2729ac0a57b1 100644
 --- a/browser/components/preferences/preferences.js
 +++ b/browser/components/preferences/preferences.js
-@@ -559,6 +559,7 @@ function init_all() {
+@@ -504,6 +504,7 @@ function init_all() {
      document.getElementById("category-general").hidden = false;
      document.getElementById("nav-separator").hidden = true;
    }
@@ -135,43 +134,10 @@ index 1f77010aeb8e..2729ac0a57b1 100644
    register_module("paneHome", gHomePane);
    register_module("paneSearch", gSearchPane);
    register_module("panePrivacy", gPrivacyPane);
-@@ -1170,17 +1171,15 @@ function appendSearchKeywords(aId, keywords) {
- }
- 
- function maybeDisplayPoliciesNotice() {
--  if (Services.policies.status == Services.policies.ACTIVE) {
--    document
--      .getElementById("policies-container-content")
--      .removeAttribute("hidden");
-+  let el = document.getElementById("policies-container-content");
-+  if (el && Services.policies.status == Services.policies.ACTIVE) {
-+    el.removeAttribute("hidden");
-   }
- }
- 
- function maybeDisplayTLSKeyLoggingNotice() {
--  if (Services.env.exists("SSLKEYLOGFILE")) {
--    document
--      .getElementById("tls-key-logging-container-content")
--      .removeAttribute("hidden");
-+  let el = document.getElementById("tls-key-logging-container-content");
-+  if (el && Services.env.exists("SSLKEYLOGFILE")) {
-+    el.removeAttribute("hidden");
-   }
- }
 diff --git a/browser/components/preferences/preferences.xhtml b/browser/components/preferences/preferences.xhtml
-index bb84d15bec40..f8622988a33b 100644
 --- a/browser/components/preferences/preferences.xhtml
 +++ b/browser/components/preferences/preferences.xhtml
-@@ -38,6 +38,7 @@
-   <link rel="stylesheet" href="chrome://browser/content/preferences/widgets/setting-group.css" />
-   <link rel="stylesheet" href="chrome://browser/content/preferences/widgets/setting-pane.css" />
-   <link rel="stylesheet" href="chrome://browser/content/preferences/widgets/setting-control.css" />
-+  <link rel="stylesheet" href="chrome://browser/skin/preferences/hilal-preferences.css" />
- 
-   <link rel="localization" href="branding/brand.ftl"/>
-   <link rel="localization" href="browser/browser.ftl"/>
-@@ -127,6 +128,11 @@
+@@ -136,6 +136,11 @@
          iconsrc="chrome://browser/skin/preferences/category-sync.svg"
          data-l10n-id="pane-sync-title3">
        </html:moz-page-nav-button>
@@ -183,28 +149,7 @@ index bb84d15bec40..f8622988a33b 100644
        <html:moz-page-nav-button id="category-home"
          view="paneHome"
          iconsrc="chrome://browser/skin/home.svg"
-@@ -230,20 +235,6 @@
-     <vbox class="main-content" flex="1" align="start">
-       <vbox class="pane-container">
-         <html:div id="search-container">
--          <html:nav-notice
--            id="policies-container-content"
--            hidden="true"
--            href="about:policies"
--            iconsrc="chrome://global/skin/icons/organizational-unit.svg"
--            data-l10n-id="managed-notice-nav"
--          />
--          <html:nav-notice
--            id="tls-key-logging-container-content"
--            hidden="true"
--            iconsrc="chrome://global/skin/icons/security-custom-root.svg"
--            data-l10n-id="tls-key-logging-notice-nav"
--            support-page="sslkeylogfile-warning"
--          />
-           <html:moz-input-search
-             id="searchInput"
-             data-l10n-id="search-input-box2"
-@@ -253,6 +244,7 @@
+@@ -256,6 +261,7 @@
          <vbox id="mainPrefPane">
  #include searchResults.inc.xhtml
  #include main.inc.xhtml
@@ -212,16 +157,3 @@ index bb84d15bec40..f8622988a33b 100644
  #include home.inc.xhtml
  #include search.inc.xhtml
  #include privacy.inc.xhtml
-diff --git a/browser/components/preferences/privacy.inc.xhtml b/browser/components/preferences/privacy.inc.xhtml
-index 78e2e934cf33..301394391f3c 100644
---- a/browser/components/preferences/privacy.inc.xhtml
-+++ b/browser/components/preferences/privacy.inc.xhtml
-@@ -15,8 +15,6 @@
-   <html:h1 data-l10n-id="privacy-header"/>
- </hbox>
- 
--<html:setting-group hidden="true" groupid="securityPrivacyStatus" data-category="panePrivacy" data-srd-migrated="" />
--<html:setting-group hidden="true" groupid="securityPrivacyWarnings" data-category="panePrivacy" data-srd-migrated="" />
- 
- <!-- Enhanced Tracking Protection Status Section -->
- <html:setting-group groupid="etpStatus" id="etpStatusCard" data-category="panePrivacy" data-subcategory="etpStatus" hidden="true" data-srd-migrated=""></html:setting-group>
