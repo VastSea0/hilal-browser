@@ -24,11 +24,56 @@
   const MAX_NAME_LENGTH = 64;
 
   const EMOJIS = [
-    "\u{1F5C2}", "\u{1F3E0}", "\u{1F4BC}", "\u{1F3A8}", "\u{1F4DA}", "\u{1F6E0}", "\u{1F3B5}", "\u{1F310}", "\u{1F4A1}", "\u{1F52C}",
-    "\u{1F3AE}", "\u{1F4DD}", "\u{1F3AF}", "\u{1F680}", "\u{1F319}", "\u{2615}", "\u{1F34E}", "\u{1F30D}", "\u{1F512}", "\u{26A1}",
-    "\u{1F525}", "\u{2744}\u{FE0F}", "\u{1F33F}", "\u{1F431}", "\u{1F436}", "\u{1F98A}", "\u{1F981}", "\u{1F427}", "\u{1F984}", "\u{1F308}",
-    "\u{2B50}", "\u{1F31F}", "\u{1F48E}", "\u{1F381}", "\u{1F380}", "\u{1F3C6}", "\u{1F947}", "\u{1F396}", "\u{1F3C5}", "\u{1F6A9}",
-    "\u{1F4CC}", "\u{1F4CE}", "\u{1F4D0}", "\u{1F527}", "\u{1F528}", "\u{2699}\u{FE0F}", "\u{1F48A}", "\u{1F9EA}", "\u{1F9EC}", "\u{1F9EE}"
+    "\u{1F5C2}",
+    "\u{1F3E0}",
+    "\u{1F4BC}",
+    "\u{1F3A8}",
+    "\u{1F4DA}",
+    "\u{1F6E0}",
+    "\u{1F3B5}",
+    "\u{1F310}",
+    "\u{1F4A1}",
+    "\u{1F52C}",
+    "\u{1F3AE}",
+    "\u{1F4DD}",
+    "\u{1F3AF}",
+    "\u{1F680}",
+    "\u{1F319}",
+    "\u{2615}",
+    "\u{1F34E}",
+    "\u{1F30D}",
+    "\u{1F512}",
+    "\u{26A1}",
+    "\u{1F525}",
+    "\u{2744}\u{FE0F}",
+    "\u{1F33F}",
+    "\u{1F431}",
+    "\u{1F436}",
+    "\u{1F98A}",
+    "\u{1F981}",
+    "\u{1F427}",
+    "\u{1F984}",
+    "\u{1F308}",
+    "\u{2B50}",
+    "\u{1F31F}",
+    "\u{1F48E}",
+    "\u{1F381}",
+    "\u{1F380}",
+    "\u{1F3C6}",
+    "\u{1F947}",
+    "\u{1F396}",
+    "\u{1F3C5}",
+    "\u{1F6A9}",
+    "\u{1F4CC}",
+    "\u{1F4CE}",
+    "\u{1F4D0}",
+    "\u{1F527}",
+    "\u{1F528}",
+    "\u{2699}\u{FE0F}",
+    "\u{1F48A}",
+    "\u{1F9EA}",
+    "\u{1F9EC}",
+    "\u{1F9EE}",
   ];
 
   const WORKSPACE_COLORS = [
@@ -178,7 +223,10 @@
     }
 
     get _groupsIsPublic() {
-      return Services.prefs.getBoolPref("hilal.workspaces.groups.public", false);
+      return Services.prefs.getBoolPref(
+        "hilal.workspaces.groups.public",
+        false
+      );
     }
 
     get _isCustomizing() {
@@ -190,7 +238,7 @@
         return 0;
       }
       const workspace = this._getWorkspaceById(this._activeId);
-      return workspace ? (workspace.containerId || 0) : 0;
+      return workspace ? workspace.containerId || 0 : 0;
     }
 
     _normalizeName(name, fallback) {
@@ -264,9 +312,10 @@
         ? raw.containerId
         : Number.parseInt(raw.containerId, 10) || 0;
 
-      let emoji = typeof raw.emoji === "string" && raw.emoji.trim()
-        ? raw.emoji.trim()
-        : "";
+      let emoji =
+        typeof raw.emoji === "string" && raw.emoji.trim()
+          ? raw.emoji.trim()
+          : "";
       if (!emoji && typeof raw.icon === "string" && raw.icon.trim()) {
         const potentialEmoji = raw.icon.trim();
         if (EMOJIS.includes(potentialEmoji)) {
@@ -452,7 +501,12 @@
 
     _obfuscate(str) {
       if (typeof window !== "undefined" && window.btoa) {
-        return window.btoa(str.split("").map(c => String.fromCharCode(c.charCodeAt(0) ^ 42)).join(""));
+        return window.btoa(
+          str
+            .split("")
+            .map(c => String.fromCharCode(c.charCodeAt(0) ^ 42))
+            .join("")
+        );
       }
       return str;
     }
@@ -460,7 +514,11 @@
     _deobfuscate(str) {
       try {
         if (typeof window !== "undefined" && window.atob) {
-          return window.atob(str).split("").map(c => String.fromCharCode(c.charCodeAt(0) ^ 42)).join("");
+          return window
+            .atob(str)
+            .split("")
+            .map(c => String.fromCharCode(c.charCodeAt(0) ^ 42))
+            .join("");
         }
       } catch (e) {
         // ignore
@@ -473,7 +531,12 @@
         return;
       }
       try {
-        if (!Services.prefs.getBoolPref("hilal.workspaces.remember_host_mapping", false)) {
+        if (
+          !Services.prefs.getBoolPref(
+            "hilal.workspaces.remember_host_mapping",
+            false
+          )
+        ) {
           return;
         }
         const prefName = "hilal.workspaces.host_mapping";
@@ -603,13 +666,19 @@
           obs.disconnect();
         } else {
           const sidebarEl = document.querySelector("sidebar-main");
-          if (sidebarEl && sidebarEl.shadowRoot && !sidebarEl._hilalShadowObserver) {
-            const shadowObserver = new MutationObserver((mutationsSub, obsSub) => {
-              if (build()) {
-                obsSub.disconnect();
-                obs.disconnect();
+          if (
+            sidebarEl &&
+            sidebarEl.shadowRoot &&
+            !sidebarEl._hilalShadowObserver
+          ) {
+            const shadowObserver = new MutationObserver(
+              (mutationsSub, obsSub) => {
+                if (build()) {
+                  obsSub.disconnect();
+                  obs.disconnect();
+                }
               }
-            });
+            );
             shadowObserver.observe(sidebarEl.shadowRoot, {
               childList: true,
               subtree: true,
@@ -654,7 +723,11 @@
       gBrowser.tabContainer.addEventListener("TabOpen", this._tabOpenHandler);
 
       this._tabRestoreHandler = event => {
-        if (!this._enabled || this._isCustomizing || typeof SessionStore === "undefined") {
+        if (
+          !this._enabled ||
+          this._isCustomizing ||
+          typeof SessionStore === "undefined"
+        ) {
           return;
         }
 
@@ -677,7 +750,10 @@
           return;
         }
         const tab = event.target;
-        if (!this._pinnedIsPublic && this._getTabWorkspace(tab) !== this._activeId) {
+        if (
+          !this._pinnedIsPublic &&
+          this._getTabWorkspace(tab) !== this._activeId
+        ) {
           this._rememberPinned(tab);
         }
         this._apply();
@@ -696,7 +772,10 @@
             this._scheduleContainerRetarget(tab, workspaceId, locationURI);
           }
 
-          if (locationURI && (locationURI.scheme === "http" || locationURI.scheme === "https")) {
+          if (
+            locationURI &&
+            (locationURI.scheme === "http" || locationURI.scheme === "https")
+          ) {
             if (tab) {
               let workspaceId = this._getTabWorkspace(tab);
               if (workspaceId && locationURI.host) {
@@ -978,13 +1057,12 @@
       }
 
       // Do not retarget privileged browser pages (about:, chrome:, resource:) as they cannot load in containers
-      const spec = locationURI?.spec || tab.linkedBrowser?.currentURI?.spec || "";
+      const spec =
+        locationURI?.spec || tab.linkedBrowser?.currentURI?.spec || "";
       if (spec === "about:blank" || spec === "") {
         return false;
       }
-      const isTransientInitialPage = /^(about:newtab|about:home)$/i.test(
-        spec
-      );
+      const isTransientInitialPage = /^(about:newtab|about:home)$/i.test(spec);
       // UI-triggered navigations often start in about:newtab and then resolve to
       // the real destination. Retargeting during that transient stage can drop
       // the pending destination load.
@@ -1063,8 +1141,11 @@
       let newTab = null;
       let isFreshNewTab = false;
       let state = null;
-      const currentURI = locationURI?.spec || tab.linkedBrowser?.currentURI?.spec || "";
-      const isActuallyLoadingRealURL = currentURI && !/^(about:blank|about:newtab|about:home)$/i.test(currentURI);
+      const currentURI =
+        locationURI?.spec || tab.linkedBrowser?.currentURI?.spec || "";
+      const isActuallyLoadingRealURL =
+        currentURI &&
+        !/^(about:blank|about:newtab|about:home)$/i.test(currentURI);
       let rawState = "";
       try {
         if (typeof SessionStore !== "undefined") {
@@ -1116,10 +1197,17 @@
               if (!state.entries) {
                 state.entries = [];
               }
-              const activeIndex = (state.index || state.entries.length || 1) - 1;
+              const activeIndex =
+                (state.index || state.entries.length || 1) - 1;
               const activeEntry = state.entries[activeIndex];
-              if (!activeEntry || /^(about:blank|about:newtab|about:home)$/i.test(activeEntry.url)) {
-                state.entries[activeIndex >= 0 ? activeIndex : 0] = { url: currentURI, title: currentURI };
+              if (
+                !activeEntry ||
+                /^(about:blank|about:newtab|about:home)$/i.test(activeEntry.url)
+              ) {
+                state.entries[activeIndex >= 0 ? activeIndex : 0] = {
+                  url: currentURI,
+                  title: currentURI,
+                };
               } else if (activeEntry.url !== currentURI) {
                 state.entries.push({ url: currentURI, title: currentURI });
                 state.index = state.entries.length;
@@ -1243,7 +1331,11 @@
           selected.hidden ||
           selected.closing)
       ) {
-        if (!selected || (!(pinnedIsPublic && selected.pinned) && !(groupsIsPublic && selected.group))) {
+        if (
+          !selected ||
+          (!(pinnedIsPublic && selected.pinned) &&
+            !(groupsIsPublic && selected.group))
+        ) {
           gBrowser.selectedTab = nextSelected;
         }
       }
@@ -1270,7 +1362,6 @@
           group.setAttribute("hidden", "true");
         }
       }
-
     }
 
     switchTo(id) {
@@ -1291,11 +1382,7 @@
       const workspace = {
         id: this._uuid(),
         name: this._normalizeName(name, "Workspace"),
-        emoji: this._normalizeChoice(
-          emoji,
-          EMOJIS,
-          this._defaultEmoji(index)
-        ),
+        emoji: this._normalizeChoice(emoji, EMOJIS, this._defaultEmoji(index)),
         color: this._normalizeChoice(
           color,
           WORKSPACE_COLORS,
@@ -1328,11 +1415,7 @@
         return;
       }
       workspace.name = this._normalizeName(name, workspace.name);
-      workspace.emoji = this._normalizeChoice(
-        emoji,
-        EMOJIS,
-        workspace.emoji
-      );
+      workspace.emoji = this._normalizeChoice(emoji, EMOJIS, workspace.emoji);
       workspace.color = this._normalizeChoice(
         color,
         WORKSPACE_COLORS,
@@ -1538,6 +1621,13 @@
 
     _buildDialog(titleText, initialWorkspace) {
       this._closeOpenSurfaces();
+
+      if (!document.getElementById("hilal-ws-dialog-style")) {
+        const dialogStyle = document.createElement("style");
+        dialogStyle.id = "hilal-ws-dialog-style";
+        dialogStyle.textContent = this._getDialogCSS();
+        (document.head || document.documentElement).appendChild(dialogStyle);
+      }
 
       const previousFocus = document.activeElement;
       const overlay = document.createElement("div");
@@ -1824,7 +1914,8 @@
         popup.remove();
       });
 
-      const popupSet = document.getElementById("mainPopupSet") || document.documentElement;
+      const popupSet =
+        document.getElementById("mainPopupSet") || document.documentElement;
       popupSet.appendChild(popup);
 
       popup.openPopup(anchor, "", 0, 0, true, false, event);
@@ -1959,124 +2050,162 @@
         ${this._getColorCSS()}
 
         #hilal-ws-dialog-overlay {
-          position: fixed;
-          inset: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 99999;
-          background: color-mix(in srgb, currentColor 30%, transparent);
+          position: fixed !important;
+          inset: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          z-index: 999999 !important;
+          background: rgba(0, 0, 0, 0.65) !important;
+          backdrop-filter: blur(8px) !important;
         }
 
         #hilal-ws-dialog {
-          background: var(--panel-background-color);
-          color: var(--panel-color);
-          border: 1px solid var(--panel-border-color);
-          border-radius: var(--panel-border-radius);
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-          font: menu;
-        }
-
-        #hilal-ws-dialog {
-          padding: var(--space-xlarge, 20px);
-          width: 360px;
-          max-width: 90vw;
-          display: flex;
-          flex-direction: column;
-          gap: var(--space-medium, 12px);
+          background: var(--md-sys-color-surface-container-high, #21252d) !important;
+          color: var(--md-sys-color-on-surface, #f3f4f6) !important;
+          border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.14)) !important;
+          border-radius: 20px !important;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+          padding: 24px !important;
+          width: 440px !important;
+          max-width: 90vw !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 14px !important;
+          box-sizing: border-box !important;
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
         }
 
         #hilal-ws-dialog h3 {
-          margin: 0;
-          font-size: var(--font-size-large, 15px);
-          font-weight: 600;
+          margin: 0 !important;
+          font-size: 18px !important;
+          font-weight: 700 !important;
+          color: var(--md-sys-color-on-surface, #ffffff) !important;
         }
 
         #hilal-ws-dialog label {
-          font-size: var(--font-size-small);
-          font-weight: 500;
-          opacity: 0.8;
+          font-size: 12px !important;
+          font-weight: 600 !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.5px !important;
+          color: var(--md-sys-color-on-surface-variant, #c3c7cf) !important;
         }
 
         #hilal-ws-name-input {
-          appearance: auto;
-          padding: var(--space-small) var(--space-medium);
-          border: 1px solid var(--border-color, ThreeDShadow);
-          border-radius: var(--button-border-radius);
-          background: Field;
-          color: FieldText;
-          font: inherit;
+          appearance: none !important;
+          background: var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.08)) !important;
+          color: var(--md-sys-color-on-surface, #ffffff) !important;
+          border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.16)) !important;
+          border-radius: 10px !important;
+          padding: 10px 14px !important;
+          font-size: 14px !important;
+          outline: none !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+          transition: border-color 140ms ease !important;
         }
 
         #hilal-ws-name-input:focus {
-          outline: var(--focus-outline);
-          outline-offset: var(--focus-outline-offset);
+          border-color: var(--md-sys-color-primary, #af51f5) !important;
+          box-shadow: 0 0 0 2px var(--md-sys-color-primary, #af51f5) !important;
         }
 
         #hilal-ws-name-input[aria-invalid] {
-          border-color: var(--red-50, #ff613d);
-        }
-
-        #hilal-ws-emoji-grid,
-        #hilal-ws-color-grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: var(--space-xxsmall);
+          border-color: var(--md-sys-color-error, #ef4444) !important;
         }
 
         #hilal-ws-emoji-grid {
-          max-height: 130px;
-          overflow-y: auto;
+          display: grid !important;
+          grid-template-columns: repeat(8, 1fr) !important;
+          gap: 6px !important;
+          max-height: 130px !important;
+          overflow-y: auto !important;
+          padding: 8px !important;
+          background: var(--md-sys-color-surface-container, rgba(0, 0, 0, 0.25)) !important;
+          border-radius: 12px !important;
+          border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.08)) !important;
+          scrollbar-width: thin !important;
+        }
+
+        #hilal-ws-color-grid {
+          display: flex !important;
+          flex-wrap: wrap !important;
+          gap: 10px !important;
+          padding: 4px 0 !important;
         }
 
         .hilal-ws-choice {
-          appearance: none;
-          border: 1px solid transparent;
-          background: var(--button-background-color-ghost);
-          border-radius: var(--button-border-radius);
-          cursor: pointer;
-          width: 34px;
-          height: 34px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          appearance: none !important;
+          border: 1px solid transparent !important;
+          background: transparent !important;
+          border-radius: 8px !important;
+          cursor: pointer !important;
+          width: 38px !important;
+          height: 38px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          transition: all 120ms ease !important;
         }
 
         .hilal-ws-emoji-choice {
-          font-size: 18px;
+          font-size: 20px !important;
+        }
+
+        .hilal-ws-emoji-choice:hover {
+          background: var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.1)) !important;
+        }
+
+        .hilal-ws-emoji-choice.hilal-ws-choice-selected {
+          background: var(--md-sys-color-primary-container, rgba(175, 81, 245, 0.25)) !important;
+          border-color: var(--md-sys-color-primary, #af51f5) !important;
+        }
+
+        .hilal-ws-color-choice {
+          width: 34px !important;
+          height: 34px !important;
+          border-radius: 50% !important;
+          border: 2px solid transparent !important;
+          padding: 0 !important;
         }
 
         .hilal-ws-color-choice::before {
-          content: "";
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          background: var(--hilal-ws-accent);
+          content: "" !important;
+          width: 22px !important;
+          height: 22px !important;
+          border-radius: 50% !important;
+          background: var(--hilal-ws-accent) !important;
         }
 
-        .hilal-ws-choice:hover {
-          background-color: var(--button-background-color-ghost-hover);
+        .hilal-ws-color-choice:hover {
+          transform: scale(1.1) !important;
         }
 
-        .hilal-ws-choice-selected {
-          background-color: var(--button-background-color-ghost-selected);
-          border-color: var(--focus-outline-color);
-        }
-
-        .hilal-ws-choice:focus-visible {
-          outline: var(--focus-outline);
-          outline-offset: var(--focus-outline-offset);
+        .hilal-ws-color-choice.hilal-ws-choice-selected {
+          border-color: var(--md-sys-color-primary, #af51f5) !important;
+          background: rgba(255, 255, 255, 0.12) !important;
         }
 
         #hilal-ws-dialog-actions {
-          display: flex;
-          gap: var(--space-small);
-          justify-content: flex-end;
-          align-items: center;
+          display: flex !important;
+          gap: 10px !important;
+          justify-content: flex-end !important;
+          align-items: center !important;
+          margin-top: 8px !important;
+        }
+
+        #hilal-ws-dialog-actions moz-button,
+        #hilal-ws-dialog-actions button {
+          border-radius: 9999px !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          cursor: pointer !important;
         }
 
         #hilal-ws-dialog-delete {
-          margin-inline-end: auto;
+          margin-inline-end: auto !important;
         }
       `;
     }
@@ -2101,7 +2230,7 @@
       const dialogStyle = document.createElement("style");
       dialogStyle.id = "hilal-ws-dialog-style";
       dialogStyle.textContent = this._getDialogCSS();
-      document.head.appendChild(dialogStyle);
+      (document.head || document.documentElement).appendChild(dialogStyle);
 
       this._container = document.createElement("div");
       this._container.id = "hilal-workspace-strip";
@@ -2219,7 +2348,10 @@
         button.addEventListener("drop", event => {
           button.classList.remove("hilal-ws-drop-target");
           if (event.dataTransfer.types.includes(TAB_DROP_TYPE)) {
-            const draggedTab = event.dataTransfer.mozGetDataAt(TAB_DROP_TYPE, 0);
+            const draggedTab = event.dataTransfer.mozGetDataAt(
+              TAB_DROP_TYPE,
+              0
+            );
             if (draggedTab && gBrowser.isTab(draggedTab)) {
               event.preventDefault();
               this._moveTabToWorkspace(draggedTab, workspace.id);
@@ -2243,7 +2375,11 @@
       const activeBtn = list.querySelector(".hilal-ws-active");
       if (activeBtn) {
         requestAnimationFrame(() => {
-          activeBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+          activeBtn.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: "nearest",
+          });
         });
       }
     }

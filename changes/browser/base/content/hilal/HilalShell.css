@@ -23,7 +23,9 @@
   height: 100vh !important;
   display: flex !important;
   flex-direction: column !important;
-  transition: background-color 300ms ease, color 300ms ease;
+  transition:
+    background-color 300ms ease,
+    color 300ms ease;
 
   /* Force zero-border variables across gecko content canvas */
   --chrome-content-separator-color: transparent !important;
@@ -157,7 +159,10 @@
   font-size: 12px !important;
   font-weight: 500 !important;
   white-space: nowrap !important;
-  transition: background-color 150ms ease, color 150ms ease, transform 200ms var(--md-sys-motion-spring-spatial) !important;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 200ms var(--md-sys-motion-spring-spatial) !important;
   -moz-window-dragging: no-drag !important;
 }
 
@@ -215,10 +220,11 @@
   color: var(--md-sys-color-on-surface-variant, #c3c7cf);
   cursor: pointer;
   padding: 0;
-  transition: background-color 150ms ease,
-              color 150ms ease,
-              transform 250ms var(--md-sys-motion-spring-spatial),
-              border-radius 250ms var(--md-sys-motion-spring-spatial);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 250ms var(--md-sys-motion-spring-spatial),
+    border-radius 250ms var(--md-sys-motion-spring-spatial);
   -moz-window-dragging: no-drag;
 }
 
@@ -232,7 +238,7 @@
 .hilal-btn:active:not([disabled]) {
   background-color: var(--md-sys-color-surface-container-highest, #31363e);
   color: var(--md-sys-color-primary, #a8c7fa);
-  transform: scale(0.90) !important;
+  transform: scale(0.9) !important;
   border-radius: 10px !important;
 }
 
@@ -319,10 +325,11 @@
   margin: 0 !important;
   position: relative !important;
   overflow: visible !important;
-  transition: background-color 150ms ease,
-              color 150ms ease,
-              transform 250ms var(--md-sys-motion-spring-spatial),
-              border-radius 250ms var(--md-sys-motion-spring-spatial) !important;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 250ms var(--md-sys-motion-spring-spatial),
+    border-radius 250ms var(--md-sys-motion-spring-spatial) !important;
   -moz-window-dragging: no-drag !important;
 }
 
@@ -339,7 +346,7 @@
 #hilal-extensions-slot > toolbarbutton:not(.unified-extensions-item-menu-button):active:not([disabled]) {
   background-color: var(--md-sys-color-surface-container-highest) !important;
   color: var(--md-sys-color-primary) !important;
-  transform: scale(0.90) !important;
+  transform: scale(0.9) !important;
 }
 
 #hilal-extensions-slot toolbarbutton[hidden="true"],
@@ -417,7 +424,9 @@
   height: 34px;
   padding: 0 12px;
   gap: 8px;
-  transition: background-color 200ms ease, box-shadow 200ms ease;
+  transition:
+    background-color 200ms ease,
+    box-shadow 200ms ease;
   -moz-window-dragging: no-drag;
   box-sizing: border-box;
 }
@@ -483,7 +492,10 @@
   cursor: pointer !important;
   padding: 0 !important;
   margin: 0 !important;
-  transition: background-color 150ms ease, color 150ms ease, transform 180ms var(--md-sys-motion-spring-spatial) !important;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 180ms var(--md-sys-motion-spring-spatial) !important;
   -moz-window-dragging: no-drag !important;
 }
 
@@ -529,16 +541,17 @@
   display: none !important;
 }
 
-#page-action-buttons > :is(
-  #pageActionButton,
-  #userContext-icons,
-  #picture-in-picture-button,
-  #taskbar-tabs-button,
-  #split-view-button,
-  #share-button,
-  #contextual-feature-recommendation,
-  toolbartabstop
-) {
+#page-action-buttons
+  > :is(
+    #pageActionButton,
+    #userContext-icons,
+    #picture-in-picture-button,
+    #taskbar-tabs-button,
+    #split-view-button,
+    #share-button,
+    #contextual-feature-recommendation,
+    toolbartabstop
+  ) {
   display: none !important;
 }
 
@@ -553,7 +566,10 @@
 }
 
 /* Only allow legit interactive buttons (#star-button-box, reader-mode when available, zoom when active) */
-#page-action-buttons > .urlbar-page-action:not([hidden]):not([hidden="true"]):not([hidden=""]):not(#pageActionButton):not(#userContext-icons):not(#picture-in-picture-button):not(#taskbar-tabs-button):not(#split-view-button):not(#share-button):not(#contextual-feature-recommendation),
+#page-action-buttons
+  > .urlbar-page-action:not([hidden]):not([hidden="true"]):not([hidden=""]):not(#pageActionButton):not(#userContext-icons):not(#picture-in-picture-button):not(
+    #taskbar-tabs-button
+  ):not(#split-view-button):not(#share-button):not(#contextual-feature-recommendation),
 #urlbar-zoom-button:not([hidden]):not([hidden="true"]) {
   display: inline-flex !important;
   align-items: center !important;
@@ -569,7 +585,10 @@
   cursor: pointer !important;
   padding: 0 !important;
   margin: 0 !important;
-  transition: background-color 150ms ease, color 150ms ease, transform 180ms var(--md-sys-motion-spring-spatial) !important;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 180ms var(--md-sys-motion-spring-spatial) !important;
   -moz-window-dragging: no-drag !important;
 }
 
@@ -617,7 +636,9 @@
   background-color: var(--md-sys-color-surface-container-high, #21252d);
   border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.1));
   border-radius: var(--md-sys-shape-corner-large, 16px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(24px);
   z-index: 100000;
   min-width: 180px;
@@ -646,7 +667,9 @@
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
-  transition: transform 150ms ease, border-color 150ms ease;
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease;
   padding: 0;
   outline: none;
 }
@@ -670,7 +693,9 @@
   background-color: var(--md-sys-color-surface-container-high, #21252d);
   border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.1));
   border-radius: 20px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   z-index: 100000;
   display: none;
@@ -717,7 +742,9 @@
   border-radius: 14px;
   cursor: pointer;
   user-select: none;
-  transition: background-color 150ms ease, transform 150ms var(--md-sys-motion-spring-spatial);
+  transition:
+    background-color 150ms ease,
+    transform 150ms var(--md-sys-motion-spring-spatial);
 }
 
 .hilal-search-item:hover {
@@ -863,10 +890,11 @@
   cursor: pointer;
   border: none !important;
   -moz-window-dragging: no-drag;
-  transition: transform 200ms var(--md-sys-motion-spring-spatial),
-              background-color 150ms ease,
-              color 150ms ease,
-              border-radius 180ms var(--md-sys-motion-spring-spatial);
+  transition:
+    transform 200ms var(--md-sys-motion-spring-spatial),
+    background-color 150ms ease,
+    color 150ms ease,
+    border-radius 180ms var(--md-sys-motion-spring-spatial);
   position: relative;
 }
 
@@ -967,7 +995,9 @@
   justify-content: center;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 150ms ease, background-color 150ms ease;
+  transition:
+    opacity 150ms ease,
+    background-color 150ms ease;
   padding: 0;
   font-size: 13px;
   line-height: 1;
@@ -1094,13 +1124,14 @@
   overflow-x: hidden;
   overflow-y: auto;
   user-select: none;
-  transition: width 380ms var(--md-sys-motion-spring-spatial),
-              min-width 380ms var(--md-sys-motion-spring-spatial),
-              max-width 380ms var(--md-sys-motion-spring-spatial),
-              padding 380ms var(--md-sys-motion-spring-spatial),
-              margin 380ms var(--md-sys-motion-spring-spatial),
-              opacity 200ms var(--md-sys-motion-spring-effects),
-              transform 380ms var(--md-sys-motion-spring-spatial);
+  transition:
+    width 380ms var(--md-sys-motion-spring-spatial),
+    min-width 380ms var(--md-sys-motion-spring-spatial),
+    max-width 380ms var(--md-sys-motion-spring-spatial),
+    padding 380ms var(--md-sys-motion-spring-spatial),
+    margin 380ms var(--md-sys-motion-spring-spatial),
+    opacity 200ms var(--md-sys-motion-spring-effects),
+    transform 380ms var(--md-sys-motion-spring-spatial);
   transform-origin: left center;
 }
 
@@ -1163,10 +1194,11 @@
   white-space: nowrap;
   flex-shrink: 0;
   padding: 0;
-  transition: transform 280ms var(--md-sys-motion-spring-spatial),
-              border-radius 280ms var(--md-sys-motion-spring-spatial),
-              background-color 250ms ease,
-              color 250ms ease;
+  transition:
+    transform 280ms var(--md-sys-motion-spring-spatial),
+    border-radius 280ms var(--md-sys-motion-spring-spatial),
+    background-color 250ms ease,
+    color 250ms ease;
 }
 
 .hilal-ws-chip:hover {
@@ -1177,7 +1209,7 @@
 }
 
 .hilal-ws-chip:active {
-  transform: scale(0.90) !important;
+  transform: scale(0.9) !important;
   border-radius: 10px !important;
 }
 
@@ -1193,10 +1225,11 @@
   font-weight: 400;
   background: transparent;
   border: 1px dashed var(--md-sys-color-outline-variant, #31363e) !important;
-  transition: transform 280ms var(--md-sys-motion-spring-spatial),
-              border-radius 280ms var(--md-sys-motion-spring-spatial),
-              background-color 250ms ease,
-              border-color 250ms ease;
+  transition:
+    transform 280ms var(--md-sys-motion-spring-spatial),
+    border-radius 280ms var(--md-sys-motion-spring-spatial),
+    background-color 250ms ease,
+    border-color 250ms ease;
 }
 
 .hilal-ws-add:hover {
@@ -1208,7 +1241,7 @@
 }
 
 .hilal-ws-add:active {
-  transform: scale(0.90) !important;
+  transform: scale(0.9) !important;
   border-radius: 10px !important;
 }
 
@@ -1261,10 +1294,11 @@
   position: relative;
   user-select: none;
   border: none !important;
-  transition: transform 220ms var(--md-sys-motion-spring-spatial),
-              background-color 160ms ease,
-              color 160ms ease,
-              border-radius 200ms var(--md-sys-motion-spring-spatial);
+  transition:
+    transform 220ms var(--md-sys-motion-spring-spatial),
+    background-color 160ms ease,
+    color 160ms ease,
+    border-radius 200ms var(--md-sys-motion-spring-spatial);
 }
 
 .hilal-tab-pill.hilal-tab-entering {
@@ -1349,7 +1383,9 @@
   justify-content: center;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s ease, background-color 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease;
   padding: 0;
   font-size: 14px;
   line-height: 1;
@@ -1392,7 +1428,9 @@
   outline-width: 0 !important;
   overflow: hidden !important;
   clip-path: inset(0 round var(--md-sys-shape-corner-large, 16px)) !important;
-  transition: flex 380ms var(--md-sys-motion-spring-spatial), background-color 300ms ease;
+  transition:
+    flex 380ms var(--md-sys-motion-spring-spatial),
+    background-color 300ms ease;
 }
 
 #tabbrowser-tabpanels {
@@ -1452,7 +1490,9 @@ browser[type="content"],
   padding: 6px 12px !important;
   color: var(--md-sys-color-on-surface, #e1e2e9) !important;
   font-size: 13px !important;
-  transition: background-color 150ms ease, transform 150ms var(--md-sys-motion-spring-spatial);
+  transition:
+    background-color 150ms ease,
+    transform 150ms var(--md-sys-motion-spring-spatial);
 }
 
 #tabContextMenu menuitem:hover:not([disabled="true"]),
@@ -1474,3 +1514,164 @@ browser[type="content"],
   margin: 4px 6px !important;
   border: none !important;
 }
+
+/* 8. Material 3 Expressive Workspace Dialog */
+#hilal-ws-dialog-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 999999 !important;
+  background: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+#hilal-ws-dialog {
+  background: var(--md-sys-color-surface-container-high, #21252d) !important;
+  color: var(--md-sys-color-on-surface, #f3f4f6) !important;
+  border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.14)) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+  padding: 24px !important;
+  width: 440px !important;
+  max-width: 90vw !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  box-sizing: border-box !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+#hilal-ws-dialog h3 {
+  margin: 0 !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: var(--md-sys-color-on-surface, #ffffff) !important;
+}
+
+#hilal-ws-dialog label {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  color: var(--md-sys-color-on-surface-variant, #c3c7cf) !important;
+}
+
+#hilal-ws-name-input {
+  appearance: none !important;
+  background: var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.08)) !important;
+  color: var(--md-sys-color-on-surface, #ffffff) !important;
+  border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.16)) !important;
+  border-radius: 10px !important;
+  padding: 10px 14px !important;
+  font-size: 14px !important;
+  outline: none !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  transition: border-color 140ms ease !important;
+}
+
+#hilal-ws-name-input:focus {
+  border-color: var(--md-sys-color-primary, #af51f5) !important;
+  box-shadow: 0 0 0 2px var(--md-sys-color-primary, #af51f5) !important;
+}
+
+#hilal-ws-name-input[aria-invalid] {
+  border-color: var(--md-sys-color-error, #ef4444) !important;
+}
+
+#hilal-ws-emoji-grid {
+  display: grid !important;
+  grid-template-columns: repeat(8, 1fr) !important;
+  gap: 6px !important;
+  max-height: 130px !important;
+  overflow-y: auto !important;
+  padding: 8px !important;
+  background: var(--md-sys-color-surface-container, rgba(0, 0, 0, 0.25)) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.08)) !important;
+  scrollbar-width: thin !important;
+}
+
+#hilal-ws-color-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  padding: 4px 0 !important;
+}
+
+.hilal-ws-choice {
+  appearance: none !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  width: 38px !important;
+  height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 120ms ease !important;
+}
+
+.hilal-ws-emoji-choice {
+  font-size: 20px !important;
+}
+
+.hilal-ws-emoji-choice:hover {
+  background: var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.1)) !important;
+}
+
+.hilal-ws-emoji-choice.hilal-ws-choice-selected {
+  background: var(--md-sys-color-primary-container, rgba(175, 81, 245, 0.25)) !important;
+  border-color: var(--md-sys-color-primary, #af51f5) !important;
+}
+
+.hilal-ws-color-choice {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  border: 2px solid transparent !important;
+  padding: 0 !important;
+}
+
+.hilal-ws-color-choice::before {
+  content: "" !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  background: var(--hilal-ws-accent) !important;
+}
+
+.hilal-ws-color-choice:hover {
+  transform: scale(1.1) !important;
+}
+
+.hilal-ws-color-choice.hilal-ws-choice-selected {
+  border-color: var(--md-sys-color-primary, #af51f5) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+#hilal-ws-dialog-actions {
+  display: flex !important;
+  gap: 10px !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  margin-top: 8px !important;
+}
+
+#hilal-ws-dialog-actions moz-button,
+#hilal-ws-dialog-actions button {
+  border-radius: 9999px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+}
+
+#hilal-ws-dialog-delete {
+  margin-inline-end: auto !important;
+}
+
