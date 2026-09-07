@@ -676,7 +676,7 @@
                   <span></span>
                 </label>
               </div>
-              <h5 class="hw-tile-title">Light</h5>
+              <div class="hw-tile-title">Light</div>
               <p class="hw-tile-desc">Crisp, solid light tonal surfaces.</p>
             </div>
 
@@ -689,7 +689,7 @@
                   <span></span>
                 </label>
               </div>
-              <h5 class="hw-tile-title">Dark</h5>
+              <div class="hw-tile-title">Dark</div>
               <p class="hw-tile-desc">Deep midnight tones for comfortable viewing.</p>
             </div>
 
@@ -702,7 +702,7 @@
                   <span></span>
                 </label>
               </div>
-              <h5 class="hw-tile-title">System</h5>
+              <div class="hw-tile-title">System</div>
               <p class="hw-tile-desc">Seamlessly adapts to your operating system.</p>
             </div>
           </div>
@@ -775,7 +775,7 @@
                   <span></span>
                 </label>
               </div>
-              <h5 class="hw-tile-title">Vertical Tabs</h5>
+              <div class="hw-tile-title">Vertical Tabs</div>
               <p class="hw-tile-desc">Sidebar tabs for cleaner multitasking on widescreen monitors.</p>
             </div>
 
@@ -789,7 +789,7 @@
                   <span></span>
                 </label>
               </div>
-              <h5 class="hw-tile-title">Horizontal Tabs</h5>
+              <div class="hw-tile-title">Horizontal Tabs</div>
               <p class="hw-tile-desc">Familiar top tab strip across the browser window.</p>
             </div>
           </div>
@@ -809,7 +809,7 @@
                   <div class="hw-tile-row">
                     <div class="hw-tile-icon-circle" style="color: ${preset.hex};"><i>${preset.icon}</i></div>
                     <div class="hw-tile-label-wrap">
-                      <h5 class="hw-tile-title">${preset.label}</h5>
+                      <div class="hw-tile-title hw-tile-title-compact">${preset.label}</div>
                       <span class="hw-tile-sub">Isolated space</span>
                     </div>
                     <div class="hw-tile-spacer"></div>
@@ -855,7 +855,7 @@
                       <span></span>
                     </label>
                   </div>
-                  <h5 class="hw-tile-title">${level.label}</h5>
+                  <div class="hw-tile-title">${level.label}</div>
                   <p class="hw-tile-desc">${level.description}</p>
                 </div>
               `;
@@ -878,7 +878,7 @@
                   <div class="hw-tile-row">
                     <div class="hw-engine-icon-wrap">${this._engineIconHTML(engine)}</div>
                     <div class="hw-tile-label-wrap">
-                      <h5 class="hw-tile-title">${this._escapeHTML(engine.name)}</h5>
+                      <div class="hw-tile-title hw-tile-title-compact">${this._escapeHTML(engine.name)}</div>
                       <span class="hw-tile-sub">${isDuckDuckGo ? "Privacy-first" : "Direct search"}</span>
                     </div>
                     <div class="hw-tile-spacer"></div>
@@ -909,7 +909,7 @@
         <div class="hw-summary-banner">
           <div class="hw-summary-icon"><i>rocket_launch</i></div>
           <div class="hw-summary-text">
-            <h5 class="hw-summary-title">Configuration Summary</h5>
+            <span class="hw-summary-title">Configuration Summary</span>
             <div class="hw-summary-chips">
               <span class="hw-pill-feature"><i>palette</i>${themeLabel} Mode</span>
               <span class="hw-pill-feature"><i>view_sidebar</i>${tabsLabel} Tabs</span>
@@ -924,7 +924,7 @@
             <div class="hw-row-card">
               <div class="hw-row-icon"><i>sync</i></div>
               <div class="hw-row-content">
-                <h5 class="hw-row-title">Import Browser Data</h5>
+                <div class="hw-row-title">Import Browser Data</div>
                 <p class="hw-row-desc">Bring bookmarks & logins.</p>
               </div>
               <button type="button" class="hw-btn-secondary" id="hw-import-btn">
@@ -936,7 +936,7 @@
             <div class="hw-row-card">
               <div class="hw-row-icon"><i>home</i></div>
               <div class="hw-row-content">
-                <h5 class="hw-row-title">Set as Default Browser</h5>
+                <div class="hw-row-title">Set as Default Browser</div>
                 <p class="hw-row-desc">Open links in Hilal.</p>
               </div>
               <label class="hw-switch">
@@ -964,7 +964,7 @@
                       : `<div class="hw-pinned-avatar" style="background-color: ${site.color};">${site.initial}</div>`
                     }
                     <div class="hw-tile-label-wrap">
-                      <h6 class="hw-tile-title">${this._escapeHTML(site.label)}</h6>
+                      <div class="hw-tile-title hw-tile-title-compact">${this._escapeHTML(site.label)}</div>
                     </div>
                     <div class="hw-tile-spacer"></div>
                     <label class="hw-checkbox">
