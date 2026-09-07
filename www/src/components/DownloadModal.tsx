@@ -6,14 +6,9 @@ import {
   Terminal,
   ExternalLink,
   CheckCircle2,
-  Package
+  Package,
+  X
 } from "lucide-react";
-import {
-  M3eDialog,
-  M3eButton,
-  M3eCard,
-  M3eChip
-} from "@m3e/react/all";
 import { GithubRelease, GithubAsset } from "../types";
 import { formatBytes } from "../utils/github";
 
@@ -94,119 +89,131 @@ export default function DownloadModal({
     return { label: activeT.platforms.linuxTar, icon: <Terminal className="w-5 h-5" /> };
   }
 
+  if (!isOpen) return null;
+
   return (
-    <M3eDialog
-      open={isOpen}
-      onClosed={onClose}
-      dismissible
-      className="max-w-lg w-full"
-    >
-      <div slot="header" className="flex items-center gap-2.5">
-        <Package className="w-5 h-5 text-[var(--md-sys-color-primary)]" />
-        <span className="text-xl font-bold tracking-tight text-[var(--md-sys-color-on-surface)]">
-          {downloadedAsset ? activeT.downloadStarted : activeT.headline}
-        </span>
-      </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop overlay */}
+      <div 
+        className="overlay active blur"
+        onClick={onClose}
+      />
 
-      {downloadedAsset ? (
-        <div className="text-center py-4 space-y-4">
-          <div className="mx-auto w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
-            <CheckCircle2 className="w-7 h-7" />
+      {/* Beer CSS Modal Dialog */}
+      <dialog className="modal active max-w-lg w-full z-10 bg-m3-container border border-[var(--outline-variant)]/30 rounded-3xl p-6 shadow-2xl">
+        <div className="flex items-center justify-between pb-4 border-b border-[var(--outline-variant)]/20">
+          <div className="flex items-center gap-2.5">
+            <div className="shape sunny tiny tertiary">
+              <Package className="w-4 h-4" />
+            </div>
+            <h5 className="text-xl font-bold tracking-tight text-[var(--on-surface)] m-0">
+              {downloadedAsset ? activeT.downloadStarted : activeT.headline}
+            </h5>
           </div>
-          <p className="text-sm text-[var(--md-sys-color-on-surface-variant)]">
-            {activeT.downloadDesc}
-          </p>
-          <div className="flex justify-center">
-            <M3eChip variant="outlined">
-              <span>{downloadedAsset.name} • {formatBytes(downloadedAsset.size)}</span>
-            </M3eChip>
-          </div>
-          <div className="pt-4 flex justify-center gap-3">
-            <M3eButton
-              variant="filled"
-              size="small"
-              shape="rounded"
-              onClick={() => handleDownload(downloadedAsset)}
-            >
-              <Download slot="icon" className="w-4 h-4" />
-              <span>{activeT.redownloadBtn}</span>
-            </M3eButton>
-            <M3eButton
-              variant="text"
-              size="small"
-              shape="rounded"
-              onClick={onClose}
-            >
-              <span>{activeT.closeBtn}</span>
-            </M3eButton>
-          </div>
+          <button 
+            className="circle transparent small" 
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
-      ) : (
-        <div className="space-y-4">
-          <p className="text-sm text-[var(--md-sys-color-on-surface-variant)]">
-            {activeT.supportingText}
-          </p>
 
-          {/* Package list using M3E Card */}
-          <div className="space-y-2.5 max-h-[50vh] overflow-y-auto pr-1">
-            {assets.map((asset) => {
-              const info = getPlatformInfo(asset.name);
-              return (
-                <M3eCard
-                  key={asset.id}
-                  variant="outlined"
-                  actionable
-                  onClick={() => handleDownload(asset)}
-                  className="w-full text-left cursor-pointer group"
+        <div className="pt-4">
+          {downloadedAsset ? (
+            <div className="text-center py-4 space-y-4">
+              <div className="mx-auto w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
+                <CheckCircle2 className="w-7 h-7" />
+              </div>
+              <p className="text-sm text-[var(--on-surface-variant)]">
+                {activeT.downloadDesc}
+              </p>
+              <div className="flex justify-center">
+                <div className="chip border">
+                  <span>{downloadedAsset.name} • {formatBytes(downloadedAsset.size)}</span>
+                </div>
+              </div>
+              <div className="pt-4 flex justify-center gap-3">
+                <button
+                  className="primary small"
+                  onClick={() => handleDownload(downloadedAsset)}
                 >
-                  <div slot="content" className="p-3.5 sm:p-4 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center shrink-0">
-                        {info.icon}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-[var(--md-sys-color-on-surface)] truncate">
-                          {info.label}
-                        </div>
-                        <div className="text-xs font-mono text-[var(--md-sys-color-on-surface-variant)] truncate">
-                          {asset.name}
-                        </div>
-                      </div>
-                    </div>
+                  <Download className="w-4 h-4 mr-2" />
+                  <span>{activeT.redownloadBtn}</span>
+                </button>
+                <button
+                  className="transparent small"
+                  onClick={onClose}
+                >
+                  <span>{activeT.closeBtn}</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-[var(--on-surface-variant)]">
+                {activeT.supportingText}
+              </p>
 
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs font-mono text-[var(--md-sys-color-on-surface-variant)] hidden sm:inline">
-                        {formatBytes(asset.size)}
-                      </span>
-                      <M3eButton
-                        variant="filled"
-                        size="small"
-                        shape="rounded"
-                      >
-                        <Download slot="icon" className="w-3.5 h-3.5" />
-                        <span className="sm:hidden">{formatBytes(asset.size)}</span>
-                      </M3eButton>
-                    </div>
-                  </div>
-                </M3eCard>
-              );
-            })}
-          </div>
+              {/* Package list using Beer CSS cards */}
+              <div className="space-y-2.5 max-h-[50vh] overflow-y-auto pr-1">
+                {assets.map((asset) => {
+                  const info = getPlatformInfo(asset.name);
+                  return (
+                    <article
+                      key={asset.id}
+                      onClick={() => handleDownload(asset)}
+                      className="border round p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer hover:border-[var(--primary)] transition-all bg-m3-container-lowest m-0"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-full bg-[var(--primary-container)] text-[var(--on-primary-container)] flex items-center justify-center shrink-0">
+                          {info.icon}
+                        </div>
+                        <div className="min-w-0 text-left">
+                          <div className="text-sm font-semibold text-[var(--on-surface)] truncate">
+                            {info.label}
+                          </div>
+                          <div className="text-xs font-mono text-[var(--on-surface-variant)] truncate">
+                            {asset.name}
+                          </div>
+                        </div>
+                      </div>
 
-          <div className="pt-3 border-t border-[var(--md-sys-color-outline-variant)]/20 text-center">
-            <M3eButton
-              variant="text"
-              size="small"
-              shape="rounded"
-              href={release?.html_url || "https://github.com/VastSea0/hilal-browser/releases"}
-              target="_blank"
-            >
-              <span>{activeT.viewAllOnGh}</span>
-              <ExternalLink slot="trailing-icon" className="w-3.5 h-3.5 ml-1" />
-            </M3eButton>
-          </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-xs font-mono text-[var(--on-surface-variant)] hidden sm:inline">
+                          {formatBytes(asset.size)}
+                        </span>
+                        <button
+                          className="primary circle small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownload(asset);
+                          }}
+                          aria-label={`Download ${info.label}`}
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <div className="pt-3 border-t border-[var(--outline-variant)]/20 text-center">
+                <a
+                  className="button transparent small"
+                  href={release?.html_url || "https://github.com/VastSea0/hilal-browser/releases"}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <span>{activeT.viewAllOnGh}</span>
+                  <ExternalLink className="w-3.5 h-3.5 ml-1" />
+                </a>
+              </div>
+            </div>
+          )}
         </div>
-      )}
-    </M3eDialog>
+      </dialog>
+    </div>
   );
 }

@@ -4,6 +4,7 @@ import {
   Sun,
   Moon,
   Github,
+  ChevronDown,
   Download,
   Terminal,
   Apple,
@@ -15,7 +16,7 @@ import {
   Sparkles,
   Cpu,
   Boxes,
-  GitCommit,
+  History,
   Users,
   BookOpen,
 } from "lucide-react";
@@ -34,19 +35,6 @@ import DownloadModal from "./components/DownloadModal";
 import ChangelogPage from "./components/ChangelogPage";
 import DocsPage from "./components/DocsPage";
 import { CONTRIBUTORS_DATA } from "./data/changelogData";
-
-import {
-  M3eTheme,
-  M3eButton,
-  M3eIconButton,
-  M3eChip,
-  M3eCard,
-  M3eSegmentedButton,
-  M3eButtonSegment,
-  M3eAccordion,
-  M3eExpansionPanel,
-  M3eTooltip
-} from "@m3e/react/all";
 
 // M3 Expressive Spring Motion Physics
 const springTransition = {
@@ -460,123 +448,119 @@ export default function App() {
   };
 
   return (
-    <M3eTheme scheme={theme} motion="expressive" strongFocus color="#0b57d0">
-      <div className="min-h-screen bg-m3-surface text-[var(--md-sys-color-on-surface)] selection:bg-[var(--md-sys-color-primary-container)] selection:text-[var(--md-sys-color-on-primary-container)]">
-        {/* 1. M3 Floating Top App Bar */}
-        <nav className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 pointer-events-none">
-          <div className="mx-auto max-w-5xl pointer-events-auto h-14 rounded-full bg-m3-surface/80 dark:bg-m3-container-low/80 backdrop-blur-xl border border-[var(--md-sys-color-outline-variant)]/20 px-4 sm:px-5 flex items-center justify-between shadow-md shadow-black/5 transition-all">
-            {/* Logo & Name */}
-            <motion.div
+    <div className="min-h-screen bg-m3-surface text-[var(--on-surface)] selection:bg-[var(--primary-container)] selection:text-[var(--on-primary-container)]">
+      {/* 1. M3 Floating Top App Bar */}
+      <div className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 pointer-events-none">
+        <div className="mx-auto max-w-5xl pointer-events-auto h-14 rounded-full bg-m3-surface/80 dark:bg-m3-container-low/80 backdrop-blur-xl border border-[var(--outline-variant)]/20 px-4 sm:px-5 flex items-center justify-between shadow-md shadow-black/5 transition-all">
+          {/* Logo & Name */}
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigateTo("home")}
+            className="flex items-center gap-2.5 cursor-pointer"
+          >
+            <div className="w-8 h-8 rounded-full bg-[var(--primary-container)]/60 flex items-center justify-center p-1.5">
+              <img
+                src="/default128.png"
+                alt="Hilal Logo"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <span className="text-sm font-bold tracking-tight text-[var(--on-surface)]">
+              Hilal
+            </span>
+          </motion.div>
+
+          {/* Center Nav Links - Clean & Consistent Typography */}
+          <div className="hidden md:flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => scrollToId("features")}
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 transition-colors cursor-pointer border-0 bg-transparent"
+            >
+              {activeT.nav.features}
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToId("architecture")}
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 transition-colors cursor-pointer border-0 bg-transparent"
+            >
+              {activeT.nav.architecture}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigateTo("docs")}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border-0 ${
+                currentView === "docs"
+                  ? "bg-[var(--secondary-container)] text-[var(--on-secondary-container)]"
+                  : "bg-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8"
+              }`}
+            >
+              <span>{activeT.nav.docs}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigateTo("changelog")}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border-0 ${
+                currentView === "changelog"
+                  ? "bg-[var(--secondary-container)] text-[var(--on-secondary-container)]"
+                  : "bg-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8"
+              }`}
+            >
+              <span>{activeT.nav.changelog}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToId("download")}
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 transition-colors cursor-pointer border-0 bg-transparent"
+            >
+              {activeT.nav.download}
+            </button>
+            <a
+              href="https://github.com/VastSea0/hilal-browser"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 transition-colors no-underline"
+            >
+              <span>{activeT.nav.github}</span>
+            </a>
+          </div>
+
+          {/* Right Utilities */}
+          <div className="flex items-center gap-1.5">
+            {/* Lang Chip */}
+            <button
+              type="button"
+              onClick={() => setLang(lang === "tr" ? "en" : "tr")}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-bold text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 transition-colors cursor-pointer border-0 bg-transparent"
+              title={lang === "tr" ? "Switch to English" : "Türkçe'ye Geç"}
+            >
+              {lang === "tr" ? "EN" : "TR"}
+            </button>
+
+            {/* Theme Chip */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 transition-colors cursor-pointer border-0 bg-transparent"
+              aria-label="Theme Toggle"
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+
+            {/* CTA Pill Button */}
+            <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => navigateTo("home")}
-              className="flex items-center gap-2.5 cursor-pointer"
+              onClick={() => setIsDownloadOpen(true)}
+              className="h-9 px-4 rounded-full bg-[var(--primary)] text-[var(--on-primary)] font-semibold text-xs transition-all shadow-sm hover:shadow flex items-center gap-1.5 cursor-pointer ml-1 border-0"
             >
-              <div className="w-8 h-8 rounded-full bg-[var(--md-sys-color-primary-container)]/60 flex items-center justify-center p-1.5">
-                <img
-                  src="/default128.png"
-                  alt="Hilal Logo"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <span className="text-sm font-bold tracking-tight text-[var(--md-sys-color-on-surface)]">
-                Hilal
-              </span>
-            </motion.div>
-
-            {/* Center Nav Links - M3E Buttons */}
-            <div className="hidden md:flex items-center gap-1">
-              <M3eButton
-                variant="text"
-                size="small"
-                shape="rounded"
-                onClick={() => scrollToId("features")}
-              >
-                {activeT.nav.features}
-              </M3eButton>
-              <M3eButton
-                variant="text"
-                size="small"
-                shape="rounded"
-                onClick={() => scrollToId("architecture")}
-              >
-                {activeT.nav.architecture}
-              </M3eButton>
-              <M3eButton
-                variant={currentView === "docs" ? "tonal" : "text"}
-                size="small"
-                shape="rounded"
-                onClick={() => navigateTo("docs")}
-              >
-                <BookOpen slot="icon" className="w-3.5 h-3.5" />
-                <span>{activeT.nav.docs}</span>
-              </M3eButton>
-              <M3eButton
-                variant={currentView === "changelog" ? "tonal" : "text"}
-                size="small"
-                shape="rounded"
-                onClick={() => navigateTo("changelog")}
-              >
-                <GitCommit slot="icon" className="w-3.5 h-3.5" />
-                <span>{activeT.nav.changelog}</span>
-              </M3eButton>
-              <M3eButton
-                variant="text"
-                size="small"
-                shape="rounded"
-                onClick={() => scrollToId("download")}
-              >
-                {activeT.nav.download}
-              </M3eButton>
-              <M3eButton
-                variant="text"
-                size="small"
-                shape="rounded"
-                href="https://github.com/VastSea0/hilal-browser"
-                target="_blank"
-              >
-                <Github slot="icon" className="w-3.5 h-3.5" />
-                <span>{activeT.nav.github}</span>
-              </M3eButton>
-            </div>
-
-            {/* Right Utilities */}
-            <div className="flex items-center gap-1">
-              {/* Lang Chip */}
-              <M3eButton
-                variant="text"
-                size="small"
-                shape="rounded"
-                onClick={() => setLang(lang === "tr" ? "en" : "tr")}
-                title={lang === "tr" ? "Switch to English" : "Türkçe'ye Geç"}
-              >
-                {lang === "tr" ? "EN" : "TR"}
-              </M3eButton>
-
-              {/* Theme Toggle */}
-              <M3eIconButton
-                variant="standard"
-                size="small"
-                shape="rounded"
-                onClick={toggleTheme}
-                aria-label="Theme Toggle"
-              >
-                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </M3eIconButton>
-
-              {/* CTA Button */}
-              <M3eButton
-                variant="filled"
-                size="small"
-                shape="rounded"
-                onClick={() => setIsDownloadOpen(true)}
-              >
-                <Download slot="icon" className="w-3.5 h-3.5" />
-                <span>{activeT.nav.getHilal}</span>
-              </M3eButton>
-            </div>
+              <Download className="w-3.5 h-3.5" />
+              <span>{activeT.nav.getHilal}</span>
+            </motion.button>
           </div>
-        </nav>
+        </div>
+      </div>
 
       {/* Main View Router */}
       {currentView === "docs" ? (
@@ -602,17 +586,18 @@ export default function App() {
               className="space-y-6"
             >
               {/* M3 Assist Chip */}
-              <motion.div variants={m3FadeIn} className="flex justify-center">
-                <M3eChip variant="elevated">
-                  <Sparkles slot="icon" className="w-3.5 h-3.5 text-[var(--md-sys-color-primary)]" />
-                  <span>{activeT.hero.chip}</span>
-                </M3eChip>
+              <motion.div
+                variants={m3FadeIn}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--secondary-container)] text-[var(--on-secondary-container)] text-xs font-semibold tracking-wide"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[var(--primary)]" />
+                <span>{activeT.hero.chip}</span>
               </motion.div>
 
               {/* M3 Emphasized Display Large Tagline */}
               <motion.h1
                 variants={m3FadeIn}
-                className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-[var(--md-sys-color-on-surface)] leading-[1.05]"
+                className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-[var(--on-surface)] leading-[1.05]"
                 style={{ fontStretch: "110%" }}
               >
                 {activeT.hero.tagline}
@@ -621,59 +606,58 @@ export default function App() {
               {/* M3 Body Large Subtitle */}
               <motion.p
                 variants={m3FadeIn}
-                className="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-[var(--md-sys-color-on-surface-variant)] leading-relaxed font-normal"
+                className="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-[var(--on-surface-variant)] leading-relaxed font-normal"
               >
                 {activeT.hero.subtitle}
               </motion.p>
 
-              {/* M3 Actions (Filled & Tonal M3E Buttons) */}
+              {/* M3 Actions (Filled & Tonal Pill Buttons) */}
               <motion.div
                 variants={m3FadeIn}
                 className="pt-4 flex flex-col items-center gap-4"
               >
                 <div className="flex flex-wrap items-center justify-center gap-3">
-                  {/* Primary Filled Button */}
-                  <M3eButton
-                    variant="filled"
-                    size="small"
-                    shape="rounded"
+                  {/* Primary Filled Button - BLUE! */}
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
                     onClick={() => setIsDownloadOpen(true)}
+                    className="h-14 px-8 rounded-full bg-[var(--primary)] text-[var(--on-primary)] font-bold text-sm sm:text-base flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all cursor-pointer border-0"
                   >
-                    <span slot="icon" className="flex items-center">
-                      {detectedOS === "macos" && <Apple className="w-4 h-4" />}
-                      {detectedOS === "windows" && <Laptop className="w-4 h-4" />}
-                      {detectedOS !== "macos" && detectedOS !== "windows" && <Download className="w-4 h-4" />}
-                    </span>
+                    {detectedOS === "macos" && <Apple className="w-5 h-5" />}
+                    {detectedOS === "windows" && <Laptop className="w-5 h-5" />}
+                    {detectedOS !== "macos" && detectedOS !== "windows" && <Download className="w-5 h-5" />}
                     <span>{getDynamicBtnLabel()}</span>
-                  </M3eButton>
+                  </motion.button>
 
                   {/* Changelog Pill Button */}
-                  <M3eButton
-                    variant="tonal"
-                    size="small"
-                    shape="rounded"
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
                     onClick={() => navigateTo("changelog")}
+                    className="h-14 px-7 rounded-full bg-m3-container text-[var(--on-surface)] border border-[var(--outline-variant)]/50 font-semibold text-sm sm:text-base flex items-center gap-2.5 hover:bg-m3-container-high transition-colors cursor-pointer"
                   >
-                    <GitCommit slot="icon" className="w-4 h-4 text-[var(--md-sys-color-primary)]" />
+                    <History className="w-5 h-5 text-[var(--primary)]" />
                     <span>{activeT.nav.changelog}</span>
-                  </M3eButton>
+                  </motion.button>
 
                   {/* GitHub Repo Button */}
-                  <M3eButton
-                    variant="outlined"
-                    size="small"
-                    shape="rounded"
+                  <motion.a
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
                     href="https://github.com/VastSea0/hilal-browser"
                     target="_blank"
+                    rel="noopener noreferrer"
+                    className="h-14 px-7 rounded-full bg-m3-container text-[var(--on-surface)] border border-[var(--outline-variant)]/50 font-semibold text-sm sm:text-base flex items-center gap-2.5 hover:bg-m3-container-high transition-colors no-underline"
                   >
-                    <Github slot="icon" className="w-4 h-4" />
+                    <Github className="w-5 h-5" />
                     <span>GitHub Repo</span>
-                  </M3eButton>
+                  </motion.a>
                 </div>
 
                 {/* Supporting artifact note */}
                 {recommendedAsset && (
-                  <p className="text-xs font-mono text-[var(--md-sys-color-on-surface-variant)]">
+                  <p className="text-xs font-mono text-[var(--on-surface-variant)]">
                     {recommendedAsset.name} • {formatBytes(recommendedAsset.size)}
                   </p>
                 )}
@@ -698,30 +682,31 @@ export default function App() {
           {/* 3. M3 Expressive Interactive Stories Showcase */}
           <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6" id="features">
             <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-              <div className="flex justify-center">
-                <M3eChip variant="elevated">
-                  <Layers slot="icon" className="w-3.5 h-3.5" />
-                  <span>{lang === "tr" ? "Öne Çıkan Özellikler" : "Key Highlights"}</span>
-                </M3eChip>
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--tertiary-container)] text-[var(--on-tertiary-container)] text-xs font-semibold">
+                <Layers className="w-3.5 h-3.5" />
+                <span>{lang === "tr" ? "Öne Çıkan Özellikler" : "Key Highlights"}</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)]">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[var(--on-surface)]">
                 {lang === "tr" ? "Temel Yetenekler." : "Core Pillars."}
               </h2>
             </div>
 
             {/* M3 Segmented Navigation Bar */}
-            <div className="flex justify-center mb-12">
-              <M3eSegmentedButton>
-                {activeT.stories.map((story, idx) => (
-                  <M3eButtonSegment
-                    key={idx}
-                    checked={activeTab === idx}
-                    onClick={() => setActiveTab(idx)}
-                  >
-                    {story.chip}
-                  </M3eButtonSegment>
-                ))}
-              </M3eSegmentedButton>
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
+              {activeT.stories.map((story, idx) => (
+                <motion.button
+                  key={idx}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setActiveTab(idx)}
+                  className={`h-11 px-5 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 border-0 ${
+                    activeTab === idx
+                      ? "bg-[var(--primary)] text-[var(--on-primary)] shadow-md"
+                      : "bg-m3-container text-[var(--on-surface-variant)] hover:bg-m3-container-high"
+                  }`}
+                >
+                  <span>{story.chip}</span>
+                </motion.button>
+              ))}
             </div>
 
             {/* Active Tab Story Showcase Container */}
@@ -732,32 +717,29 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -16 }}
                 transition={springTransition}
+                className="p-6 sm:p-10 rounded-[36px] bg-m3-container-low border border-[var(--outline-variant)]/20 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center shadow-lg"
               >
-                <M3eCard variant="filled" className="w-full">
-                  <div slot="content" className="p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
-                    {/* Story Text Side */}
-                    <div className="lg:col-span-5 space-y-4 text-left">
-                      <M3eChip variant="elevated">
-                        {activeT.stories[activeTab].chip}
-                      </M3eChip>
-                      <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)] leading-snug">
-                        {activeT.stories[activeTab].title}
-                      </h3>
-                      <p className="text-sm sm:text-base text-[var(--md-sys-color-on-surface-variant)] leading-relaxed font-normal">
-                        {activeT.stories[activeTab].description}
-                      </p>
-                    </div>
+                {/* Story Text Side */}
+                <div className="lg:col-span-5 space-y-4 text-left">
+                  <span className="px-3.5 py-1 rounded-full bg-[var(--primary-container)] text-[var(--on-primary-container)] text-xs font-semibold inline-block">
+                    {activeT.stories[activeTab].chip}
+                  </span>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--on-surface)] leading-snug">
+                    {activeT.stories[activeTab].title}
+                  </h3>
+                  <p className="text-sm sm:text-base text-[var(--on-surface-variant)] leading-relaxed font-normal">
+                    {activeT.stories[activeTab].description}
+                  </p>
+                </div>
 
-                    {/* Story Visual Side */}
-                    <div className="lg:col-span-7 drop-shadow-xl">
-                      <img
-                        src={activeT.stories[activeTab].image}
-                        alt={activeT.stories[activeTab].alt}
-                        className="w-full h-auto block select-none pointer-events-none rounded-2xl"
-                      />
-                    </div>
-                  </div>
-                </M3eCard>
+                {/* Story Visual Side */}
+                <div className="lg:col-span-7 drop-shadow-xl">
+                  <img
+                    src={activeT.stories[activeTab].image}
+                    alt={activeT.stories[activeTab].alt}
+                    className="w-full h-auto block select-none pointer-events-none rounded-2xl"
+                  />
+                </div>
               </motion.div>
             </AnimatePresence>
           </section>
@@ -769,130 +751,116 @@ export default function App() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={springTransition}
+              className="p-8 sm:p-12 rounded-[36px] bg-m3-container border border-[var(--outline-variant)]/20 text-center space-y-6 shadow-lg"
             >
-              <M3eCard variant="outlined" className="w-full">
-                <div slot="content" className="p-8 sm:p-12 text-center space-y-6">
-                  <div className="flex justify-center">
-                    <M3eChip variant="elevated">
-                      <Cpu slot="icon" className="w-3.5 h-3.5" />
-                      <span>{activeT.openSourceSection.chip}</span>
-                    </M3eChip>
-                  </div>
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--secondary-container)] text-[var(--on-secondary-container)] text-xs font-semibold">
+                <Cpu className="w-3.5 h-3.5" />
+                <span>{activeT.openSourceSection.chip}</span>
+              </div>
 
-                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-[var(--md-sys-color-on-surface)] max-w-2xl mx-auto">
-                    {activeT.openSourceSection.title}
-                  </h2>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-[var(--on-surface)] max-w-2xl mx-auto">
+                {activeT.openSourceSection.title}
+              </h2>
 
-                  <p className="text-sm sm:text-base md:text-lg text-[var(--md-sys-color-on-surface-variant)] max-w-2xl mx-auto leading-relaxed">
-                    {activeT.openSourceSection.description}
-                  </p>
+              <p className="text-sm sm:text-base md:text-lg text-[var(--on-surface-variant)] max-w-2xl mx-auto leading-relaxed">
+                {activeT.openSourceSection.description}
+              </p>
 
-                  {/* M3 Tonal Interactive Terminal Card */}
-                  <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-                    <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/20 text-xs font-mono text-[var(--md-sys-color-on-surface)] shadow-inner">
-                      <span className="text-[var(--md-sys-color-primary)] font-bold">$</span>
-                      <span className="select-all truncate max-w-[260px] sm:max-w-md">
-                        git clone https://github.com/VastSea0/hilal-browser.git && cd hilal-browser && ./bin/hil setup
-                      </span>
-                      <M3eIconButton
-                        id="copy-term-btn"
-                        variant="standard"
-                        size="small"
-                        shape="rounded"
-                        onClick={handleCopyCommand}
-                        aria-label="Copy Command"
+              {/* M3 Tonal Interactive Terminal Card */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-m3-container-lowest border border-[var(--outline-variant)]/20 text-xs font-mono text-[var(--on-surface)] shadow-inner">
+                  <span className="text-[var(--primary)] font-bold">$</span>
+                  <span className="select-all truncate max-w-[260px] sm:max-w-md">
+                    git clone https://github.com/VastSea0/hilal-browser.git && cd hilal-browser && ./bin/hil setup
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopyCommand}
+                    className="w-8 h-8 rounded-full flex items-center justify-center bg-m3-container hover:bg-[var(--primary-container)] hover:text-[var(--on-primary-container)] transition-colors cursor-pointer border-0"
+                    title="Copy Command"
+                  >
+                    {copiedClone ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Contributors Grid */}
+              <div className="pt-6 border-t border-[var(--outline-variant)]/20">
+                <div className="flex flex-col items-center gap-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[var(--on-surface-variant)] flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-[var(--primary)]" />
+                    <span>{lang === "tr" ? "Projeye Katkıda Bulunanlar" : "Project Contributors"}</span>
+                  </span>
+                  <div className="flex flex-wrap items-center justify-center gap-2.5">
+                    {CONTRIBUTORS_DATA.map((c) => (
+                      <a
+                        key={c.username}
+                        href={c.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-m3-container-lowest hover:bg-m3-container-high border border-[var(--outline-variant)]/30 text-xs transition-all hover:scale-105 group no-underline"
+                        title={`${c.name} (@${c.username}) • ${c.contributions} commit`}
                       >
-                        {copiedClone ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                      </M3eIconButton>
-                      <M3eTooltip htmlFor="copy-term-btn">
-                        {copiedClone ? (lang === "tr" ? "Kopyalandı" : "Copied") : (lang === "tr" ? "Komutu Kopyala" : "Copy Command")}
-                      </M3eTooltip>
-                    </div>
-                  </div>
-
-                  {/* Contributors Grid */}
-                  <div className="pt-6 border-t border-[var(--md-sys-color-outline-variant)]/20">
-                    <div className="flex flex-col items-center gap-3">
-                      <span className="text-xs font-bold uppercase tracking-wider text-[var(--md-sys-color-on-surface-variant)] flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5 text-[var(--md-sys-color-primary)]" />
-                        <span>{lang === "tr" ? "Projeye Katkıda Bulunanlar" : "Project Contributors"}</span>
-                      </span>
-                      <div className="flex flex-wrap items-center justify-center gap-2.5">
-                        {CONTRIBUTORS_DATA.map((c) => (
-                          <a
-                            key={c.username}
-                            href={c.githubUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-m3-container-lowest hover:bg-m3-container-high border border-[var(--md-sys-color-outline-variant)]/30 text-xs transition-all hover:scale-105 group"
-                            title={`${c.name} (@${c.username}) • ${c.contributions} commit`}
-                          >
-                            <img
-                              src={c.avatarUrl}
-                              alt={c.name}
-                              className="w-5 h-5 rounded-full object-cover ring-1 ring-[var(--md-sys-color-outline-variant)]/40"
-                            />
-                            <span className="font-semibold text-[var(--md-sys-color-on-surface)] group-hover:text-[var(--md-sys-color-primary)] transition-colors">
-                              {c.name}
-                            </span>
-                            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-m3-container text-[var(--md-sys-color-on-surface-variant)]">
-                              {c.contributions} commit
-                            </span>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
+                        <img
+                          src={c.avatarUrl}
+                          alt={c.name}
+                          className="w-5 h-5 rounded-full object-cover ring-1 ring-[var(--outline-variant)]/40"
+                        />
+                        <span className="font-semibold text-[var(--on-surface)] group-hover:text-[var(--primary)] transition-colors">
+                          {c.name}
+                        </span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-m3-container text-[var(--on-surface-variant)]">
+                          {c.contributions} commit
+                        </span>
+                      </a>
+                    ))}
                   </div>
                 </div>
-              </M3eCard>
+              </div>
             </motion.div>
           </section>
 
           {/* 5. M3 Expressive Platform Download Center */}
           <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6 text-center" id="download">
-            <div className="flex justify-center mb-3">
-              <M3eChip variant="elevated">
-                <Boxes slot="icon" className="w-3.5 h-3.5" />
-                <span>{activeT.downloadSection.chip}</span>
-              </M3eChip>
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--primary-container)] text-[var(--on-primary-container)] text-xs font-semibold mb-3">
+              <Boxes className="w-3.5 h-3.5" />
+              <span>{activeT.downloadSection.chip}</span>
             </div>
 
-            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-[var(--md-sys-color-on-surface)]">
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-[var(--on-surface)]">
               {activeT.downloadSection.title}
             </h2>
-            <p className="mt-2 text-base text-[var(--md-sys-color-on-surface-variant)]">
+            <p className="mt-2 text-base text-[var(--on-surface-variant)]">
               {activeT.downloadSection.subtitle}
             </p>
 
             {/* 3 M3 Tonal Container Cards */}
             <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
               {activeT.downloadSection.platforms.map((p, idx) => (
-                <M3eCard
+                <motion.div
                   key={idx}
-                  variant="filled"
-                  actionable
+                  whileHover={{ y: -6, scale: 1.02 }}
+                  transition={springTransition}
                   onClick={() => setIsDownloadOpen(true)}
-                  className="text-left cursor-pointer group"
+                  className="p-7 rounded-[32px] bg-m3-container-low hover:bg-m3-container border border-[var(--outline-variant)]/20 transition-all text-left flex flex-col justify-between cursor-pointer group shadow-lg"
                 >
-                  <div slot="content" className="p-7 flex flex-col justify-between h-full">
-                    <div>
-                      <div className="w-12 h-12 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                        {p.icon}
-                      </div>
-                      <h3 className="text-xl font-bold text-[var(--md-sys-color-on-surface)]">
-                        {p.name}
-                      </h3>
-                      <p className="mt-1 text-xs text-[var(--md-sys-color-on-surface-variant)] font-normal">
-                        {p.spec}
-                      </p>
+                  <div>
+                    <div className="w-12 h-12 rounded-full bg-[var(--primary-container)] text-[var(--on-primary-container)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                      {p.icon}
                     </div>
-
-                    <div className="mt-8 flex items-center gap-2 text-xs font-bold text-[var(--md-sys-color-primary)] group-hover:translate-x-1 transition-transform">
-                      <span>{activeT.downloadSection.directDownload}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </div>
+                    <h3 className="text-xl font-bold text-[var(--on-surface)]">
+                      {p.name}
+                    </h3>
+                    <p className="mt-1 text-xs text-[var(--on-surface-variant)] font-normal">
+                      {p.spec}
+                    </p>
                   </div>
-                </M3eCard>
+
+                  <div className="mt-8 flex items-center gap-2 text-xs font-bold text-[var(--primary)] group-hover:translate-x-1 transition-transform">
+                    <span>{activeT.downloadSection.directDownload}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </motion.div>
               ))}
             </div>
           </section>
@@ -900,28 +868,31 @@ export default function App() {
           {/* 6. M3 Expressive S.S.S. (FAQ) */}
           <section className="py-20 max-w-3xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-10 space-y-2">
-              <div className="flex justify-center">
-                <M3eChip variant="elevated">
-                  <span>{activeT.faq.chip}</span>
-                </M3eChip>
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--secondary-container)] text-[var(--on-secondary-container)] text-xs font-semibold">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{activeT.faq.chip}</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)]">
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--on-surface)]">
                 {activeT.faq.title}
               </h2>
             </div>
 
-            <M3eAccordion>
+            <div className="space-y-3">
               {activeT.faq.items.map((item, idx) => (
-                <M3eExpansionPanel key={idx}>
-                  <span slot="header" className="font-semibold text-base text-[var(--md-sys-color-on-surface)]">
-                    {item.q}
-                  </span>
-                  <div className="text-sm text-[var(--md-sys-color-on-surface-variant)] leading-relaxed py-3">
+                <details
+                  key={idx}
+                  className="group rounded-2xl bg-m3-container-low border border-[var(--outline-variant)]/20 p-5 cursor-pointer transition-all open:bg-m3-container"
+                >
+                  <summary className="flex items-center justify-between font-semibold text-sm sm:text-base text-[var(--on-surface)] list-none select-none">
+                    <span>{item.q}</span>
+                    <ChevronDown className="w-4 h-4 text-[var(--on-surface-variant)] transition-transform duration-200 group-open:rotate-180" />
+                  </summary>
+                  <p className="mt-3 text-xs sm:text-sm text-[var(--on-surface-variant)] leading-relaxed pl-0">
                     {item.a}
-                  </div>
-                </M3eExpansionPanel>
+                  </p>
+                </details>
               ))}
-            </M3eAccordion>
+            </div>
           </section>
         </>
       )}
@@ -982,6 +953,5 @@ export default function App() {
         lang={lang}
       />
     </div>
-  </M3eTheme>
   );
 }

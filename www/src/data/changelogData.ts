@@ -39,11 +39,101 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 486;
+export const REPO_COMMITS_TOTAL = 495;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "d75c03656f63b714512d1c50ff0fae24e5fbce33",
+    "shortHash": "d75c036",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-08T00:09:40+03:00",
+    "subject": "fix(shell): add native favicon resolution, default search engine and bangs support",
+    "body": "- Add native page-icon protocol and tab in-memory favicon loading in suggestions with SVG fallbacks\n- Integrate SearchService.defaultEngine for search submission, suggest API, and icon prefetching\n- Support HilalBangs resolution and shortcut hints in url suggestions and direct navigation\n- Synchronize tab strips immediately on tab close and restrict urlbar auto-focus to new tabs",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d75c03656f63b714512d1c50ff0fae24e5fbce33"
+  },
+  {
+    "hash": "389423fee03f29f40d8c57b27d56b1da46bae0f8",
+    "shortHash": "389423f",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T23:59:19+03:00",
+    "subject": "Fix: tab closings and urlbar url naming",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/389423fee03f29f40d8c57b27d56b1da46bae0f8"
+  },
+  {
+    "hash": "59749e55564ea5226330470b278d22ce3a9cdc66",
+    "shortHash": "59749e5",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T19:58:56+03:00",
+    "subject": "preferences: polish Material 3 Expressive UI and resolve feedback items",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/59749e55564ea5226330470b278d22ce3a9cdc66"
+  },
+  {
+    "hash": "5d63e459d9dfe5323b6630c6d317013fed36e8d1",
+    "shortHash": "5d63e45",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T08:21:53+03:00",
+    "subject": "Implement Material 3 Expressive web components in preferences page",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5d63e459d9dfe5323b6630c6d317013fed36e8d1"
+  },
+  {
+    "hash": "bf39b1c734afdc62752f8dba87428e2d1dda1c8b",
+    "shortHash": "bf39b1c",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T07:17:34+03:00",
+    "subject": "fix(preferences): streamline M3 layout, retire legacy UI fixes and wire theme sync",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/bf39b1c734afdc62752f8dba87428e2d1dda1c8b"
+  },
+  {
+    "hash": "14d99caade26c6e7122f153115c934ca6761dcc0",
+    "shortHash": "14d99ca",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T06:57:24+03:00",
+    "subject": "fix(preferences): resolve Hilal tab switch states and interactive controls",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/14d99caade26c6e7122f153115c934ca6761dcc0"
+  },
+  {
+    "hash": "323cba4902eef4dd87fad6e2dd40a047f37caf6e",
+    "shortHash": "323cba4",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T06:28:22+03:00",
+    "subject": "feat(preferences): add workspace and global accent color customization and Hilal Boosts mode",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/323cba4902eef4dd87fad6e2dd40a047f37caf6e"
+  },
+  {
+    "hash": "a20397d26a8f3346db1a5204ebf1a7d282e7b57f",
+    "shortHash": "a20397d",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T04:52:31+03:00",
+    "subject": "Redesign preferences page using Material 3 Expressive and restore desing.html",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a20397d26a8f3346db1a5204ebf1a7d282e7b57f"
+  },
+  {
+    "hash": "e6e94307a8484d8213f8991c4300b3fc6013d11f",
+    "shortHash": "e6e9430",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T04:51:56+03:00",
+    "subject": "feat(www): migrate UI components to official Material 3 Expressive library",
+    "body": "- Integrate @m3e/web and @m3e/react components\n- Replace custom buttons, cards, dialog, chips, and accordion with M3E equivalents\n- Adjust button sizing to standard scale (size=\"small\") to ensure balanced visual hierarchy\n- Add Google Roboto and Material Symbols font references\n- Register all M3E web components in main entry",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e6e94307a8484d8213f8991c4300b3fc6013d11f"
+  },
   {
     "hash": "673b639fdb108b0cf1a17181462efaf1c28e54da",
     "shortHash": "673b639",
@@ -4911,9 +5001,99 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-07T04:28:40+03:00",
-    "commitCount": 45,
+    "date": "2026-09-08T00:09:40+03:00",
+    "commitCount": 54,
     "commits": [
+      {
+        "hash": "d75c03656f63b714512d1c50ff0fae24e5fbce33",
+        "shortHash": "d75c036",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-08T00:09:40+03:00",
+        "subject": "fix(shell): add native favicon resolution, default search engine and bangs support",
+        "body": "- Add native page-icon protocol and tab in-memory favicon loading in suggestions with SVG fallbacks\n- Integrate SearchService.defaultEngine for search submission, suggest API, and icon prefetching\n- Support HilalBangs resolution and shortcut hints in url suggestions and direct navigation\n- Synchronize tab strips immediately on tab close and restrict urlbar auto-focus to new tabs",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d75c03656f63b714512d1c50ff0fae24e5fbce33"
+      },
+      {
+        "hash": "389423fee03f29f40d8c57b27d56b1da46bae0f8",
+        "shortHash": "389423f",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T23:59:19+03:00",
+        "subject": "Fix: tab closings and urlbar url naming",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/389423fee03f29f40d8c57b27d56b1da46bae0f8"
+      },
+      {
+        "hash": "59749e55564ea5226330470b278d22ce3a9cdc66",
+        "shortHash": "59749e5",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T19:58:56+03:00",
+        "subject": "preferences: polish Material 3 Expressive UI and resolve feedback items",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/59749e55564ea5226330470b278d22ce3a9cdc66"
+      },
+      {
+        "hash": "5d63e459d9dfe5323b6630c6d317013fed36e8d1",
+        "shortHash": "5d63e45",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T08:21:53+03:00",
+        "subject": "Implement Material 3 Expressive web components in preferences page",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5d63e459d9dfe5323b6630c6d317013fed36e8d1"
+      },
+      {
+        "hash": "bf39b1c734afdc62752f8dba87428e2d1dda1c8b",
+        "shortHash": "bf39b1c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T07:17:34+03:00",
+        "subject": "fix(preferences): streamline M3 layout, retire legacy UI fixes and wire theme sync",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/bf39b1c734afdc62752f8dba87428e2d1dda1c8b"
+      },
+      {
+        "hash": "14d99caade26c6e7122f153115c934ca6761dcc0",
+        "shortHash": "14d99ca",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T06:57:24+03:00",
+        "subject": "fix(preferences): resolve Hilal tab switch states and interactive controls",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/14d99caade26c6e7122f153115c934ca6761dcc0"
+      },
+      {
+        "hash": "323cba4902eef4dd87fad6e2dd40a047f37caf6e",
+        "shortHash": "323cba4",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T06:28:22+03:00",
+        "subject": "feat(preferences): add workspace and global accent color customization and Hilal Boosts mode",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/323cba4902eef4dd87fad6e2dd40a047f37caf6e"
+      },
+      {
+        "hash": "a20397d26a8f3346db1a5204ebf1a7d282e7b57f",
+        "shortHash": "a20397d",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T04:52:31+03:00",
+        "subject": "Redesign preferences page using Material 3 Expressive and restore desing.html",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a20397d26a8f3346db1a5204ebf1a7d282e7b57f"
+      },
+      {
+        "hash": "e6e94307a8484d8213f8991c4300b3fc6013d11f",
+        "shortHash": "e6e9430",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T04:51:56+03:00",
+        "subject": "feat(www): migrate UI components to official Material 3 Expressive library",
+        "body": "- Integrate @m3e/web and @m3e/react components\n- Replace custom buttons, cards, dialog, chips, and accordion with M3E equivalents\n- Adjust button sizing to standard scale (size=\"small\") to ensure balanced visual hierarchy\n- Add Google Roboto and Material Symbols font references\n- Register all M3E web components in main entry",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e6e94307a8484d8213f8991c4300b3fc6013d11f"
+      },
       {
         "hash": "673b639fdb108b0cf1a17181462efaf1c28e54da",
         "shortHash": "673b639",
@@ -10033,7 +10213,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 474,
+    "contributions": 483,
     "role": "Lead Developer"
   },
   {

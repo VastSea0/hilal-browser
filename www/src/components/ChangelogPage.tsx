@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import {
-  GitCommit,
+  History,
   Tag,
   Calendar,
   ExternalLink,
@@ -11,12 +11,6 @@ import {
   Users,
 } from "lucide-react";
 import { RELEASES_DATA, CONTRIBUTORS_DATA } from "../data/changelogData";
-import {
-  M3eChip,
-  M3eButton,
-  M3eCard,
-  M3eDivider
-} from "@m3e/react/all";
 
 interface ChangelogPageProps {
   lang: "tr" | "en";
@@ -54,11 +48,11 @@ function formatHighlightText(text: string) {
   return text
     .replace(
       /\*\*(.*?)\*\*/g,
-      '<strong class="font-semibold text-[var(--md-sys-color-on-surface)]">$1</strong>'
+      '<strong class="font-semibold text-[var(--on-surface)]">$1</strong>'
     )
     .replace(
       /`([^`]+)`/g,
-      '<code class="px-1.5 py-0.5 rounded bg-m3-container-high font-mono text-xs text-[var(--md-sys-color-primary)]">$1</code>'
+      '<code class="px-1.5 py-0.5 rounded bg-m3-container-high font-mono text-xs text-[var(--primary)]">$1</code>'
     );
 }
 
@@ -86,7 +80,7 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
   };
 
   return (
-    <main className="min-h-screen pt-36 sm:pt-44 pb-28 px-4 sm:px-6 bg-m3-surface text-[var(--md-sys-color-on-surface)]">
+    <div className="min-h-screen pt-36 sm:pt-44 pb-28 px-4 sm:px-6 bg-m3-surface text-[var(--on-surface)]">
       <div className="max-w-4xl mx-auto">
         {/* M3 Expressive Header */}
         <motion.div
@@ -96,15 +90,15 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
           className="text-center space-y-4 mb-20"
         >
           <motion.div variants={m3FadeIn} className="flex justify-center">
-            <M3eChip variant="elevated">
-              <GitCommit slot="icon" className="w-3.5 h-3.5 text-[var(--md-sys-color-primary)]" />
+            <div className="chip border elevate">
+              <History className="w-3.5 h-3.5 text-[var(--primary)] mr-2" />
               <span>{lang === "tr" ? "Resmi Sürüm Notları" : "Official Release Notes"}</span>
-            </M3eChip>
+            </div>
           </motion.div>
 
           <motion.h1
             variants={m3FadeIn}
-            className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-[var(--md-sys-color-on-surface)] leading-[1.05]"
+            className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-[var(--on-surface)] leading-[1.05]"
             style={{ fontStretch: "110%" }}
           >
             {lang === "tr" ? "Sürüm Notları" : "Changelog"}
@@ -112,7 +106,7 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
 
           <motion.p
             variants={m3FadeIn}
-            className="max-w-2xl mx-auto text-base sm:text-lg text-[var(--md-sys-color-on-surface-variant)] leading-relaxed font-normal"
+            className="max-w-2xl mx-auto text-base sm:text-lg text-[var(--on-surface-variant)] leading-relaxed font-normal"
           >
             {lang === "tr"
               ? "Hilal Browser için yayınlanan sürümler, yeni özellikler ve hata düzeltmelerinin kronolojik geçmişi."
@@ -124,8 +118,8 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
             variants={m3FadeIn}
             className="pt-4 flex flex-wrap items-center justify-center gap-3"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-m3-container border border-[var(--md-sys-color-outline-variant)]/30 text-xs font-semibold text-[var(--md-sys-color-on-surface)]">
-              <Users className="w-3.5 h-3.5 text-[var(--md-sys-color-primary)]" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-m3-container border border-[var(--outline-variant)]/30 text-xs font-semibold text-[var(--on-surface)]">
+              <Users className="w-3.5 h-3.5 text-[var(--primary)]" />
               <span>{lang === "tr" ? "Katkıda Bulunanlar:" : "Contributors:"}</span>
               <div className="flex items-center -space-x-1.5 ml-1">
                 {CONTRIBUTORS_DATA.map((c) => (
@@ -149,12 +143,12 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
           </motion.div>
         </motion.div>
 
-        {/* Sequential Timeline List */}
+        {/* Timeline List */}
         <motion.div
           variants={m3Stagger}
           initial="hidden"
           animate="visible"
-          className="relative border-l-2 border-[var(--md-sys-color-outline-variant)]/30 pl-6 sm:pl-10 ml-3 sm:ml-6 space-y-12"
+          className="relative pl-6 sm:pl-10 space-y-12 before:absolute before:left-[11px] sm:before:left-[19px] before:top-3 before:bottom-3 before:w-0.5 before:bg-[var(--outline-variant)]/30"
         >
           {RELEASES_DATA.map((rel) => {
             const hasHighlights =
@@ -170,7 +164,7 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
                 className="relative"
               >
                 {/* Timeline Node */}
-                <div className="absolute -left-[31px] sm:-left-[47px] top-6 w-6 h-6 rounded-full bg-m3-container-high border-2 border-[var(--md-sys-color-primary)] text-[var(--md-sys-color-primary)] flex items-center justify-center shadow-sm z-10">
+                <div className="absolute -left-[31px] sm:-left-[47px] top-6 w-6 h-6 rounded-full bg-m3-container-high border-2 border-[var(--primary)] text-[var(--primary)] flex items-center justify-center shadow-sm z-10">
                   {rel.isDev ? (
                     <GitBranch className="w-3 h-3" />
                   ) : (
@@ -178,133 +172,130 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
                   )}
                 </div>
 
-                <M3eCard variant="outlined" className="w-full">
-                  <div slot="content" className="p-6 sm:p-8 space-y-6">
-                    {/* Release Header */}
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)]">
-                          {rel.tag}
-                        </h2>
-                        {rel.isDev && (
-                          <M3eChip variant="elevated">
-                            <span>{lang === "tr" ? "Geliştirme" : "Development"}</span>
-                          </M3eChip>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-3 text-xs text-[var(--md-sys-color-on-surface-variant)] font-medium">
-                        {rel.date && (
-                          <span className="inline-flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 opacity-70" />
-                            <time dateTime={rel.date}>{formatDate(rel.date)}</time>
-                          </span>
-                        )}
-                        <span>•</span>
-                        <M3eButton
-                          variant="outlined"
-                          size="small"
-                          shape="rounded"
-                          href={rel.githubUrl}
-                          target="_blank"
-                        >
-                          <span>{rel.isDev ? (lang === "tr" ? `${rel.commitCount} Commit` : `${rel.commitCount} Commits`) : "GitHub"}</span>
-                          <ExternalLink slot="trailing-icon" className="w-3 h-3 ml-1 opacity-70" />
-                        </M3eButton>
-                      </div>
+                <article className="border round w-full bg-m3-container-lowest p-6 sm:p-8 space-y-6 m-0 shadow-sm">
+                  {/* Release Header */}
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--on-surface)] m-0">
+                        {rel.tag}
+                      </h2>
+                      {rel.isDev && (
+                        <div className="chip border elevate">
+                          <span>{lang === "tr" ? "Geliştirme" : "Development"}</span>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Highlights (Added, Changed, Fixed) */}
-                    {hasHighlights && rel.highlights && (
-                      <div className="space-y-6 text-sm text-[var(--md-sys-color-on-surface)]">
-                        {rel.highlights.added.length > 0 && (
-                          <div className="space-y-2.5">
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                              <PlusCircle className="w-3.5 h-3.5" />
-                              <span>{lang === "tr" ? "Eklenenler" : "Added"}</span>
-                            </div>
-                            <ul className="list-disc pl-5 space-y-2 leading-relaxed text-[var(--md-sys-color-on-surface)] marker:text-emerald-500">
-                              {rel.highlights.added.map((item, idx) => (
-                                <li
-                                  key={idx}
-                                  dangerouslySetInnerHTML={{
-                                    __html: formatHighlightText(item),
-                                  }}
-                                />
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {rel.highlights.changed.length > 0 && (
-                          <div className="space-y-2.5">
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                              <RefreshCw className="w-3.5 h-3.5" />
-                              <span>{lang === "tr" ? "Değiştirilenler" : "Changed"}</span>
-                            </div>
-                            <ul className="list-disc pl-5 space-y-2 leading-relaxed text-[var(--md-sys-color-on-surface)] marker:text-amber-500">
-                              {rel.highlights.changed.map((item, idx) => (
-                                <li
-                                  key={idx}
-                                  dangerouslySetInnerHTML={{
-                                    __html: formatHighlightText(item),
-                                  }}
-                                />
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {rel.highlights.fixed.length > 0 && (
-                          <div className="space-y-2.5">
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400">
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>{lang === "tr" ? "Düzeltmeler" : "Fixed"}</span>
-                            </div>
-                            <ul className="list-disc pl-5 space-y-2 leading-relaxed text-[var(--md-sys-color-on-surface)] marker:text-rose-500">
-                              {rel.highlights.fixed.map((item, idx) => (
-                                <li
-                                  key={idx}
-                                  dangerouslySetInnerHTML={{
-                                    __html: formatHighlightText(item),
-                                  }}
-                                />
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Fallback commit items */}
-                    {!hasHighlights && (
-                      <ul className="space-y-2 text-sm text-[var(--md-sys-color-on-surface)]">
-                        {rel.commits.map((c) => (
-                          <li
-                            key={c.hash}
-                            className="flex items-baseline justify-between gap-3 py-1 border-b border-[var(--md-sys-color-outline-variant)]/10 last:border-b-0"
-                          >
-                            <span className="leading-relaxed">{c.subject}</span>
-                            <a
-                              href={c.githubUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="font-mono text-xs px-2 py-0.5 rounded bg-m3-container-low hover:bg-m3-container border border-[var(--md-sys-color-outline-variant)]/30 text-[var(--md-sys-color-primary)] shrink-0 transition-colors"
-                              title={c.author}
-                            >
-                              {c.shortHash}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                    <div className="flex items-center gap-3 text-xs text-[var(--on-surface-variant)] font-medium">
+                      {rel.date && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 opacity-70" />
+                          <time dateTime={rel.date}>{formatDate(rel.date)}</time>
+                        </span>
+                      )}
+                      <span>•</span>
+                      <a
+                        className="button border small"
+                        href={rel.githubUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <span>{rel.isDev ? (lang === "tr" ? `${rel.commitCount} Commit` : `${rel.commitCount} Commits`) : "GitHub"}</span>
+                        <ExternalLink className="w-3 h-3 ml-1 opacity-70" />
+                      </a>
+                    </div>
                   </div>
-                </M3eCard>
+
+                  {/* Highlights (Added, Changed, Fixed) */}
+                  {hasHighlights && rel.highlights && (
+                    <div className="space-y-6 text-sm text-[var(--on-surface)]">
+                      {rel.highlights.added.length > 0 && (
+                        <div className="space-y-2.5">
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            <PlusCircle className="w-3.5 h-3.5" />
+                            <span>{lang === "tr" ? "Eklenenler" : "Added"}</span>
+                          </div>
+                          <ul className="list-disc pl-5 space-y-2 leading-relaxed text-[var(--on-surface)] marker:text-emerald-500">
+                            {rel.highlights.added.map((item, idx) => (
+                              <li
+                                key={idx}
+                                dangerouslySetInnerHTML={{
+                                  __html: formatHighlightText(item),
+                                }}
+                              />
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {rel.highlights.changed.length > 0 && (
+                        <div className="space-y-2.5">
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span>{lang === "tr" ? "Değiştirilenler" : "Changed"}</span>
+                          </div>
+                          <ul className="list-disc pl-5 space-y-2 leading-relaxed text-[var(--on-surface)] marker:text-amber-500">
+                            {rel.highlights.changed.map((item, idx) => (
+                              <li
+                                key={idx}
+                                dangerouslySetInnerHTML={{
+                                  __html: formatHighlightText(item),
+                                }}
+                              />
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {rel.highlights.fixed.length > 0 && (
+                        <div className="space-y-2.5">
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>{lang === "tr" ? "Düzeltmeler" : "Fixed"}</span>
+                          </div>
+                          <ul className="list-disc pl-5 space-y-2 leading-relaxed text-[var(--on-surface)] marker:text-rose-500">
+                            {rel.highlights.fixed.map((item, idx) => (
+                              <li
+                                key={idx}
+                                dangerouslySetInnerHTML={{
+                                  __html: formatHighlightText(item),
+                                }}
+                              />
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Fallback commit items */}
+                  {!hasHighlights && (
+                    <ul className="space-y-2 text-sm text-[var(--on-surface)]">
+                      {rel.commits.map((c) => (
+                        <li
+                          key={c.hash}
+                          className="flex items-baseline justify-between gap-3 py-1 border-b border-[var(--outline-variant)]/10 last:border-b-0"
+                        >
+                          <span className="leading-relaxed">{c.subject}</span>
+                          <a
+                            href={c.githubUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-mono text-xs px-2 py-0.5 rounded bg-m3-container-low hover:bg-m3-container border border-[var(--outline-variant)]/30 text-[var(--primary)] shrink-0 transition-colors"
+                            title={c.author}
+                          >
+                            {c.shortHash}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </article>
               </motion.section>
             );
           })}
         </motion.div>
       </div>
-    </main>
+    </div>
   );
 }

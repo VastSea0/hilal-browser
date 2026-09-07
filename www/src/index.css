@@ -1,3 +1,5 @@
+@layer beercss;
+@import "beercss/dist/cdn/beer.css" layer(beercss);
 @import "tailwindcss";
 
 @theme {
@@ -27,82 +29,160 @@
   --md-sys-motion-easing-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
 }
 
-/* Dark Scheme (Default) */
-html.dark, :root {
-  --md-sys-color-surface: #101319;
-  --md-sys-color-surface-dim: #0a0d13;
-  --md-sys-color-surface-bright: #363940;
-  --md-sys-color-surface-container-lowest: #0b0e14;
-  --md-sys-color-surface-container-low: #181c22;
-  --md-sys-color-surface-container: #1c2027;
-  --md-sys-color-surface-container-high: #262b32;
-  --md-sys-color-surface-container-highest: #31363e;
-  
-  --md-sys-color-on-surface: #e1e2e9;
-  --md-sys-color-on-surface-variant: #c3c7cf;
-  
-  --md-sys-color-primary: #a8c7fa;
-  --md-sys-color-on-primary: #042f66;
-  --md-sys-color-primary-container: #0842a0;
-  --md-sys-color-on-primary-container: #d3e3fd;
-  
-  --md-sys-color-secondary: #bec7d8;
-  --md-sys-color-on-secondary: #28313e;
-  --md-sys-color-secondary-container: #3e4756;
-  --md-sys-color-on-secondary-container: #dae3f5;
-  
-  --md-sys-color-tertiary: #dcbce1;
-  --md-sys-color-on-tertiary: #3e2845;
-  --md-sys-color-tertiary-container: #563e5d;
-  --md-sys-color-on-tertiary-container: #f9d8fe;
-  
-  --md-sys-color-outline: #8c9199;
-  --md-sys-color-outline-variant: #43474e;
+/* Light Scheme (Seed Color: #0b57d0 — Google / Hilal Blue) */
+:root,
+body,
+body.light,
+html:not(.dark) body {
+  --primary: #0b57d0 !important;
+  --on-primary: #ffffff !important;
+  --primary-container: #d3e3fd !important;
+  --on-primary-container: #041e49 !important;
+
+  --secondary: #555f6f !important;
+  --on-secondary: #ffffff !important;
+  --secondary-container: #d9e3f5 !important;
+  --on-secondary-container: #121c2a !important;
+
+  --tertiary: #6f5575 !important;
+  --on-tertiary: #ffffff !important;
+  --tertiary-container: #f9d8fe !important;
+  --on-tertiary-container: #28132f !important;
+
+  --background: #f8f9ff !important;
+  --on-background: #181c22 !important;
+  --surface: #f8f9ff !important;
+  --surface-dim: #d9dae1 !important;
+  --surface-bright: #f8f9ff !important;
+  --surface-container-lowest: #ffffff !important;
+  --surface-container-low: #f2f3fa !important;
+  --surface-container: #eceef5 !important;
+  --surface-container-high: #e6e8ef !important;
+  --surface-container-highest: #e0e2e9 !important;
+
+  --on-surface: #181c22 !important;
+  --on-surface-variant: #43474e !important;
+
+  --outline: #73777f !important;
+  --outline-variant: #c3c7cf !important;
+
+  /* M3 System Color Aliases */
+  --md-sys-color-primary: var(--primary);
+  --md-sys-color-on-primary: var(--on-primary);
+  --md-sys-color-primary-container: var(--primary-container);
+  --md-sys-color-on-primary-container: var(--on-primary-container);
+  --md-sys-color-secondary: var(--secondary);
+  --md-sys-color-on-secondary: var(--on-secondary);
+  --md-sys-color-secondary-container: var(--secondary-container);
+  --md-sys-color-on-secondary-container: var(--on-secondary-container);
+  --md-sys-color-tertiary: var(--tertiary);
+  --md-sys-color-on-tertiary: var(--on-tertiary);
+  --md-sys-color-tertiary-container: var(--tertiary-container);
+  --md-sys-color-on-tertiary-container: var(--on-tertiary-container);
+  --md-sys-color-surface: var(--surface);
+  --md-sys-color-surface-dim: var(--surface-dim);
+  --md-sys-color-surface-bright: var(--surface-bright);
+  --md-sys-color-surface-container-lowest: var(--surface-container-lowest);
+  --md-sys-color-surface-container-low: var(--surface-container-low);
+  --md-sys-color-surface-container: var(--surface-container);
+  --md-sys-color-surface-container-high: var(--surface-container-high);
+  --md-sys-color-surface-container-highest: var(--surface-container-highest);
+  --md-sys-color-on-surface: var(--on-surface);
+  --md-sys-color-on-surface-variant: var(--on-surface-variant);
+  --md-sys-color-outline: var(--outline);
+  --md-sys-color-outline-variant: var(--outline-variant);
 }
 
-/* Light Scheme */
-html:not(.dark) {
-  --md-sys-color-surface: #f8f9ff;
-  --md-sys-color-surface-dim: #d9dae1;
-  --md-sys-color-surface-bright: #f8f9ff;
-  --md-sys-color-surface-container-lowest: #ffffff;
-  --md-sys-color-surface-container-low: #f2f3fa;
-  --md-sys-color-surface-container: #eceef5;
-  --md-sys-color-surface-container-high: #e6e8ef;
-  --md-sys-color-surface-container-highest: #e0e2e9;
-  
-  --md-sys-color-on-surface: #181c22;
-  --md-sys-color-on-surface-variant: #43474e;
-  
-  --md-sys-color-primary: #0b57d0;
-  --md-sys-color-on-primary: #ffffff;
-  --md-sys-color-primary-container: #d3e3fd;
-  --md-sys-color-on-primary-container: #041e49;
-  
-  --md-sys-color-secondary: #555f6f;
-  --md-sys-color-on-secondary: #ffffff;
-  --md-sys-color-secondary-container: #d9e3f5;
-  --md-sys-color-on-secondary-container: #121c2a;
-  
-  --md-sys-color-tertiary: #6f5575;
-  --md-sys-color-on-tertiary: #ffffff;
-  --md-sys-color-tertiary-container: #f9d8fe;
-  --md-sys-color-on-tertiary-container: #28132f;
-  
-  --md-sys-color-outline: #73777f;
-  --md-sys-color-outline-variant: #c3c7cf;
+/* Dark Scheme (Default — Seed Color: #0b57d0 -> M3 dark palette, primary #a8c7fa) */
+html.dark,
+html.dark body,
+body.dark,
+:root.dark {
+  --primary: #a8c7fa !important;
+  --on-primary: #042f66 !important;
+  --primary-container: #0842a0 !important;
+  --on-primary-container: #d3e3fd !important;
+
+  --secondary: #bec7d8 !important;
+  --on-secondary: #28313e !important;
+  --secondary-container: #3e4756 !important;
+  --on-secondary-container: #dae3f5 !important;
+
+  --tertiary: #dcbce1 !important;
+  --on-tertiary: #3e2845 !important;
+  --tertiary-container: #563e5d !important;
+  --on-tertiary-container: #f9d8fe !important;
+
+  --background: #101319 !important;
+  --on-background: #e1e2e9 !important;
+  --surface: #101319 !important;
+  --surface-dim: #0a0d13 !important;
+  --surface-bright: #363940 !important;
+  --surface-container-lowest: #0b0e14 !important;
+  --surface-container-low: #181c22 !important;
+  --surface-container: #1c2027 !important;
+  --surface-container-high: #262b32 !important;
+  --surface-container-highest: #31363e !important;
+
+  --on-surface: #e1e2e9 !important;
+  --on-surface-variant: #c3c7cf !important;
+
+  --outline: #8c9199 !important;
+  --outline-variant: #43474e !important;
 }
 
 html, body {
   margin: 0;
   padding: 0;
-  background-color: var(--md-sys-color-surface);
-  color: var(--md-sys-color-on-surface);
+  background-color: var(--surface) !important;
+  color: var(--on-surface) !important;
   font-family: var(--font-sans);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Normalize Beer CSS button defaults so Tailwind sizes and typography work cleanly */
+button,
+.button {
+  box-sizing: border-box !important;
+  font-family: inherit;
+  letter-spacing: inherit;
+}
+
+button.transparent,
+.button.transparent {
+  color: var(--on-surface) !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+button.transparent:hover,
+.button.transparent:hover {
+  background-color: color-mix(in srgb, var(--on-surface) 8%, transparent) !important;
+}
+
+/* Prevent Beer CSS layout grid hijacking */
+:has(> main) {
+  display: block !important;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  grid-template-areas: none !important;
+  min-block-size: auto !important;
+}
+
+:has(> main) > :is(header, footer).fixed {
+  position: fixed !important;
+  inset: auto !important;
+  transform: none !important;
+}
+
+main {
+  overflow: visible !important;
+  grid-area: auto !important;
+  padding: 0 !important;
+  display: block !important;
 }
 
 /* Material Symbols Outlined Icon Styling */

@@ -26,12 +26,6 @@ import {
 } from "lucide-react";
 
 import { DOCS_DATA, DocSection, DocSubSection } from "../data/docsData";
-import {
-  M3eChip,
-  M3eButton,
-  M3eIconButton,
-  M3eDivider
-} from "@m3e/react/all";
 
 interface DocsPageProps {
   lang: "tr" | "en";
@@ -90,24 +84,22 @@ function CodeBlock({
         <span className="text-[11px] font-semibold tracking-wide uppercase text-[var(--md-sys-color-primary)]">
           {language || "sh"}
         </span>
-        <M3eButton
-          variant="text"
-          size="small"
-          shape="rounded"
+        <button
+          className="transparent small text-xs"
           onClick={() => onCopy(code)}
         >
           {copied ? (
             <>
-              <Check slot="icon" className="w-3.5 h-3.5 text-emerald-400" />
+              <Check className="w-3.5 h-3.5 text-emerald-400 mr-1.5" />
               <span className="text-emerald-400 font-semibold">{copiedLabel}</span>
             </>
           ) : (
             <>
-              <Copy slot="icon" className="w-3.5 h-3.5" />
+              <Copy className="w-3.5 h-3.5 mr-1.5" />
               <span>{copyLabel}</span>
             </>
           )}
-        </M3eButton>
+        </button>
       </div>
       <div className="p-4 sm:p-5 overflow-x-auto font-mono text-xs sm:text-sm leading-relaxed text-[#e6edf3] scrollbar-thin">
         <pre className="m-0 whitespace-pre">{code}</pre>
@@ -375,24 +367,24 @@ export default function DocsPage({ lang }: DocsPageProps) {
   }, [sections, searchQuery]);
 
   return (
-    <main className="min-h-screen pt-28 sm:pt-36 pb-28 px-4 sm:px-6 bg-m3-surface text-[var(--md-sys-color-on-surface)] selection:bg-[var(--md-sys-color-primary-container)] selection:text-[var(--md-sys-color-on-primary-container)]">
+    <div className="min-h-screen pt-28 sm:pt-36 pb-28 px-4 sm:px-6 bg-m3-surface text-[var(--md-sys-color-on-surface)] selection:bg-[var(--md-sys-color-primary-container)] selection:text-[var(--md-sys-color-on-primary-container)]">
       <div className="max-w-6xl mx-auto">
         {/* Header (No Card Box, Pure Typography & M3 Expressive Pill Chips) */}
-        <header className="mb-12 pb-8 border-b border-[var(--md-sys-color-outline-variant)]/20">
+        <div className="mb-12 pb-8 border-b border-[var(--md-sys-color-outline-variant)]/20">
           <div className="flex flex-wrap items-center gap-2 mb-4">
-            <M3eChip variant="elevated">
-              <BookOpen slot="icon" className="w-3.5 h-3.5" />
+            <div className="chip border elevate">
+              <BookOpen className="w-3.5 h-3.5 mr-1.5 text-[var(--primary)]" />
               <span>Hilal Documentation</span>
-            </M3eChip>
-            <M3eChip variant="outlined">
+            </div>
+            <div className="chip border">
               <span>{content.meta.targetVersion}</span>
-            </M3eChip>
-            <M3eChip variant="outlined">
+            </div>
+            <div className="chip border">
               <span>{content.meta.engineBase}</span>
-            </M3eChip>
-            <M3eChip variant="outlined">
+            </div>
+            <div className="chip border">
               <span>{content.meta.licenseBadge}</span>
-            </M3eChip>
+            </div>
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--md-sys-color-on-surface)]">
@@ -401,7 +393,7 @@ export default function DocsPage({ lang }: DocsPageProps) {
           <p className="mt-2 text-sm sm:text-base text-[var(--md-sys-color-on-surface-variant)] max-w-3xl leading-relaxed">
             {content.meta.subtitle}
           </p>
-        </header>
+        </div>
 
         {/* Mobile Navigation Drawer Trigger */}
         <div className="lg:hidden mb-8">
@@ -450,7 +442,7 @@ export default function DocsPage({ lang }: DocsPageProps) {
         {/* Two-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           {/* Left Sidebar (Desktop Navigation) */}
-          <aside className="hidden lg:block lg:col-span-4 sticky top-24 space-y-6">
+          <div className="hidden lg:block lg:col-span-4 sticky top-24 space-y-6">
             {/* Expressive Pill Search Bar */}
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--md-sys-color-on-surface-variant)]" />
@@ -472,7 +464,7 @@ export default function DocsPage({ lang }: DocsPageProps) {
             </div>
 
             {/* Section Links (Tonal Pill List with Spring Layout) */}
-            <nav className="space-y-1">
+            <div className="flex flex-col space-y-1">
               {filteredSections.length === 0 ? (
                 <div className="p-4 text-xs text-[var(--md-sys-color-on-surface-variant)] text-center">
                   {content.meta.noResults}
@@ -502,7 +494,7 @@ export default function DocsPage({ lang }: DocsPageProps) {
                   );
                 })
               )}
-            </nav>
+            </div>
 
             {/* In-Page Quick TOC */}
             {activeSection.subsections.length > 1 && (
@@ -523,10 +515,10 @@ export default function DocsPage({ lang }: DocsPageProps) {
                 </div>
               </div>
             )}
-          </aside>
+          </div>
 
           {/* Main Editorial Content (Flows naturally on surface, ZERO nested cards) */}
-          <article className="lg:col-span-8 space-y-14">
+          <div className="lg:col-span-8 space-y-14">
             {/* Section Headline */}
             <motion.div
               key={activeSection.id}
@@ -536,9 +528,9 @@ export default function DocsPage({ lang }: DocsPageProps) {
               className="pb-6 border-b border-[var(--md-sys-color-outline-variant)]/20"
             >
               <div className="mb-3">
-                <M3eChip variant="outlined">
+                <div className="chip border">
                   <span>{lang === "tr" ? "Bölüm" : "Section"} {activeSectionIdx + 1} / {sections.length}</span>
-                </M3eChip>
+                </div>
               </div>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[var(--md-sys-color-on-surface)] tracking-tight">
                 {activeSection.title}
@@ -581,49 +573,41 @@ export default function DocsPage({ lang }: DocsPageProps) {
               ))}
             </div>
 
-            {/* Bottom Pager Buttons (M3E Buttons) */}
+            {/* Bottom Pager Buttons */}
             <div className="pt-10 border-t border-[var(--md-sys-color-outline-variant)]/20 flex flex-wrap items-center justify-between gap-4">
               {prevSection ? (
-                <M3eButton
-                  variant="tonal"
-                  size="small"
-                  shape="rounded"
+                <button
+                  className="secondary-container small"
                   onClick={() => handleSelectSection(prevSection.id)}
                 >
-                  <ChevronLeft slot="icon" className="w-4 h-4" />
+                  <ChevronLeft className="w-4 h-4 mr-1.5" />
                   <span>{prevSection.title}</span>
-                </M3eButton>
+                </button>
               ) : (
                 <div />
               )}
 
               {nextSection ? (
-                <M3eButton
-                  variant="filled"
-                  size="small"
-                  shape="rounded"
+                <button
+                  className="primary small ml-auto"
                   onClick={() => handleSelectSection(nextSection.id)}
-                  className="ml-auto"
                 >
                   <span>{nextSection.title}</span>
-                  <ChevronRight slot="trailing-icon" className="w-4 h-4 ml-1" />
-                </M3eButton>
+                  <ChevronRight className="w-4 h-4 ml-1.5" />
+                </button>
               ) : (
-                <M3eButton
-                  variant="tonal"
-                  size="small"
-                  shape="rounded"
+                <button
+                  className="secondary-container small ml-auto"
                   onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                  className="ml-auto"
                 >
-                  <ArrowUp slot="icon" className="w-4 h-4" />
+                  <ArrowUp className="w-4 h-4 mr-1.5" />
                   <span>{lang === "tr" ? "Başa Dön" : "Back to Top"}</span>
-                </M3eButton>
+                </button>
               )}
             </div>
-          </article>
+          </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
