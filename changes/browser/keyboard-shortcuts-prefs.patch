@@ -36,7 +36,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
    UpdateListener: "resource://gre/modules/UpdateListener.sys.mjs",
    LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
    MigrationUtils: "resource:///modules/MigrationUtils.sys.mjs",
-@@ -122,6 +124,25 @@ Preferences.addAll([
+@@ -122,6 +124,23 @@ Preferences.addAll([
      id: "privacy.userContext.newTabContainerOnLeftClick.enabled",
      type: "bool",
    },
@@ -47,9 +47,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +  { id: "hilal.workspaces.pinned.public", type: "bool" },
 +  { id: "hilal.workspaces.groups.public", type: "bool" },
 +  { id: "hilal.urlbar.showWorkspaceName", type: "bool" },
-+  { id: "hilal.compact.enabled", type: "bool" },
 +  { id: "hilal.compact.hideToolbar", type: "bool" },
-+  { id: "sidebar.verticalTabs.showHorizontal", type: "bool" },
 +  { id: "hilal.sidebar.footer.bookmarks", type: "bool" },
 +  { id: "hilal.sidebar.footer.history", type: "bool" },
 +  { id: "hilal.sidebar.footer.passwords", type: "bool" },
@@ -62,7 +60,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
  ]);
  
  if (AppConstants.HAVE_SHELL_SERVICE) {
-@@ -1671,6 +1692,1370 @@ gMainPane.initialized = new Promise(res => {
+@@ -1671,6 +1690,1374 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
@@ -621,7 +619,8 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +        accentModeRadioGroup.value = mode;
 +        const segments = accentModeRadioGroup.querySelectorAll("m3e-button-segment, m3e-button, radio");
 +        for (const s of segments) {
-+          const isSel = (s.value === mode);
++          const val = s.getAttribute("value") || s.value;
++          const isSel = (val === mode);
 +          s.checked = isSel;
 +          s.selected = isSel;
 +          if (isSel) {
@@ -685,20 +684,20 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +      if (isDark) {
 +        document.documentElement.style.setProperty(
 +          "--md-sys-color-primary-container",
-+          `color-mix(in srgb, ${hex} 32%, #000000)`
++          `color-mix(in srgb, ${hex} 32%, #1b1e25)`
 +        );
 +        document.documentElement.style.setProperty(
 +          "--md-sys-color-on-primary-container",
-+          `color-mix(in srgb, ${hex} 25%, #ffffff)`
++          `color-mix(in srgb, ${hex} 35%, #ffffff)`
 +        );
 +      } else {
 +        document.documentElement.style.setProperty(
 +          "--md-sys-color-primary-container",
-+          `color-mix(in srgb, ${hex} 18%, #ffffff)`
++          `color-mix(in srgb, ${hex} 20%, #f2f3fa)`
 +        );
 +        document.documentElement.style.setProperty(
 +          "--md-sys-color-on-primary-container",
-+          `color-mix(in srgb, ${hex} 75%, #000000)`
++          `color-mix(in srgb, ${hex} 75%, #181c22)`
 +        );
 +      }
 +    };
@@ -709,6 +708,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +
 +      const onModeChange = (modeVal) => {
 +        const selected = modeVal || accentModeRadioGroup.value;
++        if (!selected) return;
 +        Services.prefs.setStringPref("hilal.theme.accentMode", selected);
 +        if (selected === "boosts") {
 +          Services.prefs.setBoolPref("hilal.boosts.auto_palette.enabled", true);
@@ -728,12 +728,14 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +        const val = accentModeRadioGroup.value || e.target?.value;
 +        if (val) onModeChange(val);
 +      });
-+      accentModeRadioGroup.addEventListener("click", e => {
-+        const seg = e.target.closest("m3e-button-segment, m3e-button, radio");
-+        if (seg && seg.value) {
-+          onModeChange(seg.value);
-+        }
-+      });
++
++      const segButtons = accentModeRadioGroup.querySelectorAll("m3e-button-segment, m3e-button, radio");
++      for (const seg of segButtons) {
++        seg.addEventListener("click", () => {
++          const val = seg.getAttribute("value") || seg.value;
++          if (val) onModeChange(val);
++        });
++      }
 +    }
 +
 +    refreshWorkspaceColorsUI();

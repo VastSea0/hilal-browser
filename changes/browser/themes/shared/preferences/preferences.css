@@ -75,6 +75,34 @@
   --border-color: var(--md-sys-color-outline-variant);
   --border-color-interactive: var(--md-sys-color-outline);
 
+  /* --- Firefox In-Content Token Overrides --- */
+  --in-content-page-background: var(--md-sys-color-surface-container-low);
+  --in-content-page-color: var(--md-sys-color-on-surface);
+  --in-content-box-background: var(--md-sys-color-surface);
+  --in-content-box-background-odd: var(--md-sys-color-surface-container);
+  --in-content-box-background-hover: var(--md-sys-color-surface-container-high);
+  --in-content-box-background-active: var(--md-sys-color-surface-container-highest);
+  --in-content-box-border-color: var(--md-sys-color-outline-variant);
+  --in-content-border-color: var(--md-sys-color-outline-variant);
+  --in-content-border-hover: var(--md-sys-color-outline);
+  --in-content-border-focus: var(--md-sys-color-primary);
+  --in-content-border-active: var(--md-sys-color-primary);
+  --in-content-primary-button-background: var(--md-sys-color-primary);
+  --in-content-primary-button-background-hover: color-mix(in srgb, var(--md-sys-color-primary) 85%, black);
+  --in-content-primary-button-background-active: color-mix(in srgb, var(--md-sys-color-primary) 70%, black);
+  --in-content-primary-button-text-color: var(--md-sys-color-on-primary);
+  --in-content-button-background: var(--md-sys-color-secondary-container);
+  --in-content-button-background-hover: color-mix(in srgb, var(--md-sys-color-secondary-container) 85%, black);
+  --in-content-button-background-active: color-mix(in srgb, var(--md-sys-color-secondary-container) 70%, black);
+  --in-content-button-text-color: var(--md-sys-color-on-secondary-container);
+  --in-content-text-color: var(--md-sys-color-on-surface);
+  --in-content-deemphasized-text: var(--md-sys-color-on-surface-variant);
+  --in-content-link-color: var(--md-sys-color-primary);
+  --in-content-link-color-hover: color-mix(in srgb, var(--md-sys-color-primary) 80%, black);
+  --in-content-link-color-active: color-mix(in srgb, var(--md-sys-color-primary) 65%, black);
+  --in-content-link-color-visited: var(--md-sys-color-tertiary);
+  --section-highlight-background-color: color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
+
   /* Component Token Overrides */
   --card-background-color: var(--md-sys-color-surface);
   --card-border: 1px solid var(--md-sys-color-outline-variant);
@@ -251,12 +279,12 @@
 .main-content {
   background-color: var(--md-sys-color-surface-container-low) !important;
   contain: inline-size;
-  padding: 32px 48px 80px 48px !important;
+  padding: 24px 32px 80px 32px !important;
   scroll-behavior: smooth !important;
   overflow-y: auto !important;
   display: flex !important;
   flex-direction: column !important;
-  align-items: center !important;
+  align-items: flex-start !important;
   flex: 1 !important;
 }
 
@@ -265,8 +293,8 @@
   flex-direction: column !important;
   gap: 20px !important;
   width: 100% !important;
-  max-width: 960px !important;
-  margin: 0 auto !important;
+  max-width: 880px !important;
+  margin: 0 !important;
 }
 
 /* ==========================================================================
@@ -276,16 +304,16 @@
 #categories.categories-list,
 #categories,
 html|moz-page-nav#categories {
-  width: 290px !important;
-  min-width: 290px !important;
-  max-width: 290px !important;
-  flex: 0 0 290px !important;
+  width: 280px !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
+  flex: 0 0 280px !important;
   margin-inline-start: 0px !important;
   margin-left: 0px !important;
   background-color: var(--md-sys-color-surface) !important;
   border-inline-end: 1px solid var(--md-sys-color-outline-variant) !important;
   box-sizing: border-box !important;
-  padding: 12px 16px 24px 16px !important;
+  padding: 8px 12px 24px 12px !important;
   overflow-x: hidden !important;
   display: flex !important;
   flex-direction: column !important;
@@ -299,7 +327,7 @@ html|moz-page-nav#categories {
 .page-nav-heading-wrapper {
   margin-block-start: 0px !important;
   margin-top: 0px !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 4px !important;
   padding-top: 0px !important;
 }
 
@@ -447,7 +475,8 @@ moz-input-search#searchInput:focus-within {
 
 moz-card:not([hidden]),
 groupbox[data-category]:not([hidden]),
-.settings-group-card:not([hidden]) {
+.settings-group-card:not([hidden]),
+.card:not([hidden]) {
   border-radius: 24px !important;
   background-color: var(--card-background-color) !important;
   border: 1px solid var(--md-sys-color-outline-variant) !important;
@@ -468,6 +497,44 @@ setting-group:not([hidden]):has(> moz-card) {
 
 setting-group:not([hidden]) {
   margin-block: 16px !important;
+}
+
+/* Material 3 Nested Containers & Setting Controls */
+moz-card setting-control,
+moz-card .setting-control-row,
+setting-group setting-control,
+.privacy-detailedoption,
+.content-blocking-category,
+#contentBlockingCategories,
+#fpiIncompatibilityWarning,
+#rfpIncompatibilityWarning {
+  border-radius: 16px !important;
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  padding: 14px 18px !important;
+  margin-block: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+  transition: background-color 150ms ease, border-color 150ms ease !important;
+}
+
+moz-card setting-control:hover,
+setting-group setting-control:hover {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+}
+
+moz-card [slot="nested"] {
+  border-radius: 14px !important;
+  background-color: var(--md-sys-color-surface-container-low) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  padding: 12px 16px !important;
+  margin-top: 8px !important;
+}
+
+moz-card setting-control[is="setting-link"] {
+  cursor: pointer !important;
 }
 
 .subcategory:not([hidden]) {
@@ -572,7 +639,8 @@ html|m3e-segmented-button {
   display: inline-flex !important;
   vertical-align: middle !important;
   align-items: center !important;
-  min-width: 360px !important;
+  width: max-content !important;
+  min-width: 460px !important;
   max-width: 100% !important;
   --m3e-segmented-button-height: 42px !important;
   --m3e-segmented-button-selected-container-color: var(--md-sys-color-secondary-container) !important;
@@ -583,12 +651,16 @@ html|m3e-segmented-button {
 
 m3e-button-segment,
 html|m3e-button-segment {
-  flex: 1 !important;
+  flex: 1 1 auto !important;
+  min-width: 130px !important;
+  padding: 0 16px !important;
   cursor: pointer !important;
   font-family: var(--font-sans) !important;
   font-size: 13.5px !important;
   font-weight: 500 !important;
   text-align: center !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
 }
 
 m3e-button,
@@ -600,33 +672,103 @@ html|m3e-button {
   --m3e-button-container-shape: 9999px !important;
 }
 
-/* Fallback for native checkbox */
+/* ==========================================================================
+   7. MATERIAL 3 CHECKBOXES & RADIO BUTTONS
+   ========================================================================== */
+
 checkbox:not(.settings-switch) {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 10px !important;
-  margin: 4px 0 !important;
+  gap: 12px !important;
+  margin: 6px 0 !important;
   cursor: pointer !important;
+  color: var(--md-sys-color-on-surface) !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
 }
 
-checkbox:not(.settings-switch) .checkbox-check {
+checkbox:not(.settings-switch) .checkbox-check,
+input[type="checkbox"] {
+  appearance: none !important;
+  -moz-appearance: none !important;
   width: 20px !important;
   height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
   border-radius: 6px !important;
   border: 2px solid var(--md-sys-color-outline) !important;
   background: transparent !important;
   box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 150ms cubic-bezier(0.2, 0, 0, 1) !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+checkbox:not(.settings-switch):hover .checkbox-check,
+input[type="checkbox"]:hover {
+  border-color: var(--md-sys-color-primary) !important;
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent) !important;
 }
 
 checkbox:not(.settings-switch)[checked] .checkbox-check,
 checkbox:not(.settings-switch):checked .checkbox-check,
-checkbox:not(.settings-switch)[checked="true"] .checkbox-check {
+checkbox:not(.settings-switch)[checked="true"] .checkbox-check,
+input[type="checkbox"]:checked {
   background-color: var(--md-sys-color-primary) !important;
   border-color: var(--md-sys-color-primary) !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
   background-size: 13px 13px !important;
+}
+
+radio {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 6px 0 !important;
+  cursor: pointer !important;
+  color: var(--md-sys-color-on-surface) !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+}
+
+radio .radio-check,
+input[type="radio"] {
+  appearance: none !important;
+  -moz-appearance: none !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  border-radius: 50% !important;
+  border: 2px solid var(--md-sys-color-outline) !important;
+  background: transparent !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 150ms cubic-bezier(0.2, 0, 0, 1) !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+radio:hover .radio-check,
+input[type="radio"]:hover {
+  border-color: var(--md-sys-color-primary) !important;
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent) !important;
+}
+
+radio[selected="true"] .radio-check,
+radio[selected] .radio-check,
+input[type="radio"]:checked {
+  border-color: var(--md-sys-color-primary) !important;
+  background-image: radial-gradient(circle, var(--md-sys-color-primary) 42%, transparent 46%) !important;
 }
 
 /* ==========================================================================
@@ -1125,4 +1267,201 @@ setting-group[groupid="browserLayout"],
   min-height: auto !important;
   height: auto !important;
 }
+
+/* ==========================================================================
+   13. CONSOLIDATED MATERIAL 3 TABLES, LISTS, DIALOGS & ICONS
+   ========================================================================== */
+
+/* Universal Lists and Trees */
+richlistbox,
+tree,
+table {
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: 16px !important;
+  color: var(--md-sys-color-on-surface) !important;
+  box-sizing: border-box !important;
+}
+
+richlistitem {
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
+  transition: background-color 120ms ease !important;
+}
+
+richlistitem:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 6%, transparent) !important;
+}
+
+richlistitem[selected="true"],
+richlistitem[selected] {
+  background-color: var(--md-sys-color-primary-container) !important;
+  color: var(--md-sys-color-on-primary-container) !important;
+}
+
+/* Applications Table (#appList) */
+#appList {
+  min-height: 212px !important;
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: 16px !important;
+}
+
+#appList > richlistitem {
+  align-items: center !important;
+}
+
+#appList > richlistitem > image {
+  margin: 5px !important;
+  width: 32px !important;
+  height: 32px !important;
+}
+
+#appList > richlistitem > label {
+  margin: 0 !important;
+  padding: 5px !important;
+  white-space: nowrap !important;
+}
+
+.actionsMenu > menupopup > menuitem > .menu-icon {
+  display: flex !important;
+}
+
+richlistitem[appHandlerIcon] .actionIcon,
+richlistitem[appHandlerIcon] .actionsMenu::part(icon) {
+  content: var(--app-handler-icon);
+}
+
+menuitem[appHandlerIcon] {
+  --menuitem-icon: var(--app-handler-icon);
+}
+
+:is(richlistitem, menuitem)[appHandlerIcon="handleInternally"] {
+  --app-handler-icon: url("chrome://branding/content/icon32.png");
+}
+
+:is(richlistitem, menuitem)[appHandlerIcon="ask"] {
+  --app-handler-icon: url("chrome://browser/skin/preferences/alwaysAsk.png");
+}
+
+:is(richlistitem, menuitem)[appHandlerIcon="save"] {
+  @media not (-moz-platform: linux) {
+    --app-handler-icon: url("chrome://browser/skin/preferences/saveFile.png");
+  }
+  @media (-moz-platform: linux) {
+    --app-handler-icon: image-set(
+      "moz-icon://stock/document-save?size=16" 1x,
+      "moz-icon://stock/document-save?size=16&scale=2" 2x
+    );
+  }
+}
+
+/* Search Engines List (#engineList) */
+#defaultEngineNormal,
+#defaultPrivateEngine {
+  max-width: var(--search-engine-name-max-width);
+}
+
+#engineList {
+  --box-group-max-height: 500px;
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: 16px !important;
+}
+
+#engineList treechildren::-moz-tree-image(engineName) {
+  margin-inline: 1px 10px !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+#engineList treechildren::-moz-tree-drop-feedback {
+  background-color: var(--md-sys-color-primary) !important;
+  height: 2px !important;
+}
+
+#engineList treechildren::-moz-tree-image(bookmarks),
+#engineList treechildren::-moz-tree-image(tabs),
+#engineList treechildren::-moz-tree-image(history) {
+  -moz-context-properties: fill;
+}
+
+#engineList treechildren::-moz-tree-image(bookmarks) {
+  fill: var(--md-sys-color-primary) !important;
+}
+
+#engineList treechildren::-moz-tree-image(tabs) {
+  fill: var(--md-sys-color-tertiary) !important;
+}
+
+#engineList treechildren::-moz-tree-image(history),
+#engineList treechildren::-moz-tree-image(bookmarks, selected),
+#engineList treechildren::-moz-tree-image(tabs, selected) {
+  fill: currentColor !important;
+}
+
+#engineList > treechildren::-moz-tree-cell(engineKeyword) {
+  unicode-bidi: plaintext;
+}
+
+/* Permission and Security Icons */
+.permission-icon {
+  width: 20px !important;
+  height: 20px !important;
+  vertical-align: middle !important;
+  margin-inline-end: 8px !important;
+}
+
+.permission-icon,
+.privacy-detailedoption .checkbox-label-box,
+.extra-information-label > image,
+.arrowhead,
+.reload-tabs-button,
+.content-blocking-warning-image {
+  -moz-context-properties: fill;
+  fill: currentColor !important;
+}
+
+.geo-icon { list-style-image: url(chrome://browser/skin/notification-icons/geo.svg); }
+.xr-icon { list-style-image: url(chrome://browser/skin/notification-icons/xr.svg); }
+.camera-icon { list-style-image: url(chrome://browser/skin/notification-icons/camera.svg); }
+.loopback-network-icon { list-style-image: url(chrome://browser/skin/notification-icons/local-host.svg); }
+.local-network-icon { list-style-image: url(chrome://browser/skin/notification-icons/local-network.svg); }
+.microphone-icon { list-style-image: url(chrome://browser/skin/notification-icons/microphone.svg); }
+.speaker-icon { list-style-image: url(chrome://browser/skin/notification-icons/speaker.svg); }
+.desktop-notification-icon { list-style-image: url(chrome://browser/skin/notification-icons/desktop-notification.svg); }
+.autoplay-icon { list-style-image: url(chrome://browser/skin/notification-icons/autoplay-media.svg); }
+.midi-icon { list-style-image: url(chrome://browser/skin/notification-icons/midi.svg); }
+.serial-icon { list-style-image: url(chrome://browser/skin/notification-icons/serial.svg); }
+
+#trackingProtectionShield {
+  list-style-image: url("chrome://browser/skin/controlcenter/tracking-protection.svg");
+  -moz-context-properties: fill, fill-opacity;
+  fill: var(--md-sys-color-primary) !important;
+  width: 48px !important;
+  height: 48px !important;
+  margin-inline-end: 12px !important;
+}
+
+/* Material 3 Banners and Messages */
+moz-message-bar,
+.info-box,
+.alert-box,
+.message-bar {
+  border-radius: 16px !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  background-color: var(--md-sys-color-surface-container) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  padding: 12px 16px !important;
+}
+
+/* Default Browser & Sync Banners */
+#defaultBrowserGroup,
+#setAsDefaultCard {
+  border-radius: 20px !important;
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  padding: 16px 20px !important;
+}
+
 
