@@ -19,20 +19,13 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
    UpdateListener: "resource://gre/modules/UpdateListener.sys.mjs",
    LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
    MigrationUtils: "resource:///modules/MigrationUtils.sys.mjs",
-@@ -122,6 +124,32 @@ Preferences.addAll([
+@@ -122,6 +124,25 @@ Preferences.addAll([
      id: "privacy.userContext.newTabContainerOnLeftClick.enabled",
      type: "bool",
    },
 +
 +  // Hilal Browser settings
-+  { id: "hilal.tahoe.enabled", type: "bool" },
 +  { id: "hilal.boosts.auto_palette.enabled", type: "bool" },
-+  { id: "userChrome.compatibility.theme", type: "bool" },
-+  { id: "userChrome.tabs.connect_to_window", type: "bool" },
-+  { id: "userChrome.tabs.compact_padding", type: "bool" },
-+  { id: "userChrome.tabs.dynamic_separator", type: "bool" },
-+  { id: "userChrome.tabs.bottom_rounded_corner", type: "bool" },
-+  { id: "userChrome.tabs.close_button.on_hover", type: "bool" },
 +  { id: "hilal.workspaces.enabled", type: "bool" },
 +  { id: "hilal.workspaces.pinned.public", type: "bool" },
 +  { id: "hilal.workspaces.groups.public", type: "bool" },
@@ -46,13 +39,13 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +  { id: "hilal.sidebar.footer.downloads", type: "bool" },
 +  { id: "hilal.sidebar.footer.privacy", type: "bool" },
 +  { id: "hilal.sidebar.footer.settings", type: "bool" },
-+  { id: "hilal.accent.mode", type: "string" },
-+  { id: "hilal.accent.overrideColor", type: "string" },
++  { id: "hilal.theme.accentMode", type: "string" },
++  { id: "hilal.theme.globalAccentColor", type: "string" },
 +  { id: "hilal.privacy.level", type: "string" },
  ]);
  
  if (AppConstants.HAVE_SHELL_SERVICE) {
-@@ -1671,6 +1699,1251 @@ gMainPane.initialized = new Promise(res => {
+@@ -1671,6 +1692,1327 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
@@ -158,15 +151,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +        ["hilalSidebarCompactEnabled", "hilal.compact.enabled", false],
 +        ["hilalSidebarCompactHideToolbar", "hilal.compact.hideToolbar", false],
 +        ["hilalSidebarShowHorizontalTabs", "sidebar.verticalTabs.showHorizontal", false],
-+        ["hilalTahoeEnabled", "hilal.tahoe.enabled", true],
-+        ["hilalUiFixEnabled", "userChrome.compatibility.theme", false],
-+        ["hilalUiFixConnectToWindow", "userChrome.tabs.connect_to_window", false],
-+        ["hilalUiFixCompactPadding", "userChrome.tabs.compact_padding", false],
-+        ["hilalUiFixDynamicSeparator", "userChrome.tabs.dynamic_separator", false],
-+        ["hilalUiFixBottomRounded", "userChrome.tabs.bottom_rounded_corner", false],
-+        ["hilalUiFixCloseOnHover", "userChrome.tabs.close_button.on_hover", false],
 +        ["hilalBoostsAutoPalette", "hilal.boosts.auto_palette.enabled", false],
-+        ["hilalBoostsBrowserUi", "hilal.boosts.browser_ui.enabled", false],
 +      ];
 +      for (const [elementId, prefName, defaultValue] of hilalPrefMappings) {
 +        const checkbox = document.getElementById(elementId);
@@ -520,6 +505,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +            ws.color = choice.id;
 +            setWorkspacesData(workspaces);
 +            refreshWorkspaceColorsUI();
++            applyPreferencesTheme();
 +          });
 +
 +          swatches.appendChild(swatch);
@@ -550,6 +536,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +        swatch.addEventListener("click", () => {
 +          Services.prefs.setStringPref("hilal.theme.globalAccentColor", choice.hex);
 +          refreshGlobalColorUI();
++          applyPreferencesTheme();
 +          if (globalCustomColor) {
 +            globalCustomColor.value = choice.hex;
 +          }
@@ -570,6 +557,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +        const hex = globalCustomColor.value;
 +        Services.prefs.setStringPref("hilal.theme.globalAccentColor", hex);
 +        refreshGlobalColorUI();
++        applyPreferencesTheme();
 +      });
 +    }
 +
@@ -596,6 +584,74 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +      }
 +    };
 +
++    const applyPreferencesTheme = () => {
++      // 1. Resolve Accent Color
++      const mode = Services.prefs.getStringPref("hilal.theme.accentMode", "workspace");
++      let hex = "#0b57d0";
++      const colorChoices = {
++        purple: "#af51f5",
++        blue: "#37adff",
++        turquoise: "#00c79a",
++        green: "#51cd00",
++        yellow: "#ffcb00",
++        orange: "#ff9f00",
++        red: "#ff613d",
++        pink: "#ff4bda",
++      };
++
++      if (mode === "global") {
++        const globalHex = Services.prefs.getStringPref("hilal.theme.globalAccentColor", "#af51f5");
++        hex = colorChoices[globalHex] || globalHex || "#af51f5";
++      } else if (mode === "boosts") {
++        hex = "#7c5cff";
++      } else {
++        try {
++          const workspaces = JSON.parse(Services.prefs.getStringPref("hilal.workspaces.data", "[]"));
++          const activeId = Services.prefs.getStringPref("hilal.workspaces.active", workspaces[0]?.id || "default");
++          const activeWs = workspaces.find(w => w.id === activeId) || workspaces[0];
++          hex = colorChoices[activeWs?.color] || activeWs?.color || "#af51f5";
++        } catch (e) {
++          hex = "#af51f5";
++        }
++      }
++
++      // 2. Resolve Dark / Light Mode
++      const contentOverride = Services.prefs.getIntPref("layout.css.prefers-color-scheme.content-override", 2);
++      let isDark = false;
++      if (contentOverride === 0) {
++        isDark = true;
++      } else if (contentOverride === 1) {
++        isDark = false;
++      } else {
++        isDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
++      }
++
++      document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
++
++      // Apply dynamic tokens
++      document.documentElement.style.setProperty("--md-sys-color-primary", hex);
++      document.documentElement.style.setProperty("--color-accent-primary", hex);
++      if (isDark) {
++        document.documentElement.style.setProperty(
++          "--md-sys-color-primary-container",
++          `color-mix(in srgb, ${hex} 32%, #000000)`
++        );
++        document.documentElement.style.setProperty(
++          "--md-sys-color-on-primary-container",
++          `color-mix(in srgb, ${hex} 25%, #ffffff)`
++        );
++      } else {
++        document.documentElement.style.setProperty(
++          "--md-sys-color-primary-container",
++          `color-mix(in srgb, ${hex} 18%, #ffffff)`
++        );
++        document.documentElement.style.setProperty(
++          "--md-sys-color-on-primary-container",
++          `color-mix(in srgb, ${hex} 75%, #000000)`
++        );
++      }
++    };
++
 +    if (accentModeRadioGroup) {
 +      const currentMode = Services.prefs.getStringPref("hilal.theme.accentMode", "workspace");
 +      updateAccentModeUI(currentMode);
@@ -609,6 +665,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +          Services.prefs.setBoolPref("hilal.boosts.enabled", true);
 +        }
 +        updateAccentModeUI(selected);
++        applyPreferencesTheme();
 +      };
 +
 +      accentModeRadioGroup.addEventListener("command", () => onModeChange());
@@ -623,19 +680,31 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +
 +    refreshWorkspaceColorsUI();
 +    refreshGlobalColorUI();
++    applyPreferencesTheme();
 +
-+    const wsPrefObserver = () => {
++    const themePrefObserver = () => {
 +      refreshWorkspaceColorsUI();
++      refreshGlobalColorUI();
++      applyPreferencesTheme();
 +    };
 +    try {
-+      Services.prefs.addObserver("hilal.workspaces.data", wsPrefObserver);
-+      Services.prefs.addObserver("hilal.workspaces.active", wsPrefObserver);
++      Services.prefs.addObserver("hilal.workspaces.data", themePrefObserver);
++      Services.prefs.addObserver("hilal.workspaces.active", themePrefObserver);
++      Services.prefs.addObserver("hilal.theme.accentMode", themePrefObserver);
++      Services.prefs.addObserver("hilal.theme.globalAccentColor", themePrefObserver);
++      Services.prefs.addObserver("layout.css.prefers-color-scheme.content-override", themePrefObserver);
++      if (window.matchMedia) {
++        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyPreferencesTheme);
++      }
 +      window.addEventListener("unload", () => {
 +        try {
-+          Services.prefs.removeObserver("hilal.workspaces.data", wsPrefObserver);
-+          Services.prefs.removeObserver("hilal.workspaces.active", wsPrefObserver);
++          Services.prefs.removeObserver("hilal.workspaces.data", themePrefObserver);
++          Services.prefs.removeObserver("hilal.workspaces.active", themePrefObserver);
++          Services.prefs.removeObserver("hilal.theme.accentMode", themePrefObserver);
++          Services.prefs.removeObserver("hilal.theme.globalAccentColor", themePrefObserver);
++          Services.prefs.removeObserver("layout.css.prefers-color-scheme.content-override", themePrefObserver);
 +        } catch (e) {}
-+      }, { once: true });
++      });
 +    } catch (e) {}
 +
 +    // -- Hilal Bangs Customization -------------------------------------------

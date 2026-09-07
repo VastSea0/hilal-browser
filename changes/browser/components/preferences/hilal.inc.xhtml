@@ -12,21 +12,13 @@
   <html:h1 data-l10n-id="hilal-settings-header"/>
 </hbox>
 
-<!-- Group 1: Appearance & Tahoe Aesthetics -->
-<groupbox id="hilalUiFixGroup" class="settings-group-card" data-category="paneHilal" hidden="true">
+<!-- Group 1: Hilal Boosts -->
+<groupbox id="hilalBoostsGroup" class="settings-group-card" data-category="paneHilal" hidden="true">
   <div class="settings-group-header">
     <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
       <path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.28 19.64 10.59 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
     </svg>
-    <html:h2 data-l10n-id="hilal-tahoe-header"/>
-  </div>
-
-  <div class="settings-row">
-    <div class="settings-row-text">
-      <span class="settings-row-title" data-l10n-id="hilal-tahoe-enabled"/>
-      <span class="settings-row-desc" data-l10n-id="hilal-tahoe-enabled-desc"/>
-    </div>
-    <checkbox id="hilalTahoeEnabled" preference="hilal.tahoe.enabled" class="settings-switch"/>
+    <html:h2 data-l10n-id="hilal-boosts-auto-palette">Hilal Boosts</html:h2>
   </div>
 
   <div class="settings-row">
@@ -36,47 +28,6 @@
     </div>
     <checkbox id="hilalBoostsAutoPalette" preference="hilal.boosts.auto_palette.enabled" class="settings-switch"/>
   </div>
-
-  <div class="settings-row">
-    <div class="settings-row-text">
-      <span class="settings-row-title" data-l10n-id="hilal-uifix-enabled"/>
-      <span class="settings-row-desc">Firefox-UI-Fix (@black7375)</span>
-    </div>
-    <checkbox id="hilalUiFixEnabled" preference="userChrome.compatibility.theme" class="settings-switch"/>
-  </div>
-
-  <vbox id="hilalUiFixSubOptions" class="indent">
-    <div class="settings-row">
-      <div class="settings-row-text">
-        <span class="settings-row-title" data-l10n-id="hilal-uifix-connect-to-window"/>
-      </div>
-      <checkbox id="hilalUiFixConnectToWindow" preference="userChrome.tabs.connect_to_window" class="settings-switch"/>
-    </div>
-    <div class="settings-row">
-      <div class="settings-row-text">
-        <span class="settings-row-title" data-l10n-id="hilal-uifix-compact-padding"/>
-      </div>
-      <checkbox id="hilalUiFixCompactPadding" preference="userChrome.tabs.compact_padding" class="settings-switch"/>
-    </div>
-    <div class="settings-row">
-      <div class="settings-row-text">
-        <span class="settings-row-title" data-l10n-id="hilal-uifix-dynamic-separator"/>
-      </div>
-      <checkbox id="hilalUiFixDynamicSeparator" preference="userChrome.tabs.dynamic_separator" class="settings-switch"/>
-    </div>
-    <div class="settings-row">
-      <div class="settings-row-text">
-        <span class="settings-row-title" data-l10n-id="hilal-uifix-bottom-rounded"/>
-      </div>
-      <checkbox id="hilalUiFixBottomRounded" preference="userChrome.tabs.bottom_rounded_corner" class="settings-switch"/>
-    </div>
-    <div class="settings-row">
-      <div class="settings-row-text">
-        <span class="settings-row-title" data-l10n-id="hilal-uifix-close-on-hover"/>
-      </div>
-      <checkbox id="hilalUiFixCloseOnHover" preference="userChrome.tabs.close_button.on_hover" class="settings-switch"/>
-    </div>
-  </vbox>
 </groupbox>
 
 <!-- Group 2: Workspaces -->

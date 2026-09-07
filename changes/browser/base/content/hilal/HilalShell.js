@@ -90,6 +90,16 @@
     },
 
     isDarkMode() {
+      try {
+        if (typeof Services !== "undefined" && Services.prefs) {
+          const contentOverride = Services.prefs.getIntPref(
+            "layout.css.prefers-color-scheme.content-override",
+            2
+          );
+          if (contentOverride === 0) return true;
+          if (contentOverride === 1) return false;
+        }
+      } catch (e) {}
       if (document.documentElement.hasAttribute("lwtheme-brighttext")) {
         return (
           document.documentElement.getAttribute("lwtheme-brighttext") === "true"
@@ -135,6 +145,7 @@
           Services.prefs.addObserver("hilal.theme.accentMode", this._prefObserver);
           Services.prefs.addObserver("hilal.theme.globalAccentColor", this._prefObserver);
           Services.prefs.addObserver("hilal.workspaces.data", this._prefObserver);
+          Services.prefs.addObserver("layout.css.prefers-color-scheme.content-override", this._prefObserver);
         } catch (e) {}
       }
     },

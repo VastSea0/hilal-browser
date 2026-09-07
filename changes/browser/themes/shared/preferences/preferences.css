@@ -115,7 +115,7 @@
 
 /* --- Dark Theme Palette --- */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --md-sys-color-primary: #a8c7fa;
     --md-sys-color-on-primary: #042f66;
     --md-sys-color-primary-container: #0842a0;
@@ -155,7 +155,8 @@
   }
 }
 
-:root[brighttext="true"] {
+:root[data-theme="dark"],
+:root[brighttext="true"]:not([data-theme="light"]) {
   --md-sys-color-primary: #a8c7fa;
   --md-sys-color-on-primary: #042f66;
   --md-sys-color-primary-container: #0842a0;
@@ -192,6 +193,23 @@
 
   --card-background-color: var(--md-sys-color-surface-container);
   --card-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="light"] {
+  --md-sys-color-surface: #ffffff !important;
+  --md-sys-color-surface-dim: #d9dae1 !important;
+  --md-sys-color-surface-bright: #f8f9ff !important;
+  --md-sys-color-surface-container-lowest: #ffffff !important;
+  --md-sys-color-surface-container-low: #f2f3fa !important;
+  --md-sys-color-surface-container: #eceef5 !important;
+  --md-sys-color-surface-container-high: #e6e8ef !important;
+  --md-sys-color-surface-container-highest: #e0e2e9 !important;
+  --md-sys-color-on-surface: #181c22 !important;
+  --md-sys-color-on-surface-variant: #43474e !important;
+  --md-sys-color-outline: #73777f !important;
+  --md-sys-color-outline-variant: #c3c7cf !important;
+  --card-background-color: #ffffff !important;
+  --card-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
 }
 
 /* ==========================================================================
@@ -265,11 +283,29 @@ html|moz-page-nav#categories {
   background-color: var(--md-sys-color-surface) !important;
   border-inline-end: 1px solid var(--md-sys-color-outline-variant) !important;
   box-sizing: border-box !important;
-  padding: 24px 16px !important;
+  padding: 12px 16px 24px 16px !important;
   overflow-x: hidden !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 4px !important;
+  --page-nav-margin-block-start: 0px !important;
+  --page-space-block-start: 0px !important;
+}
+
+#categories::part(heading-wrapper),
+.page-nav-heading-wrapper {
+  margin-block-start: 0px !important;
+  margin-top: 0px !important;
+  margin-bottom: 8px !important;
+  padding-top: 0px !important;
+}
+
+#page-nav-heading,
+.page-nav-heading {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.4px !important;
+  margin: 0 !important;
 }
 
 #categories nav,
@@ -362,25 +398,21 @@ hr.nav-separator,
    3. MATERIAL 3 SEARCH BAR & IN-CONTENT NOTICES
    ========================================================================== */
 
+html|nav-notice,
+nav-notice {
+  display: none !important;
+}
+
 #search-container {
   position: sticky !important;
   top: 0 !important;
-  z-index: 10 !important;
+  z-index: 100 !important;
   background-color: var(--md-sys-color-surface-container-low) !important;
-  padding: 8px 0 16px 0 !important;
-  margin-bottom: 12px !important;
+  padding: 8px 0 12px 0 !important;
+  margin-bottom: 8px !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 12px !important;
-}
-
-html|nav-notice,
-nav-notice {
-  --nav-notice-background-color: var(--md-sys-color-surface-container-high) !important;
-  --nav-notice-text-color: var(--md-sys-color-on-surface) !important;
-  border-radius: 16px !important;
-  border: 1px solid var(--md-sys-color-outline-variant) !important;
-  overflow: hidden !important;
+  gap: 0 !important;
 }
 
 #searchInput,
@@ -685,7 +717,8 @@ radiogroup.segmented-radiogroup {
   margin: 8px 0 !important;
   background-color: var(--md-sys-color-surface-container-low) !important;
   box-sizing: border-box !important;
-  max-width: 600px !important;
+  min-width: 390px !important;
+  max-width: 100% !important;
 }
 
 #hilalPrivacyLevel radio,
@@ -697,12 +730,13 @@ radiogroup.segmented-radiogroup radio {
   align-items: center !important;
   justify-content: center !important;
   margin: 0 !important;
-  padding: 0 16px !important;
+  padding: 0 12px !important;
   border-inline-end: 1px solid var(--md-sys-color-outline-variant) !important;
   cursor: pointer !important;
   transition: background-color 150ms ease, color 150ms ease !important;
   box-sizing: border-box !important;
   user-select: none !important;
+  white-space: nowrap !important;
 }
 
 #hilalPrivacyLevel radio:last-child,
@@ -717,11 +751,14 @@ radiogroup.segmented-radiogroup radio .radio-check {
 
 #hilalPrivacyLevel radio .radio-label,
 radiogroup.segmented-radiogroup radio .radio-label {
-  font-size: 14px !important;
+  font-size: 13px !important;
   font-weight: 500 !important;
   color: var(--md-sys-color-on-surface-variant) !important;
   margin: 0 !important;
   pointer-events: none !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 #hilalPrivacyLevel radio:hover,
@@ -1051,4 +1088,15 @@ select:focus {
   100% {
     background-color: transparent;
   }
+}
+
+/* ==========================================================================
+   11. HILAL BROWSER INTEGRATION CLEANUP
+   ========================================================================== */
+
+/* Hide legacy Firefox layout picker that conflicts with Hilal's custom sidebar */
+setting-group[data-subcategory="layout"],
+setting-group[groupid="browserLayout"],
+#browserLayout {
+  display: none !important;
 }
