@@ -1677,17 +1677,38 @@ setting-pane[onsearchpane] {
 
 
 /* ==========================================================================
-   HILAL BROWSER — MATERIAL 3 EXPRESSIVE DESIGN SYSTEM
-   Strict adherence to Material 3 Expressive guidelines:
-   - Official M3 Navigation Drawer (340dp, 56dp items, pill active indicator)
-   - Official M3 Switch (52x32dp track, 24dp thumb with checkmark icon)
-   - Official M3 Top App Bar & Pill Search Bar (56dp)
-   - Single-Layer Tonal Cards (Zero nested card-itis)
-   - Official Hilal M3 Tokens from www/src/index.css and hilal-m3-tokens.css
+   HILAL BROWSER — MATERIAL 3 EXPRESSIVE REDESIGN
+   ==========================================================================
+   Pixel-perfect implementation of Material 3 Expressive guidelines:
+   - Official M3 Navigation Drawer (320dp, 50dp items, vibrant primary-container active pill)
+   - Official M3 Search Bar (Single-layer 48dp pill, surface-container-high, centered icon)
+   - Strict Hidden Handling (Ensures no false "No results" or "Managed" banners)
+   - Single-Layer Tonal Cards (Zero card-itis, zero nested cards or double borders)
+   - Official M3 Switch (52x32dp track, 16dp unselected / 24dp selected thumb with embedded checkmark)
+   - M3 Buttons (Filled pill primary, tonal accessory)
+   - Strict adherence to www/src/index.css and hilal-m3-tokens.css tokens
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   1. Design Tokens & System Variables
+   1. INVIOLABLE HIDDEN ELEMENT RULE
+   Guarantees that elements with hidden attributes never render as visible cards.
+   -------------------------------------------------------------------------- */
+[hidden],
+[hidden="true"],
+:host([hidden]),
+[data-hidden-by-setting-group],
+[data-hidden-from-search],
+.hidden-category,
+#no-results-message[hidden],
+#policies-container-content[hidden],
+#policies-container[hidden],
+nav-notice[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Design Tokens & System Variables
    -------------------------------------------------------------------------- */
 :root {
   /* Typography */
@@ -1702,8 +1723,6 @@ setting-pane[onsearchpane] {
   --md-sys-shape-corner-large: 16px;
   --md-sys-shape-corner-large-increased: 20px;
   --md-sys-shape-corner-extra-large: 24px;
-  --md-sys-shape-corner-extra-large-increased: 28px;
-  --md-sys-shape-corner-extra-extra-large: 32px;
   --md-sys-shape-corner-full: 9999px;
 
   /* Material 3 Motion Physics */
@@ -1713,7 +1732,7 @@ setting-pane[onsearchpane] {
   --md-sys-motion-duration-medium: 250ms;
   --md-sys-motion-duration-long: 400ms;
 
-  /* Light Scheme Tokens (from www/src/index.css) */
+  /* Light Scheme Tokens (Default fallback, www/src/index.css) */
   --md-sys-color-surface: #f8f9ff;
   --md-sys-color-surface-dim: #d9dae1;
   --md-sys-color-surface-bright: #f8f9ff;
@@ -1744,18 +1763,15 @@ setting-pane[onsearchpane] {
   --md-sys-color-outline: #73777f;
   --md-sys-color-outline-variant: #c3c7cf;
 
-  /* Switch checkmark color */
-  --m3-switch-icon-stroke: #0b57d0;
-
   /* Firefox Core Tokens Mapping */
   --background-color-canvas: var(--md-sys-color-surface);
   --in-content-page-background: var(--md-sys-color-surface);
   --in-content-box-background: var(--md-sys-color-surface-container);
-  --in-content-box-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 50%, transparent);
-  --in-content-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 50%, transparent);
+  --in-content-box-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent);
+  --in-content-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent);
   --card-background-color: var(--md-sys-color-surface-container);
-  --card-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 50%, transparent);
-  --card-border-radius: 24px;
+  --card-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent);
+  --card-border-radius: 20px;
   --card-box-shadow: none;
   --text-color: var(--md-sys-color-on-surface);
   --text-color-deemphasized: var(--md-sys-color-on-surface-variant);
@@ -1796,15 +1812,13 @@ setting-pane[onsearchpane] {
     --md-sys-color-outline: #8c9199;
     --md-sys-color-outline-variant: #43474e;
 
-    --m3-switch-icon-stroke: #042f66;
-
     --background-color-canvas: var(--md-sys-color-surface);
     --in-content-page-background: var(--md-sys-color-surface);
     --in-content-box-background: var(--md-sys-color-surface-container);
-    --in-content-box-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 50%, transparent);
-    --in-content-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 50%, transparent);
+    --in-content-box-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent);
+    --in-content-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent);
     --card-background-color: var(--md-sys-color-surface-container);
-    --card-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 50%, transparent);
+    --card-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent);
     --text-color: var(--md-sys-color-on-surface);
     --text-color-deemphasized: var(--md-sys-color-on-surface-variant);
     --color-accent-primary: var(--md-sys-color-primary);
@@ -1843,15 +1857,13 @@ setting-pane[onsearchpane] {
   --md-sys-color-outline: #8c9199;
   --md-sys-color-outline-variant: #43474e;
 
-  --m3-switch-icon-stroke: #042f66;
-
   --background-color-canvas: var(--md-sys-color-surface);
   --in-content-page-background: var(--md-sys-color-surface);
   --in-content-box-background: var(--md-sys-color-surface-container);
-  --in-content-box-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 50%, transparent);
-  --in-content-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 50%, transparent);
+  --in-content-box-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent);
+  --in-content-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent);
   --card-background-color: var(--md-sys-color-surface-container);
-  --card-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 50%, transparent);
+  --card-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent);
   --text-color: var(--md-sys-color-on-surface);
   --text-color-deemphasized: var(--md-sys-color-on-surface-variant);
   --color-accent-primary: var(--md-sys-color-primary);
@@ -1859,7 +1871,7 @@ setting-pane[onsearchpane] {
 }
 
 /* --------------------------------------------------------------------------
-   2. Page Shell & Typography
+   3. Page Shell & Clean Typography
    -------------------------------------------------------------------------- */
 #preferences-root,
 #preferences-body {
@@ -1876,15 +1888,18 @@ html|h1 {
   letter-spacing: -0.3px !important;
   color: var(--md-sys-color-on-surface) !important;
   margin: 16px 0 24px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
 }
 
 html|h2,
 #heading {
-  font-size: 18px !important;
+  font-size: 17px !important;
   font-weight: 600 !important;
   letter-spacing: 0px !important;
   color: var(--md-sys-color-on-surface) !important;
-  margin: 0 0 12px 0 !important;
+  margin: 0 0 10px 0 !important;
 }
 
 description,
@@ -1895,40 +1910,43 @@ description,
 }
 
 /* --------------------------------------------------------------------------
-   3. Material 3 Navigation Drawer (#categories)
-   Specs: 340px width, 56px item height, pill active indicator
+   4. Material 3 Navigation Drawer (#categories)
+   Specs: 320px width, 50px item height, primary-container blue active pill
    -------------------------------------------------------------------------- */
 moz-page-nav,
 #categories,
 html|moz-page-nav#categories {
-  width: 340px !important;
-  min-width: 340px !important;
-  max-width: 340px !important;
-  flex: 0 0 340px !important;
+  width: 320px !important;
+  min-width: 320px !important;
+  max-width: 320px !important;
+  flex: 0 0 320px !important;
   background-color: var(--md-sys-color-surface) !important;
-  border-inline-end: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 40%, transparent) !important;
-  padding: 16px 12px !important;
+  border-inline-end: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 25%, transparent) !important;
+  padding: 24px 12px 24px 12px !important;
   box-sizing: border-box !important;
 
   /* Custom property bindings for inner shadow DOM */
-  --page-nav-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 40%, transparent);
+  --page-nav-border-color: transparent;
   --page-nav-margin-inline-start: 0px;
+  --page-nav-margin-block-start: 0px;
   --page-nav-gap: 4px;
   --page-nav-button-gap: 4px;
   --page-nav-button-border-radius: var(--md-sys-shape-corner-full);
   --page-nav-button-border-radius-focused: var(--md-sys-shape-corner-full);
-  --page-nav-button-padding: 0 24px 0 16px;
+  --page-nav-button-padding: 0 20px 0 16px;
   --page-nav-button-indicator-width: 0px;
   --page-nav-button-indicator-background-color: transparent;
   --page-nav-button-background-color: transparent;
   --page-nav-button-background-color-hover: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
   --page-nav-button-background-color-active: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
-  --page-nav-button-background-color-selected: var(--md-sys-color-secondary-container);
+  --page-nav-button-background-color-selected: var(--md-sys-color-primary-container);
   --page-nav-button-text-color: var(--md-sys-color-on-surface-variant);
   --page-nav-button-text-color-hover: var(--md-sys-color-on-surface);
   --page-nav-button-text-color-active: var(--md-sys-color-on-surface);
-  --page-nav-button-text-color-selected: var(--md-sys-color-on-secondary-container);
-  --icon-size: 24px;
+  --page-nav-button-text-color-selected: var(--md-sys-color-on-primary-container);
+  --icon-size: 22px;
+  --font-size-xlarge: 24px;
+  --font-weight-heading: 700;
 }
 
 @media (max-width: 950px) {
@@ -1946,20 +1964,20 @@ html|moz-page-nav#categories {
 /* Nav Drawer Item Layout */
 moz-page-nav-button,
 html|moz-page-nav-button {
-  min-height: 56px !important;
-  height: 56px !important;
-  margin: 2px 0 !important;
+  min-height: 50px !important;
+  height: 50px !important;
+  margin: 3px 6px !important;
   box-sizing: border-box !important;
 }
 
 moz-page-nav-button::part(button),
 moz-page-nav-button > button,
 moz-page-nav-button a {
-  min-height: 56px !important;
-  height: 56px !important;
+  min-height: 50px !important;
+  height: 50px !important;
   border-radius: var(--md-sys-shape-corner-full) !important;
-  padding: 0 24px 0 16px !important;
-  gap: 12px !important;
+  padding: 0 20px 0 16px !important;
+  gap: 14px !important;
   display: flex !important;
   align-items: center !important;
   font-family: var(--font-sans) !important;
@@ -1975,16 +1993,16 @@ moz-page-nav-button a {
 
 moz-page-nav-button .page-nav-icon,
 moz-page-nav-button::part(icon) {
-  width: 24px !important;
-  height: 24px !important;
-  min-width: 24px !important;
-  min-height: 24px !important;
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  min-height: 22px !important;
   -moz-context-properties: fill;
   fill: var(--md-sys-color-on-surface-variant) !important;
   transition: fill 200ms var(--md-sys-motion-easing-emphasized) !important;
 }
 
-/* Nav Drawer Hover State */
+/* Nav Drawer Hover */
 moz-page-nav-button:not([selected]):hover::part(button),
 moz-page-nav-button:not([selected]) > button:hover,
 moz-page-nav-button:not([selected]) a:hover {
@@ -1995,11 +2013,11 @@ moz-page-nav-button:not([selected]):hover .page-nav-icon {
   fill: var(--md-sys-color-on-surface) !important;
 }
 
-/* Nav Drawer Active/Selected Destination */
+/* Nav Drawer Active/Selected Destination (M3 Primary Container Blue) */
 moz-page-nav-button[selected]::part(button),
 moz-page-nav-button button[selected] {
-  background-color: var(--md-sys-color-secondary-container) !important;
-  color: var(--md-sys-color-on-secondary-container) !important;
+  background-color: var(--md-sys-color-primary-container) !important;
+  color: var(--md-sys-color-on-primary-container) !important;
   font-weight: 600 !important;
 }
 moz-page-nav-button[selected]::part(button)::before,
@@ -2008,20 +2026,20 @@ moz-page-nav-button button[selected]::before {
 }
 moz-page-nav-button[selected] .page-nav-icon,
 moz-page-nav-button[selected]::part(icon) {
-  fill: var(--md-sys-color-on-secondary-container) !important;
+  fill: var(--md-sys-color-on-primary-container) !important;
 }
 
-/* Nav Divider */
+/* Nav Separator */
 .nav-separator,
 #categories hr {
   border: none !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 40%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent) !important;
   margin: 12px 16px !important;
   width: auto !important;
 }
 
 /* --------------------------------------------------------------------------
-   4. Main Content Area & M3 Search Bar
+   5. Main Content Area & Single-Layer M3 Search Bar
    -------------------------------------------------------------------------- */
 .main-content {
   padding-inline: 48px !important;
@@ -2048,53 +2066,79 @@ moz-page-nav-button[selected]::part(icon) {
   top: 0 !important;
   z-index: 10 !important;
   background-color: var(--md-sys-color-surface) !important;
-  padding-top: 24px !important;
-  padding-bottom: 16px !important;
-  margin-bottom: 16px !important;
-  margin-inline-start: 0 !important;
+  padding: 24px 0 16px 0 !important;
+  margin: 0 !important;
   width: 100% !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-/* M3 Search Bar (Pill 56px) */
-#searchInput,
-moz-input-search {
+/* Eliminate Double Outline: moz-input-search is transparent host */
+moz-input-search,
+#searchInput {
+  display: block !important;
   width: 100% !important;
-  height: 56px !important;
-  min-height: 56px !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+
+  /* CSS token injection for shadow DOM */
+  --input-text-background-color: var(--md-sys-color-surface-container-high) !important;
+  --input-text-border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 35%, transparent) !important;
+  --input-text-border-radius: 9999px !important;
+  --input-search-border-radius: 9999px !important;
+  --input-text-min-height: 48px !important;
+  --input-text-color: var(--md-sys-color-on-surface) !important;
+  --input-text-icon-size: 20px !important;
+  --input-search-icon-size: 20px !important;
+  --icon-color: var(--md-sys-color-on-surface-variant) !important;
+}
+
+/* Target the real inner input directly */
+moz-input-search::part(input),
+#searchInput::part(input) {
+  height: 48px !important;
+  min-height: 48px !important;
   border-radius: var(--md-sys-shape-corner-full) !important;
   background-color: var(--md-sys-color-surface-container-high) !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 50%, transparent) !important;
-  padding: 0 24px !important;
-  font-family: var(--font-sans) !important;
-  font-size: 15px !important;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 35%, transparent) !important;
+  padding-inline-start: 48px !important;
+  padding-inline-end: 20px !important;
   color: var(--md-sys-color-on-surface) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 14px !important;
   box-sizing: border-box !important;
   box-shadow: none !important;
   transition: all 200ms var(--md-sys-motion-easing-emphasized) !important;
 }
 
-#searchInput::placeholder {
-  color: var(--md-sys-color-on-surface-variant) !important;
+moz-input-search::part(input):hover,
+#searchInput::part(input):hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
 }
 
-#searchInput:focus,
-moz-input-search:focus-within {
+moz-input-search::part(input):focus,
+#searchInput::part(input):focus {
   border-color: var(--md-sys-color-primary) !important;
   outline: 2px solid var(--md-sys-color-primary) !important;
   outline-offset: 0 !important;
   background-color: var(--md-sys-color-surface-container-highest) !important;
 }
 
-/* M3 Policy Notice / Managed Banner */
-#policies-container-content,
-#policies-container {
+/* Managed Banner (Only when NOT hidden) */
+#policies-container-content:not([hidden]),
+#policies-container:not([hidden]) {
   border-radius: 16px !important;
   background-color: var(--md-sys-color-surface-container-high) !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 50%, transparent) !important;
-  padding: 14px 20px !important;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 40%, transparent) !important;
+  padding: 12px 18px !important;
   margin-bottom: 16px !important;
   color: var(--md-sys-color-on-surface) !important;
-  font-size: 14px !important;
+  font-size: 13.5px !important;
   font-weight: 500 !important;
   display: flex !important;
   align-items: center !important;
@@ -2102,9 +2146,7 @@ moz-input-search:focus-within {
 }
 
 /* --------------------------------------------------------------------------
-   5. ZERO CARD-ITIS: Strict Single-Layer Card Containment
-   Only setting-group > moz-card and top-level groupbox are cards.
-   All wrappers and inner containers have transparent background and no border.
+   6. SINGLE-LAYER TONAL CARDS (Absolute Elimination of Card-itis)
    -------------------------------------------------------------------------- */
 
 /* Outer Layout Wrappers: Completely Transparent */
@@ -2119,39 +2161,54 @@ setting-group:has(> moz-card) {
 }
 
 setting-group {
-  margin: 0 0 20px 0 !important;
+  margin: 0 0 16px 0 !important;
 }
 
 /* The Single Card Container */
-setting-group > moz-card,
-groupbox[data-category],
-#pane-experimental-featureGates > moz-card {
+setting-group > moz-card:not([hidden]),
+groupbox[data-category]:not([hidden]):not(#no-results-message),
+#pane-experimental-featureGates > moz-card:not([hidden]) {
   display: flex !important;
   flex-direction: column !important;
   background-color: var(--md-sys-color-surface-container) !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 45%, transparent) !important;
-  border-radius: 24px !important;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent) !important;
+  border-radius: 20px !important;
   padding: 24px !important;
-  margin: 0 0 20px 0 !important;
+  margin: 0 0 16px 0 !important;
   box-shadow: none !important;
   box-sizing: border-box !important;
 }
 
-/* Inner Fieldsets & Controls: No Nested Boxes */
+/* All Inner Containers Inside Cards: Must Be Completely Transparent */
 moz-card > moz-fieldset,
 setting-group moz-fieldset,
 groupbox moz-fieldset,
 groupbox fieldset,
 moz-card fieldset,
-setting-control {
+setting-control,
+#weavePrefsDeck,
+#noFxaAccount,
+#hasFxaAccount,
+#fxaGroup,
+#fxaNoLoginStatus,
+moz-box-group,
+#noFxaAccountGroup {
   background: transparent !important;
+  background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
+  outline: none !important;
   padding: 0 !important;
-  margin: 0 !important;
 }
 
-/* Eliminate Inner Box in Default Browser Card (moz-promo) */
+moz-card moz-box-item,
+#noFxaAccountGroup moz-box-item {
+  background: transparent !important;
+  border: none !important;
+  padding: 6px 0 !important;
+}
+
+/* moz-promo: Clean row without inner box */
 moz-promo,
 moz-promo .container,
 moz-promo::part(container) {
@@ -2160,61 +2217,74 @@ moz-promo::part(container) {
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
+  margin: 0 !important;
   --promo-background-color: transparent !important;
   --promo-border: none !important;
   --promo-padding: 0 !important;
 }
 
-/* Eliminate Inner Boxes in Sync & Accounts */
-#weavePrefsDeck,
-#noFxaAccount,
-#hasFxaAccount,
-#fxaGroup,
-#fxaNoLoginStatus {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
+moz-promo .container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 16px !important;
 }
 
-/* Grouped Lists (Search Engines, Handlers, Shortcuts): Tonal Container */
-moz-box-group,
+moz-promo .image-container {
+  width: 54px !important;
+  height: 54px !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+moz-promo .image-container img {
+  width: 48px !important;
+  height: 48px !important;
+  object-fit: contain !important;
+}
+
+moz-promo .text-container {
+  flex: 1 !important;
+  font-size: 14px !important;
+  color: var(--md-sys-color-on-surface) !important;
+  line-height: 1.4 !important;
+}
+
+/* Multi-Item Data Lists (Search Engines, App Handlers): Low Container */
 #handlersView,
 #translations-manage-install-list,
 #hilalSidebarCustomList {
   border-radius: 16px !important;
   background-color: var(--md-sys-color-surface-container-low) !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 40%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent) !important;
   overflow: hidden !important;
   margin-block: 8px !important;
 }
 
-moz-box-item,
 #handlersView > richlistitem,
 #translations-manage-install-list > .translations-manage-language {
-  min-height: 52px !important;
-  padding: 12px 18px !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 35%, transparent) !important;
+  min-height: 48px !important;
+  padding: 10px 16px !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 25%, transparent) !important;
   box-sizing: border-box !important;
   background-color: transparent !important;
   transition: background-color 150ms ease !important;
 }
 
-moz-box-item:last-child,
 #handlersView > richlistitem:last-child,
 #translations-manage-install-list > .translations-manage-language:last-child {
   border-bottom: none !important;
 }
 
-moz-box-item:hover,
 #handlersView > richlistitem:hover,
 #translations-manage-install-list > .translations-manage-language:hover {
   background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 6%, transparent) !important;
 }
 
 /* --------------------------------------------------------------------------
-   6. Material 3 Switch (Official 52x32dp Spec)
+   7. Material 3 Switch (Official 52x32dp Spec)
    -------------------------------------------------------------------------- */
 moz-toggle,
 .toggle-button,
@@ -2299,18 +2369,6 @@ moz-toggle[pressed]::part(button)::before {
   margin: 2px !important;
   translate: 20px 0 !important;
   background-color: var(--md-sys-color-on-primary) !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b57d0' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  .toggle-button[aria-pressed="true"]::before,
-  moz-toggle[pressed]::part(button)::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23042f66' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") !important;
-  }
-}
-
-:root[brighttext="true"] .toggle-button[aria-pressed="true"]::before,
-:root[brighttext="true"] moz-toggle[pressed]::part(button)::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23042f66' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") !important;
 }
 
@@ -2326,13 +2384,15 @@ moz-toggle:dir(rtl)[pressed]::part(button)::before {
 }
 
 /* --------------------------------------------------------------------------
-   7. Material 3 Buttons (40px Pill Shape)
+   8. Material 3 Buttons
    -------------------------------------------------------------------------- */
-button,
-html|button,
-moz-button,
-.accessory-button,
-button[is="highlightable-button"] {
+/* Primary Filled Pill Button */
+button.primary,
+button[primary="true"],
+moz-button[type="primary"],
+#setDefaultButton,
+#noFxaSignIn,
+#addEngineButton {
   height: 40px !important;
   min-height: 40px !important;
   border-radius: var(--md-sys-shape-corner-full) !important;
@@ -2347,40 +2407,11 @@ button[is="highlightable-button"] {
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  background-color: var(--md-sys-color-surface-container-high) !important;
-  color: var(--md-sys-color-on-surface) !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 50%, transparent) !important;
-  transition: background-color 150ms var(--md-sys-motion-easing-emphasized),
-              border-color 150ms var(--md-sys-motion-easing-emphasized),
-              transform 100ms ease !important;
-}
-
-button:hover,
-html|button:hover,
-moz-button:hover,
-.accessory-button:hover,
-button[is="highlightable-button"]:hover {
-  background-color: var(--md-sys-color-surface-container-highest) !important;
-}
-
-button:active,
-html|button:active,
-moz-button:active,
-.accessory-button:active,
-button[is="highlightable-button"]:active {
-  transform: scale(0.98) !important;
-}
-
-/* Primary Filled Buttons (Highest Emphasis) */
-button.primary,
-button[primary="true"],
-moz-button[type="primary"],
-#setDefaultButton,
-#noFxaSignIn,
-#addEngineButton {
   background-color: var(--md-sys-color-primary) !important;
   color: var(--md-sys-color-on-primary) !important;
   border: none !important;
+  transition: background-color 150ms var(--md-sys-motion-easing-emphasized),
+              transform 100ms ease !important;
 }
 
 button.primary:hover,
@@ -2392,17 +2423,64 @@ moz-button[type="primary"]:hover,
   background-color: color-mix(in srgb, var(--md-sys-color-primary) 88%, #ffffff) !important;
 }
 
+button.primary:active,
+button[primary="true"]:active,
+moz-button[type="primary"]:active,
+#setDefaultButton:active,
+#noFxaSignIn:active,
+#addEngineButton:active {
+  transform: scale(0.97) !important;
+}
+
+/* Secondary / Accessory Pill Button */
+button:not(.primary):not([primary="true"]),
+.accessory-button,
+button[is="highlightable-button"] {
+  height: 38px !important;
+  min-height: 38px !important;
+  border-radius: var(--md-sys-shape-corner-full) !important;
+  padding: 0 20px !important;
+  font-family: var(--font-sans) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1px !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 35%, transparent) !important;
+  transition: background-color 150ms var(--md-sys-motion-easing-emphasized),
+              border-color 150ms var(--md-sys-motion-easing-emphasized),
+              transform 100ms ease !important;
+}
+
+button:not(.primary):not([primary="true"]):hover,
+.accessory-button:hover,
+button[is="highlightable-button"]:hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+}
+
+button:not(.primary):not([primary="true"]):active,
+.accessory-button:active,
+button[is="highlightable-button"]:active {
+  transform: scale(0.97) !important;
+}
+
 /* --------------------------------------------------------------------------
-   8. Form Controls (Selects, Text Inputs, Checkboxes, Radios)
+   9. Form Controls (Selects, Text Inputs, Checkboxes, Radios)
    -------------------------------------------------------------------------- */
 menulist,
 html|select,
 moz-select {
-  height: 44px !important;
-  min-height: 44px !important;
+  height: 42px !important;
+  min-height: 42px !important;
   border-radius: 12px !important;
   background-color: var(--md-sys-color-surface-container-high) !important;
-  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 40%, transparent) !important;
   padding: 0 16px !important;
   color: var(--md-sys-color-on-surface) !important;
   font-family: var(--font-sans) !important;
@@ -2431,11 +2509,11 @@ html|input[type="text"],
 html|input[type="password"],
 html|input[type="url"],
 moz-input-text {
-  height: 44px !important;
-  min-height: 44px !important;
+  height: 42px !important;
+  min-height: 42px !important;
   border-radius: 12px !important;
   background-color: var(--md-sys-color-surface-container-high) !important;
-  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 40%, transparent) !important;
   padding: 0 16px !important;
   color: var(--md-sys-color-on-surface) !important;
   font-family: var(--font-sans) !important;
@@ -2460,11 +2538,11 @@ moz-checkbox {
 
 checkbox::part(box),
 moz-checkbox::part(box) {
-  width: 20px !important;
-  height: 20px !important;
-  min-width: 20px !important;
-  min-height: 20px !important;
-  border-radius: 6px !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  border-radius: 5px !important;
   border: 2px solid var(--md-sys-color-outline) !important;
   background-color: transparent !important;
   box-sizing: border-box !important;
@@ -2484,10 +2562,10 @@ moz-radio {
 
 radio::part(box),
 moz-radio::part(box) {
-  width: 20px !important;
-  height: 20px !important;
-  min-width: 20px !important;
-  min-height: 20px !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
   border-radius: 50% !important;
   border: 2px solid var(--md-sys-color-outline) !important;
   background-color: transparent !important;
@@ -2500,7 +2578,7 @@ moz-radio[selected]::part(box) {
 }
 
 /* --------------------------------------------------------------------------
-   9. Hilal Custom Preferences Panels
+   10. Hilal Browser Panels (paneHilal)
    -------------------------------------------------------------------------- */
 #hilalWorkspacesGroup,
 #hilalSidebarGroup,
@@ -2511,10 +2589,10 @@ moz-radio[selected]::part(box) {
 #hilalLanguageGroup,
 #hilalShortcutsGroup {
   background-color: var(--md-sys-color-surface-container) !important;
-  border-radius: 24px !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 45%, transparent) !important;
+  border-radius: 20px !important;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent) !important;
   padding: 24px !important;
-  margin: 0 0 20px 0 !important;
+  margin: 0 0 16px 0 !important;
 }
 
 .shortcuts-category-card,
@@ -2522,7 +2600,7 @@ moz-radio[selected]::part(box) {
 #hilalBangsForm {
   background-color: var(--md-sys-color-surface-container-low) !important;
   border-radius: 16px !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 40%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent) !important;
   padding: 16px !important;
 }
 
