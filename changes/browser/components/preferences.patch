@@ -160,10 +160,18 @@ index 1f77010aeb8e..2729ac0a57b1 100644
    }
  }
 diff --git a/browser/components/preferences/preferences.xhtml b/browser/components/preferences/preferences.xhtml
-index bb84d15bec40..6284b97a4313 100644
+index bb84d15bec40..f8622988a33b 100644
 --- a/browser/components/preferences/preferences.xhtml
 +++ b/browser/components/preferences/preferences.xhtml
-@@ -127,6 +127,11 @@
+@@ -38,6 +38,7 @@
+   <link rel="stylesheet" href="chrome://browser/content/preferences/widgets/setting-group.css" />
+   <link rel="stylesheet" href="chrome://browser/content/preferences/widgets/setting-pane.css" />
+   <link rel="stylesheet" href="chrome://browser/content/preferences/widgets/setting-control.css" />
++  <link rel="stylesheet" href="chrome://browser/skin/preferences/hilal-preferences.css" />
+ 
+   <link rel="localization" href="branding/brand.ftl"/>
+   <link rel="localization" href="browser/browser.ftl"/>
+@@ -127,6 +128,11 @@
          iconsrc="chrome://browser/skin/preferences/category-sync.svg"
          data-l10n-id="pane-sync-title3">
        </html:moz-page-nav-button>
