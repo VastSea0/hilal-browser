@@ -1679,19 +1679,22 @@ setting-pane[onsearchpane] {
 /* ==========================================================================
    HILAL BROWSER — MATERIAL 3 EXPRESSIVE REDESIGN
    ==========================================================================
-   Pixel-perfect implementation of Material 3 Expressive guidelines:
-   - Official M3 Navigation Drawer (320dp, 50dp items, vibrant primary-container active pill)
-   - Official M3 Search Bar (Single-layer 48dp pill, surface-container-high, centered icon)
-   - Strict Hidden Handling (Ensures no false "No results" or "Managed" banners)
-   - Single-Layer Tonal Cards (Zero card-itis, zero nested cards or double borders)
-   - Official M3 Switch (52x32dp track, 16dp unselected / 24dp selected thumb with embedded checkmark)
-   - M3 Buttons (Filled pill primary, tonal accessory)
-   - Strict adherence to www/src/index.css and hilal-m3-tokens.css tokens
+   Authentic implementation of Material 3 Expressive design system:
+   - Official M3 Navigation Drawer (320dp width, 56dp items, full rounded pill,
+     vibrant expressive container, zero vertical indicator lines)
+   - Official M3 Search Bar (52dp full pill, surface-container-high, centered,
+     clean focus ring, no managed organization banners)
+   - Inviolable Hidden Handling (Guarantees zero ghost cards, hides Firefox SRD clutter)
+   - Single-Layer M3 Tonal Cards (24dp rounded corners, subtle outline, zero card-itis)
+   - Official M3 Switch (52x32dp track, 16dp unselected / 24dp selected thumb)
+   - M3 Buttons (40dp full pill, filled primary & tonal accessory)
+   - Complete www/src/index.css token alignment
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   1. INVIOLABLE HIDDEN ELEMENT RULE
-   Guarantees that elements with hidden attributes never render as visible cards.
+   1. INVIOLABLE HIDDEN & CLUTTER ELIMINATION RULE
+   Guarantees that hidden elements and Firefox internal promotional banners
+   never render or consume any layout space.
    -------------------------------------------------------------------------- */
 [hidden],
 [hidden="true"],
@@ -1700,15 +1703,27 @@ setting-pane[onsearchpane] {
 [data-hidden-from-search],
 .hidden-category,
 #no-results-message[hidden],
-#policies-container-content[hidden],
-#policies-container[hidden],
-nav-notice[hidden] {
+#policies-container,
+#policies-container-content,
+#tls-key-logging-container-content,
+setting-group[groupid="securityPrivacyStatus"],
+setting-group[groupid="securityPrivacyWarnings"],
+security-privacy-card,
+#privacyCard,
+#warningCard,
+#etpBannerEl,
+#securityPrivacyStatus,
+nav-notice {
   display: none !important;
   visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
 }
 
 /* --------------------------------------------------------------------------
-   2. Design Tokens & System Variables
+   2. Material 3 Design Tokens (Light & Dark, matching www/src/index.css)
    -------------------------------------------------------------------------- */
 :root {
   /* Typography */
@@ -1723,6 +1738,7 @@ nav-notice[hidden] {
   --md-sys-shape-corner-large: 16px;
   --md-sys-shape-corner-large-increased: 20px;
   --md-sys-shape-corner-extra-large: 24px;
+  --md-sys-shape-corner-extra-large-increased: 28px;
   --md-sys-shape-corner-full: 9999px;
 
   /* Material 3 Motion Physics */
@@ -1732,7 +1748,7 @@ nav-notice[hidden] {
   --md-sys-motion-duration-medium: 250ms;
   --md-sys-motion-duration-long: 400ms;
 
-  /* Light Scheme Tokens (Default fallback, www/src/index.css) */
+  /* Light Scheme Tokens (Fallback) */
   --md-sys-color-surface: #f8f9ff;
   --md-sys-color-surface-dim: #d9dae1;
   --md-sys-color-surface-bright: #f8f9ff;
@@ -1763,6 +1779,13 @@ nav-notice[hidden] {
   --md-sys-color-outline: #73777f;
   --md-sys-color-outline-variant: #c3c7cf;
 
+  /* M3 Expressive Pill & Switch Tokens */
+  --md-m3-active-pill-bg: #e8def8;
+  --md-m3-active-pill-fg: #1d192b;
+  --md-m3-switch-on-track: #6750a4;
+  --md-m3-switch-on-track-hover: #7965b2;
+  --md-m3-switch-on-thumb: #ffffff;
+
   /* Firefox Core Tokens Mapping */
   --background-color-canvas: var(--md-sys-color-surface);
   --in-content-page-background: var(--md-sys-color-surface);
@@ -1771,7 +1794,7 @@ nav-notice[hidden] {
   --in-content-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent);
   --card-background-color: var(--md-sys-color-surface-container);
   --card-border-color: color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent);
-  --card-border-radius: 20px;
+  --card-border-radius: 24px;
   --card-box-shadow: none;
   --text-color: var(--md-sys-color-on-surface);
   --text-color-deemphasized: var(--md-sys-color-on-surface-variant);
@@ -1811,6 +1834,13 @@ nav-notice[hidden] {
 
     --md-sys-color-outline: #8c9199;
     --md-sys-color-outline-variant: #43474e;
+
+    /* M3 Expressive Pill & Switch Tokens (Lilac, matching user screenshots) */
+    --md-m3-active-pill-bg: #bfa8ff;
+    --md-m3-active-pill-fg: #21005d;
+    --md-m3-switch-on-track: #bfa8ff;
+    --md-m3-switch-on-track-hover: #cdb9ff;
+    --md-m3-switch-on-thumb: #21005d;
 
     --background-color-canvas: var(--md-sys-color-surface);
     --in-content-page-background: var(--md-sys-color-surface);
@@ -1857,6 +1887,12 @@ nav-notice[hidden] {
   --md-sys-color-outline: #8c9199;
   --md-sys-color-outline-variant: #43474e;
 
+  --md-m3-active-pill-bg: #bfa8ff;
+  --md-m3-active-pill-fg: #21005d;
+  --md-m3-switch-on-track: #bfa8ff;
+  --md-m3-switch-on-track-hover: #cdb9ff;
+  --md-m3-switch-on-thumb: #21005d;
+
   --background-color-canvas: var(--md-sys-color-surface);
   --in-content-page-background: var(--md-sys-color-surface);
   --in-content-box-background: var(--md-sys-color-surface-container);
@@ -1871,7 +1907,7 @@ nav-notice[hidden] {
 }
 
 /* --------------------------------------------------------------------------
-   3. Page Shell & Clean Typography
+   3. Page Shell & Global Layout
    -------------------------------------------------------------------------- */
 #preferences-root,
 #preferences-body {
@@ -1880,9 +1916,201 @@ nav-notice[hidden] {
   font-family: var(--font-sans) !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
 }
 
-html|h1 {
+#preferences-stack {
+  height: 100vh !important;
+  min-height: 0 !important;
+  display: flex !important;
+}
+
+#preferences-stack > hbox {
+  height: 100vh !important;
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Material 3 Navigation Drawer (#categories / moz-page-nav)
+   Specs: 320dp persistent width, 56dp items, full rounded pill,
+   no indicator line, expressive container
+   -------------------------------------------------------------------------- */
+:root,
+#categories,
+moz-page-nav,
+moz-page-nav-button {
+  --page-nav-margin-inline-start: 16px !important;
+  --page-nav-margin-block-start: 24px !important;
+  --page-nav-gap: 16px !important;
+  --page-nav-heading-logo-size: 28px !important;
+  --font-size-xlarge: 24px !important;
+  --font-weight-heading: 700 !important;
+  --page-nav-button-gap: 4px !important;
+  --page-nav-hr-background-color: var(--md-sys-color-outline-variant) !important;
+  --page-nav-border-color: transparent !important;
+
+  --page-nav-button-background-color: transparent !important;
+  --page-nav-button-background-color-hover: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent) !important;
+  --page-nav-button-background-color-active: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent) !important;
+  --page-nav-button-background-color-selected: var(--md-m3-active-pill-bg) !important;
+
+  --page-nav-button-text-color: var(--md-sys-color-on-surface-variant) !important;
+  --page-nav-button-text-color-hover: var(--md-sys-color-on-surface) !important;
+  --page-nav-button-text-color-active: var(--md-sys-color-on-surface) !important;
+  --page-nav-button-text-color-selected: var(--md-m3-active-pill-fg) !important;
+
+  --page-nav-button-border-color: transparent !important;
+  --page-nav-button-border-color-hover: transparent !important;
+  --page-nav-button-border-color-active: transparent !important;
+  --page-nav-button-border-radius: 9999px !important;
+  --page-nav-button-border-radius-focused: 9999px !important;
+
+  --page-nav-button-indicator-width: 0px !important;
+  --page-nav-button-indicator-background-color: transparent !important;
+
+  --page-nav-button-padding: 16px 24px 16px 16px !important;
+  --page-nav-button-padding-small: 16px 24px 16px 16px !important;
+  --icon-color: var(--md-sys-color-on-surface-variant) !important;
+  --font-weight-semibold: 600 !important;
+  --space-medium: 12px !important;
+}
+
+moz-page-nav,
+#categories,
+html|moz-page-nav#categories {
+  width: 320px !important;
+  min-width: 320px !important;
+  max-width: 320px !important;
+  flex: 0 0 320px !important;
+  background-color: var(--md-sys-color-surface-container-low) !important;
+  border-inline-end: 1px solid var(--md-sys-color-outline-variant) !important;
+  padding: 0 0 24px 0 !important;
+  box-sizing: border-box !important;
+  height: 100vh !important;
+  position: sticky !important;
+  top: 0 !important;
+}
+
+moz-page-nav-button,
+html|moz-page-nav-button {
+  display: block !important;
+  min-height: 56px !important;
+  margin: 0 12px 4px 12px !important;
+  box-sizing: border-box !important;
+  font-family: var(--font-sans) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1px !important;
+  cursor: pointer !important;
+}
+
+moz-page-nav-button[selected],
+html|moz-page-nav-button[selected] {
+  --icon-color: var(--md-m3-active-pill-fg) !important;
+  font-weight: 600 !important;
+}
+
+/* Nav Drawer Separator */
+.nav-separator,
+#categories hr {
+  border: none !important;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant) !important;
+  margin: 12px 20px !important;
+  width: auto !important;
+}
+
+/* Footer Actions */
+#addonsButton,
+#helpButton {
+  margin: 2px 12px !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. Main Content Area & M3 Top Search Bar
+   -------------------------------------------------------------------------- */
+.main-content {
+  flex: 1 1 0% !important;
+  height: 100vh !important;
+  overflow-y: auto !important;
+  background-color: var(--md-sys-color-surface) !important;
+  padding: 0 48px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.pane-container {
+  max-width: 860px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 0 80px 0 !important;
+  box-sizing: border-box !important;
+}
+
+#mainPrefPane {
+  max-width: 860px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+/* Search Bar Container */
+#search-container {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 20 !important;
+  background-color: var(--md-sys-color-surface) !important;
+  padding: 24px 0 16px 0 !important;
+  margin: 0 0 20px 0 !important;
+  width: 100% !important;
+  max-width: 860px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+}
+
+/* M3 Search Input (52dp Full Pill) */
+#searchInput {
+  width: 100% !important;
+  max-width: 860px !important;
+  --input-text-min-height: 52px !important;
+  --input-text-border-radius: 9999px !important;
+  --input-search-border-radius: 9999px !important;
+  --input-text-border: 1px solid transparent !important;
+  --input-text-background-color: var(--md-sys-color-surface-container-high) !important;
+  --input-text-color: var(--md-sys-color-on-surface) !important;
+  --icon-color: var(--md-sys-color-on-surface-variant) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 15px !important;
+  letter-spacing: 0.1px !important;
+  box-sizing: border-box !important;
+  transition: background-color 200ms ease, border-color 200ms ease !important;
+}
+
+#searchInput:hover {
+  --input-text-background-color: var(--md-sys-color-surface-container-highest) !important;
+}
+
+#searchInput:focus-within {
+  --input-text-border: 2px solid var(--md-sys-color-primary) !important;
+  --input-text-background-color: var(--md-sys-color-surface-container-highest) !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. Headings & Section Typography
+   -------------------------------------------------------------------------- */
+html|h1,
+.subcategory h1,
+#searchCategory h1,
+#browserPrivacyCategory h1,
+#hilalCategory h1 {
+  font-family: var(--font-sans) !important;
   font-size: 28px !important;
   font-weight: 700 !important;
   letter-spacing: -0.3px !important;
@@ -1894,505 +2122,137 @@ html|h1 {
 }
 
 html|h2,
-#heading {
-  font-size: 17px !important;
+#heading,
+.card-title {
+  font-family: var(--font-sans) !important;
+  font-size: 18px !important;
   font-weight: 600 !important;
   letter-spacing: 0px !important;
   color: var(--md-sys-color-on-surface) !important;
-  margin: 0 0 10px 0 !important;
+  margin: 0 0 12px 0 !important;
 }
 
 description,
 .description-deemphasized {
+  font-family: var(--font-sans) !important;
   color: var(--md-sys-color-on-surface-variant) !important;
-  font-size: 13px !important;
+  font-size: 13.5px !important;
   line-height: 1.5 !important;
 }
 
 /* --------------------------------------------------------------------------
-   4. Material 3 Navigation Drawer (#categories)
-   Specs: 320px width, 50px item height, primary-container blue active pill
+   7. Material 3 Tonal Group Cards
+   Single-layer container, 24px rounded corners, subtle outline, no card-itis
    -------------------------------------------------------------------------- */
-moz-page-nav,
-#categories,
-html|moz-page-nav#categories {
-  width: 320px !important;
-  min-width: 320px !important;
-  max-width: 320px !important;
-  flex: 0 0 320px !important;
-  background-color: var(--md-sys-color-surface) !important;
-  border-inline-end: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 25%, transparent) !important;
-  padding: 24px 12px 24px 12px !important;
+moz-card,
+setting-group:not([groupid="securityPrivacyStatus"]):not([groupid="securityPrivacyWarnings"]),
+groupbox,
+.card {
+  background-color: var(--md-sys-color-surface-container) !important;
+  border-radius: 24px !important;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent) !important;
+  padding: 24px !important;
+  margin: 0 0 20px 0 !important;
+  box-shadow: none !important;
   box-sizing: border-box !important;
-
-  /* Custom property bindings for inner shadow DOM */
-  --page-nav-border-color: transparent;
-  --page-nav-margin-inline-start: 0px;
-  --page-nav-margin-block-start: 0px;
-  --page-nav-gap: 4px;
-  --page-nav-button-gap: 4px;
-  --page-nav-button-border-radius: var(--md-sys-shape-corner-full);
-  --page-nav-button-border-radius-focused: var(--md-sys-shape-corner-full);
-  --page-nav-button-padding: 0 20px 0 16px;
-  --page-nav-button-indicator-width: 0px;
-  --page-nav-button-indicator-background-color: transparent;
-  --page-nav-button-background-color: transparent;
-  --page-nav-button-background-color-hover: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
-  --page-nav-button-background-color-active: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
-  --page-nav-button-background-color-selected: var(--md-sys-color-primary-container);
-  --page-nav-button-text-color: var(--md-sys-color-on-surface-variant);
-  --page-nav-button-text-color-hover: var(--md-sys-color-on-surface);
-  --page-nav-button-text-color-active: var(--md-sys-color-on-surface);
-  --page-nav-button-text-color-selected: var(--md-sys-color-on-primary-container);
-  --icon-size: 22px;
-  --font-size-xlarge: 24px;
-  --font-weight-heading: 700;
-}
-
-@media (max-width: 950px) {
-  moz-page-nav,
-  #categories,
-  html|moz-page-nav#categories {
-    width: auto !important;
-    min-width: unset !important;
-    max-width: unset !important;
-    flex: none !important;
-    padding: 8px !important;
-  }
-}
-
-/* Nav Drawer Item Layout */
-moz-page-nav-button,
-html|moz-page-nav-button {
-  min-height: 50px !important;
-  height: 50px !important;
-  margin: 3px 6px !important;
-  box-sizing: border-box !important;
-}
-
-moz-page-nav-button::part(button),
-moz-page-nav-button > button,
-moz-page-nav-button a {
-  min-height: 50px !important;
-  height: 50px !important;
-  border-radius: var(--md-sys-shape-corner-full) !important;
-  padding: 0 20px 0 16px !important;
-  gap: 14px !important;
-  display: flex !important;
-  align-items: center !important;
-  font-family: var(--font-sans) !important;
-  font-size: 14px !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.1px !important;
-  color: var(--md-sys-color-on-surface-variant) !important;
-  background-color: transparent !important;
-  border: none !important;
-  transition: background-color 200ms var(--md-sys-motion-easing-emphasized),
-              color 200ms var(--md-sys-motion-easing-emphasized) !important;
-}
-
-moz-page-nav-button .page-nav-icon,
-moz-page-nav-button::part(icon) {
-  width: 22px !important;
-  height: 22px !important;
-  min-width: 22px !important;
-  min-height: 22px !important;
-  -moz-context-properties: fill;
-  fill: var(--md-sys-color-on-surface-variant) !important;
-  transition: fill 200ms var(--md-sys-motion-easing-emphasized) !important;
-}
-
-/* Nav Drawer Hover */
-moz-page-nav-button:not([selected]):hover::part(button),
-moz-page-nav-button:not([selected]) > button:hover,
-moz-page-nav-button:not([selected]) a:hover {
-  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent) !important;
-  color: var(--md-sys-color-on-surface) !important;
-}
-moz-page-nav-button:not([selected]):hover .page-nav-icon {
-  fill: var(--md-sys-color-on-surface) !important;
-}
-
-/* Nav Drawer Active/Selected Destination (M3 Primary Container Blue) */
-moz-page-nav-button[selected]::part(button),
-moz-page-nav-button button[selected] {
-  background-color: var(--md-sys-color-primary-container) !important;
-  color: var(--md-sys-color-on-primary-container) !important;
-  font-weight: 600 !important;
-}
-moz-page-nav-button[selected]::part(button)::before,
-moz-page-nav-button button[selected]::before {
-  display: none !important;
-}
-moz-page-nav-button[selected] .page-nav-icon,
-moz-page-nav-button[selected]::part(icon) {
-  fill: var(--md-sys-color-on-primary-container) !important;
-}
-
-/* Nav Separator */
-.nav-separator,
-#categories hr {
-  border: none !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent) !important;
-  margin: 12px 16px !important;
-  width: auto !important;
-}
-
-/* --------------------------------------------------------------------------
-   5. Main Content Area & Single-Layer M3 Search Bar
-   -------------------------------------------------------------------------- */
-.main-content {
-  padding-inline: 48px !important;
-  padding-top: 0 !important;
-  margin-top: 0 !important;
-  background-color: var(--md-sys-color-surface) !important;
-}
-
-@media (max-width: 950px) {
-  .main-content {
-    padding-inline: 20px !important;
-  }
-}
-
-.pane-container {
-  width: min(100%, 780px) !important;
-  max-width: 780px !important;
-  min-width: min-content !important;
-  margin-inline: 0 !important;
-}
-
-#search-container {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 10 !important;
-  background-color: var(--md-sys-color-surface) !important;
-  padding: 24px 0 16px 0 !important;
-  margin: 0 !important;
-  width: 100% !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Eliminate Double Outline: moz-input-search is transparent host */
-moz-input-search,
-#searchInput {
-  display: block !important;
-  width: 100% !important;
-  background: transparent !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-
-  /* CSS token injection for shadow DOM */
-  --input-text-background-color: var(--md-sys-color-surface-container-high) !important;
-  --input-text-border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 35%, transparent) !important;
-  --input-text-border-radius: 9999px !important;
-  --input-search-border-radius: 9999px !important;
-  --input-text-min-height: 48px !important;
-  --input-text-color: var(--md-sys-color-on-surface) !important;
-  --input-text-icon-size: 20px !important;
-  --input-search-icon-size: 20px !important;
-  --icon-color: var(--md-sys-color-on-surface-variant) !important;
-}
-
-/* Target the real inner input directly */
-moz-input-search::part(input),
-#searchInput::part(input) {
-  height: 48px !important;
-  min-height: 48px !important;
-  border-radius: var(--md-sys-shape-corner-full) !important;
-  background-color: var(--md-sys-color-surface-container-high) !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 35%, transparent) !important;
-  padding-inline-start: 48px !important;
-  padding-inline-end: 20px !important;
-  color: var(--md-sys-color-on-surface) !important;
-  font-family: var(--font-sans) !important;
-  font-size: 14px !important;
-  box-sizing: border-box !important;
-  box-shadow: none !important;
-  transition: all 200ms var(--md-sys-motion-easing-emphasized) !important;
-}
-
-moz-input-search::part(input):hover,
-#searchInput::part(input):hover {
-  background-color: var(--md-sys-color-surface-container-highest) !important;
-}
-
-moz-input-search::part(input):focus,
-#searchInput::part(input):focus {
-  border-color: var(--md-sys-color-primary) !important;
-  outline: 2px solid var(--md-sys-color-primary) !important;
-  outline-offset: 0 !important;
-  background-color: var(--md-sys-color-surface-container-highest) !important;
-}
-
-/* Managed Banner (Only when NOT hidden) */
-#policies-container-content:not([hidden]),
-#policies-container:not([hidden]) {
-  border-radius: 16px !important;
-  background-color: var(--md-sys-color-surface-container-high) !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 40%, transparent) !important;
-  padding: 12px 18px !important;
-  margin-bottom: 16px !important;
-  color: var(--md-sys-color-on-surface) !important;
-  font-size: 13.5px !important;
-  font-weight: 500 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-}
-
-/* --------------------------------------------------------------------------
-   6. SINGLE-LAYER TONAL CARDS (Absolute Elimination of Card-itis)
-   -------------------------------------------------------------------------- */
-
-/* Outer Layout Wrappers: Completely Transparent */
-#mainPrefPane,
-html|div[data-category],
-setting-group,
-setting-group:has(> moz-card) {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-}
-
-setting-group {
-  margin: 0 0 16px 0 !important;
-}
-
-/* The Single Card Container */
-setting-group > moz-card:not([hidden]),
-groupbox[data-category]:not([hidden]):not(#no-results-message),
-#pane-experimental-featureGates > moz-card:not([hidden]) {
   display: flex !important;
   flex-direction: column !important;
-  background-color: var(--md-sys-color-surface-container) !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent) !important;
-  border-radius: 20px !important;
-  padding: 24px !important;
-  margin: 0 0 16px 0 !important;
-  box-shadow: none !important;
-  box-sizing: border-box !important;
-}
-
-/* All Inner Containers Inside Cards: Must Be Completely Transparent */
-moz-card > moz-fieldset,
-setting-group moz-fieldset,
-groupbox moz-fieldset,
-groupbox fieldset,
-moz-card fieldset,
-setting-control,
-#weavePrefsDeck,
-#noFxaAccount,
-#hasFxaAccount,
-#fxaGroup,
-#fxaNoLoginStatus,
-moz-box-group,
-#noFxaAccountGroup {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-  padding: 0 !important;
-}
-
-moz-card moz-box-item,
-#noFxaAccountGroup moz-box-item {
-  background: transparent !important;
-  border: none !important;
-  padding: 6px 0 !important;
-}
-
-/* moz-promo: Clean row without inner box */
-moz-promo,
-moz-promo .container,
-moz-promo::part(container) {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  --promo-background-color: transparent !important;
-  --promo-border: none !important;
-  --promo-padding: 0 !important;
-}
-
-moz-promo .container {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
   gap: 16px !important;
+  transition: background-color 200ms ease, border-color 200ms ease !important;
 }
 
-moz-promo .image-container {
-  width: 54px !important;
-  height: 54px !important;
-  flex-shrink: 0 !important;
+/* --------------------------------------------------------------------------
+   8. Material 3 Setting Rows & Items (moz-box-item, setting-control)
+   -------------------------------------------------------------------------- */
+moz-box-group {
+  --box-border: none !important;
+  --box-border-color: transparent !important;
+  --box-border-radius: 16px !important;
+  outline: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+moz-box-item,
+setting-control,
+.setting-row {
+  min-height: 56px !important;
+  padding: 14px 16px !important;
+  border-radius: 16px !important;
+  margin-bottom: 2px !important;
+  box-sizing: border-box !important;
   display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
-}
-
-moz-promo .image-container img {
-  width: 48px !important;
-  height: 48px !important;
-  object-fit: contain !important;
-}
-
-moz-promo .text-container {
-  flex: 1 !important;
-  font-size: 14px !important;
-  color: var(--md-sys-color-on-surface) !important;
-  line-height: 1.4 !important;
-}
-
-/* Multi-Item Data Lists (Search Engines, App Handlers): Low Container */
-#handlersView,
-#translations-manage-install-list,
-#hilalSidebarCustomList {
-  border-radius: 16px !important;
-  background-color: var(--md-sys-color-surface-container-low) !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent) !important;
-  overflow: hidden !important;
-  margin-block: 8px !important;
-}
-
-#handlersView > richlistitem,
-#translations-manage-install-list > .translations-manage-language {
-  min-height: 48px !important;
-  padding: 10px 16px !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 25%, transparent) !important;
-  box-sizing: border-box !important;
-  background-color: transparent !important;
   transition: background-color 150ms ease !important;
 }
 
-#handlersView > richlistitem:last-child,
-#translations-manage-install-list > .translations-manage-language:last-child {
-  border-bottom: none !important;
+moz-box-item:hover,
+setting-control:hover,
+.setting-row:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 4%, transparent) !important;
 }
 
-#handlersView > richlistitem:hover,
-#translations-manage-install-list > .translations-manage-language:hover {
-  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 6%, transparent) !important;
+/* Item Labels & Descriptions */
+moz-box-item .label,
+setting-control .label,
+.setting-row .title {
+  font-family: var(--font-sans) !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+
+moz-box-item .description,
+setting-control .description,
+.setting-row .description {
+  font-family: var(--font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
+  line-height: 1.4 !important;
+}
+
+/* Item Icons */
+moz-box-item .icon,
+setting-control .icon {
+  --icon-size: 24px !important;
+  fill: var(--md-sys-color-primary) !important;
+  color: var(--md-sys-color-primary) !important;
 }
 
 /* --------------------------------------------------------------------------
-   7. Material 3 Switch (Official 52x32dp Spec)
+   9. Official Material 3 Switch (52x32dp)
+   Specs: https://m3.material.io/components/switch/overview
    -------------------------------------------------------------------------- */
 moz-toggle,
-.toggle-button,
-html|button.toggle-button {
-  --toggle-width: 52px;
-  --toggle-height: 32px;
-  --toggle-border-radius: var(--md-sys-shape-corner-full);
-  --toggle-border-width: 2px;
-  --toggle-border-color: var(--md-sys-color-outline);
-  --toggle-background-color: var(--md-sys-color-surface-container-highest);
-  --toggle-background-color-pressed: var(--md-sys-color-primary);
-  --toggle-dot-width: 16px;
-  --toggle-dot-height: 16px;
-  --toggle-dot-margin: 6px;
-  --toggle-dot-transform-x: 20px;
-  --toggle-dot-background-color: var(--md-sys-color-outline);
-  --toggle-dot-background-color-on-pressed: var(--md-sys-color-on-primary);
-}
-
-.toggle-button,
-moz-toggle::part(button) {
-  appearance: none !important;
-  width: 52px !important;
-  height: 32px !important;
-  min-height: 32px !important;
-  min-width: 52px !important;
-  max-width: 52px !important;
-  padding: 0 !important;
-  border-radius: var(--md-sys-shape-corner-full) !important;
-  border: 2px solid var(--md-sys-color-outline) !important;
-  background-color: var(--md-sys-color-surface-container-highest) !important;
-  box-sizing: border-box !important;
+[is="moz-toggle"] {
+  --toggle-width: 52px !important;
+  --toggle-height: 32px !important;
+  --toggle-border-radius: 9999px !important;
+  --toggle-border-width: 2px !important;
+  --toggle-border-color: var(--md-sys-color-outline) !important;
+  --toggle-background-color: var(--md-sys-color-surface-container-highest) !important;
+  --toggle-dot-background-color: var(--md-sys-color-outline) !important;
+  --toggle-dot-margin: 4px !important;
+  --toggle-dot-width: 16px !important;
+  --toggle-dot-height: 16px !important;
+  --toggle-dot-transform-x: 20px !important;
+  --toggle-background-color-pressed: var(--md-m3-switch-on-track) !important;
+  --toggle-background-color-pressed-hover: var(--md-m3-switch-on-track-hover) !important;
+  --toggle-dot-background-color-on-pressed: var(--md-m3-switch-on-thumb) !important;
   cursor: pointer !important;
-  position: relative !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  transition: background-color 200ms var(--md-sys-motion-easing-emphasized),
-              border-color 200ms var(--md-sys-motion-easing-emphasized) !important;
-}
-
-.toggle-button:focus-visible,
-moz-toggle:focus-visible::part(button) {
-  outline: 2px solid var(--md-sys-color-primary) !important;
-  outline-offset: 2px !important;
-}
-
-.toggle-button::before,
-moz-toggle::part(button)::before {
-  content: "" !important;
-  display: block !important;
-  width: 16px !important;
-  height: 16px !important;
-  margin: 6px !important;
-  border-radius: 50% !important;
-  background-color: var(--md-sys-color-outline) !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-  background-size: 14px 14px !important;
-  translate: 0 0 !important;
-  transition: translate 250ms var(--md-sys-motion-easing-emphasized),
-              width 200ms var(--md-sys-motion-easing-emphasized),
-              height 200ms var(--md-sys-motion-easing-emphasized),
-              margin 200ms var(--md-sys-motion-easing-emphasized),
-              background-color 200ms var(--md-sys-motion-easing-emphasized) !important;
-}
-
-.toggle-button:hover:not([aria-pressed="true"])::before,
-moz-toggle:hover:not([pressed])::part(button)::before {
-  background-color: var(--md-sys-color-on-surface-variant) !important;
-}
-
-.toggle-button[aria-pressed="true"],
-moz-toggle[pressed]::part(button) {
-  background-color: var(--md-sys-color-primary) !important;
-  border-color: var(--md-sys-color-primary) !important;
-}
-
-.toggle-button[aria-pressed="true"]::before,
-moz-toggle[pressed]::part(button)::before {
-  width: 24px !important;
-  height: 24px !important;
-  margin: 2px !important;
-  translate: 20px 0 !important;
-  background-color: var(--md-sys-color-on-primary) !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23042f66' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") !important;
-}
-
-.toggle-button[aria-pressed="true"]:active::before,
-moz-toggle[pressed]:active::part(button)::before {
-  width: 28px !important;
-  translate: 16px 0 !important;
-}
-
-.toggle-button:dir(rtl)[aria-pressed="true"]::before,
-moz-toggle:dir(rtl)[pressed]::part(button)::before {
-  translate: -20px 0 !important;
 }
 
 /* --------------------------------------------------------------------------
-   8. Material 3 Buttons
+   10. Material 3 Buttons
+   Filled pill primary (40dp), tonal pill accessory (40dp)
    -------------------------------------------------------------------------- */
-/* Primary Filled Pill Button */
 button.primary,
 button[primary="true"],
 moz-button[type="primary"],
 #setDefaultButton,
-#noFxaSignIn,
-#addEngineButton {
+#noFxaSignIn {
   height: 40px !important;
   min-height: 40px !important;
   border-radius: var(--md-sys-shape-corner-full) !important;
@@ -2407,8 +2267,8 @@ moz-button[type="primary"],
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  background-color: var(--md-sys-color-primary) !important;
-  color: var(--md-sys-color-on-primary) !important;
+  background-color: var(--md-m3-active-pill-bg) !important;
+  color: var(--md-m3-active-pill-fg) !important;
   border: none !important;
   transition: background-color 150ms var(--md-sys-motion-easing-emphasized),
               transform 100ms ease !important;
@@ -2418,26 +2278,24 @@ button.primary:hover,
 button[primary="true"]:hover,
 moz-button[type="primary"]:hover,
 #setDefaultButton:hover,
-#noFxaSignIn:hover,
-#addEngineButton:hover {
-  background-color: color-mix(in srgb, var(--md-sys-color-primary) 88%, #ffffff) !important;
+#noFxaSignIn:hover {
+  background-color: var(--md-m3-switch-on-track-hover) !important;
 }
 
 button.primary:active,
 button[primary="true"]:active,
 moz-button[type="primary"]:active,
 #setDefaultButton:active,
-#noFxaSignIn:active,
-#addEngineButton:active {
+#noFxaSignIn:active {
   transform: scale(0.97) !important;
 }
 
-/* Secondary / Accessory Pill Button */
+/* Secondary / Tonal Accessory Pill Button */
 button:not(.primary):not([primary="true"]),
 .accessory-button,
 button[is="highlightable-button"] {
-  height: 38px !important;
-  min-height: 38px !important;
+  height: 40px !important;
+  min-height: 40px !important;
   border-radius: var(--md-sys-shape-corner-full) !important;
   padding: 0 20px !important;
   font-family: var(--font-sans) !important;
@@ -2452,7 +2310,7 @@ button[is="highlightable-button"] {
   gap: 8px !important;
   background-color: var(--md-sys-color-surface-container-high) !important;
   color: var(--md-sys-color-on-surface) !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 35%, transparent) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
   transition: background-color 150ms var(--md-sys-motion-easing-emphasized),
               border-color 150ms var(--md-sys-motion-easing-emphasized),
               transform 100ms ease !important;
@@ -2471,16 +2329,16 @@ button[is="highlightable-button"]:active {
 }
 
 /* --------------------------------------------------------------------------
-   9. Form Controls (Selects, Text Inputs, Checkboxes, Radios)
+   11. Material 3 Form Controls (Dropdowns, Inputs, Radios, Checkboxes)
    -------------------------------------------------------------------------- */
 menulist,
 html|select,
 moz-select {
-  height: 42px !important;
-  min-height: 42px !important;
+  height: 44px !important;
+  min-height: 44px !important;
   border-radius: 12px !important;
   background-color: var(--md-sys-color-surface-container-high) !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 40%, transparent) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
   padding: 0 16px !important;
   color: var(--md-sys-color-on-surface) !important;
   font-family: var(--font-sans) !important;
@@ -2509,11 +2367,11 @@ html|input[type="text"],
 html|input[type="password"],
 html|input[type="url"],
 moz-input-text {
-  height: 42px !important;
-  min-height: 42px !important;
+  height: 44px !important;
+  min-height: 44px !important;
   border-radius: 12px !important;
   background-color: var(--md-sys-color-surface-container-high) !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 40%, transparent) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
   padding: 0 16px !important;
   color: var(--md-sys-color-on-surface) !important;
   font-family: var(--font-sans) !important;
@@ -2542,7 +2400,7 @@ moz-checkbox::part(box) {
   height: 18px !important;
   min-width: 18px !important;
   min-height: 18px !important;
-  border-radius: 5px !important;
+  border-radius: 4px !important;
   border: 2px solid var(--md-sys-color-outline) !important;
   background-color: transparent !important;
   box-sizing: border-box !important;
@@ -2562,10 +2420,10 @@ moz-radio {
 
 radio::part(box),
 moz-radio::part(box) {
-  width: 18px !important;
-  height: 18px !important;
-  min-width: 18px !important;
-  min-height: 18px !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
   border-radius: 50% !important;
   border: 2px solid var(--md-sys-color-outline) !important;
   background-color: transparent !important;
@@ -2578,8 +2436,40 @@ moz-radio[selected]::part(box) {
 }
 
 /* --------------------------------------------------------------------------
-   10. Hilal Browser Panels (paneHilal)
+   12. Specific Panes Styling (Search, Privacy, Hilal)
    -------------------------------------------------------------------------- */
+
+/* Search Shortcuts Table (media_1788736168487.png) */
+#oneClickSearchProvidersGroup {
+  background-color: var(--md-sys-color-surface-container) !important;
+  border-radius: 24px !important;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent) !important;
+  padding: 24px !important;
+}
+
+#engineList {
+  background-color: var(--md-sys-color-surface-container-low) !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  margin: 16px 0 !important;
+}
+
+/* Privacy & Content Blocking Options */
+.privacy-detailedoption {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  padding: 16px !important;
+  margin-bottom: 12px !important;
+  transition: border-color 150ms ease !important;
+}
+
+.privacy-detailedoption[selected="true"] {
+  border-color: var(--md-sys-color-primary) !important;
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 8%, var(--md-sys-color-surface-container-high)) !important;
+}
+
+/* Hilal Browser Pane Cards */
 #hilalWorkspacesGroup,
 #hilalSidebarGroup,
 #hilalPrivacyGroup,
@@ -2589,10 +2479,10 @@ moz-radio[selected]::part(box) {
 #hilalLanguageGroup,
 #hilalShortcutsGroup {
   background-color: var(--md-sys-color-surface-container) !important;
-  border-radius: 20px !important;
+  border-radius: 24px !important;
   border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent) !important;
   padding: 24px !important;
-  margin: 0 0 16px 0 !important;
+  margin: 0 0 20px 0 !important;
 }
 
 .shortcuts-category-card,
@@ -2600,7 +2490,7 @@ moz-radio[selected]::part(box) {
 #hilalBangsForm {
   background-color: var(--md-sys-color-surface-container-low) !important;
   border-radius: 16px !important;
-  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 30%, transparent) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
   padding: 16px !important;
 }
 
@@ -2614,6 +2504,7 @@ moz-radio[selected]::part(box) {
   border-radius: 6px !important;
   padding: 4px 10px !important;
   font-weight: 600 !important;
+  font-family: var(--font-mono) !important;
   color: var(--md-sys-color-on-surface) !important;
 }
 
