@@ -73,6 +73,7 @@
 
 /* ============================================================
    4. Material Design 3 Expressive Solid Flat Palette & Overlay
+      Aligned with Hilal Browser Identity (BRANDING.md & Live UI)
    ============================================================ */
 
 #hilal-welcome-overlay.beer {
@@ -84,76 +85,1066 @@
   overflow-x: hidden;
   overflow-y: auto;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   background-color: var(--surface) !important;
   background-image: none !important;
   color: var(--on-surface);
-  color-scheme: dark;
   -moz-window-dragging: no-drag;
+  animation: hw-fade-in 240ms cubic-bezier(0.2, 0, 0, 1) both;
 
-  /* Solid Flat M3 Expressive Tokens (NO GRADIENTS) */
-  --primary: #53dbca;
-  --on-primary: #003731;
-  --primary-container: #004f46;
-  --on-primary-container: #72f8e6;
+  /* Default Light Mode Tokens (Hilal Blue & M3 Expressive) */
+  --primary: #0b57d0;
+  --on-primary: #ffffff;
+  --primary-container: #d3e3fd;
+  --on-primary-container: #041e49;
+  --primary-glow: rgba(11, 87, 208, 0.2);
 
-  --secondary: #b1ccc5;
-  --on-secondary: #1c3530;
-  --secondary-container: #333d3b;
-  --on-secondary-container: #cde8e1;
+  --secondary: #575e71;
+  --on-secondary: #ffffff;
+  --secondary-container: #e8edf5;
+  --on-secondary-container: #141b2c;
 
-  --tertiary: #a9cbe4;
-  --on-tertiary: #0f3448;
-  --tertiary-container: #263845;
-  --on-tertiary-container: #c5e7ff;
+  --tertiary: #6e5676;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #f7d8ff;
+  --on-tertiary-container: #271430;
 
-  --surface: #111413;
-  --on-surface: #e1e9e6;
-  --surface-variant: #3a4240;
-  --on-surface-variant: #b0bcba;
+  --surface: #f8f9fd;
+  --on-surface: #1b1c1f;
+  --surface-variant: #e1e3e8;
+  --on-surface-variant: #444746;
 
-  --surface-container-lowest: #0c0f0e;
-  --surface-container-low: #151918;
-  --surface-container: #1b201f;
-  --surface-container-high: #222826;
-  --surface-container-highest: #2a312f;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f3f5f9;
+  --surface-container: #ffffff;
+  --surface-container-high: #eaeff6;
+  --surface-container-highest: #e0e6f0;
 
-  --outline: #7a8683;
-  --outline-variant: rgba(122, 134, 131, 0.25);
-  --speed: 160ms;
+  --outline: #74777f;
+  --outline-variant: rgba(0, 0, 0, 0.08);
+  --shadow: rgba(0, 0, 0, 0.08);
+  --speed: 200ms;
   --ease: cubic-bezier(0.2, 0, 0, 1);
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: light) {
-  #hilal-welcome-overlay.beer {
-    --primary: #006a60;
-    --on-primary: #ffffff;
-    --primary-container: #72f8e6;
-    --on-primary-container: #00201d;
+#hilal-welcome-overlay.beer.dark,
+#hilal-welcome-overlay.dark {
+  /* Dark Mode Tokens (Hilal Midnight #121826 & M3 Light Blue) */
+  --primary: #a8c7fa;
+  --on-primary: #041e49;
+  --primary-container: #0842a0;
+  --on-primary-container: #d3e3fd;
+  --primary-glow: rgba(168, 199, 250, 0.18);
 
-    --secondary: #4a635d;
-    --on-secondary: #ffffff;
-    --secondary-container: #d9e5e1;
-    --on-secondary-container: #06201b;
+  --secondary: #bec6dc;
+  --on-secondary: #283141;
+  --secondary-container: #3e4759;
+  --on-secondary-container: #dae2f9;
 
-    --surface: #f6f8f7;
-    --on-surface: #171d1b;
-    --surface-variant: #d6e2de;
-    --on-surface-variant: #3e4846;
+  --tertiary: #ddbce2;
+  --on-tertiary: #3e2846;
+  --tertiary-container: #553e5d;
+  --on-tertiary-container: #f7d8ff;
 
-    --surface-container-lowest: #ffffff;
-    --surface-container-low: #edf1ef;
-    --surface-container: #e6eae8;
-    --surface-container-high: #dee3e1;
-    --surface-container-highest: #d6dedb;
+  --surface: #121826;
+  --on-surface: #e2e8f0;
+  --surface-variant: #283144;
+  --on-surface-variant: #94a3b8;
 
-    --outline: #6d7875;
-    --outline-variant: rgba(109, 120, 117, 0.22);
-    color-scheme: light;
+  --surface-container-lowest: #0d111a;
+  --surface-container-low: #151c2c;
+  --surface-container: #1a2234;
+  --surface-container-high: #212b42;
+  --surface-container-highest: #2a3652;
+
+  --outline: #64748b;
+  --outline-variant: rgba(255, 255, 255, 0.1);
+  --shadow: rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  #hilal-welcome-overlay.beer:not(.light) {
+    --primary: #a8c7fa;
+    --on-primary: #041e49;
+    --primary-container: #0842a0;
+    --on-primary-container: #d3e3fd;
+    --primary-glow: rgba(168, 199, 250, 0.18);
+
+    --secondary: #bec6dc;
+    --on-secondary: #283141;
+    --secondary-container: #3e4759;
+    --on-secondary-container: #dae2f9;
+
+    --tertiary: #ddbce2;
+    --on-tertiary: #3e2846;
+    --tertiary-container: #553e5d;
+    --on-tertiary-container: #f7d8ff;
+
+    --surface: #121826;
+    --on-surface: #e2e8f0;
+    --surface-variant: #283144;
+    --on-surface-variant: #94a3b8;
+
+    --surface-container-lowest: #0d111a;
+    --surface-container-low: #151c2c;
+    --surface-container: #1a2234;
+    --surface-container-high: #212b42;
+    --surface-container-highest: #2a3652;
+
+    --outline: #64748b;
+    --outline-variant: rgba(255, 255, 255, 0.1);
+    --shadow: rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
   }
+}
+
+#hilal-welcome-overlay.beer.light,
+#hilal-welcome-overlay.light {
+  --primary: #0b57d0;
+  --on-primary: #ffffff;
+  --primary-container: #d3e3fd;
+  --on-primary-container: #041e49;
+  --primary-glow: rgba(11, 87, 208, 0.2);
+
+  --secondary: #575e71;
+  --on-secondary: #ffffff;
+  --secondary-container: #e8edf5;
+  --on-secondary-container: #141b2c;
+
+  --surface: #f8f9fd;
+  --on-surface: #1b1c1f;
+  --surface-variant: #e1e3e8;
+  --on-surface-variant: #444746;
+
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f3f5f9;
+  --surface-container: #ffffff;
+  --surface-container-high: #eaeff6;
+  --surface-container-highest: #e0e6f0;
+
+  --outline: #74777f;
+  --outline-variant: rgba(0, 0, 0, 0.08);
+  --shadow: rgba(0, 0, 0, 0.08);
+  color-scheme: light;
 }
 
 #hilal-welcome-overlay * {
   -moz-window-dragging: no-drag;
 }
+
+/* ============================================================
+   5. Keyframe Animations & Micro-interactions
+   ============================================================ */
+
+@keyframes hw-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes hw-stage-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hw-stage-enter {
+  animation: hw-stage-enter 240ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+/* ============================================================
+   6. Layout Containers & Surface Geometry
+   ============================================================ */
+
+.hw-overlay-center {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.hw-card {
+  background-color: var(--surface-container) !important;
+  border: 1px solid var(--outline-variant) !important;
+  box-shadow: 0 16px 48px var(--shadow) !important;
+  border-radius: 28px !important;
+  box-sizing: border-box;
+  transition: box-shadow var(--speed) var(--ease), background-color var(--speed) var(--ease);
+}
+
+.hw-intro-card {
+  max-width: 640px;
+  width: 100%;
+  padding: 52px 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.hw-intro-logo-wrap {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background-color: var(--primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 20px var(--primary-glow);
+}
+
+.hw-intro-logo {
+  width: 50px;
+  height: 50px;
+  display: block;
+}
+
+.hw-intro-heading {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 12px 0 0 0;
+  color: var(--on-surface);
+  letter-spacing: -0.025em;
+}
+
+.hw-intro-subtitle {
+  font-size: 1rem;
+  color: var(--on-surface-variant);
+  margin: 10px 0 0 0;
+  line-height: 1.55;
+  max-width: 480px;
+}
+
+.hw-intro-pills {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.hw-pill-feature {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
+  color: var(--on-surface);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.hw-pill-feature i {
+  font-size: 16px;
+  color: var(--primary);
+}
+
+.hw-intro-cta-wrap {
+  margin-top: 36px;
+}
+
+/* ============================================================
+   7. Flow Card & Stepper Header
+   ============================================================ */
+
+.hw-flow-card {
+  max-width: 880px !important;
+  width: 100% !important;
+  padding: 22px 32px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: calc(100vh - 32px) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+#hilal-welcome-overlay header.hw-header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  min-height: 38px !important;
+  padding: 0 0 10px 0 !important;
+  border-bottom: 1px solid var(--outline-variant) !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.hw-header-brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-weight: 700 !important;
+  font-size: 0.9375rem !important;
+  color: var(--on-surface) !important;
+  flex-shrink: 0 !important;
+}
+
+.hw-header-logo {
+  width: 22px !important;
+  height: 22px !important;
+  display: block !important;
+}
+
+.hw-stepper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.hw-step-item {
+  width: 24px !important;
+  height: 5px !important;
+  border-radius: 9999px !important;
+  background-color: var(--surface-container-highest) !important;
+  overflow: hidden !important;
+  transition: all 240ms ease !important;
+}
+
+.hw-step-item.hw-step-active {
+  width: 38px !important;
+  background-color: var(--primary) !important;
+}
+
+.hw-step-item.hw-step-done {
+  background-color: var(--primary) !important;
+  opacity: 0.55 !important;
+}
+
+.hw-step-badge {
+  background-color: var(--primary-container) !important;
+  color: var(--on-primary-container) !important;
+  padding: 3px 10px !important;
+  border-radius: 9999px !important;
+  font-size: 0.6875rem !important;
+  font-weight: 700 !important;
+  margin-left: 6px !important;
+}
+
+.hw-stage-scroll {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 14px 4px 10px !important;
+  box-sizing: border-box !important;
+}
+
+.hw-stage-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.hw-stage-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--outline-variant);
+  border-radius: 9999px;
+}
+
+.hw-stage-head {
+  text-align: center !important;
+  margin-bottom: 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.hw-badge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--primary-container);
+  color: var(--on-primary-container);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 10px;
+  border-radius: 9999px;
+}
+
+.hw-stage-heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 4px 0 0 0;
+  color: var(--on-surface);
+  letter-spacing: -0.02em;
+}
+
+.hw-stage-subheading {
+  font-size: 0.8125rem;
+  color: var(--on-surface-variant);
+  margin: 2px 0 0 0;
+  max-width: 560px;
+  line-height: 1.35;
+}
+
+/* ============================================================
+   8. Grid & Selection Tiles
+   ============================================================ */
+
+.hw-section-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.hw-section-gap {
+  margin-top: 14px;
+}
+
+.hw-section-title-wrap {
+  margin-bottom: 8px;
+}
+
+.hw-section-title {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--on-surface);
+}
+
+.hw-section-desc {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+  margin-top: 1px;
+}
+
+.hw-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.hw-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.hw-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 720px) {
+  .hw-grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .hw-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hw-tile {
+  background-color: var(--surface-container-lowest);
+  border: 1.5px solid var(--outline-variant);
+  border-radius: 16px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 180ms cubic-bezier(0.2, 0, 0, 1),
+              border-color 180ms ease,
+              background-color 180ms ease,
+              box-shadow 180ms ease;
+  box-sizing: border-box;
+  min-height: auto;
+  justify-content: space-between;
+}
+
+.hw-tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 6px 20px var(--shadow);
+}
+
+.hw-tile:has(input:checked) {
+  border-color: var(--primary);
+  background-color: var(--surface-container-high);
+  box-shadow: 0 2px 12px var(--primary-glow);
+}
+
+.hw-tile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.hw-tile-spacer {
+  flex: 1;
+}
+
+.hw-tile-icon-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--primary-container);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hw-tile-icon-circle i {
+  font-size: 17px;
+}
+
+.hw-engine-icon-wrap {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--surface-container-lowest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hw-tile-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin: 0 0 2px 0;
+  color: var(--on-surface);
+}
+
+.hw-tile-desc {
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--on-surface-variant);
+  margin: 0;
+  flex-grow: 1;
+}
+
+.hw-tile-bottom {
+  margin-top: 6px;
+}
+
+.hw-badge-chip-small {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  background-color: var(--surface-container-highest);
+  color: var(--on-surface-variant);
+}
+
+.hw-badge-chip-small.primary {
+  background-color: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.hw-tile-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.hw-tile-label-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hw-tile-sub {
+  font-size: 0.6875rem;
+  color: var(--on-surface-variant);
+  margin-top: 1px;
+}
+
+/* ============================================================
+   9. Controls: Radio, Checkbox, Switch & Segmented
+   ============================================================ */
+
+.hw-radio,
+.hw-checkbox {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.hw-radio input,
+.hw-checkbox input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.hw-radio span {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--outline);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 160ms ease;
+  box-sizing: border-box;
+}
+
+.hw-radio input:checked + span {
+  border-color: var(--primary);
+}
+
+.hw-radio input:checked + span::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--primary);
+}
+
+.hw-checkbox span {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--outline);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 160ms ease;
+  box-sizing: border-box;
+}
+
+.hw-checkbox input:checked + span {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.hw-checkbox input:checked + span::after {
+  content: "";
+  width: 5px;
+  height: 9px;
+  border: solid var(--on-primary);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-top: -2px;
+}
+
+.hw-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.hw-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.hw-switch span {
+  width: 48px;
+  height: 26px;
+  border-radius: 9999px;
+  background-color: var(--surface-container-highest);
+  border: 1px solid var(--outline-variant);
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  transition: all 200ms ease;
+  box-sizing: border-box;
+}
+
+.hw-switch span::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--outline);
+  transition: all 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.hw-switch input:checked + span {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.hw-switch input:checked + span::after {
+  transform: translateX(22px);
+  background-color: var(--on-primary);
+}
+
+/* ============================================================
+   10. Accent Color Picker & Swatches
+   ============================================================ */
+
+.hw-segmented-bar {
+  display: inline-flex;
+  background-color: var(--surface-container-highest);
+  border-radius: 9999px;
+  padding: 3px;
+  gap: 3px;
+  width: fit-content;
+}
+
+.hw-segment-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  transition: all 160ms ease;
+  box-sizing: border-box;
+}
+
+.hw-segment-btn i {
+  font-size: 16px;
+}
+
+.hw-segment-btn.active {
+  background-color: var(--surface-container-lowest);
+  color: var(--primary);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.hw-accent-swatches-box {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background-color: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+}
+
+.hw-swatches-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+  margin-bottom: 8px;
+}
+
+.hw-swatches-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hw-swatch-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--swatch-color);
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.hw-swatch-circle:hover {
+  transform: scale(1.15);
+}
+
+.hw-swatch-circle[selected="true"] {
+  box-shadow: 0 0 0 2px var(--surface-container-lowest), 0 0 0 4px var(--swatch-color);
+  transform: scale(1.1);
+}
+
+.hw-swatch-circle i {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.hw-custom-color-wrap {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--outline);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--on-surface-variant);
+  position: relative;
+  overflow: hidden;
+}
+
+.hw-custom-color-wrap i {
+  font-size: 15px;
+}
+
+.hw-custom-color-wrap input[type="color"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================================
+   11. Buttons & Stage Footer
+   ============================================================ */
+
+#hilal-welcome-overlay footer.hw-footer {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  min-height: 48px !important;
+  padding: 12px 0 0 0 !important;
+  border-top: 1px solid var(--outline-variant) !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+}
+
+.hw-footer-nav {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+}
+
+.hw-footer-spacer {
+  flex: 1 !important;
+}
+
+.hw-btn-primary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 10px 24px !important;
+  border-radius: 9999px !important;
+  background-color: var(--primary) !important;
+  color: var(--on-primary) !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  border: none !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 8px var(--primary-glow) !important;
+  transition: transform 160ms ease, box-shadow 160ms ease !important;
+  box-sizing: border-box !important;
+}
+
+.hw-btn-primary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 16px var(--primary-glow) !important;
+}
+
+.hw-btn-primary:active {
+  transform: scale(0.97) !important;
+}
+
+.hw-btn-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 8px 18px !important;
+  border-radius: 9999px !important;
+  background: transparent !important;
+  border: 1.5px solid var(--outline-variant) !important;
+  color: var(--on-surface) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 160ms ease !important;
+  box-sizing: border-box !important;
+}
+
+.hw-btn-secondary i {
+  font-size: 16px;
+}
+
+.hw-btn-secondary:hover:not(:disabled) {
+  border-color: var(--outline) !important;
+  background-color: var(--surface-container-high) !important;
+}
+
+.hw-btn-secondary:disabled {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+}
+
+#hilal-welcome-overlay .hw-btn-icon {
+  all: unset !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  color: var(--on-surface-variant) !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+  transition: all 160ms ease !important;
+}
+
+#hilal-welcome-overlay .hw-btn-icon:hover {
+  background-color: var(--surface-container-high) !important;
+  color: var(--on-surface) !important;
+}
+
+/* ============================================================
+   12. Summary & Getting Started Stage Elements
+   ============================================================ */
+
+.hw-summary-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  background-color: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.hw-summary-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: var(--on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hw-summary-icon i {
+  font-size: 17px;
+}
+
+.hw-summary-text {
+  flex: 1;
+}
+
+.hw-summary-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  margin: 0 0 3px 0;
+}
+
+.hw-summary-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hw-summary-chips .hw-pill-feature {
+  padding: 2px 8px;
+  font-size: 0.6875rem;
+  gap: 4px;
+}
+
+.hw-summary-chips .hw-pill-feature i {
+  font-size: 13px;
+}
+
+.hw-row-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background-color: var(--surface-container-lowest);
+  border: 1.5px solid var(--outline-variant);
+  box-sizing: border-box;
+}
+
+.hw-row-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--surface-container-high);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hw-row-icon i {
+  font-size: 17px;
+}
+
+.hw-row-content {
+  flex: 1;
+}
+
+.hw-row-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  margin: 0 0 1px 0;
+  color: var(--on-surface);
+}
+
+.hw-row-desc {
+  font-size: 0.6875rem;
+  color: var(--on-surface-variant);
+  margin: 0;
+}
+
+.hw-pinned-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+}
+
+.hw-pinned-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hw-tile-compact {
+  min-height: auto;
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+
+.hw-tile-title-compact {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin: 4px 0 0 0;
+  color: var(--on-surface);
+}
+
 

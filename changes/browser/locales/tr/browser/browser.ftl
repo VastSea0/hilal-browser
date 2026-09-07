@@ -18,45 +18,21 @@ hilal-welcome-step-label-spaces = Alanlar
 hilal-welcome-step-label-pin = Pinli sekmeler
 hilal-welcome-step-label-check = Hazır
 
-hilal-welcome-stage-0-kicker = İlk seçimler
-hilal-welcome-stage-0-title = Hilal'in neyle başlayacağını seçin.
-hilal-welcome-stage-0-subtitle = Yalnızca gereken verileri taşıyın ve sistem bağlantılarının burada açılıp açılmayacağına karar verin.
+hilal-welcome-stage-0-kicker = Görünüm
+hilal-welcome-stage-0-title = Hilal'i kendi tarzınıza göre özelleştirin.
+hilal-welcome-stage-0-subtitle = Tercih ettiğiniz tema görünümünü ve vurgu rengi paletini seçin.
 
-hilal-welcome-stage-1-kicker = Görünüm
-hilal-welcome-stage-1-title = Yoğunluğu seçin.
-hilal-welcome-stage-1-subtitle = Standart mod araç çubuğunu her zaman görünür tutar. Kompakt mod yalnızca ihtiyaç olduğunda gösterir.
+hilal-welcome-stage-1-kicker = Düzen & Alanlar
+hilal-welcome-stage-1-title = Tarama düzeninizi belirleyin.
+hilal-welcome-stage-1-subtitle = Sekme yönünü seçin ve başlangıç çalışma alanlarınızı oluşturun.
 
-hilal-welcome-stage-2-kicker = Sekmeler
-hilal-welcome-stage-2-title = Sekme yönünü seçin.
-hilal-welcome-stage-2-subtitle = Dikey sekmeler kenar çubuğunda durur. Yatay sekmeler pencerenin üstünde sıralanır.
+hilal-welcome-stage-2-kicker = Gizlilik & Arama
+hilal-welcome-stage-2-title = Koruma düzeyinizi ve arama motorunuzu seçin.
+hilal-welcome-stage-2-subtitle = Günlük gezinme için dengeli veya daha sıkı gizlilik koruması.
 
-hilal-welcome-stage-3-kicker = Alanlar
-hilal-welcome-stage-3-title = Bağlamlarınızı ayırın.
-hilal-welcome-stage-3-subtitle = Alanlar kişisel, iş ve sosyal sekmeleri kendi gruplarında tutar; birbirlerine karışmazlar.
-
-hilal-welcome-stage-4-kicker = Araç çubuğu
-hilal-welcome-stage-4-title = Araç çubuğunu kontrol edin.
-hilal-welcome-stage-4-subtitle = Otomatik gizleme adres çubuğunu yalnızca üst kenara geldiğinizde gösterir. Her zaman görünür seçeneği sabit tutar.
-
-hilal-welcome-stage-5-kicker = Gizlilik
-hilal-welcome-stage-5-title = Koruma duruşunu seçin.
-hilal-welcome-stage-5-subtitle = Hilal günlük kullanım için uyumlu kalabilir veya sitelerin sizi tanımak için kullandığı yüzeyleri daha sıkı kapatabilir.
-
-hilal-welcome-stage-6-kicker = Arama
-hilal-welcome-stage-6-title = Adres çubuğu motorunu seçin.
-hilal-welcome-stage-6-subtitle = Adres çubuğuna yazdığınızda Hilal bu motoru kullanır. Tarayıcı açıkken dilediğiniz zaman değiştirebilirsiniz.
-
-hilal-welcome-stage-7-kicker = Pinli sekmeler
-hilal-welcome-stage-7-title = Vazgeçilmezleri tek tık uzağa alın.
-hilal-welcome-stage-7-subtitle = Hilal'in başlangıçta pinleyeceği siteleri seçin. Netflix, Spotify, YouTube, GitHub, Reddit, Notion ve Gemini eklemeye hazır.
-
-hilal-welcome-stage-8-kicker = Alanlar
-hilal-welcome-stage-8-title = Karışan sekmeleri azaltın.
-hilal-welcome-stage-8-subtitle = İsterseniz şimdi birkaç başlangıç alanı oluşturun; isterseniz tarayıcıyı boş bırakıp sonra şekillendirin.
-
-hilal-welcome-stage-9-kicker = Bitir
-hilal-welcome-stage-9-title = Temiz pencereye hazır.
-hilal-welcome-stage-9-subtitle = Seçimleriniz yerelde kaydedilir. Hilal kurulum katmanını kapatıp tarayıcı arayüzünü geri getirir.
+hilal-welcome-stage-3-kicker = Başlangıç
+hilal-welcome-stage-3-title = Hilal keşfetmeniz için hazır.
+hilal-welcome-stage-3-subtitle = Verilerinizi aktarın, Hilal'i varsayılan yapın veya doğrudan gezinmeye başlayın.
 
 hilal-welcome-home-preview-image-alt =
     .alt = Hilal Tarayıcı ana sayfa önizlemesi

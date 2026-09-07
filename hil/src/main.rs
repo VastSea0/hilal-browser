@@ -77,8 +77,10 @@ enum Commands {
     Preview {
         #[arg(default_value = "welcome", help = "Page to preview ('welcome' or 'newtab')")]
         page: String,
-        #[arg(long, help = "Stage number to preview directly (0-9 for welcome)")]
+        #[arg(long, help = "Stage number to preview directly (0-3 for welcome)")]
         stage: Option<usize>,
+        #[arg(long, help = "Theme mode to preview ('light' or 'dark')")]
+        theme: Option<String>,
         #[arg(long, help = "Path to save screenshot via headless Chrome")]
         screenshot: Option<PathBuf>,
         #[arg(long, help = "Open in Google Chrome directly")]
@@ -180,11 +182,12 @@ fn main() -> Result<()> {
         Commands::Preview {
             page,
             stage,
+            theme,
             screenshot,
             open,
             port,
         } => {
-            preview(&repo_root, &page, stage, screenshot, open, port)?;
+            preview(&repo_root, &page, stage, theme.as_deref(), screenshot, open, port)?;
         }
     }
 
@@ -1687,7 +1690,7 @@ fn handle_http_request(mut stream: TcpStream, repo_root: &Path) -> Result<()> {
 
     let (status, content_type, body): (&str, &str, Vec<u8>) = match path {
         "/" | "/welcome" | "/welcome.html" | "/index.html" => {
-            let html = r#"<!DOCTYPE html>
+            let html = r##"<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -1704,12 +1707,17 @@ fn handle_http_request(mut stream: TcpStream, repo_root: &Path) -> Result<()> {
           "sidebar.verticalTabs": false,
           "hilal.workspaces.enabled": true,
           "hilal.workspaces.pinned.public": true,
-          "hilal.welcome-screen.seen": false
+          "hilal.welcome-screen.seen": false,
+          "hilal.theme.accentMode": "workspace",
+          "hilal.theme.globalAccentColor": "#0b57d0",
+          "layout.css.prefers-color-scheme.content-override": 2
         },
         getStringPref(k, def) { return this._store[k] ?? def; },
         getBoolPref(k, def) { return this._store[k] ?? def; },
+        getIntPref(k, def) { return this._store[k] ?? def; },
         setBoolPref(k, v) { this._store[k] = v; },
-        setStringPref(k, v) { this._store[k] = v; }
+        setStringPref(k, v) { this._store[k] = v; },
+        setIntPref(k, v) { this._store[k] = v; }
       },
       io: {
         newURI(url) { return new URL(url, window.location.href); }
@@ -1772,17 +1780,24 @@ fn handle_http_request(mut stream: TcpStream, repo_root: &Path) -> Result<()> {
       await welcome.start();
       const params = new URLSearchParams(window.location.search);
       const stageParam = params.get("stage");
+      const themeParam = params.get("theme");
+      if (themeParam === "dark") {
+        welcome._selectedThemeMode = 0;
+      } else if (themeParam === "light") {
+        welcome._selectedThemeMode = 1;
+      }
       if (stageParam !== null) {
         const st = parseInt(stageParam, 10);
         welcome._stage = st;
         welcome._initFlowShell();
         welcome._renderStage();
       }
+      welcome._applyLiveTheme();
       window._welcome = welcome;
     });
   </script>
 </body>
-</html>"#;
+</html>"##;
             ("200 OK", "text/html; charset=utf-8", html.as_bytes().to_vec())
         }
         "/newtab" | "/newtab.html" => {
@@ -1806,10 +1821,22 @@ fn handle_http_request(mut stream: TcpStream, repo_root: &Path) -> Result<()> {
                 Err(_) => ("404 Not Found", "text/plain", b"Not Found".to_vec()),
             }
         }
-        "/assets/branding/about-logo.svg" => {
-            let p = repo_root.join("changes/browser/branding/hilal/content/about-logo.svg");
-            match fs::read(p) {
-                Ok(bytes) => ("200 OK", "image/svg+xml", bytes),
+        p if p.starts_with("/assets/branding/") => {
+            let file_name = &p["/assets/branding/".len()..];
+            let target = repo_root
+                .join("changes/browser/branding/hilal/content")
+                .join(file_name);
+            match fs::read(target) {
+                Ok(bytes) => {
+                    let mime = if file_name.ends_with(".svg") {
+                        "image/svg+xml"
+                    } else if file_name.ends_with(".png") {
+                        "image/png"
+                    } else {
+                        "application/octet-stream"
+                    };
+                    ("200 OK", mime, bytes)
+                }
                 Err(_) => ("404 Not Found", "text/plain", b"Not Found".to_vec()),
             }
         }
@@ -1873,6 +1900,7 @@ fn preview(
     repo_root: &Path,
     page: &str,
     stage: Option<usize>,
+    theme: Option<&str>,
     screenshot: Option<PathBuf>,
     open: bool,
     port: u16,
@@ -1894,10 +1922,20 @@ fn preview(
 
     let target_page = match page {
         "newtab" => "newtab.html".to_string(),
-        _ => match stage {
-            Some(s) => format!("welcome.html?stage={}", s),
-            None => "welcome.html".to_string(),
-        },
+        _ => {
+            let mut q = Vec::new();
+            if let Some(s) = stage {
+                q.push(format!("stage={}", s));
+            }
+            if let Some(t) = theme {
+                q.push(format!("theme={}", t));
+            }
+            if q.is_empty() {
+                "welcome.html".to_string()
+            } else {
+                format!("welcome.html?{}", q.join("&"))
+            }
+        }
     };
 
     let url = format!("http://127.0.0.1:{}/{}", port, target_page);

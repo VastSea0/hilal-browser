@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/* global Services, MigrationUtils, ChromeUtils, MozXULElement, gURLBar, gBrowser */
+/* global Services, MigrationUtils, ChromeUtils, MozXULElement, gBrowser */
 
 (function () {
   "use strict";
@@ -23,36 +23,36 @@
   }
 
   const STAGES = [
-    { title: "First choices", icon: "settings" },
-    { title: "Layout", icon: "desktop_windows" },
-    { title: "Tabs", icon: "view_sidebar" },
-    { title: "Spaces", icon: "stacks" },
-    { title: "Toolbar", icon: "visibility" },
-    { title: "Privacy", icon: "security" },
-    { title: "Search", icon: "search" },
-    { title: "Pinned tabs", icon: "push_pin" },
-    { title: "Spaces setup", icon: "home" },
-    { title: "Ready", icon: "check_circle" },
+    { key: "appearance", title: "Appearance", kicker: "Appearance", icon: "palette" },
+    { key: "workflow", title: "Tabs & Spaces", kicker: "Workflow", icon: "view_sidebar" },
+    { key: "privacy", title: "Privacy & Search", kicker: "Protection", icon: "security" },
+    { key: "ready", title: "Getting Started", kicker: "Ready", icon: "rocket_launch" },
   ];
-  const STAGE_TOOLBAR = 4;
 
+  const PREF_THEME_OVERRIDE = "layout.css.prefers-color-scheme.content-override";
+  const PREF_ACCENT_MODE = "hilal.theme.accentMode";
+  const PREF_GLOBAL_ACCENT = "hilal.theme.globalAccentColor";
   const PREF_COMPACT_ENABLED = "hilal.compact.enabled";
-  const PREF_COMPACT_HIDE_TOOLBOX = "hilal.compact.hide_toolbox";
   const PREF_VERTICAL_TABS = "sidebar.verticalTabs";
+  const PREF_SIDEBAR_REVAMP = "sidebar.revamp";
   const PREF_WORKSPACES_ENABLED = "hilal.workspaces.enabled";
   const PREF_PINNED_PUBLIC = "hilal.workspaces.pinned.public";
+  const PREF_PRIVACY_LEVEL = "hilal.privacy.level";
+  const PREF_SEEN = "hilal.welcome-screen.seen";
 
   const IS_HTTP_PREVIEW =
     typeof window !== "undefined" &&
     window.location.protocol.startsWith("http");
 
   const BRAND_LOGO_URL = IS_HTTP_PREVIEW
-    ? "/assets/branding/about-logo.svg"
-    : "chrome://branding/content/about-logo.svg";
+    ? "/assets/branding/about-logo@2x.png"
+    : "chrome://branding/content/about-logo@2x.png";
 
   const TOPSITE_IMAGE_BASE = IS_HTTP_PREVIEW
     ? "/assets/tippytop/"
     : "chrome://activity-stream/content/data/content/tippytop/images/";
+
+  const HTML_NS = "http://www.w3.org/1999/xhtml";
 
   const WELCOME_CSS_HREF = IS_HTTP_PREVIEW
     ? "/changes/browser/base/content/hilal/HilalWelcome.css"
@@ -62,6 +62,17 @@
     "chrome://browser/skin/search-engine-placeholder.png";
   const SEARCH_ENGINE_PLACEHOLDER_2X =
     "chrome://browser/skin/search-engine-placeholder@2x.png";
+
+  const ACCENT_COLOR_SWATCHES = [
+    { id: "blue", hex: "#0b57d0", label: "Hilal Blue" },
+    { id: "purple", hex: "#af51f5", label: "Purple" },
+    { id: "turquoise", hex: "#00c79a", label: "Turquoise" },
+    { id: "green", hex: "#51cd00", label: "Green" },
+    { id: "yellow", hex: "#ffcb00", label: "Yellow" },
+    { id: "orange", hex: "#ff9f00", label: "Orange" },
+    { id: "red", hex: "#ff613d", label: "Red" },
+    { id: "pink", hex: "#ff4bda", label: "Pink" },
+  ];
 
   const PRIVACY_LEVELS = [
     {
@@ -102,18 +113,21 @@
       label: "Personal",
       icon: "home",
       workspaceColor: "blue",
+      hex: "#0b57d0",
     },
     {
       key: "work",
       label: "Work",
       icon: "work",
       workspaceColor: "orange",
+      hex: "#ff9f00",
     },
     {
       key: "social",
       label: "Social",
       icon: "group",
       workspaceColor: "pink",
+      hex: "#ff4bda",
     },
   ];
 
@@ -159,7 +173,7 @@
     },
     {
       key: "twitter",
-      label: "X / Twitter",
+      label: "X",
       url: "https://twitter.com/",
       initial: "X",
       color: "#1da1f2",
@@ -178,27 +192,36 @@
       this._selectedEngine = null;
 
       const prefService = typeof Services !== "undefined" ? Services.prefs : null;
-      this._selectedPrivacyLevel = this._normalizePrivacyLevel(
-        prefService?.getStringPref("hilal.privacy.level", "standard") || "standard"
-      );
-      this._defaultBrowserSelected = false;
-      this._compactSelected = prefService?.getBoolPref(PREF_COMPACT_ENABLED, true) ?? true;
-      this._compactHideToolboxSelected = prefService?.getBoolPref(PREF_COMPACT_HIDE_TOOLBOX, true) ?? true;
-      this._verticalTabsSelected = prefService?.getBoolPref(PREF_VERTICAL_TABS, false) ?? false;
-      this._workspacesEnabledSelected = prefService?.getBoolPref(PREF_WORKSPACES_ENABLED, true) ?? true;
-      this._pinnedPublicSelected = prefService?.getBoolPref(PREF_PINNED_PUBLIC, true) ?? true;
 
+      // Theme & Accent Colors (M3 Expressive)
+      this._selectedThemeMode = prefService?.getIntPref(PREF_THEME_OVERRIDE, 2) ?? 2;
+      this._selectedAccentMode = prefService?.getStringPref(PREF_ACCENT_MODE, "workspace") || "workspace";
+      this._selectedGlobalAccent = prefService?.getStringPref(PREF_GLOBAL_ACCENT, "#0b57d0") || "#0b57d0";
+
+      // Workflow & Layout
+      this._verticalTabsSelected = prefService?.getBoolPref(PREF_VERTICAL_TABS, false) ?? false;
+      this._workspacesEnabledSelected = true;
+      this._pinnedPublicSelected = prefService?.getBoolPref(PREF_PINNED_PUBLIC, true) ?? true;
+      this._workspacesSelected = { personal: true, work: true, social: true };
+
+      // Privacy & Search
+      this._selectedPrivacyLevel = this._normalizePrivacyLevel(
+        prefService?.getStringPref(PREF_PRIVACY_LEVEL, "standard") || "standard"
+      );
+
+      // Getting Started
+      this._defaultBrowserSelected = false;
       this._pinnedSitesSelected = Object.fromEntries(
         PINNED_SITE_PRESETS.map(site => [site.key, false])
       );
       this._pinnedSiteTabs = {};
-      this._workspacesSelected = { personal: true, work: true, social: true };
     }
 
     async start() {
       this._injectStyles();
       this._enterWelcomeStage();
       this._createOverlay();
+      this._applyLiveTheme();
       this._renderIntro();
       this._enginesReady = this._fetchEngines();
       await this._enginesReady;
@@ -211,7 +234,7 @@
         this._style = existing;
         return;
       }
-      this._style = document.createElement("link");
+      this._style = document.createElementNS(HTML_NS, "link");
       this._style.id = "hilal-welcome-style";
       this._style.rel = "stylesheet";
       this._style.href = WELCOME_CSS_HREF;
@@ -224,6 +247,70 @@
 
     _leaveWelcomeStage() {
       document.documentElement.removeAttribute("hilal-welcome-stage");
+    }
+
+    _createOverlay() {
+      let overlay = document.getElementById("hilal-welcome-overlay");
+      if (!overlay) {
+        overlay = document.createElementNS(HTML_NS, "div");
+        overlay.id = "hilal-welcome-overlay";
+        overlay.className = "beer";
+        (document.body || document.documentElement).appendChild(overlay);
+      }
+      this._overlay = overlay;
+    }
+
+    _applyLiveTheme() {
+      if (!this._overlay) return;
+      let isDark = false;
+      if (this._selectedThemeMode === 0) {
+        isDark = true;
+      } else if (this._selectedThemeMode === 1) {
+        isDark = false;
+      } else {
+        isDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      }
+
+      this._overlay.classList.remove("light", "dark");
+      this._overlay.classList.add(isDark ? "dark" : "light");
+      this._overlay.style.colorScheme = isDark ? "dark" : "light";
+
+      if (IS_HTTP_PREVIEW && document.body) {
+        document.body.classList.remove("light", "dark");
+        document.body.classList.add(isDark ? "dark" : "light");
+      }
+
+      this._applyLiveAccentColor(isDark);
+    }
+
+    _applyLiveAccentColor(isDark) {
+      if (!this._overlay) return;
+      if (typeof isDark === "undefined") {
+        if (this._selectedThemeMode === 0) {
+          isDark = true;
+        } else if (this._selectedThemeMode === 1) {
+          isDark = false;
+        } else {
+          isDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        }
+      }
+
+      let accent = this._selectedGlobalAccent || "#0b57d0";
+      if (this._selectedAccentMode === "workspace") {
+        accent = isDark ? "#a8c7fa" : "#0b57d0";
+      } else if (this._selectedAccentMode === "boosts") {
+        accent = "#00c79a";
+      }
+
+      this._overlay.style.setProperty("--primary", accent);
+      this._overlay.style.setProperty("--primary-glow", `color-mix(in srgb, ${accent} 25%, transparent)`);
+      if (isDark) {
+        this._overlay.style.setProperty("--primary-container", `color-mix(in srgb, ${accent} 28%, #1a2234)`);
+        this._overlay.style.setProperty("--on-primary-container", `color-mix(in srgb, ${accent} 35%, #ffffff)`);
+      } else {
+        this._overlay.style.setProperty("--primary-container", `color-mix(in srgb, ${accent} 16%, #f0f4f9)`);
+        this._overlay.style.setProperty("--on-primary-container", `color-mix(in srgb, ${accent} 80%, #041e49)`);
+      }
     }
 
     async _fetchEngines() {
@@ -295,18 +382,13 @@
     }
 
     _bestIconFromMap(iconMap) {
-      if (!iconMap) {
-        return "";
-      }
+      if (!iconMap) return "";
       const widths = Object.keys(iconMap)
         .map(width => parseInt(width, 10))
         .filter(width => Number.isFinite(width))
-        .sort((first, second) => first - second);
-      if (!widths.length) {
-        return "";
-      }
-      const bestWidth =
-        widths.find(width => width >= 32) || widths[widths.length - 1];
+        .sort((a, b) => a - b);
+      if (!widths.length) return "";
+      const bestWidth = widths.find(w => w >= 32) || widths[widths.length - 1];
       return iconMap[bestWidth] || "";
     }
 
@@ -317,68 +399,65 @@
     }
 
     _sanitizeIconURL(url) {
-      if (!url) {
-        return "";
-      }
+      if (!url) return "";
       try {
         const parsed = typeof Services !== "undefined" ? Services.io.newURI(url) : new URL(url);
         const scheme = parsed.scheme || parsed.protocol?.replace(":", "");
         const safeSchemes = ["http", "https", "data", "chrome", "resource"];
-        if (safeSchemes.includes(scheme)) {
-          return url;
-        }
+        if (safeSchemes.includes(scheme)) return url;
       } catch (e) {
         const cleanUrl = String(url).trim().toLowerCase();
-        if (/^(https?|data|chrome|resource):/i.test(cleanUrl)) {
-          return url;
-        }
+        if (/^(https?|data|chrome|resource):/i.test(cleanUrl)) return url;
       }
       return "";
     }
 
-    _createOverlay() {
-      let overlay = document.getElementById("hilal-welcome-overlay");
-      if (!overlay) {
-        overlay = document.createElement("div");
-        overlay.id = "hilal-welcome-overlay";
-        overlay.className = "beer dark";
-        document.documentElement.appendChild(overlay);
-      }
-      this._overlay = overlay;
+    _setHTML(element, markup) {
+      if (!element) return;
+      element.replaceChildren(this._parseFragment(markup));
     }
 
     _parseFragment(markup) {
-      if (typeof MozXULElement !== "undefined" && MozXULElement.parseXULToFragment) {
-        return MozXULElement.parseXULToFragment(markup);
+      const doc = new DOMParser().parseFromString(markup, "text/html");
+      const frag = document.createDocumentFragment();
+      while (doc.body.firstChild) {
+        frag.appendChild(document.adoptNode(doc.body.firstChild));
       }
-      return document.createRange().createContextualFragment(markup);
+      return frag;
     }
 
     _renderIntro() {
-      if (!this._overlay) {
-        return;
-      }
+      if (!this._overlay) return;
 
       const markup = `
-        <div class="center-align middle-align" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px;" role="dialog" aria-modal="true" aria-labelledby="hw-intro-title">
-          <div class="circle extra surface-container-highest center-align middle-align" style="width: 88px; height: 88px; margin: 0 auto;">
-            <img src="${BRAND_LOGO_URL}" style="width: 52px; height: 52px; display: block;" alt="" />
-          </div>
-          <div class="space"></div>
-          <div class="chip primary bold upper">
-            Welcome to Hilal
-          </div>
-          <div class="small-space"></div>
-          <h3 class="bold" id="hw-intro-title" data-l10n-id="hilal-welcome-intro-title">Set up Hilal</h3>
-          <p class="secondary-text large-text center-align" style="max-width: 480px; margin: 8px auto 0;" data-l10n-id="hilal-welcome-intro-sub">A few quick choices to make the browser yours.</p>
-          <div class="large-space"></div>
-          <button type="button" class="primary round large" id="hw-start-btn">
-            <span data-l10n-id="hilal-welcome-action-start">Set up</span>
-            <i>arrow_forward</i>
-          </button>
+        <div class="hw-overlay-center">
+          <article class="hw-card hw-intro-card" role="dialog" aria-modal="true" aria-labelledby="hw-intro-title">
+            <div class="hw-intro-logo-wrap">
+              <img src="${BRAND_LOGO_URL}" class="hw-intro-logo" alt="" />
+            </div>
+            <div class="hw-badge-chip">
+              <i>auto_awesome</i>
+              <span>Hilal Browser</span>
+            </div>
+            <h2 class="hw-intro-heading" id="hw-intro-title" data-l10n-id="hilal-welcome-intro-title">Welcome to Hilal</h2>
+            <p class="hw-intro-subtitle" data-l10n-id="hilal-welcome-intro-sub">A fast, private, and expressive web browser built around workspaces and solid Material 3 design.</p>
+            
+            <div class="hw-intro-pills">
+              <div class="hw-pill-feature"><i>palette</i><span>Expressive Theming</span></div>
+              <div class="hw-pill-feature"><i>view_sidebar</i><span>Isolated Workspaces</span></div>
+              <div class="hw-pill-feature"><i>security</i><span>Zero Tracker Leaks</span></div>
+            </div>
+
+            <div class="hw-intro-cta-wrap">
+              <button type="button" class="hw-btn-primary" id="hw-start-btn">
+                <span data-l10n-id="hilal-welcome-action-start">Get Started</span>
+                <i>arrow_forward</i>
+              </button>
+            </div>
+          </article>
         </div>
       `;
-      this._overlay.replaceChildren(this._parseFragment(markup));
+      this._setHTML(this._overlay, markup);
       document.getElementById("hw-start-btn")?.addEventListener("click", () => {
         this._beginFlow();
       });
@@ -386,9 +465,7 @@
 
     async _beginFlow() {
       const button = document.getElementById("hw-start-btn");
-      if (button) {
-        button.disabled = true;
-      }
+      if (button) button.disabled = true;
 
       try {
         await this._enginesReady;
@@ -403,32 +480,31 @@
 
     _initFlowShell() {
       const markup = `
-        <div style="min-height: 100vh; display: flex; flex-direction: column;" role="dialog" aria-modal="true" aria-labelledby="hw-stage-title">
-          <header class="fixed responsive">
-            <nav style="max-width: 680px; margin: 0 auto; width: 100%;">
-              <img src="${BRAND_LOGO_URL}" style="width: 24px; height: 24px; display: block;" alt="" />
-              <h6 class="bold" data-l10n-id="hilal-welcome-brand-text">Hilal Browser</h6>
-              <div class="max"></div>
-              <progress id="hw-progress" value="1" max="10" style="max-width: 140px;"></progress>
-              <div class="chip small secondary-container" id="hw-progress-chip">1 / 10</div>
-              <div class="max"></div>
-              <button type="button" class="circle transparent" id="hw-skip-btn" title="Skip" aria-label="Skip">
+        <div class="hw-overlay-center">
+          <article class="hw-card hw-flow-card" role="dialog" aria-modal="true" aria-labelledby="hw-stage-title">
+            <header class="hw-header">
+              <div class="hw-header-brand">
+                <img src="${BRAND_LOGO_URL}" class="hw-header-logo" alt="" />
+                <span class="hw-header-title" data-l10n-id="hilal-welcome-brand-text">Hilal Browser</span>
+              </div>
+              <div class="hw-stepper-wrap" id="hw-stepper"></div>
+              <button type="button" class="hw-btn-icon" id="hw-skip-btn" title="Skip" aria-label="Skip">
                 <i>close</i>
               </button>
-            </nav>
-          </header>
+            </header>
 
-          <main class="responsive" style="max-width: 680px; width: 100%; margin: 0 auto; padding-top: 84px; padding-bottom: 96px; flex: 1 1 auto; overflow-y: auto;">
-            <div class="center-align" id="hw-stage-head" style="margin-bottom: 24px;"></div>
-            <div id="hw-stage-body"></div>
-          </main>
+            <div id="hw-stage-container" class="hw-stage-scroll hw-stage-enter">
+              <div id="hw-stage-head" class="hw-stage-head"></div>
+              <div id="hw-stage-body" class="hw-stage-body"></div>
+            </div>
 
-          <footer class="fixed responsive">
-            <nav id="hw-footer-nav" style="max-width: 680px; width: 100%; margin: 0 auto;"></nav>
-          </footer>
+            <footer class="hw-footer">
+              <nav id="hw-footer-nav" class="hw-footer-nav"></nav>
+            </footer>
+          </article>
         </div>
       `;
-      this._overlay.replaceChildren(this._parseFragment(markup));
+      this._setHTML(this._overlay, markup);
 
       document.getElementById("hw-skip-btn")?.addEventListener("click", () => {
         this._dismiss();
@@ -436,157 +512,123 @@
     }
 
     _renderStage() {
-      if (!this._overlay) {
-        return;
-      }
+      if (!this._overlay) return;
 
       if (!document.getElementById("hw-stage-body")) {
         this._initFlowShell();
       }
 
-      const visible = this._visibleStages();
-      const currentVisual = this._visibleStageIndex();
-
-      const progressEl = document.getElementById("hw-progress");
-      if (progressEl) {
-        progressEl.value = currentVisual + 1;
-        progressEl.max = visible.length;
+      // Stepper
+      const stepperEl = document.getElementById("hw-stepper");
+      if (stepperEl) {
+        this._setHTML(stepperEl, this._stepperHTML());
       }
 
-      const progressChip = document.getElementById("hw-progress-chip");
-      if (progressChip) {
-        progressChip.textContent = `${currentVisual + 1} / ${visible.length}`;
-      }
-
+      // Stage Header
       const headEl = document.getElementById("hw-stage-head");
       if (headEl) {
-        headEl.innerHTML = this._stageCopyHTML();
+        this._setHTML(headEl, this._stageCopyHTML());
       }
 
+      // Stage Body
       const bodyEl = document.getElementById("hw-stage-body");
       if (bodyEl) {
-        bodyEl.innerHTML = this._stageHTML();
+        this._setHTML(bodyEl, this._stageHTML());
       }
 
+      // Footer Navigation
       const footerNavEl = document.getElementById("hw-footer-nav");
       if (footerNavEl) {
-        footerNavEl.innerHTML = this._actionsHTML();
+        this._setHTML(footerNavEl, this._actionsHTML());
+      }
+
+      // Entrance animation
+      const containerEl = document.getElementById("hw-stage-container");
+      if (containerEl) {
+        containerEl.classList.remove("hw-stage-enter");
+        void containerEl.offsetWidth;
+        containerEl.classList.add("hw-stage-enter");
       }
 
       this._attachStageListeners();
     }
 
-    _visibleStages() {
-      return STAGES.filter(
-        (_, index) => index !== STAGE_TOOLBAR || this._compactSelected
-      );
-    }
-
-    _visibleStageIndex() {
-      let visual = 0;
-      for (let i = 0; i < this._stage; i++) {
-        if (i !== STAGE_TOOLBAR || this._compactSelected) {
-          visual++;
-        }
-      }
-      return visual;
+    _stepperHTML() {
+      const current = this._stage;
+      const total = STAGES.length;
+      return `
+        <div class="hw-stepper">
+          ${STAGES.map((s, idx) => {
+            const isDone = idx < current;
+            const isCurrent = idx === current;
+            let stateClass = isCurrent ? "hw-step-active" : isDone ? "hw-step-done" : "hw-step-pending";
+            return `
+              <div class="hw-step-item ${stateClass}" title="${s.title}">
+                <div class="hw-step-bar"></div>
+              </div>
+            `;
+          }).join("")}
+          <div class="hw-step-badge">
+            <span data-l10n-id="hilal-welcome-step-count" data-l10n-args='{"current": ${current + 1}, "total": ${total}}'>${current + 1} / ${total}</span>
+          </div>
+        </div>
+      `;
     }
 
     _stageCopyHTML() {
       const stageCopies = [
         {
-          kicker: "First choices",
-          title: "Choose what starts with Hilal.",
-          subtitle:
-            "Bring data from another browser and set Hilal as your default.",
+          kicker: "Appearance",
+          title: "Make Hilal uniquely yours",
+          subtitle: "Choose your preferred theme appearance and accent color palette.",
+          l10nKicker: "hilal-welcome-stage-0-kicker",
+          l10nTitle: "hilal-welcome-stage-0-title",
+          l10nSub: "hilal-welcome-stage-0-subtitle",
         },
         {
-          kicker: "Layout",
-          title: "Pick a density.",
-          subtitle:
-            "Standard keeps the toolbar fixed. Compact hides it until you need it.",
+          kicker: "Workflow & Tabs",
+          title: "Organize your workflow",
+          subtitle: "Select your tab orientation and set up clean workspace contexts.",
+          l10nKicker: "hilal-welcome-stage-1-kicker",
+          l10nTitle: "hilal-welcome-stage-1-title",
+          l10nSub: "hilal-welcome-stage-1-subtitle",
         },
         {
-          kicker: "Tabs",
-          title: "Choose a tab direction.",
-          subtitle:
-            "Vertical tabs sit in a sidebar. Horizontal tabs line up across the top.",
+          kicker: "Privacy & Search",
+          title: "Protected and powered by your choice",
+          subtitle: "Pick a protection profile and configure your primary search engine.",
+          l10nKicker: "hilal-welcome-stage-2-kicker",
+          l10nTitle: "hilal-welcome-stage-2-title",
+          l10nSub: "hilal-welcome-stage-2-subtitle",
         },
         {
-          kicker: "Spaces",
-          title: "Separate your contexts.",
-          subtitle:
-            "Spaces keep personal, work, and social tabs in their own groups.",
-        },
-        {
-          kicker: "Toolbar",
-          title: "Control the toolbar.",
-          subtitle:
-            "Auto-hide reveals the address bar on hover. Always visible keeps it fixed.",
-        },
-        {
-          kicker: "Privacy",
-          title: "Pick a protection level.",
-          subtitle:
-            "Hilal can stay comfortable for daily browsing or tighten site tracking surfaces.",
-        },
-        {
-          kicker: "Search",
-          title: "Choose the address-bar engine.",
-          subtitle:
-            "Used when you type into the bar. You can change it any time.",
-        },
-        {
-          kicker: "Pinned tabs",
-          title: "Keep essentials one click away.",
-          subtitle:
-            "Select sites to pin at startup. They stay in the sidebar across sessions.",
-        },
-        {
-          kicker: "Spaces setup",
-          title: "Start with a few spaces.",
-          subtitle: "Create spaces now, or skip and shape it later.",
-        },
-        {
-          kicker: "Done",
-          title: "Ready.",
-          subtitle:
-            "Your choices are saved. Hilal will close this setup and open the browser.",
+          kicker: "Getting Started",
+          title: "You're all set",
+          subtitle: "Import existing data, set your default browser, or jump straight in.",
+          l10nKicker: "hilal-welcome-stage-3-kicker",
+          l10nTitle: "hilal-welcome-stage-3-title",
+          l10nSub: "hilal-welcome-stage-3-subtitle",
         },
       ];
-      const copy = stageCopies[this._stage];
+
+      const copy = stageCopies[this._stage] || stageCopies[0];
       return `
-        <div class="chip primary bold upper" data-l10n-id="hilal-welcome-stage-${this._stage}-kicker">
-          ${copy.kicker}
-        </div>
-        <div class="small-space"></div>
-        <h4 class="bold no-margin" id="hw-stage-title" data-l10n-id="hilal-welcome-stage-${this._stage}-title">${copy.title}</h4>
-        <p class="secondary-text medium-text no-margin" style="margin-top: 8px;" data-l10n-id="hilal-welcome-stage-${this._stage}-subtitle">${copy.subtitle}</p>
+        <div class="hw-badge-chip" data-l10n-id="${copy.l10nKicker}">${copy.kicker}</div>
+        <h3 class="hw-stage-heading" id="hw-stage-title" data-l10n-id="${copy.l10nTitle}">${copy.title}</h3>
+        <p class="hw-stage-subheading" data-l10n-id="${copy.l10nSub}">${copy.subtitle}</p>
       `;
     }
 
     _stageHTML() {
       switch (this._stage) {
         case 0:
-          return this._firstChoicesHTML();
+          return this._stageAppearanceHTML();
         case 1:
-          return this._layoutModeHTML();
+          return this._stageWorkflowHTML();
         case 2:
-          return this._tabOrientationHTML();
+          return this._stagePrivacyAndSearchHTML();
         case 3:
-          return this._workspacesToggleHTML();
-        case 4:
-          return this._hideToolbarHTML();
-        case 5:
-          return this._privacyLevelsHTML();
-        case 6:
-          return this._enginesHTML();
-        case 7:
-          return this._pinnedTabsHTML();
-        case 8:
-          return this._workspacesHTML();
-        case 9:
-          return this._summaryHTML();
+          return this._stageReadyHTML();
       }
       return "";
     }
@@ -595,568 +637,481 @@
       const isFirst = this._stage === 0;
       const isLast = this._stage === STAGES.length - 1;
 
-      let primaryId = isLast ? "hw-finish-btn" : "hw-next-btn";
-      let primaryL10nId = "hilal-welcome-action-continue";
-      let primaryFallback = "Continue";
-      if (isLast) {
-        primaryL10nId = "hilal-welcome-action-start-browsing";
-        primaryFallback = "Open Hilal";
-      }
-
       return `
-        <button type="button" class="border round large" id="hw-prev-btn"${isFirst ? ' disabled="disabled"' : ""}>
+        <button type="button" class="hw-btn-secondary" id="hw-prev-btn"${isFirst ? ' disabled="disabled"' : ""}>
           <i>arrow_back</i>
           <span data-l10n-id="hilal-welcome-action-back">Back</span>
         </button>
-        <div class="max"></div>
-        <button type="button" class="primary round large" id="${primaryId}">
-          <span data-l10n-id="${primaryL10nId}">${primaryFallback}</span>
-          <i>${isLast ? "check" : "arrow_forward"}</i>
+        <div class="hw-footer-spacer"></div>
+        <button type="button" class="hw-btn-primary" id="${isLast ? "hw-finish-btn" : "hw-next-btn"}">
+          <span data-l10n-id="${isLast ? "hilal-welcome-action-start-browsing" : "hilal-welcome-action-continue"}">${isLast ? "Start Browsing" : "Continue"}</span>
+          <i>${isLast ? "rocket_launch" : "arrow_forward"}</i>
         </button>
       `;
     }
 
     /* ----------------------------------------------------------
-       Pure Beer CSS Semantic Markup (No Custom Classes)
+       Stage 0: Appearance (Theme & Accent Color)
        ---------------------------------------------------------- */
 
-    _firstChoicesHTML() {
+    _stageAppearanceHTML() {
+      const themeMode = this._selectedThemeMode;
+      const accentMode = this._selectedAccentMode;
+      const currentGlobalAccent = (this._selectedGlobalAccent || "#0b57d0").toLowerCase();
+
       return `
-        <article class="border round">
-          <div class="row">
-            <i>home</i>
-            <div class="max">
-              <h6 class="small bold no-margin" data-l10n-id="hilal-welcome-default-browser-label">Default browser</h6>
-              <div class="small-text secondary-text" data-l10n-id="hilal-welcome-default-browser-desc">Open system web links in Hilal.</div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="hw-default-browser-toggle"${this._defaultBrowserSelected ? ' checked="checked"' : ""}/>
-              <span></span>
-            </label>
+        <div class="hw-section-block">
+          <div class="hw-section-title-wrap">
+            <span class="hw-section-title">Theme Mode</span>
+            <span class="hw-section-desc">Choose between light, dark, or system-synchronized appearance.</span>
           </div>
-          <hr>
-          <div class="row">
-            <i>sync</i>
-            <div class="max">
-              <h6 class="small bold no-margin" data-l10n-id="hilal-welcome-import-label">Browser data</h6>
-              <div class="small-text secondary-text" data-l10n-id="hilal-welcome-import-desc">Bring bookmarks, history, and passwords from another browser.</div>
+
+          <div class="hw-grid hw-grid-3">
+            <div class="hw-tile" data-theme-choice="1">
+              <div class="hw-tile-top">
+                <div class="hw-tile-icon-circle"><i>light_mode</i></div>
+                <div class="hw-tile-spacer"></div>
+                <label class="hw-radio">
+                  <input type="radio" name="hw-theme-mode" value="1"${themeMode === 1 ? ' checked="checked"' : ""}/>
+                  <span></span>
+                </label>
+              </div>
+              <h5 class="hw-tile-title">Light</h5>
+              <p class="hw-tile-desc">Crisp, solid light tonal surfaces.</p>
             </div>
-            <button type="button" class="border round" id="hw-import-btn" data-l10n-id="hilal-welcome-import-button">
-              <span data-l10n-id="hilal-welcome-import-button">Import</span>
-              <i>arrow_forward</i>
+
+            <div class="hw-tile" data-theme-choice="0">
+              <div class="hw-tile-top">
+                <div class="hw-tile-icon-circle"><i>dark_mode</i></div>
+                <div class="hw-tile-spacer"></div>
+                <label class="hw-radio">
+                  <input type="radio" name="hw-theme-mode" value="0"${themeMode === 0 ? ' checked="checked"' : ""}/>
+                  <span></span>
+                </label>
+              </div>
+              <h5 class="hw-tile-title">Dark</h5>
+              <p class="hw-tile-desc">Deep midnight tones for comfortable viewing.</p>
+            </div>
+
+            <div class="hw-tile" data-theme-choice="2">
+              <div class="hw-tile-top">
+                <div class="hw-tile-icon-circle"><i>brightness_auto</i></div>
+                <div class="hw-tile-spacer"></div>
+                <label class="hw-radio">
+                  <input type="radio" name="hw-theme-mode" value="2"${themeMode === 2 ? ' checked="checked"' : ""}/>
+                  <span></span>
+                </label>
+              </div>
+              <h5 class="hw-tile-title">System</h5>
+              <p class="hw-tile-desc">Seamlessly adapts to your operating system.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hw-section-block hw-section-gap">
+          <div class="hw-section-title-wrap">
+            <span class="hw-section-title">Accent Color</span>
+            <span class="hw-section-desc">Select how the browser colors highlights, buttons, and active workspace badges.</span>
+          </div>
+
+          <div class="hw-segmented-bar">
+            <button type="button" class="hw-segment-btn${accentMode === "workspace" ? " active" : ""}" data-accent-mode="workspace">
+              <i>stacks</i>
+              <span>Workspace Sync</span>
+            </button>
+            <button type="button" class="hw-segment-btn${accentMode === "global" ? " active" : ""}" data-accent-mode="global">
+              <i>palette</i>
+              <span>Global Accent</span>
+            </button>
+            <button type="button" class="hw-segment-btn${accentMode === "boosts" ? " active" : ""}" data-accent-mode="boosts">
+              <i>auto_fix_high</i>
+              <span>Hilal Boosts</span>
             </button>
           </div>
-        </article>
-      `;
-    }
 
-    _layoutModeHTML() {
-      const standard = !this._compactSelected;
-      const compact = this._compactSelected;
-      return `
-        <div class="grid">
-          <div class="s6">
-            <article class="border round" style="cursor: pointer; height: 100%; display: flex; flex-direction: column; justify-content: space-between;" data-layout-mode="standard">
-              <div>
-                <div class="row">
-                  <i>desktop_windows</i>
-                  <div class="max">
-                    <h6 class="small bold no-margin">Standard</h6>
-                  </div>
-                  <label class="radio">
-                    <input type="radio" name="layout-choice" value="standard"${standard ? ' checked="checked"' : ""}/>
-                    <span></span>
-                  </label>
-                </div>
-                <div class="small-space"></div>
-                <p class="small-text secondary-text no-margin">Full toolbar, always visible. Ideal for classic browsing.</p>
-              </div>
-              <div style="margin-top: 16px;">
-                <div class="chip">Default</div>
-              </div>
-            </article>
-          </div>
-          <div class="s6">
-            <article class="border round" style="cursor: pointer; height: 100%; display: flex; flex-direction: column; justify-content: space-between;" data-layout-mode="compact">
-              <div>
-                <div class="row">
-                  <i>fullscreen</i>
-                  <div class="max">
-                    <h6 class="small bold no-margin">Compact</h6>
-                  </div>
-                  <label class="radio">
-                    <input type="radio" name="layout-choice" value="compact"${compact ? ' checked="checked"' : ""}/>
-                    <span></span>
-                  </label>
-                </div>
-                <div class="small-space"></div>
-                <p class="small-text secondary-text no-margin">More page, less chrome. Address bar reveals on hover.</p>
-              </div>
-              <div style="margin-top: 16px;">
-                <div class="chip primary">Immersive</div>
-              </div>
-            </article>
-          </div>
-        </div>
-      `;
-    }
-
-    _tabOrientationHTML() {
-      const vertical = this._verticalTabsSelected;
-      return `
-        <div class="grid">
-          <div class="s6">
-            <article class="border round" style="cursor: pointer; height: 100%; display: flex; flex-direction: column; justify-content: space-between;" data-tab-layout="vertical">
-              <div>
-                <div class="row">
-                  <i>view_sidebar</i>
-                  <div class="max">
-                    <h6 class="small bold no-margin">Vertical</h6>
-                  </div>
-                  <label class="radio">
-                    <input type="radio" name="tabs-choice" value="vertical"${vertical ? ' checked="checked"' : ""}/>
-                    <span></span>
-                  </label>
-                </div>
-                <div class="small-space"></div>
-                <p class="small-text secondary-text no-margin">Tabs sit in a sleek sidebar panel. Great for modern widescreen displays.</p>
-              </div>
-              <div style="margin-top: 16px;">
-                <div class="chip primary">Modern</div>
-              </div>
-            </article>
-          </div>
-          <div class="s6">
-            <article class="border round" style="cursor: pointer; height: 100%; display: flex; flex-direction: column; justify-content: space-between;" data-tab-layout="horizontal">
-              <div>
-                <div class="row">
-                  <i>tab</i>
-                  <div class="max">
-                    <h6 class="small bold no-margin">Horizontal</h6>
-                  </div>
-                  <label class="radio">
-                    <input type="radio" name="tabs-choice" value="horizontal"${!vertical ? ' checked="checked"' : ""}/>
-                    <span></span>
-                  </label>
-                </div>
-                <div class="small-space"></div>
-                <p class="small-text secondary-text no-margin">Tabs line up across the top bar. Familiar, classic workflow.</p>
-              </div>
-              <div style="margin-top: 16px;">
-                <div class="chip">Classic</div>
-              </div>
-            </article>
-          </div>
-        </div>
-      `;
-    }
-
-    _workspacesToggleHTML() {
-      const on = this._workspacesEnabledSelected;
-      return `
-        <div class="grid">
-          <div class="s6">
-            <article class="border round" style="cursor: pointer; height: 100%; display: flex; flex-direction: column; justify-content: space-between;" data-workspaces="on">
-              <div>
-                <div class="row">
-                  <i>stacks</i>
-                  <div class="max">
-                    <h6 class="small bold no-margin">Spaces on</h6>
-                  </div>
-                  <label class="radio">
-                    <input type="radio" name="spaces-choice" value="on"${on ? ' checked="checked"' : ""}/>
-                    <span></span>
-                  </label>
-                </div>
-                <div class="small-space"></div>
-                <p class="small-text secondary-text no-margin">Group tabs into separate contexts (Personal, Work, Social) with isolated cookies.</p>
-              </div>
-              <div style="margin-top: 16px;">
-                <div class="chip primary">Recommended</div>
-              </div>
-            </article>
-          </div>
-          <div class="s6">
-            <article class="border round" style="cursor: pointer; height: 100%; display: flex; flex-direction: column; justify-content: space-between;" data-workspaces="off">
-              <div>
-                <div class="row">
-                  <i>tab_unselected</i>
-                  <div class="max">
-                    <h6 class="small bold no-margin">Spaces off</h6>
-                  </div>
-                  <label class="radio">
-                    <input type="radio" name="spaces-choice" value="off"${!on ? ' checked="checked"' : ""}/>
-                    <span></span>
-                  </label>
-                </div>
-                <div class="small-space"></div>
-                <p class="small-text secondary-text no-margin">One single browser window without workspace isolation.</p>
-              </div>
-              <div style="margin-top: 16px;">
-                <div class="chip">Simple</div>
-              </div>
-            </article>
-          </div>
-        </div>
-      `;
-    }
-
-    _hideToolbarHTML() {
-      const hidden = this._compactHideToolboxSelected;
-      return `
-        <div class="grid">
-          <div class="s6">
-            <article class="border round" style="cursor: pointer; height: 100%; display: flex; flex-direction: column; justify-content: space-between;" data-toolbar="hidden">
-              <div>
-                <div class="row">
-                  <i>visibility_off</i>
-                  <div class="max">
-                    <h6 class="small bold no-margin">Auto-hide</h6>
-                  </div>
-                  <label class="radio">
-                    <input type="radio" name="toolbar-choice" value="hidden"${hidden ? ' checked="checked"' : ""}/>
-                    <span></span>
-                  </label>
-                </div>
-                <div class="small-space"></div>
-                <p class="small-text secondary-text no-margin">Toolbar stays hidden to maximize screen space; reveal by hovering the top.</p>
-              </div>
-              <div style="margin-top: 16px;">
-                <div class="chip primary">Auto-hide</div>
-              </div>
-            </article>
-          </div>
-          <div class="s6">
-            <article class="border round" style="cursor: pointer; height: 100%; display: flex; flex-direction: column; justify-content: space-between;" data-toolbar="visible">
-              <div>
-                <div class="row">
-                  <i>visibility</i>
-                  <div class="max">
-                    <h6 class="small bold no-margin">Always visible</h6>
-                  </div>
-                  <label class="radio">
-                    <input type="radio" name="toolbar-choice" value="visible"${!hidden ? ' checked="checked"' : ""}/>
-                    <span></span>
-                  </label>
-                </div>
-                <div class="small-space"></div>
-                <p class="small-text secondary-text no-margin">The toolbar stays fixed at the top even in compact mode.</p>
-              </div>
-              <div style="margin-top: 16px;">
-                <div class="chip">Fixed</div>
-              </div>
-            </article>
-          </div>
-        </div>
-      `;
-    }
-
-    _privacyLevelsHTML() {
-      const icons = {
-        standard: "verified_user",
-        strict: "security",
-        extreme: "lock",
-      };
-      return `
-        <article class="border round">
-          ${PRIVACY_LEVELS.map((level, idx) => {
-            const active = this._selectedPrivacyLevel === level.key;
-            return `
-              ${idx > 0 ? `<hr>` : ""}
-              <div class="row" style="cursor: pointer; padding: 12px 0;" data-privacy-level="${level.key}">
-                <i>${icons[level.key]}</i>
-                <div class="max">
-                  <div class="row" style="align-items: center; gap: 8px;">
-                    <h6 class="small bold no-margin" data-l10n-id="${level.l10nLabel}">${level.label}</h6>
-                    <div class="chip small">${level.badge}</div>
-                  </div>
-                  <div class="small-text secondary-text" style="margin-top: 4px;" data-l10n-id="${level.l10nDesc}">${level.description}</div>
-                </div>
-                <label class="radio">
-                  <input type="radio" name="privacy-choice" value="${level.key}"${active ? ' checked="checked"' : ""}/>
-                  <span></span>
-                </label>
-              </div>
-            `;
-          }).join("")}
-        </article>
-      `;
-    }
-
-    _enginesHTML() {
-      const colClass = this._engines.length === 3 ? "s12 m4" : "s12 m6";
-      return `
-        <div class="grid">
-          ${this._engines.map((engine, index) => {
-            const name = this._escapeHTML(engine.name);
-            const isActive = this._selectedEngine?.name === engine.name;
-            const isDuckDuckGo = engine.name.toLowerCase().includes("duckduckgo");
-            return `
-              <div class="${colClass}">
-                <article class="border round" style="cursor: pointer; height: 100%; display: flex; flex-direction: column; justify-content: space-between;" data-idx="${index}">
-                  <div>
-                    <div class="row">
-                      ${this._engineIconHTML(engine)}
-                      <div class="max">
-                        <h6 class="small bold no-margin">${name}</h6>
-                      </div>
-                      <label class="radio">
-                        <input type="radio" name="engine-choice" value="${index}"${isActive ? ' checked="checked"' : ""}/>
-                        <span></span>
-                      </label>
-                    </div>
-                  </div>
-                  <div style="margin-top: 16px;">
-                    ${isDuckDuckGo ? `<div class="chip primary bold" data-l10n-id="hilal-welcome-recommended">Recommended</div>` : `<div class="chip">Search</div>`}
-                  </div>
-                </article>
-              </div>
-            `;
-          }).join("")}
-        </div>
-      `;
-    }
-
-    _pinnedTabsHTML() {
-      const sites = PINNED_SITE_PRESETS;
-      return `
-        <article class="border round">
-          <div class="row">
-            <i>push_pin</i>
-            <div class="max">
-              <h6 class="small bold no-margin" data-l10n-id="hilal-welcome-pinned-public-label">Show in every space</h6>
-              <div class="small-text secondary-text" data-l10n-id="hilal-welcome-pinned-public-desc">Pinned tabs stay visible when you switch workspaces.</div>
+          <div class="hw-accent-swatches-box" id="hw-swatches-panel"${accentMode === "workspace" ? ' style="display: none;"' : ""}>
+            <div class="hw-swatches-label">Choose primary color swatch:</div>
+            <div class="hw-swatches-row">
+              ${ACCENT_COLOR_SWATCHES.map(swatch => {
+                const isSelected = currentGlobalAccent === swatch.hex.toLowerCase();
+                return `
+                  <button type="button" class="hw-swatch-circle" data-swatch-hex="${swatch.hex}" style="--swatch-color: ${swatch.hex};"${isSelected ? ' selected="true"' : ""} title="${swatch.label}">
+                    ${isSelected ? `<i>check</i>` : ""}
+                  </button>
+                `;
+              }).join("")}
+              <label class="hw-custom-color-wrap" title="Custom color">
+                <i>colorize</i>
+                <input type="color" id="hw-custom-color-input" value="${currentGlobalAccent}" />
+              </label>
             </div>
-            <label class="switch">
-              <input type="checkbox" id="hw-pinned-public-toggle"${this._pinnedPublicSelected ? ' checked="checked"' : ""}/>
-              <span></span>
-            </label>
           </div>
-        </article>
-        <div class="space"></div>
-        <div class="grid">
-          ${sites.map(site => {
-            const active = this._pinnedSitesSelected[site.key];
-            const domain = site.url
-              .replace(/^https?:\/\/(www\.)?/, "")
-              .replace(/\/$/, "");
-            return `
-              <div class="s6 m4">
-                <article class="border round" style="cursor: pointer; height: 100%; display: flex; flex-direction: column; justify-content: space-between;" data-pinned-site="${site.key}">
-                  <div>
-                    <div class="row">
-                      ${
-                        site.iconURL
-                          ? `<img src="${this._escapeHTML(site.iconURL)}" style="width: 24px; height: 24px; object-fit: contain; display: block;" alt="" />`
-                          : `<div class="circle small surface-container center-align middle-align"><b>${this._escapeHTML(site.initial)}</b></div>`
-                      }
-                      <div class="max"></div>
-                      <label class="checkbox">
-                        <input type="checkbox"${active ? ' checked="checked"' : ""}/>
-                        <span></span>
-                      </label>
-                    </div>
-                    <div class="small-space"></div>
-                    <h6 class="small bold no-margin">${this._escapeHTML(site.label)}</h6>
-                    <div class="small-text secondary-text">${this._escapeHTML(domain)}</div>
-                  </div>
-                </article>
-              </div>
-            `;
-          }).join("")}
         </div>
-      `;
-    }
-
-    _workspacesHTML() {
-      if (!this._workspacesEnabledSelected) {
-        return `
-          <article class="border round">
-            <div class="row">
-              <i>tab_unselected</i>
-              <div class="max">
-                <h6 class="small bold no-margin" data-l10n-id="hilal-welcome-workspaces-disabled-label">Spaces are off</h6>
-                <div class="small-text secondary-text" data-l10n-id="hilal-welcome-workspaces-disabled-desc">Hilal will open with one clean browser space. You can turn spaces on in Settings later.</div>
-              </div>
-            </div>
-          </article>
-        `;
-      }
-
-      const icons = { personal: "home", work: "work", social: "group" };
-      return `
-        <article class="border round">
-          ${WORKSPACE_PRESETS.map((item, idx) => {
-            const active = this._workspacesSelected[item.key];
-            return `
-              ${idx > 0 ? `<hr>` : ""}
-              <div class="row" style="cursor: pointer; padding: 12px 0;" data-workspace="${item.key}">
-                <i>${icons[item.key] || "folder"}</i>
-                <div class="max">
-                  <h6 class="small bold no-margin" data-l10n-id="hilal-welcome-workspace-label-${item.key}">${item.label}</h6>
-                  <div class="small-text secondary-text hw-workspace-status" data-l10n-id="hilal-welcome-workspace-state-${active ? "added" : "skipped"}">${active ? "Will be created" : "Skipped"}</div>
-                </div>
-                <label class="checkbox">
-                  <input type="checkbox"${active ? ' checked="checked"' : ""}/>
-                  <span></span>
-                </label>
-              </div>
-            `;
-          }).join("")}
-        </article>
-      `;
-    }
-
-    _summaryHTML() {
-      const engineName = this._escapeHTML(
-        this._selectedEngine?.name ?? "DuckDuckGo"
-      );
-      const privacyLevel =
-        PRIVACY_LEVELS.find(
-          level => level.key === this._selectedPrivacyLevel
-        ) || PRIVACY_LEVELS[0];
-      const selectedPinnedSites = this._selectedPinnedSites();
-      const pinnedTabsText = selectedPinnedSites.length
-        ? selectedPinnedSites
-            .map(site => this._escapeHTML(site.label))
-            .join(", ")
-        : "None";
-
-      const activePresets = WORKSPACE_PRESETS.filter(
-        item => this._workspacesSelected[item.key]
-      );
-      let workspacesText = "Off";
-      if (this._workspacesEnabledSelected) {
-        workspacesText = activePresets.length
-          ? activePresets.map(item => item.label).join(", ")
-          : "None";
-      }
-
-      const rows = [
-        {
-          label: "Layout",
-          value: this._compactSelected ? "Compact" : "Standard",
-          icon: "desktop_windows",
-          l10nKey: "hilal-welcome-summary-layout",
-          l10nValue: `hilal-welcome-summary-layout-${this._compactSelected ? "compact" : "standard"}`,
-        },
-        {
-          label: "Tabs",
-          value: this._verticalTabsSelected ? "Vertical" : "Horizontal",
-          icon: "view_sidebar",
-          l10nKey: "hilal-welcome-summary-tabs",
-          l10nValue: `hilal-welcome-summary-tabs-${this._verticalTabsSelected ? "vertical" : "horizontal"}`,
-        },
-        {
-          label: "Search",
-          value: engineName,
-          icon: "search",
-          l10nKey: "hilal-welcome-summary-search",
-          l10nValue: null,
-        },
-        {
-          label: "Privacy",
-          value: this._escapeHTML(privacyLevel.label),
-          icon: "security",
-          l10nKey: "hilal-welcome-summary-privacy",
-          l10nValue: null,
-        },
-        {
-          label: "Pinned tabs",
-          value: pinnedTabsText,
-          icon: "push_pin",
-          l10nKey: "hilal-welcome-summary-pinned-tabs",
-          l10nValue: null,
-        },
-        {
-          label: "Spaces",
-          value: workspacesText,
-          icon: "stacks",
-          l10nKey: "hilal-welcome-summary-workspaces",
-          l10nValue: null,
-        },
-        {
-          label: "Default browser",
-          value: this._defaultBrowserSelected ? "Set as default" : "No change",
-          icon: "home",
-          l10nKey: "hilal-welcome-summary-default-browser",
-          l10nValue: `hilal-welcome-summary-default-${this._defaultBrowserSelected ? "set" : "no-change"}`,
-        },
-      ];
-
-      return `
-        <div class="center-align">
-          <div class="circle extra primary-container center-align middle-align" style="margin: 0 auto 16px; width: 64px; height: 64px;">
-            <i>check</i>
-          </div>
-          <h4 class="bold no-margin">You're all set</h4>
-          <p class="secondary-text medium-text">Here is a quick overview of your configuration.</p>
-        </div>
-        <div class="space"></div>
-        <article class="border round">
-          ${rows
-            .map(
-              (row, idx) => `
-            ${idx > 0 ? `<hr>` : ""}
-            <div class="row" style="padding: 10px 0;">
-              <div class="row" style="align-items: center; gap: 8px;">
-                <i class="secondary-text">${row.icon}</i>
-                <span class="secondary-text">${row.label}</span>
-              </div>
-              <div class="max"></div>
-              <span class="bold"${row.l10nValue ? ` data-l10n-id="${row.l10nValue}"` : ""}>${row.value}</span>
-            </div>
-          `
-            )
-            .join("")}
-        </article>
       `;
     }
 
     /* ----------------------------------------------------------
-       Interactive Selection (Pure Beer CSS, No DOM wiping)
+       Stage 1: Workflow (Tab Orientation & Starter Workspaces)
+       ---------------------------------------------------------- */
+
+    _stageWorkflowHTML() {
+      const vertical = this._verticalTabsSelected;
+
+      return `
+        <div class="hw-section-block">
+          <div class="hw-section-title-wrap">
+            <span class="hw-section-title">Tab Orientation</span>
+            <span class="hw-section-desc">Choose whether tabs reside in the modern sidebar or classic horizontal top bar.</span>
+          </div>
+
+          <div class="hw-grid hw-grid-2">
+            <div class="hw-tile" data-tab-layout="vertical">
+              <div class="hw-tile-top">
+                <div class="hw-tile-icon-circle"><i>view_sidebar</i></div>
+                <div class="hw-tile-spacer"></div>
+                <span class="hw-badge-chip-small primary">Recommended</span>
+                <label class="hw-radio" style="margin-left: 8px;">
+                  <input type="radio" name="hw-tab-choice" value="vertical"${vertical ? ' checked="checked"' : ""}/>
+                  <span></span>
+                </label>
+              </div>
+              <h5 class="hw-tile-title">Vertical Tabs</h5>
+              <p class="hw-tile-desc">Sidebar tabs for cleaner multitasking on widescreen monitors.</p>
+            </div>
+
+            <div class="hw-tile" data-tab-layout="horizontal">
+              <div class="hw-tile-top">
+                <div class="hw-tile-icon-circle"><i>tab</i></div>
+                <div class="hw-tile-spacer"></div>
+                <span class="hw-badge-chip-small">Classic</span>
+                <label class="hw-radio" style="margin-left: 8px;">
+                  <input type="radio" name="hw-tab-choice" value="horizontal"${!vertical ? ' checked="checked"' : ""}/>
+                  <span></span>
+                </label>
+              </div>
+              <h5 class="hw-tile-title">Horizontal Tabs</h5>
+              <p class="hw-tile-desc">Familiar top tab strip across the browser window.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hw-section-block hw-section-gap">
+          <div class="hw-section-title-wrap">
+            <span class="hw-section-title">Starter Workspaces</span>
+            <span class="hw-section-desc">Workspaces keep cookies, accounts, and tabs isolated so your work and personal life never mix.</span>
+          </div>
+
+          <div class="hw-grid hw-grid-3">
+            ${WORKSPACE_PRESETS.map(preset => {
+              const active = this._workspacesSelected[preset.key];
+              return `
+                <div class="hw-tile hw-tile-compact" data-starter-ws="${preset.key}">
+                  <div class="hw-tile-row">
+                    <div class="hw-tile-icon-circle" style="color: ${preset.hex};"><i>${preset.icon}</i></div>
+                    <div class="hw-tile-label-wrap">
+                      <h5 class="hw-tile-title">${preset.label}</h5>
+                      <span class="hw-tile-sub">Isolated space</span>
+                    </div>
+                    <div class="hw-tile-spacer"></div>
+                    <label class="hw-checkbox">
+                      <input type="checkbox"${active ? ' checked="checked"' : ""}/>
+                      <span></span>
+                    </label>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    /* ----------------------------------------------------------
+       Stage 2: Privacy & Search
+       ---------------------------------------------------------- */
+
+    _stagePrivacyAndSearchHTML() {
+      const currentLevel = this._selectedPrivacyLevel;
+      const icons = { standard: "verified_user", strict: "security", extreme: "lock" };
+
+      return `
+        <div class="hw-section-block">
+          <div class="hw-section-title-wrap">
+            <span class="hw-section-title">Privacy Protection Profile</span>
+            <span class="hw-section-desc">Hilal enforces zero tracking by default; choose how strictly tracking surfaces are closed.</span>
+          </div>
+
+          <div class="hw-grid hw-grid-3">
+            ${PRIVACY_LEVELS.map(level => {
+              const isSelected = currentLevel === level.key;
+              return `
+                <div class="hw-tile" data-privacy-choice="${level.key}">
+                  <div class="hw-tile-top">
+                    <div class="hw-tile-icon-circle"><i>${icons[level.key]}</i></div>
+                    <div class="hw-tile-spacer"></div>
+                    <span class="hw-badge-chip-small${level.key === "standard" ? " primary" : ""}">${level.badge}</span>
+                    <label class="hw-radio" style="margin-left: 8px;">
+                      <input type="radio" name="hw-privacy-choice" value="${level.key}"${isSelected ? ' checked="checked"' : ""}/>
+                      <span></span>
+                    </label>
+                  </div>
+                  <h5 class="hw-tile-title">${level.label}</h5>
+                  <p class="hw-tile-desc">${level.description}</p>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+
+        <div class="hw-section-block hw-section-gap">
+          <div class="hw-section-title-wrap">
+            <span class="hw-section-title">Default Search Engine</span>
+            <span class="hw-section-desc">The search provider used when you type into the unified address bar.</span>
+          </div>
+
+          <div class="hw-grid hw-grid-3">
+            ${this._engines.map((engine, idx) => {
+              const isActive = this._selectedEngine?.name === engine.name;
+              const isDuckDuckGo = engine.name.toLowerCase().includes("duckduckgo");
+              return `
+                <div class="hw-tile hw-tile-compact" data-engine-choice="${idx}">
+                  <div class="hw-tile-row">
+                    <div class="hw-engine-icon-wrap">${this._engineIconHTML(engine)}</div>
+                    <div class="hw-tile-label-wrap">
+                      <h5 class="hw-tile-title">${this._escapeHTML(engine.name)}</h5>
+                      <span class="hw-tile-sub">${isDuckDuckGo ? "Privacy-first" : "Direct search"}</span>
+                    </div>
+                    <div class="hw-tile-spacer"></div>
+                    <label class="hw-radio">
+                      <input type="radio" name="hw-engine-choice" value="${idx}"${isActive ? ' checked="checked"' : ""}/>
+                      <span></span>
+                    </label>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    /* ----------------------------------------------------------
+       Stage 3: Getting Started (Import, Default, Pinned Tabs)
+       ---------------------------------------------------------- */
+
+    _stageReadyHTML() {
+      const themeLabel = this._selectedThemeMode === 1 ? "Light" : this._selectedThemeMode === 0 ? "Dark" : "System";
+      const tabsLabel = this._verticalTabsSelected ? "Vertical" : "Horizontal";
+      const privacyLabel = PRIVACY_LEVELS.find(l => l.key === this._selectedPrivacyLevel)?.label || "Balanced";
+      const engineName = this._selectedEngine?.name || "DuckDuckGo";
+
+      return `
+        <div class="hw-summary-banner">
+          <div class="hw-summary-icon"><i>rocket_launch</i></div>
+          <div class="hw-summary-text">
+            <h5 class="hw-summary-title">Configuration Summary</h5>
+            <div class="hw-summary-chips">
+              <span class="hw-pill-feature"><i>palette</i>${themeLabel} Mode</span>
+              <span class="hw-pill-feature"><i>view_sidebar</i>${tabsLabel} Tabs</span>
+              <span class="hw-pill-feature"><i>security</i>${privacyLabel} Privacy</span>
+              <span class="hw-pill-feature"><i>search</i>${this._escapeHTML(engineName)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hw-section-block hw-section-gap">
+          <div class="hw-grid hw-grid-2">
+            <div class="hw-row-card">
+              <div class="hw-row-icon"><i>sync</i></div>
+              <div class="hw-row-content">
+                <h5 class="hw-row-title">Import Browser Data</h5>
+                <p class="hw-row-desc">Bring bookmarks & logins.</p>
+              </div>
+              <button type="button" class="hw-btn-secondary" id="hw-import-btn">
+                <span>Import</span>
+                <i>arrow_forward</i>
+              </button>
+            </div>
+
+            <div class="hw-row-card">
+              <div class="hw-row-icon"><i>home</i></div>
+              <div class="hw-row-content">
+                <h5 class="hw-row-title">Set as Default Browser</h5>
+                <p class="hw-row-desc">Open links in Hilal.</p>
+              </div>
+              <label class="hw-switch">
+                <input type="checkbox" id="hw-default-browser-toggle"${this._defaultBrowserSelected ? ' checked="checked"' : ""}/>
+                <span></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="hw-section-block hw-section-gap">
+          <div class="hw-section-title-wrap">
+            <span class="hw-section-title">Quick-Access Pinned Tabs</span>
+            <span class="hw-section-desc">Pin your daily essentials so they are always ready when you launch the browser.</span>
+          </div>
+
+          <div class="hw-grid hw-grid-3">
+            ${PINNED_SITE_PRESETS.map(site => {
+              const isChecked = this._pinnedSitesSelected[site.key];
+              return `
+                <div class="hw-tile hw-tile-compact" data-pinned-site="${site.key}">
+                  <div class="hw-tile-row">
+                    ${site.iconURL
+                      ? `<img src="${this._escapeHTML(site.iconURL)}" class="hw-pinned-icon" alt="" />`
+                      : `<div class="hw-pinned-avatar" style="background-color: ${site.color};">${site.initial}</div>`
+                    }
+                    <div class="hw-tile-label-wrap">
+                      <h6 class="hw-tile-title">${this._escapeHTML(site.label)}</h6>
+                    </div>
+                    <div class="hw-tile-spacer"></div>
+                    <label class="hw-checkbox">
+                      <input type="checkbox"${isChecked ? ' checked="checked"' : ""}/>
+                      <span></span>
+                    </label>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    /* ----------------------------------------------------------
+       Interactive Listeners
        ---------------------------------------------------------- */
 
     _attachStageListeners() {
       const onClick = (id, fn) => {
-        const element = document.getElementById(id);
-        if (element) {
-          element.addEventListener("click", fn);
-        }
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("click", fn);
       };
 
       onClick("hw-next-btn", () => this._next());
       onClick("hw-prev-btn", () => this._prev());
       onClick("hw-finish-btn", () => this._finish());
 
-      // Stage 0: Default browser
-      const defaultBrowserToggle = document.getElementById(
-        "hw-default-browser-toggle"
-      );
-      if (defaultBrowserToggle) {
-        defaultBrowserToggle.addEventListener("change", event => {
-          this._defaultBrowserSelected = event.target.checked;
+      // Stage 0: Theme Mode
+      const themeTiles = this._overlay.querySelectorAll("[data-theme-choice]");
+      themeTiles.forEach(tile => {
+        tile.addEventListener("click", () => {
+          const modeVal = parseInt(tile.dataset.themeChoice, 10);
+          this._selectedThemeMode = modeVal;
+          const radio = tile.querySelector('input[type="radio"]');
+          if (radio) radio.checked = true;
+          this._applyLiveTheme();
+        });
+      });
+
+      // Stage 0: Accent Mode Segmented Button
+      const segmentBtns = this._overlay.querySelectorAll("[data-accent-mode]");
+      segmentBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const mode = btn.dataset.accentMode;
+          this._selectedAccentMode = mode;
+          segmentBtns.forEach(b => b.classList.toggle("active", b.dataset.accentMode === mode));
+          const swatchesBox = document.getElementById("hw-swatches-panel");
+          if (swatchesBox) {
+            swatchesBox.style.display = (mode === "workspace") ? "none" : "block";
+          }
+          this._applyLiveAccentColor();
+        });
+      });
+
+      // Stage 0: Swatch Selection
+      const swatchBtns = this._overlay.querySelectorAll("[data-swatch-hex]");
+      swatchBtns.forEach(swatch => {
+        swatch.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const hex = swatch.dataset.swatchHex;
+          this._selectedGlobalAccent = hex;
+          swatchBtns.forEach(s => {
+            const isTarget = s.dataset.swatchHex === hex;
+            s.setAttribute("selected", isTarget ? "true" : "false");
+            s.replaceChildren();
+            if (isTarget) {
+              const checkIcon = document.createElementNS(HTML_NS, "i");
+              checkIcon.textContent = "check";
+              s.appendChild(checkIcon);
+            }
+          });
+          const customColorInput = document.getElementById("hw-custom-color-input");
+          if (customColorInput) customColorInput.value = hex;
+          this._applyLiveAccentColor();
+        });
+      });
+
+      // Stage 0: Custom Color Input
+      const customColorInput = document.getElementById("hw-custom-color-input");
+      if (customColorInput) {
+        customColorInput.addEventListener("input", (e) => {
+          const hex = e.target.value;
+          this._selectedGlobalAccent = hex;
+          swatchBtns.forEach(s => {
+            s.setAttribute("selected", "false");
+            s.replaceChildren();
+          });
+          this._applyLiveAccentColor();
         });
       }
 
-      // Stage 0: Import button
+      // Stage 1: Tab Orientation
+      const tabTiles = this._overlay.querySelectorAll("[data-tab-layout]");
+      tabTiles.forEach(tile => {
+        tile.addEventListener("click", () => {
+          this._verticalTabsSelected = tile.dataset.tabLayout === "vertical";
+          const radio = tile.querySelector('input[type="radio"]');
+          if (radio) radio.checked = true;
+        });
+      });
+
+      // Stage 1: Starter Workspaces
+      const wsTiles = this._overlay.querySelectorAll("[data-starter-ws]");
+      wsTiles.forEach(tile => {
+        const checkbox = tile.querySelector('input[type="checkbox"]');
+        tile.addEventListener("click", (event) => {
+          if (event.target !== checkbox && checkbox) {
+            checkbox.checked = !checkbox.checked;
+          }
+          const key = tile.dataset.starterWs;
+          this._workspacesSelected[key] = checkbox ? checkbox.checked : !this._workspacesSelected[key];
+        });
+      });
+
+      // Stage 2: Privacy Choices
+      const privacyTiles = this._overlay.querySelectorAll("[data-privacy-choice]");
+      privacyTiles.forEach(tile => {
+        tile.addEventListener("click", () => {
+          this._selectedPrivacyLevel = tile.dataset.privacyChoice;
+          const radio = tile.querySelector('input[type="radio"]');
+          if (radio) radio.checked = true;
+        });
+      });
+
+      // Stage 2: Search Engines
+      const engineTiles = this._overlay.querySelectorAll("[data-engine-choice]");
+      engineTiles.forEach(tile => {
+        tile.addEventListener("click", () => {
+          const idx = parseInt(tile.dataset.engineChoice, 10);
+          this._selectedEngine = this._engines[idx];
+          const radio = tile.querySelector('input[type="radio"]');
+          if (radio) radio.checked = true;
+        });
+      });
+
+      // Stage 3: Import Button
       onClick("hw-import-btn", async () => {
-        const button = document.getElementById("hw-import-btn");
+        const btn = document.getElementById("hw-import-btn");
         try {
-          if (
-            typeof MigrationUtils !== "undefined" &&
-            MigrationUtils.showMigrationWizard
-          ) {
-            MigrationUtils.showMigrationWizard(window, {
-              isStartupMigration: true,
-            });
-            if (button) {
-              button.setAttribute(
-                "data-l10n-id",
-                "hilal-welcome-imported-button"
-              );
-              button.textContent = "Imported";
-              button.disabled = true;
+          if (typeof MigrationUtils !== "undefined" && MigrationUtils.showMigrationWizard) {
+            MigrationUtils.showMigrationWizard(window, { isStartupMigration: true });
+            if (btn) {
+              btn.setAttribute("data-l10n-id", "hilal-welcome-imported-button");
+              btn.textContent = "Imported";
+              btn.disabled = true;
             }
           }
         } catch (e) {
@@ -1164,172 +1119,31 @@
         }
       });
 
-      // Stage 1: Layout Density
-      const layoutArticles = this._overlay.querySelectorAll("[data-layout-mode]");
-      layoutArticles.forEach(art => {
-        const radio = art.querySelector('input[type="radio"]');
-        const handler = () => {
-          this._compactSelected = art.dataset.layoutMode === "compact";
-          if (typeof Services !== "undefined") {
-            Services.prefs.setBoolPref(PREF_COMPACT_ENABLED, this._compactSelected);
-          }
-          if (radio) radio.checked = true;
-        };
-        art.addEventListener("click", handler);
-      });
-
-      // Stage 2: Tab Orientation
-      const tabArticles = this._overlay.querySelectorAll("[data-tab-layout]");
-      tabArticles.forEach(art => {
-        const radio = art.querySelector('input[type="radio"]');
-        const handler = () => {
-          this._verticalTabsSelected = art.dataset.tabLayout === "vertical";
-          if (typeof Services !== "undefined") {
-            Services.prefs.setBoolPref(
-              PREF_VERTICAL_TABS,
-              this._verticalTabsSelected
-            );
-            const isSidebarActive =
-              this._verticalTabsSelected || this._workspacesEnabledSelected;
-            Services.prefs.setBoolPref("sidebar.revamp", isSidebarActive);
-          }
-          if (radio) radio.checked = true;
-        };
-        art.addEventListener("click", handler);
-      });
-
-      // Stage 3: Spaces
-      const wsArticles = this._overlay.querySelectorAll("[data-workspaces]");
-      wsArticles.forEach(art => {
-        const radio = art.querySelector('input[type="radio"]');
-        const handler = () => {
-          this._workspacesEnabledSelected = art.dataset.workspaces === "on";
-          if (typeof Services !== "undefined") {
-            Services.prefs.setBoolPref(
-              PREF_WORKSPACES_ENABLED,
-              this._workspacesEnabledSelected
-            );
-            const isSidebarActive =
-              this._verticalTabsSelected || this._workspacesEnabledSelected;
-            Services.prefs.setBoolPref("sidebar.revamp", isSidebarActive);
-          }
-          if (radio) radio.checked = true;
-        };
-        art.addEventListener("click", handler);
-      });
-
-      // Stage 4: Toolbar
-      const tbArticles = this._overlay.querySelectorAll("[data-toolbar]");
-      tbArticles.forEach(art => {
-        const radio = art.querySelector('input[type="radio"]');
-        const handler = () => {
-          this._compactHideToolboxSelected =
-            art.dataset.toolbar === "hidden";
-          if (typeof Services !== "undefined") {
-            Services.prefs.setBoolPref(
-              PREF_COMPACT_HIDE_TOOLBOX,
-              this._compactHideToolboxSelected
-            );
-          }
-          if (radio) radio.checked = true;
-        };
-        art.addEventListener("click", handler);
-      });
-
-      // Stage 5: Privacy
-      const privacyRows = this._overlay.querySelectorAll("[data-privacy-level]");
-      privacyRows.forEach(row => {
-        const radio = row.querySelector('input[type="radio"]');
-        const handler = () => {
-          this._selectedPrivacyLevel = this._normalizePrivacyLevel(
-            row.dataset.privacyLevel
-          );
-          if (radio) radio.checked = true;
-        };
-        row.addEventListener("click", handler);
-      });
-
-      // Stage 6: Engines
-      const engineArticles = this._overlay.querySelectorAll("[data-idx]");
-      engineArticles.forEach(art => {
-        const radio = art.querySelector('input[type="radio"]');
-        const handler = () => {
-          const index = parseInt(art.dataset.idx, 10);
-          this._selectedEngine = this._engines[index];
-          if (radio) radio.checked = true;
-        };
-        art.addEventListener("click", handler);
-      });
-
-      // Stage 7: Pinned Public Toggle
-      const pinnedPublicToggle = document.getElementById(
-        "hw-pinned-public-toggle"
-      );
-      if (pinnedPublicToggle) {
-        pinnedPublicToggle.addEventListener("change", event => {
-          this._pinnedPublicSelected = event.target.checked;
-          if (typeof Services !== "undefined") {
-            Services.prefs.setBoolPref(
-              PREF_PINNED_PUBLIC,
-              this._pinnedPublicSelected
-            );
-          }
+      // Stage 3: Default Browser Switch
+      const defaultToggle = document.getElementById("hw-default-browser-toggle");
+      if (defaultToggle) {
+        defaultToggle.addEventListener("change", (e) => {
+          this._defaultBrowserSelected = e.target.checked;
         });
       }
 
-      // Stage 7: Pinned Sites
-      const pinnedArticles = this._overlay.querySelectorAll("[data-pinned-site]");
-      pinnedArticles.forEach(art => {
-        const checkbox = art.querySelector('input[type="checkbox"]');
-        const handler = event => {
+      // Stage 3: Pinned Sites
+      const pinnedTiles = this._overlay.querySelectorAll("[data-pinned-site]");
+      pinnedTiles.forEach(tile => {
+        const checkbox = tile.querySelector('input[type="checkbox"]');
+        tile.addEventListener("click", (event) => {
           if (event.target !== checkbox && checkbox) {
             checkbox.checked = !checkbox.checked;
           }
-          const key = art.dataset.pinnedSite;
+          const key = tile.dataset.pinnedSite;
           this._pinnedSitesSelected[key] = checkbox ? checkbox.checked : !this._pinnedSitesSelected[key];
-          this._togglePinnedSite(key, this._pinnedSitesSelected[key]);
-        };
-        art.addEventListener("click", handler);
+        });
       });
-
-      // Stage 8: Workspace Presets
-      const wsRows = this._overlay.querySelectorAll("[data-workspace]");
-      wsRows.forEach(row => {
-        const checkbox = row.querySelector('input[type="checkbox"]');
-        const handler = event => {
-          if (event.target !== checkbox && checkbox) {
-            checkbox.checked = !checkbox.checked;
-          }
-          const key = row.dataset.workspace;
-          this._workspacesSelected[key] = checkbox ? checkbox.checked : !this._workspacesSelected[key];
-          const statusEl = row.querySelector(".hw-workspace-status");
-          if (statusEl) {
-            const active = this._workspacesSelected[key];
-            statusEl.textContent = active ? "Will be created" : "Skipped";
-            statusEl.setAttribute(
-              "data-l10n-id",
-              `hilal-welcome-workspace-state-${active ? "added" : "skipped"}`
-            );
-          }
-        };
-        row.addEventListener("click", handler);
-      });
-    }
-
-    /* ----------------------------------------------------------
-       Navigation
-       ---------------------------------------------------------- */
-
-    _shouldSkipStage(stage) {
-      return stage === STAGE_TOOLBAR && !this._compactSelected;
     }
 
     _next() {
       if (this._stage < STAGES.length - 1) {
         this._stage++;
-        if (this._shouldSkipStage(this._stage)) {
-          this._stage++;
-        }
         this._renderStage();
       }
     }
@@ -1337,36 +1151,46 @@
     _prev() {
       if (this._stage > 0) {
         this._stage--;
-        if (this._shouldSkipStage(this._stage)) {
-          this._stage--;
-        }
         this._renderStage();
       }
     }
 
-    /* ----------------------------------------------------------
-       Finish / dismiss / teardown
-       ---------------------------------------------------------- */
-
     async _finish() {
-      this._saveLayoutPrefs();
+      // 1. Save Theme and Accent Prefs
+      if (typeof Services !== "undefined" && Services.prefs) {
+        try {
+          Services.prefs.setIntPref(PREF_THEME_OVERRIDE, this._selectedThemeMode);
+          Services.prefs.setStringPref(PREF_ACCENT_MODE, this._selectedAccentMode);
+          Services.prefs.setStringPref(PREF_GLOBAL_ACCENT, this._selectedGlobalAccent);
+        } catch (e) {
+          console.error("HilalWelcome: failed to save theme prefs", e);
+        }
+      }
 
-      if (this._workspaces && this._workspacesEnabledSelected) {
+      // 2. Save Layout Prefs
+      if (typeof Services !== "undefined" && Services.prefs) {
+        try {
+          Services.prefs.setBoolPref(PREF_COMPACT_ENABLED, true);
+          Services.prefs.setBoolPref(PREF_VERTICAL_TABS, this._verticalTabsSelected);
+          Services.prefs.setBoolPref(PREF_SIDEBAR_REVAMP, true);
+          Services.prefs.setBoolPref(PREF_WORKSPACES_ENABLED, true);
+          Services.prefs.setBoolPref(PREF_PINNED_PUBLIC, this._pinnedPublicSelected);
+          Services.prefs.setStringPref(PREF_PRIVACY_LEVEL, this._selectedPrivacyLevel);
+        } catch (e) {
+          console.error("HilalWelcome: failed to save layout prefs", e);
+        }
+      }
+
+      // 3. Create Selected Starter Workspaces
+      if (this._workspaces) {
         for (const item of WORKSPACE_PRESETS) {
           if (this._workspacesSelected[item.key]) {
             let label = item.label;
             try {
               if (document.l10n?.formatValue) {
-                label = await document.l10n.formatValue(
-                  `hilal-welcome-workspace-label-${item.key}`
-                );
+                label = await document.l10n.formatValue(`hilal-welcome-workspace-label-${item.key}`);
               }
-            } catch (e) {
-              console.error(
-                "HilalWelcome: failed to format workspace label",
-                e
-              );
-            }
+            } catch (e) {}
             if (typeof this._workspaces.ensureWorkspace === "function") {
               this._workspaces.ensureWorkspace(label, "", item.workspaceColor);
             } else if (typeof this._workspaces.create === "function") {
@@ -1376,8 +1200,10 @@
         }
       }
 
+      // 4. Create Pinned Tabs
       await this._createPinnedTabs();
 
+      // 5. Set Default Engine
       if (this._selectedEngine?.originalEngine && SearchService) {
         try {
           if (SearchService.setDefault) {
@@ -1393,10 +1219,11 @@
             );
           }
         } catch (e) {
-          console.error("HilalWelcome: failed to set default engine", e);
+          console.error("HilalWelcome: failed to set default search engine", e);
         }
       }
 
+      // 6. Set Default Browser
       if (this._defaultBrowserSelected) {
         try {
           const shellService = window.getShellService?.();
@@ -1408,23 +1235,12 @@
         }
       }
 
-      try {
-        if (typeof Services !== "undefined") {
-          Services.prefs.setStringPref(
-            "hilal.privacy.level",
-            this._normalizePrivacyLevel(this._selectedPrivacyLevel)
-          );
-        }
-      } catch (e) {
-        console.error("HilalWelcome: failed to set privacy level", e);
-      }
-
       this._markSeen();
       this._teardown();
     }
 
     async _createPinnedTabs() {
-      const selectedSites = this._selectedPinnedSites();
+      const selectedSites = PINNED_SITE_PRESETS.filter(s => this._pinnedSitesSelected[s.key]);
       if (
         !selectedSites.length ||
         typeof gBrowser === "undefined" ||
@@ -1437,22 +1253,11 @@
       const userContextId = this._workspaces?.activeContainerId || 0;
       for (const site of selectedSites) {
         try {
-          let tab = this._pinnedSiteTabs[site.key];
-          if (tab && !gBrowser.tabs.includes(tab)) {
-            tab = null;
-            this._pinnedSiteTabs[site.key] = null;
-          }
-          if (!tab) {
-            tab = this._findExistingTabForURL(site.url);
-          }
-          if (!tab) {
-            tab = gBrowser.addTrustedTab(site.url, {
-              inBackground: true,
-              createLazyBrowser: true,
-              userContextId,
-            });
-            this._pinnedSiteTabs[site.key] = tab;
-          }
+          let tab = gBrowser.addTrustedTab(site.url, {
+            inBackground: true,
+            createLazyBrowser: true,
+            userContextId,
+          });
           if (tab && !tab.pinned) {
             gBrowser.pinTab(tab);
           }
@@ -1462,121 +1267,15 @@
       }
     }
 
-    _togglePinnedSite(key, selected) {
-      if (
-        typeof gBrowser === "undefined" ||
-        typeof gBrowser.addTrustedTab !== "function" ||
-        typeof gBrowser.pinTab !== "function"
-      ) {
-        return;
-      }
-      const site = PINNED_SITE_PRESETS.find(s => s.key === key);
-      if (!site) {
-        return;
-      }
-      let tab = this._pinnedSiteTabs[key];
-      if (tab && !gBrowser.tabs.includes(tab)) {
-        tab = null;
-        this._pinnedSiteTabs[key] = null;
-      }
-
-      if (selected) {
-        if (!tab) {
-          const userContextId = this._workspaces?.activeContainerId || 0;
-          try {
-            tab = gBrowser.addTrustedTab(site.url, {
-              inBackground: true,
-              createLazyBrowser: true,
-              userContextId,
-            });
-            if (tab) {
-              gBrowser.pinTab(tab);
-              this._pinnedSiteTabs[key] = tab;
-            }
-          } catch (e) {
-            console.error(`HilalWelcome: failed to pin ${site.label}`, e);
-          }
-        } else if (!tab.pinned) {
-          gBrowser.pinTab(tab);
-        }
-      } else {
-        if (tab) {
-          gBrowser.removeTab(tab);
-          this._pinnedSiteTabs[key] = null;
-        }
-      }
-    }
-
-    _findExistingTabForURL(url) {
-      const normalizedURL = this._normalizeURLForCompare(url);
-      if (typeof gBrowser === "undefined" || !gBrowser.tabs) {
-        return null;
-      }
-      for (const tab of gBrowser.tabs) {
-        const tabURL = this._normalizeURLForCompare(
-          tab.linkedBrowser?.currentURI?.spec || ""
-        );
-        if (tabURL && tabURL === normalizedURL) {
-          return tab;
-        }
-      }
-      return null;
-    }
-
-    _normalizeURLForCompare(url) {
-      return String(url || "")
-        .trim()
-        .replace(/\/+$/, "")
-        .toLowerCase();
-    }
-
-    _saveLayoutPrefs() {
-      if (typeof Services === "undefined") {
-        return;
-      }
-      try {
-        Services.prefs.setBoolPref(PREF_COMPACT_ENABLED, this._compactSelected);
-        Services.prefs.setBoolPref(
-          PREF_COMPACT_HIDE_TOOLBOX,
-          this._compactHideToolboxSelected
-        );
-        if (this._verticalTabsSelected || this._workspacesEnabledSelected) {
-          Services.prefs.setBoolPref("sidebar.revamp", true);
-        }
-        Services.prefs.setBoolPref(
-          PREF_VERTICAL_TABS,
-          this._verticalTabsSelected
-        );
-        Services.prefs.setBoolPref(
-          PREF_WORKSPACES_ENABLED,
-          this._workspacesEnabledSelected
-        );
-        Services.prefs.setBoolPref(
-          PREF_PINNED_PUBLIC,
-          this._pinnedPublicSelected
-        );
-      } catch (e) {
-        console.error("HilalWelcome: failed to save layout prefs", e);
-      }
-    }
-
-    _selectedPinnedSites() {
-      return PINNED_SITE_PRESETS.filter(
-        site => this._pinnedSitesSelected[site.key]
-      );
-    }
-
     _dismiss() {
       this._markSeen();
       this._teardown();
     }
 
     _markSeen() {
-      if (typeof Services === "undefined") {
-        return;
-      }
+      if (typeof Services === "undefined" || !Services.prefs) return;
       try {
-        Services.prefs.setBoolPref("hilal.welcome-screen.seen", true);
+        Services.prefs.setBoolPref(PREF_SEEN, true);
       } catch (e) {
         console.error("HilalWelcome: failed to save seen pref", e);
       }
@@ -1600,19 +1299,11 @@
 
       try {
         window.maximize?.();
-      } catch (e) {
-        console.error("HilalWelcome: failed to maximize window", e);
-      }
+      } catch (e) {}
     }
 
-    /* ----------------------------------------------------------
-       Utilities
-       ---------------------------------------------------------- */
-
     _normalizePrivacyLevel(value) {
-      return PRIVACY_LEVELS.some(level => level.key === value)
-        ? value
-        : "standard";
+      return PRIVACY_LEVELS.some(level => level.key === value) ? value : "standard";
     }
 
     _engineIconHTML(engine) {
@@ -1634,26 +1325,21 @@
       }
 
       if (iconURL) {
-        return `<img src="${this._escapeHTML(iconURL)}" style="width: 24px; height: 24px; object-fit: contain; display: block;" alt="" />`;
+        return `<img src="${this._escapeHTML(iconURL)}" style="width: 28px; height: 28px; object-fit: contain; display: block;" alt="" />`;
       }
       return `<i>search</i>`;
     }
 
     _escapeHTML(value) {
-      return String(value).replace(/[&<>"']/g, character => {
-        switch (character) {
-          case "&":
-            return "&amp;";
-          case "<":
-            return "&lt;";
-          case ">":
-            return "&gt;";
-          case '"':
-            return "&quot;";
-          case "'":
-            return "&#39;";
+      return String(value).replace(/[&<>"']/g, char => {
+        switch (char) {
+          case "&": return "&amp;";
+          case "<": return "&lt;";
+          case ">": return "&gt;";
+          case '"': return "&quot;";
+          case "'": return "&#39;";
         }
-        return character;
+        return char;
       });
     }
   }
