@@ -39,11 +39,21 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 500;
+export const REPO_COMMITS_TOTAL = 501;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "1ae1f8228131d2f466900c1eabc0836c804bc15b",
+    "shortHash": "1ae1f82",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-08T01:28:22+03:00",
+    "subject": "fix(www): synchronize light/dark theme with Beer CSS and ensure solid navbar background",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1ae1f8228131d2f466900c1eabc0836c804bc15b"
+  },
   {
     "hash": "f034ab3f5d7377eddab7567470ef1b8afea2c812",
     "shortHash": "f034ab3",
@@ -5051,9 +5061,19 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-08T01:22:58+03:00",
-    "commitCount": 59,
+    "date": "2026-09-08T01:28:22+03:00",
+    "commitCount": 60,
     "commits": [
+      {
+        "hash": "1ae1f8228131d2f466900c1eabc0836c804bc15b",
+        "shortHash": "1ae1f82",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-08T01:28:22+03:00",
+        "subject": "fix(www): synchronize light/dark theme with Beer CSS and ensure solid navbar background",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1ae1f8228131d2f466900c1eabc0836c804bc15b"
+      },
       {
         "hash": "f034ab3f5d7377eddab7567470ef1b8afea2c812",
         "shortHash": "f034ab3",
@@ -10313,7 +10333,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 488,
+    "contributions": 489,
     "role": "Lead Developer"
   },
   {

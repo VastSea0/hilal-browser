@@ -349,18 +349,18 @@ export default function DocsPage({ lang }: DocsPageProps) {
       <div className="max-w-6xl mx-auto">
         {/* Compact, Clean Documentation Header */}
         <div className="mb-8 pb-5 border-b border-[var(--outline-variant)]/20">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <div className="chip border elevate text-xs">
-              <i className="text-sm mr-1.5 text-[var(--primary)]">menu_book</i>
+          <div className="flex flex-wrap items-center gap-2.5 mb-3">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold border border-[var(--outline-variant)]/40 bg-m3-container-low text-[var(--on-surface-variant)] shadow-xs">
+              <i className="text-sm text-[var(--primary)]">menu_book</i>
               <span>Hilal Documentation</span>
             </div>
-            <div className="chip border text-xs">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold border border-[var(--outline-variant)]/40 bg-m3-container-low text-[var(--on-surface-variant)] shadow-xs">
               <span>{content.meta.targetVersion}</span>
             </div>
-            <div className="chip border text-xs">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold border border-[var(--outline-variant)]/40 bg-m3-container-low text-[var(--on-surface-variant)] shadow-xs">
               <span>{content.meta.engineBase}</span>
             </div>
-            <div className="chip border text-xs">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold border border-[var(--outline-variant)]/40 bg-m3-container-low text-[var(--on-surface-variant)] shadow-xs">
               <span>{content.meta.licenseBadge}</span>
             </div>
           </div>
@@ -510,7 +510,7 @@ export default function DocsPage({ lang }: DocsPageProps) {
               className="pb-6 border-b border-[var(--md-sys-color-outline-variant)]/20"
             >
               <div className="mb-3">
-                <div className="chip border">
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold border border-[var(--md-sys-color-outline-variant)]/40 bg-m3-container-low text-[var(--md-sys-color-on-surface-variant)] shadow-xs">
                   <span>{lang === "tr" ? "Bölüm" : "Section"} {activeSectionIdx + 1} / {sections.length}</span>
                 </div>
               </div>

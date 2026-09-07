@@ -79,8 +79,8 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
           className="text-center space-y-4 mb-20"
         >
           <motion.div variants={m3FadeIn} className="flex justify-center">
-            <div className="chip border elevate">
-              <i className="text-base text-[var(--primary)] mr-1.5">history</i>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold border border-[var(--outline-variant)]/40 bg-m3-container-low text-[var(--on-surface-variant)] shadow-xs">
+              <i className="text-base text-[var(--primary)]">history</i>
               <span>{lang === "tr" ? "Resmi Sürüm Notları" : "Official Release Notes"}</span>
             </div>
           </motion.div>
@@ -167,7 +167,7 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
                         {rel.tag}
                       </h2>
                       {rel.isDev && (
-                        <div className="chip border elevate">
+                        <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold border border-[var(--outline-variant)]/40 bg-m3-container-low text-[var(--on-surface-variant)] shadow-xs">
                           <span>{lang === "tr" ? "Geliştirme" : "Development"}</span>
                         </div>
                       )}

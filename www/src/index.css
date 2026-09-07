@@ -307,3 +307,18 @@ i,
 .m3-state-layer:active::after {
   opacity: 0.12;
 }
+
+/* Material 3 Chip / Badge reset - guaranteed comfortable padding and border radius */
+.chip,
+.m3-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.375rem !important;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 9999px !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25 !important;
+  font-weight: 600 !important;
+  box-sizing: border-box !important;
+}
