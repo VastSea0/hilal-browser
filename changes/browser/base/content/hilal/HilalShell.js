@@ -68,6 +68,26 @@
 
     _currentColor: "blue",
     _listenerAttached: false,
+    _prefObserver: null,
+
+    getEffectiveColor(colorInput) {
+      try {
+        if (typeof Services !== "undefined" && Services.prefs) {
+          const mode = Services.prefs.getStringPref("hilal.theme.accentMode", "workspace");
+          if (mode === "global") {
+            const globalColor = Services.prefs.getStringPref("hilal.theme.globalAccentColor", "#af51f5");
+            if (globalColor) return globalColor;
+          } else if (mode === "boosts") {
+            const domain = window.gHilalBoosts?.activeDomain;
+            const extracted = domain ? window.gHilalBoosts?._extractedThemeColors?.[domain] : null;
+            if (extracted) {
+              return extracted;
+            }
+          }
+        }
+      } catch (e) {}
+      return colorInput || this._currentColor || "purple";
+    },
 
     isDarkMode() {
       if (document.documentElement.hasAttribute("lwtheme-brighttext")) {
@@ -103,6 +123,20 @@
         attributes: true,
         attributeFilter: ["lwtheme-brighttext"],
       });
+
+      if (typeof Services !== "undefined" && Services.prefs && !this._prefObserver) {
+        this._prefObserver = () => {
+          this.applyTheme();
+          if (window.HilalShell) {
+            window.HilalShell.renderWorkspaces();
+          }
+        };
+        try {
+          Services.prefs.addObserver("hilal.theme.accentMode", this._prefObserver);
+          Services.prefs.addObserver("hilal.theme.globalAccentColor", this._prefObserver);
+          Services.prefs.addObserver("hilal.workspaces.data", this._prefObserver);
+        } catch (e) {}
+      }
     },
 
     applyTheme(colorInput) {
@@ -111,8 +145,8 @@
       }
       this.initListeners();
 
-      const currentColor = this._currentColor || "blue";
-      const rgb = this.hexToRgb(currentColor) || [175, 81, 245];
+      const effectiveColor = this.getEffectiveColor(colorInput);
+      const rgb = this.hexToRgb(effectiveColor) || [175, 81, 245];
       const { C: rawChroma, H: hue } = this.srgbToOklch(rgb[0], rgb[1], rgb[2]);
       const chroma = Math.max(rawChroma, 0.14);
       const h = hue.toFixed(1);
@@ -302,7 +336,7 @@
     },
 
     getThemeData() {
-      const currentColor = this._currentColor || "purple";
+      const currentColor = this.getEffectiveColor(this._currentColor) || "purple";
       const rgb = this.hexToRgb(currentColor) || [175, 81, 245];
       const hex = rgb
         ? `#${rgb.map(x => x.toString(16).padStart(2, "0")).join("")}`

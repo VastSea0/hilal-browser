@@ -19,7 +19,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
    UpdateListener: "resource://gre/modules/UpdateListener.sys.mjs",
    LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
    MigrationUtils: "resource:///modules/MigrationUtils.sys.mjs",
-@@ -1671,6 +1673,998 @@ gMainPane.initialized = new Promise(res => {
+@@ -1671,6 +1673,1197 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
@@ -113,8 +113,8 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +      ["hilalUiFixDynamicSeparator", "userChrome.tabs.dynamic_separator", false],
 +      ["hilalUiFixBottomRounded", "userChrome.tabs.bottom_rounded_corner", false],
 +      ["hilalUiFixCloseOnHover", "userChrome.tabs.close_button.on_hover", false],
-+      ["hilalBoostsAutoPalette", "hilal.boosts.autoPalette", true],
-+      ["hilalBoostsBrowserUi", "hilal.boosts.browserUi", true],
++      ["hilalBoostsAutoPalette", "hilal.boosts.auto_palette.enabled", false],
++      ["hilalBoostsBrowserUi", "hilal.boosts.browser_ui.enabled", false],
 +    ];
 +    for (const [elementId, prefName, defaultValue] of hilalPrefMappings) {
 +      const checkbox = document.getElementById(elementId);
@@ -360,6 +360,205 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +        }
 +      }
 +    });
++
++    // -- Hilal Accent Color & Theme Customization ----------------------------
++    const accentModeRadioGroup = document.getElementById("hilalAccentMode");
++    const workspaceColorsSection = document.getElementById("hilalWorkspaceColorsSection");
++    const globalColorSection = document.getElementById("hilalGlobalColorSection");
++    const boostsColorSection = document.getElementById("hilalBoostsColorSection");
++    const workspaceColorList = document.getElementById("hilalWorkspaceColorList");
++    const globalColorSwatches = document.getElementById("hilalGlobalColorSwatches");
++    const globalCustomColor = document.getElementById("hilalGlobalCustomColor");
++
++    const WORKSPACE_COLOR_CHOICES = [
++      { id: "purple", hex: "#af51f5", label: "Purple" },
++      { id: "blue", hex: "#37adff", label: "Blue" },
++      { id: "turquoise", hex: "#00c79a", label: "Turquoise" },
++      { id: "green", hex: "#51cd00", label: "Green" },
++      { id: "yellow", hex: "#ffcb00", label: "Yellow" },
++      { id: "orange", hex: "#ff9f00", label: "Orange" },
++      { id: "red", hex: "#ff613d", label: "Red" },
++      { id: "pink", hex: "#ff4bda", label: "Pink" },
++    ];
++
++    const getWorkspacesData = () => {
++      try {
++        const raw = Services.prefs.getStringPref("hilal.workspaces.data", "[]");
++        const parsed = JSON.parse(raw);
++        return Array.isArray(parsed) && parsed.length > 0
++          ? parsed
++          : [{ id: "default", name: "Default", emoji: "\u{1F5C2}", color: "purple" }];
++      } catch (e) {
++        return [{ id: "default", name: "Default", emoji: "\u{1F5C2}", color: "purple" }];
++      }
++    };
++
++    const setWorkspacesData = data => {
++      Services.prefs.setStringPref("hilal.workspaces.data", JSON.stringify(data));
++    };
++
++    const refreshWorkspaceColorsUI = () => {
++      if (!workspaceColorList) return;
++      workspaceColorList.textContent = "";
++      const workspaces = getWorkspacesData();
++      const activeId = Services.prefs.getStringPref("hilal.workspaces.active", workspaces[0]?.id || "default");
++
++      for (const ws of workspaces) {
++        const row = document.createElement("div");
++        row.className = "workspace-color-row";
++
++        // Meta (emoji badge, name label, active badge)
++        const meta = document.createElement("div");
++        meta.className = "workspace-meta";
++
++        const emojiBadge = document.createElement("div");
++        emojiBadge.className = "workspace-emoji-badge";
++        emojiBadge.textContent = ws.emoji || "\u{1F5C2}";
++        meta.appendChild(emojiBadge);
++
++        const nameLabel = document.createElement("span");
++        nameLabel.className = "workspace-name-label";
++        nameLabel.textContent = ws.name || ws.id;
++        meta.appendChild(nameLabel);
++
++        if (ws.id === activeId) {
++          const activeBadge = document.createElement("span");
++          activeBadge.className = "workspace-active-badge";
++          activeBadge.textContent = "Aktif";
++          activeBadge.setAttribute("data-l10n-id", "hilal-workspace-active-badge");
++          meta.appendChild(activeBadge);
++        }
++
++        row.appendChild(meta);
++
++        // Swatches
++        const swatches = document.createElement("div");
++        swatches.className = "m3-color-swatches";
++
++        for (const choice of WORKSPACE_COLOR_CHOICES) {
++          const swatch = document.createElement("button");
++          swatch.className = "m3-swatch-circle";
++          swatch.style.setProperty("--swatch-color", choice.hex);
++          swatch.style.backgroundColor = choice.hex;
++          swatch.title = choice.label;
++          swatch.setAttribute("aria-label", choice.label);
++
++          if (ws.color === choice.id || ws.color === choice.hex) {
++            swatch.setAttribute("selected", "true");
++          }
++
++          swatch.addEventListener("click", () => {
++            ws.color = choice.id;
++            setWorkspacesData(workspaces);
++            refreshWorkspaceColorsUI();
++          });
++
++          swatches.appendChild(swatch);
++        }
++
++        row.appendChild(swatches);
++        workspaceColorList.appendChild(row);
++      }
++    };
++
++    const refreshGlobalColorUI = () => {
++      if (!globalColorSwatches) return;
++      globalColorSwatches.textContent = "";
++      const currentColor = Services.prefs.getStringPref("hilal.theme.globalAccentColor", "#af51f5");
++
++      for (const choice of WORKSPACE_COLOR_CHOICES) {
++        const swatch = document.createElement("button");
++        swatch.className = "m3-swatch-circle";
++        swatch.style.setProperty("--swatch-color", choice.hex);
++        swatch.style.backgroundColor = choice.hex;
++        swatch.title = choice.label;
++        swatch.setAttribute("aria-label", choice.label);
++
++        if (currentColor.toLowerCase() === choice.hex.toLowerCase() || currentColor === choice.id) {
++          swatch.setAttribute("selected", "true");
++        }
++
++        swatch.addEventListener("click", () => {
++          Services.prefs.setStringPref("hilal.theme.globalAccentColor", choice.hex);
++          refreshGlobalColorUI();
++          if (globalCustomColor) {
++            globalCustomColor.value = choice.hex;
++          }
++        });
++
++        globalColorSwatches.appendChild(swatch);
++      }
++
++      if (globalCustomColor) {
++        if (/^#[0-9A-Fa-f]{6}$/.test(currentColor)) {
++          globalCustomColor.value = currentColor;
++        }
++      }
++    };
++
++    if (globalCustomColor) {
++      globalCustomColor.addEventListener("input", () => {
++        const hex = globalCustomColor.value;
++        Services.prefs.setStringPref("hilal.theme.globalAccentColor", hex);
++        refreshGlobalColorUI();
++      });
++    }
++
++    const updateAccentModeUI = (mode) => {
++      if (workspaceColorsSection) {
++        workspaceColorsSection.hidden = (mode !== "workspace");
++      }
++      if (globalColorSection) {
++        globalColorSection.hidden = (mode !== "global");
++      }
++      if (boostsColorSection) {
++        boostsColorSection.hidden = (mode !== "boosts");
++      }
++      if (accentModeRadioGroup) {
++        accentModeRadioGroup.value = mode;
++        const radios = accentModeRadioGroup.querySelectorAll("radio");
++        for (const r of radios) {
++          if (r.value === mode) {
++            r.setAttribute("selected", "true");
++          } else {
++            r.removeAttribute("selected");
++          }
++        }
++      }
++    };
++
++    if (accentModeRadioGroup) {
++      const currentMode = Services.prefs.getStringPref("hilal.theme.accentMode", "workspace");
++      updateAccentModeUI(currentMode);
++
++      accentModeRadioGroup.addEventListener("command", () => {
++        const selected = accentModeRadioGroup.value;
++        Services.prefs.setStringPref("hilal.theme.accentMode", selected);
++        if (selected === "boosts") {
++          Services.prefs.setBoolPref("hilal.boosts.auto_palette.enabled", true);
++          Services.prefs.setBoolPref("hilal.boosts.browser_ui.enabled", true);
++          Services.prefs.setBoolPref("hilal.boosts.enabled", true);
++        }
++        updateAccentModeUI(selected);
++      });
++    }
++
++    refreshWorkspaceColorsUI();
++    refreshGlobalColorUI();
++
++    const wsPrefObserver = () => {
++      refreshWorkspaceColorsUI();
++    };
++    try {
++      Services.prefs.addObserver("hilal.workspaces.data", wsPrefObserver);
++      Services.prefs.addObserver("hilal.workspaces.active", wsPrefObserver);
++      window.addEventListener("unload", () => {
++        try {
++          Services.prefs.removeObserver("hilal.workspaces.data", wsPrefObserver);
++          Services.prefs.removeObserver("hilal.workspaces.active", wsPrefObserver);
++        } catch (e) {}
++      }, { once: true });
++    } catch (e) {}
 +
 +    // -- Hilal Bangs Customization -------------------------------------------
 +    const { HilalBangs } = ChromeUtils.importESModule(
@@ -1021,7 +1220,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2832,3 +2832,151 @@ referrals-section-header2 =
+@@ -2832,3 +2832,172 @@ referrals-section-header2 =
  # use the browser. "Share" here means recommending or referring the browser
  referrals-link2 =
    .label = Share { -brand-product-name }
@@ -1045,6 +1244,27 @@ diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser
 +    .label = Reset Workspaces
 +hilal-workspaces-reset-confirm-title = Reset Workspaces
 +hilal-workspaces-reset-confirm-message = This will delete all workspace data and cannot be undone. Continue?
++
++## Theme & Accent Color
++
++hilal-theme-color-header = Accent Color & Theme
++hilal-accent-mode-title = Accent Color Mode
++hilal-accent-mode-desc = Choose how theme accent colors are determined across workspaces and the browser
++hilal-accent-mode-workspace = Workspaces
++    .label = Workspaces
++hilal-accent-mode-global = Global Accent
++    .label = Global Accent
++hilal-accent-mode-boosts = Dynamic Boosts
++    .label = Dynamic Boosts
++hilal-workspace-colors-subdesc = Set a distinct accent color for each workspace. When you switch workspaces, the browser theme updates dynamically.
++hilal-workspace-active-badge = Active
++    .label = Active
++hilal-global-color-title = Master Accent Color
++hilal-global-color-desc = Override all workspaces and chrome elements with a single unified accent color
++hilal-boosts-mode-title = Hilal Boosts Active Color
++hilal-boosts-mode-desc = Automatically extracts the dominant accent color from the visited website and applies it dynamically throughout the entire browser
++hilal-boosts-live-status = Live Web Tinting Active
++    .label = Live Web Tinting Active
 +
 +## Sidebar Options
 +

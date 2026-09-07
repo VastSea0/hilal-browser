@@ -674,13 +674,201 @@ radiogroup.segmented-radiogroup radio[selected="true"] .radio-label {
 }
 
 /* ==========================================================================
+   7b. MATERIAL 3 COLOR SWATCHES & WORKSPACE ACCENT COLOR PICKER
+   ========================================================================== */
+
+.workspace-color-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.workspace-color-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 18px !important;
+  background-color: var(--md-sys-color-surface-container-low) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: var(--md-sys-shape-corner-large) !important;
+  box-sizing: border-box !important;
+  transition: background-color 150ms ease, border-color 150ms ease !important;
+}
+
+.workspace-color-row:hover {
+  background-color: var(--md-sys-color-surface-container) !important;
+  border-color: var(--md-sys-color-outline) !important;
+}
+
+.workspace-meta {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.workspace-emoji-badge {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 12px !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 20px !important;
+  flex-shrink: 0 !important;
+}
+
+.workspace-name-label {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+
+.workspace-active-badge {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 3px 10px !important;
+  border-radius: 9999px !important;
+  background-color: var(--md-sys-color-primary-container) !important;
+  color: var(--md-sys-color-on-primary-container) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+.color-picker-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+
+.m3-color-swatches {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+}
+
+.m3-swatch-circle {
+  appearance: none !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  border-radius: 50% !important;
+  border: 2px solid transparent !important;
+  background-color: var(--swatch-color, #af51f5) !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  transition: transform 120ms cubic-bezier(0.2, 0, 0, 1), box-shadow 120ms ease !important;
+  position: relative !important;
+}
+
+.m3-swatch-circle:hover {
+  transform: scale(1.18) !important;
+}
+
+.m3-swatch-circle[selected="true"] {
+  outline: 2px solid var(--md-sys-color-on-surface) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 5px var(--md-sys-color-surface-container-high) !important;
+}
+
+.m3-swatch-circle[selected="true"]::after {
+  content: "" !important;
+  display: block !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+}
+
+.custom-color-input {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  border-radius: 50% !important;
+  border: 2px solid var(--md-sys-color-outline-variant) !important;
+  cursor: pointer !important;
+  background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+  transition: transform 120ms ease, border-color 120ms ease !important;
+}
+
+.custom-color-input::-webkit-color-swatch-wrapper {
+  padding: 0 !important;
+}
+
+.custom-color-input::-webkit-color-swatch {
+  border: none !important;
+  border-radius: 50% !important;
+  opacity: 0 !important;
+}
+
+.custom-color-input:hover {
+  transform: scale(1.15) !important;
+  border-color: var(--md-sys-color-primary) !important;
+}
+
+.boosts-status-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 18px !important;
+  border-radius: 9999px !important;
+  background-color: var(--md-sys-color-primary-container) !important;
+  color: var(--md-sys-color-on-primary-container) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+.boosts-pulse-dot {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background-color: var(--md-sys-color-primary) !important;
+  box-shadow: 0 0 0 0 rgba(11, 87, 208, 0.7) !important;
+  animation: pulse-dot 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1) !important;
+}
+
+@keyframes pulse-dot {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(11, 87, 208, 0.7);
+  }
+  70% {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 8px rgba(11, 87, 208, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(11, 87, 208, 0);
+  }
+}
+
+
+/* ==========================================================================
    8. MATERIAL 3 EXPRESSIVE BUTTONS
    ========================================================================== */
 
 moz-button::part(button),
 button.accessory-button,
 button.primary,
-button:not(.toggle-button, [is="highlightable-button"]) {
+button:not(.toggle-button, [is="highlightable-button"], .m3-swatch-circle) {
   min-height: 40px !important;
   height: 40px !important;
   border-radius: 9999px !important;
@@ -712,7 +900,7 @@ button.primary:hover {
 
 moz-button:not([category="primary"])::part(button),
 button.accessory-button,
-button:not(.primary, .toggle-button) {
+button:not(.primary, .toggle-button, .m3-swatch-circle) {
   background-color: var(--md-sys-color-secondary-container) !important;
   color: var(--md-sys-color-on-secondary-container) !important;
   border: none !important;

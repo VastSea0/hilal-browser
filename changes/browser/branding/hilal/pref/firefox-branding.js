@@ -211,3 +211,7 @@ pref("hilal.toolbar.initialized", false);
 // Site Customizer and dynamic UI tinting preferences
 pref("hilal.boosts.auto_palette.enabled", false);
 pref("hilal.boosts.browser_ui.enabled", false);
+
+// Theme and accent color preferences ("workspace" | "global" | "boosts")
+pref("hilal.theme.accentMode", "workspace");
+pref("hilal.theme.globalAccentColor", "#af51f5");

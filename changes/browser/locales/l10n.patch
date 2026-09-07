@@ -210,7 +210,7 @@ diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/b
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2832,3 +2832,151 @@ referrals-section-header2 =
+@@ -2832,3 +2832,172 @@ referrals-section-header2 =
  # use the browser. "Share" here means recommending or referring the browser
  referrals-link2 =
    .label = Share { -brand-product-name }
@@ -234,6 +234,27 @@ diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser
 +    .label = Reset Workspaces
 +hilal-workspaces-reset-confirm-title = Reset Workspaces
 +hilal-workspaces-reset-confirm-message = This will delete all workspace data and cannot be undone. Continue?
++
++## Theme & Accent Color
++
++hilal-theme-color-header = Accent Color & Theme
++hilal-accent-mode-title = Accent Color Mode
++hilal-accent-mode-desc = Choose how theme accent colors are determined across workspaces and the browser
++hilal-accent-mode-workspace = Workspaces
++    .label = Workspaces
++hilal-accent-mode-global = Global Accent
++    .label = Global Accent
++hilal-accent-mode-boosts = Dynamic Boosts
++    .label = Dynamic Boosts
++hilal-workspace-colors-subdesc = Set a distinct accent color for each workspace. When you switch workspaces, the browser theme updates dynamically.
++hilal-workspace-active-badge = Active
++    .label = Active
++hilal-global-color-title = Master Accent Color
++hilal-global-color-desc = Override all workspaces and chrome elements with a single unified accent color
++hilal-boosts-mode-title = Hilal Boosts Active Color
++hilal-boosts-mode-desc = Automatically extracts the dominant accent color from the visited website and applies it dynamically throughout the entire browser
++hilal-boosts-live-status = Live Web Tinting Active
++    .label = Live Web Tinting Active
 +
 +## Sidebar Options
 +

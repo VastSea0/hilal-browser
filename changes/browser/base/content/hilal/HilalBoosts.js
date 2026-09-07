@@ -470,6 +470,11 @@
           "--hilal-boosts-ui-brightness",
           brightness + "%"
         );
+        try {
+          if (Services.prefs.getStringPref("hilal.theme.accentMode", "workspace") === "boosts") {
+            window.MaterialYouTheme?.applyTheme(extractedColor);
+          }
+        } catch (e) {}
       } else if (boost && boost.enabled && boost.browserUIEnabled) {
         docEl.setAttribute("hilal-boosts-ui", "true");
         docEl.style.setProperty("--hilal-boosts-ui-accent", boost.accentColor);
@@ -509,6 +514,11 @@
       docEl.style.removeProperty("--hilal-boosts-ui-secondary");
       docEl.style.removeProperty("--hilal-boosts-ui-intensity");
       docEl.style.removeProperty("--hilal-boosts-ui-brightness");
+      try {
+        if (Services.prefs.getStringPref("hilal.theme.accentMode", "workspace") === "boosts") {
+          window.MaterialYouTheme?.applyTheme();
+        }
+      } catch (e) {}
     }
 
     _updateTahoeBoostedPageBackground(boost) {
@@ -1922,6 +1932,11 @@
       if (domain === this.activeDomain) {
         this._updateUIState();
         this._updatePanelUI();
+        try {
+          if (Services.prefs.getStringPref("hilal.theme.accentMode", "workspace") === "boosts") {
+            window.MaterialYouTheme?.applyTheme(themeColor);
+          }
+        } catch (e) {}
       }
     }
   }

@@ -19,6 +19,27 @@ hilal-workspaces-reset-button =
 hilal-workspaces-reset-confirm-title = Çalışma Alanlarını Sıfırla
 hilal-workspaces-reset-confirm-message = Bu işlem tüm çalışma alanı verilerini silecek ve geri alınamaz. Devam edilsin mi?
 
+## Theme & Accent Color
+
+hilal-theme-color-header = Vurgu Rengi ve Tema
+hilal-accent-mode-title = Vurgu Rengi Modu
+hilal-accent-mode-desc = Tarayıcı ve çalışma alanlarında kullanılacak tema rengi kaynağını seçin
+hilal-accent-mode-workspace = Çalışma Alanı
+    .label = Çalışma Alanı
+hilal-accent-mode-global = Genel Vurgu
+    .label = Genel Vurgu
+hilal-accent-mode-boosts = Hilal Boosts
+    .label = Hilal Boosts
+hilal-workspace-colors-subdesc = Her çalışma alanı için özel bir vurgu rengi belirleyin. Çalışma alanını değiştirdiğinizde tarayıcı teması o alana ait renge otomatik geçiş yapar.
+hilal-workspace-active-badge = Aktif
+    .label = Aktif
+hilal-global-color-title = Ana Vurgu Rengi
+hilal-global-color-desc = Tüm çalışma alanları ve tarayıcı pencereleri için tek bir ana vurgu rengi uygula
+hilal-boosts-mode-title = Hilal Boosts Dinamik Renk
+hilal-boosts-mode-desc = Gezindiğiniz aktif web sitesinin rengi otomatik olarak ayıklanır ve tüm tarayıcı arayüzü ile çalışma alanlarına anlık olarak yansıtılır
+hilal-boosts-live-status = Canlı Web Rengi Aktif
+    .label = Canlı Web Rengi Aktif
+
 ## Sidebar Options
 
 hilal-sidebar-header = Kenar Çubuğu Seçenekleri

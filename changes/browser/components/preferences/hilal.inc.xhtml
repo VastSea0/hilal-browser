@@ -132,7 +132,73 @@
   </div>
 </groupbox>
 
-<!-- Group 3: Sidebar Options -->
+<!-- Group 3: Theme & Accent Color Customization -->
+<groupbox id="hilalThemeColorsGroup" class="settings-group-card" data-category="paneHilal" hidden="true">
+  <div class="settings-group-header">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+      <path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.28 19.64 10.59 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
+    </svg>
+    <html:h2 data-l10n-id="hilal-theme-color-header"/>
+  </div>
+
+  <div class="settings-row" style="border-bottom: none; margin-bottom: 8px;">
+    <div class="settings-row-text">
+      <span class="settings-row-title" data-l10n-id="hilal-accent-mode-title"/>
+      <span class="settings-row-desc" data-l10n-id="hilal-accent-mode-desc"/>
+    </div>
+    <radiogroup id="hilalAccentMode" class="segmented-radiogroup">
+      <radio id="hilalAccentModeWorkspace"
+             value="workspace"
+             label="Çalışma Alanı"
+             data-l10n-id="hilal-accent-mode-workspace"/>
+      <radio id="hilalAccentModeGlobal"
+             value="global"
+             label="Genel Vurgu"
+             data-l10n-id="hilal-accent-mode-global"/>
+      <radio id="hilalAccentModeBoosts"
+             value="boosts"
+             label="Hilal Boosts"
+             data-l10n-id="hilal-accent-mode-boosts"/>
+    </radiogroup>
+  </div>
+
+  <!-- Sub-section: Workspace Colors -->
+  <vbox id="hilalWorkspaceColorsSection">
+    <span class="settings-row-desc" style="display: block; margin-bottom: 12px;" data-l10n-id="hilal-workspace-colors-subdesc"/>
+    <html:div id="hilalWorkspaceColorList" class="workspace-color-container">
+    </html:div>
+  </vbox>
+
+  <!-- Sub-section: Global Master Color -->
+  <vbox id="hilalGlobalColorSection" hidden="true">
+    <div class="settings-row" style="border-bottom: none;">
+      <div class="settings-row-text">
+        <span class="settings-row-title" data-l10n-id="hilal-global-color-title"/>
+        <span class="settings-row-desc" data-l10n-id="hilal-global-color-desc"/>
+      </div>
+      <html:div class="color-picker-wrapper">
+        <html:div id="hilalGlobalColorSwatches" class="m3-color-swatches"></html:div>
+        <html:input type="color" id="hilalGlobalCustomColor" class="custom-color-input" title="Özel Renk"/>
+      </html:div>
+    </div>
+  </vbox>
+
+  <!-- Sub-section: Dynamic Hilal Boosts Website Color -->
+  <vbox id="hilalBoostsColorSection" hidden="true">
+    <div class="settings-row" style="border-bottom: none;">
+      <div class="settings-row-text">
+        <span class="settings-row-title" data-l10n-id="hilal-boosts-mode-title"/>
+        <span class="settings-row-desc" data-l10n-id="hilal-boosts-mode-desc"/>
+      </div>
+      <html:div class="boosts-status-badge">
+        <html:span class="boosts-pulse-dot"></html:span>
+        <html:span data-l10n-id="hilal-boosts-live-status">Canlı Web Rengi Aktif</html:span>
+      </html:div>
+    </div>
+  </vbox>
+</groupbox>
+
+<!-- Group 4: Sidebar Options -->
 <groupbox id="hilalSidebarGroup" class="settings-group-card" data-category="paneHilal" hidden="true">
   <div class="settings-group-header">
     <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
