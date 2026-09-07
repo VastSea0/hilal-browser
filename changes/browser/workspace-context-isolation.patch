@@ -1,10 +1,10 @@
 diff --git a/browser/base/content/browser-places.js b/browser/base/content/browser-places.js
 --- a/browser/base/content/browser-places.js
 +++ b/browser/base/content/browser-places.js
-@@ -1165,7 +1165,20 @@ var PlacesToolbarHelper = {
+@@ -1165,8 +1165,21 @@ var PlacesToolbarHelper = {
        return;
      }
-
+ 
 +    let initialPlace = `place:parent=${PlacesUtils.bookmarks.toolbarGuid}`;
 +    try {
 +      let activeWorkspaceId = Services.prefs.getStringPref("hilal.workspaces.active", "default");
@@ -27,7 +27,7 @@ diff --git a/browser/base/content/browser-places.js b/browser/base/content/brows
 diff --git a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs b/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
 --- a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
 +++ b/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
-@@ -802,4 +802,66 @@ class MuxerUnifiedComplete extends UrlbarMuxer {
+@@ -802,6 +802,68 @@ class MuxerUnifiedComplete extends UrlbarMuxer {
    // error or increase the complexity threshold.
    // eslint-disable-next-line complexity
    _canAddResult(result, state) {
@@ -94,3 +94,5 @@ diff --git a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs b/browser/com
 +    }
 +
      if (state.context.excludeSponsoredResults && result.payload.isSponsored) {
+       return false;
+     }

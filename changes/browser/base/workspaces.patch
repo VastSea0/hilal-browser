@@ -23,7 +23,7 @@ diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.x
 diff --git a/browser/base/jar.mn b/browser/base/jar.mn
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
-@@ -66,26 +66,29 @@ browser.jar:
+@@ -66,6 +66,26 @@ browser.jar:
          content/browser/browser-unified-extensions.js       (content/browser-unified-extensions.js)
          content/browser/browser-graphics-utils.js           (content/browser-graphics-utils.js)
          content/browser/browser-webrtc.js                   (content/browser-webrtc.js)
@@ -49,4 +49,4 @@ diff --git a/browser/base/jar.mn b/browser/base/jar.mn
 +        content/browser/hilal/newtab/newtab.js              (content/hilal/newtab/newtab.js)
          content/browser/global-scripts.js                   (content/global-scripts.js)
          content/browser/main-popupset.js                    (content/main-popupset.js)
-  *       content/browser/pageinfo/pageInfo.xhtml             (content/pageinfo/pageInfo.xhtml)
+ *       content/browser/pageinfo/pageInfo.xhtml             (content/pageinfo/pageInfo.xhtml)

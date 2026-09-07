@@ -1,5 +1,4 @@
 diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/browser/browser.ftl
-index 33bc54e5edf6..832aa7d6d0a8 100644
 --- a/browser/locales/en-US/browser/browser.ftl
 +++ b/browser/locales/en-US/browser/browser.ftl
 @@ -1693,3 +1693,205 @@ reduced-protection-infobar-reload-button = Reload
@@ -209,10 +208,9 @@ index 33bc54e5edf6..832aa7d6d0a8 100644
 +hilal-toolbar-newtab =
 +    .title = New Tab
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
-index c576ab200c77..170302d71dce 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2832,3 +2832,130 @@ referrals-section-header2 =
+@@ -2832,3 +2832,151 @@ referrals-section-header2 =
  # use the browser. "Share" here means recommending or referring the browser
  referrals-link2 =
    .label = Share { -brand-product-name }
@@ -223,14 +221,16 @@ index c576ab200c77..170302d71dce 100644
 +## Workspaces
 +
 +hilal-workspaces-header = Workspaces
-+hilal-workspaces-enabled =
++hilal-workspaces-enabled = Enable workspaces
 +    .label = Enable workspaces
-+hilal-workspaces-pinned-public =
++hilal-workspaces-pinned-public = Make pinned tabs visible in all workspaces
 +    .label = Make pinned tabs visible in all workspaces
-+hilal-workspaces-groups-public =
++hilal-workspaces-groups-public = Make tab groups visible in all workspaces
 +    .label = Make tab groups visible in all workspaces
++hilal-urlbar-show-workspace-name = Show workspace name in address bar
++    .label = Show workspace name in address bar
 +hilal-workspaces-reset-description = Reset all workspace data (cannot be undone).
-+hilal-workspaces-reset-button =
++hilal-workspaces-reset-button = Reset Workspaces
 +    .label = Reset Workspaces
 +hilal-workspaces-reset-confirm-title = Reset Workspaces
 +hilal-workspaces-reset-confirm-message = This will delete all workspace data and cannot be undone. Continue?
@@ -238,6 +238,13 @@ index c576ab200c77..170302d71dce 100644
 +## Sidebar Options
 +
 +hilal-sidebar-header = Sidebar Options
++hilal-sidebar-compact-enabled = Enable Compact Mode (hover near screen edges to reveal sidebar and toolbar)
++    .label = Enable Compact Mode (hover near screen edges to reveal sidebar and toolbar)
++hilal-sidebar-compact-hide-toolbar = Auto-hide top toolbar in compact mode
++    .label = Auto-hide top toolbar in compact mode
++hilal-sidebar-compact-hide-toolbar-desc = When enabled, the top navigation and tab bar automatically hides and slides down with a smooth blur when the cursor nears the top edge.
++hilal-sidebar-show-horizontal-tabs = Show horizontal tabs
++    .label = Show horizontal tabs
 +hilal-sidebar-footer-items-label = Standard Footer Items:
 +hilal-sidebar-footer-bookmarks =
 +    .label = Bookmarks
@@ -252,6 +259,33 @@ index c576ab200c77..170302d71dce 100644
 +hilal-sidebar-footer-settings =
 +    .label = Settings
 +
++## UI Enhancements & Tahoe
++
++hilal-tahoe-header = Appearance & Tahoe Aesthetics
++hilal-tahoe-enabled = macOS Tahoe Glass Effect
++    .label = macOS Tahoe Glass Effect
++hilal-tahoe-enabled-desc = Window translucency, dynamic background blur, and lighting reflections.
++hilal-uifix-header = UI Enhancements
++hilal-uifix-enabled = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
++    .label = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
++hilal-uifix-connect-to-window = Connected Tabs (Connect tab borders to the window)
++    .label = Connected Tabs (Connect tab borders to the window)
++hilal-uifix-compact-padding = Compact Tab Padding (Slimmer tabs)
++    .label = Compact Tab Padding (Slimmer tabs)
++hilal-uifix-dynamic-separator = Dynamic Tab Separators
++    .label = Dynamic Tab Separators
++hilal-uifix-bottom-rounded = Rounded Bottom Tab Corners
++    .label = Rounded Bottom Tab Corners
++hilal-uifix-close-on-hover = Show Tab Close Button Only on Hover
++    .label = Show Tab Close Button Only on Hover
++
++## Site Customizer & Dynamic Coloring
++
++hilal-boosts-header = Site Customizer & Dynamic Coloring
++hilal-boosts-auto-palette = Automatically extract and apply website color palette to browser UI
++    .label = Automatically extract and apply website color palette to browser UI
++hilal-boosts-browser-ui = Apply site customizer colors to browser UI by default
++    .label = Apply site customizer colors to browser UI by default
 +hilal-sidebar-custom-shortcuts-label = Custom Sidebar Shortcuts:
 +hilal-sidebar-custom-shortcuts-desc = Add custom pages, bookmarks, or external links to the sidebar footer. Hilal shows favicons from Firefox's favicon cache for web links; it does not contact a site just to fetch its icon.
 +hilal-sidebar-custom-add =
@@ -288,30 +322,6 @@ index c576ab200c77..170302d71dce 100644
 +hilal-privacy-extreme =
 +    .label = Maximum local hardening (not Tor): Strict plus JavaScript off, camera/microphone/location blocked, and browsing history cleared on close.
 +
-+## UI Enhancements
-+
-+hilal-uifix-header = UI Enhancements
-+hilal-uifix-enabled =
-+    .label = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
-+hilal-uifix-connect-to-window =
-+    .label = Connected Tabs (Connect tab borders to the window)
-+hilal-uifix-compact-padding =
-+    .label = Compact Tab Padding (Slimmer, Lepton-style tabs)
-+hilal-uifix-dynamic-separator =
-+    .label = Dynamic Tab Separators
-+hilal-uifix-bottom-rounded =
-+    .label = Rounded Bottom Tab Corners
-+hilal-uifix-close-on-hover =
-+    .label = Show Tab Close Button Only on Hover
-+
-+## Site Customizer & Dynamic Coloring
-+
-+hilal-boosts-header = Site Customizer & Dynamic Coloring
-+hilal-boosts-auto-palette =
-+    .label = Automatically extract and apply website color palette to browser UI
-+hilal-boosts-browser-ui =
-+    .label = Apply site customizer colors to browser UI by default
-+
 +## Bangs
 +
 +hilal-bangs-header = Bangs
@@ -342,4 +352,13 @@ index c576ab200c77..170302d71dce 100644
 +hilal-shortcuts-description = Customize keyboard shortcuts for Hilal actions and native browser functions.
 +hilal-shortcuts-reset =
 +    .label = Restore Defaults
++
++## Hilal About
++
++hilal-about-header = Hilal Browser Information
++hilal-about-version-title = Hilal Browser 0.3.0-alpha.6
++hilal-about-version-subtitle = Based on Firefox Gecko 153.0a1
++hilal-about-version-button =
++    .label = Version Details
++
 +

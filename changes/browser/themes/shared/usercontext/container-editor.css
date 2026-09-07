@@ -1,0 +1,101 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+@import url("chrome://browser/content/usercontext/usercontext.css");
+
+.container-editor,
+.site-container-editor {
+  display: flex;
+  padding: var(--space-large);
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-large);
+
+  moz-input-text::part(label),
+  container-select::part(label) {
+    font-weight: var(--font-weight-semibold);
+  }
+}
+
+.site-container-editor {
+  min-inline-size: 32em;
+
+  container-select {
+    --select-margin-inline: 0;
+    --select-min-width: 100%;
+  }
+
+  .site-container-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxsmall);
+  }
+
+  .site-container-error {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xsmall);
+    font-size: var(--font-size-small);
+    color: var(--text-color-error);
+
+    &:empty {
+      display: none;
+    }
+
+    &::before {
+      content: url("chrome://global/skin/icons/error.svg");
+      display: flex;
+      inline-size: var(--icon-size);
+      block-size: var(--icon-size);
+      fill: var(--icon-color-critical);
+      -moz-context-properties: fill;
+    }
+  }
+}
+
+.container-editor {
+  .swatches::part(inputs) {
+    justify-content: space-between;
+  }
+
+  .swatch {
+    --visual-picker-item-border-radius: var(--border-radius-circle);
+    --visual-picker-item-border-color: transparent;
+    inline-size: var(--size-item-large);
+    block-size: var(--size-item-large);
+
+    .userContext-icon {
+      display: block;
+      inline-size: 100%;
+      block-size: 100%;
+      background-size: 22px;
+    }
+  }
+
+  .icon-swatches .userContext-icon {
+    fill: var(--icon-color);
+    background-size: 16px;
+  }
+
+  @media -moz-pref("browser.nova.enabled") {
+    .color-swatches .userContext-icon {
+      background-image: none;
+      background-color: var(--identity-stroke-color);
+      border-radius: var(--border-radius-circle);
+      inline-size: var(--size-item-medium);
+      block-size: var(--size-item-medium);
+      margin: auto;
+    }
+  }
+}
+
+/* When the URL-bar container indicator is revealed solely to anchor the
+   container-creation panel, keep it as a minimal, empty anchor. */
+#userContext-icons.container-anchor-pinned {
+  min-inline-size: var(--size-item-small);
+}
+
+#userContext-icons.container-anchor-pinned > * {
+  display: none;
+}

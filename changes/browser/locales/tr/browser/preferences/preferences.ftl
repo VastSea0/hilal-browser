@@ -80,6 +80,9 @@ hilal-privacy-extreme =
 ## UI Enhancements
 
 hilal-uifix-header = Arayüz Geliştirmeleri
+hilal-tahoe-enabled =
+    .label = macOS Tahoe Cam Efekti
+hilal-tahoe-enabled-desc = Pencere saydamlığı, arka plan bulanıklığı ve ışık yansıması.
 hilal-uifix-enabled =
     .label = Arayüz geliştirmelerini etkinleştir (@black7375 tarafından geliştirilen Firefox-UI-Fix'i içerir)
 hilal-uifix-connect-to-window =
@@ -130,5 +133,14 @@ hilal-shortcuts-header = Klavye Kısayolları
 hilal-shortcuts-description = Hilal eylemleri ve yerleşik tarayıcı işlevleri için klavye kısayollarını özelleştirin.
 hilal-shortcuts-reset =
     .label = Varsayılana Dön
+
+## Hilal About
+
+hilal-about-header = Hilal Sürüm Bilgileri
+hilal-about-version-title = Hilal Browser 0.3.0-alpha.6
+hilal-about-version-subtitle = Firefox Gecko 153.0a1 Tabanlı
+hilal-about-version-button =
+    .label = Sürüm Detayları
+
 
 

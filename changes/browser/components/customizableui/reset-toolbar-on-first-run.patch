@@ -13,5 +13,3 @@ diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/
      this._setAutoTouchModeDefault();
  
      lazy.AddonManagerPrivate.databaseReady.then(async () => {
-       lazy.AddonManager.addAddonListener(this);
- 

@@ -7,7 +7,88 @@ starts with "hilal-".
 diff --git a/toolkit/mozapps/update/updater/moz.build b/toolkit/mozapps/update/updater/moz.build
 --- a/toolkit/mozapps/update/updater/moz.build
 +++ b/toolkit/mozapps/update/updater/moz.build
-@@ -51,7 +51,7 @@ xpcshell_cert.script = "gen_cert_header.py:create_header"
+@@ -13,78 +13,21 @@ DIRS += ["updater-dep"]
+ TEST_DIRS += ["updater-xpcshell"]
+ 
+ if CONFIG["MOZ_WIDGET_TOOLKIT"] == "cocoa":
+-    GeneratedFile(
+-        "Info.plist",
+-        script="/python/mozbuild/mozbuild/action/preprocessor.py",
+-        entry_point="generate",
+-        inputs=["macbuild/Contents/Info.plist.in"],
+-        flags=[
+-            "-Fsubstitution",
+-            f"-DMOZ_MACBUNDLE_ID={CONFIG['MOZ_MACBUNDLE_ID']}",
+-            f"-DMOZ_SMAUTHORIZEDCLIENTS_REQUIREMENTS={CONFIG['MOZ_SMAUTHORIZEDCLIENTS_REQUIREMENTS']}",
+-        ],
+-    )
+-    GeneratedFile(
+-        "InfoPlist.strings",
+-        script="/python/mozbuild/mozbuild/action/preprocessor.py",
+-        entry_point="generate",
+-        inputs=["macbuild/Contents/Resources/English.lproj/InfoPlist.strings.in"],
+-        flags=[
+-            "-Fsubstitution",
+-            "--output-encoding",
+-            "utf-16",
+-            f"-DAPP_NAME={CONFIG['MOZ_APP_DISPLAYNAME']}",
+-        ],
+-    )
+-    FINAL_TARGET_FILES += ["!Info.plist"]
+     LDFLAGS += [
+         "-sectcreate",
+         "__TEXT",
+         "__info_plist",
+-        OBJDIR + "/Info.plist",
++        TOPOBJDIR + "/dist/bin/Info.plist",
+         "-sectcreate",
+         "__TEXT",
+         "__launchd_plist",
+         SRCDIR + "/Launchd.plist",
+     ]
+-    EXTRA_LINK_DEPS += ["!Info.plist", "Launchd.plist"]
+     DIRS += [
+         "macos-frameworks",
+     ]
+-    # In a compile build, the moz.build stanzas produce the binary named
+-    # `UpdateSettings`; we just need it in the correct place. In an artifact
+-    # build, we copy upstream artifacts from
+-    # `dist/update_framework_artifacts/UpdateSettings-localbuild.framework`.
+-    if CONFIG["COMPILE_ENVIRONMENT"]:
+-        update_settings = f"!/{FINAL_TARGET}/UpdateSettings"
+-    elif CONFIG["MOZ_ARTIFACT_BUILDS"]:
+-        update_settings = (
+-            "!/dist/update_framework_artifacts/"
+-            "UpdateSettings-localbuild.framework/UpdateSettings"
+-        )
+-    else:
+-        update_settings = None
+-    extra_files = []
+-    if update_settings:
+-        extra_files.append(
+-            (update_settings, "Frameworks/UpdateSettings.framework/UpdateSettings")
+-        )
+-    extra_files.append(
+-        (
+-            "macos-frameworks/UpdateSettings/Info.plist",
+-            "Frameworks/UpdateSettings.framework/Resources/Info.plist",
+-        )
+-    )
+-    MacOSBundle(
+-        f"!/{FINAL_TARGET}/updater.app",
+-        skeleton="macbuild/Contents",
+-        info_plist="!Info.plist",
+-        strings="!InfoPlist.strings",
+-        binaries=[(f"!/{FINAL_TARGET}/org.mozilla.updater", "org.mozilla.updater")],
+-        extra_files=extra_files,
+-    )
+ 
+-GENERATED_FILES += [
++GENERATED_FILES = [
+     "dep1Cert.h",
+     "dep2Cert.h",
+     "primaryCert.h",
+@@ -108,7 +51,7 @@ xpcshell_cert.script = "gen_cert_header.py:create_header"
  dep1_cert.script = "gen_cert_header.py:create_header"
  dep2_cert.script = "gen_cert_header.py:create_header"
  

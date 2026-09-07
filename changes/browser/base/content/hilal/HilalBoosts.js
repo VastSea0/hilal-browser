@@ -1,4 +1,4 @@
-(function() {
+(function () {
   "use strict";
 
   const { HilalBoostsShared } = ChromeUtils.importESModule(
@@ -30,8 +30,10 @@
       this._panelCommandListener = event => this.onPanelCommand(event.target);
       this._zapButtonListener = () => this.startZapMode();
       this._colorPresetListener = event => this._onColorPresetClick(event);
-      this._colorPickerPointerDown = event => this._onColorPickerPointerDown(event);
-      this._colorPickerPointerMove = event => this._onColorPickerPointerMove(event);
+      this._colorPickerPointerDown = event =>
+        this._onColorPickerPointerDown(event);
+      this._colorPickerPointerMove = event =>
+        this._onColorPickerPointerMove(event);
       this._colorPickerPointerUp = () => {
         this._draggingColor = false;
       };
@@ -59,22 +61,27 @@
       this._tabSelectListener = () => {
         this._updateUIState();
       };
-      window.gBrowser.tabContainer.addEventListener("TabSelect", this._tabSelectListener);
+      window.gBrowser.tabContainer.addEventListener(
+        "TabSelect",
+        this._tabSelectListener
+      );
 
       this._tabsProgressListener = {
         onLocationChange: (browser, webProgress, request, locationURI) => {
           this._updateUIState();
-        }
+        },
       };
       window.gBrowser.addTabsProgressListener(this._tabsProgressListener);
 
       try {
         ChromeUtils.registerWindowActor("HilalBoosts", {
           parent: {
-            esModuleURI: "chrome://browser/content/hilal/HilalBoostsActorParent.sys.mjs",
+            esModuleURI:
+              "chrome://browser/content/hilal/HilalBoostsActorParent.sys.mjs",
           },
           child: {
-            esModuleURI: "chrome://browser/content/hilal/HilalBoostsActorChild.sys.mjs",
+            esModuleURI:
+              "chrome://browser/content/hilal/HilalBoostsActorChild.sys.mjs",
             events: {
               DOMDocElementInserted: {},
               DOMContentLoaded: {},
@@ -103,7 +110,10 @@
         Services.prefs.removeObserver(PREF_BROWSER_UI, this._prefObserver);
       }
       if (this._tabSelectListener) {
-        window.gBrowser.tabContainer.removeEventListener("TabSelect", this._tabSelectListener);
+        window.gBrowser.tabContainer.removeEventListener(
+          "TabSelect",
+          this._tabSelectListener
+        );
       }
       if (this._tabsProgressListener) {
         window.gBrowser.removeTabsProgressListener(this._tabsProgressListener);
@@ -117,9 +127,12 @@
       if (picker) {
         picker.removeEventListener("pointerdown", this._colorPickerPointerDown);
       }
-      document.getElementById("hilal-boosts-zap-btn")
+      document
+        .getElementById("hilal-boosts-zap-btn")
         ?.removeEventListener("click", this._zapButtonListener);
-      for (const preset of document.querySelectorAll(".hilal-boosts-swatch-circle")) {
+      for (const preset of document.querySelectorAll(
+        ".hilal-boosts-swatch-circle"
+      )) {
         preset.removeEventListener("click", this._colorPresetListener);
       }
       this._removePanelCommandListeners();
@@ -160,7 +173,10 @@
         smartInvert: false,
         colorEnabled: false,
         browserUIEnabled: Services.prefs.getBoolPref(PREF_BROWSER_UI, false),
-        autoPaletteEnabled: Services.prefs.getBoolPref(PREF_AUTO_PALETTE, false),
+        autoPaletteEnabled: Services.prefs.getBoolPref(
+          PREF_AUTO_PALETTE,
+          false
+        ),
         accentColor: DEFAULT_ACCENT_COLOR,
         secondaryColor: DEFAULT_SECONDARY_COLOR,
         colorIntensity: 35,
@@ -191,7 +207,9 @@
 
     getBoostForDomain(domain) {
       if (!domain) return null;
-      return this._normalizeBoost(this._boosts[domain] || this._makeDefaultBoost());
+      return this._normalizeBoost(
+        this._boosts[domain] || this._makeDefaultBoost()
+      );
     }
 
     saveBoostForDomain(domain, data) {
@@ -213,21 +231,30 @@
               if (browser && browser.browsingContext) {
                 try {
                   const tabDomain = this._domainForURI(browser.currentURI);
-                  if (!tabDomain || (targetDomain && tabDomain !== targetDomain)) {
+                  if (
+                    !tabDomain ||
+                    (targetDomain && tabDomain !== targetDomain)
+                  ) {
                     continue;
                   }
-                  const windowGlobal = browser.browsingContext.currentWindowGlobal;
+                  const windowGlobal =
+                    browser.browsingContext.currentWindowGlobal;
                   const actor = windowGlobal?.getActor("HilalBoosts");
                   if (!actor) {
                     continue;
                   }
                   const boost = this._enabled ? this._boosts[tabDomain] : null;
                   if (boost?.enabled) {
-                    actor.sendAsyncMessage("HilalBoosts:UpdateBoost", this._normalizeBoost(boost));
+                    actor.sendAsyncMessage(
+                      "HilalBoosts:UpdateBoost",
+                      this._normalizeBoost(boost)
+                    );
                   } else {
                     actor.sendAsyncMessage("HilalBoosts:ClearBoost");
                   }
-                  if (Services.prefs.getBoolPref("hilal.tahoe.enabled", false)) {
+                  if (
+                    Services.prefs.getBoolPref("hilal.tahoe.enabled", false)
+                  ) {
                     windowGlobal
                       ?.getActor("HilalTahoe")
                       ?.sendAsyncMessage("HilalTahoe:UpdateOffsets", {});
@@ -329,7 +356,10 @@
 
       for (const [domain, css] of nextSheets) {
         const current = HilalBoostsShared.activeSheetUris.get(domain);
-        if (current?.css === css && sss.sheetRegistered(current.uri, sheetType)) {
+        if (
+          current?.css === css &&
+          sss.sheetRegistered(current.uri, sheetType)
+        ) {
           continue;
         }
 
@@ -338,12 +368,16 @@
         }
 
         try {
-          const dataUriStr = "data:text/css;charset=utf-8," + encodeURIComponent(css);
+          const dataUriStr =
+            "data:text/css;charset=utf-8," + encodeURIComponent(css);
           const uri = Services.io.newURI(dataUriStr);
           sss.loadAndRegisterSheet(uri, sheetType);
           HilalBoostsShared.activeSheetUris.set(domain, { uri, css });
         } catch (e) {
-          console.error(`HilalBoosts: failed to register stylesheet for ${domain}`, e);
+          console.error(
+            `HilalBoosts: failed to register stylesheet for ${domain}`,
+            e
+          );
         }
       }
 
@@ -414,10 +448,12 @@
 
       this._updateTahoeBoostedPageBackground(boost);
 
-      const globalAutoPalette = Services.prefs.getBoolPref(PREF_AUTO_PALETTE, false);
-      const isAutoPalette = boost && boost.enabled
-        ? boost.autoPaletteEnabled
-        : globalAutoPalette;
+      const globalAutoPalette = Services.prefs.getBoolPref(
+        PREF_AUTO_PALETTE,
+        false
+      );
+      const isAutoPalette =
+        boost && boost.enabled ? boost.autoPaletteEnabled : globalAutoPalette;
 
       const extractedColor = domain ? this._extractedThemeColors[domain] : null;
 
@@ -430,13 +466,25 @@
         docEl.style.setProperty("--hilal-boosts-ui-accent", extractedColor);
         docEl.style.setProperty("--hilal-boosts-ui-secondary", secondaryColor);
         docEl.style.setProperty("--hilal-boosts-ui-intensity", intensity + "%");
-        docEl.style.setProperty("--hilal-boosts-ui-brightness", brightness + "%");
+        docEl.style.setProperty(
+          "--hilal-boosts-ui-brightness",
+          brightness + "%"
+        );
       } else if (boost && boost.enabled && boost.browserUIEnabled) {
         docEl.setAttribute("hilal-boosts-ui", "true");
         docEl.style.setProperty("--hilal-boosts-ui-accent", boost.accentColor);
-        docEl.style.setProperty("--hilal-boosts-ui-secondary", boost.secondaryColor);
-        docEl.style.setProperty("--hilal-boosts-ui-intensity", boost.colorIntensity + "%");
-        docEl.style.setProperty("--hilal-boosts-ui-brightness", boost.colorBrightness + "%");
+        docEl.style.setProperty(
+          "--hilal-boosts-ui-secondary",
+          boost.secondaryColor
+        );
+        docEl.style.setProperty(
+          "--hilal-boosts-ui-intensity",
+          boost.colorIntensity + "%"
+        );
+        docEl.style.setProperty(
+          "--hilal-boosts-ui-brightness",
+          boost.colorBrightness + "%"
+        );
       } else {
         this._clearBrowserUIColors();
       }
@@ -469,7 +517,11 @@
         return;
       }
       const docEl = document.documentElement;
-      if (!boost?.enabled || !boost.colorEnabled || !this._isHexColor(boost.accentColor)) {
+      if (
+        !boost?.enabled ||
+        !boost.colorEnabled ||
+        !this._isHexColor(boost.accentColor)
+      ) {
         this._clearTahoeBoostedPageBackground();
         return;
       }
@@ -608,11 +660,7 @@
     _filterHilalBoostColor(rgb, accent, complementary) {
       const blendFactor = accent.contrastFactor;
       const original = this._rgbToOklab(rgb);
-      const halfWidth = this._clampFloat(
-        0.5 - blendFactor * 0.45,
-        0.05,
-        0.5
-      );
+      const halfWidth = this._clampFloat(0.5 - blendFactor * 0.45, 0.05, 0.5);
       let t = this._clampFloat(
         (original.l - (0.5 - halfWidth)) / (2 * halfWidth),
         0,
@@ -652,9 +700,15 @@
       const lr = this._srgbToLinear(rgb[0] / 255);
       const lg = this._srgbToLinear(rgb[1] / 255);
       const lb = this._srgbToLinear(rgb[2] / 255);
-      const l = Math.cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb);
-      const m = Math.cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb);
-      const s = Math.cbrt(0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb);
+      const l = Math.cbrt(
+        0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb
+      );
+      const m = Math.cbrt(
+        0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb
+      );
+      const s = Math.cbrt(
+        0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb
+      );
       return {
         l: 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
         a: 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
@@ -708,7 +762,10 @@
       const channelFloor = 40;
       const range = 255 - channelFloor;
       return shifted.map(channel =>
-        Math.min(255, Math.max(0, Math.floor(channelFloor + (channel * range) / 255)))
+        Math.min(
+          255,
+          Math.max(0, Math.floor(channelFloor + (channel * range) / 255))
+        )
       );
     }
 
@@ -736,7 +793,9 @@
             .map(channel => channel + channel)
             .join("");
         }
-        return [0, 2, 4].map(index => parseInt(hex.slice(index, index + 2), 16));
+        return [0, 2, 4].map(index =>
+          parseInt(hex.slice(index, index + 2), 16)
+        );
       }
 
       const rgbMatch = color.match(/^rgba?\((.*)\)$/i);
@@ -757,7 +816,10 @@
       );
       if (srgbMatch) {
         return [1, 2, 3].map(index =>
-          Math.min(255, Math.max(0, Math.round(parseFloat(srgbMatch[index]) * 255)))
+          Math.min(
+            255,
+            Math.max(0, Math.round(parseFloat(srgbMatch[index]) * 255))
+          )
         );
       }
 
@@ -792,82 +854,102 @@
       this._addPanelCommandListener("hilal-boosts-case", "change");
       this._addPanelCommandListener("hilal-boosts-invert", "change");
       this._addPanelCommandListener("hilal-boosts-color-enable", "change");
-      this._addPanelCommandListener("hilal-boosts-auto-palette-enable", "change");
+      this._addPanelCommandListener(
+        "hilal-boosts-auto-palette-enable",
+        "change"
+      );
       this._addPanelCommandListener("hilal-boosts-browser-ui-enable", "change");
       this._addPanelCommandListener("hilal-boosts-color", "input");
       this._addPanelCommandListener("hilal-boosts-color-secondary", "input");
       this._addPanelCommandListener("hilal-boosts-color-intensity", "input");
       this._addPanelCommandListener("hilal-boosts-color-brightness", "input");
       this._addPanelCommandListener("hilal-boosts-css", "input");
-      document.getElementById("hilal-boosts-zap-btn")
+      document
+        .getElementById("hilal-boosts-zap-btn")
         ?.addEventListener("click", this._zapButtonListener);
-      for (const preset of document.querySelectorAll(".hilal-boosts-swatch-circle")) {
+      for (const preset of document.querySelectorAll(
+        ".hilal-boosts-swatch-circle"
+      )) {
         preset.addEventListener("click", this._colorPresetListener);
       }
 
-      document.getElementById("hilal-boosts-btn-close")?.addEventListener("click", () => {
-        document.getElementById("hilal-boosts-panel")?.hidePopup();
-      });
+      document
+        .getElementById("hilal-boosts-btn-close")
+        ?.addEventListener("click", () => {
+          document.getElementById("hilal-boosts-panel")?.hidePopup();
+        });
 
-      document.getElementById("hilal-boosts-btn-reset")?.addEventListener("click", () => {
-        const domain = this.activeDomain;
-        if (domain) {
-          this.saveBoostForDomain(domain, {
-            enabled: false,
-            fontFamily: "",
-            fontSize: 100,
-            textCase: "none",
-            smartInvert: false,
-            colorEnabled: false,
-            autoPaletteEnabled: false,
-            browserUIEnabled: false,
-            accentColor: DEFAULT_ACCENT_COLOR,
-            secondaryColor: DEFAULT_SECONDARY_COLOR,
-            colorIntensity: 35,
-            colorBrightness: 100,
-            customCSS: "",
-            zappedSelectors: []
-          });
-          this.populatePanel();
-        }
-      });
+      document
+        .getElementById("hilal-boosts-btn-reset")
+        ?.addEventListener("click", () => {
+          const domain = this.activeDomain;
+          if (domain) {
+            this.saveBoostForDomain(domain, {
+              enabled: false,
+              fontFamily: "",
+              fontSize: 100,
+              textCase: "none",
+              smartInvert: false,
+              colorEnabled: false,
+              autoPaletteEnabled: false,
+              browserUIEnabled: false,
+              accentColor: DEFAULT_ACCENT_COLOR,
+              secondaryColor: DEFAULT_SECONDARY_COLOR,
+              colorIntensity: 35,
+              colorBrightness: 100,
+              customCSS: "",
+              zappedSelectors: [],
+            });
+            this.populatePanel();
+          }
+        });
 
-      document.getElementById("hilal-boosts-btn-sparkle")?.addEventListener("click", () => {
-        const input = document.getElementById("hilal-boosts-color-enable");
-        if (input) {
-          input.checked = !input.checked;
-          input.dispatchEvent(new Event("change"));
-        }
-      });
+      document
+        .getElementById("hilal-boosts-btn-sparkle")
+        ?.addEventListener("click", () => {
+          const input = document.getElementById("hilal-boosts-color-enable");
+          if (input) {
+            input.checked = !input.checked;
+            input.dispatchEvent(new Event("change"));
+          }
+        });
 
-      document.getElementById("hilal-boosts-btn-invert-toggle")?.addEventListener("click", () => {
-        const input = document.getElementById("hilal-boosts-invert");
-        if (input) {
-          input.checked = !input.checked;
-          input.dispatchEvent(new Event("change"));
-        }
-      });
+      document
+        .getElementById("hilal-boosts-btn-invert-toggle")
+        ?.addEventListener("click", () => {
+          const input = document.getElementById("hilal-boosts-invert");
+          if (input) {
+            input.checked = !input.checked;
+            input.dispatchEvent(new Event("change"));
+          }
+        });
 
-      document.getElementById("hilal-boosts-btn-sliders-toggle")?.addEventListener("click", (event) => {
-        const drawer = document.getElementById("hilal-boosts-drawer-sliders");
-        const btn = event.currentTarget;
-        if (drawer) {
-          const isOpen = drawer.getAttribute("open") === "true";
-          drawer.setAttribute("open", isOpen ? "false" : "true");
-          btn.setAttribute("active", isOpen ? "false" : "true");
-        }
-      });
+      document
+        .getElementById("hilal-boosts-btn-sliders-toggle")
+        ?.addEventListener("click", event => {
+          const drawer = document.getElementById("hilal-boosts-drawer-sliders");
+          const btn = event.currentTarget;
+          if (drawer) {
+            const isOpen = drawer.getAttribute("open") === "true";
+            drawer.setAttribute("open", isOpen ? "false" : "true");
+            btn.setAttribute("active", isOpen ? "false" : "true");
+          }
+        });
 
-      document.getElementById("hilal-boosts-btn-power-toggle")?.addEventListener("click", () => {
-        const input = document.getElementById("hilal-boosts-enable");
-        if (input) {
-          input.checked = !input.checked;
-          input.dispatchEvent(new Event("change"));
-        }
-      });
+      document
+        .getElementById("hilal-boosts-btn-power-toggle")
+        ?.addEventListener("click", () => {
+          const input = document.getElementById("hilal-boosts-enable");
+          if (input) {
+            input.checked = !input.checked;
+            input.dispatchEvent(new Event("change"));
+          }
+        });
 
-      for (const btn of document.querySelectorAll(".hilal-boosts-font-preview-btn")) {
-        btn.addEventListener("click", (event) => {
+      for (const btn of document.querySelectorAll(
+        ".hilal-boosts-font-preview-btn"
+      )) {
+        btn.addEventListener("click", event => {
           const fontInput = document.getElementById("hilal-boosts-font");
           if (fontInput) {
             fontInput.value = event.currentTarget.dataset.font || "";
@@ -876,34 +958,42 @@
         });
       }
 
-      document.getElementById("hilal-boosts-btn-size-toggle")?.addEventListener("click", () => {
-        const drawer = document.getElementById("hilal-boosts-drawer-sliders");
-        const btn = document.getElementById("hilal-boosts-btn-sliders-toggle");
-        if (drawer) {
-          const isOpen = drawer.getAttribute("open") === "true";
-          drawer.setAttribute("open", isOpen ? "false" : "true");
-          btn?.setAttribute("active", isOpen ? "false" : "true");
-        }
-      });
+      document
+        .getElementById("hilal-boosts-btn-size-toggle")
+        ?.addEventListener("click", () => {
+          const drawer = document.getElementById("hilal-boosts-drawer-sliders");
+          const btn = document.getElementById(
+            "hilal-boosts-btn-sliders-toggle"
+          );
+          if (drawer) {
+            const isOpen = drawer.getAttribute("open") === "true";
+            drawer.setAttribute("open", isOpen ? "false" : "true");
+            btn?.setAttribute("active", isOpen ? "false" : "true");
+          }
+        });
 
-      document.getElementById("hilal-boosts-btn-case-cycle")?.addEventListener("click", () => {
-        const input = document.getElementById("hilal-boosts-case");
-        if (input) {
-          const cases = ["none", "uppercase", "lowercase", "capitalize"];
-          const currentIdx = cases.indexOf(input.value || "none");
-          const nextIdx = (currentIdx + 1) % cases.length;
-          input.value = cases[nextIdx];
-          input.dispatchEvent(new Event("change"));
-        }
-      });
+      document
+        .getElementById("hilal-boosts-btn-case-cycle")
+        ?.addEventListener("click", () => {
+          const input = document.getElementById("hilal-boosts-case");
+          if (input) {
+            const cases = ["none", "uppercase", "lowercase", "capitalize"];
+            const currentIdx = cases.indexOf(input.value || "none");
+            const nextIdx = (currentIdx + 1) % cases.length;
+            input.value = cases[nextIdx];
+            input.dispatchEvent(new Event("change"));
+          }
+        });
 
-      document.getElementById("hilal-boosts-code-btn")?.addEventListener("click", () => {
-        const drawer = document.getElementById("hilal-boosts-drawer-code");
-        if (drawer) {
-          const isOpen = drawer.getAttribute("open") === "true";
-          drawer.setAttribute("open", isOpen ? "false" : "true");
-        }
-      });
+      document
+        .getElementById("hilal-boosts-code-btn")
+        ?.addEventListener("click", () => {
+          const drawer = document.getElementById("hilal-boosts-drawer-code");
+          if (drawer) {
+            const isOpen = drawer.getAttribute("open") === "true";
+            drawer.setAttribute("open", isOpen ? "false" : "true");
+          }
+        });
 
       window.addEventListener("pointermove", this._colorPickerPointerMove);
       window.addEventListener("pointerup", this._colorPickerPointerUp);
@@ -938,7 +1028,11 @@
     }
 
     togglePanel(event) {
-      if (event?.type === "keypress" && event.key !== "Enter" && event.key !== " ") {
+      if (
+        event?.type === "keypress" &&
+        event.key !== "Enter" &&
+        event.key !== " "
+      ) {
         return;
       }
 
@@ -962,9 +1056,13 @@
 
       const anchor = this._getPopupAnchor(btn);
       btn.setAttribute("open", "true");
-      panel.addEventListener("popuphidden", () => {
-        btn.removeAttribute("open");
-      }, { once: true });
+      panel.addEventListener(
+        "popuphidden",
+        () => {
+          btn.removeAttribute("open");
+        },
+        { once: true }
+      );
       panel.openPopup(anchor.node, anchor.position, 0, 0, false, false, event);
       this._pulseContentBorder(true);
     }
@@ -1000,30 +1098,46 @@
       scaleValue.textContent = (boost.fontSize || 100) + "%";
 
       // Font Family
-      document.getElementById("hilal-boosts-font").value = boost.fontFamily || "";
+      document.getElementById("hilal-boosts-font").value =
+        boost.fontFamily || "";
 
       // Text Case
-      document.getElementById("hilal-boosts-case").value = boost.textCase || "none";
+      document.getElementById("hilal-boosts-case").value =
+        boost.textCase || "none";
 
       // Smart Invert
-      document.getElementById("hilal-boosts-invert").checked = boost.smartInvert || false;
+      document.getElementById("hilal-boosts-invert").checked =
+        boost.smartInvert || false;
 
       // Color Boost
-      document.getElementById("hilal-boosts-color-enable").checked = !!boost.colorEnabled;
-      document.getElementById("hilal-boosts-auto-palette-enable").checked = !!boost.autoPaletteEnabled;
-      document.getElementById("hilal-boosts-browser-ui-enable").checked = !!boost.browserUIEnabled;
+      document.getElementById("hilal-boosts-color-enable").checked =
+        !!boost.colorEnabled;
+      document.getElementById("hilal-boosts-auto-palette-enable").checked =
+        !!boost.autoPaletteEnabled;
+      document.getElementById("hilal-boosts-browser-ui-enable").checked =
+        !!boost.browserUIEnabled;
       const colorInput = document.getElementById("hilal-boosts-color");
       colorInput.value = boost.accentColor;
-      const secondaryColorInput = document.getElementById("hilal-boosts-color-secondary");
+      const secondaryColorInput = document.getElementById(
+        "hilal-boosts-color-secondary"
+      );
       secondaryColorInput.value = boost.secondaryColor;
 
-      const intensityInput = document.getElementById("hilal-boosts-color-intensity");
-      const intensityValue = document.getElementById("hilal-boosts-color-intensity-value");
+      const intensityInput = document.getElementById(
+        "hilal-boosts-color-intensity"
+      );
+      const intensityValue = document.getElementById(
+        "hilal-boosts-color-intensity-value"
+      );
       intensityInput.value = boost.colorIntensity;
       intensityValue.textContent = boost.colorIntensity + "%";
 
-      const brightnessInput = document.getElementById("hilal-boosts-color-brightness");
-      const brightnessValue = document.getElementById("hilal-boosts-color-brightness-value");
+      const brightnessInput = document.getElementById(
+        "hilal-boosts-color-brightness"
+      );
+      const brightnessValue = document.getElementById(
+        "hilal-boosts-color-brightness-value"
+      );
       brightnessInput.value = boost.colorBrightness;
       brightnessValue.textContent = boost.colorBrightness + "%";
       this._updateColorPickerVisuals(boost);
@@ -1032,8 +1146,12 @@
       document.getElementById("hilal-boosts-css").value = boost.customCSS || "";
 
       // Action Row Buttons Active State
-      document.getElementById("hilal-boosts-btn-invert-toggle").toggleAttribute("active", !!boost.smartInvert);
-      document.getElementById("hilal-boosts-btn-power-toggle").toggleAttribute("active", !!boost.enabled);
+      document
+        .getElementById("hilal-boosts-btn-invert-toggle")
+        .toggleAttribute("active", !!boost.smartInvert);
+      document
+        .getElementById("hilal-boosts-btn-power-toggle")
+        .toggleAttribute("active", !!boost.enabled);
 
       // Text Case Cycle Button Text
       const caseBtn = document.getElementById("hilal-boosts-btn-case-cycle");
@@ -1049,7 +1167,9 @@
       // Font Family Selection Grid Highlight
       const font = boost.fontFamily || "";
       let activeFontLabel = "System Default";
-      for (const fontBtn of document.querySelectorAll(".hilal-boosts-font-preview-btn")) {
+      for (const fontBtn of document.querySelectorAll(
+        ".hilal-boosts-font-preview-btn"
+      )) {
         const isMatch = (fontBtn.dataset.font || "") === font;
         fontBtn.toggleAttribute("active", isMatch);
         if (isMatch) {
@@ -1068,17 +1188,19 @@
         for (const selector of boost.zappedSelectors) {
           const item = document.createElement("div");
           item.className = "hilal-boosts-zap-item";
-          
+
           const label = document.createElement("span");
           label.textContent = selector;
           label.className = "hilal-boosts-zap-label";
           label.title = selector;
-          
+
           const removeBtn = document.createElement("button");
           removeBtn.textContent = "×";
           removeBtn.className = "hilal-boosts-zap-remove";
           removeBtn.addEventListener("click", () => {
-            boost.zappedSelectors = boost.zappedSelectors.filter(s => s !== selector);
+            boost.zappedSelectors = boost.zappedSelectors.filter(
+              s => s !== selector
+            );
             this.saveBoostForDomain(domain, boost);
             this.populatePanel();
           });
@@ -1087,13 +1209,17 @@
           item.appendChild(removeBtn);
           zapsList.appendChild(item);
         }
-        document.getElementById("hilal-boosts-drawer-zaps")?.setAttribute("open", "true");
+        document
+          .getElementById("hilal-boosts-drawer-zaps")
+          ?.setAttribute("open", "true");
       } else {
         const placeholder = document.createElement("div");
         placeholder.textContent = "No active element blocks";
         placeholder.className = "hilal-boosts-zap-placeholder";
         zapsList.appendChild(placeholder);
-        document.getElementById("hilal-boosts-drawer-zaps")?.setAttribute("open", "false");
+        document
+          .getElementById("hilal-boosts-drawer-zaps")
+          ?.setAttribute("open", "false");
       }
     }
 
@@ -1107,7 +1233,8 @@
         boost.enabled = target.checked;
       } else if (target.id === "hilal-boosts-scale") {
         boost.fontSize = parseInt(target.value);
-        document.getElementById("hilal-boosts-scale-value").textContent = boost.fontSize + "%";
+        document.getElementById("hilal-boosts-scale-value").textContent =
+          boost.fontSize + "%";
       } else if (target.id === "hilal-boosts-font") {
         boost.fontFamily = target.value;
       } else if (target.id === "hilal-boosts-case") {
@@ -1140,7 +1267,10 @@
         document.getElementById("hilal-boosts-color-enable").checked = true;
         this._updateColorPickerVisuals(boost);
       } else if (target.id === "hilal-boosts-color-secondary") {
-        boost.secondaryColor = this._normalizeHexColor(target.value, DEFAULT_SECONDARY_COLOR);
+        boost.secondaryColor = this._normalizeHexColor(
+          target.value,
+          DEFAULT_SECONDARY_COLOR
+        );
         boost.colorEnabled = true;
         boost.enabled = true;
         document.getElementById("hilal-boosts-enable").checked = true;
@@ -1152,14 +1282,18 @@
         boost.enabled = true;
         document.getElementById("hilal-boosts-enable").checked = true;
         document.getElementById("hilal-boosts-color-enable").checked = true;
-        document.getElementById("hilal-boosts-color-intensity-value").textContent = boost.colorIntensity + "%";
+        document.getElementById(
+          "hilal-boosts-color-intensity-value"
+        ).textContent = boost.colorIntensity + "%";
       } else if (target.id === "hilal-boosts-color-brightness") {
         boost.colorBrightness = this._clampNumber(target.value, 80, 120, 100);
         boost.colorEnabled = true;
         boost.enabled = true;
         document.getElementById("hilal-boosts-enable").checked = true;
         document.getElementById("hilal-boosts-color-enable").checked = true;
-        document.getElementById("hilal-boosts-color-brightness-value").textContent = boost.colorBrightness + "%";
+        document.getElementById(
+          "hilal-boosts-color-brightness-value"
+        ).textContent = boost.colorBrightness + "%";
       } else if (target.id === "hilal-boosts-css") {
         boost.customCSS = target.value;
       }
@@ -1182,7 +1316,8 @@
       document.getElementById("hilal-boosts-enable").checked = true;
       document.getElementById("hilal-boosts-color-enable").checked = true;
       document.getElementById("hilal-boosts-color").value = boost.accentColor;
-      document.getElementById("hilal-boosts-color-secondary").value = boost.secondaryColor;
+      document.getElementById("hilal-boosts-color-secondary").value =
+        boost.secondaryColor;
       this._updateColorPickerVisuals(boost);
       this.saveBoostForDomain(domain, boost);
     }
@@ -1190,17 +1325,27 @@
     _onColorPickerPointerDown(event) {
       if (event.button !== 0) return;
 
-      const secondaryDot = document.getElementById("hilal-boosts-color-dot-secondary");
-      const primaryDot = document.getElementById("hilal-boosts-color-dot-primary");
-      
+      const secondaryDot = document.getElementById(
+        "hilal-boosts-color-dot-secondary"
+      );
+      const primaryDot = document.getElementById(
+        "hilal-boosts-color-dot-primary"
+      );
+
       this._dragTarget = "primary";
       if (secondaryDot && event.target === secondaryDot) {
         this._dragTarget = "secondary";
       } else if (secondaryDot && primaryDot) {
         const secRect = secondaryDot.getBoundingClientRect();
         const priRect = primaryDot.getBoundingClientRect();
-        const secDist = Math.hypot(event.clientX - (secRect.left + secRect.width / 2), event.clientY - (secRect.top + secRect.height / 2));
-        const priDist = Math.hypot(event.clientX - (priRect.left + priRect.width / 2), event.clientY - (priRect.top + priRect.height / 2));
+        const secDist = Math.hypot(
+          event.clientX - (secRect.left + secRect.width / 2),
+          event.clientY - (secRect.top + secRect.height / 2)
+        );
+        const priDist = Math.hypot(
+          event.clientX - (priRect.left + priRect.width / 2),
+          event.clientY - (priRect.top + priRect.height / 2)
+        );
         if (secDist < priDist && secDist < 25) {
           this._dragTarget = "secondary";
         }
@@ -1231,8 +1376,8 @@
       const radius = Math.min(rect.width, rect.height) * 0.42;
       const distance = Math.min(Math.sqrt(dx * dx + dy * dy), radius);
       const angle = Math.atan2(dy, dx);
-      const hue = (angle * 180 / Math.PI + 360) % 360;
-      const saturation = Math.round(distance / radius * 100);
+      const hue = ((angle * 180) / Math.PI + 360) % 360;
+      const saturation = Math.round((distance / radius) * 100);
 
       const boost = this.getBoostForDomain(domain);
       if (this._dragTarget === "secondary") {
@@ -1244,14 +1389,19 @@
         let diff = (prevSecondaryHsl.h - prevAccentHsl.h + 360) % 360;
         if (diff === 0) diff = 52;
         boost.accentColor = this._hslToHex(hue, saturation, 55);
-        boost.secondaryColor = this._hslToHex((hue + diff) % 360, saturation, 48);
+        boost.secondaryColor = this._hslToHex(
+          (hue + diff) % 360,
+          saturation,
+          48
+        );
       }
       boost.colorEnabled = true;
       boost.enabled = true;
       document.getElementById("hilal-boosts-enable").checked = true;
       document.getElementById("hilal-boosts-color-enable").checked = true;
       document.getElementById("hilal-boosts-color").value = boost.accentColor;
-      document.getElementById("hilal-boosts-color-secondary").value = boost.secondaryColor;
+      document.getElementById("hilal-boosts-color-secondary").value =
+        boost.secondaryColor;
       this._updateColorPickerVisuals(boost);
       this.saveBoostForDomain(domain, boost);
     }
@@ -1259,16 +1409,21 @@
     _updateColorPickerVisuals(boost) {
       const picker = document.getElementById("hilal-boosts-color-picker");
       const dot = document.getElementById("hilal-boosts-color-dot-primary");
-      const secondaryDot = document.getElementById("hilal-boosts-color-dot-secondary");
+      const secondaryDot = document.getElementById(
+        "hilal-boosts-color-dot-secondary"
+      );
       const circle = picker?.querySelector(".hilal-boosts-picker-circle");
       const preview = document.getElementById("hilal-boosts-gradient-preview");
       if (!picker || !dot || !secondaryDot) return;
 
       const color = this._normalizeHexColor(boost.accentColor);
-      const secondaryColor = this._normalizeHexColor(boost.secondaryColor, DEFAULT_SECONDARY_COLOR);
+      const secondaryColor = this._normalizeHexColor(
+        boost.secondaryColor,
+        DEFAULT_SECONDARY_COLOR
+      );
       picker.style.setProperty("--hilal-boosts-accent", color);
       picker.style.setProperty("--hilal-boosts-secondary", secondaryColor);
-      
+
       this._positionColorDot(picker, dot, color);
       this._positionColorDot(picker, secondaryDot, secondaryColor);
       dot.style.backgroundColor = color;
@@ -1289,7 +1444,9 @@
         preview.style.setProperty("--hilal-boosts-accent", color);
         preview.style.setProperty("--hilal-boosts-secondary", secondaryColor);
       }
-      for (const preset of document.querySelectorAll(".hilal-boosts-swatch-circle")) {
+      for (const preset of document.querySelectorAll(
+        ".hilal-boosts-swatch-circle"
+      )) {
         preset.toggleAttribute("active", preset.dataset.color === color);
       }
     }
@@ -1392,8 +1549,12 @@
 
       const grad = svg.querySelector("#hilal-arc-gradient");
       if (grad) {
-        grad.querySelector("#hilal-ag-stop1").setAttribute("stop-color", color1);
-        grad.querySelector("#hilal-ag-stop2").setAttribute("stop-color", color2);
+        grad
+          .querySelector("#hilal-ag-stop1")
+          .setAttribute("stop-color", color1);
+        grad
+          .querySelector("#hilal-ag-stop2")
+          .setAttribute("stop-color", color2);
         grad.setAttribute("gradientUnits", "userSpaceOnUse");
         grad.setAttribute("x1", point1.x);
         grad.setAttribute("y1", point1.y);
@@ -1430,7 +1591,10 @@
       boost.colorEnabled = boost.colorEnabled === true;
       boost.browserUIEnabled = boost.browserUIEnabled === true;
       if (boost.autoPaletteEnabled === undefined) {
-        boost.autoPaletteEnabled = Services.prefs.getBoolPref("hilal.boosts.auto_palette.enabled", false);
+        boost.autoPaletteEnabled = Services.prefs.getBoolPref(
+          "hilal.boosts.auto_palette.enabled",
+          false
+        );
       } else {
         boost.autoPaletteEnabled = boost.autoPaletteEnabled === true;
       }
@@ -1439,8 +1603,18 @@
         boost.secondaryColor,
         DEFAULT_SECONDARY_COLOR
       );
-      boost.colorIntensity = this._clampNumber(boost.colorIntensity, 0, 100, 35);
-      boost.colorBrightness = this._clampNumber(boost.colorBrightness, 80, 120, 100);
+      boost.colorIntensity = this._clampNumber(
+        boost.colorIntensity,
+        0,
+        100,
+        35
+      );
+      boost.colorBrightness = this._clampNumber(
+        boost.colorBrightness,
+        80,
+        120,
+        100
+      );
       if (!Array.isArray(boost.zappedSelectors)) {
         boost.zappedSelectors = [];
       }
@@ -1495,52 +1669,70 @@
 
     _adjustHexBrightness(hex, brightness) {
       const amount = (brightness - 100) / 100;
-      const channels = [1, 3, 5].map(index => parseInt(hex.slice(index, index + 2), 16));
+      const channels = [1, 3, 5].map(index =>
+        parseInt(hex.slice(index, index + 2), 16)
+      );
       const adjusted = channels.map(channel => {
         if (amount >= 0) {
           return channel + (255 - channel) * amount;
         }
         return channel * (1 + amount);
       });
-      return "#" + adjusted
-        .map(channel => Math.round(Math.min(255, Math.max(0, channel)))
-          .toString(16)
-          .padStart(2, "0"))
-        .join("");
+      return (
+        "#" +
+        adjusted
+          .map(channel =>
+            Math.round(Math.min(255, Math.max(0, channel)))
+              .toString(16)
+              .padStart(2, "0")
+          )
+          .join("")
+      );
     }
 
     _rotateHexColor(hex, degrees) {
       const { h, s, l } = this._hexToHsl(this._normalizeHexColor(hex));
-      return this._hslToHex((h + degrees) % 360, Math.max(55, s), Math.max(48, l));
+      return this._hslToHex(
+        (h + degrees) % 360,
+        Math.max(55, s),
+        Math.max(48, l)
+      );
     }
 
     _hslToHex(hue, saturation, lightness) {
       const s = saturation / 100;
       const l = lightness / 100;
       const c = (1 - Math.abs(2 * l - 1)) * s;
-      const x = c * (1 - Math.abs((hue / 60) % 2 - 1));
+      const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
       const m = l - c / 2;
       let r = 0;
       let g = 0;
       let b = 0;
 
       if (hue < 60) {
-        r = c; g = x;
+        r = c;
+        g = x;
       } else if (hue < 120) {
-        r = x; g = c;
+        r = x;
+        g = c;
       } else if (hue < 180) {
-        g = c; b = x;
+        g = c;
+        b = x;
       } else if (hue < 240) {
-        g = x; b = c;
+        g = x;
+        b = c;
       } else if (hue < 300) {
-        r = x; b = c;
+        r = x;
+        b = c;
       } else {
-        r = c; b = x;
+        r = c;
+        b = x;
       }
 
-      const toHex = channel => Math.round((channel + m) * 255)
-        .toString(16)
-        .padStart(2, "0");
+      const toHex = channel =>
+        Math.round((channel + m) * 255)
+          .toString(16)
+          .padStart(2, "0");
       return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
     }
 
@@ -1556,7 +1748,8 @@
       }
 
       const browser = window.gBrowser.selectedBrowser;
-      const actor = browser.browsingContext.currentWindowGlobal?.getActor("HilalBoosts");
+      const actor =
+        browser.browsingContext.currentWindowGlobal?.getActor("HilalBoosts");
       if (actor) {
         const boost = this.getBoostForDomain(domain);
         this._zapping = true;
@@ -1653,7 +1846,10 @@
         return this._browserFrameOverlay;
       }
 
-      const overlay = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+      const overlay = document.createElementNS(
+        "http://www.w3.org/1999/xhtml",
+        "div"
+      );
       overlay.id = "hilal-boosts-content-frame";
       overlay.style.cssText = [
         "position: fixed",
@@ -1666,7 +1862,10 @@
         "contain: layout style paint",
       ].join(";");
 
-      const wave = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+      const wave = document.createElementNS(
+        "http://www.w3.org/1999/xhtml",
+        "div"
+      );
       wave.style.cssText = [
         "position: absolute",
         "inset: -2px",
@@ -1744,5 +1943,4 @@
   } else {
     tryInit();
   }
-
 })();

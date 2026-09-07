@@ -63,14 +63,14 @@
   --hw-accent: #8bd9cc;
   --hw-accent-strong: #31b7a7;
   --hw-ink: #f8f7f2;
-  --hw-muted: rgba(248, 247, 242, 0.60);
+  --hw-muted: rgba(248, 247, 242, 0.6);
   --hw-faint: rgba(248, 247, 242, 0.38);
   --hw-line: rgba(255, 255, 255, 0.13);
-  --hw-line-mid: rgba(255, 255, 255, 0.20);
+  --hw-line-mid: rgba(255, 255, 255, 0.2);
   --hw-glass-bg: rgba(18, 20, 22, 0.72);
   --hw-glass-surface: rgba(255, 255, 255, 0.06);
-  --hw-glass-surface-hover: rgba(255, 255, 255, 0.10);
-  --hw-glass-active: rgba(139, 217, 204, 0.10);
+  --hw-glass-surface-hover: rgba(255, 255, 255, 0.1);
+  --hw-glass-active: rgba(139, 217, 204, 0.1);
   --hw-glass-active-border: rgba(139, 217, 204, 0.72);
   --hw-blue: #8fbaff;
   --hw-amber: #e5bd64;
@@ -132,20 +132,48 @@
   mask-size: contain;
 }
 
-.hw-icon-arrow-left  { --hw-icon-url: url("chrome://global/skin/icons/arrow-left.svg"); }
-.hw-icon-arrow-right { --hw-icon-url: url("chrome://global/skin/icons/arrow-right.svg"); }
-.hw-icon-check       { --hw-icon-url: url("chrome://global/skin/icons/check.svg"); }
-.hw-icon-close       { --hw-icon-url: url("chrome://global/skin/icons/close.svg"); }
-.hw-icon-folder      { --hw-icon-url: url("chrome://global/skin/icons/folder.svg"); }
-.hw-icon-home        { --hw-icon-url: url("chrome://browser/skin/home.svg"); }
-.hw-icon-layout      { --hw-icon-url: url("chrome://browser/skin/window.svg"); }
-.hw-icon-search      { --hw-icon-url: url("chrome://global/skin/icons/search-glass.svg"); }
-.hw-icon-settings    { --hw-icon-url: url("chrome://global/skin/icons/settings.svg"); }
-.hw-icon-shield      { --hw-icon-url: url("chrome://browser/skin/tracking-protection.svg"); }
-.hw-icon-star        { --hw-icon-url: url("chrome://global/skin/icons/rating-star.svg"); }
-.hw-icon-tabs        { --hw-icon-url: url("chrome://browser/skin/tabs.svg"); }
-.hw-icon-spaces      { --hw-icon-url: url("chrome://browser/skin/window.svg"); }
-.hw-icon-pin         { --hw-icon-url: url("chrome://browser/skin/pin-tab.svg"); }
+.hw-icon-arrow-left {
+  --hw-icon-url: url("chrome://global/skin/icons/arrow-left.svg");
+}
+.hw-icon-arrow-right {
+  --hw-icon-url: url("chrome://global/skin/icons/arrow-right.svg");
+}
+.hw-icon-check {
+  --hw-icon-url: url("chrome://global/skin/icons/check.svg");
+}
+.hw-icon-close {
+  --hw-icon-url: url("chrome://global/skin/icons/close.svg");
+}
+.hw-icon-folder {
+  --hw-icon-url: url("chrome://global/skin/icons/folder.svg");
+}
+.hw-icon-home {
+  --hw-icon-url: url("chrome://browser/skin/home.svg");
+}
+.hw-icon-layout {
+  --hw-icon-url: url("chrome://browser/skin/window.svg");
+}
+.hw-icon-search {
+  --hw-icon-url: url("chrome://global/skin/icons/search-glass.svg");
+}
+.hw-icon-settings {
+  --hw-icon-url: url("chrome://global/skin/icons/settings.svg");
+}
+.hw-icon-shield {
+  --hw-icon-url: url("chrome://browser/skin/tracking-protection.svg");
+}
+.hw-icon-star {
+  --hw-icon-url: url("chrome://global/skin/icons/rating-star.svg");
+}
+.hw-icon-tabs {
+  --hw-icon-url: url("chrome://browser/skin/tabs.svg");
+}
+.hw-icon-spaces {
+  --hw-icon-url: url("chrome://browser/skin/window.svg");
+}
+.hw-icon-pin {
+  --hw-icon-url: url("chrome://browser/skin/pin-tab.svg");
+}
 
 /* ============================================================
    Glass card — shared base component
@@ -282,7 +310,10 @@
   color: var(--hw-faint);
   font-size: 0.78rem;
   font-weight: 640;
-  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    color 140ms ease;
   white-space: nowrap;
 }
 
@@ -313,7 +344,10 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.15);
   overflow: hidden;
-  transition: background 160ms ease, transform 160ms ease, width 160ms ease;
+  transition:
+    background 160ms ease,
+    transform 160ms ease,
+    width 160ms ease;
 }
 
 /* visually-hidden label inside each dot for a11y */
@@ -422,7 +456,7 @@
 }
 
 .hw-option.hw-option-active {
-  border-color: rgba(139, 217, 204, 0.30);
+  border-color: rgba(139, 217, 204, 0.3);
   border-left-color: var(--hw-accent);
   background: var(--hw-glass-active);
 }
@@ -493,7 +527,10 @@
   border: 1.5px solid rgba(255, 255, 255, 0.25);
   background: transparent;
   color: transparent;
-  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    color 140ms ease;
 }
 
 .hw-option.hw-option-active .hw-option-check {
@@ -812,11 +849,14 @@
   border: 1px solid var(--hw-line);
   border-radius: 7px;
   background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.80);
-  font-size: 0.80rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
   font-weight: 640;
   white-space: nowrap;
-  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
 }
 
 .hw-btn-inline:hover,

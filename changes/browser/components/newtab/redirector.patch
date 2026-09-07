@@ -1,5 +1,4 @@
 diff --git a/browser/components/newtab/AboutNewTabRedirector.sys.mjs b/browser/components/newtab/AboutNewTabRedirector.sys.mjs
-index 33ebe5111a15..c7938c576e1f 100644
 --- a/browser/components/newtab/AboutNewTabRedirector.sys.mjs
 +++ b/browser/components/newtab/AboutNewTabRedirector.sys.mjs
 @@ -425,21 +425,7 @@ class BaseAboutNewTabRedirector {

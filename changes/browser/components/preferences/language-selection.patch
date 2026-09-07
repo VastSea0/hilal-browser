@@ -1,10 +1,528 @@
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -1945,6 +1945,104 @@ var gHilalPane = {
-     }
+@@ -13,7 +13,7 @@
+ /* import-globals-from preferences.js */
+ /* import-globals-from /toolkit/mozapps/preferences/fontbuilder.js */
+ /* import-globals-from /browser/base/content/aboutDialog-appUpdater.js */
+-/* global MozXULElement */
++/* global ContextualIdentityService, MozXULElement, Services */
  
-     refreshBangsList();
+ /**
+  * @import { Setting } from "chrome://global/content/preferences/Setting.mjs"
+@@ -31,6 +31,8 @@ const { DefaultBrowserHelper } = ChromeUtils.importESModule(
+ 
+ ChromeUtils.defineESModuleGetters(this, {
+   BackgroundUpdate: "resource://gre/modules/BackgroundUpdate.sys.mjs",
++  ContextualIdentityService:
++    "resource://gre/modules/ContextualIdentityService.sys.mjs",
+   UpdateListener: "resource://gre/modules/UpdateListener.sys.mjs",
+   LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
+   MigrationUtils: "resource:///modules/MigrationUtils.sys.mjs",
+@@ -1671,6 +1673,998 @@ gMainPane.initialized = new Promise(res => {
+   gMainPane.setInitialized = res;
+ });
+ 
++var gHilalPane = {
++  init() {
++    function setEventListener(aId, aEventType, aCallback) {
++      const el = document.getElementById(aId);
++      if (el) {
++        el.addEventListener(aEventType, aCallback);
++      }
++    }
++
++    const hilalWsCheckbox = document.getElementById("hilalWorkspacesEnabled");
++    const hilalWsPinnedPublicCheckbox = document.getElementById("hilalWorkspacesPinnedPublic");
++    const hilalWsGroupsPublicCheckbox = document.getElementById("hilalWorkspacesGroupsPublic");
++    const hilalPrivacyLevelRadioGroup = /** @type {HTMLElement|null} */ (
++      document.getElementById("hilalPrivacyLevel")
++    );
++    const normalizePrivacyLevel = value =>
++      ["standard", "strict", "extreme"].includes(value) ? value : "standard";
++    const resetHilalWorkspaceContainers = () => {
++      let workspaces = [];
++      try {
++        workspaces = JSON.parse(
++          Services.prefs.getStringPref("hilal.workspaces.data", "[]")
++        );
++      } catch (e) {
++        console.warn("Failed to parse Hilal workspace data during reset", e);
++      }
++      if (!Array.isArray(workspaces)) {
++        return;
++      }
++      for (const workspace of workspaces) {
++        const containerId = Number.parseInt(workspace?.containerId, 10);
++        if (containerId) {
++          try {
++            ContextualIdentityService.remove(containerId);
++          } catch (e) {
++            console.warn("Failed to remove Hilal workspace container", e);
++          }
++        }
++      }
++    };
++
++    if (hilalWsCheckbox) {
++      hilalWsCheckbox.checked = Services.prefs.getBoolPref(
++        "hilal.workspaces.enabled",
++        true
++      );
++      hilalWsCheckbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref(
++          "hilal.workspaces.enabled",
++          hilalWsCheckbox.checked
++        );
++      });
++    }
++    if (hilalWsPinnedPublicCheckbox) {
++      hilalWsPinnedPublicCheckbox.checked = Services.prefs.getBoolPref(
++        "hilal.workspaces.pinned.public",
++        true
++      );
++      hilalWsPinnedPublicCheckbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref(
++          "hilal.workspaces.pinned.public",
++          hilalWsPinnedPublicCheckbox.checked
++        );
++      });
++    }
++    if (hilalWsGroupsPublicCheckbox) {
++      hilalWsGroupsPublicCheckbox.checked = Services.prefs.getBoolPref(
++        "hilal.workspaces.groups.public",
++        false
++      );
++      hilalWsGroupsPublicCheckbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref(
++          "hilal.workspaces.groups.public",
++          hilalWsGroupsPublicCheckbox.checked
++        );
++      });
++    }
++
++    const hilalPrefMappings = [
++      ["hilalUrlbarShowWorkspaceName", "hilal.urlbar.showWorkspaceName", false],
++      ["hilalSidebarCompactEnabled", "hilal.compact.enabled", false],
++      ["hilalSidebarCompactHideToolbar", "hilal.compact.hideToolbar", false],
++      ["hilalSidebarShowHorizontalTabs", "sidebar.verticalTabs.showHorizontal", false],
++      ["hilalTahoeEnabled", "hilal.tahoe.enabled", true],
++      ["hilalUiFixEnabled", "userChrome.compatibility.theme", false],
++      ["hilalUiFixConnectToWindow", "userChrome.tabs.connect_to_window", false],
++      ["hilalUiFixCompactPadding", "userChrome.tabs.compact_padding", false],
++      ["hilalUiFixDynamicSeparator", "userChrome.tabs.dynamic_separator", false],
++      ["hilalUiFixBottomRounded", "userChrome.tabs.bottom_rounded_corner", false],
++      ["hilalUiFixCloseOnHover", "userChrome.tabs.close_button.on_hover", false],
++      ["hilalBoostsAutoPalette", "hilal.boosts.autoPalette", true],
++      ["hilalBoostsBrowserUi", "hilal.boosts.browserUi", true],
++    ];
++    for (const [elementId, prefName, defaultValue] of hilalPrefMappings) {
++      const checkbox = document.getElementById(elementId);
++      if (!checkbox) {
++        continue;
++      }
++      checkbox.checked = Services.prefs.getBoolPref(prefName, defaultValue);
++      checkbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref(prefName, checkbox.checked);
++      });
++    }
++
++    const hilalSidebarFooterCheckboxes = [
++      ["hilalSidebarFooterBookmarks", "hilal.sidebar.footer.bookmarks", false],
++      ["hilalSidebarFooterHistory", "hilal.sidebar.footer.history", true],
++      ["hilalSidebarFooterPasswords", "hilal.sidebar.footer.passwords", false],
++      ["hilalSidebarFooterDownloads", "hilal.sidebar.footer.downloads", true],
++      ["hilalSidebarFooterPrivacy", "hilal.sidebar.footer.privacy", true],
++      ["hilalSidebarFooterSettings", "hilal.sidebar.footer.settings", true],
++    ];
++    for (const [elementId, prefName, defaultValue] of hilalSidebarFooterCheckboxes) {
++      const checkbox = document.getElementById(elementId);
++      if (!checkbox) {
++        continue;
++      }
++      checkbox.checked = Services.prefs.getBoolPref(prefName, defaultValue);
++      checkbox.addEventListener("command", function () {
++        Services.prefs.setBoolPref(prefName, checkbox.checked);
++      });
++    }
++
++    const getHilalSidebarCustomItems = () => {
++      try {
++        const parsed = JSON.parse(
++          Services.prefs.getStringPref("hilal.sidebar.customItems", "[]")
++        );
++        return Array.isArray(parsed) ? parsed : [];
++      } catch (e) {
++        console.warn("Failed to parse hilal.sidebar.customItems", e);
++        return [];
++      }
++    };
++    const setHilalSidebarCustomItems = items => {
++      Services.prefs.setStringPref(
++        "hilal.sidebar.customItems",
++        JSON.stringify(items)
++      );
++    };
++
++    const customList = document.getElementById("hilalSidebarCustomList");
++    const customAddBtn = document.getElementById("hilalSidebarCustomAdd");
++    const customRemoveBtn = document.getElementById("hilalSidebarCustomRemove");
++    const customForm = document.getElementById("hilalSidebarCustomForm");
++    const customNameInput = document.getElementById("hilalSidebarCustomName");
++    const customUrlInput = document.getElementById("hilalSidebarCustomUrl");
++    const customIconSelect = document.getElementById("hilalSidebarCustomIcon");
++    const customSaveBtn = document.getElementById("hilalSidebarCustomSave");
++    const customCancelBtn = document.getElementById("hilalSidebarCustomCancel");
++    let editingCustomItemId = null;
++
++    const refreshHilalSidebarCustomList = () => {
++      if (!customList) {
++        return;
++      }
++      customList.textContent = "";
++      for (const item of getHilalSidebarCustomItems()) {
++        if (!item?.id) {
++          continue;
++        }
++        const row = document.createXULElement("richlistitem");
++        row.setAttribute("itemId", item.id);
++        row.setAttribute(
++          "style",
++          "padding: 6px; border-bottom: 1px solid var(--in-content-border-color); align-items: center; display: flex; flex-direction: row;"
++        );
++
++        const nameLabel = document.createXULElement("label");
++        nameLabel.setAttribute("value", item.name || item.url || item.id);
++        nameLabel.setAttribute(
++          "style",
++          "font-weight: bold; width: 160px; min-width: 160px; margin-right: 10px;"
++        );
++        row.appendChild(nameLabel);
++
++        const urlLabel = document.createXULElement("label");
++        urlLabel.setAttribute("value", item.url || "");
++        urlLabel.setAttribute("flex", "1");
++        urlLabel.setAttribute("crop", "end");
++        row.appendChild(urlLabel);
++
++        customList.appendChild(row);
++      }
++      if (customRemoveBtn) {
++        customRemoveBtn.disabled = true;
++      }
++    };
++
++    const resetHilalSidebarCustomForm = () => {
++      editingCustomItemId = null;
++      if (customForm) {
++        customForm.hidden = true;
++      }
++      if (customNameInput) {
++        customNameInput.value = "";
++      }
++      if (customUrlInput) {
++        customUrlInput.value = "";
++      }
++      if (customIconSelect) {
++        customIconSelect.value = "link";
++      }
++    };
++
++    const showHilalSidebarCustomForm = item => {
++      if (customForm) {
++        customForm.hidden = false;
++      }
++      editingCustomItemId = item?.id || null;
++      if (customNameInput) {
++        customNameInput.value = item?.name || "";
++        customNameInput.focus();
++      }
++      if (customUrlInput) {
++        customUrlInput.value = item?.url || "";
++      }
++      if (customIconSelect) {
++        customIconSelect.value = item?.icon || "link";
++      }
++    };
++
++    if (customList) {
++      customList.addEventListener("select", () => {
++        if (customRemoveBtn) {
++          customRemoveBtn.disabled = !customList.selectedItem;
++        }
++      });
++    }
++
++    if (customAddBtn) {
++      customAddBtn.addEventListener("command", () => {
++        showHilalSidebarCustomForm(null);
++      });
++    }
++
++    if (customCancelBtn) {
++      customCancelBtn.addEventListener("command", resetHilalSidebarCustomForm);
++    }
++
++    if (customSaveBtn) {
++      customSaveBtn.addEventListener("command", () => {
++        const name = customNameInput ? customNameInput.value.trim() : "";
++        const url = customUrlInput ? customUrlInput.value.trim() : "";
++        const icon = customIconSelect ? customIconSelect.value : "link";
++        if (!name || !url) {
++          Services.prompt.alert(
++            window,
++            "Invalid Input",
++            "Name and URL are required."
++          );
++          return;
++        }
++
++        const items = getHilalSidebarCustomItems();
++        const itemId =
++          editingCustomItemId ||
++          `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
++        const nextItem = { id: itemId, name, url, icon };
++        const existingIndex = items.findIndex(item => item.id === itemId);
++        if (existingIndex >= 0) {
++          items[existingIndex] = nextItem;
++        } else {
++          items.push(nextItem);
++        }
++        setHilalSidebarCustomItems(items);
++        refreshHilalSidebarCustomList();
++        resetHilalSidebarCustomForm();
++      });
++    }
++
++    if (customRemoveBtn) {
++      customRemoveBtn.addEventListener("command", () => {
++        const selected = customList ? customList.selectedItem : null;
++        if (!selected) {
++          return;
++        }
++        const itemId = selected.getAttribute("itemId");
++        if (
++          !itemId ||
++          !Services.prompt.confirm(
++            window,
++            "Remove Shortcut",
++            "Remove this custom sidebar shortcut?"
++          )
++        ) {
++          return;
++        }
++        setHilalSidebarCustomItems(
++          getHilalSidebarCustomItems().filter(item => item.id !== itemId)
++        );
++        refreshHilalSidebarCustomList();
++        resetHilalSidebarCustomForm();
++      });
++    }
++
++    refreshHilalSidebarCustomList();
++
++    if (hilalPrivacyLevelRadioGroup) {
++      hilalPrivacyLevelRadioGroup.value = normalizePrivacyLevel(
++        Services.prefs.getStringPref("hilal.privacy.level", "standard")
++      );
++      hilalPrivacyLevelRadioGroup.addEventListener("command", function () {
++        const level = normalizePrivacyLevel(hilalPrivacyLevelRadioGroup.value);
++        hilalPrivacyLevelRadioGroup.value = level;
++        Services.prefs.setStringPref("hilal.privacy.level", level);
++      });
++    }
++    setEventListener("hilalWorkspacesReset", "command", function () {
++      if (
++        Services.prompt.confirm(
++          window,
++          "Reset Workspaces",
++          "This will delete all workspace data and cannot be undone. Continue?"
++        )
++      ) {
++        resetHilalWorkspaceContainers();
++        Services.prefs.setStringPref("hilal.workspaces.data", "[]");
++        Services.prefs.setStringPref("hilal.workspaces.active", "default");
++        Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
++        Services.prefs.setBoolPref("hilal.workspaces.pinned.public", true);
++        Services.prefs.setBoolPref("hilal.workspaces.groups.public", false);
++        Services.prefs.setStringPref("hilal.privacy.level", "standard");
++        if (hilalWsCheckbox) {
++          hilalWsCheckbox.checked = true;
++        }
++        if (hilalWsPinnedPublicCheckbox) {
++          hilalWsPinnedPublicCheckbox.checked = true;
++        }
++        if (hilalWsGroupsPublicCheckbox) {
++          hilalWsGroupsPublicCheckbox.checked = false;
++        }
++        if (hilalPrivacyLevelRadioGroup) {
++          hilalPrivacyLevelRadioGroup.value = "standard";
++        }
++      }
++    });
++
++    // -- Hilal Bangs Customization -------------------------------------------
++    const { HilalBangs } = ChromeUtils.importESModule(
++      "resource:///modules/HilalBangs.sys.mjs"
++    );
++
++    const bangsList = document.getElementById("hilalBangsList");
++    const bangsAddBtn = document.getElementById("hilalBangsAdd");
++    const bangsRemoveBtn = document.getElementById("hilalBangsRemove");
++    const bangsForm = document.getElementById("hilalBangsForm");
++    const bangsTriggerInput = document.getElementById("hilalBangsTrigger");
++    const bangsSearchUrlInput = document.getElementById("hilalBangsSearchUrl");
++    const bangsHomeUrlInput = document.getElementById("hilalBangsHomeUrl");
++    const bangsSaveBtn = document.getElementById("hilalBangsSave");
++    const bangsCancelBtn = document.getElementById("hilalBangsCancel");
++
++    const refreshBangsList = () => {
++      if (!bangsList) {
++        return;
++      }
++      bangsList.textContent = "";
++
++      const defaults = HilalBangs.getDefaultBangs();
++      const customs = HilalBangs.getCustomBangs() || [];
++
++      const addRow = (trigger, search, home, isCustom) => {
++        const item = document.createXULElement("richlistitem");
++        item.setAttribute("style", "padding: 6px; border-bottom: 1px solid var(--in-content-border-color); align-items: center; display: flex; flex-direction: row;");
++        item.setAttribute("trigger", trigger);
++        item.setAttribute("isCustom", isCustom ? "true" : "false");
++
++        const triggerLabel = document.createXULElement("label");
++        triggerLabel.setAttribute("value", "!" + trigger);
++        triggerLabel.setAttribute("style", "font-weight: bold; width: 80px; min-width: 80px; margin-right: 10px;");
++        item.appendChild(triggerLabel);
++
++        const typeLabel = document.createXULElement("label");
++        typeLabel.setAttribute("value", isCustom ? "(custom)" : "(default)");
++        typeLabel.setAttribute("style", "color: gray; width: 80px; min-width: 80px; margin-right: 10px;");
++        item.appendChild(typeLabel);
++
++        const urlLabel = document.createXULElement("label");
++        urlLabel.setAttribute("value", search);
++        urlLabel.setAttribute("flex", "1");
++        urlLabel.setAttribute("crop", "end");
++        item.appendChild(urlLabel);
++
++        bangsList.appendChild(item);
++      };
++
++      // Add custom bangs first
++      for (const entry of customs) {
++        if (entry && entry.trigger) {
++          addRow(entry.trigger, entry.search, entry.home || "", true);
++        }
++      }
++
++      // Add default bangs
++      for (const [trigger, data] of Object.entries(defaults)) {
++        addRow(trigger, data.search, data.home, false);
++      }
++    };
++
++    if (bangsList) {
++      bangsList.addEventListener("select", () => {
++        const selected = bangsList.selectedItem;
++        if (selected) {
++          const isCustom = selected.getAttribute("isCustom") === "true";
++          if (bangsRemoveBtn) {
++            bangsRemoveBtn.disabled = !isCustom;
++          }
++        } else {
++          if (bangsRemoveBtn) {
++            bangsRemoveBtn.disabled = true;
++          }
++        }
++      });
++    }
++
++    if (bangsAddBtn) {
++      bangsAddBtn.addEventListener("command", () => {
++        if (bangsForm) {
++          bangsForm.hidden = false;
++        }
++        if (bangsTriggerInput) {
++          bangsTriggerInput.value = "";
++          bangsTriggerInput.focus();
++        }
++        if (bangsSearchUrlInput) {
++          bangsSearchUrlInput.value = "";
++        }
++        if (bangsHomeUrlInput) {
++          bangsHomeUrlInput.value = "";
++        }
++      });
++    }
++
++    if (bangsCancelBtn) {
++      bangsCancelBtn.addEventListener("command", () => {
++        if (bangsForm) {
++          bangsForm.hidden = true;
++        }
++      });
++    }
++
++    if (bangsSaveBtn) {
++      bangsSaveBtn.addEventListener("command", () => {
++        const trigger = bangsTriggerInput ? bangsTriggerInput.value.trim().toLowerCase().replace(/^!/, "") : "";
++        const search = bangsSearchUrlInput ? bangsSearchUrlInput.value.trim() : "";
++        const home = bangsHomeUrlInput ? bangsHomeUrlInput.value.trim() : "";
++
++        if (!trigger || !search) {
++          Services.prompt.alert(window, "Invalid Input", "Trigger and Search URL are required.");
++          return;
++        }
++
++        // Check if trigger is already in use by default bangs
++        const defaults = HilalBangs.getDefaultBangs();
++        if (trigger in defaults) {
++          Services.prompt.alert(window, "Duplicate Trigger", "The trigger '!" + trigger + "' is reserved as a default bang.");
++          return;
++        }
++
++        const customs = HilalBangs.getCustomBangs() || [];
++        const existingIndex = customs.findIndex(c => c.trigger === trigger);
++
++        if (existingIndex >= 0) {
++          customs[existingIndex] = { trigger, search, home };
++        } else {
++          customs.push({ trigger, search, home });
++        }
++
++        HilalBangs.setCustomBangs(customs);
++        refreshBangsList();
++
++        if (bangsForm) {
++          bangsForm.hidden = true;
++        }
++      });
++    }
++
++    if (bangsRemoveBtn) {
++      bangsRemoveBtn.addEventListener("command", () => {
++        const selected = bangsList ? bangsList.selectedItem : null;
++        if (!selected) {
++          return;
++        }
++
++        const trigger = selected.getAttribute("trigger");
++        const isCustom = selected.getAttribute("isCustom") === "true";
++
++        if (isCustom && trigger) {
++          if (Services.prompt.confirm(window, "Remove Bang", "Are you sure you want to remove the custom bang '!" + trigger + "'?")) {
++            const customs = HilalBangs.getCustomBangs() || [];
++            const filtered = customs.filter(c => c.trigger !== trigger);
++            HilalBangs.setCustomBangs(filtered);
++            refreshBangsList();
++          }
++        }
++      });
++    }
++
++    refreshBangsList();
 +
 +    // -- Hilal Language Customization -----------------------------------------
 +    const languageSelect = document.getElementById("hilalLanguageSelect");
@@ -103,16 +621,534 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +        }
 +      });
 +    }
-   },
- };
- 
++    gHilalShortcutsSettings.init();
++  },
++};
++
++var gHilalShortcutsSettings = {
++  init() {
++    this._container = document.getElementById("hilalShortcutsContainer");
++    this._defaultsBtn = document.getElementById("hilalShortcutsRestoreDefaults");
++
++    if (!this._container) return;
++
++    this.refresh();
++
++    if (this._defaultsBtn) {
++      this._defaultsBtn.addEventListener("command", () => {
++        if (Services.prompt.confirm(window, "Restore Defaults", "Are you sure you want to restore all keyboard shortcuts to their default settings?")) {
++          Services.prefs.clearUserPref("hilal.keyboard.shortcuts.data");
++          this.refresh();
++        }
++      });
++    }
++  },
++
++  getShortcut(id) {
++    let userShortcuts = {};
++    try {
++      userShortcuts = JSON.parse(Services.prefs.getStringPref("hilal.keyboard.shortcuts.data", "{}"));
++    } catch (e) {}
++
++    if (userShortcuts[id] !== undefined) {
++      return userShortcuts[id];
++    }
++    return this.getDefaultShortcut(id);
++  },
++
++  getDefaultShortcut(id) {
++    const isMac = AppConstants.platform === "macosx";
++    const defaults = {
++      "key_toggleSidebar": isMac ? { key: "Z", modifiers: "control" } : { key: "Z", modifiers: "control,alt" },
++      "key_hilalNewWorkspace": { key: "W", modifiers: "accel,alt" },
++      "key_hilalNextWorkspace": { key: "]", modifiers: "accel,alt" },
++      "key_hilalPrevWorkspace": { key: "[", modifiers: "accel,alt" },
++      "key_hilalToggleWorkspaces": { key: "E", modifiers: "accel,alt" },
++      "key_hilalToggleCompactMode": { key: "M", modifiers: "accel,alt" },
++      "key_toggleCompactHideToolbar": { key: "T", modifiers: "accel,alt" },
++      "key_focusUrlbar": { key: "L", modifiers: "accel" },
++      "key_newNavigator": { key: "N", modifiers: "accel" },
++      "key_newNavigatorTab": { key: "T", modifiers: "accel" },
++      "key_closeWindow": { key: "W", modifiers: "accel,shift" },
++      "key_close": { key: "W", modifiers: "accel" },
++      "key_undoCloseTab": { key: "T", modifiers: "accel,shift" },
++      "key_gotoHistory": isMac ? { key: "H", modifiers: "accel,shift" } : { key: "H", modifiers: "accel" },
++      "key_viewBookmarksSidebar": { key: "B", modifiers: "accel" }
++    };
++    return defaults[id] || { key: "", modifiers: "" };
++  },
++
++  refresh() {
++    this._container.textContent = "";
++
++    const categories = [
++      {
++        id: "workspaces",
++        title: "Workspaces",
++        items: [
++          { id: "key_hilalNewWorkspace", name: "New Workspace", desc: "Create a new workspace to organize your tabs" },
++          { id: "key_hilalToggleWorkspaces", name: "Toggle Workspaces Panel", desc: "Show or hide the workspace list sidebar" },
++          { id: "key_hilalNextWorkspace", name: "Next Workspace", desc: "Switch to the next active workspace" },
++          { id: "key_hilalPrevWorkspace", name: "Previous Workspace", desc: "Switch to the previous active workspace" }
++        ]
++      },
++      {
++        id: "sidebar",
++        title: "Sidebar & Compact Mode",
++        items: [
++          { id: "key_toggleSidebar", name: "Toggle Primary Sidebar", desc: "Show or hide the primary vertical sidebar" },
++          { id: "key_hilalToggleCompactMode", name: "Toggle Compact Mode", desc: "Enable or disable compact mode spacing" },
++          { id: "key_toggleCompactHideToolbar", name: "Toggle Top Toolbar", desc: "Show or hide the top toolbar in compact mode" },
++          { id: "key_viewBookmarksSidebar", name: "Bookmarks Sidebar", desc: "Toggle bookmarks sidebar panel" },
++          { id: "key_gotoHistory", name: "History Sidebar", desc: "Toggle history sidebar panel" }
++        ]
++      },
++      {
++        id: "tabs",
++        title: "Tabs & Windows",
++        items: [
++          { id: "key_newNavigatorTab", name: "New Tab", desc: "Open a new tab in the active window" },
++          { id: "key_close", name: "Close Active Tab", desc: "Close the currently selected tab" },
++          { id: "key_undoCloseTab", name: "Reopen Closed Tab", desc: "Restore the last tab you closed" },
++          { id: "key_newNavigator", name: "New Window", desc: "Open a new browser window" },
++          { id: "key_closeWindow", name: "Close Window", desc: "Close the current browser window" }
++        ]
++      },
++      {
++        id: "navigation",
++        title: "Navigation",
++        items: [
++          { id: "key_focusUrlbar", name: "Focus Address Bar", desc: "Highlight address bar for search or web address entry" }
++        ]
++      }
++    ];
++
++    for (let cat of categories) {
++      let card = this._createCategoryCard(cat);
++      this._container.appendChild(card);
++    }
++  },
++
++  _createCategoryCard(cat) {
++    let card = document.createXULElement("html:div");
++    card.setAttribute("class", "shortcuts-category-card");
++
++    let title = document.createXULElement("html:div");
++    title.setAttribute("class", "shortcuts-category-title");
++    title.textContent = cat.title;
++    card.appendChild(title);
++
++    for (let item of cat.items) {
++      let rowContainer = document.createXULElement("html:div");
++      rowContainer.setAttribute("class", "shortcut-row-container");
++      rowContainer.setAttribute("id", `container_${item.id}`);
++
++      let row = document.createXULElement("html:div");
++      row.setAttribute("class", "shortcut-row");
++
++      let info = document.createXULElement("html:div");
++      info.setAttribute("class", "shortcut-info");
++
++      let label = document.createXULElement("html:span");
++      label.setAttribute("class", "shortcut-label");
++      label.textContent = item.name;
++
++      let desc = document.createXULElement("html:span");
++      desc.setAttribute("class", "shortcut-desc");
++      desc.textContent = item.desc;
++
++      info.appendChild(label);
++      info.appendChild(desc);
++      row.appendChild(info);
++
++      let controls = document.createXULElement("html:div");
++      controls.setAttribute("class", "shortcut-controls");
++
++      let kbdContainer = document.createXULElement("html:div");
++      kbdContainer.setAttribute("class", "kbd-container");
++      
++      let shortcut = this.getShortcut(item.id);
++      this._renderKeycaps(kbdContainer, shortcut.key, shortcut.modifiers);
++      controls.appendChild(kbdContainer);
++
++      let btnEdit = document.createXULElement("html:button");
++      btnEdit.setAttribute("class", "shortcut-action-btn");
++      btnEdit.textContent = "Edit";
++      btnEdit.addEventListener("click", () => {
++        this._startCapture(item.id, btnEdit, kbdContainer, rowContainer);
++      });
++      controls.appendChild(btnEdit);
++
++      let btnClear = document.createXULElement("html:button");
++      btnClear.setAttribute("class", "shortcut-clear-btn");
++      btnClear.textContent = "×";
++      btnClear.setAttribute("title", "Clear shortcut");
++      btnClear.addEventListener("click", () => {
++        this._save(item.id, "", "");
++      });
++      controls.appendChild(btnClear);
++
++      row.appendChild(controls);
++      rowContainer.appendChild(row);
++      card.appendChild(rowContainer);
++    }
++
++    return card;
++  },
++
++  _renderKeycaps(container, key, modifiers) {
++    container.textContent = "";
++    if (!key && !modifiers) {
++      let span = document.createXULElement("html:span");
++      span.style.opacity = "0.5";
++      span.textContent = "Disabled";
++      container.appendChild(span);
++      return;
++    }
++
++    let parts = [];
++    if (modifiers) {
++      if (modifiers.includes("accel") || modifiers.includes("control")) {
++        parts.push(AppConstants.platform === "macosx" ? "Cmd" : "Ctrl");
++      }
++      if (modifiers.includes("alt")) {
++        parts.push(AppConstants.platform === "macosx" ? "Option" : "Alt");
++      }
++      if (modifiers.includes("shift")) {
++        parts.push("Shift");
++      }
++    }
++    if (key) {
++      parts.push(key);
++    }
++
++    for (let part of parts) {
++      let kbd = document.createXULElement("html:kbd");
++      kbd.setAttribute("class", "shortcut-keycap");
++      kbd.textContent = part;
++      container.appendChild(kbd);
++    }
++  },
++
++  _startCapture(id, btn, kbdContainer, rowContainer) {
++    btn.setAttribute("class", "shortcut-action-btn recording-active");
++    btn.textContent = "Recording...";
++    btn.focus();
++
++    // Clear conflict banners if any
++    let activeBanner = rowContainer.querySelector(".shortcut-conflict-banner");
++    if (activeBanner) activeBanner.remove();
++
++    const updateLivePreview = (e) => {
++      let mods = [];
++      if (e.metaKey) mods.push("accel");
++      if (e.ctrlKey) mods.push("control");
++      if (e.altKey) mods.push("alt");
++      if (e.shiftKey) mods.push("shift");
++
++      let k = e.key;
++      if (["Meta", "Control", "Alt", "Shift"].includes(k)) {
++        k = "";
++      } else if (k.length === 1) {
++        k = k.toUpperCase();
++      }
++
++      this._renderKeycaps(kbdContainer, k, mods.join(","));
++    };
++
++    const handler = (e) => {
++      e.preventDefault();
++      e.stopPropagation();
++
++      if (e.key === "Escape") {
++        cleanup();
++        this.refresh();
++        return;
++      }
++
++      let modifiers = [];
++      if (e.metaKey) modifiers.push("accel");
++      if (e.ctrlKey) modifiers.push("control");
++      if (e.altKey) modifiers.push("alt");
++      if (e.shiftKey) modifiers.push("shift");
++
++      let key = e.key;
++      // Filter out isolated modifier key presses
++      if (["Meta", "Control", "Alt", "Shift"].includes(key)) {
++        updateLivePreview(e);
++        return;
++      }
++
++      if (key.length === 1) {
++        key = key.toUpperCase();
++      }
++
++      cleanup();
++      this._handleCapturedShortcut(id, key, modifiers.join(","), rowContainer);
++    };
++
++    const keyupHandler = (e) => {
++      updateLivePreview(e);
++    };
++
++    const blurHandler = () => {
++      cleanup();
++      this.refresh();
++    };
++
++    const cleanup = () => {
++      btn.removeEventListener("keydown", handler, true);
++      btn.removeEventListener("keyup", keyupHandler, true);
++      btn.removeEventListener("blur", blurHandler, true);
++      btn.setAttribute("class", "shortcut-action-btn");
++      btn.textContent = "Edit";
++    };
++
++    btn.addEventListener("keydown", handler, true);
++    btn.addEventListener("keyup", keyupHandler, true);
++    btn.addEventListener("blur", blurHandler, true);
++  },
++
++  _handleCapturedShortcut(id, key, modifiers, rowContainer) {
++    let conflict = this._detectConflict(id, key, modifiers);
++    if (conflict) {
++      this._showConflictBanner(id, key, modifiers, conflict, rowContainer);
++    } else {
++      this._save(id, key, modifiers);
++    }
++  },
++
++  _detectConflict(id, key, modifiers) {
++    if (!key && !modifiers) return null;
++
++    const categories = [
++      {
++        items: [
++          { id: "key_hilalNewWorkspace", name: "New Workspace" },
++          { id: "key_hilalToggleWorkspaces", name: "Toggle Workspaces Panel" },
++          { id: "key_hilalNextWorkspace", name: "Next Workspace" },
++          { id: "key_hilalPrevWorkspace", name: "Previous Workspace" },
++          { id: "key_toggleSidebar", name: "Toggle Primary Sidebar" },
++          { id: "key_hilalToggleCompactMode", name: "Toggle Compact Mode" },
++          { id: "key_toggleCompactHideToolbar", name: "Toggle Top Toolbar" },
++          { id: "key_viewBookmarksSidebar", name: "Bookmarks Sidebar" },
++          { id: "key_gotoHistory", name: "History Sidebar" },
++          { id: "key_newNavigatorTab", name: "New Tab" },
++          { id: "key_close", name: "Close Active Tab" },
++          { id: "key_undoCloseTab", name: "Reopen Closed Tab" },
++          { id: "key_newNavigator", name: "New Window" },
++          { id: "key_closeWindow", name: "Close Window" },
++          { id: "key_focusUrlbar", name: "Focus Address Bar" }
++        ]
++      }
++    ];
++
++    for (let cat of categories) {
++      for (let item of cat.items) {
++        if (item.id === id) continue;
++        let other = this.getShortcut(item.id);
++        if (other.key === key && other.modifiers === modifiers) {
++          return item;
++        }
++      }
++    }
++    return null;
++  },
++
++  _showConflictBanner(id, key, modifiers, conflict, rowContainer) {
++    let activeBanner = rowContainer.querySelector(".shortcut-conflict-banner");
++    if (activeBanner) activeBanner.remove();
++
++    let banner = document.createXULElement("html:div");
++    banner.setAttribute("class", "shortcut-conflict-banner");
++
++    let text = document.createXULElement("html:span");
++    text.setAttribute("class", "shortcut-conflict-text");
++    text.textContent = `Conflicts with "${conflict.name}"`;
++    banner.appendChild(text);
++
++    let actions = document.createXULElement("html:div");
++    actions.setAttribute("class", "shortcut-conflict-actions");
++
++    let btnOverwrite = document.createXULElement("html:button");
++    btnOverwrite.setAttribute("class", "conflict-action-link");
++    btnOverwrite.textContent = "Overwrite";
++    btnOverwrite.addEventListener("click", () => {
++      this._overwrite(id, key, modifiers, conflict.id);
++    });
++    actions.appendChild(btnOverwrite);
++
++    let btnCancel = document.createXULElement("html:button");
++    btnCancel.setAttribute("class", "conflict-action-link");
++    btnCancel.textContent = "Cancel";
++    btnCancel.addEventListener("click", () => {
++      this.refresh();
++    });
++    actions.appendChild(btnCancel);
++
++    banner.appendChild(actions);
++    rowContainer.appendChild(banner);
++  },
++
++  _overwrite(id, key, modifiers, conflictId) {
++    let userShortcuts = {};
++    try {
++      userShortcuts = JSON.parse(Services.prefs.getStringPref("hilal.keyboard.shortcuts.data", "{}"));
++    } catch (e) {}
++
++    userShortcuts[conflictId] = { key: "", modifiers: "" };
++    userShortcuts[id] = { key, modifiers };
++
++    Services.prefs.setStringPref("hilal.keyboard.shortcuts.data", JSON.stringify(userShortcuts));
++    this.refresh();
++  },
++
++  _save(id, key, modifiers) {
++    let userShortcuts = {};
++    try {
++      userShortcuts = JSON.parse(Services.prefs.getStringPref("hilal.keyboard.shortcuts.data", "{}"));
++    } catch (e) {}
++
++    userShortcuts[id] = { key, modifiers };
++    Services.prefs.setStringPref("hilal.keyboard.shortcuts.data", JSON.stringify(userShortcuts));
++    this.refresh();
++  }
++};
++
+ var {
+   InternalHandlerInfoWrapper,
+   getFileDisplayName,
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2944,3 +2944,10 @@ hilal-bangs-searchurl-label = Search URL:
- hilal-bangs-homeurl-label = Home URL (optional):
- hilal-bangs-default-label = (default)
- hilal-bangs-custom-label = (custom)
+@@ -2832,3 +2832,151 @@ referrals-section-header2 =
+ # use the browser. "Share" here means recommending or referring the browser
+ referrals-link2 =
+   .label = Share { -brand-product-name }
++## Hilal Browser Settings
++
++hilal-settings-header = Hilal Browser
++
++## Workspaces
++
++hilal-workspaces-header = Workspaces
++hilal-workspaces-enabled = Enable workspaces
++    .label = Enable workspaces
++hilal-workspaces-pinned-public = Make pinned tabs visible in all workspaces
++    .label = Make pinned tabs visible in all workspaces
++hilal-workspaces-groups-public = Make tab groups visible in all workspaces
++    .label = Make tab groups visible in all workspaces
++hilal-urlbar-show-workspace-name = Show workspace name in address bar
++    .label = Show workspace name in address bar
++hilal-workspaces-reset-description = Reset all workspace data (cannot be undone).
++hilal-workspaces-reset-button = Reset Workspaces
++    .label = Reset Workspaces
++hilal-workspaces-reset-confirm-title = Reset Workspaces
++hilal-workspaces-reset-confirm-message = This will delete all workspace data and cannot be undone. Continue?
++
++## Sidebar Options
++
++hilal-sidebar-header = Sidebar Options
++hilal-sidebar-compact-enabled = Enable Compact Mode (hover near screen edges to reveal sidebar and toolbar)
++    .label = Enable Compact Mode (hover near screen edges to reveal sidebar and toolbar)
++hilal-sidebar-compact-hide-toolbar = Auto-hide top toolbar in compact mode
++    .label = Auto-hide top toolbar in compact mode
++hilal-sidebar-compact-hide-toolbar-desc = When enabled, the top navigation and tab bar automatically hides and slides down with a smooth blur when the cursor nears the top edge.
++hilal-sidebar-show-horizontal-tabs = Show horizontal tabs
++    .label = Show horizontal tabs
++hilal-sidebar-footer-items-label = Standard Footer Items:
++hilal-sidebar-footer-bookmarks =
++    .label = Bookmarks
++hilal-sidebar-footer-history =
++    .label = History
++hilal-sidebar-footer-passwords =
++    .label = Passwords
++hilal-sidebar-footer-downloads =
++    .label = Downloads
++hilal-sidebar-footer-privacy =
++    .label = Privacy
++hilal-sidebar-footer-settings =
++    .label = Settings
++
++## UI Enhancements & Tahoe
++
++hilal-tahoe-header = Appearance & Tahoe Aesthetics
++hilal-tahoe-enabled = macOS Tahoe Glass Effect
++    .label = macOS Tahoe Glass Effect
++hilal-tahoe-enabled-desc = Window translucency, dynamic background blur, and lighting reflections.
++hilal-uifix-header = UI Enhancements
++hilal-uifix-enabled = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
++    .label = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
++hilal-uifix-connect-to-window = Connected Tabs (Connect tab borders to the window)
++    .label = Connected Tabs (Connect tab borders to the window)
++hilal-uifix-compact-padding = Compact Tab Padding (Slimmer tabs)
++    .label = Compact Tab Padding (Slimmer tabs)
++hilal-uifix-dynamic-separator = Dynamic Tab Separators
++    .label = Dynamic Tab Separators
++hilal-uifix-bottom-rounded = Rounded Bottom Tab Corners
++    .label = Rounded Bottom Tab Corners
++hilal-uifix-close-on-hover = Show Tab Close Button Only on Hover
++    .label = Show Tab Close Button Only on Hover
++
++## Site Customizer & Dynamic Coloring
++
++hilal-boosts-header = Site Customizer & Dynamic Coloring
++hilal-boosts-auto-palette = Automatically extract and apply website color palette to browser UI
++    .label = Automatically extract and apply website color palette to browser UI
++hilal-boosts-browser-ui = Apply site customizer colors to browser UI by default
++    .label = Apply site customizer colors to browser UI by default
++hilal-sidebar-custom-shortcuts-label = Custom Sidebar Shortcuts:
++hilal-sidebar-custom-shortcuts-desc = Add custom pages, bookmarks, or external links to the sidebar footer. Hilal shows favicons from Firefox's favicon cache for web links; it does not contact a site just to fetch its icon.
++hilal-sidebar-custom-add =
++    .label = Add Shortcut
++hilal-sidebar-custom-remove =
++    .label = Remove Selected
++hilal-sidebar-custom-name-label = Name:
++hilal-sidebar-custom-name-placeholder =
++    .placeholder = e.g. My Workspace or Hacker News
++hilal-sidebar-custom-url-label = URL:
++hilal-sidebar-custom-url-placeholder =
++    .placeholder = e.g. https://news.ycombinator.com or about:logins
++hilal-sidebar-custom-icon-label = Icon:
++hilal-sidebar-custom-icon-link = Globe/Link (Default)
++hilal-sidebar-custom-icon-bookmark = Bookmark
++hilal-sidebar-custom-icon-history = History
++hilal-sidebar-custom-icon-key = Key (Password)
++hilal-sidebar-custom-icon-downloads = Download
++hilal-sidebar-custom-icon-shield = Shield (Privacy)
++hilal-sidebar-custom-icon-settings = Settings
++hilal-sidebar-custom-save =
++    .label = Save
++hilal-sidebar-custom-cancel =
++    .label = Cancel
++
++## Privacy Level
++
++hilal-privacy-header = Privacy Level
++hilal-privacy-description = Hilal privacy levels are explicit hardening profiles. They do not hide your public IP address, do not replace Tor Browser, and may break sites that depend on fingerprinting surfaces, WebGL, WebRTC, persistent cookies, saved passwords, or JavaScript.
++hilal-privacy-standard =
++    .label = Balanced (LibreWolf-like): strict tracking protection, RFP, HTTPS-only, URL cleanup, WebGL off, reduced WebRTC exposure, cookies/cache cleared on close.
++hilal-privacy-strict =
++    .label = Strict: Balanced plus First Party Isolation and WebRTC disabled. Safer for privacy, more likely to break video calls and sign-in flows.
++hilal-privacy-extreme =
++    .label = Maximum local hardening (not Tor): Strict plus JavaScript off, camera/microphone/location blocked, and browsing history cleared on close.
++
++## Bangs
++
++hilal-bangs-header = Bangs
++hilal-bangs-add-button =
++    .label = Add Bang
++hilal-bangs-remove-button =
++    .label = Remove Selected
++hilal-bangs-save-button =
++    .label = Save
++hilal-bangs-cancel-button =
++    .label = Cancel
++hilal-bangs-trigger-label = Trigger:
++hilal-bangs-searchurl-label = Search URL:
++hilal-bangs-homeurl-label = Home URL (optional):
++hilal-bangs-default-label = (default)
++hilal-bangs-custom-label = (custom)
 +
 +## Language Selection
 +
@@ -120,3 +1156,20 @@ diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser
 +hilal-language-description = Select the interface language for the browser. The browser must be restarted for changes to take effect.
 +hilal-language-apply-button =
 +    .label = Apply and Restart
++
++## Keyboard Shortcuts
++
++hilal-shortcuts-header = Keyboard Shortcuts
++hilal-shortcuts-description = Customize keyboard shortcuts for Hilal actions and native browser functions.
++hilal-shortcuts-reset =
++    .label = Restore Defaults
++
++## Hilal About
++
++hilal-about-header = Hilal Browser Information
++hilal-about-version-title = Hilal Browser 0.3.0-alpha.6
++hilal-about-version-subtitle = Based on Firefox Gecko 153.0a1
++hilal-about-version-button =
++    .label = Version Details
++
++

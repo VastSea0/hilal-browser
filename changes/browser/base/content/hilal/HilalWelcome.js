@@ -53,7 +53,8 @@
       key: "standard",
       label: "Balanced",
       badge: "Everyday",
-      description: "RFP, strict tracking protection, HTTPS-only, URL cleanup, WebGL off, cookie/cache cleanup on close.",
+      description:
+        "RFP, strict tracking protection, HTTPS-only, URL cleanup, WebGL off, cookie/cache cleanup on close.",
       l10nLabel: "hilal-welcome-privacy-standard-label",
       l10nBadge: "hilal-welcome-privacy-standard-badge",
       l10nDesc: "hilal-welcome-privacy-standard-desc",
@@ -62,7 +63,8 @@
       key: "strict",
       label: "Strict",
       badge: "Less exposed",
-      description: "Adds First Party Isolation on top of Balanced. WebRTC is disabled.",
+      description:
+        "Adds First Party Isolation on top of Balanced. WebRTC is disabled.",
       l10nLabel: "hilal-welcome-privacy-strict-label",
       l10nBadge: "hilal-welcome-privacy-strict-badge",
       l10nDesc: "hilal-welcome-privacy-strict-desc",
@@ -71,7 +73,8 @@
       key: "extreme",
       label: "Maximum",
       badge: "Local only",
-      description: "Adds JavaScript, camera, microphone, location, and history blocking on top of Strict.",
+      description:
+        "Adds JavaScript, camera, microphone, location, and history blocking on top of Strict.",
       l10nLabel: "hilal-welcome-privacy-extreme-label",
       l10nBadge: "hilal-welcome-privacy-extreme-badge",
       l10nDesc: "hilal-welcome-privacy-extreme-desc",
@@ -462,42 +465,50 @@
         {
           kicker: "First choices",
           title: "Choose what starts with Hilal.",
-          subtitle: "Bring data from another browser and set Hilal as your default.",
+          subtitle:
+            "Bring data from another browser and set Hilal as your default.",
         },
         {
           kicker: "Layout",
           title: "Pick a density.",
-          subtitle: "Standard keeps the toolbar fixed. Compact hides it until you need it.",
+          subtitle:
+            "Standard keeps the toolbar fixed. Compact hides it until you need it.",
         },
         {
           kicker: "Tabs",
           title: "Choose a tab direction.",
-          subtitle: "Vertical tabs sit in a sidebar. Horizontal tabs line up across the top.",
+          subtitle:
+            "Vertical tabs sit in a sidebar. Horizontal tabs line up across the top.",
         },
         {
           kicker: "Spaces",
           title: "Separate your contexts.",
-          subtitle: "Spaces keep personal, work, and social tabs in their own groups.",
+          subtitle:
+            "Spaces keep personal, work, and social tabs in their own groups.",
         },
         {
           kicker: "Toolbar",
           title: "Control the toolbar.",
-          subtitle: "Auto-hide reveals the address bar on hover. Always visible keeps it fixed.",
+          subtitle:
+            "Auto-hide reveals the address bar on hover. Always visible keeps it fixed.",
         },
         {
           kicker: "Privacy",
           title: "Pick a protection level.",
-          subtitle: "Hilal can stay comfortable for daily browsing or tighten site tracking surfaces.",
+          subtitle:
+            "Hilal can stay comfortable for daily browsing or tighten site tracking surfaces.",
         },
         {
           kicker: "Search",
           title: "Choose the address-bar engine.",
-          subtitle: "Used when you type into the bar. You can change it any time.",
+          subtitle:
+            "Used when you type into the bar. You can change it any time.",
         },
         {
           kicker: "Pinned tabs",
           title: "Keep essentials one click away.",
-          subtitle: "Select sites to pin at startup. They stay in the sidebar across sessions.",
+          subtitle:
+            "Select sites to pin at startup. They stay in the sidebar across sessions.",
         },
         {
           kicker: "Spaces setup",
@@ -507,7 +518,8 @@
         {
           kicker: "Done",
           title: "Ready.",
-          subtitle: "Your choices are saved. Hilal will close this setup and open the browser.",
+          subtitle:
+            "Your choices are saved. Hilal will close this setup and open the browser.",
         },
       ];
       const copy = stageCopies[this._stage];
@@ -603,14 +615,14 @@
       return `
         <div class="hw-choice-stack">
           ${this._optionRowHTML(
-            "data-layout-mode=\"standard\"",
+            'data-layout-mode="standard"',
             "layout",
             "Standard",
             "Full toolbar, always visible.",
             standard
           )}
           ${this._optionRowHTML(
-            "data-layout-mode=\"compact\"",
+            'data-layout-mode="compact"',
             "layout",
             "Compact",
             "More page, less chrome. Toolbar on hover.",
@@ -624,14 +636,14 @@
       return `
         <div class="hw-choice-stack">
           ${this._optionRowHTML(
-            "data-tab-layout=\"vertical\"",
+            'data-tab-layout="vertical"',
             "tabs",
             "Vertical",
             "Tabs sit in a sidebar panel.",
             this._verticalTabsSelected
           )}
           ${this._optionRowHTML(
-            "data-tab-layout=\"horizontal\"",
+            'data-tab-layout="horizontal"',
             "tabs",
             "Horizontal",
             "Tabs line up across the top.",
@@ -645,14 +657,14 @@
       return `
         <div class="hw-choice-stack">
           ${this._optionRowHTML(
-            "data-workspaces=\"on\"",
+            'data-workspaces="on"',
             "spaces",
             "Spaces on",
             "Group tabs into separate, isolated workspaces.",
             this._workspacesEnabledSelected
           )}
           ${this._optionRowHTML(
-            "data-workspaces=\"off\"",
+            'data-workspaces="off"',
             "layout",
             "Spaces off",
             "One clean browser window, no separation.",
@@ -666,14 +678,14 @@
       return `
         <div class="hw-choice-stack">
           ${this._optionRowHTML(
-            "data-toolbar=\"hidden\"",
+            'data-toolbar="hidden"',
             "layout",
             "Auto-hide",
             "Reveal the toolbar by hovering the top edge.",
             this._compactHideToolboxSelected
           )}
           ${this._optionRowHTML(
-            "data-toolbar=\"visible\"",
+            'data-toolbar="visible"',
             "layout",
             "Always visible",
             "The toolbar stays fixed at the top.",
@@ -739,15 +751,19 @@
               <span class="hw-toggle-track"></span>
             </span>
           </label>
-          ${sites.map(site => {
-            const active = this._pinnedSitesSelected[site.key];
-            const domain = site.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
-            return `
+          ${sites
+            .map(site => {
+              const active = this._pinnedSitesSelected[site.key];
+              const domain = site.url
+                .replace(/^https?:\/\/(www\.)?/, "")
+                .replace(/\/$/, "");
+              return `
               <button type="button" class="hw-option${active ? " hw-option-active" : ""}" data-pinned-site="${site.key}" aria-pressed="${active}">
                 <span class="hw-option-icon" style="background: radial-gradient(circle at 30% 20%, color-mix(in srgb, ${this._escapeHTML(site.color)} 28%, transparent), transparent 60%), rgba(255,255,255,0.07); color: ${this._escapeHTML(site.color)};">
-                  ${site.iconURL
-                    ? `<img src="${this._escapeHTML(site.iconURL)}" alt="" style="width:22px;height:22px;object-fit:contain;" />`
-                    : `<span style="font-size:0.82rem;font-weight:780;">${this._escapeHTML(site.initial)}</span>`
+                  ${
+                    site.iconURL
+                      ? `<img src="${this._escapeHTML(site.iconURL)}" alt="" style="width:22px;height:22px;object-fit:contain;" />`
+                      : `<span style="font-size:0.82rem;font-weight:780;">${this._escapeHTML(site.initial)}</span>`
                   }
                 </span>
                 <div class="hw-option-copy">
@@ -759,7 +775,8 @@
                 </span>
               </button>
             `;
-          }).join("")}
+            })
+            .join("")}
         </div>
       `;
     }
@@ -806,7 +823,9 @@
         ) || PRIVACY_LEVELS[0];
       const selectedPinnedSites = this._selectedPinnedSites();
       const pinnedTabsText = selectedPinnedSites.length
-        ? selectedPinnedSites.map(site => this._escapeHTML(site.label)).join(", ")
+        ? selectedPinnedSites
+            .map(site => this._escapeHTML(site.label))
+            .join(", ")
         : "None";
 
       const activePresets = WORKSPACE_PRESETS.filter(
@@ -820,23 +839,62 @@
       }
 
       const rows = [
-        { label: "Layout", value: this._compactSelected ? "Compact" : "Standard", l10nKey: "hilal-welcome-summary-layout", l10nValue: `hilal-welcome-summary-layout-${this._compactSelected ? "compact" : "standard"}` },
-        { label: "Tabs", value: this._verticalTabsSelected ? "Vertical" : "Horizontal", l10nKey: "hilal-welcome-summary-tabs", l10nValue: `hilal-welcome-summary-tabs-${this._verticalTabsSelected ? "vertical" : "horizontal"}` },
-        { label: "Search", value: engineName, l10nKey: "hilal-welcome-summary-search", l10nValue: null },
-        { label: "Privacy", value: this._escapeHTML(privacyLevel.label), l10nKey: "hilal-welcome-summary-privacy", l10nValue: null },
-        { label: "Pinned tabs", value: pinnedTabsText, l10nKey: "hilal-welcome-summary-pinned-tabs", l10nValue: null },
-        { label: "Spaces", value: workspacesText, l10nKey: "hilal-welcome-summary-workspaces", l10nValue: null },
-        { label: "Default browser", value: this._defaultBrowserSelected ? "Set as default" : "No change", l10nKey: "hilal-welcome-summary-default-browser", l10nValue: `hilal-welcome-summary-default-${this._defaultBrowserSelected ? "set" : "no-change"}` },
+        {
+          label: "Layout",
+          value: this._compactSelected ? "Compact" : "Standard",
+          l10nKey: "hilal-welcome-summary-layout",
+          l10nValue: `hilal-welcome-summary-layout-${this._compactSelected ? "compact" : "standard"}`,
+        },
+        {
+          label: "Tabs",
+          value: this._verticalTabsSelected ? "Vertical" : "Horizontal",
+          l10nKey: "hilal-welcome-summary-tabs",
+          l10nValue: `hilal-welcome-summary-tabs-${this._verticalTabsSelected ? "vertical" : "horizontal"}`,
+        },
+        {
+          label: "Search",
+          value: engineName,
+          l10nKey: "hilal-welcome-summary-search",
+          l10nValue: null,
+        },
+        {
+          label: "Privacy",
+          value: this._escapeHTML(privacyLevel.label),
+          l10nKey: "hilal-welcome-summary-privacy",
+          l10nValue: null,
+        },
+        {
+          label: "Pinned tabs",
+          value: pinnedTabsText,
+          l10nKey: "hilal-welcome-summary-pinned-tabs",
+          l10nValue: null,
+        },
+        {
+          label: "Spaces",
+          value: workspacesText,
+          l10nKey: "hilal-welcome-summary-workspaces",
+          l10nValue: null,
+        },
+        {
+          label: "Default browser",
+          value: this._defaultBrowserSelected ? "Set as default" : "No change",
+          l10nKey: "hilal-welcome-summary-default-browser",
+          l10nValue: `hilal-welcome-summary-default-${this._defaultBrowserSelected ? "set" : "no-change"}`,
+        },
       ];
 
       return `
         <div class="hw-summary">
-          ${rows.map(row => `
+          ${rows
+            .map(
+              row => `
             <div class="hw-summary-row">
               <span class="hw-summary-label" data-l10n-id="${row.l10nKey}">${row.label}</span>
               <span class="hw-summary-value"${row.l10nValue ? ` data-l10n-id="${row.l10nValue}"` : ""}>${row.value}</span>
             </div>
-          `).join("")}
+          `
+            )
+            .join("")}
         </div>
       `;
     }
@@ -920,21 +978,26 @@
         });
       });
 
-      this._overlay.querySelectorAll(".hw-option[data-privacy-level]").forEach(choice => {
-        choice.addEventListener("click", () => {
-          this._selectedPrivacyLevel = this._normalizePrivacyLevel(
-            choice.dataset.privacyLevel
-          );
-          this._renderStage();
+      this._overlay
+        .querySelectorAll(".hw-option[data-privacy-level]")
+        .forEach(choice => {
+          choice.addEventListener("click", () => {
+            this._selectedPrivacyLevel = this._normalizePrivacyLevel(
+              choice.dataset.privacyLevel
+            );
+            this._renderStage();
+          });
         });
-      });
 
       this._overlay
         .querySelectorAll(".hw-option[data-layout-mode]")
         .forEach(choice => {
           choice.addEventListener("click", () => {
             this._compactSelected = choice.dataset.layoutMode === "compact";
-            Services.prefs.setBoolPref(PREF_COMPACT_ENABLED, this._compactSelected);
+            Services.prefs.setBoolPref(
+              PREF_COMPACT_ENABLED,
+              this._compactSelected
+            );
             this._renderStage();
           });
         });
@@ -945,8 +1008,12 @@
           choice.addEventListener("click", () => {
             this._verticalTabsSelected =
               choice.dataset.tabLayout === "vertical";
-            Services.prefs.setBoolPref(PREF_VERTICAL_TABS, this._verticalTabsSelected);
-            const isSidebarActive = this._verticalTabsSelected || this._workspacesEnabledSelected;
+            Services.prefs.setBoolPref(
+              PREF_VERTICAL_TABS,
+              this._verticalTabsSelected
+            );
+            const isSidebarActive =
+              this._verticalTabsSelected || this._workspacesEnabledSelected;
             Services.prefs.setBoolPref("sidebar.revamp", isSidebarActive);
             this._renderStage();
           });
@@ -958,8 +1025,12 @@
           choice.addEventListener("click", () => {
             this._workspacesEnabledSelected =
               choice.dataset.workspaces === "on";
-            Services.prefs.setBoolPref(PREF_WORKSPACES_ENABLED, this._workspacesEnabledSelected);
-            const isSidebarActive = this._verticalTabsSelected || this._workspacesEnabledSelected;
+            Services.prefs.setBoolPref(
+              PREF_WORKSPACES_ENABLED,
+              this._workspacesEnabledSelected
+            );
+            const isSidebarActive =
+              this._verticalTabsSelected || this._workspacesEnabledSelected;
             Services.prefs.setBoolPref("sidebar.revamp", isSidebarActive);
             this._renderStage();
           });
@@ -971,18 +1042,23 @@
           choice.addEventListener("click", () => {
             this._compactHideToolboxSelected =
               choice.dataset.toolbar === "hidden";
-            Services.prefs.setBoolPref(PREF_COMPACT_HIDE_TOOLBOX, this._compactHideToolboxSelected);
+            Services.prefs.setBoolPref(
+              PREF_COMPACT_HIDE_TOOLBOX,
+              this._compactHideToolboxSelected
+            );
             this._renderStage();
           });
         });
 
-      this._overlay.querySelectorAll(".hw-option[data-workspace]").forEach(choice => {
-        choice.addEventListener("click", () => {
-          const key = choice.dataset.workspace;
-          this._workspacesSelected[key] = !this._workspacesSelected[key];
-          this._renderStage();
+      this._overlay
+        .querySelectorAll(".hw-option[data-workspace]")
+        .forEach(choice => {
+          choice.addEventListener("click", () => {
+            const key = choice.dataset.workspace;
+            this._workspacesSelected[key] = !this._workspacesSelected[key];
+            this._renderStage();
+          });
         });
-      });
 
       const pinnedPublicToggle = document.getElementById(
         "hw-pinned-public-toggle"
@@ -990,18 +1066,23 @@
       if (pinnedPublicToggle) {
         pinnedPublicToggle.addEventListener("change", event => {
           this._pinnedPublicSelected = event.target.checked;
-          Services.prefs.setBoolPref(PREF_PINNED_PUBLIC, this._pinnedPublicSelected);
+          Services.prefs.setBoolPref(
+            PREF_PINNED_PUBLIC,
+            this._pinnedPublicSelected
+          );
         });
       }
 
-      this._overlay.querySelectorAll(".hw-option[data-pinned-site]").forEach(choice => {
-        choice.addEventListener("click", () => {
-          const key = choice.dataset.pinnedSite;
-          this._pinnedSitesSelected[key] = !this._pinnedSitesSelected[key];
-          this._togglePinnedSite(key, this._pinnedSitesSelected[key]);
-          this._renderStage();
+      this._overlay
+        .querySelectorAll(".hw-option[data-pinned-site]")
+        .forEach(choice => {
+          choice.addEventListener("click", () => {
+            const key = choice.dataset.pinnedSite;
+            this._pinnedSitesSelected[key] = !this._pinnedSitesSelected[key];
+            this._togglePinnedSite(key, this._pinnedSitesSelected[key]);
+            this._renderStage();
+          });
         });
-      });
     }
 
     /* ----------------------------------------------------------
@@ -1147,7 +1228,11 @@
     }
 
     _togglePinnedSite(key, selected) {
-      if (typeof gBrowser === "undefined" || typeof gBrowser.addTrustedTab !== "function" || typeof gBrowser.pinTab !== "function") {
+      if (
+        typeof gBrowser === "undefined" ||
+        typeof gBrowser.addTrustedTab !== "function" ||
+        typeof gBrowser.pinTab !== "function"
+      ) {
         return;
       }
       const site = PINNED_SITE_PRESETS.find(s => s.key === key);

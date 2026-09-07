@@ -1,0 +1,16 @@
+{
+  "border": {
+    "radius": {
+      "value": "{popup.border.radius}"
+    }
+  },
+  "box": {
+    "background": {
+      "color": {
+        "focus": {
+          "value": "{urlbar.box.background.color.@base}"
+        }
+      }
+    }
+  }
+}

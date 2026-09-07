@@ -1,7 +1,7 @@
 diff --git a/browser/components/BrowserGlue.sys.mjs b/browser/components/BrowserGlue.sys.mjs
 --- a/browser/components/BrowserGlue.sys.mjs
 +++ b/browser/components/BrowserGlue.sys.mjs
-@@ -1214,11 +1214,12 @@ BrowserGlue.prototype = {
+@@ -1235,11 +1235,12 @@ BrowserGlue.prototype = {
          name: "BackgroundUpdate",
          condition: AppConstants.MOZ_UPDATE_AGENT && AppConstants.MOZ_UPDATER,
          task: async () => {
@@ -71,7 +71,41 @@ diff --git a/browser/components/preferences/config/about-firefox.mjs b/browser/c
          return () => {};
        }
        if (gAppUpdater) {
-@@ -262,7 +271,7 @@ Preferences.addSetting({
+@@ -198,20 +207,30 @@ Preferences.addSetting(
+ Preferences.addSetting({
+   id: "updateAppInfo",
+   getControlConfig(config) {
+-    let version = AppConstants.MOZ_APP_VERSION_DISPLAY;
++    let displayVersion = AppConstants.MOZ_APP_VERSION_DISPLAY;
++    let appVersion = Services.appinfo.version;
++    let buildID = Services.appinfo.appBuildID;
++    let version = displayVersion;
+     let distribution;
+     let distributionId;
+     let releaseNotesURL = "";
+ 
+     // Include the build ID if this is an "a#" (nightly) build
+-    if (/a\d+$/.test(version)) {
+-      let buildID = Services.appinfo.appBuildID;
++    if (/a\d+$/.test(appVersion)) {
+       let year = buildID.slice(0, 4);
+       let month = buildID.slice(4, 6);
+       let day = buildID.slice(6, 8);
+       version += ` (${year}-${month}-${day})`;
+     }
+ 
++    if (appVersion && appVersion !== displayVersion) {
++      let baseVersion = `Firefox ${appVersion}`;
++      if (buildID) {
++        baseVersion += `, build ${buildID}`;
++      }
++      version += ` (${baseVersion})`;
++    }
++
+     // Append "(32-bit)" or "(64-bit)" build architecture to the version number:
+     let bundle = Services.strings.createBundle(
+       "chrome://browser/locale/browser.properties"
+@@ -263,7 +282,7 @@ Preferences.addSetting({
  
  Preferences.addSetting({
    id: "disableShowUpdateHistory",
@@ -80,7 +114,7 @@ diff --git a/browser/components/preferences/config/about-firefox.mjs b/browser/c
      ? "app.update.disable_button.showUpdateHistory"
      : undefined,
  });
-@@ -455,7 +464,7 @@ Preferences.addSetting({
+@@ -456,7 +475,7 @@ Preferences.addSetting({
  Preferences.addSetting({
    id: "showUpdatePrompts",
    pref:
@@ -92,7 +126,7 @@ diff --git a/browser/components/preferences/config/about-firefox.mjs b/browser/c
 diff --git a/toolkit/components/telemetry/app/TelemetryEnvironment.sys.mjs b/toolkit/components/telemetry/app/TelemetryEnvironment.sys.mjs
 --- a/toolkit/components/telemetry/app/TelemetryEnvironment.sys.mjs
 +++ b/toolkit/components/telemetry/app/TelemetryEnvironment.sys.mjs
-@@ -1273,7 +1273,9 @@ EnvironmentCache.prototype = {
+@@ -1265,7 +1265,9 @@ EnvironmentCache.prototype = {
        update: {
          channel: updateChannel,
          enabled:

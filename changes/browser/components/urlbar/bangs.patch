@@ -1,12 +1,16 @@
 diff --git a/browser/components/urlbar/UrlbarUtils.sys.mjs b/browser/components/urlbar/UrlbarUtils.sys.mjs
 --- a/browser/components/urlbar/UrlbarUtils.sys.mjs
 +++ b/browser/components/urlbar/UrlbarUtils.sys.mjs
-@@ -39,3 +39,4 @@ const lazy = XPCOMUtils.declareLazy({
+@@ -37,6 +37,7 @@ const lazy = XPCOMUtils.declareLazy({
+   SearchSuggestionController:
+     "moz-src:///toolkit/components/search/SearchSuggestionController.sys.mjs",
    UrlbarPrefs: "moz-src:///browser/components/urlbar/UrlbarPrefs.sys.mjs",
 +  HilalBangs: "resource:///modules/HilalBangs.sys.mjs",
    UrlUtils: "resource://gre/modules/UrlUtils.sys.mjs",
    blobAsDataURL: "moz-src:///toolkit/modules/FaviconUtils.sys.mjs",
-@@ -273,5 +274,17 @@ export var UrlbarUtils = {
+   clearTimeout: "resource://gre/modules/Timer.sys.mjs",
+@@ -272,6 +273,18 @@ export var UrlbarUtils = {
+    *    post data (object).
     */
    getSearchQueryUrl(engine, query) {
 +    const resolved = lazy.HilalBangs.resolveQuery(query, {

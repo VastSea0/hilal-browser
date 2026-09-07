@@ -1,0 +1,1159 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hilal Browser × @m3e/web — Material 3 Expressive Mimari Kanıtı</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet" />
+
+  <!-- @m3e/web: Official Material 3 Expressive Web Components Suite -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@m3e/web@2.7.9/dist/all.min.js"></script>
+
+  <style>
+    :root {
+      --m3e-scrollbar-width: thin;
+      --font-mono: "JetBrains Mono", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    *:not(:defined) {
+      visibility: hidden;
+    }
+
+    body {
+      font-family: "Roboto", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* M3E Application Theme Root */
+    m3e-theme {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-color: var(--md-sys-color-background, var(--md-sys-color-surface));
+      color: var(--md-sys-color-on-background, var(--md-sys-color-on-surface));
+      transition: background-color 300ms cubic-bezier(0.2, 0, 0, 1), color 300ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    /* Top Sticky App Bar */
+    .top-app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      --m3e-app-bar-container-color: var(--md-sys-color-surface-container-low);
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    .brand-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-left: 12px;
+    }
+
+    .brand-heading {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-right: 12px;
+    }
+
+    /* Main Container */
+    .showcase-content {
+      max-width: 1260px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 24px 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 64px;
+    }
+
+    /* Hero Manifesto */
+    .hero-manifesto {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background-color: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+    }
+
+    .hero-title {
+      font-size: clamp(34px, 5vw, 52px);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -1.2px;
+    }
+
+    .hero-lead {
+      font-size: 18px;
+      line-height: 1.65;
+      color: var(--md-sys-color-on-surface-variant);
+      max-width: 980px;
+    }
+
+    /* Epiphany Card */
+    .epiphany-card {
+      background-color: var(--md-sys-color-surface-container-high);
+      border-radius: 28px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .epiphany-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--md-sys-color-primary);
+    }
+
+    .epiphany-body {
+      font-size: 15.5px;
+      line-height: 1.7;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .epiphany-body strong {
+      color: var(--md-sys-color-primary);
+    }
+
+    .epiphany-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .epiphany-box {
+      background-color: var(--md-sys-color-surface-container);
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    .epiphany-box h4 {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .epiphany-box p {
+      font-size: 13.5px;
+      color: var(--md-sys-color-on-surface-variant);
+      line-height: 1.5;
+    }
+
+    /* Section Layout */
+    .content-section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .section-headline-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--md-sys-color-primary);
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.6px;
+    }
+
+    .section-subtext {
+      font-size: 15px;
+      color: var(--md-sys-color-on-surface-variant);
+      max-width: 860px;
+    }
+
+    /* ========================================================================
+       LIVE HILAL BROWSER CHROME SIMULATION (REAL @m3e/web INSIDE)
+       ======================================================================== */
+    .browser-canvas-stage {
+      background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--md-sys-color-primary) 18%, transparent) 0%, transparent 75%);
+      padding: 32px;
+      border-radius: 32px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background-color: var(--md-sys-color-surface-container-lowest);
+    }
+
+    .browser-window-shell {
+      width: 100%;
+      background-color: var(--md-sys-color-surface);
+      border-radius: 24px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .window-traffic-strip {
+      padding: 10px 16px 8px;
+      background-color: var(--md-sys-color-surface-container-low);
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .traffic-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .dots-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .dot-red { background-color: #ff5f56; }
+    .dot-yellow { background-color: #ffbd2e; }
+    .dot-green { background-color: #27c93f; }
+
+    .browser-tabs-box {
+      flex: 1;
+      overflow-x: auto;
+    }
+
+    .browser-nav-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-pill-wrapper {
+      flex: 1;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    m3e-search-bar {
+      width: 100%;
+      --m3e-search-bar-container-shape: 9999px;
+      --m3e-search-bar-container-color: var(--md-sys-color-surface-container-high);
+    }
+
+    .browser-inner-layout {
+      display: flex;
+      min-height: 480px;
+      background-color: var(--md-sys-color-surface);
+      padding: 10px;
+      gap: 10px;
+    }
+
+    .workspaces-rail-wrap {
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background-color: var(--md-sys-color-surface-container-low);
+    }
+
+    /* Hilal Floating Canvas Viewport */
+    .hilal-floating-viewport {
+      flex: 1;
+      border-radius: 18px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background-color: var(--md-sys-color-surface-container-lowest);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 36px;
+      text-align: center;
+      gap: 28px;
+      position: relative;
+    }
+
+    .viewport-brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .viewport-logo-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      background-color: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+    }
+
+    .viewport-wordmark {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .viewport-wordmark span {
+      font-weight: 300;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .viewport-search-container {
+      width: 100%;
+      max-width: 540px;
+    }
+
+    /* ========================================================================
+       LIVE HILAL PREFERENCES (SETTINGS) PANEL RECREATION
+       ======================================================================== */
+    .settings-panel-demo {
+      background-color: var(--md-sys-color-surface-container-low);
+      border-radius: 28px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      overflow: hidden;
+      display: flex;
+      min-height: 480px;
+    }
+
+    .settings-drawer {
+      width: 300px;
+      background-color: var(--md-sys-color-surface);
+      border-right: 1px solid var(--md-sys-color-outline-variant);
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .settings-drawer-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--md-sys-color-on-surface-variant);
+      padding: 0 16px 10px;
+    }
+
+    .settings-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      height: 52px;
+      padding: 0 20px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface-variant);
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 150ms ease, color 150ms ease;
+    }
+
+    .settings-nav-item:hover:not(.active) {
+      background-color: var(--md-sys-color-surface-container);
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .settings-nav-item.active {
+      background-color: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      font-weight: 600;
+    }
+
+    .settings-body-area {
+      flex: 1;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      background-color: var(--md-sys-color-surface-container-low);
+      overflow-y: auto;
+    }
+
+    .settings-group-card {
+      background-color: var(--md-sys-color-surface);
+      border-radius: 24px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .settings-group-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+
+    .settings-row-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .settings-row-title {
+      font-size: 14.5px;
+      font-weight: 600;
+    }
+
+    .settings-row-desc {
+      font-size: 13px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    /* ========================================================================
+       THE 31-SHAPE EXPRESSIVE SHAPE SCALE & MORPHING LAB (<m3e-shape>)
+       ======================================================================== */
+    .shapes-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 14px;
+      background-color: var(--md-sys-color-surface-container-lowest);
+      padding: 24px;
+      border-radius: 28px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    .shape-card {
+      background-color: var(--md-sys-color-surface-container);
+      border-radius: 18px;
+      padding: 16px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 200ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .shape-card:hover {
+      background-color: var(--md-sys-color-surface-container-high);
+      border-color: var(--md-sys-color-primary);
+      transform: translateY(-2px);
+    }
+
+    .shape-card.active {
+      background-color: var(--md-sys-color-primary-container);
+      border-color: var(--md-sys-color-primary);
+    }
+
+    .shape-card.active .shape-name-tag {
+      color: var(--md-sys-color-on-primary-container);
+      font-weight: 600;
+    }
+
+    m3e-shape {
+      width: 48px;
+      height: 48px;
+      --m3e-shape-container-color: var(--md-sys-color-primary);
+      color: var(--md-sys-color-primary);
+    }
+
+    .shape-name-tag {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--md-sys-color-on-surface-variant);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    /* Morphing Stage */
+    .morph-hero-stage {
+      background-color: var(--md-sys-color-surface-container);
+      border-radius: 28px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      padding: 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      text-align: center;
+    }
+
+    #live-morph-shape {
+      width: 100px;
+      height: 100px;
+      --m3e-shape-container-color: var(--md-sys-color-primary);
+      transition: all 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* ========================================================================
+       LIVE TOKEN INSPECTOR (DOM REAL COMPUTED VALUES)
+       ======================================================================== */
+    .tokens-table-box {
+      background-color: var(--md-sys-color-surface-container-low);
+      border-radius: 24px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      overflow: hidden;
+    }
+
+    .token-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    .token-table th {
+      background-color: var(--md-sys-color-surface-container);
+      padding: 12px 18px;
+      text-align: left;
+      font-weight: 700;
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    .token-table td {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .token-table tr:hover td {
+      background-color: var(--md-sys-color-surface-container-high);
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .token-badge {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background-color: var(--md-sys-color-surface-container-highest);
+      color: var(--md-sys-color-primary);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .color-swatch-cell {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      vertical-align: middle;
+      margin-right: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+    }
+
+    /* Footer */
+    .page-footer {
+      text-align: center;
+      padding-top: 40px;
+      border-top: 1px solid var(--md-sys-color-outline-variant);
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- THE ROOT M3E THEME ENGINE -->
+  <m3e-theme id="app-theme" color="#0b57d0" scheme="dark" motion="expressive" strong-focus>
+
+    <!-- Top Sticky Header -->
+    <m3e-app-bar class="top-app-header">
+      <div slot="leading" class="brand-title-wrap">
+        <m3e-icon name="explore" style="color: var(--md-sys-color-primary); font-size: 26px;"></m3e-icon>
+        <span class="brand-heading">
+          <span>Hilal Browser</span>
+          <m3e-chip variant="elevated" style="font-size: 11px;">@m3e/web v2.7.9</m3e-chip>
+        </span>
+      </div>
+
+      <div slot="trailing" class="header-actions-group">
+        <!-- Live Seed Color Selector via Segmented Button -->
+        <m3e-segmented-button id="seed-color-control">
+          <m3e-button value="#0b57d0" selected onclick="applySeed('#0b57d0')">Hilal Blue</m3e-button>
+          <m3e-button value="#00897b" onclick="applySeed('#00897b')">Teal</m3e-button>
+          <m3e-button value="#8e24aa" onclick="applySeed('#8e24aa')">Purple</m3e-button>
+          <m3e-button value="#f57c00" onclick="applySeed('#f57c00')">Amber</m3e-button>
+        </m3e-segmented-button>
+
+        <!-- Dark / Light Mode Toggle -->
+        <m3e-icon-button id="theme-toggle" aria-label="Temayı Değiştir" onclick="toggleThemeScheme()">
+          <m3e-icon name="light_mode"></m3e-icon>
+        </m3e-icon-button>
+        <m3e-tooltip for="theme-toggle">Açık / Koyu Mod</m3e-tooltip>
+
+        <m3e-icon-button href="https://github.com/matraic/m3e" target="_blank" aria-label="GitHub">
+          <m3e-icon name="code"></m3e-icon>
+        </m3e-icon-button>
+      </div>
+    </m3e-app-bar>
+
+    <div class="showcase-content">
+
+      <!-- ====================================================================
+           HERO & THE REALITY OF M3 EXPRESSIVE
+           ==================================================================== -->
+      <section class="hero-manifesto">
+        <div class="pill-badge">
+          <m3e-icon name="verified" style="font-size: 16px;"></m3e-icon>
+          <span>Material Design 3 Expressive Standartları</span>
+        </div>
+
+        <h1 class="hero-title">
+          Tahmin edilen CSS sınıflarının sonu: <br />
+          Platforma özgü gerçek @m3e/web Web Components.
+        </h1>
+
+        <p class="hero-lead">
+          Neden hem ben hem de önceki yapay zeka ajanları Material 3 Expressive'i anlamakta zorlanıyordu? Çünkü Google'ın eski <code>@material/web</code> kütüphanesi bakım moduna alınmış ve M3 Expressive desteğini hiç almamıştı. Ajanlar elle uydurma CSS sınıfları (sahte switch'ler, tahmin edilen border-radius'lar, sert 1px kenarlıklar) yazıp "card-itis" tuzağına düşüyordu. Oysa <strong><code>@m3e/web</code> (matraic/m3e)</strong> ile Material 3 Expressive; 31 şekil kütüphanesi, 5 tonal yüzey kademesi, 52×32dp switch'ler ve organik yay fiziğiyle tarayıcıda yerel Custom Elements olarak çalışır.
+        </p>
+
+        <!-- Epiphany Card -->
+        <div class="epiphany-card">
+          <div class="epiphany-header">
+            <m3e-icon name="psychology" style="font-size: 30px;"></m3e-icon>
+            <h3>Material Design 3 Expressive Nedir ve Neyi Çözer?</h3>
+          </div>
+          <p class="epiphany-body">
+            M3 Expressive; basit bir "yuvarlak köşe" veya "renk paleti" değildir. Google'ın <strong>46 araştırma ve 18.000+ kullanıcı çalışmasıyla</strong> geliştirdiği, duygusal netlik ve dokunsallık getiren canlı bir tasarım ekosistemidir:
+          </p>
+
+          <div class="epiphany-grid">
+            <div class="epiphany-box">
+              <h4><m3e-icon name="shapes" style="font-size: 20px; color: var(--md-sys-color-primary);"></m3e-icon> 31+ Şekil & Morfoloji (&lt;m3e-shape&gt;)</h4>
+              <p>Sadece yuvarlak köşeler değil; <code>sunny</code>, <code>flower</code>, <code>burst</code>, <code>cookie</code> gibi 31 resmi şekil ve durumlar arası morflanma.</p>
+            </div>
+            <div class="epiphany-box">
+              <h4><m3e-icon name="layers" style="font-size: 20px; color: var(--md-sys-color-primary);"></m3e-icon> Tonal Derinlik (Anti-Carditis)</h4>
+              <p>Sert 1px kenarlıklar ve kutu içine kutu tıkıştırma yerine <code>surface-container-lowest</code> ile <code>highest</code> arası 5 katmanlı tonal hiyerarşi.</p>
+            </div>
+            <div class="epiphany-box">
+              <h4><m3e-icon name="toggle_on" style="font-size: 20px; color: var(--md-sys-color-primary);"></m3e-icon> 52×32dp Resmi M3 Switch</h4>
+              <p>Başparmağın (thumb) seçili değilken 16dp'den seçildiğinde 24dp'ye yay fiziğiyle genişlediği resmi kontrol mekaniği.</p>
+            </div>
+            <div class="epiphany-box">
+              <h4><m3e-icon name="palette" style="font-size: 20px; color: var(--md-sys-color-primary);"></m3e-icon> &lt;m3e-theme&gt; Motoru</h4>
+              <p>Elle CSS renk kodları yazmak yerine, tohum renkten otomatik üretilen ve erişilebilir WCAG kontrastlarını sağlayan dinamik token motoru.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           LIVE HILAL BROWSER CHROME SIMULATION (POWERED BY @m3e/web)
+           ======================================================================== -->
+      <section class="content-section">
+        <div class="section-headline-box">
+          <span class="section-label">Canlı Tarayıcı Simülasyonu</span>
+          <h2 class="section-title">Hilal Browser Kabuğu: @m3e/web ile Birebir Canlı</h2>
+          <p class="section-subtext">
+            Aşağıdaki tarayıcı simülasyonu div veya sahte stillerle değil; doğrudan <strong><code>@m3e/web</code></strong> custom element'leri (Tabs, SearchBar, NavRail, IconButtons, Chips) ile çalışmaktadır:
+          </p>
+        </div>
+
+        <div class="browser-canvas-stage">
+          <div class="browser-window-shell">
+            
+            <!-- Window Traffic Strip & Tabs -->
+            <div class="window-traffic-strip">
+              <div class="traffic-row">
+                <div class="dots-group">
+                  <div class="dot dot-red"></div>
+                  <div class="dot dot-yellow"></div>
+                  <div class="dot dot-green"></div>
+                </div>
+
+                <!-- Real M3E Tabs Component -->
+                <div class="browser-tabs-box">
+                  <m3e-tabs selected-index="0">
+                    <m3e-tab>
+                      <m3e-icon slot="icon" name="explore"></m3e-icon>
+                      Yeni Sekme
+                    </m3e-tab>
+                    <m3e-tab>
+                      <m3e-icon slot="icon" name="menu_book"></m3e-icon>
+                      @m3e/web Dokümantasyonu
+                    </m3e-tab>
+                    <m3e-tab>
+                      <m3e-icon slot="icon" name="settings"></m3e-icon>
+                      Hilal Tercihleri
+                    </m3e-tab>
+                  </m3e-tabs>
+                </div>
+              </div>
+
+              <!-- Navbar Row with Search Pill -->
+              <div class="browser-nav-row">
+                <m3e-icon-button aria-label="Geri"><m3e-icon name="arrow_back"></m3e-icon></m3e-icon-button>
+                <m3e-icon-button aria-label="İleri"><m3e-icon name="arrow_forward"></m3e-icon></m3e-icon-button>
+                <m3e-icon-button aria-label="Yenile"><m3e-icon name="refresh"></m3e-icon></m3e-icon-button>
+
+                <!-- The Real M3E Search Bar (Hilal URL Bar) -->
+                <div class="search-pill-wrapper">
+                  <m3e-search-bar clearable id="hilal-omnibar">
+                    <m3e-icon name="lock" slot="leading" style="color: var(--md-sys-color-primary);"></m3e-icon>
+                    <input slot="input" value="https://matraic.github.io/m3e" spellcheck="false" />
+                  </m3e-search-bar>
+                </div>
+
+                <m3e-icon-button aria-label="Hilal Boosts"><m3e-icon name="tune"></m3e-icon></m3e-icon-button>
+                <m3e-icon-button aria-label="Profil"><m3e-icon name="account_circle"></m3e-icon></m3e-icon-button>
+              </div>
+            </div>
+
+            <!-- Browser Interior: Workspaces Rail + Floating Canvas Viewport -->
+            <div class="browser-inner-layout">
+              
+              <!-- Real M3E Nav Rail for Workspaces Contexts -->
+              <div class="workspaces-rail-wrap">
+                <m3e-nav-rail orientation="vertical">
+                  <m3e-nav-item selected onclick="applySeed('#0b57d0')">
+                    <m3e-icon slot="icon" name="person"></m3e-icon>
+                    Kişisel
+                  </m3e-nav-item>
+                  <m3e-nav-item onclick="applySeed('#00897b')">
+                    <m3e-icon slot="icon" name="work"></m3e-icon>
+                    İş
+                  </m3e-nav-item>
+                  <m3e-nav-item onclick="applySeed('#8e24aa')">
+                    <m3e-icon slot="icon" name="school"></m3e-icon>
+                    Akademi
+                  </m3e-nav-item>
+                </m3e-nav-rail>
+              </div>
+
+              <!-- Signature Floating Canvas (Hilal 16px Floating Web Viewport) -->
+              <div class="hilal-floating-viewport">
+                <div class="viewport-brand-group">
+                  <div class="viewport-logo-circle">
+                    <m3e-icon name="nightlight_round" style="font-size: 30px;"></m3e-icon>
+                  </div>
+                  <div class="viewport-wordmark">Hilal <span>Browser</span></div>
+                </div>
+
+                <div class="viewport-search-container">
+                  <m3e-search-bar clearable>
+                    <m3e-icon name="search" slot="leading"></m3e-icon>
+                    <input slot="input" placeholder="İnternette veya çalışma alanınızda arayın..." />
+                  </m3e-search-bar>
+                </div>
+
+                <div>
+                  <m3e-chip-set>
+                    <m3e-chip variant="elevated"><m3e-icon slot="leading" name="language"></m3e-icon>Google</m3e-chip>
+                    <m3e-chip variant="elevated"><m3e-icon slot="leading" name="code"></m3e-icon>GitHub</m3e-chip>
+                    <m3e-chip variant="elevated"><m3e-icon slot="leading" name="auto_awesome"></m3e-icon>Material 3</m3e-chip>
+                    <m3e-chip variant="elevated"><m3e-icon slot="leading" name="shield"></m3e-icon>uBlock Origin</m3e-chip>
+                  </m3e-chip-set>
+                </div>
+
+                <div style="font-size: 12px; font-family: var(--font-mono); opacity: 0.75; margin-top: 12px;">
+                  16px Large Corner • Tonal Surface Lowest • Elevation-1 Floating Canvas
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           LIVE HILAL PREFERENCES (SETTINGS) PANEL RECREATION VIA @m3e/web
+           ==================================================================== -->
+      <section class="content-section">
+        <div class="section-headline-box">
+          <span class="section-label">Hilal Tercihler Paneli Re-Design</span>
+          <h2 class="section-title">Gerçek M3 Expressive ile Hilal Ayarlar Ekranı</h2>
+          <p class="section-subtext">
+            Repodaki son commit'lerde (<code>6717d22</code>) elle yazılmaya çalışılan 320dp navigasyon çekmecesi, 56dp tam kapsül butonlar ve 52×32dp switch'lerin <code>@m3e/web</code> ile kusursuz çalışan resmi versiyonu:
+          </p>
+        </div>
+
+        <div class="settings-panel-demo">
+          
+          <!-- Navigation Drawer -->
+          <div class="settings-drawer">
+            <span class="settings-drawer-title">Hilal Ayarları</span>
+            <div class="settings-nav-item active" onclick="selectSettingsTab(this, 'genel')">
+              <m3e-icon name="tune"></m3e-icon>
+              <span>Genel & Görünüm</span>
+            </div>
+            <div class="settings-nav-item" onclick="selectSettingsTab(this, 'workspaces')">
+              <m3e-icon name="workspaces"></m3e-icon>
+              <span>Çalışma Alanları</span>
+            </div>
+            <div class="settings-nav-item" onclick="selectSettingsTab(this, 'gizlilik')">
+              <m3e-icon name="shield"></m3e-icon>
+              <span>Gizlilik & Güvenlik</span>
+            </div>
+            <div class="settings-nav-item" onclick="selectSettingsTab(this, 'hakkinda')">
+              <m3e-icon name="info"></m3e-icon>
+              <span>Hilal Hakkında</span>
+            </div>
+          </div>
+
+          <!-- Settings Body -->
+          <div class="settings-body-area">
+            
+            <!-- Group 1: Appearance & Tahoe -->
+            <div class="settings-group-card">
+              <div class="settings-group-header">
+                <m3e-icon name="palette" style="color: var(--md-sys-color-primary);"></m3e-icon>
+                <span>Arayüz & Tahoe Estetiği</span>
+              </div>
+
+              <div class="settings-row">
+                <div class="settings-row-text">
+                  <span class="settings-row-title">macOS Tahoe Cam Efekti</span>
+                  <span class="settings-row-desc">Pencere saydamlığı, arka plan bulanıklığı ve ışık yansıması</span>
+                </div>
+                <m3e-switch checked icons="both"></m3e-switch>
+              </div>
+
+              <div class="settings-row">
+                <div class="settings-row-text">
+                  <span class="settings-row-title">Hilal Boosts: Otomatik Renk Çıkarımı</span>
+                  <span class="settings-row-desc">Ziyaret edilen sitenin rengini tarayıcı başlığına harmanla</span>
+                </div>
+                <m3e-switch checked icons="both"></m3e-switch>
+              </div>
+
+              <div class="settings-row">
+                <div class="settings-row-text">
+                  <span class="settings-row-title">Renk Yoğunluğu (OKLCH Mix)</span>
+                  <span class="settings-row-desc">Tarayıcı kromundaki tema harmanlama oranı</span>
+                </div>
+                <div style="width: 200px;">
+                  <m3e-slider labelled discrete step="5">
+                    <m3e-slider-thumb value="15"></m3e-slider-thumb>
+                  </m3e-slider>
+                </div>
+              </div>
+            </div>
+
+            <!-- Group 2: Privacy Profiles -->
+            <div class="settings-group-card">
+              <div class="settings-group-header">
+                <m3e-icon name="security" style="color: var(--md-sys-color-primary);"></m3e-icon>
+                <span>Gizlilik Profilleri</span>
+              </div>
+
+              <div class="settings-row">
+                <div class="settings-row-text">
+                  <span class="settings-row-title">Yerel Güvenlik Kademesi</span>
+                  <span class="settings-row-desc">İzleyici koruması, telemetri engelleme ve parmak izi direnci</span>
+                </div>
+                <m3e-segmented-button>
+                  <m3e-button value="balanced" selected>Dengeli</m3e-button>
+                  <m3e-button value="strict">Katı</m3e-button>
+                  <m3e-button value="max">Maksimum</m3e-button>
+                </m3e-segmented-button>
+              </div>
+
+              <div class="settings-row">
+                <div class="settings-row-text">
+                  <span class="settings-row-title">Entegre uBlock Origin</span>
+                  <span class="settings-row-desc">Varsayılan olarak paketlenmiş ve etkin reklam engelleme</span>
+                </div>
+                <m3e-switch checked></m3e-switch>
+              </div>
+
+              <div class="settings-row">
+                <div class="settings-row-text">
+                  <span class="settings-row-title">Firefox Telemetri ve Güncelleme Servisleri</span>
+                  <span class="settings-row-desc">Arka plan Firefox telemetrisi tamamen devre dışı bırakılır</span>
+                </div>
+                <m3e-switch></m3e-switch>
+              </div>
+            </div>
+
+            <!-- Group 3: Modal Actions -->
+            <div class="settings-group-card">
+              <div class="settings-group-header">
+                <m3e-icon name="info" style="color: var(--md-sys-color-primary);"></m3e-icon>
+                <span>Hilal Sürüm Bilgileri</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-weight: 600;">Hilal Browser 0.3.0-alpha.6</div>
+                  <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant);">Firefox Gecko 153.0a1 Tabanlı</div>
+                </div>
+                <m3e-button variant="filled">
+                  <m3e-dialog-trigger for="about-dialog">Sürüm Detayları</m3e-dialog-trigger>
+                </m3e-button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Real M3E Dialog Element -->
+        <m3e-dialog id="about-dialog" dismissible>
+          <span slot="header" style="display: flex; align-items: center; gap: 8px;">
+            <m3e-icon name="nightlight_round" style="color: var(--md-sys-color-primary);"></m3e-icon>
+            Hilal Browser Hakkında
+          </span>
+          <div style="display: flex; flex-direction: column; gap: 12px; padding: 8px 0; font-size: 14px;">
+            <p>Hilal Browser; Egehan Kahraman tarafından Kahramanmaraş'ta geliştirilen, Firefox Gecko üzerine kurulu kişisel bir açık kaynak projesidir.</p>
+            <p>Arayüz mimarisi; <strong>@m3e/web (Material 3 Expressive)</strong> ve macOS Tahoe cam estetiğini bir araya getirir.</p>
+          </div>
+          <div slot="actions" end>
+            <m3e-button autofocus>
+              <m3e-dialog-action return-value="ok">Kapat</m3e-dialog-action>
+            </m3e-button>
+          </div>
+        </m3e-dialog>
+      </section>
+
+      <!-- ====================================================================
+           THE 31-SHAPE EXPRESSIVE SHAPE SCALE & MORPHING LAB (<m3e-shape>)
+           ==================================================================== -->
+      <section class="content-section">
+        <div class="section-headline-box">
+          <span class="section-label">Özel Yetenek: &lt;m3e-shape&gt;</span>
+          <h2 class="section-title">Resmi Material 3 Expressive 31-Şekil Kütüphanesi</h2>
+          <p class="section-subtext">
+            M3 Expressive'i M3'ten ayıran en radikal farklardan biri: Google'ın resmi 31 şekil kütüphanesidir. Aşağıdaki kartlara tıklayarak canlı morflanmayı test edebilirsiniz:
+          </p>
+        </div>
+
+        <!-- Live Morphing Hero Stage -->
+        <div class="morph-hero-stage">
+          <m3e-shape id="live-morph-shape" name="sunny"></m3e-shape>
+          <div style="font-weight: 700; font-size: 18px;" id="current-morph-label">Aktif Şekil: sunny</div>
+          <p style="font-size: 13.5px; color: var(--md-sys-color-on-surface-variant); max-width: 500px;">
+            Aşağıdaki galeriden herhangi bir şekle tıkladığınızda yukarıdaki <code>&lt;m3e-shape&gt;</code> elemanı yeni şekle organik olarak morflanacaktır.
+          </p>
+        </div>
+
+        <!-- Shapes Gallery -->
+        <div class="shapes-gallery-grid" id="shapes-grid">
+          <!-- Dynamically populated 31 shapes -->
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           LIVE TOKEN INSPECTOR (DOM COMPUTED TOKENS)
+           ==================================================================== -->
+      <section class="content-section">
+        <div class="section-headline-box">
+          <span class="section-label">Token Doğrulama ve Canlı Teftiş</span>
+          <h2 class="section-title">&lt;m3e-theme&gt; Tarafından DOM'a Üretilen Canlı Tokenlar</h2>
+          <p class="section-subtext">
+            Sağ üstten tohum rengi değiştirdiğinizde aşağıdaki tüm CSS Custom Property'lerinin DOM seviyesinde dinamik olarak nasıl yeniden hesaplandığını canlı izleyin:
+          </p>
+        </div>
+
+        <div class="tokens-table-box">
+          <table class="token-table">
+            <thead>
+              <tr>
+                <th>Token Adı</th>
+                <th>Temsil Ettiği Rol</th>
+                <th>DOM'daki Değeri</th>
+              </tr>
+            </thead>
+            <tbody id="token-tbody">
+              <!-- Dynamically populated from computed styles -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Site Footer -->
+      <footer class="page-footer">
+        <p>Hilal Browser × <strong>@m3e/web (matraic/m3e)</strong> — Material 3 Expressive Mimari Raporu</p>
+        <p style="margin-top: 6px; opacity: 0.7;">Egehan Kahraman • Kahramanmaraş, Türkiye</p>
+      </footer>
+
+    </div>
+
+  </m3e-theme>
+
+  <!-- ========================================================================
+       APPLICATION LOGIC & SHAPES INITIALIZATION
+       ======================================================================== -->
+  <script>
+    const themeEl = document.getElementById('app-theme');
+
+    // Official M3 Shape library (31 shapes supported by @m3e/web/shape)
+    const M3_SHAPES = [
+      "sunny", "very-sunny", "flower", "8-leaf-clover", "4-leaf-clover",
+      "burst", "soft-burst", "boom", "soft-boom", "gem", "diamond",
+      "heart", "hexagon", "pentagon", "circle", "semicircle", "oval",
+      "pill", "bun", "arrow", "arch", "slanted", "puffy", "puffy-diamond",
+      "4-sided-cookie", "6-sided-cookie", "7-sided-cookie", "9-sided-cookie",
+      "12-sided-cookie", "pixel-circle", "pixel-triangle"
+    ];
+
+    // Populate shapes grid
+    function initShapesGallery() {
+      const grid = document.getElementById('shapes-grid');
+      grid.innerHTML = '';
+
+      M3_SHAPES.forEach((shapeName, idx) => {
+        const card = document.createElement('div');
+        card.className = 'shape-card' + (shapeName === 'sunny' ? ' active' : '');
+        card.onclick = () => selectShape(shapeName, card);
+
+        const shapeEl = document.createElement('m3e-shape');
+        shapeEl.setAttribute('name', shapeName);
+
+        const label = document.createElement('span');
+        label.className = 'shape-name-tag';
+        label.textContent = shapeName;
+
+        card.appendChild(shapeEl);
+        card.appendChild(label);
+        grid.appendChild(card);
+      });
+    }
+
+    function selectShape(name, cardEl) {
+      document.querySelectorAll('.shape-card').forEach(c => c.classList.remove('active'));
+      cardEl.classList.add('active');
+
+      const heroShape = document.getElementById('live-morph-shape');
+      heroShape.setAttribute('name', name);
+      document.getElementById('current-morph-label').textContent = 'Aktif Şekil: ' + name;
+    }
+
+    // Live Token Inspector Reader
+    function updateTokenInspector() {
+      const computed = getComputedStyle(themeEl);
+      const tokens = [
+        { name: '--md-sys-color-primary', role: 'Ana Vurgu Rengi (High-emphasis)' },
+        { name: '--md-sys-color-on-primary', role: 'Primary Üzeri Metin/Simge' },
+        { name: '--md-sys-color-primary-container', role: 'Kapsül / Konteyner Rengi' },
+        { name: '--md-sys-color-on-primary-container', role: 'Konteyner Üzeri Metin' },
+        { name: '--md-sys-color-surface', role: 'Ana Yüzey Zemin Rengi' },
+        { name: '--md-sys-color-surface-container-lowest', role: 'En Düşük Konteyner (Web Canvas)' },
+        { name: '--md-sys-color-surface-container-low', role: 'Düşük Konteyner (Yan Çubuk)' },
+        { name: '--md-sys-color-surface-container', role: 'Standart Konteyner' },
+        { name: '--md-sys-color-surface-container-high', role: 'Yüksek Konteyner (Arama Kapsülü)' },
+        { name: '--md-sys-color-surface-container-highest', role: 'En Yüksek Konteyner (Menüler)' },
+        { name: '--md-sys-color-outline', role: 'Kenarlık ve Girdi Sınırları' },
+        { name: '--md-sys-color-outline-variant', role: 'Hafif Bölücüler ve Çizgiler' }
+      ];
+
+      const tbody = document.getElementById('token-tbody');
+      tbody.innerHTML = '';
+
+      tokens.forEach(t => {
+        const val = computed.getPropertyValue(t.name).trim() || '(otomatik hesaplanıyor)';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="token-badge">${t.name}</span></td>
+          <td>${t.role}</td>
+          <td><span class="color-swatch-cell" style="background-color: ${val};"></span><code>${val}</code></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Dynamic Seed Color Application
+    function applySeed(color) {
+      themeEl.setAttribute('color', color);
+      setTimeout(updateTokenInspector, 100);
+    }
+
+    // Toggle Light / Dark Scheme
+    function toggleThemeScheme() {
+      const current = themeEl.getAttribute('scheme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      themeEl.setAttribute('scheme', next);
+
+      const icon = document.querySelector('#theme-toggle m3e-icon');
+      if (icon) {
+        icon.setAttribute('name', next === 'light' ? 'dark_mode' : 'light_mode');
+      }
+      setTimeout(updateTokenInspector, 100);
+    }
+
+    // Settings Navigation Drawer selection
+    function selectSettingsTab(el, tabName) {
+      document.querySelectorAll('.settings-nav-item').forEach(i => i.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initShapesGallery();
+      setTimeout(updateTokenInspector, 500);
+    });
+  </script>
+</body>
+</html>

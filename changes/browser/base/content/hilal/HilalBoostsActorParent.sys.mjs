@@ -14,7 +14,10 @@ export class HilalBoostsParent extends JSWindowActorParent {
           if (!Services.prefs.getBoolPref("hilal.boosts.enabled", true)) {
             return null;
           }
-          const dataStr = Services.prefs.getStringPref("hilal.boosts.data", "{}");
+          const dataStr = Services.prefs.getStringPref(
+            "hilal.boosts.data",
+            "{}"
+          );
           const boosts = JSON.parse(dataStr);
           return boosts[domain] || null;
         } catch (e) {

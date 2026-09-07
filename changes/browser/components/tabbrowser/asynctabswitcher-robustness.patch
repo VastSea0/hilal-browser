@@ -1,7 +1,7 @@
 diff --git a/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs b/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs
 --- a/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs
 +++ b/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs
-@@ -356,6 +356,9 @@ export class AsyncTabSwitcher {
+@@ -354,6 +354,9 @@ export class AsyncTabSwitcher {
    // This function is called after all the main state changes to
    // make sure we display the right tab.
    updateDisplay() {
@@ -11,7 +11,7 @@ diff --git a/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs b/browser/co
      let requestedTabState = this.getTabState(this.requestedTab);
      let requestedBrowser = this.requestedTab.linkedBrowser;
  
-@@ -621,11 +624,15 @@ export class AsyncTabSwitcher {
+@@ -619,11 +622,15 @@ export class AsyncTabSwitcher {
      this.assert(!this.loadTimer || this.loadingTab);
      this.assert(!this.loadingTab || this.loadTimer);
  
@@ -28,7 +28,7 @@ diff --git a/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs b/browser/co
        this.maybeClearLoadTimer("postActions");
      }
  
-@@ -1105,9 +1112,7 @@ export class AsyncTabSwitcher {
+@@ -1102,9 +1109,7 @@ export class AsyncTabSwitcher {
        this.setTimer(() => this.handleEvent(event, true), 0);
        return;
      }
@@ -42,17 +42,32 @@ diff --git a/browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs b/browser/co
 diff --git a/browser/components/tabbrowser/Tabbrowser.sys.mjs b/browser/components/tabbrowser/Tabbrowser.sys.mjs
 --- a/browser/components/tabbrowser/Tabbrowser.sys.mjs
 +++ b/browser/components/tabbrowser/Tabbrowser.sys.mjs
-@@ -9356,11 +9356,11 @@
+@@ -4540,8 +4540,12 @@ export class Tabbrowser {
+ 
+     // Related tab inherits current tab's user context unless a different
+     // usercontextid is specified
+-    if (userContextId == null && openerTab) {
+-      userContextId = openerTab.userContextId;
++    if (userContextId == null) {
++      if (openerTab) {
++        userContextId = openerTab.userContextId || 0;
++      } else if (this.documentGlobal?.gHilalWorkspaces) {
++        userContextId = this.documentGlobal.gHilalWorkspaces.activeContainerId || 0;
++      }
+     }
+ 
+     if (!noInitialLabel) {
+@@ -9356,11 +9360,11 @@ export class Tabbrowser {
    }
-
+ 
    on_activate() {
 -    this.selectedTab.updateLastSeenActive();
 +    this.selectedTab?.updateLastSeenActive();
    }
-
+ 
    on_deactivate() {
 -    this.selectedTab.updateLastSeenActive();
 +    this.selectedTab?.updateLastSeenActive();
    }
-
+ 
    on_change() {

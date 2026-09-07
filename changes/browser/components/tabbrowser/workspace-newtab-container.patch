@@ -9,7 +9,7 @@ loss and page reloads.
 diff --git a/browser/components/tabbrowser/Tabbrowser.sys.mjs b/browser/components/tabbrowser/Tabbrowser.sys.mjs
 --- a/browser/components/tabbrowser/Tabbrowser.sys.mjs
 +++ b/browser/components/tabbrowser/Tabbrowser.sys.mjs
-@@ -4540,8 +4540,12 @@
+@@ -4540,8 +4540,12 @@ export class Tabbrowser {
  
      // Related tab inherits current tab's user context unless a different
      // usercontextid is specified
@@ -24,3 +24,17 @@ diff --git a/browser/components/tabbrowser/Tabbrowser.sys.mjs b/browser/componen
      }
  
      if (!noInitialLabel) {
+@@ -9356,11 +9360,11 @@ export class Tabbrowser {
+   }
+ 
+   on_activate() {
+-    this.selectedTab.updateLastSeenActive();
++    this.selectedTab?.updateLastSeenActive();
+   }
+ 
+   on_deactivate() {
+-    this.selectedTab.updateLastSeenActive();
++    this.selectedTab?.updateLastSeenActive();
+   }
+ 
+   on_change() {

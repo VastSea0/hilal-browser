@@ -1,5 +1,4 @@
 diff --git a/ipc/chromium/src/chrome/common/ipc_channel_posix.cc b/ipc/chromium/src/chrome/common/ipc_channel_posix.cc
-index bfa6d607d3f4..3d0205f517de 100644
 --- a/ipc/chromium/src/chrome/common/ipc_channel_posix.cc
 +++ b/ipc/chromium/src/chrome/common/ipc_channel_posix.cc
 @@ -924,6 +924,13 @@ static mozilla::UniqueMachSendRight BrokerExtractSendRight(
