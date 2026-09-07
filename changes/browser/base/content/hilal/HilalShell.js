@@ -1130,7 +1130,7 @@
       } else {
         // When input is blank, suggest top open tabs
         const tabs = Array.from(window.gBrowser?.tabs || [])
-          .filter(t => !t.hidden)
+          .filter(t => !t.hidden && !t.closing && t.isConnected)
           .slice(0, 4);
         tabs.forEach(tab => {
           items.push({
@@ -1275,7 +1275,7 @@
       const term = query.toLowerCase();
       const results = [];
       for (const tab of window.gBrowser.tabs) {
-        if (tab.hidden) continue;
+        if (tab.hidden || tab.closing || !tab.isConnected) continue;
         const title = tab.label || tab.getAttribute("label") || "";
         const uri = tab.linkedBrowser?.currentURI?.spec || "";
         if (
@@ -2013,6 +2013,7 @@
       closeBtn.addEventListener("click", e => {
         e.stopPropagation();
         window.gBrowser.removeTab(tab);
+        this.renderTabs();
       });
       htab.appendChild(closeBtn);
 
@@ -2158,6 +2159,7 @@
       closeBtn.addEventListener("click", e => {
         e.stopPropagation();
         window.gBrowser.removeTab(tab);
+        this.renderTabs();
       });
       pill.appendChild(closeBtn);
 
@@ -2298,7 +2300,8 @@
 
       // Filter tabs by active workspace
       const visibleTabs = allTabs.filter(tab => {
-        if (tab.hidden) return false;
+        if (tab.hidden || tab.closing || !tab.isConnected) return false;
+        if (tab.isOpen !== undefined && !tab.isOpen) return false;
         if (manager && activeWsId) {
           const tabWs =
             typeof manager._getTabWorkspace === "function"
@@ -2418,7 +2421,13 @@
       const isRealWebPage =
         currentUri.startsWith("http://") || currentUri.startsWith("https://");
 
-      if (document.activeElement !== input) {
+      const isInputFocused = document.activeElement === input;
+      const isUserTyping =
+        isInputFocused &&
+        input.value.trim().length > 0 &&
+        input.value !== currentUri;
+
+      if (!isUserTyping) {
         if (
           currentUri === "about:blank" ||
           currentUri === "about:newtab" ||
@@ -2504,6 +2513,7 @@
           this.renderTabs();
           const tab = event.target;
           if (tab === window.gBrowser.selectedTab) {
+            this.syncUrl();
             setTimeout(() => {
               const spec = window.gBrowser.currentURI?.spec || "";
               if (
@@ -2522,16 +2532,6 @@
         tc.addEventListener("TabSelect", () => {
           this.renderTabs();
           this.syncUrl();
-          const spec = window.gBrowser.currentURI?.spec || "";
-          if (
-            !spec ||
-            spec === "about:blank" ||
-            spec === "about:newtab" ||
-            spec === "about:home" ||
-            spec.startsWith("chrome://browser/content/hilal/newtab/")
-          ) {
-            setTimeout(() => this.focusUrlInput(false), 20);
-          }
         });
         tc.addEventListener("TabAttrModified", () => this.renderTabs());
         tc.addEventListener("TabHide", () => this.renderTabs());
@@ -2539,8 +2539,8 @@
       }
 
       window.gBrowser.addProgressListener({
-        onLocationChange: aBrowser => {
-          if (aBrowser === window.gBrowser.selectedBrowser) {
+        onLocationChange: (aWebProgress, aRequest, aLocation, aFlags) => {
+          if (!aWebProgress || aWebProgress.isTopLevel) {
             this.syncUrl();
             this.renderTabs();
           }
@@ -2570,6 +2570,7 @@
           e.preventDefault();
           if (window.gBrowser?.selectedTab) {
             window.gBrowser.removeTab(window.gBrowser.selectedTab);
+            this.renderTabs();
           }
         } else if (isAccel && e.key.toLowerCase() === "r") {
           e.preventDefault();
