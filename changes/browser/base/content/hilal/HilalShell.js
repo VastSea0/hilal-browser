@@ -429,6 +429,44 @@
 
   window.MaterialYouTheme = MaterialYouTheme;
 
+  let gHilalBangs = null;
+  function getHilalBangs() {
+    if (!gHilalBangs) {
+      try {
+        const mod = ChromeUtils.importESModule(
+          "resource:///modules/HilalBangs.sys.mjs"
+        );
+        gHilalBangs = mod.HilalBangs;
+      } catch (e) {
+        console.error("Hilal: Failed to import HilalBangs.sys.mjs", e);
+      }
+    }
+    return gHilalBangs;
+  }
+
+  let gSearchService = null;
+  function getSearchService() {
+    if (gSearchService) return gSearchService;
+    if (window.SearchService) {
+      gSearchService = window.SearchService;
+      return gSearchService;
+    }
+    try {
+      gSearchService = ChromeUtils.importESModule(
+        "moz-src:///toolkit/components/search/SearchService.sys.mjs"
+      ).SearchService;
+    } catch (e) {
+      try {
+        gSearchService = ChromeUtils.importESModule(
+          "resource:///modules/SearchService.sys.mjs"
+        ).SearchService;
+      } catch (e2) {
+        gSearchService = null;
+      }
+    }
+    return gSearchService;
+  }
+
   const HilalShell = {
     initialized: false,
     tabMode: "vertical", // "vertical" | "dual" | "horizontal"
@@ -437,6 +475,7 @@
     _draggedHTab: null,
     _searchDebounceTimer: null,
     _searchAbortController: null,
+    _defaultEngineIcon: null,
     _suggestions: [],
     _selectedSuggestionIndex: -1,
 
@@ -991,6 +1030,16 @@
       const container = document.getElementById("hilal-url-container");
       if (!input || !dropdown) return;
 
+      // Prefetch default search engine icon asynchronously
+      try {
+        const ss = getSearchService();
+        if (ss?.defaultEngine?.getIconURL) {
+          ss.defaultEngine.getIconURL(32).then(icon => {
+            if (icon) this._defaultEngineIcon = icon;
+          }).catch(() => {});
+        }
+      } catch (e) {}
+
       const updateClearBtn = () => {
         if (clearBtn) {
           clearBtn.style.display =
@@ -1084,13 +1133,60 @@
       const trimmed = (query || "").trim();
 
       if (trimmed) {
-        // 1. Direct Search Query Item
-        items.push({
-          type: "search",
-          label: trimmed,
-          sub: "Search with Google",
-          query: trimmed,
-        });
+        // Bang query detection & shortcut hints
+        const bangs = getHilalBangs();
+        let bangResolved = null;
+        if (bangs && (trimmed.startsWith("!") || trimmed.includes("!"))) {
+          try {
+            bangResolved = bangs.resolveQuery(trimmed, {
+              fallbackToDuckDuckGo: true,
+            });
+            if (bangResolved && bangResolved.url) {
+              const bangInfo = bangs._parseQuery(trimmed);
+              const bangName = bangInfo?.rawBang || "bang";
+              items.push({
+                type: "bang",
+                label: bangInfo?.query
+                  ? `!${bangName}: ${bangInfo.query}`
+                  : `!${bangName}`,
+                sub: bangResolved.url,
+                url: bangResolved.url,
+              });
+            } else if (trimmed.startsWith("!") && !trimmed.includes(" ")) {
+              const prefix = trimmed.slice(1).toLowerCase();
+              const bangsMap = bangs.getBangsMap();
+              const matches = Object.entries(bangsMap)
+                .filter(([trigger]) => !prefix || trigger.startsWith(prefix))
+                .slice(0, 4);
+              matches.forEach(([trigger, entry]) => {
+                items.push({
+                  type: "bang_hint",
+                  label: `!${trigger}`,
+                  sub: `Search with ${trigger.toUpperCase()} (${entry.home || entry.search})`,
+                  fill: `!${trigger} `,
+                  url: entry.home || entry.search,
+                });
+              });
+            }
+          } catch (e) {}
+        }
+
+        // 1. Direct Search Query Item (if not a resolved bang)
+        if (!bangResolved || !bangResolved.url) {
+          let engineName = "Google";
+          try {
+            const ss = getSearchService();
+            if (ss?.defaultEngine) {
+              engineName = ss.defaultEngine.name;
+            }
+          } catch (e) {}
+          items.push({
+            type: "search",
+            label: trimmed,
+            sub: `Search with ${engineName}`,
+            query: trimmed,
+          });
+        }
 
         // 2. Direct Website URL (if looks like URL or domain)
         if (
@@ -1166,26 +1262,62 @@
       const list = document.createElement("div");
       list.className = "hilal-search-list";
 
+      const searchSvg =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>';
+      const globeSvg =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>';
+      const tabSvg =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z"/></svg>';
+      const historySvg =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>';
+      const bangSvg =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
+
       items.forEach((item, index) => {
         const row = document.createElement("div");
         row.className = "hilal-search-item";
         row.dataset.index = index;
 
-        // Icon container
+        // Fast native Favicon with fallback SVG
         const iconDiv = document.createElement("div");
         iconDiv.className = "hilal-search-item-icon";
-        if (item.type === "search" || item.type === "suggestion") {
-          iconDiv.innerHTML =
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>';
-        } else if (item.type === "url") {
-          iconDiv.innerHTML =
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>';
+
+        let favSrc = null;
+        let fallbackSvg = searchSvg;
+
+        if (item.type === "search") {
+          favSrc = this._defaultEngineIcon || null;
+          fallbackSvg = searchSvg;
+        } else if (item.type === "suggestion") {
+          fallbackSvg = searchSvg;
         } else if (item.type === "tab") {
-          iconDiv.innerHTML =
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z"/></svg>';
+          favSrc = item.tab?.image || item.tab?.getAttribute("image");
+          if (!favSrc && item.sub) {
+            favSrc = `page-icon:${item.sub}`;
+          }
+          fallbackSvg = tabSvg;
+        } else if (item.type === "url") {
+          favSrc = item.url ? `page-icon:${item.url}` : null;
+          fallbackSvg = globeSvg;
         } else if (item.type === "history") {
-          iconDiv.innerHTML =
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>';
+          favSrc = item.url ? `page-icon:${item.url}` : null;
+          fallbackSvg = historySvg;
+        } else if (item.type === "bang" || item.type === "bang_hint") {
+          favSrc = item.url ? `page-icon:${item.url}` : null;
+          fallbackSvg = bangSvg;
+        }
+
+        if (favSrc) {
+          const img = document.createElement("img");
+          img.className = "hilal-search-favicon";
+          img.src = favSrc;
+          img.onerror = () => {
+            img.remove();
+            iconDiv.innerHTML = fallbackSvg;
+          };
+          iconDiv.appendChild(img);
+        } else {
+          iconDiv.innerHTML = fallbackSvg;
         }
         row.appendChild(iconDiv);
 
@@ -1210,6 +1342,18 @@
           const trail = document.createElement("span");
           trail.className = "hilal-search-item-trailing";
           trail.textContent = "SWITCH TO TAB";
+          row.appendChild(trail);
+        } else if (item.type === "bang") {
+          const trail = document.createElement("span");
+          trail.className =
+            "hilal-search-item-trailing hilal-search-item-bang-chip";
+          trail.textContent = "BANG";
+          row.appendChild(trail);
+        } else if (item.type === "bang_hint") {
+          const trail = document.createElement("span");
+          trail.className =
+            "hilal-search-item-trailing hilal-search-item-bang-chip";
+          trail.textContent = "SHORTCUT";
           row.appendChild(trail);
         } else if (item.type === "search" || item.type === "suggestion") {
           const trail = document.createElement("span");
@@ -1254,8 +1398,19 @@
       if (!item) return;
       if (item.type === "tab" && item.tab) {
         window.gBrowser.selectedTab = item.tab;
-      } else if (item.type === "url" || item.type === "history") {
+      } else if (
+        item.type === "url" ||
+        item.type === "history" ||
+        item.type === "bang"
+      ) {
         this.navigate(item.url);
+      } else if (item.type === "bang_hint") {
+        const input = document.getElementById("hilal-url-input");
+        if (input) {
+          input.value = item.fill;
+          input.focus();
+          this.fetchAndRenderSuggestions(item.fill);
+        }
       } else if (item.type === "search" || item.type === "suggestion") {
         this.navigate(item.query || item.label);
       }
@@ -1331,12 +1486,27 @@
 
     async fetchLiveSearchSuggestions(query, signal) {
       try {
-        const url = `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`;
+        let suggestUrl = "";
+        try {
+          const ss = getSearchService();
+          const engine = ss?.defaultEngine;
+          if (engine) {
+            const submission = engine.getSubmission(
+              query,
+              "application/x-suggestions+json"
+            );
+            suggestUrl = submission?.uri?.spec || "";
+          }
+        } catch (e) {}
+
+        const url =
+          suggestUrl ||
+          `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`;
         const res = await fetch(url, { signal });
         if (!res.ok) return [];
         const data = await res.json();
         const queries = Array.isArray(data[1]) ? data[1] : [];
-        return queries.slice(0, 3).map(q => ({
+        return queries.slice(0, 4).map(q => ({
           type: "suggestion",
           label: q,
           sub: "Search suggestion",
@@ -1910,6 +2080,22 @@
       let url = rawUrl.trim();
       if (!url) return;
 
+      // 1. Check Bangs first
+      const bangs = getHilalBangs();
+      if (bangs) {
+        try {
+          const resolved = bangs.resolveQuery(url, {
+            fallbackToDuckDuckGo: true,
+          });
+          if (resolved && resolved.url) {
+            url = resolved.url;
+          }
+        } catch (e) {
+          console.warn("Hilal: Bangs resolution error in navigate", e);
+        }
+      }
+
+      // 2. If not a protocol or about: URI, resolve domain or search
       if (
         !url.includes("://") &&
         !url.startsWith("about:") &&
@@ -1918,7 +2104,20 @@
         if (url.includes(".") && !url.includes(" ")) {
           url = "https://" + url;
         } else {
-          url = "https://www.google.com/search?q=" + encodeURIComponent(url);
+          let searchUrl = "";
+          try {
+            const ss = getSearchService();
+            const engine = ss?.defaultEngine;
+            if (engine) {
+              const submission = engine.getSubmission(url, null);
+              searchUrl = submission?.uri?.spec || "";
+            }
+          } catch (e) {
+            console.warn("Hilal: Search submission error in navigate", e);
+          }
+          url =
+            searchUrl ||
+            `https://www.google.com/search?q=${encodeURIComponent(url)}`;
         }
       }
 

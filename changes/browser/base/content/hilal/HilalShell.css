@@ -840,6 +840,27 @@
   fill: var(--md-sys-color-outline, #8c9199);
 }
 
+.hilal-search-favicon {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.hilal-search-item-trailing.hilal-search-item-bang-chip {
+  background-color: var(--md-sys-color-tertiary-container, rgba(175, 81, 245, 0.2));
+  color: var(--md-sys-color-on-tertiary-container, #d0bcff);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.hilal-search-item.selected .hilal-search-item-trailing.hilal-search-item-bang-chip {
+  background-color: var(--md-sys-color-on-primary-container, #d3e3fd);
+  color: var(--md-sys-color-primary-container, #0842a0);
+}
+
 /* 3c. Horizontal Tab Bar (Safari Dual Mode & Chrome Horizontal Mode) */
 #hilal-horizontal-tabs {
   display: flex;
