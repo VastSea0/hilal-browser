@@ -17,6 +17,7 @@ const SECTION_ICONS: Record<string, string> = {
   Boxes: "inventory_2",
   RefreshCw: "sync",
   Shield: "shield",
+  Palette: "palette",
 };
 
 // M3 Expressive Spring Motion Physics

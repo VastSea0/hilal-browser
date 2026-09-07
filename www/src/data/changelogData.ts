@@ -39,11 +39,21 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 502;
+export const REPO_COMMITS_TOTAL = 503;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "8c09c3972b7319fac6dc168a752ecf4fff08d4e7",
+    "shortHash": "8c09c39",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-08T01:43:10+03:00",
+    "subject": "fix(www): migrate docs pager and copy buttons to Material 3 Expressive pill buttons",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/8c09c3972b7319fac6dc168a752ecf4fff08d4e7"
+  },
   {
     "hash": "075b02b7d734be7c0bebd6b6ca9ba68b38e2291d",
     "shortHash": "075b02b",
@@ -5071,9 +5081,19 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-08T01:35:49+03:00",
-    "commitCount": 61,
+    "date": "2026-09-08T01:43:10+03:00",
+    "commitCount": 62,
     "commits": [
+      {
+        "hash": "8c09c3972b7319fac6dc168a752ecf4fff08d4e7",
+        "shortHash": "8c09c39",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-08T01:43:10+03:00",
+        "subject": "fix(www): migrate docs pager and copy buttons to Material 3 Expressive pill buttons",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/8c09c3972b7319fac6dc168a752ecf4fff08d4e7"
+      },
       {
         "hash": "075b02b7d734be7c0bebd6b6ca9ba68b38e2291d",
         "shortHash": "075b02b",
@@ -10353,7 +10373,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 490,
+    "contributions": 491,
     "role": "Lead Developer"
   },
   {

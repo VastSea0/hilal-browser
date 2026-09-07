@@ -101,3 +101,20 @@ Only use local `rg`/`grep` for searching files that have definitely changed loca
 
 - Never submit patches to Phabricator or push to upstream without explicit user approval.
 - Do not run slow commands like `./mach test` piped through `tail`/`grep`/`head`. Redirect to a temp file and read selectively.
+
+## Material 3 Expressive UI — Design System & Implementation Rules
+
+All user interfaces in Hilal Browser—including the website (`www/`), browser chrome (`chrome://`), `about:` pages (`about:welcome`, `about:newtab`, `about:preferences`), modals, and internal tools—MUST strictly follow the **Material 3 Expressive (M3E)** design system.
+
+See [docs/MATERIAL-3-EXPRESSIVE.md](docs/MATERIAL-3-EXPRESSIVE.md) for full token tables, component anatomy, and guidelines.
+
+### Mandatory Rules:
+1. **Brand Anchor:** Official seed color is Google / Hilal Blue (`#0b57d0` light, `#a8c7fa` dark). Never alter this primary brand color.
+2. **Solid Surfaces Only:** No glassmorphism, no `backdrop-blur` on navbars or menus. Use opaque tonal surfaces (`#ffffff` light, `#1e2025` dark).
+3. **Breathing Room & Padding:** Elements must never be squished.
+   - Badges/chips must have explicit padding (minimum `px-3.5 py-1 rounded-full text-xs font-semibold`).
+   - Buttons must be pill-shaped (`rounded-full`) with comfortable padding (`px-5 py-2.5`) and icons (`gap-2.5`). Sharp 90-degree box buttons are forbidden.
+4. **Modal Container Sizing:** Modals and dialogs on desktop must NEVER be squeezed into `max-w-lg` (512px). Use `max-w-2xl` (672px) or `max-w-3xl` (768px) with two-line metadata so filenames/build targets are never abruptly truncated.
+5. **Google Material Symbols Only:** Use ONLY Google Material Symbols Outlined with ligature format (`<i>icon_name</i>`). No mixed icon libraries. Ensure local `.woff2` font loading to avoid FOUT.
+6. **Beer CSS & Tailwind Isolation:** Prevent Beer CSS `body.dark` class pollution or `box-sizing: content-box` from breaking Tailwind resets.
+7. **Visual Screenshot Verification:** Never assume CSS changes work by code inspection alone. Always verify visually with headless Chrome screenshots in both Light and Dark modes before finalizing work.

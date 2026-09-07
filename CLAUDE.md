@@ -6,3 +6,4 @@
 - Always run `./bin/hil refresh` after editing in `engine/` before telling the user changes are ready. Do not leave edits only in the gitignored tree.
 - When regenerating patches, review `git diff` output to ensure the patch is focused and doesn't include unrelated changes.
 - If the user asks about a Firefox API or internal module, use `searchfox-cli` before guessing or grepping blindly.
+- When working on any UI (web, browser chrome, about: pages, dialogs), strictly follow the rules in `docs/MATERIAL-3-EXPRESSIVE.md`.

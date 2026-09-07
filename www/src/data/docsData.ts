@@ -528,6 +528,58 @@ scripts/build-macos.sh faster
 > **Teknik Not:** \`Maximum Local\` profili JavaScript'i tamamen kapattığı için dinamik web uygulamaları ve oturum açma akışları çalışmayabilir. Bu profil yüksek tehdit ortamlarında saf belge okuma amaçlıdır.`
           }
         ]
+      },
+      {
+        id: "design-system",
+        title: "Material 3 Expressive Tasarım Sistemi",
+        shortTitle: "Tasarım Sistemi",
+        iconName: "Palette",
+        description: "Hilal Browser genelinde geçerli M3E token'ları, bileşen kuralları ve standartlar.",
+        subsections: [
+          {
+            id: "m3e-foundations",
+            title: "Tasarım Felsefesi ve Token Mimarisi",
+            description: "Marka tohum rengi, tonlu yüzeyler ve köşe yuvarlatma ölçeği.",
+            content: `Hilal Browser arayüzü (web sitesi, \`about:\` sayfaları, çalışma alanları ve tarayıcı kromu), Google'ın **Material 3 Expressive (M3E)** tasarım sistemini temel alır.
+
+### Temel Mimari İlkeler
+1. **Marka Mavisi Sabittir:** Resmi tohum rengi **Google / Hilal Mavisi (\`#0b57d0\`)** rengidir. Koyu mod türevi \`#a8c7fa\`'dır.
+2. **Cam/Bulanıklık Yok:** Gezinti çubukları, kartlar ve menülerde saydamlık veya \`backdrop-blur\` kullanılmaz; saf ve opak tonlu M3 yüzeyleri (\`surface\`, \`surface-container\`) kullanılır.
+3. **Ferah Alan:** Bileşenler, rozetler ve butonlar asla sıkıştırılamaz. Masaüstü pencerelerinde bileşenlerin sığması için ferah alan bırakılır.
+
+### Yüzey ve Renk Token'ları
+
+| Token | Açık Mod | Koyu Mod | Kullanım Alanı |
+| --- | --- | --- | --- |
+| \`--primary\` | \`#0b57d0\` | \`#a8c7fa\` | Birincil butonlar, aktif sekmeler, vurgular |
+| \`--primary-container\` | \`#d3e3fd\` | \`#0842a0\` | Tonal butonlar, rozet arkaplanları |
+| \`--surface\` | \`#f8f9ff\` | \`#111318\` | Genel sayfa arkaplanı |
+| \`--surface-container-lowest\` | \`#ffffff\` | \`#0c0e12\` | Kartlar, girdi kutuları |
+| \`--surface-container\` | \`#eceef5\` | \`#1e2025\` | Modallar, sabit üst çubuklar |
+| \`--outline-variant\` | \`#c3c7cf\` | \`#43474e\` | İnce kart ve ayırıcı sınırları |`
+          },
+          {
+            id: "m3e-components",
+            title: "Bileşen Standartları ve Kuralları",
+            description: "Hap butonlar, genişletilmiş rozetler ve masaüstü diyalog ferahlığı.",
+            content: `Arayüz bileşenleri oluşturulurken şu kurallara kesin olarak uyulmalıdır:
+
+### 1. Butonlar (Buttons)
+- Tüm butonlar hap biçimli (\`rounded-full\`) olmalıdır. Keskin 90 derece kutu butonlar yasaktır.
+- Minimum iç dolgu \`px-5 py-2.5\`, ikon ile metin arası boşluk en az \`gap-2.5\` olmalıdır.
+
+### 2. Rozetler ve Çipler (Chips)
+- Metinlerin sınır çizgisine yapışması yasaktır.
+- Minimum dolgu \`px-3.5 py-1 rounded-full text-xs font-semibold\` olmalıdır.
+
+### 3. Modallar ve Pop-up'lar
+- Masaüstü modalları asla dar \`max-w-lg\` (512px) konteynerlara sıkıştırılamaz; en az \`max-w-2xl\` (672px) veya \`max-w-3xl\` (768px) olmalıdır.
+- Liste kartlarında platform başlığı ve dosya boyutu üst satırda, tam dosya adı kırpılmadan alt satırda yer almalıdır.
+
+### 4. İkon Standardı
+- Tüm arayüzde yalnızca **Google Material Symbols Outlined** (\`<i>icon_name</i>\`) kullanılır. Karışık ikon kütüphaneleri kullanılamaz.`
+          }
+        ]
       }
     ]
   },
@@ -1026,6 +1078,58 @@ scripts/build-macos.sh faster
 | **Clear on Shutdown** | Cookies & Cache | Cookies & Cache | **All History & Downloads** |
 
 > **Technical Note:** \`Maximum Local\` disables JavaScript entirely. Modern single-page applications and authenticated dashboards will break. This profile is intended for zero-script document reading in high-risk environments.`
+          }
+        ]
+      },
+      {
+        id: "design-system",
+        title: "Material 3 Expressive Design System",
+        shortTitle: "Design System",
+        iconName: "Palette",
+        description: "Official M3E token specifications, component standards, and implementation rules across Hilal Browser.",
+        subsections: [
+          {
+            id: "m3e-foundations",
+            title: "Design Philosophy & Token Architecture",
+            description: "Brand anchor color, solid surfaces, and shape scale.",
+            content: `The Hilal Browser user interface (website, \`about:\` pages, workspace shells, and browser chrome) strictly follows Google's **Material 3 Expressive (M3E)** design system.
+
+### Core Architectural Principles
+1. **Brand Anchor:** Official seed color is **Google / Hilal Blue (\`#0b57d0\`)**, with dark mode primary derived as \`#a8c7fa\`.
+2. **Solid Surfaces Only:** No glassmorphism or \`backdrop-blur\` on navbars or menus. Surfaces are opaque and tonal.
+3. **Breathing Room:** Elements, chips, and buttons must never be squeezed. Adequate padding and space are strictly enforced.
+
+### Surface & Color Tokens
+
+| Token | Light Mode | Dark Mode | Usage |
+| --- | --- | --- | --- |
+| \`--primary\` | \`#0b57d0\` | \`#a8c7fa\` | Primary filled buttons, active tab indicators, accents |
+| \`--primary-container\` | \`#d3e3fd\` | \`#0842a0\` | Tonal pill buttons, active menu backgrounds, badges |
+| \`--surface\` | \`#f8f9ff\` | \`#111318\` | Default page background |
+| \`--surface-container-lowest\` | \`#ffffff\` | \`#0c0e12\` | Input fields, prominent card surfaces |
+| \`--surface-container\` | \`#eceef5\` | \`#1e2025\` | Modals, fixed top navigation bar |
+| \`--outline-variant\` | \`#c3c7cf\` | \`#43474e\` | Subtle borders and structural dividers |`
+          },
+          {
+            id: "m3e-components",
+            title: "Component Anatomy & Rules",
+            description: "Pill buttons, generous chip padding, and spacious desktop dialogs.",
+            content: `All UI implementations must adhere to the following rules:
+
+### 1. Buttons
+- Buttons must be pill-shaped (\`rounded-full\`). Sharp 90-degree box buttons are forbidden.
+- Minimum padding is \`px-5 py-2.5\`, with icon-label spacing of at least \`gap-2.5\`.
+
+### 2. Chips & Badges
+- Text must never touch the border outline.
+- Explicit minimum padding is \`px-3.5 py-1 rounded-full text-xs font-semibold\`.
+
+### 3. Modals & Dialogs
+- Desktop modals must never be squeezed into \`max-w-lg\` (512px); use at least \`max-w-2xl\` (672px) or \`max-w-3xl\` (768px).
+- Artifact rows must display platform and size badges on the top line, with the full unclipped filename below.
+
+### 4. Google Material Symbols Only
+- Use ONLY Google Material Symbols Outlined (\`<i>icon_name</i>\`). Mixed icon libraries are forbidden.`
           }
         ]
       }
