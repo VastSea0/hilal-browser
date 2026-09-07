@@ -478,8 +478,16 @@ moz-card h2 {
   align-items: center !important;
   justify-content: space-between !important;
   gap: 24px !important;
-  padding: 14px 0 !important;
+  padding: 14px 12px !important;
+  margin-inline: -12px !important;
   border-bottom: 1px solid var(--md-sys-color-outline-variant) !important;
+  cursor: pointer !important;
+  border-radius: 12px !important;
+  transition: background-color 150ms ease !important;
+}
+
+.settings-row:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 4%, transparent) !important;
 }
 
 .settings-row:last-child,
@@ -510,10 +518,31 @@ setting-control:last-child {
    6. MATERIAL 3 EXPRESSIVE SWITCHES (52x32dp, spring, checkmark)
    ========================================================================== */
 
+checkbox.settings-switch,
+.settings-row > checkbox,
+.settings-switch {
+  appearance: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  border: none !important;
+  background: transparent !important;
+}
+
 moz-toggle::part(button),
 .toggle-button,
 checkbox.settings-switch .checkbox-check,
-.settings-row > checkbox .checkbox-check {
+.settings-row > checkbox .checkbox-check,
+.settings-switch .checkbox-check {
   appearance: none !important;
   width: 52px !important;
   min-width: 52px !important;
@@ -538,10 +567,29 @@ checkbox.settings-switch .checkbox-check,
               background-image 200ms cubic-bezier(0.2, 0, 0, 1) !important;
 }
 
+moz-toggle:hover::part(button),
+.toggle-button:hover,
+checkbox.settings-switch:hover .checkbox-check,
+.settings-row:hover checkbox.settings-switch .checkbox-check,
+.settings-row > checkbox:hover .checkbox-check,
+.settings-switch:hover .checkbox-check {
+  border-color: var(--md-sys-color-primary) !important;
+}
+
 moz-toggle[pressed]::part(button),
+moz-toggle[pressed="true"]::part(button),
 .toggle-button[aria-pressed="true"],
+checkbox.settings-switch[checked] .checkbox-check,
+checkbox.settings-switch:checked .checkbox-check,
 checkbox.settings-switch[checked="true"] .checkbox-check,
-.settings-row > checkbox[checked="true"] .checkbox-check {
+.settings-row > checkbox[checked] .checkbox-check,
+.settings-row > checkbox:checked .checkbox-check,
+.settings-row > checkbox[checked="true"] .checkbox-check,
+.settings-switch[checked] .checkbox-check,
+.settings-switch:checked .checkbox-check,
+.settings-switch[checked="true"] .checkbox-check,
+.checkbox-check[checked],
+.checkbox-check[checked="true"] {
   background-color: var(--md-sys-color-primary) !important;
   border-color: var(--md-sys-color-primary) !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b57d0' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"),
@@ -553,25 +601,40 @@ checkbox.settings-switch[checked="true"] .checkbox-check,
 
 @media (prefers-color-scheme: dark) {
   moz-toggle[pressed]::part(button),
+  moz-toggle[pressed="true"]::part(button),
   .toggle-button[aria-pressed="true"],
+  checkbox.settings-switch[checked] .checkbox-check,
+  checkbox.settings-switch:checked .checkbox-check,
   checkbox.settings-switch[checked="true"] .checkbox-check,
-  .settings-row > checkbox[checked="true"] .checkbox-check {
+  .settings-row > checkbox[checked] .checkbox-check,
+  .settings-row > checkbox:checked .checkbox-check,
+  .settings-row > checkbox[checked="true"] .checkbox-check,
+  .settings-switch[checked] .checkbox-check,
+  .settings-switch:checked .checkbox-check,
+  .settings-switch[checked="true"] .checkbox-check,
+  .checkbox-check[checked],
+  .checkbox-check[checked="true"] {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23042f66' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"),
                       radial-gradient(circle 12px at 36px center, var(--md-sys-color-on-primary) 99%, transparent 100%) !important;
   }
 }
 
 :root[brighttext="true"] moz-toggle[pressed]::part(button),
+:root[brighttext="true"] moz-toggle[pressed="true"]::part(button),
 :root[brighttext="true"] .toggle-button[aria-pressed="true"],
+:root[brighttext="true"] checkbox.settings-switch[checked] .checkbox-check,
+:root[brighttext="true"] checkbox.settings-switch:checked .checkbox-check,
 :root[brighttext="true"] checkbox.settings-switch[checked="true"] .checkbox-check,
-:root[brighttext="true"] .settings-row > checkbox[checked="true"] .checkbox-check {
+:root[brighttext="true"] .settings-row > checkbox[checked] .checkbox-check,
+:root[brighttext="true"] .settings-row > checkbox:checked .checkbox-check,
+:root[brighttext="true"] .settings-row > checkbox[checked="true"] .checkbox-check,
+:root[brighttext="true"] .settings-switch[checked] .checkbox-check,
+:root[brighttext="true"] .settings-switch:checked .checkbox-check,
+:root[brighttext="true"] .settings-switch[checked="true"] .checkbox-check,
+:root[brighttext="true"] .checkbox-check[checked],
+:root[brighttext="true"] .checkbox-check[checked="true"] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23042f66' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"),
                     radial-gradient(circle 12px at 36px center, var(--md-sys-color-on-primary) 99%, transparent 100%) !important;
-}
-
-.settings-row > checkbox {
-  margin: 0 !important;
-  padding: 0 !important;
 }
 
 .settings-row > checkbox .checkbox-label-box {
@@ -596,6 +659,8 @@ checkbox:not(.settings-switch) .checkbox-check {
   box-sizing: border-box !important;
 }
 
+checkbox:not(.settings-switch)[checked] .checkbox-check,
+checkbox:not(.settings-switch):checked .checkbox-check,
 checkbox:not(.settings-switch)[checked="true"] .checkbox-check {
   background-color: var(--md-sys-color-primary) !important;
   border-color: var(--md-sys-color-primary) !important;
@@ -637,6 +702,7 @@ radiogroup.segmented-radiogroup radio {
   cursor: pointer !important;
   transition: background-color 150ms ease, color 150ms ease !important;
   box-sizing: border-box !important;
+  user-select: none !important;
 }
 
 #hilalPrivacyLevel radio:last-child,
@@ -655,6 +721,7 @@ radiogroup.segmented-radiogroup radio .radio-label {
   font-weight: 500 !important;
   color: var(--md-sys-color-on-surface-variant) !important;
   margin: 0 !important;
+  pointer-events: none !important;
 }
 
 #hilalPrivacyLevel radio:hover,
@@ -662,13 +729,21 @@ radiogroup.segmented-radiogroup radio:hover {
   background-color: var(--md-sys-color-surface-container-high) !important;
 }
 
+#hilalPrivacyLevel radio[selected],
 #hilalPrivacyLevel radio[selected="true"],
-radiogroup.segmented-radiogroup radio[selected="true"] {
+#hilalPrivacyLevel radio:checked,
+radiogroup.segmented-radiogroup radio[selected],
+radiogroup.segmented-radiogroup radio[selected="true"],
+radiogroup.segmented-radiogroup radio:checked {
   background-color: var(--md-sys-color-secondary-container) !important;
 }
 
+#hilalPrivacyLevel radio[selected] .radio-label,
 #hilalPrivacyLevel radio[selected="true"] .radio-label,
-radiogroup.segmented-radiogroup radio[selected="true"] .radio-label {
+#hilalPrivacyLevel radio:checked .radio-label,
+radiogroup.segmented-radiogroup radio[selected] .radio-label,
+radiogroup.segmented-radiogroup radio[selected="true"] .radio-label,
+radiogroup.segmented-radiogroup radio:checked .radio-label {
   color: var(--md-sys-color-on-secondary-container) !important;
   font-weight: 600 !important;
 }
@@ -775,12 +850,14 @@ radiogroup.segmented-radiogroup radio[selected="true"] .radio-label {
   transform: scale(1.18) !important;
 }
 
+.m3-swatch-circle[selected],
 .m3-swatch-circle[selected="true"] {
   outline: 2px solid var(--md-sys-color-on-surface) !important;
   outline-offset: 3px !important;
   box-shadow: 0 0 0 5px var(--md-sys-color-surface-container-high) !important;
 }
 
+.m3-swatch-circle[selected]::after,
 .m3-swatch-circle[selected="true"]::after {
   content: "" !important;
   display: block !important;

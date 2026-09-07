@@ -15,11 +15,44 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
  ChromeUtils.defineESModuleGetters(this, {
    BackgroundUpdate: "resource://gre/modules/BackgroundUpdate.sys.mjs",
 +  ContextualIdentityService:
-+    "resource://gre/modules/ContextualIdentityService.sys.mjs",
++    "moz-src:///toolkit/components/contextualidentity/ContextualIdentityService.sys.mjs",
    UpdateListener: "resource://gre/modules/UpdateListener.sys.mjs",
    LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
    MigrationUtils: "resource:///modules/MigrationUtils.sys.mjs",
-@@ -1671,6 +1673,1197 @@ gMainPane.initialized = new Promise(res => {
+@@ -122,6 +124,32 @@ Preferences.addAll([
+     id: "privacy.userContext.newTabContainerOnLeftClick.enabled",
+     type: "bool",
+   },
++
++  // Hilal Browser settings
++  { id: "hilal.tahoe.enabled", type: "bool" },
++  { id: "hilal.boosts.auto_palette.enabled", type: "bool" },
++  { id: "userChrome.compatibility.theme", type: "bool" },
++  { id: "userChrome.tabs.connect_to_window", type: "bool" },
++  { id: "userChrome.tabs.compact_padding", type: "bool" },
++  { id: "userChrome.tabs.dynamic_separator", type: "bool" },
++  { id: "userChrome.tabs.bottom_rounded_corner", type: "bool" },
++  { id: "userChrome.tabs.close_button.on_hover", type: "bool" },
++  { id: "hilal.workspaces.enabled", type: "bool" },
++  { id: "hilal.workspaces.pinned.public", type: "bool" },
++  { id: "hilal.workspaces.groups.public", type: "bool" },
++  { id: "hilal.urlbar.showWorkspaceName", type: "bool" },
++  { id: "hilal.compact.enabled", type: "bool" },
++  { id: "hilal.compact.hideToolbar", type: "bool" },
++  { id: "sidebar.verticalTabs.showHorizontal", type: "bool" },
++  { id: "hilal.sidebar.footer.bookmarks", type: "bool" },
++  { id: "hilal.sidebar.footer.history", type: "bool" },
++  { id: "hilal.sidebar.footer.passwords", type: "bool" },
++  { id: "hilal.sidebar.footer.downloads", type: "bool" },
++  { id: "hilal.sidebar.footer.privacy", type: "bool" },
++  { id: "hilal.sidebar.footer.settings", type: "bool" },
++  { id: "hilal.accent.mode", type: "string" },
++  { id: "hilal.accent.overrideColor", type: "string" },
++  { id: "hilal.privacy.level", type: "string" },
+ ]);
+ 
+ if (AppConstants.HAVE_SHELL_SERVICE) {
+@@ -1671,6 +1699,1251 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
@@ -30,6 +63,51 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +      if (el) {
 +        el.addEventListener(aEventType, aCallback);
 +      }
++    }
++
++    function wireCheckbox(checkbox, prefName, defaultValue) {
++      if (!checkbox) return;
++      const initialVal = Services.prefs.getBoolPref(prefName, defaultValue);
++      checkbox.checked = initialVal;
++      checkbox.toggleAttribute("checked", initialVal);
++      if (initialVal) {
++        checkbox.setAttribute("checked", "true");
++      } else {
++        checkbox.removeAttribute("checked");
++      }
++
++      function onToggle() {
++        const isChecked = checkbox.checked ?? checkbox.hasAttribute("checked");
++        Services.prefs.setBoolPref(prefName, isChecked);
++        checkbox.checked = isChecked;
++        checkbox.toggleAttribute("checked", isChecked);
++        if (isChecked) {
++          checkbox.setAttribute("checked", "true");
++        } else {
++          checkbox.removeAttribute("checked");
++        }
++      }
++
++      checkbox.addEventListener("command", onToggle);
++      checkbox.addEventListener("change", onToggle);
++      checkbox.addEventListener("click", onToggle);
++    }
++
++    // Interactive row click delegation: clicking on any settings-row toggles its switch
++    const mainPane = document.getElementById("mainPrefPane");
++    if (mainPane && !mainPane._hilalRowClickDelegated) {
++      mainPane._hilalRowClickDelegated = true;
++      mainPane.addEventListener("click", e => {
++        const row = e.target.closest(".settings-row");
++        if (!row) return;
++        if (e.target.closest("button, a, input, select, radiogroup, radio, .m3-swatch-circle, richlistbox, richlistitem")) {
++          return;
++        }
++        const switchEl = row.querySelector("checkbox.settings-switch, .settings-switch, moz-toggle");
++        if (switchEl && e.target !== switchEl && !switchEl.contains(e.target)) {
++          switchEl.click();
++        }
++      });
 +    }
 +
 +    const hilalWsCheckbox = document.getElementById("hilalWorkspacesEnabled");
@@ -56,7 +134,9 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +        const containerId = Number.parseInt(workspace?.containerId, 10);
 +        if (containerId) {
 +          try {
-+            ContextualIdentityService.remove(containerId);
++            if (lazy.ContextualIdentityService) {
++              lazy.ContextualIdentityService.remove(containerId);
++            }
 +          } catch (e) {
 +            console.warn("Failed to remove Hilal workspace container", e);
 +          }
@@ -64,86 +144,53 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +      }
 +    };
 +
-+    if (hilalWsCheckbox) {
-+      hilalWsCheckbox.checked = Services.prefs.getBoolPref(
-+        "hilal.workspaces.enabled",
-+        true
-+      );
-+      hilalWsCheckbox.addEventListener("command", function () {
-+        Services.prefs.setBoolPref(
-+          "hilal.workspaces.enabled",
-+          hilalWsCheckbox.checked
-+        );
-+      });
-+    }
-+    if (hilalWsPinnedPublicCheckbox) {
-+      hilalWsPinnedPublicCheckbox.checked = Services.prefs.getBoolPref(
-+        "hilal.workspaces.pinned.public",
-+        true
-+      );
-+      hilalWsPinnedPublicCheckbox.addEventListener("command", function () {
-+        Services.prefs.setBoolPref(
-+          "hilal.workspaces.pinned.public",
-+          hilalWsPinnedPublicCheckbox.checked
-+        );
-+      });
-+    }
-+    if (hilalWsGroupsPublicCheckbox) {
-+      hilalWsGroupsPublicCheckbox.checked = Services.prefs.getBoolPref(
-+        "hilal.workspaces.groups.public",
-+        false
-+      );
-+      hilalWsGroupsPublicCheckbox.addEventListener("command", function () {
-+        Services.prefs.setBoolPref(
-+          "hilal.workspaces.groups.public",
-+          hilalWsGroupsPublicCheckbox.checked
-+        );
-+      });
++    try {
++      wireCheckbox(hilalWsCheckbox, "hilal.workspaces.enabled", true);
++      wireCheckbox(hilalWsPinnedPublicCheckbox, "hilal.workspaces.pinned.public", true);
++      wireCheckbox(hilalWsGroupsPublicCheckbox, "hilal.workspaces.groups.public", false);
++    } catch (e) {
++      console.error("Hilal workspaces checkbox init error:", e);
 +    }
 +
-+    const hilalPrefMappings = [
-+      ["hilalUrlbarShowWorkspaceName", "hilal.urlbar.showWorkspaceName", false],
-+      ["hilalSidebarCompactEnabled", "hilal.compact.enabled", false],
-+      ["hilalSidebarCompactHideToolbar", "hilal.compact.hideToolbar", false],
-+      ["hilalSidebarShowHorizontalTabs", "sidebar.verticalTabs.showHorizontal", false],
-+      ["hilalTahoeEnabled", "hilal.tahoe.enabled", true],
-+      ["hilalUiFixEnabled", "userChrome.compatibility.theme", false],
-+      ["hilalUiFixConnectToWindow", "userChrome.tabs.connect_to_window", false],
-+      ["hilalUiFixCompactPadding", "userChrome.tabs.compact_padding", false],
-+      ["hilalUiFixDynamicSeparator", "userChrome.tabs.dynamic_separator", false],
-+      ["hilalUiFixBottomRounded", "userChrome.tabs.bottom_rounded_corner", false],
-+      ["hilalUiFixCloseOnHover", "userChrome.tabs.close_button.on_hover", false],
-+      ["hilalBoostsAutoPalette", "hilal.boosts.auto_palette.enabled", false],
-+      ["hilalBoostsBrowserUi", "hilal.boosts.browser_ui.enabled", false],
-+    ];
-+    for (const [elementId, prefName, defaultValue] of hilalPrefMappings) {
-+      const checkbox = document.getElementById(elementId);
-+      if (!checkbox) {
-+        continue;
++    try {
++      const hilalPrefMappings = [
++        ["hilalUrlbarShowWorkspaceName", "hilal.urlbar.showWorkspaceName", false],
++        ["hilalSidebarCompactEnabled", "hilal.compact.enabled", false],
++        ["hilalSidebarCompactHideToolbar", "hilal.compact.hideToolbar", false],
++        ["hilalSidebarShowHorizontalTabs", "sidebar.verticalTabs.showHorizontal", false],
++        ["hilalTahoeEnabled", "hilal.tahoe.enabled", true],
++        ["hilalUiFixEnabled", "userChrome.compatibility.theme", false],
++        ["hilalUiFixConnectToWindow", "userChrome.tabs.connect_to_window", false],
++        ["hilalUiFixCompactPadding", "userChrome.tabs.compact_padding", false],
++        ["hilalUiFixDynamicSeparator", "userChrome.tabs.dynamic_separator", false],
++        ["hilalUiFixBottomRounded", "userChrome.tabs.bottom_rounded_corner", false],
++        ["hilalUiFixCloseOnHover", "userChrome.tabs.close_button.on_hover", false],
++        ["hilalBoostsAutoPalette", "hilal.boosts.auto_palette.enabled", false],
++        ["hilalBoostsBrowserUi", "hilal.boosts.browser_ui.enabled", false],
++      ];
++      for (const [elementId, prefName, defaultValue] of hilalPrefMappings) {
++        const checkbox = document.getElementById(elementId);
++        wireCheckbox(checkbox, prefName, defaultValue);
 +      }
-+      checkbox.checked = Services.prefs.getBoolPref(prefName, defaultValue);
-+      checkbox.addEventListener("command", function () {
-+        Services.prefs.setBoolPref(prefName, checkbox.checked);
-+      });
++    } catch (e) {
++      console.error("Hilal pref mappings init error:", e);
 +    }
 +
-+    const hilalSidebarFooterCheckboxes = [
-+      ["hilalSidebarFooterBookmarks", "hilal.sidebar.footer.bookmarks", false],
-+      ["hilalSidebarFooterHistory", "hilal.sidebar.footer.history", true],
-+      ["hilalSidebarFooterPasswords", "hilal.sidebar.footer.passwords", false],
-+      ["hilalSidebarFooterDownloads", "hilal.sidebar.footer.downloads", true],
-+      ["hilalSidebarFooterPrivacy", "hilal.sidebar.footer.privacy", true],
-+      ["hilalSidebarFooterSettings", "hilal.sidebar.footer.settings", true],
-+    ];
-+    for (const [elementId, prefName, defaultValue] of hilalSidebarFooterCheckboxes) {
-+      const checkbox = document.getElementById(elementId);
-+      if (!checkbox) {
-+        continue;
++    try {
++      const hilalSidebarFooterCheckboxes = [
++        ["hilalSidebarFooterBookmarks", "hilal.sidebar.footer.bookmarks", false],
++        ["hilalSidebarFooterHistory", "hilal.sidebar.footer.history", true],
++        ["hilalSidebarFooterPasswords", "hilal.sidebar.footer.passwords", false],
++        ["hilalSidebarFooterDownloads", "hilal.sidebar.footer.downloads", true],
++        ["hilalSidebarFooterPrivacy", "hilal.sidebar.footer.privacy", true],
++        ["hilalSidebarFooterSettings", "hilal.sidebar.footer.settings", true],
++      ];
++      for (const [elementId, prefName, defaultValue] of hilalSidebarFooterCheckboxes) {
++        const checkbox = document.getElementById(elementId);
++        wireCheckbox(checkbox, prefName, defaultValue);
 +      }
-+      checkbox.checked = Services.prefs.getBoolPref(prefName, defaultValue);
-+      checkbox.addEventListener("command", function () {
-+        Services.prefs.setBoolPref(prefName, checkbox.checked);
-+      });
++    } catch (e) {
++      console.error("Hilal sidebar footer checkboxes init error:", e);
 +    }
 +
 +    const getHilalSidebarCustomItems = () => {
@@ -322,13 +369,35 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +    refreshHilalSidebarCustomList();
 +
 +    if (hilalPrivacyLevelRadioGroup) {
-+      hilalPrivacyLevelRadioGroup.value = normalizePrivacyLevel(
-+        Services.prefs.getStringPref("hilal.privacy.level", "standard")
-+      );
-+      hilalPrivacyLevelRadioGroup.addEventListener("command", function () {
-+        const level = normalizePrivacyLevel(hilalPrivacyLevelRadioGroup.value);
-+        hilalPrivacyLevelRadioGroup.value = level;
++      const updatePrivacyLevelUI = (level) => {
++        const normalized = normalizePrivacyLevel(level);
++        hilalPrivacyLevelRadioGroup.value = normalized;
++        const radios = hilalPrivacyLevelRadioGroup.querySelectorAll("radio");
++        for (const r of radios) {
++          if (r.value === normalized) {
++            r.setAttribute("selected", "true");
++          } else {
++            r.removeAttribute("selected");
++          }
++        }
++      };
++
++      const initialLevel = Services.prefs.getStringPref("hilal.privacy.level", "standard");
++      updatePrivacyLevelUI(initialLevel);
++
++      const onPrivacyChange = (val) => {
++        const level = normalizePrivacyLevel(val || hilalPrivacyLevelRadioGroup.value);
++        updatePrivacyLevelUI(level);
 +        Services.prefs.setStringPref("hilal.privacy.level", level);
++      };
++
++      hilalPrivacyLevelRadioGroup.addEventListener("command", () => onPrivacyChange());
++      hilalPrivacyLevelRadioGroup.addEventListener("change", () => onPrivacyChange());
++      hilalPrivacyLevelRadioGroup.addEventListener("click", e => {
++        const radio = e.target.closest("radio");
++        if (radio && radio.value) {
++          onPrivacyChange(radio.value);
++        }
 +      });
 +    }
 +    setEventListener("hilalWorkspacesReset", "command", function () {
@@ -531,8 +600,8 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +      const currentMode = Services.prefs.getStringPref("hilal.theme.accentMode", "workspace");
 +      updateAccentModeUI(currentMode);
 +
-+      accentModeRadioGroup.addEventListener("command", () => {
-+        const selected = accentModeRadioGroup.value;
++      const onModeChange = (modeVal) => {
++        const selected = modeVal || accentModeRadioGroup.value;
 +        Services.prefs.setStringPref("hilal.theme.accentMode", selected);
 +        if (selected === "boosts") {
 +          Services.prefs.setBoolPref("hilal.boosts.auto_palette.enabled", true);
@@ -540,6 +609,15 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +          Services.prefs.setBoolPref("hilal.boosts.enabled", true);
 +        }
 +        updateAccentModeUI(selected);
++      };
++
++      accentModeRadioGroup.addEventListener("command", () => onModeChange());
++      accentModeRadioGroup.addEventListener("change", () => onModeChange());
++      accentModeRadioGroup.addEventListener("click", e => {
++        const radio = e.target.closest("radio");
++        if (radio && radio.value) {
++          onModeChange(radio.value);
++        }
 +      });
 +    }
 +
@@ -727,100 +805,109 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +    const languageSelect = document.getElementById("hilalLanguageSelect");
 +    const languageApplyBtn = document.getElementById("hilalLanguageApply");
 +
-+    if (languageSelect && languageApplyBtn) {
-+      const initLanguageUI = async () => {
-+        let available = [];
-+        try {
-+          const { LangPackMatcher } = ChromeUtils.importESModule(
-+            "resource://gre/modules/LangPackMatcher.sys.mjs"
-+          );
-+          available = await LangPackMatcher.getAvailableLocales();
-+        } catch (e) {
-+          console.error("Failed to dynamically load locales:", e);
-+        }
++    try {
++      if (languageSelect && languageApplyBtn) {
++        const initLanguageUI = async () => {
++          let available = [];
++          try {
++            const matcher = window.LangPackMatcher || ChromeUtils.importESModule(
++              "moz-src:///intl/locale/LangPackMatcher.sys.mjs"
++            ).LangPackMatcher;
++            if (matcher && matcher.getAvailableLocales) {
++              available = await matcher.getAvailableLocales();
++            }
++          } catch (e) {
++            // fallback
++          }
 +
-+        if (!available || !available.length) {
-+          available = ["en-US", "tr"];
-+        }
++          if (!available || !available.length) {
++            available = ["en-US", "tr"];
++          }
 +
-+        if (!available.includes("en-US")) {
-+          available.push("en-US");
-+        }
-+        if (!available.includes("tr")) {
-+          available.push("tr");
-+        }
++          if (!available.includes("en-US")) {
++            available.push("en-US");
++          }
++          if (!available.includes("tr")) {
++            available.push("tr");
++          }
 +
-+        let localeNames = [];
-+        try {
-+          localeNames = Services.intl.getLocaleDisplayNames(undefined, available, {
-+            preferNative: true,
-+          });
-+        } catch (e) {
-+          console.error("Failed to get locale display names:", e);
-+          localeNames = available.map(code =>
-+            code.startsWith("tr") ? "Türkçe" : (code.startsWith("en") ? "English (US)" : code)
-+          );
-+        }
++          let localeNames = [];
++          try {
++            localeNames = Services.intl.getLocaleDisplayNames(undefined, available, {
++              preferNative: true,
++            });
++          } catch (e) {
++            localeNames = available.map(code =>
++              code.startsWith("tr") ? "Türkçe" : (code.startsWith("en") ? "English (US)" : code)
++            );
++          }
 +
-+        languageSelect.textContent = "";
++          languageSelect.textContent = "";
 +
-+        const currentLocale = Services.locale.appLocaleAsBCP47;
-+        const systemLabel = currentLocale.startsWith("tr")
-+          ? "Sistem Dili (Varsayılan)"
-+          : "System Language (Default)";
++          const currentLocale = Services.locale.appLocaleAsBCP47;
++          const systemLabel = currentLocale.startsWith("tr")
++            ? "Sistem Dili (Varsayılan)"
++            : "System Language (Default)";
 +
-+        const systemOption = document.createElement("option");
-+        systemOption.value = "";
-+        systemOption.textContent = systemLabel;
-+        languageSelect.appendChild(systemOption);
++          const systemOption = document.createElement("option");
++          systemOption.value = "";
++          systemOption.textContent = systemLabel;
++          languageSelect.appendChild(systemOption);
 +
-+        for (let i = 0; i < available.length; i++) {
-+          const code = available[i];
-+          const name = localeNames[i] || code;
-+          const option = document.createElement("option");
-+          option.value = code;
-+          option.textContent = name;
-+          languageSelect.appendChild(option);
-+        }
++          for (let i = 0; i < available.length; i++) {
++            const code = available[i];
++            const name = localeNames[i] || code;
++            const option = document.createElement("option");
++            option.value = code;
++            option.textContent = name;
++            languageSelect.appendChild(option);
++          }
 +
-+        const requestedLocales = Services.locale.requestedLocales || [];
-+        const currentPrimary = requestedLocales[0] || "";
-+        if (currentPrimary && !available.includes(currentPrimary)) {
-+          const option = document.createElement("option");
-+          option.value = currentPrimary;
-+          option.textContent = currentPrimary;
-+          languageSelect.appendChild(option);
-+        }
-+        languageSelect.value = currentPrimary;
-+      };
++          const requestedLocales = Services.locale.requestedLocales || [];
++          const currentPrimary = requestedLocales[0] || "";
++          if (currentPrimary && !available.includes(currentPrimary)) {
++            const option = document.createElement("option");
++            option.value = currentPrimary;
++            option.textContent = currentPrimary;
++            languageSelect.appendChild(option);
++          }
++          languageSelect.value = currentPrimary;
++        };
 +
-+      initLanguageUI();
++        initLanguageUI();
 +
-+      languageApplyBtn.addEventListener("command", () => {
-+        const selected = languageSelect.value;
-+        const requestedLocales = Services.locale.requestedLocales || [];
-+        const currentPrimary = requestedLocales[0] || "";
++        languageApplyBtn.addEventListener("command", () => {
++          const selected = languageSelect.value;
++          const requestedLocales = Services.locale.requestedLocales || [];
++          const currentPrimary = requestedLocales[0] || "";
 +
-+        if (selected === currentPrimary) {
-+          // No change, no restart needed
-+          return;
-+        }
-+        const nextLocales = selected
-+          ? Array.from(new Set([selected, ...requestedLocales]).values())
-+          : [];
++          if (selected === currentPrimary) {
++            return;
++          }
++          const nextLocales = selected
++            ? Array.from(new Set([selected, ...requestedLocales]).values())
++            : [];
 +
-+        const currentLocale = Services.locale.appLocaleAsBCP47;
-+        const title = currentLocale.startsWith("tr") ? "Yeniden Başlatma Gerekli" : "Restart Required";
-+        const message = currentLocale.startsWith("tr")
-+          ? "Dil değişikliğini uygulamak için tarayıcının yeniden başlatılması gerekiyor. Şimdi yeniden başlatılsın mı?"
-+          : "The browser needs to be restarted to apply language changes. Restart now?";
++          const currentLocale = Services.locale.appLocaleAsBCP47;
++          const title = currentLocale.startsWith("tr") ? "Yeniden Başlatma Gerekli" : "Restart Required";
++          const message = currentLocale.startsWith("tr")
++            ? "Dil değişikliğini uygulamak için tarayıcının yeniden başlatılması gerekiyor. Şimdi yeniden başlatılsın mı?"
++            : "The browser needs to be restarted to apply language changes. Restart now?";
 +
-+        if (Services.prompt.confirm(window, title, message)) {
-+          Multilingual.applyAndRestart(nextLocales);
-+        }
-+      });
++          if (Services.prompt.confirm(window, title, message)) {
++            Multilingual.applyAndRestart(nextLocales);
++          }
++        });
++      }
++    } catch (e) {
++      console.error("Hilal language settings init error:", e);
 +    }
-+    gHilalShortcutsSettings.init();
++
++    try {
++      gHilalShortcutsSettings.init();
++    } catch (e) {
++      console.error("Hilal shortcuts settings init error:", e);
++    }
 +  },
 +};
 +

@@ -26,7 +26,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-tahoe-enabled"/>
       <span class="settings-row-desc" data-l10n-id="hilal-tahoe-enabled-desc"/>
     </div>
-    <checkbox id="hilalTahoeEnabled" class="settings-switch"/>
+    <checkbox id="hilalTahoeEnabled" preference="hilal.tahoe.enabled" class="settings-switch"/>
   </div>
 
   <div class="settings-row">
@@ -34,7 +34,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-boosts-auto-palette"/>
       <span class="settings-row-desc" data-l10n-id="hilal-boosts-browser-ui"/>
     </div>
-    <checkbox id="hilalBoostsAutoPalette" class="settings-switch"/>
+    <checkbox id="hilalBoostsAutoPalette" preference="hilal.boosts.auto_palette.enabled" class="settings-switch"/>
   </div>
 
   <div class="settings-row">
@@ -42,7 +42,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-uifix-enabled"/>
       <span class="settings-row-desc">Firefox-UI-Fix (@black7375)</span>
     </div>
-    <checkbox id="hilalUiFixEnabled" class="settings-switch"/>
+    <checkbox id="hilalUiFixEnabled" preference="userChrome.compatibility.theme" class="settings-switch"/>
   </div>
 
   <vbox id="hilalUiFixSubOptions" class="indent">
@@ -50,31 +50,31 @@
       <div class="settings-row-text">
         <span class="settings-row-title" data-l10n-id="hilal-uifix-connect-to-window"/>
       </div>
-      <checkbox id="hilalUiFixConnectToWindow" class="settings-switch"/>
+      <checkbox id="hilalUiFixConnectToWindow" preference="userChrome.tabs.connect_to_window" class="settings-switch"/>
     </div>
     <div class="settings-row">
       <div class="settings-row-text">
         <span class="settings-row-title" data-l10n-id="hilal-uifix-compact-padding"/>
       </div>
-      <checkbox id="hilalUiFixCompactPadding" class="settings-switch"/>
+      <checkbox id="hilalUiFixCompactPadding" preference="userChrome.tabs.compact_padding" class="settings-switch"/>
     </div>
     <div class="settings-row">
       <div class="settings-row-text">
         <span class="settings-row-title" data-l10n-id="hilal-uifix-dynamic-separator"/>
       </div>
-      <checkbox id="hilalUiFixDynamicSeparator" class="settings-switch"/>
+      <checkbox id="hilalUiFixDynamicSeparator" preference="userChrome.tabs.dynamic_separator" class="settings-switch"/>
     </div>
     <div class="settings-row">
       <div class="settings-row-text">
         <span class="settings-row-title" data-l10n-id="hilal-uifix-bottom-rounded"/>
       </div>
-      <checkbox id="hilalUiFixBottomRounded" class="settings-switch"/>
+      <checkbox id="hilalUiFixBottomRounded" preference="userChrome.tabs.bottom_rounded_corner" class="settings-switch"/>
     </div>
     <div class="settings-row">
       <div class="settings-row-text">
         <span class="settings-row-title" data-l10n-id="hilal-uifix-close-on-hover"/>
       </div>
-      <checkbox id="hilalUiFixCloseOnHover" class="settings-switch"/>
+      <checkbox id="hilalUiFixCloseOnHover" preference="userChrome.tabs.close_button.on_hover" class="settings-switch"/>
     </div>
   </vbox>
 </groupbox>
@@ -93,7 +93,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-workspaces-enabled"/>
       <span class="settings-row-desc">Sekmelerinizi kişisel, iş ve sosyal alanlara ayırın</span>
     </div>
-    <checkbox id="hilalWorkspacesEnabled" class="settings-switch"/>
+    <checkbox id="hilalWorkspacesEnabled" preference="hilal.workspaces.enabled" class="settings-switch"/>
   </div>
 
   <div class="settings-row">
@@ -101,7 +101,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-workspaces-pinned-public"/>
       <span class="settings-row-desc">Pinli sekmeler her alanda ortak kalsın</span>
     </div>
-    <checkbox id="hilalWorkspacesPinnedPublic" class="settings-switch"/>
+    <checkbox id="hilalWorkspacesPinnedPublic" preference="hilal.workspaces.pinned.public" class="settings-switch"/>
   </div>
 
   <div class="settings-row">
@@ -109,7 +109,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-workspaces-groups-public"/>
       <span class="settings-row-desc">Sekme gruplarını tüm çalışma alanlarına yay</span>
     </div>
-    <checkbox id="hilalWorkspacesGroupsPublic" class="settings-switch"/>
+    <checkbox id="hilalWorkspacesGroupsPublic" preference="hilal.workspaces.groups.public" class="settings-switch"/>
   </div>
 
   <div class="settings-row">
@@ -117,7 +117,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-urlbar-show-workspace-name"/>
       <span class="settings-row-desc">Adres çubuğunda geçerli alan adını göster</span>
     </div>
-    <checkbox id="hilalUrlbarShowWorkspaceName" class="settings-switch"/>
+    <checkbox id="hilalUrlbarShowWorkspaceName" preference="hilal.urlbar.showWorkspaceName" class="settings-switch"/>
   </div>
 
   <div class="settings-row">
@@ -212,7 +212,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-sidebar-compact-enabled"/>
       <span class="settings-row-desc">Kenara yaklaşınca süzülen kenar ve üst araç çubuğu</span>
     </div>
-    <checkbox id="hilalSidebarCompactEnabled" class="settings-switch"/>
+    <checkbox id="hilalSidebarCompactEnabled" preference="hilal.compact.enabled" class="settings-switch"/>
   </div>
 
   <div class="settings-row">
@@ -220,7 +220,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-sidebar-compact-hide-toolbar"/>
       <span class="settings-row-desc" data-l10n-id="hilal-sidebar-compact-hide-toolbar-desc"/>
     </div>
-    <checkbox id="hilalSidebarCompactHideToolbar" class="settings-switch"/>
+    <checkbox id="hilalSidebarCompactHideToolbar" preference="hilal.compact.hideToolbar" class="settings-switch"/>
   </div>
 
   <div class="settings-row">
@@ -228,18 +228,18 @@
       <span class="settings-row-title" data-l10n-id="hilal-sidebar-show-horizontal-tabs"/>
       <span class="settings-row-desc">Dikey kenar çubuğu yerine üst yatay sekmeler</span>
     </div>
-    <checkbox id="hilalSidebarShowHorizontalTabs" class="settings-switch"/>
+    <checkbox id="hilalSidebarShowHorizontalTabs" preference="sidebar.verticalTabs.showHorizontal" class="settings-switch"/>
   </div>
 
   <div style="margin-top: 12px;">
     <span class="settings-row-title" style="display: block; margin-bottom: 8px;" data-l10n-id="hilal-sidebar-footer-items-label"/>
     <div style="display: flex; flex-wrap: wrap; gap: 16px;">
-      <checkbox id="hilalSidebarFooterBookmarks" data-l10n-id="hilal-sidebar-footer-bookmarks"/>
-      <checkbox id="hilalSidebarFooterHistory" data-l10n-id="hilal-sidebar-footer-history"/>
-      <checkbox id="hilalSidebarFooterPasswords" data-l10n-id="hilal-sidebar-footer-passwords"/>
-      <checkbox id="hilalSidebarFooterDownloads" data-l10n-id="hilal-sidebar-footer-downloads"/>
-      <checkbox id="hilalSidebarFooterPrivacy" data-l10n-id="hilal-sidebar-footer-privacy"/>
-      <checkbox id="hilalSidebarFooterSettings" data-l10n-id="hilal-sidebar-footer-settings"/>
+      <checkbox id="hilalSidebarFooterBookmarks" preference="hilal.sidebar.footer.bookmarks" data-l10n-id="hilal-sidebar-footer-bookmarks"/>
+      <checkbox id="hilalSidebarFooterHistory" preference="hilal.sidebar.footer.history" data-l10n-id="hilal-sidebar-footer-history"/>
+      <checkbox id="hilalSidebarFooterPasswords" preference="hilal.sidebar.footer.passwords" data-l10n-id="hilal-sidebar-footer-passwords"/>
+      <checkbox id="hilalSidebarFooterDownloads" preference="hilal.sidebar.footer.downloads" data-l10n-id="hilal-sidebar-footer-downloads"/>
+      <checkbox id="hilalSidebarFooterPrivacy" preference="hilal.sidebar.footer.privacy" data-l10n-id="hilal-sidebar-footer-privacy"/>
+      <checkbox id="hilalSidebarFooterSettings" preference="hilal.sidebar.footer.settings" data-l10n-id="hilal-sidebar-footer-settings"/>
     </div>
   </div>
 
