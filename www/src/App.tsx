@@ -436,9 +436,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-m3-surface text-[var(--on-surface)] selection:bg-[var(--primary-container)] selection:text-[var(--on-primary-container)]">
-      {/* 1. M3 Floating Top App Bar */}
+      {/* 1. M3 Floating Top App Bar - Solid Color, No Glass */}
       <div className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 pointer-events-none">
-        <div className="mx-auto max-w-5xl pointer-events-auto h-14 rounded-full bg-m3-surface/80 dark:bg-m3-container-low/80 backdrop-blur-xl border border-[var(--outline-variant)]/20 px-4 sm:px-5 flex items-center justify-between shadow-md shadow-black/5 transition-all">
+        <div className="mx-auto max-w-5xl pointer-events-auto h-14 rounded-full bg-white dark:bg-[#1e2025] border border-[var(--outline-variant)]/30 px-4 sm:px-5 flex items-center justify-between shadow-md transition-all">
           {/* Logo & Name */}
           <motion.div
             whileHover={{ scale: 1.02 }}
@@ -479,7 +479,7 @@ export default function App() {
               onClick={() => navigateTo("docs")}
               className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border-0 ${
                 currentView === "docs"
-                  ? "bg-[var(--secondary-container)] text-[var(--on-secondary-container)]"
+                  ? "bg-[var(--primary-container)] text-[var(--on-primary-container)]"
                   : "bg-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8"
               }`}
             >
@@ -490,7 +490,7 @@ export default function App() {
               onClick={() => navigateTo("changelog")}
               className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border-0 ${
                 currentView === "changelog"
-                  ? "bg-[var(--secondary-container)] text-[var(--on-secondary-container)]"
+                  ? "bg-[var(--primary-container)] text-[var(--on-primary-container)]"
                   : "bg-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8"
               }`}
             >

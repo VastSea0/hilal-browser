@@ -39,11 +39,21 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 496;
+export const REPO_COMMITS_TOTAL = 497;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "80ffff5fb58c4ba5d792fffc837d5683f4ac5447",
+    "shortHash": "80ffff5",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-08T01:01:53+03:00",
+    "subject": "feat(www): replace Lucide with Google Material Symbols and fix download modal",
+    "body": "- Replace all Lucide icons across App, ChangelogPage, DocsPage, and DownloadModal with Google Material Symbols ligatures\n- Bundle Material Symbols Outlined locally with font-display: block to prevent FOUT\n- Fix DownloadModal z-index and stacking context collision with Beer CSS overlay\n- Implement robust keyboard (Escape) and backdrop dismissal for DownloadModal\n- Add safe programmatic asset download fallback without breaking page context",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/80ffff5fb58c4ba5d792fffc837d5683f4ac5447"
+  },
   {
     "hash": "84a8ff94e50eb3e982ba336271badc79a5286d00",
     "shortHash": "84a8ff9",
@@ -5011,9 +5021,19 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-08T00:43:02+03:00",
-    "commitCount": 55,
+    "date": "2026-09-08T01:01:53+03:00",
+    "commitCount": 56,
     "commits": [
+      {
+        "hash": "80ffff5fb58c4ba5d792fffc837d5683f4ac5447",
+        "shortHash": "80ffff5",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-08T01:01:53+03:00",
+        "subject": "feat(www): replace Lucide with Google Material Symbols and fix download modal",
+        "body": "- Replace all Lucide icons across App, ChangelogPage, DocsPage, and DownloadModal with Google Material Symbols ligatures\n- Bundle Material Symbols Outlined locally with font-display: block to prevent FOUT\n- Fix DownloadModal z-index and stacking context collision with Beer CSS overlay\n- Implement robust keyboard (Escape) and backdrop dismissal for DownloadModal\n- Add safe programmatic asset download fallback without breaking page context",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/80ffff5fb58c4ba5d792fffc837d5683f4ac5447"
+      },
       {
         "hash": "84a8ff94e50eb3e982ba336271badc79a5286d00",
         "shortHash": "84a8ff9",
@@ -10233,7 +10253,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 484,
+    "contributions": 485,
     "role": "Lead Developer"
   },
   {

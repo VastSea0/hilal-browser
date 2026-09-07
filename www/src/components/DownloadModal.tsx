@@ -124,23 +124,29 @@ export default function DownloadModal({
 
       {/* Modal Dialog Card */}
       <div 
-        className="relative z-[102] w-full max-w-lg rounded-3xl bg-m3-container text-[var(--on-surface)] border border-[var(--outline-variant)]/30 p-6 shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
+        className="relative z-[102] w-full max-w-lg rounded-[28px] bg-m3-container text-[var(--on-surface)] border border-[var(--outline-variant)]/30 p-6 sm:p-7 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
         role="dialog"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Modal Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[var(--outline-variant)]/20 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="shape sunny tiny tertiary flex items-center justify-center">
-              <i className="text-base text-[var(--tertiary)]">cloud_download</i>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[var(--primary-container)] text-[var(--primary)] flex items-center justify-center shrink-0">
+              <i className="text-xl">cloud_download</i>
             </div>
-            <h5 className="text-xl font-bold tracking-tight text-[var(--on-surface)] m-0">
-              {downloadedAsset ? activeT.downloadStarted : activeT.headline}
-            </h5>
+            <div>
+              <h5 className="text-lg sm:text-xl font-bold tracking-tight text-[var(--on-surface)] m-0 leading-tight">
+                {downloadedAsset ? activeT.downloadStarted : activeT.headline}
+              </h5>
+              <p className="text-xs text-[var(--on-surface-variant)] m-0 mt-0.5">
+                {downloadedAsset ? activeT.downloadDesc : activeT.supportingText}
+              </p>
+            </div>
           </div>
           <button 
             type="button"
-            className="circle transparent small cursor-pointer flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]" 
+            className="w-9 h-9 rounded-full flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/10 transition-colors cursor-pointer border-0 bg-transparent shrink-0 ml-2" 
             onClick={onClose}
             aria-label={activeT.closeBtn}
           >
@@ -150,7 +156,7 @@ export default function DownloadModal({
 
         <div className="pt-4 overflow-y-auto pr-1">
           {downloadedAsset ? (
-            <div className="text-center py-4 space-y-4">
+            <div className="text-center py-6 space-y-4">
               <div className="mx-auto w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
                 <i className="text-3xl text-emerald-500">check_circle</i>
               </div>
@@ -158,7 +164,7 @@ export default function DownloadModal({
                 {activeT.downloadDesc}
               </p>
               <div className="flex justify-center">
-                <div className="chip border">
+                <div className="px-3.5 py-1.5 rounded-full bg-m3-container-high border border-[var(--outline-variant)]/30 text-xs font-mono text-[var(--on-surface)]">
                   <span>{downloadedAsset.name} • {formatBytes(downloadedAsset.size)}</span>
                 </div>
               </div>
@@ -177,15 +183,15 @@ export default function DownloadModal({
               <div className="pt-4 flex justify-center gap-3">
                 <button
                   type="button"
-                  className="primary button small rounded-full gap-2 cursor-pointer font-semibold"
+                  className="h-10 px-6 rounded-full bg-[var(--primary)] text-[var(--on-primary)] gap-2 cursor-pointer font-semibold text-xs flex items-center border-0 shadow-sm hover:shadow"
                   onClick={() => handleDownload(downloadedAsset)}
                 >
-                  <i>download</i>
+                  <i className="text-base">download</i>
                   <span>{activeT.redownloadBtn}</span>
                 </button>
                 <button
                   type="button"
-                  className="transparent button small rounded-full cursor-pointer font-semibold"
+                  className="h-10 px-5 rounded-full text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 cursor-pointer font-semibold text-xs border-0 bg-transparent transition-colors"
                   onClick={onClose}
                 >
                   <span>{activeT.closeBtn}</span>
@@ -194,64 +200,55 @@ export default function DownloadModal({
             </div>
           ) : (
             <div className="space-y-4">
-              <p className="text-sm text-[var(--on-surface-variant)]">
-                {activeT.supportingText}
-              </p>
-
-              {/* Package list using Beer CSS cards */}
-              <div className="space-y-2.5 max-h-[50vh] overflow-y-auto pr-1">
+              {/* Package list using clean M3 Expressive cards */}
+              <div className="space-y-3 max-h-[55vh] overflow-y-auto pr-1 py-1">
                 {assets.map((asset) => {
                   const info = getPlatformInfo(asset.name);
                   return (
-                    <article
+                    <div
                       key={asset.id}
                       onClick={() => handleDownload(asset)}
-                      className="border round p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer hover:border-[var(--primary)] transition-all bg-m3-container-lowest m-0 group"
+                      className="p-4 rounded-2xl bg-m3-container-lowest border border-[var(--outline-variant)]/25 hover:border-[var(--primary)] hover:bg-[var(--primary-container)]/10 flex items-center justify-between gap-3 cursor-pointer transition-all shadow-xs group"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-full bg-[var(--primary-container)] text-[var(--on-primary-container)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                          <i className="text-xl">{info.iconName}</i>
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="w-11 h-11 rounded-xl bg-[var(--primary-container)] text-[var(--primary)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                          <i className="text-2xl">{info.iconName}</i>
                         </div>
                         <div className="min-w-0 text-left">
-                          <div className="text-sm font-semibold text-[var(--on-surface)] truncate">
+                          <div className="text-sm font-bold text-[var(--on-surface)] truncate">
                             {info.label}
                           </div>
-                          <div className="text-xs font-mono text-[var(--on-surface-variant)] truncate">
+                          <div className="text-xs font-mono text-[var(--on-surface-variant)] truncate mt-0.5">
                             {asset.name}
                           </div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-xs font-mono text-[var(--on-surface-variant)] hidden sm:inline">
+                        <span className="px-2.5 py-1 rounded-full bg-m3-container-high text-[11px] font-mono text-[var(--on-surface-variant)] hidden sm:inline-block">
                           {formatBytes(asset.size)}
                         </span>
-                        <button
-                          type="button"
-                          className="primary circle small cursor-pointer flex items-center justify-center"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDownload(asset);
-                          }}
-                          aria-label={`Download ${info.label}`}
+                        <div
+                          className="w-10 h-10 rounded-full bg-[var(--primary)] text-[var(--on-primary)] flex items-center justify-center shadow-sm group-hover:scale-110 active:scale-95 transition-transform"
+                          title={`Download ${info.label}`}
                         >
-                          <i className="text-base">download</i>
-                        </button>
+                          <i className="text-xl">download</i>
+                        </div>
                       </div>
-                    </article>
+                    </div>
                   );
                 })}
               </div>
 
               <div className="pt-3 border-t border-[var(--outline-variant)]/20 text-center">
                 <a
-                  className="button transparent small rounded-full cursor-pointer inline-flex items-center gap-1.5"
+                  className="inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-full text-xs font-semibold text-[var(--primary)] hover:bg-[var(--primary-container)]/25 transition-colors cursor-pointer no-underline border-0 bg-transparent"
                   href={release?.html_url || "https://github.com/VastSea0/hilal-browser/releases"}
                   target="_blank"
                   rel="noreferrer"
                 >
                   <span>{activeT.viewAllOnGh}</span>
-                  <i className="text-sm">open_in_new</i>
+                  <i className="text-base">open_in_new</i>
                 </a>
               </div>
             </div>

@@ -77,7 +77,7 @@ function CodeBlock({
         </button>
       </div>
       <div className="p-4 sm:p-5 overflow-x-auto font-mono text-xs sm:text-sm leading-relaxed text-[#e6edf3] scrollbar-thin">
-        <pre className="m-0 whitespace-pre">{code}</pre>
+        <pre className="!bg-transparent !p-0 !border-0 !text-[#e6edf3] !m-0 !whitespace-pre font-mono">{code}</pre>
       </div>
     </div>
   );
@@ -305,7 +305,10 @@ export default function DocsPage({ lang }: DocsPageProps) {
     setActiveSectionId(id);
     setIsMobileMenuOpen(false);
     window.history.pushState(null, "", `#docs/${id}`);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const el = document.getElementById("docs-content-area");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   const handleCopy = (text: string) => {
@@ -342,42 +345,43 @@ export default function DocsPage({ lang }: DocsPageProps) {
   }, [sections, searchQuery]);
 
   return (
-    <div className="min-h-screen pt-28 sm:pt-36 pb-28 px-4 sm:px-6 bg-m3-surface text-[var(--md-sys-color-on-surface)] selection:bg-[var(--md-sys-color-primary-container)] selection:text-[var(--md-sys-color-on-primary-container)]">
+    <div className="min-h-screen pt-24 sm:pt-28 pb-24 px-4 sm:px-6 bg-m3-surface text-[var(--on-surface)] selection:bg-[var(--primary-container)] selection:text-[var(--on-primary-container)]">
       <div className="max-w-6xl mx-auto">
-        {/* Header (No Card Box, Pure Typography & M3 Expressive Pill Chips) */}
-        <div className="mb-12 pb-8 border-b border-[var(--md-sys-color-outline-variant)]/20">
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            <div className="chip border elevate">
+        {/* Compact, Clean Documentation Header */}
+        <div className="mb-8 pb-5 border-b border-[var(--outline-variant)]/20">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <div className="chip border elevate text-xs">
               <i className="text-sm mr-1.5 text-[var(--primary)]">menu_book</i>
               <span>Hilal Documentation</span>
             </div>
-            <div className="chip border">
+            <div className="chip border text-xs">
               <span>{content.meta.targetVersion}</span>
             </div>
-            <div className="chip border">
+            <div className="chip border text-xs">
               <span>{content.meta.engineBase}</span>
             </div>
-            <div className="chip border">
+            <div className="chip border text-xs">
               <span>{content.meta.licenseBadge}</span>
             </div>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--md-sys-color-on-surface)]">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-[var(--on-surface)]">
             {content.meta.title}
           </h1>
-          <p className="mt-2 text-sm sm:text-base text-[var(--md-sys-color-on-surface-variant)] max-w-3xl leading-relaxed">
+          <p className="mt-1.5 text-xs sm:text-sm text-[var(--on-surface-variant)] max-w-3xl leading-relaxed">
             {content.meta.subtitle}
           </p>
         </div>
 
         {/* Mobile Navigation Drawer Trigger */}
-        <div className="lg:hidden mb-8">
+        <div className="lg:hidden mb-6">
           <button
+            type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] text-xs font-semibold cursor-pointer shadow-sm"
+            className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-m3-container-lowest border border-[var(--outline-variant)]/30 text-[var(--on-surface)] text-xs font-semibold cursor-pointer shadow-sm"
           >
             <div className="flex items-center gap-2.5">
-              <i className="text-base">menu</i>
+              <i className="text-base text-[var(--primary)]">menu</i>
               <span>{activeSection.title}</span>
             </div>
             <i className={`text-base transition-transform ${isMobileMenuOpen ? "rotate-180" : ""}`}>expand_more</i>
@@ -389,7 +393,7 @@ export default function DocsPage({ lang }: DocsPageProps) {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mt-3 p-2 rounded-2xl bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/20 shadow-lg space-y-1 overflow-hidden"
+                className="mt-2 p-2 rounded-2xl bg-m3-container-low border border-[var(--outline-variant)]/25 shadow-lg space-y-1 overflow-hidden"
               >
                 {sections.map((s) => {
                   const iconName = SECTION_ICONS[s.iconName] || "layers";
@@ -397,14 +401,15 @@ export default function DocsPage({ lang }: DocsPageProps) {
                   return (
                     <button
                       key={s.id}
+                      type="button"
                       onClick={() => handleSelectSection(s.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left text-xs font-medium transition-colors ${
+                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left text-xs font-medium transition-colors border-0 cursor-pointer ${
                         isSelected
-                          ? "bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-semibold"
-                          : "text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-on-surface)]/8"
+                          ? "bg-[var(--primary-container)] text-[var(--on-primary-container)] font-semibold"
+                          : "bg-transparent text-[var(--on-surface-variant)] hover:bg-[var(--on-surface)]/8"
                       }`}
                     >
-                      <i className="text-base shrink-0">{iconName}</i>
+                      <i className={`text-base shrink-0 ${isSelected ? "text-[var(--primary)]" : ""}`}>{iconName}</i>
                       <span>{s.title}</span>
                     </button>
                   );
@@ -415,33 +420,34 @@ export default function DocsPage({ lang }: DocsPageProps) {
         </div>
 
         {/* Two-Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
           {/* Left Sidebar (Desktop Navigation) */}
-          <div className="hidden lg:block lg:col-span-4 sticky top-24 space-y-6">
-            {/* Expressive Pill Search Bar */}
+          <aside className="hidden lg:block lg:col-span-4 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2 space-y-4">
+            {/* Expressive Search Bar */}
             <div className="relative">
-              <i className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-[var(--md-sys-color-on-surface-variant)]">search</i>
+              <i className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base text-[var(--on-surface-variant)]">search</i>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={content.meta.searchPlaceholder}
-                className="w-full pl-10 pr-9 py-2.5 rounded-full bg-[var(--md-sys-color-secondary-container)]/40 text-xs text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-on-surface-variant)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--md-sys-color-primary)] transition-all border border-transparent"
+                placeholder={lang === "tr" ? "Dokümanda ara..." : "Search docs..."}
+                className="w-full pl-9 pr-8 py-2 rounded-full bg-m3-container-lowest text-xs text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all border border-[var(--outline-variant)]/30"
               />
               {searchQuery && (
                 <button
+                  type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] border-0 bg-transparent cursor-pointer p-0"
                 >
-                  <i className="text-base">close</i>
+                  <i className="text-sm">close</i>
                 </button>
               )}
             </div>
 
-            {/* Section Links (Tonal Pill List with Spring Layout) */}
-            <div className="flex flex-col space-y-1">
+            {/* Section Links */}
+            <nav className="flex flex-col space-y-1">
               {filteredSections.length === 0 ? (
-                <div className="p-4 text-xs text-[var(--md-sys-color-on-surface-variant)] text-center">
+                <div className="p-4 text-xs text-[var(--on-surface-variant)] text-center">
                   {content.meta.noResults}
                 </div>
               ) : (
@@ -451,15 +457,16 @@ export default function DocsPage({ lang }: DocsPageProps) {
                   return (
                     <button
                       key={s.id}
+                      type="button"
                       onClick={() => handleSelectSection(s.id)}
-                      className={`relative w-full flex items-center justify-between px-4 py-2.5 rounded-full text-left text-xs transition-all cursor-pointer ${
+                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-xs transition-all cursor-pointer border-0 ${
                         isSelected
-                          ? "bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] font-semibold shadow-xs"
-                          : "text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/6 font-medium"
+                          ? "bg-[var(--primary-container)] text-[var(--on-primary-container)] font-semibold shadow-xs"
+                          : "bg-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 font-medium"
                       }`}
                     >
-                      <div className="flex items-center gap-3 truncate">
-                        <i className={`text-base shrink-0 ${isSelected ? "text-[var(--md-sys-color-primary)]" : ""}`}>{iconName}</i>
+                      <div className="flex items-center gap-2.5 truncate">
+                        <i className={`text-lg shrink-0 ${isSelected ? "text-[var(--primary)]" : "text-[var(--on-surface-variant)]"}`}>{iconName}</i>
                         <span className="truncate">{s.title}</span>
                       </div>
                       <span className="text-[10px] opacity-60 font-mono shrink-0 ml-2">
@@ -469,20 +476,20 @@ export default function DocsPage({ lang }: DocsPageProps) {
                   );
                 })
               )}
-            </div>
+            </nav>
 
             {/* In-Page Quick TOC */}
             {activeSection.subsections.length > 1 && (
-              <div className="pt-4 border-t border-[var(--md-sys-color-outline-variant)]/20 space-y-2">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-sys-color-on-surface-variant)] px-4">
+              <div className="pt-3 border-t border-[var(--outline-variant)]/20 space-y-2">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--on-surface-variant)] px-3">
                   {content.meta.onThisPage}
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {activeSection.subsections.map((sub) => (
                     <a
                       key={sub.id}
                       href={`#${sub.id}`}
-                      className="block px-4 py-1 rounded-full text-xs text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] hover:bg-[var(--md-sys-color-on-surface)]/5 transition-colors line-clamp-1"
+                      className="block px-3 py-1.5 rounded-lg text-xs text-[var(--on-surface-variant)] hover:text-[var(--primary)] hover:bg-[var(--on-surface)]/5 transition-colors line-clamp-1 no-underline"
                     >
                       {sub.title}
                     </a>
@@ -490,10 +497,10 @@ export default function DocsPage({ lang }: DocsPageProps) {
                 </div>
               </div>
             )}
-          </div>
+          </aside>
 
-          {/* Main Editorial Content (Flows naturally on surface, ZERO nested cards) */}
-          <div className="lg:col-span-8 space-y-14">
+          {/* Main Editorial Content */}
+          <div id="docs-content-area" className="lg:col-span-8 space-y-12">
             {/* Section Headline */}
             <motion.div
               key={activeSection.id}
