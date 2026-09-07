@@ -123,6 +123,10 @@ path   = "browser/components/tabbrowser/workspace-newtab-container.patch"
 reason = "Workspace support for new tab container context"
 
 [[patches]]
+path   = "browser/components/newtab/redirector.patch"
+reason = "Redirect about:newtab and about:home to Hilal Material 3 New Tab"
+
+[[patches]]
 path   = "browser/components/customizableui/reset-toolbar-on-first-run.patch"
 reason = "Reset toolbar to defaults on first run of Hilal Browser"
 

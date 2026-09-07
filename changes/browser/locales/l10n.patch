@@ -1,7 +1,8 @@
 diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/browser/browser.ftl
+index 33bc54e5edf6..832aa7d6d0a8 100644
 --- a/browser/locales/en-US/browser/browser.ftl
 +++ b/browser/locales/en-US/browser/browser.ftl
-@@ -1693,3 +1693,148 @@
+@@ -1693,3 +1693,205 @@ reduced-protection-infobar-reload-button = Reload
    .accesskey = R
  reduced-protection-infobar-never-show-button = Don’t show again
    .accesskey = D
@@ -150,10 +151,70 @@ diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/b
 +hilal-welcome-privacy-extreme-badge = Local
 +hilal-welcome-privacy-extreme-desc = Adds JavaScript, camera, microphone, location, and history blocking on top of Strict.
 +hilal-welcome-privacy-extreme-detail = Does not hide your IP address; many modern sites may not work as expected.
++
++## Hilal New Tab
++
++hilal-newtab-title = New Tab
++hilal-newtab-active-workspace =
++    .title = Active Workspace
++hilal-newtab-default-workspace = Default
++hilal-newtab-search-input =
++    .placeholder = Search the web or enter address…
++    .title = Search the web or enter address
++    .aria-label = Search the web or enter address
++hilal-newtab-search-clear =
++    .title = Clear
++    .aria-label = Clear
++hilal-newtab-search-submit =
++    .title = Search
++    .aria-label = Search
++hilal-newtab-bookmarks = Bookmarks
++hilal-newtab-history = History
++hilal-newtab-downloads = Downloads
++hilal-newtab-settings-chip = Settings
++hilal-newtab-customize = Customize
++hilal-newtab-add-shortcut = Add shortcut
++hilal-newtab-remove-shortcut =
++    .title = Remove
++    .aria-label = Remove
++hilal-newtab-edit-shortcut =
++    .title = More actions
++    .aria-label = More actions
++hilal-newtab-dialog-title = Add shortcut
++hilal-newtab-dialog-edit-title = Edit shortcut
++hilal-newtab-field-name = Name
++hilal-newtab-field-name-input =
++    .placeholder = e.g. GitHub
++    .aria-label = Shortcut name
++hilal-newtab-field-url = URL
++hilal-newtab-field-url-input =
++    .placeholder = https://…
++    .aria-label = Shortcut URL
++hilal-newtab-dialog-cancel = Cancel
++hilal-newtab-dialog-save = Save
++hilal-newtab-dialog-delete = Remove
++
++## Hilal Toolbar
++
++hilal-toolbar-clear =
++    .title = Clear
++hilal-toolbar-copy-url =
++    .title = Copy Page URL
++hilal-toolbar-theme =
++    .title = Page Theme & Tone
++hilal-toolbar-sidebar-toggle =
++    .title = Toggle Sidebar
++hilal-toolbar-settings =
++    .title = Settings
++hilal-toolbar-newtab =
++    .title = New Tab
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
+index c576ab200c77..170302d71dce 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2834,1 +2834,113 @@
+@@ -2832,3 +2832,130 @@ referrals-section-header2 =
+ # use the browser. "Share" here means recommending or referring the browser
+ referrals-link2 =
    .label = Share { -brand-product-name }
 +## Hilal Browser Settings
 +
@@ -267,3 +328,18 @@ diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser
 +hilal-bangs-homeurl-label = Home URL (optional):
 +hilal-bangs-default-label = (default)
 +hilal-bangs-custom-label = (custom)
++
++## Language Selection
++
++hilal-language-header = Language Selection
++hilal-language-description = Select the interface language for the browser. The browser must be restarted for changes to take effect.
++hilal-language-apply-button =
++    .label = Apply and Restart
++
++## Keyboard Shortcuts
++
++hilal-shortcuts-header = Keyboard Shortcuts
++hilal-shortcuts-description = Customize keyboard shortcuts for Hilal actions and native browser functions.
++hilal-shortcuts-reset =
++    .label = Restore Defaults
++

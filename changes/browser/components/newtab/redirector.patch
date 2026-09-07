@@ -1,0 +1,80 @@
+diff --git a/browser/components/newtab/AboutNewTabRedirector.sys.mjs b/browser/components/newtab/AboutNewTabRedirector.sys.mjs
+index 33ebe5111a15..c7938c576e1f 100644
+--- a/browser/components/newtab/AboutNewTabRedirector.sys.mjs
++++ b/browser/components/newtab/AboutNewTabRedirector.sys.mjs
+@@ -425,21 +425,7 @@ class BaseAboutNewTabRedirector {
+    * the newtab page has no effect on the result of this function.
+    */
+   get defaultURL() {
+-    if (this.remoteRendererEnabled) {
+-      return "resource://newtab/data/content/remote-renderer-host.html";
+-    }
+-
+-    // Generate the desired activity stream resource depending on state, e.g.,
+-    // "resource://newtab/prerendered/activity-stream.html"
+-    // "resource://newtab/prerendered/activity-stream-debug.html"
+-    // "resource://newtab/prerendered/activity-stream-noscripts.html"
+-    return [
+-      "resource://newtab/prerendered/",
+-      "activity-stream",
+-      this.activityStreamDebug && this.selfLoadingEnabled ? "-debug" : "",
+-      this.selfLoadingEnabled ? "" : "-noscripts",
+-      ".html",
+-    ].join("");
++    return "chrome://browser/content/hilal/newtab/newtab.html";
+   }
+ 
+   newChannel() {
+@@ -542,7 +528,7 @@ export class AboutNewTabRedirectorParent extends BaseAboutNewTabRedirector {
+ 
+     if (
+       uri.spec.startsWith("about:home") ||
+-      (uri.spec.startsWith("about:newtab") && lazy.BUILTIN_NEWTAB_ENABLED)
++      uri.spec.startsWith("about:newtab")
+     ) {
+       chromeURI = Services.io.newURI(this.defaultURL);
+     }
+@@ -553,10 +539,6 @@ export class AboutNewTabRedirectorParent extends BaseAboutNewTabRedirector {
+     );
+     resultChannel.originalURI = uri;
+ 
+-    if (!this.#addonInitialized) {
+-      return this.#getSuspendedChannel(resultChannel);
+-    }
+-
+     return resultChannel;
+   }
+ 
+@@ -595,29 +577,11 @@ export class AboutNewTabRedirectorChild extends BaseAboutNewTabRedirector {
+ 
+     let pageURI;
+ 
+-    if (uri.spec.startsWith("about:home")) {
+-      let cacheChannel = AboutHomeStartupCacheChild.maybeGetCachedPageChannel(
+-        uri,
+-        loadInfo
+-      );
+-      if (cacheChannel) {
+-        return cacheChannel;
+-      }
++    if (uri.spec.startsWith("about:home") || uri.spec.startsWith("about:newtab")) {
++      AboutHomeStartupCacheChild.disqualifyCache();
+       pageURI = Services.io.newURI(this.defaultURL);
+     } else {
+-      // The only other possibility is about:newtab.
+-      //
+-      // If about:newtab is being requested, then any subsequent request for
+-      // about:home should _never_ request the cache (which might be woefully
+-      // out of date compared to about:newtab), so we disqualify the cache if
+-      // it still happens to be around.
+-      AboutHomeStartupCacheChild.disqualifyCache();
+-
+-      if (lazy.BUILTIN_NEWTAB_ENABLED) {
+-        pageURI = Services.io.newURI(this.defaultURL);
+-      } else {
+-        pageURI = this.getChromeURI(uri);
+-      }
++      pageURI = this.getChromeURI(uri);
+     }
+ 
+     let resultChannel = Services.io.newChannelFromURIWithLoadInfo(

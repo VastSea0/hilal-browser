@@ -139,3 +139,60 @@ hilal-welcome-privacy-extreme-label = Maksimum
 hilal-welcome-privacy-extreme-badge = Yalnızca yerel
 hilal-welcome-privacy-extreme-desc = Sıkı seviyenin üzerine JavaScript kapatma, kamera/mikrofon/konum engelleme ve kapanışta tarama geçmişi temizleme ekler.
 hilal-welcome-privacy-extreme-detail = IP adresinizi gizlemez; birçok modern site beklendiği gibi çalışmayabilir.
+
+## Hilal New Tab
+
+hilal-newtab-title = Yeni Sekme
+hilal-newtab-active-workspace =
+    .title = Aktif Alan
+hilal-newtab-default-workspace = Varsayılan
+hilal-newtab-search-input =
+    .placeholder = Web’de arayın veya adres girin…
+    .title = Web’de arayın veya adres girin
+    .aria-label = Web’de arayın veya adres girin
+hilal-newtab-search-clear =
+    .title = Temizle
+    .aria-label = Temizle
+hilal-newtab-search-submit =
+    .title = Ara
+    .aria-label = Ara
+hilal-newtab-bookmarks = Yer İmleri
+hilal-newtab-history = Geçmiş
+hilal-newtab-downloads = İndirilenler
+hilal-newtab-settings-chip = Ayarlar
+hilal-newtab-customize = Kişiselleştir
+hilal-newtab-add-shortcut = Kısayol ekle
+hilal-newtab-remove-shortcut =
+    .title = Kaldır
+    .aria-label = Kaldır
+hilal-newtab-edit-shortcut =
+    .title = Diğer işlemler
+    .aria-label = Diğer işlemler
+hilal-newtab-dialog-title = Kısayol ekle
+hilal-newtab-dialog-edit-title = Kısayolu düzenle
+hilal-newtab-field-name = Başlık
+hilal-newtab-field-name-input =
+    .placeholder = örn. GitHub
+    .aria-label = Kısayol adı
+hilal-newtab-field-url = URL
+hilal-newtab-field-url-input =
+    .placeholder = https://…
+    .aria-label = Kısayol URL'si
+hilal-newtab-dialog-cancel = İptal
+hilal-newtab-dialog-save = Kaydet
+hilal-newtab-dialog-delete = Kaldır
+
+## Hilal Toolbar
+
+hilal-toolbar-clear =
+    .title = Temizle
+hilal-toolbar-copy-url =
+    .title = Sayfa Adresini Kopyala
+hilal-toolbar-theme =
+    .title = Sayfa Teması ve Renkleri
+hilal-toolbar-sidebar-toggle =
+    .title = Kenar Çubuğunu Aç/Kapat
+hilal-toolbar-settings =
+    .title = Ayarlar
+hilal-toolbar-newtab =
+    .title = Yeni Sekme
