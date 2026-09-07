@@ -1447,16 +1447,33 @@
       if (typeof CustomizableUI !== "undefined") {
         try {
           const widgetIds = CustomizableUI.getWidgetIdsInArea("nav-bar");
+          const validPinnedSet = new Set();
+
           for (const id of widgetIds) {
-            if (id.includes("-browser-action") || id.includes("webext") || id.startsWith("customizableui-special-")) {
+            // Only mount actual extension buttons; explicitly exclude customizableui-special (springs/separators)
+            if ((id.includes("-browser-action") || id.includes("webext")) && !id.includes("customizableui-special")) {
+              validPinnedSet.add(id);
               const node = document.getElementById(id) || CustomizableUI.getWidgetNode(id, window)?.[1];
-              if (node && node.parentNode !== extSlot) {
+              if (node && node.localName !== "toolbarspring" && node.localName !== "toolbarseparator" && node.parentNode !== extSlot) {
                 if (ueb) {
                   extSlot.insertBefore(node, ueb);
                 } else {
                   extSlot.appendChild(node);
                 }
               }
+            }
+          }
+
+          // Clean up any nodes in extSlot that are no longer pinned extensions or are spacers
+          for (const child of Array.from(extSlot.children)) {
+            if (child === ueb) continue;
+            if (
+              !validPinnedSet.has(child.id) ||
+              child.localName === "toolbarspring" ||
+              child.localName === "toolbarseparator" ||
+              child.id.includes("customizableui-special")
+            ) {
+              child.remove();
             }
           }
         } catch (e) {

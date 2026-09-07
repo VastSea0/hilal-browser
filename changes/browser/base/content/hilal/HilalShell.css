@@ -264,12 +264,41 @@
 #hilal-extensions-slot {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   -moz-window-dragging: no-drag;
 }
 
-#hilal-extensions-slot toolbarbutton,
-#hilal-extensions-slot .toolbarbutton-1 {
+#hilal-extensions-slot toolbarspring,
+#hilal-extensions-slot toolbarseparator,
+#hilal-extensions-slot [id*="customizableui-special"],
+#hilal-extensions-slot .unified-extensions-item-menu-button,
+#hilal-extensions-slot .unified-extensions-item-contents,
+#hilal-extensions-slot unified-extensions-item-messagebar-wrapper,
+#hilal-extensions-slot moz-message-bar,
+#hilal-extensions-slot .toolbarbutton-text,
+#hilal-extensions-slot label:not(.toolbarbutton-badge) {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#hilal-extensions-slot toolbaritem,
+#hilal-extensions-slot .unified-extensions-item,
+#hilal-extensions-slot .unified-extensions-item-row-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#hilal-extensions-slot .unified-extensions-item-action-button,
+#hilal-extensions-slot #unified-extensions-button,
+#hilal-extensions-slot > toolbarbutton:not(.unified-extensions-item-menu-button) {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -277,13 +306,19 @@
   height: 32px !important;
   min-width: 32px !important;
   min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
   border-radius: var(--md-sys-shape-corner-full, 9999px) !important;
   border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   background: transparent !important;
   color: var(--md-sys-color-on-surface-variant) !important;
   cursor: pointer !important;
   padding: 0 !important;
   margin: 0 !important;
+  position: relative !important;
+  overflow: visible !important;
   transition: background-color 150ms ease,
               color 150ms ease,
               transform 250ms var(--md-sys-motion-spring-spatial),
@@ -291,15 +326,17 @@
   -moz-window-dragging: no-drag !important;
 }
 
-#hilal-extensions-slot toolbarbutton:hover:not([disabled]),
-#hilal-extensions-slot .toolbarbutton-1:hover:not([disabled]) {
+#hilal-extensions-slot .unified-extensions-item-action-button:hover:not([disabled]),
+#hilal-extensions-slot #unified-extensions-button:hover:not([disabled]),
+#hilal-extensions-slot > toolbarbutton:not(.unified-extensions-item-menu-button):hover:not([disabled]) {
   background-color: var(--md-sys-color-surface-container-high) !important;
   color: var(--md-sys-color-on-surface) !important;
   transform: scale(1.06) !important;
 }
 
-#hilal-extensions-slot toolbarbutton:active:not([disabled]),
-#hilal-extensions-slot .toolbarbutton-1:active:not([disabled]) {
+#hilal-extensions-slot .unified-extensions-item-action-button:active:not([disabled]),
+#hilal-extensions-slot #unified-extensions-button:active:not([disabled]),
+#hilal-extensions-slot > toolbarbutton:not(.unified-extensions-item-menu-button):active:not([disabled]) {
   background-color: var(--md-sys-color-surface-container-highest) !important;
   color: var(--md-sys-color-primary) !important;
   transform: scale(0.90) !important;
@@ -318,6 +355,42 @@
   fill: currentColor !important;
   color: currentColor !important;
   -moz-context-properties: fill, fill-opacity, stroke, stroke-opacity !important;
+}
+
+#hilal-extensions-slot .toolbarbutton-badge-stack {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+}
+
+#hilal-extensions-slot .toolbarbutton-badge:empty,
+#hilal-extensions-slot .toolbarbutton-badge[value=""],
+#hilal-extensions-slot html\:label.toolbarbutton-badge:empty {
+  display: none !important;
+}
+
+#hilal-extensions-slot .toolbarbutton-badge {
+  position: absolute !important;
+  top: -1px !important;
+  right: -1px !important;
+  min-width: 13px !important;
+  height: 13px !important;
+  padding: 0 3px !important;
+  font-size: 8.5px !important;
+  font-weight: 700 !important;
+  line-height: 13px !important;
+  text-align: center !important;
+  border-radius: var(--md-sys-shape-corner-full, 9999px) !important;
+  background-color: var(--md-sys-color-error, #b3261e) !important;
+  color: var(--md-sys-color-on-error, #ffffff) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: none !important;
 }
 
 #hilal-sidebar-toggle-btn.collapsed {
