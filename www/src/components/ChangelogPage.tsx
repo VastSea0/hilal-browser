@@ -159,7 +159,7 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
                   </i>
                 </div>
 
-                <article className="border round w-full bg-m3-container-lowest p-6 sm:p-8 space-y-6 m-0 shadow-sm">
+                <article className="w-full rounded-[28px] bg-m3-container-lowest border border-[var(--outline-variant)]/25 p-6 sm:p-8 space-y-6 m-0 shadow-xs">
                   {/* Release Header */}
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -182,7 +182,7 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
                       )}
                       <span>•</span>
                       <a
-                        className="button border small inline-flex items-center gap-1"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border border-[var(--outline-variant)]/30 hover:border-[var(--primary)] text-[var(--on-surface-variant)] hover:text-[var(--primary)] hover:bg-[var(--primary-container)]/10 transition-all no-underline shadow-xs"
                         href={rel.githubUrl}
                         target="_blank"
                         rel="noreferrer"

@@ -60,17 +60,18 @@ function CodeBlock({
           {language || "sh"}
         </span>
         <button
-          className="transparent small text-xs cursor-pointer inline-flex items-center"
+          type="button"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono text-[#8b949e] hover:text-white hover:bg-white/10 transition-colors cursor-pointer border-0 bg-transparent"
           onClick={() => onCopy(code)}
         >
           {copied ? (
             <>
-              <i className="text-sm text-emerald-400 mr-1.5">check</i>
+              <i className="text-sm text-emerald-400">check</i>
               <span className="text-emerald-400 font-semibold">{copiedLabel}</span>
             </>
           ) : (
             <>
-              <i className="text-sm mr-1.5">content_copy</i>
+              <i className="text-sm">content_copy</i>
               <span>{copyLabel}</span>
             </>
           )}
@@ -559,10 +560,11 @@ export default function DocsPage({ lang }: DocsPageProps) {
             <div className="pt-10 border-t border-[var(--md-sys-color-outline-variant)]/20 flex flex-wrap items-center justify-between gap-4">
               {prevSection ? (
                 <button
-                  className="secondary-container small cursor-pointer inline-flex items-center"
+                  type="button"
+                  className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-[var(--md-sys-color-outline-variant)]/35 bg-m3-container-lowest hover:bg-m3-container text-[var(--md-sys-color-on-surface)] text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs hover:shadow-md group"
                   onClick={() => handleSelectSection(prevSection.id)}
                 >
-                  <i className="text-base mr-1">chevron_left</i>
+                  <i className="text-lg text-[var(--md-sys-color-primary)] group-hover:-translate-x-1 transition-transform">chevron_left</i>
                   <span>{prevSection.title}</span>
                 </button>
               ) : (
@@ -571,18 +573,20 @@ export default function DocsPage({ lang }: DocsPageProps) {
 
               {nextSection ? (
                 <button
-                  className="primary small ml-auto cursor-pointer inline-flex items-center"
+                  type="button"
+                  className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-[var(--md-sys-color-primary)] hover:opacity-90 text-[var(--md-sys-color-on-primary)] text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-sm hover:shadow-md ml-auto group border-0"
                   onClick={() => handleSelectSection(nextSection.id)}
                 >
                   <span>{nextSection.title}</span>
-                  <i className="text-base ml-1">chevron_right</i>
+                  <i className="text-lg group-hover:translate-x-1 transition-transform">chevron_right</i>
                 </button>
               ) : (
                 <button
-                  className="secondary-container small ml-auto cursor-pointer inline-flex items-center"
+                  type="button"
+                  className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-[var(--md-sys-color-outline-variant)]/35 bg-m3-container-lowest hover:bg-m3-container text-[var(--md-sys-color-on-surface)] text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs hover:shadow-md ml-auto group"
                   onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 >
-                  <i className="text-base mr-1">arrow_upward</i>
+                  <i className="text-lg text-[var(--md-sys-color-primary)] group-hover:-translate-y-1 transition-transform">arrow_upward</i>
                   <span>{lang === "tr" ? "Başa Dön" : "Back to Top"}</span>
                 </button>
               )}

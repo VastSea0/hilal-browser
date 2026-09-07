@@ -39,11 +39,21 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 501;
+export const REPO_COMMITS_TOTAL = 502;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "075b02b7d734be7c0bebd6b6ca9ba68b38e2291d",
+    "shortHash": "075b02b",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-08T01:35:49+03:00",
+    "subject": "fix(www): widen download modal layout and fix squished chip padding",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/075b02b7d734be7c0bebd6b6ca9ba68b38e2291d"
+  },
   {
     "hash": "1ae1f8228131d2f466900c1eabc0836c804bc15b",
     "shortHash": "1ae1f82",
@@ -5061,9 +5071,19 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-08T01:28:22+03:00",
-    "commitCount": 60,
+    "date": "2026-09-08T01:35:49+03:00",
+    "commitCount": 61,
     "commits": [
+      {
+        "hash": "075b02b7d734be7c0bebd6b6ca9ba68b38e2291d",
+        "shortHash": "075b02b",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-08T01:35:49+03:00",
+        "subject": "fix(www): widen download modal layout and fix squished chip padding",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/075b02b7d734be7c0bebd6b6ca9ba68b38e2291d"
+      },
       {
         "hash": "1ae1f8228131d2f466900c1eabc0836c804bc15b",
         "shortHash": "1ae1f82",
@@ -10333,7 +10353,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 489,
+    "contributions": 490,
     "role": "Lead Developer"
   },
   {
