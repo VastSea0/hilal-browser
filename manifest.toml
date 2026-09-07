@@ -27,6 +27,10 @@ path   = "browser/components/preferences/hilal.inc.xhtml"
 reason = "Hilal preferences panels inclusion template"
 
 [[patches]]
+path   = "browser/components/preferences/m3e-web.all.min.mjs"
+reason = "Material 3 Expressive official web components bundle"
+
+[[patches]]
 path   = "browser/components/preferences.patch"
 reason = "Hilal preferences panels and tabs layout"
 

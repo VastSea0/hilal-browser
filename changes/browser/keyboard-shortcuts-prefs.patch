@@ -62,16 +62,24 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
  ]);
  
  if (AppConstants.HAVE_SHELL_SERVICE) {
-@@ -1671,6 +1692,1327 @@ gMainPane.initialized = new Promise(res => {
+@@ -1671,6 +1692,1370 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
 +var gHilalPane = {
 +  init() {
++    import("chrome://browser/content/preferences/m3e-web.all.min.mjs").catch(
++      err => {
++        console.error("Failed to load m3e-web.all.min.mjs", err);
++      }
++    );
 +    function setEventListener(aId, aEventType, aCallback) {
 +      const el = document.getElementById(aId);
 +      if (el) {
 +        el.addEventListener(aEventType, aCallback);
++        if (aEventType === "command") {
++          el.addEventListener("click", aCallback);
++        }
 +      }
 +    }
 +
@@ -86,8 +94,16 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +        checkbox.removeAttribute("checked");
 +      }
 +
++      if (customElements?.whenDefined) {
++        customElements.whenDefined(checkbox.localName || "m3e-switch").then(() => {
++          const currentVal = Services.prefs.getBoolPref(prefName, defaultValue);
++          checkbox.checked = currentVal;
++          checkbox.toggleAttribute("checked", currentVal);
++        }).catch(() => {});
++      }
++
 +      function onToggle() {
-+        const isChecked = checkbox.checked ?? checkbox.hasAttribute("checked");
++        const isChecked = !!(checkbox.checked ?? checkbox.hasAttribute("checked"));
 +        Services.prefs.setBoolPref(prefName, isChecked);
 +        checkbox.checked = isChecked;
 +        checkbox.toggleAttribute("checked", isChecked);
@@ -100,6 +116,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +
 +      checkbox.addEventListener("command", onToggle);
 +      checkbox.addEventListener("change", onToggle);
++      checkbox.addEventListener("input", onToggle);
 +      checkbox.addEventListener("click", onToggle);
 +    }
 +
@@ -110,10 +127,10 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +      mainPane.addEventListener("click", e => {
 +        const row = e.target.closest(".settings-row");
 +        if (!row) return;
-+        if (e.target.closest("button, a, input, select, radiogroup, radio, .m3-swatch-circle, richlistbox, richlistitem")) {
++        if (e.target.closest("button, m3e-button, html\\:m3e-button, a, input, select, m3e-segmented-button, html\\:m3e-segmented-button, m3e-button-segment, html\\:m3e-button-segment, radiogroup, radio, .m3-swatch-circle, richlistbox, richlistitem")) {
 +          return;
 +        }
-+        const switchEl = row.querySelector("checkbox.settings-switch, .settings-switch, moz-toggle");
++        const switchEl = row.querySelector("m3e-switch, html\\:m3e-switch, checkbox.settings-switch, .settings-switch, moz-toggle");
 +        if (switchEl && e.target !== switchEl && !switchEl.contains(e.target)) {
 +          switchEl.click();
 +        }
@@ -374,12 +391,17 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +      const updatePrivacyLevelUI = (level) => {
 +        const normalized = normalizePrivacyLevel(level);
 +        hilalPrivacyLevelRadioGroup.value = normalized;
-+        const radios = hilalPrivacyLevelRadioGroup.querySelectorAll("radio");
-+        for (const r of radios) {
-+          if (r.value === normalized) {
-+            r.setAttribute("selected", "true");
++        const segments = hilalPrivacyLevelRadioGroup.querySelectorAll("m3e-button-segment, m3e-button, radio");
++        for (const s of segments) {
++          const isSel = (s.value === normalized);
++          s.checked = isSel;
++          s.selected = isSel;
++          if (isSel) {
++            s.setAttribute("selected", "true");
++            s.setAttribute("checked", "true");
 +          } else {
-+            r.removeAttribute("selected");
++            s.removeAttribute("selected");
++            s.removeAttribute("checked");
 +          }
 +        }
 +      };
@@ -394,11 +416,18 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +      };
 +
 +      hilalPrivacyLevelRadioGroup.addEventListener("command", () => onPrivacyChange());
-+      hilalPrivacyLevelRadioGroup.addEventListener("change", () => onPrivacyChange());
++      hilalPrivacyLevelRadioGroup.addEventListener("change", (e) => {
++        const val = hilalPrivacyLevelRadioGroup.value || e.target?.value;
++        if (val) onPrivacyChange(val);
++      });
++      hilalPrivacyLevelRadioGroup.addEventListener("input", (e) => {
++        const val = hilalPrivacyLevelRadioGroup.value || e.target?.value;
++        if (val) onPrivacyChange(val);
++      });
 +      hilalPrivacyLevelRadioGroup.addEventListener("click", e => {
-+        const radio = e.target.closest("radio");
-+        if (radio && radio.value) {
-+          onPrivacyChange(radio.value);
++        const seg = e.target.closest("m3e-button-segment, m3e-button, radio");
++        if (seg && seg.value) {
++          onPrivacyChange(seg.value);
 +        }
 +      });
 +    }
@@ -590,12 +619,17 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +      }
 +      if (accentModeRadioGroup) {
 +        accentModeRadioGroup.value = mode;
-+        const radios = accentModeRadioGroup.querySelectorAll("radio");
-+        for (const r of radios) {
-+          if (r.value === mode) {
-+            r.setAttribute("selected", "true");
++        const segments = accentModeRadioGroup.querySelectorAll("m3e-button-segment, m3e-button, radio");
++        for (const s of segments) {
++          const isSel = (s.value === mode);
++          s.checked = isSel;
++          s.selected = isSel;
++          if (isSel) {
++            s.setAttribute("selected", "true");
++            s.setAttribute("checked", "true");
 +          } else {
-+            r.removeAttribute("selected");
++            s.removeAttribute("selected");
++            s.removeAttribute("checked");
 +          }
 +        }
 +      }
@@ -686,11 +720,18 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +      };
 +
 +      accentModeRadioGroup.addEventListener("command", () => onModeChange());
-+      accentModeRadioGroup.addEventListener("change", () => onModeChange());
++      accentModeRadioGroup.addEventListener("change", (e) => {
++        const val = accentModeRadioGroup.value || e.target?.value;
++        if (val) onModeChange(val);
++      });
++      accentModeRadioGroup.addEventListener("input", (e) => {
++        const val = accentModeRadioGroup.value || e.target?.value;
++        if (val) onModeChange(val);
++      });
 +      accentModeRadioGroup.addEventListener("click", e => {
-+        const radio = e.target.closest("radio");
-+        if (radio && radio.value) {
-+          onModeChange(radio.value);
++        const seg = e.target.closest("m3e-button-segment, m3e-button, radio");
++        if (seg && seg.value) {
++          onModeChange(seg.value);
 +        }
 +      });
 +    }
@@ -1007,12 +1048,14 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +    this.refresh();
 +
 +    if (this._defaultsBtn) {
-+      this._defaultsBtn.addEventListener("command", () => {
++      const onRestore = () => {
 +        if (Services.prompt.confirm(window, "Restore Defaults", "Are you sure you want to restore all keyboard shortcuts to their default settings?")) {
 +          Services.prefs.clearUserPref("hilal.keyboard.shortcuts.data");
 +          this.refresh();
 +        }
-+      });
++      };
++      this._defaultsBtn.addEventListener("command", onRestore);
++      this._defaultsBtn.addEventListener("click", onRestore);
 +    }
 +  },
 +
@@ -1102,30 +1145,30 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +  },
 +
 +  _createCategoryCard(cat) {
-+    let card = document.createXULElement("html:div");
++    let card = document.createElement("div");
 +    card.setAttribute("class", "shortcuts-category-card");
 +
-+    let title = document.createXULElement("html:div");
++    let title = document.createElement("div");
 +    title.setAttribute("class", "shortcuts-category-title");
 +    title.textContent = cat.title;
 +    card.appendChild(title);
 +
 +    for (let item of cat.items) {
-+      let rowContainer = document.createXULElement("html:div");
++      let rowContainer = document.createElement("div");
 +      rowContainer.setAttribute("class", "shortcut-row-container");
 +      rowContainer.setAttribute("id", `container_${item.id}`);
 +
-+      let row = document.createXULElement("html:div");
++      let row = document.createElement("div");
 +      row.setAttribute("class", "shortcut-row");
 +
-+      let info = document.createXULElement("html:div");
++      let info = document.createElement("div");
 +      info.setAttribute("class", "shortcut-info");
 +
-+      let label = document.createXULElement("html:span");
++      let label = document.createElement("span");
 +      label.setAttribute("class", "shortcut-label");
 +      label.textContent = item.name;
 +
-+      let desc = document.createXULElement("html:span");
++      let desc = document.createElement("span");
 +      desc.setAttribute("class", "shortcut-desc");
 +      desc.textContent = item.desc;
 +
@@ -1133,17 +1176,17 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +      info.appendChild(desc);
 +      row.appendChild(info);
 +
-+      let controls = document.createXULElement("html:div");
++      let controls = document.createElement("div");
 +      controls.setAttribute("class", "shortcut-controls");
 +
-+      let kbdContainer = document.createXULElement("html:div");
++      let kbdContainer = document.createElement("div");
 +      kbdContainer.setAttribute("class", "kbd-container");
 +      
 +      let shortcut = this.getShortcut(item.id);
 +      this._renderKeycaps(kbdContainer, shortcut.key, shortcut.modifiers);
 +      controls.appendChild(kbdContainer);
 +
-+      let btnEdit = document.createXULElement("html:button");
++      let btnEdit = document.createElement("button");
 +      btnEdit.setAttribute("class", "shortcut-action-btn");
 +      btnEdit.textContent = "Edit";
 +      btnEdit.addEventListener("click", () => {
@@ -1151,7 +1194,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +      });
 +      controls.appendChild(btnEdit);
 +
-+      let btnClear = document.createXULElement("html:button");
++      let btnClear = document.createElement("button");
 +      btnClear.setAttribute("class", "shortcut-clear-btn");
 +      btnClear.textContent = "×";
 +      btnClear.setAttribute("title", "Clear shortcut");
@@ -1171,7 +1214,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +  _renderKeycaps(container, key, modifiers) {
 +    container.textContent = "";
 +    if (!key && !modifiers) {
-+      let span = document.createXULElement("html:span");
++      let span = document.createElement("span");
 +      span.style.opacity = "0.5";
 +      span.textContent = "Disabled";
 +      container.appendChild(span);
@@ -1195,7 +1238,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +    }
 +
 +    for (let part of parts) {
-+      let kbd = document.createXULElement("html:kbd");
++      let kbd = document.createElement("kbd");
 +      kbd.setAttribute("class", "shortcut-keycap");
 +      kbd.textContent = part;
 +      container.appendChild(kbd);
@@ -1331,18 +1374,18 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +    let activeBanner = rowContainer.querySelector(".shortcut-conflict-banner");
 +    if (activeBanner) activeBanner.remove();
 +
-+    let banner = document.createXULElement("html:div");
++    let banner = document.createElement("div");
 +    banner.setAttribute("class", "shortcut-conflict-banner");
 +
-+    let text = document.createXULElement("html:span");
++    let text = document.createElement("span");
 +    text.setAttribute("class", "shortcut-conflict-text");
 +    text.textContent = `Conflicts with "${conflict.name}"`;
 +    banner.appendChild(text);
 +
-+    let actions = document.createXULElement("html:div");
++    let actions = document.createElement("div");
 +    actions.setAttribute("class", "shortcut-conflict-actions");
 +
-+    let btnOverwrite = document.createXULElement("html:button");
++    let btnOverwrite = document.createElement("button");
 +    btnOverwrite.setAttribute("class", "conflict-action-link");
 +    btnOverwrite.textContent = "Overwrite";
 +    btnOverwrite.addEventListener("click", () => {
@@ -1350,7 +1393,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
 +    });
 +    actions.appendChild(btnOverwrite);
 +
-+    let btnCancel = document.createXULElement("html:button");
++    let btnCancel = document.createElement("button");
 +    btnCancel.setAttribute("class", "conflict-action-link");
 +    btnCancel.textContent = "Cancel";
 +    btnCancel.addEventListener("click", () => {

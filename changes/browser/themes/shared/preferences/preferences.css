@@ -280,6 +280,8 @@ html|moz-page-nav#categories {
   min-width: 290px !important;
   max-width: 290px !important;
   flex: 0 0 290px !important;
+  margin-inline-start: 0px !important;
+  margin-left: 0px !important;
   background-color: var(--md-sys-color-surface) !important;
   border-inline-end: 1px solid var(--md-sys-color-outline-variant) !important;
   box-sizing: border-box !important;
@@ -289,6 +291,7 @@ html|moz-page-nav#categories {
   flex-direction: column !important;
   gap: 4px !important;
   --page-nav-margin-block-start: 0px !important;
+  --page-nav-margin-inline-start: 0px !important;
   --page-space-block-start: 0px !important;
 }
 
@@ -547,133 +550,57 @@ setting-control:last-child {
 }
 
 /* ==========================================================================
-   6. MATERIAL 3 EXPRESSIVE SWITCHES (52x32dp, spring, checkmark)
+   6. OFFICIAL MATERIAL 3 EXPRESSIVE COMPONENTS (@m3e/web)
    ========================================================================== */
 
-checkbox.settings-switch,
-.settings-row > checkbox,
-.settings-switch {
-  appearance: none !important;
+m3e-switch,
+html|m3e-switch {
+  display: inline-flex !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+  cursor: pointer !important;
+  --m3e-switch-selected-track-color: var(--md-sys-color-primary);
+  --m3e-switch-selected-handle-color: var(--md-sys-color-on-primary);
+  --m3e-switch-selected-icon-color: var(--md-sys-color-primary);
+  --m3e-switch-unselected-track-color: var(--md-sys-color-surface-container-highest);
+  --m3e-switch-unselected-handle-color: var(--md-sys-color-outline);
+  --m3e-switch-unselected-icon-color: var(--md-sys-color-surface-container-highest);
+}
+
+m3e-segmented-button,
+html|m3e-segmented-button {
+  display: inline-flex !important;
+  vertical-align: middle !important;
+  align-items: center !important;
+  min-width: 360px !important;
+  max-width: 100% !important;
+  --m3e-segmented-button-height: 42px !important;
+  --m3e-segmented-button-selected-container-color: var(--md-sys-color-secondary-container) !important;
+  --m3e-segmented-button-selected-label-text-color: var(--md-sys-color-on-secondary-container) !important;
+  --m3e-segmented-button-unselected-label-text-color: var(--md-sys-color-on-surface-variant) !important;
+  --m3e-segmented-button-outline-color: var(--md-sys-color-outline-variant) !important;
+}
+
+m3e-button-segment,
+html|m3e-button-segment {
+  flex: 1 !important;
+  cursor: pointer !important;
+  font-family: var(--font-sans) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+}
+
+m3e-button,
+html|m3e-button {
   display: inline-flex !important;
   align-items: center !important;
-  justify-content: center !important;
   cursor: pointer !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 52px !important;
-  min-width: 52px !important;
-  max-width: 52px !important;
-  height: 32px !important;
-  min-height: 32px !important;
-  max-height: 32px !important;
-  border: none !important;
-  background: transparent !important;
+  font-family: var(--font-sans) !important;
+  --m3e-button-container-shape: 9999px !important;
 }
 
-moz-toggle::part(button),
-.toggle-button,
-checkbox.settings-switch .checkbox-check,
-.settings-row > checkbox .checkbox-check,
-.settings-switch .checkbox-check {
-  appearance: none !important;
-  width: 52px !important;
-  min-width: 52px !important;
-  max-width: 52px !important;
-  height: 32px !important;
-  min-height: 32px !important;
-  max-height: 32px !important;
-  border-radius: 9999px !important;
-  border: 2px solid var(--md-sys-color-outline) !important;
-  background-color: var(--md-sys-color-surface-container-highest) !important;
-  background-image: radial-gradient(circle 8px at 14px center, var(--md-sys-color-outline) 99%, transparent 100%) !important;
-  background-repeat: no-repeat !important;
-  box-sizing: border-box !important;
-  cursor: pointer !important;
-  position: relative !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  transition: background-color 200ms cubic-bezier(0.2, 0, 0, 1),
-              border-color 200ms cubic-bezier(0.2, 0, 0, 1),
-              background-image 200ms cubic-bezier(0.2, 0, 0, 1) !important;
-}
-
-moz-toggle:hover::part(button),
-.toggle-button:hover,
-checkbox.settings-switch:hover .checkbox-check,
-.settings-row:hover checkbox.settings-switch .checkbox-check,
-.settings-row > checkbox:hover .checkbox-check,
-.settings-switch:hover .checkbox-check {
-  border-color: var(--md-sys-color-primary) !important;
-}
-
-moz-toggle[pressed]::part(button),
-moz-toggle[pressed="true"]::part(button),
-.toggle-button[aria-pressed="true"],
-checkbox.settings-switch[checked] .checkbox-check,
-checkbox.settings-switch:checked .checkbox-check,
-checkbox.settings-switch[checked="true"] .checkbox-check,
-.settings-row > checkbox[checked] .checkbox-check,
-.settings-row > checkbox:checked .checkbox-check,
-.settings-row > checkbox[checked="true"] .checkbox-check,
-.settings-switch[checked] .checkbox-check,
-.settings-switch:checked .checkbox-check,
-.settings-switch[checked="true"] .checkbox-check,
-.checkbox-check[checked],
-.checkbox-check[checked="true"] {
-  background-color: var(--md-sys-color-primary) !important;
-  border-color: var(--md-sys-color-primary) !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b57d0' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"),
-                    radial-gradient(circle 12px at 36px center, var(--md-sys-color-on-primary) 99%, transparent 100%) !important;
-  background-size: 14px 14px, 100% 100% !important;
-  background-position: 29px center, 0 0 !important;
-  background-repeat: no-repeat, no-repeat !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  moz-toggle[pressed]::part(button),
-  moz-toggle[pressed="true"]::part(button),
-  .toggle-button[aria-pressed="true"],
-  checkbox.settings-switch[checked] .checkbox-check,
-  checkbox.settings-switch:checked .checkbox-check,
-  checkbox.settings-switch[checked="true"] .checkbox-check,
-  .settings-row > checkbox[checked] .checkbox-check,
-  .settings-row > checkbox:checked .checkbox-check,
-  .settings-row > checkbox[checked="true"] .checkbox-check,
-  .settings-switch[checked] .checkbox-check,
-  .settings-switch:checked .checkbox-check,
-  .settings-switch[checked="true"] .checkbox-check,
-  .checkbox-check[checked],
-  .checkbox-check[checked="true"] {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23042f66' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"),
-                      radial-gradient(circle 12px at 36px center, var(--md-sys-color-on-primary) 99%, transparent 100%) !important;
-  }
-}
-
-:root[brighttext="true"] moz-toggle[pressed]::part(button),
-:root[brighttext="true"] moz-toggle[pressed="true"]::part(button),
-:root[brighttext="true"] .toggle-button[aria-pressed="true"],
-:root[brighttext="true"] checkbox.settings-switch[checked] .checkbox-check,
-:root[brighttext="true"] checkbox.settings-switch:checked .checkbox-check,
-:root[brighttext="true"] checkbox.settings-switch[checked="true"] .checkbox-check,
-:root[brighttext="true"] .settings-row > checkbox[checked] .checkbox-check,
-:root[brighttext="true"] .settings-row > checkbox:checked .checkbox-check,
-:root[brighttext="true"] .settings-row > checkbox[checked="true"] .checkbox-check,
-:root[brighttext="true"] .settings-switch[checked] .checkbox-check,
-:root[brighttext="true"] .settings-switch:checked .checkbox-check,
-:root[brighttext="true"] .settings-switch[checked="true"] .checkbox-check,
-:root[brighttext="true"] .checkbox-check[checked],
-:root[brighttext="true"] .checkbox-check[checked="true"] {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23042f66' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"),
-                    radial-gradient(circle 12px at 36px center, var(--md-sys-color-on-primary) 99%, transparent 100%) !important;
-}
-
-.settings-row > checkbox .checkbox-label-box {
-  display: none !important;
-}
-
-/* Standalone checkboxes (not switch rows) */
+/* Fallback for native checkbox */
 checkbox:not(.settings-switch) {
   display: inline-flex !important;
   align-items: center !important;
@@ -700,89 +627,6 @@ checkbox:not(.settings-switch)[checked="true"] .checkbox-check {
   background-repeat: no-repeat !important;
   background-position: center !important;
   background-size: 13px 13px !important;
-}
-
-/* ==========================================================================
-   7. MATERIAL 3 SEGMENTED BUTTONS (radiogroup)
-   ========================================================================== */
-
-#hilalPrivacyLevel,
-radiogroup.segmented-radiogroup {
-  display: flex !important;
-  flex-direction: row !important;
-  border: 1px solid var(--md-sys-color-outline-variant) !important;
-  border-radius: 9999px !important;
-  overflow: hidden !important;
-  padding: 0 !important;
-  margin: 8px 0 !important;
-  background-color: var(--md-sys-color-surface-container-low) !important;
-  box-sizing: border-box !important;
-  min-width: 390px !important;
-  max-width: 100% !important;
-}
-
-#hilalPrivacyLevel radio,
-radiogroup.segmented-radiogroup radio {
-  flex: 1 !important;
-  min-height: 44px !important;
-  height: 44px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  margin: 0 !important;
-  padding: 0 12px !important;
-  border-inline-end: 1px solid var(--md-sys-color-outline-variant) !important;
-  cursor: pointer !important;
-  transition: background-color 150ms ease, color 150ms ease !important;
-  box-sizing: border-box !important;
-  user-select: none !important;
-  white-space: nowrap !important;
-}
-
-#hilalPrivacyLevel radio:last-child,
-radiogroup.segmented-radiogroup radio:last-child {
-  border-inline-end: none !important;
-}
-
-#hilalPrivacyLevel radio .radio-check,
-radiogroup.segmented-radiogroup radio .radio-check {
-  display: none !important;
-}
-
-#hilalPrivacyLevel radio .radio-label,
-radiogroup.segmented-radiogroup radio .radio-label {
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  color: var(--md-sys-color-on-surface-variant) !important;
-  margin: 0 !important;
-  pointer-events: none !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-#hilalPrivacyLevel radio:hover,
-radiogroup.segmented-radiogroup radio:hover {
-  background-color: var(--md-sys-color-surface-container-high) !important;
-}
-
-#hilalPrivacyLevel radio[selected],
-#hilalPrivacyLevel radio[selected="true"],
-#hilalPrivacyLevel radio:checked,
-radiogroup.segmented-radiogroup radio[selected],
-radiogroup.segmented-radiogroup radio[selected="true"],
-radiogroup.segmented-radiogroup radio:checked {
-  background-color: var(--md-sys-color-secondary-container) !important;
-}
-
-#hilalPrivacyLevel radio[selected] .radio-label,
-#hilalPrivacyLevel radio[selected="true"] .radio-label,
-#hilalPrivacyLevel radio:checked .radio-label,
-radiogroup.segmented-radiogroup radio[selected] .radio-label,
-radiogroup.segmented-radiogroup radio[selected="true"] .radio-label,
-radiogroup.segmented-radiogroup radio:checked .radio-label {
-  color: var(--md-sys-color-on-secondary-container) !important;
-  font-weight: 600 !important;
 }
 
 /* ==========================================================================
@@ -1100,3 +944,185 @@ setting-group[groupid="browserLayout"],
 #browserLayout {
   display: none !important;
 }
+
+/* ==========================================================================
+   12. MATERIAL 3 EXPRESSIVE KEYBOARD SHORTCUTS
+   ========================================================================== */
+
+.shortcuts-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+
+.shortcuts-category-card {
+  background-color: var(--md-sys-color-surface-container-low) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: 16px !important;
+  padding: 16px 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+.shortcuts-category-title {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: var(--md-sys-color-primary) !important;
+  padding-bottom: 6px !important;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant) !important;
+  margin-bottom: 2px !important;
+}
+
+.shortcut-row-container {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+}
+
+.shortcut-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  padding: 8px 10px !important;
+  border-radius: 10px !important;
+  transition: background-color 150ms ease !important;
+}
+
+.shortcut-row:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 5%, transparent) !important;
+}
+
+.shortcut-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  flex: 1 !important;
+}
+
+.shortcut-label {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--md-sys-color-on-surface) !important;
+}
+
+.shortcut-desc {
+  font-size: 12px !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
+}
+
+.shortcut-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.kbd-container {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.shortcut-keycap {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  padding: 0 8px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  font-family: inherit !important;
+  color: var(--md-sys-color-on-surface) !important;
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+}
+
+.shortcut-action-btn {
+  min-height: 32px !important;
+  height: 32px !important;
+  padding: 0 14px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border-radius: 9999px !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  background-color: var(--md-sys-color-surface-container) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  cursor: pointer !important;
+  transition: all 150ms ease !important;
+}
+
+.shortcut-action-btn:hover {
+  background-color: var(--md-sys-color-secondary-container) !important;
+  color: var(--md-sys-color-on-secondary-container) !important;
+  border-color: transparent !important;
+}
+
+.shortcut-action-btn.recording-active {
+  background-color: var(--md-sys-color-error-container) !important;
+  color: var(--md-sys-color-on-error-container) !important;
+  border-color: var(--md-sys-color-error) !important;
+  animation: pulse-recording 1.2s infinite alternate ease-in-out !important;
+}
+
+@keyframes pulse-recording {
+  0% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.shortcut-clear-btn {
+  min-width: 28px !important;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  border-radius: 50% !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.shortcut-clear-btn:hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  color: var(--md-sys-color-error) !important;
+}
+
+.shortcut-conflict-banner {
+  margin-top: 6px !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  background-color: var(--md-sys-color-error-container) !important;
+  color: var(--md-sys-color-on-error-container) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-size: 12.5px !important;
+}
+
+.shortcut-conflict-actions {
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.conflict-action-link {
+  background: none !important;
+  border: none !important;
+  color: var(--md-sys-color-error) !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  text-decoration: underline !important;
+  padding: 0 !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+

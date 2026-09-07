@@ -26,7 +26,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-boosts-auto-palette"/>
       <span class="settings-row-desc" data-l10n-id="hilal-boosts-browser-ui"/>
     </div>
-    <checkbox id="hilalBoostsAutoPalette" preference="hilal.boosts.auto_palette.enabled" class="settings-switch"/>
+    <html:m3e-switch id="hilalBoostsAutoPalette" preference="hilal.boosts.auto_palette.enabled" icons="both"></html:m3e-switch>
   </div>
 </groupbox>
 
@@ -44,7 +44,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-workspaces-enabled"/>
       <span class="settings-row-desc">Sekmelerinizi kişisel, iş ve sosyal alanlara ayırın</span>
     </div>
-    <checkbox id="hilalWorkspacesEnabled" preference="hilal.workspaces.enabled" class="settings-switch"/>
+    <html:m3e-switch id="hilalWorkspacesEnabled" preference="hilal.workspaces.enabled" icons="both"></html:m3e-switch>
   </div>
 
   <div class="settings-row">
@@ -52,7 +52,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-workspaces-pinned-public"/>
       <span class="settings-row-desc">Pinli sekmeler her alanda ortak kalsın</span>
     </div>
-    <checkbox id="hilalWorkspacesPinnedPublic" preference="hilal.workspaces.pinned.public" class="settings-switch"/>
+    <html:m3e-switch id="hilalWorkspacesPinnedPublic" preference="hilal.workspaces.pinned.public" icons="both"></html:m3e-switch>
   </div>
 
   <div class="settings-row">
@@ -60,7 +60,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-workspaces-groups-public"/>
       <span class="settings-row-desc">Sekme gruplarını tüm çalışma alanlarına yay</span>
     </div>
-    <checkbox id="hilalWorkspacesGroupsPublic" preference="hilal.workspaces.groups.public" class="settings-switch"/>
+    <html:m3e-switch id="hilalWorkspacesGroupsPublic" preference="hilal.workspaces.groups.public" icons="both"></html:m3e-switch>
   </div>
 
   <div class="settings-row">
@@ -68,7 +68,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-urlbar-show-workspace-name"/>
       <span class="settings-row-desc">Adres çubuğunda geçerli alan adını göster</span>
     </div>
-    <checkbox id="hilalUrlbarShowWorkspaceName" preference="hilal.urlbar.showWorkspaceName" class="settings-switch"/>
+    <html:m3e-switch id="hilalUrlbarShowWorkspaceName" preference="hilal.urlbar.showWorkspaceName" icons="both"></html:m3e-switch>
   </div>
 
   <div class="settings-row">
@@ -76,10 +76,9 @@
       <span class="settings-row-title" data-l10n-id="hilal-workspaces-reset-button"/>
       <span class="settings-row-desc" data-l10n-id="hilal-workspaces-reset-description"/>
     </div>
-    <button id="hilalWorkspacesReset"
-            is="highlightable-button"
-            class="accessory-button"
-            data-l10n-id="hilal-workspaces-reset-button"/>
+    <html:m3e-button id="hilalWorkspacesReset"
+                    variant="tonal"
+                    data-l10n-id="hilal-workspaces-reset-button">Sıfırla</html:m3e-button>
   </div>
 </groupbox>
 
@@ -97,20 +96,17 @@
       <span class="settings-row-title" data-l10n-id="hilal-accent-mode-title"/>
       <span class="settings-row-desc" data-l10n-id="hilal-accent-mode-desc"/>
     </div>
-    <radiogroup id="hilalAccentMode" class="segmented-radiogroup">
-      <radio id="hilalAccentModeWorkspace"
-             value="workspace"
-             label="Çalışma Alanı"
-             data-l10n-id="hilal-accent-mode-workspace"/>
-      <radio id="hilalAccentModeGlobal"
-             value="global"
-             label="Genel Vurgu"
-             data-l10n-id="hilal-accent-mode-global"/>
-      <radio id="hilalAccentModeBoosts"
-             value="boosts"
-             label="Hilal Boosts"
-             data-l10n-id="hilal-accent-mode-boosts"/>
-    </radiogroup>
+    <html:m3e-segmented-button id="hilalAccentMode">
+      <html:m3e-button-segment id="hilalAccentModeWorkspace" value="workspace" selected="">
+        <html:span data-l10n-id="hilal-accent-mode-workspace">Çalışma Alanı</html:span>
+      </html:m3e-button-segment>
+      <html:m3e-button-segment id="hilalAccentModeGlobal" value="global">
+        <html:span data-l10n-id="hilal-accent-mode-global">Genel Vurgu</html:span>
+      </html:m3e-button-segment>
+      <html:m3e-button-segment id="hilalAccentModeBoosts" value="boosts">
+        <html:span data-l10n-id="hilal-accent-mode-boosts">Hilal Boosts</html:span>
+      </html:m3e-button-segment>
+    </html:m3e-segmented-button>
   </div>
 
   <!-- Sub-section: Workspace Colors -->
@@ -163,7 +159,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-sidebar-compact-enabled"/>
       <span class="settings-row-desc">Kenara yaklaşınca süzülen kenar ve üst araç çubuğu</span>
     </div>
-    <checkbox id="hilalSidebarCompactEnabled" preference="hilal.compact.enabled" class="settings-switch"/>
+    <html:m3e-switch id="hilalSidebarCompactEnabled" preference="hilal.compact.enabled" icons="both"></html:m3e-switch>
   </div>
 
   <div class="settings-row">
@@ -171,7 +167,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-sidebar-compact-hide-toolbar"/>
       <span class="settings-row-desc" data-l10n-id="hilal-sidebar-compact-hide-toolbar-desc"/>
     </div>
-    <checkbox id="hilalSidebarCompactHideToolbar" preference="hilal.compact.hideToolbar" class="settings-switch"/>
+    <html:m3e-switch id="hilalSidebarCompactHideToolbar" preference="hilal.compact.hideToolbar" icons="both"></html:m3e-switch>
   </div>
 
   <div class="settings-row">
@@ -179,7 +175,7 @@
       <span class="settings-row-title" data-l10n-id="hilal-sidebar-show-horizontal-tabs"/>
       <span class="settings-row-desc">Dikey kenar çubuğu yerine üst yatay sekmeler</span>
     </div>
-    <checkbox id="hilalSidebarShowHorizontalTabs" preference="sidebar.verticalTabs.showHorizontal" class="settings-switch"/>
+    <html:m3e-switch id="hilalSidebarShowHorizontalTabs" preference="sidebar.verticalTabs.showHorizontal" icons="both"></html:m3e-switch>
   </div>
 
   <div style="margin-top: 12px;">
@@ -202,15 +198,13 @@
     </richlistbox>
 
     <hbox spacing="10" style="margin-bottom: 12px; gap: 8px;">
-      <button id="hilalSidebarCustomAdd"
-              is="highlightable-button"
-              class="accessory-button"
-              data-l10n-id="hilal-sidebar-custom-add"/>
-      <button id="hilalSidebarCustomRemove"
-              is="highlightable-button"
-              class="accessory-button"
-              data-l10n-id="hilal-sidebar-custom-remove"
-              disabled="true"/>
+      <html:m3e-button id="hilalSidebarCustomAdd"
+                      variant="tonal"
+                      data-l10n-id="hilal-sidebar-custom-add">Ekle</html:m3e-button>
+      <html:m3e-button id="hilalSidebarCustomRemove"
+                      variant="tonal"
+                      data-l10n-id="hilal-sidebar-custom-remove"
+                      disabled="true">Sil</html:m3e-button>
     </hbox>
 
     <vbox id="hilalSidebarCustomForm" hidden="true" style="width: 100%; padding: 16px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 16px; background-color: var(--md-sys-color-surface-container-low); margin-top: 8px;">
@@ -243,20 +237,18 @@
         </rows>
       </grid>
       <hbox spacing="10" style="margin-top: 12px; gap: 8px;">
-        <button id="hilalSidebarCustomSave"
-                is="highlightable-button"
-                class="primary"
-                data-l10n-id="hilal-sidebar-custom-save"/>
-        <button id="hilalSidebarCustomCancel"
-                is="highlightable-button"
-                class="accessory-button"
-                data-l10n-id="hilal-sidebar-custom-cancel"/>
+        <html:m3e-button id="hilalSidebarCustomSave"
+                        variant="filled"
+                        data-l10n-id="hilal-sidebar-custom-save">Kaydet</html:m3e-button>
+        <html:m3e-button id="hilalSidebarCustomCancel"
+                        variant="text"
+                        data-l10n-id="hilal-sidebar-custom-cancel">İptal</html:m3e-button>
       </hbox>
     </vbox>
   </div>
 </groupbox>
 
-<!-- Group 4: Privacy Profiles -->
+<!-- Group 5: Privacy Profiles -->
 <groupbox id="hilalPrivacyGroup" class="settings-group-card" data-category="paneHilal" hidden="true">
   <div class="settings-group-header">
     <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
@@ -270,21 +262,21 @@
       <span class="settings-row-title">Yerel Güvenlik Kademesi</span>
       <span class="settings-row-desc" data-l10n-id="hilal-privacy-description"/>
     </div>
-    <radiogroup id="hilalPrivacyLevel" class="segmented-radiogroup">
-      <radio id="hilalPrivacyStandard"
-             value="standard"
-             label="Dengeli"/>
-      <radio id="hilalPrivacyStrict"
-             value="strict"
-             label="Sıkı"/>
-      <radio id="hilalPrivacyExtreme"
-             value="extreme"
-             label="Maksimum"/>
-    </radiogroup>
+    <html:m3e-segmented-button id="hilalPrivacyLevel">
+      <html:m3e-button-segment id="hilalPrivacyStandard" value="standard" selected="">
+        <html:span data-l10n-id="hilal-privacy-standard">Dengeli</html:span>
+      </html:m3e-button-segment>
+      <html:m3e-button-segment id="hilalPrivacyStrict" value="strict">
+        <html:span data-l10n-id="hilal-privacy-strict">Sıkı</html:span>
+      </html:m3e-button-segment>
+      <html:m3e-button-segment id="hilalPrivacyExtreme" value="extreme">
+        <html:span data-l10n-id="hilal-privacy-extreme">Maksimum</html:span>
+      </html:m3e-button-segment>
+    </html:m3e-segmented-button>
   </div>
 </groupbox>
 
-<!-- Group 5: Bangs -->
+<!-- Group 6: Bangs -->
 <groupbox id="hilalBangsGroup" class="settings-group-card" data-category="paneHilal" hidden="true">
   <div class="settings-group-header">
     <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
@@ -297,15 +289,13 @@
   </richlistbox>
 
   <hbox spacing="10" style="gap: 8px;">
-    <button id="hilalBangsAdd"
-            is="highlightable-button"
-            class="accessory-button"
-            data-l10n-id="hilal-bangs-add-button"/>
-    <button id="hilalBangsRemove"
-            is="highlightable-button"
-            class="accessory-button"
-            data-l10n-id="hilal-bangs-remove-button"
-            disabled="true"/>
+    <html:m3e-button id="hilalBangsAdd"
+                    variant="tonal"
+                    data-l10n-id="hilal-bangs-add-button">Ekle</html:m3e-button>
+    <html:m3e-button id="hilalBangsRemove"
+                    variant="tonal"
+                    data-l10n-id="hilal-bangs-remove-button"
+                    disabled="true">Sil</html:m3e-button>
   </hbox>
 
   <vbox id="hilalBangsForm" hidden="true" style="margin-top: 10px; padding: 16px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 16px; background-color: var(--md-sys-color-surface-container-low);">
@@ -330,19 +320,17 @@
       </rows>
     </grid>
     <hbox spacing="10" style="margin-top: 12px; gap: 8px;">
-      <button id="hilalBangsSave"
-              is="highlightable-button"
-              class="primary"
-              data-l10n-id="hilal-bangs-save-button"/>
-      <button id="hilalBangsCancel"
-              is="highlightable-button"
-              class="accessory-button"
-              data-l10n-id="hilal-bangs-cancel-button"/>
+      <html:m3e-button id="hilalBangsSave"
+                      variant="filled"
+                      data-l10n-id="hilal-bangs-save-button">Kaydet</html:m3e-button>
+      <html:m3e-button id="hilalBangsCancel"
+                      variant="text"
+                      data-l10n-id="hilal-bangs-cancel-button">İptal</html:m3e-button>
     </hbox>
   </vbox>
 </groupbox>
 
-<!-- Group 6: Language Selection -->
+<!-- Group 7: Language Selection -->
 <groupbox id="hilalLanguageGroup" class="settings-group-card" data-category="paneHilal" hidden="true">
   <div class="settings-group-header">
     <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
@@ -356,14 +344,13 @@
   <hbox align="center" style="gap: 12px;">
     <html:select id="hilalLanguageSelect" style="padding: 8px 14px; border-radius: 12px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface-container-high); color: inherit; min-width: 220px;">
     </html:select>
-    <button id="hilalLanguageApply"
-            is="highlightable-button"
-            class="primary"
-            data-l10n-id="hilal-language-apply-button"/>
+    <html:m3e-button id="hilalLanguageApply"
+                    variant="filled"
+                    data-l10n-id="hilal-language-apply-button">Uygula ve Yeniden Başlat</html:m3e-button>
   </hbox>
 </groupbox>
 
-<!-- Group 7: Keyboard Shortcuts -->
+<!-- Group 8: Keyboard Shortcuts -->
 <groupbox id="hilalShortcutsGroup" class="settings-group-card" data-category="paneHilal" hidden="true">
   <div class="settings-group-header">
     <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
@@ -375,14 +362,14 @@
   <span class="settings-row-desc" style="display: block; margin-bottom: 12px;" data-l10n-id="hilal-shortcuts-description"/>
   
   <hbox style="margin-bottom: 12px;">
-    <button id="hilalShortcutsRestoreDefaults" data-l10n-id="hilal-shortcuts-reset" class="accessory-button"/>
+    <html:m3e-button id="hilalShortcutsRestoreDefaults" data-l10n-id="hilal-shortcuts-reset" variant="tonal">Varsayılanlara Sıfırla</html:m3e-button>
   </hbox>
 
   <html:div class="shortcuts-container" id="hilalShortcutsContainer">
   </html:div>
 </groupbox>
 
-<!-- Group 8: Hilal Version Information -->
+<!-- Group 9: Hilal Version Information -->
 <groupbox id="hilalAboutGroup" class="settings-group-card" data-category="paneHilal" hidden="true">
   <div class="settings-group-header">
     <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
@@ -396,10 +383,10 @@
       <span class="settings-row-title" data-l10n-id="hilal-about-version-title"/>
       <span class="settings-row-desc" data-l10n-id="hilal-about-version-subtitle"/>
     </div>
-    <button id="hilalAboutVersionBtn"
-            class="primary"
-            data-l10n-id="hilal-about-version-button"
-            onclick="openAboutDialog()"/>
+    <html:m3e-button id="hilalAboutVersionBtn"
+                    variant="filled"
+                    data-l10n-id="hilal-about-version-button"
+                    onclick="openAboutDialog()">Sürüm Bilgisi</html:m3e-button>
   </div>
 </groupbox>
 
