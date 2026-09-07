@@ -26,6 +26,12 @@ import {
 } from "lucide-react";
 
 import { DOCS_DATA, DocSection, DocSubSection } from "../data/docsData";
+import {
+  M3eChip,
+  M3eButton,
+  M3eIconButton,
+  M3eDivider
+} from "@m3e/react/all";
 
 interface DocsPageProps {
   lang: "tr" | "en";
@@ -46,7 +52,7 @@ const SECTION_ICONS: Record<string, LucideIcon> = {
 
 // M3 Expressive Spring Motion Physics
 const springTransition = {
-  type: "spring",
+  type: "spring" as const,
   stiffness: 380,
   damping: 26,
 };
@@ -84,24 +90,24 @@ function CodeBlock({
         <span className="text-[11px] font-semibold tracking-wide uppercase text-[var(--md-sys-color-primary)]">
           {language || "sh"}
         </span>
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.96 }}
+        <M3eButton
+          variant="text"
+          size="small"
+          shape="rounded"
           onClick={() => onCopy(code)}
-          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#21262d] dark:bg-[#1a202c] hover:bg-[#30363d] text-[#c9d1d9] transition-colors cursor-pointer text-xs font-sans font-medium"
         >
           {copied ? (
             <>
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <Check slot="icon" className="w-3.5 h-3.5 text-emerald-400" />
               <span className="text-emerald-400 font-semibold">{copiedLabel}</span>
             </>
           ) : (
             <>
-              <Copy className="w-3.5 h-3.5" />
+              <Copy slot="icon" className="w-3.5 h-3.5" />
               <span>{copyLabel}</span>
             </>
           )}
-        </motion.button>
+        </M3eButton>
       </div>
       <div className="p-4 sm:p-5 overflow-x-auto font-mono text-xs sm:text-sm leading-relaxed text-[#e6edf3] scrollbar-thin">
         <pre className="m-0 whitespace-pre">{code}</pre>
@@ -374,19 +380,19 @@ export default function DocsPage({ lang }: DocsPageProps) {
         {/* Header (No Card Box, Pure Typography & M3 Expressive Pill Chips) */}
         <header className="mb-12 pb-8 border-b border-[var(--md-sys-color-outline-variant)]/20">
           <div className="flex flex-wrap items-center gap-2 mb-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-xs font-semibold tracking-wide">
-              <BookOpen className="w-3.5 h-3.5" />
+            <M3eChip variant="elevated">
+              <BookOpen slot="icon" className="w-3.5 h-3.5" />
               <span>Hilal Documentation</span>
-            </span>
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] text-xs font-mono font-medium">
-              {content.meta.targetVersion}
-            </span>
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] text-xs font-mono font-medium">
-              {content.meta.engineBase}
-            </span>
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] text-xs font-mono font-medium">
-              {content.meta.licenseBadge}
-            </span>
+            </M3eChip>
+            <M3eChip variant="outlined">
+              <span>{content.meta.targetVersion}</span>
+            </M3eChip>
+            <M3eChip variant="outlined">
+              <span>{content.meta.engineBase}</span>
+            </M3eChip>
+            <M3eChip variant="outlined">
+              <span>{content.meta.licenseBadge}</span>
+            </M3eChip>
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--md-sys-color-on-surface)]">
@@ -529,8 +535,10 @@ export default function DocsPage({ lang }: DocsPageProps) {
               animate="visible"
               className="pb-6 border-b border-[var(--md-sys-color-outline-variant)]/20"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--md-sys-color-secondary-container)]/50 text-[var(--md-sys-color-primary)] text-xs font-mono font-bold uppercase tracking-wider mb-3">
-                <span>{lang === "tr" ? "Bölüm" : "Section"} {activeSectionIdx + 1} / {sections.length}</span>
+              <div className="mb-3">
+                <M3eChip variant="outlined">
+                  <span>{lang === "tr" ? "Bölüm" : "Section"} {activeSectionIdx + 1} / {sections.length}</span>
+                </M3eChip>
               </div>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[var(--md-sys-color-on-surface)] tracking-tight">
                 {activeSection.title}
@@ -573,42 +581,44 @@ export default function DocsPage({ lang }: DocsPageProps) {
               ))}
             </div>
 
-            {/* Bottom Pager Buttons (Expressive Pills) */}
+            {/* Bottom Pager Buttons (M3E Buttons) */}
             <div className="pt-10 border-t border-[var(--md-sys-color-outline-variant)]/20 flex flex-wrap items-center justify-between gap-4">
               {prevSection ? (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <M3eButton
+                  variant="tonal"
+                  size="small"
+                  shape="rounded"
                   onClick={() => handleSelectSection(prevSection.id)}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--md-sys-color-secondary-container)] hover:bg-[var(--md-sys-color-secondary-container)]/80 text-xs font-semibold text-[var(--md-sys-color-on-secondary-container)] transition-all cursor-pointer shadow-xs"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft slot="icon" className="w-4 h-4" />
                   <span>{prevSection.title}</span>
-                </motion.button>
+                </M3eButton>
               ) : (
                 <div />
               )}
 
               {nextSection ? (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <M3eButton
+                  variant="filled"
+                  size="small"
+                  shape="rounded"
                   onClick={() => handleSelectSection(nextSection.id)}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] hover:opacity-90 text-xs font-semibold transition-all cursor-pointer shadow-xs ml-auto"
+                  className="ml-auto"
                 >
                   <span>{nextSection.title}</span>
-                  <ChevronRight className="w-4 h-4" />
-                </motion.button>
+                  <ChevronRight slot="trailing-icon" className="w-4 h-4 ml-1" />
+                </M3eButton>
               ) : (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <M3eButton
+                  variant="tonal"
+                  size="small"
+                  shape="rounded"
                   onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--md-sys-color-secondary-container)] hover:bg-[var(--md-sys-color-secondary-container)]/80 text-xs font-semibold text-[var(--md-sys-color-on-secondary-container)] transition-all cursor-pointer shadow-xs ml-auto"
+                  className="ml-auto"
                 >
-                  <ArrowUp className="w-4 h-4" />
+                  <ArrowUp slot="icon" className="w-4 h-4" />
                   <span>{lang === "tr" ? "Başa Dön" : "Back to Top"}</span>
-                </motion.button>
+                </M3eButton>
               )}
             </div>
           </article>

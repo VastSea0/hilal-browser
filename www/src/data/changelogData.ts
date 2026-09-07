@@ -39,11 +39,111 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 476;
+export const REPO_COMMITS_TOTAL = 486;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "673b639fdb108b0cf1a17181462efaf1c28e54da",
+    "shortHash": "673b639",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T04:28:40+03:00",
+    "subject": "fix(workspaces): center modal dialog and resolve stylesheet injection failure",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/673b639fdb108b0cf1a17181462efaf1c28e54da"
+  },
+  {
+    "hash": "5f8608e7d66e9cbde58839685b40ec6c93231de4",
+    "shortHash": "5f8608e",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T04:27:58+03:00",
+    "subject": "feat(newtab): implement clean Material 3 new tab with dynamic accent color sync and fluent l10n",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5f8608e7d66e9cbde58839685b40ec6c93231de4"
+  },
+  {
+    "hash": "3ed80fe07f64b9580506e00e8d7606f97deca524",
+    "shortHash": "3ed80fe",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T03:47:48+03:00",
+    "subject": "revert(preferences): remove settings page redesign from feature branch",
+    "body": "- Restore preferences.patch, preferences.css, and jar.inc.mn to origin baseline\n- Remove dedicated hilal-preferences.css\n- All settings redesign work safely preserved in branch feature/settings-m3-redesign",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/3ed80fe07f64b9580506e00e8d7606f97deca524"
+  },
+  {
+    "hash": "500839cc5366abab9467720556df220573fdbf50",
+    "shortHash": "500839c",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T03:38:15+03:00",
+    "subject": "feat(preferences): migrate settings layout to dedicated hilal-preferences.css",
+    "body": "- Link dedicated hilal-preferences.css directly in preferences.xhtml and register in jar.inc.mn\n- Revert upstream preferences.css to clean baseline without overrides\n- Implement complete Material 3 Expressive architecture in standalone stylesheet:\n  - 320dp Navigation Drawer with 56dp full-pill items and #bfa8ff / #21005d active container\n  - Centered 52dp full-pill search bar with surface-container-high styling\n  - 24dp rounded tonal cards with subtle borders\n  - Official 52x32dp Material 3 Switch with custom property shadow DOM integration\n  - Eradicate legacy Firefox SRD clutter and managed organization notices",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/500839cc5366abab9467720556df220573fdbf50"
+  },
+  {
+    "hash": "6717d2225a638c63526dd3858bd0ac676d0d6139",
+    "shortHash": "6717d22",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T03:24:16+03:00",
+    "subject": "feat(preferences): overhaul layout to Material 3 Expressive and eliminate clutter",
+    "body": "- Redesign navigation drawer with 320dp persistent width, 56dp full-pill items, vibrant expressive active container, and zero indicator lines\n- Center and polish 52dp full-pill search bar with surface-container-high background\n- Completely eliminate managed organization banner and TLS key logging notices from preferences layout\n- Remove legacy security privacy status card, warnings accordion, and purple shield clutter\n- Transform setting groups into sleek 24dp rounded Material 3 tonal cards with subtle borders\n- Implement official Material 3 Expressive 52x32dp switch with 16dp unselected and 24dp selected thumb\n- Refine form controls, buttons, and search shortcuts table according to Material 3 Expressive specs",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6717d2225a638c63526dd3858bd0ac676d0d6139"
+  },
+  {
+    "hash": "7911307a2d072205596d1b5ff090b3e962c33cff",
+    "shortHash": "7911307",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T03:10:23+03:00",
+    "subject": "fix(ui): eliminate unified extension menu button and hide labels in topbar",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/7911307a2d072205596d1b5ff090b3e962c33cff"
+  },
+  {
+    "hash": "8fe2d11f060035e03aa3d8c205e24ca5ba5b5828",
+    "shortHash": "8fe2d11",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T03:05:46+03:00",
+    "subject": "theme: fix hidden banners, eliminate double search outline, and polish Material 3 Expressive settings UI",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/8fe2d11f060035e03aa3d8c205e24ca5ba5b5828"
+  },
+  {
+    "hash": "e41bc412e48d6f7bd4dc24c035a600d3f82e871c",
+    "shortHash": "e41bc41",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T02:55:21+03:00",
+    "subject": "theme: redesign settings page strictly according to Material 3 Expressive and www tokens",
+    "body": "",
+    "category": "style",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e41bc412e48d6f7bd4dc24c035a600d3f82e871c"
+  },
+  {
+    "hash": "140e38455ffadebd3230784c15ccaf2715f0b721",
+    "shortHash": "140e384",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T02:54:55+03:00",
+    "subject": "fix(ui): refine mousedown dismissal for theme picker popup",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/140e38455ffadebd3230784c15ccaf2715f0b721"
+  },
+  {
+    "hash": "65a571553a0a625cd62fdf95b6e588ff7a7c6b76",
+    "shortHash": "65a5715",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-07T02:46:44+03:00",
+    "subject": "feat(www): add factual developer docs and refine M3 Expressive open layout",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/65a571553a0a625cd62fdf95b6e588ff7a7c6b76"
+  },
   {
     "hash": "01e7f7baba21deaee5cb924796ed15e5043b2163",
     "shortHash": "01e7f7b",
@@ -4811,9 +4911,109 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-07T02:46:29+03:00",
-    "commitCount": 35,
+    "date": "2026-09-07T04:28:40+03:00",
+    "commitCount": 45,
     "commits": [
+      {
+        "hash": "673b639fdb108b0cf1a17181462efaf1c28e54da",
+        "shortHash": "673b639",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T04:28:40+03:00",
+        "subject": "fix(workspaces): center modal dialog and resolve stylesheet injection failure",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/673b639fdb108b0cf1a17181462efaf1c28e54da"
+      },
+      {
+        "hash": "5f8608e7d66e9cbde58839685b40ec6c93231de4",
+        "shortHash": "5f8608e",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T04:27:58+03:00",
+        "subject": "feat(newtab): implement clean Material 3 new tab with dynamic accent color sync and fluent l10n",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5f8608e7d66e9cbde58839685b40ec6c93231de4"
+      },
+      {
+        "hash": "3ed80fe07f64b9580506e00e8d7606f97deca524",
+        "shortHash": "3ed80fe",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T03:47:48+03:00",
+        "subject": "revert(preferences): remove settings page redesign from feature branch",
+        "body": "- Restore preferences.patch, preferences.css, and jar.inc.mn to origin baseline\n- Remove dedicated hilal-preferences.css\n- All settings redesign work safely preserved in branch feature/settings-m3-redesign",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/3ed80fe07f64b9580506e00e8d7606f97deca524"
+      },
+      {
+        "hash": "500839cc5366abab9467720556df220573fdbf50",
+        "shortHash": "500839c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T03:38:15+03:00",
+        "subject": "feat(preferences): migrate settings layout to dedicated hilal-preferences.css",
+        "body": "- Link dedicated hilal-preferences.css directly in preferences.xhtml and register in jar.inc.mn\n- Revert upstream preferences.css to clean baseline without overrides\n- Implement complete Material 3 Expressive architecture in standalone stylesheet:\n  - 320dp Navigation Drawer with 56dp full-pill items and #bfa8ff / #21005d active container\n  - Centered 52dp full-pill search bar with surface-container-high styling\n  - 24dp rounded tonal cards with subtle borders\n  - Official 52x32dp Material 3 Switch with custom property shadow DOM integration\n  - Eradicate legacy Firefox SRD clutter and managed organization notices",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/500839cc5366abab9467720556df220573fdbf50"
+      },
+      {
+        "hash": "6717d2225a638c63526dd3858bd0ac676d0d6139",
+        "shortHash": "6717d22",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T03:24:16+03:00",
+        "subject": "feat(preferences): overhaul layout to Material 3 Expressive and eliminate clutter",
+        "body": "- Redesign navigation drawer with 320dp persistent width, 56dp full-pill items, vibrant expressive active container, and zero indicator lines\n- Center and polish 52dp full-pill search bar with surface-container-high background\n- Completely eliminate managed organization banner and TLS key logging notices from preferences layout\n- Remove legacy security privacy status card, warnings accordion, and purple shield clutter\n- Transform setting groups into sleek 24dp rounded Material 3 tonal cards with subtle borders\n- Implement official Material 3 Expressive 52x32dp switch with 16dp unselected and 24dp selected thumb\n- Refine form controls, buttons, and search shortcuts table according to Material 3 Expressive specs",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6717d2225a638c63526dd3858bd0ac676d0d6139"
+      },
+      {
+        "hash": "7911307a2d072205596d1b5ff090b3e962c33cff",
+        "shortHash": "7911307",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T03:10:23+03:00",
+        "subject": "fix(ui): eliminate unified extension menu button and hide labels in topbar",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/7911307a2d072205596d1b5ff090b3e962c33cff"
+      },
+      {
+        "hash": "8fe2d11f060035e03aa3d8c205e24ca5ba5b5828",
+        "shortHash": "8fe2d11",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T03:05:46+03:00",
+        "subject": "theme: fix hidden banners, eliminate double search outline, and polish Material 3 Expressive settings UI",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/8fe2d11f060035e03aa3d8c205e24ca5ba5b5828"
+      },
+      {
+        "hash": "e41bc412e48d6f7bd4dc24c035a600d3f82e871c",
+        "shortHash": "e41bc41",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T02:55:21+03:00",
+        "subject": "theme: redesign settings page strictly according to Material 3 Expressive and www tokens",
+        "body": "",
+        "category": "style",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e41bc412e48d6f7bd4dc24c035a600d3f82e871c"
+      },
+      {
+        "hash": "140e38455ffadebd3230784c15ccaf2715f0b721",
+        "shortHash": "140e384",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T02:54:55+03:00",
+        "subject": "fix(ui): refine mousedown dismissal for theme picker popup",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/140e38455ffadebd3230784c15ccaf2715f0b721"
+      },
+      {
+        "hash": "65a571553a0a625cd62fdf95b6e588ff7a7c6b76",
+        "shortHash": "65a5715",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-07T02:46:44+03:00",
+        "subject": "feat(www): add factual developer docs and refine M3 Expressive open layout",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/65a571553a0a625cd62fdf95b6e588ff7a7c6b76"
+      },
       {
         "hash": "01e7f7baba21deaee5cb924796ed15e5043b2163",
         "shortHash": "01e7f7b",
@@ -9833,7 +10033,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 464,
+    "contributions": 474,
     "role": "Lead Developer"
   },
   {
