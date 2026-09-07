@@ -4,6 +4,8 @@ use serde::Deserialize;
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::io::{Read, Write};
+use std::net::{TcpListener, TcpStream};
 use std::process::Command;
 
 #[derive(Parser)]
@@ -68,6 +70,21 @@ enum Commands {
     Doctor {
         #[arg(long, help = "Treat warnings as errors and fail the check")]
         strict: bool,
+    },
+    #[command(
+        about = "Preview UI pages (welcome, newtab) in Google Chrome or take headless screenshots"
+    )]
+    Preview {
+        #[arg(default_value = "welcome", help = "Page to preview ('welcome' or 'newtab')")]
+        page: String,
+        #[arg(long, help = "Stage number to preview directly (0-9 for welcome)")]
+        stage: Option<usize>,
+        #[arg(long, help = "Path to save screenshot via headless Chrome")]
+        screenshot: Option<PathBuf>,
+        #[arg(long, help = "Open in Google Chrome directly")]
+        open: bool,
+        #[arg(long, default_value = "8765", help = "Port for local preview server")]
+        port: u16,
     },
 }
 
@@ -159,6 +176,15 @@ fn main() -> Result<()> {
         }
         Commands::Doctor { strict } => {
             doctor(&repo_root, strict)?;
+        }
+        Commands::Preview {
+            page,
+            stage,
+            screenshot,
+            open,
+            port,
+        } => {
+            preview(&repo_root, &page, stage, screenshot, open, port)?;
         }
     }
 
@@ -1607,4 +1633,320 @@ fn doctor(repo_root: &Path, strict: bool) -> Result<()> {
 
     println!("[hil] Ready to build! No potential build blockages detected.");
     Ok(())
+}
+
+
+fn find_chrome() -> Option<PathBuf> {
+    let candidates = [
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "/Applications/Chromium.app/Contents/MacOS/Chromium",
+        "/usr/bin/google-chrome",
+        "/usr/bin/chromium",
+        "/usr/bin/chromium-browser",
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+        "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    ];
+
+    for candidate in candidates {
+        let p = PathBuf::from(candidate);
+        if p.exists() {
+            return Some(p);
+        }
+    }
+
+    for bin in ["google-chrome", "chromium", "chrome"] {
+        if let Ok(output) = Command::new("which").arg(bin).output() {
+            if output.status.success() {
+                let s = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                if !s.is_empty() {
+                    return Some(PathBuf::from(s));
+                }
+            }
+        }
+    }
+
+    None
+}
+
+fn handle_http_request(mut stream: TcpStream, repo_root: &Path) -> Result<()> {
+    let mut buffer = [0u8; 4096];
+    let n = match stream.read(&mut buffer) {
+        Ok(read_bytes) if read_bytes > 0 => read_bytes,
+        _ => return Ok(()),
+    };
+
+    let req_str = String::from_utf8_lossy(&buffer[..n]);
+    let first_line = req_str.lines().next().unwrap_or("");
+    let parts: Vec<&str> = first_line.split_whitespace().collect();
+    if parts.len() < 2 {
+        return Ok(());
+    }
+
+    let full_path = parts[1];
+    let path = full_path.split('?').next().unwrap_or(full_path);
+
+    let (status, content_type, body): (&str, &str, Vec<u8>) = match path {
+        "/" | "/welcome" | "/welcome.html" | "/index.html" => {
+            let html = r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hilal Welcome Preview</title>
+  <link rel="stylesheet" href="/changes/browser/base/content/hilal/HilalWelcome.css">
+  <script>
+    window.Services = {
+      prefs: {
+        _store: {
+          "hilal.privacy.level": "standard",
+          "hilal.compact.enabled": true,
+          "hilal.compact.hide_toolbox": true,
+          "sidebar.verticalTabs": false,
+          "hilal.workspaces.enabled": true,
+          "hilal.workspaces.pinned.public": true,
+          "hilal.welcome-screen.seen": false
+        },
+        getStringPref(k, def) { return this._store[k] ?? def; },
+        getBoolPref(k, def) { return this._store[k] ?? def; },
+        setBoolPref(k, v) { this._store[k] = v; },
+        setStringPref(k, v) { this._store[k] = v; }
+      },
+      io: {
+        newURI(url) { return new URL(url, window.location.href); }
+      }
+    };
+    window.MozXULElement = {
+      parseXULToFragment(markup) {
+        return document.createRange().createContextualFragment(markup);
+      }
+    };
+    window.ChromeUtils = {
+      importESModule() {
+        return {
+          SearchService: {
+            getVisibleEngines() {
+              return Promise.resolve([
+                { name: "DuckDuckGo", iconURL: "" },
+                { name: "Google", iconURL: "" },
+                { name: "Bing", iconURL: "" }
+              ]);
+            },
+            setDefault() { return Promise.resolve(); },
+            setDefaultPrivate() { return Promise.resolve(); }
+          }
+        };
+      }
+    };
+    window.MigrationUtils = {
+      showMigrationWizard() { console.log("MigrationUtils.showMigrationWizard"); }
+    };
+    window.gBrowser = {
+      tabs: [],
+      addTrustedTab(url, opts) {
+        const tab = { linkedBrowser: { currentURI: { spec: url } }, pinned: false };
+        this.tabs.push(tab);
+        return tab;
+      },
+      pinTab(tab) { tab.pinned = true; },
+      removeTab(tab) {
+        const idx = this.tabs.indexOf(tab);
+        if (idx !== -1) this.tabs.splice(idx, 1);
+      }
+    };
+    document.l10n = {
+      formatValue(id) { return Promise.resolve(id); }
+    };
+  </script>
+  <script src="/changes/browser/base/content/hilal/HilalWelcome.js"></script>
+</head>
+<body class="beer dark" style="margin: 0; min-height: 100vh; background-color: var(--surface);">
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const welcome = new window.HilalWelcome({
+        activeContainerId: 0,
+        ensureWorkspace(label, icon, color) {},
+        create(label, icon, color) {},
+        _apply() {},
+        _updateUI() {}
+      });
+      await welcome.start();
+      const params = new URLSearchParams(window.location.search);
+      const stageParam = params.get("stage");
+      if (stageParam !== null) {
+        const st = parseInt(stageParam, 10);
+        welcome._stage = st;
+        welcome._initFlowShell();
+        welcome._renderStage();
+      }
+      window._welcome = welcome;
+    });
+  </script>
+</body>
+</html>"#;
+            ("200 OK", "text/html; charset=utf-8", html.as_bytes().to_vec())
+        }
+        "/newtab" | "/newtab.html" => {
+            let p = repo_root.join("changes/browser/base/content/hilal/newtab/newtab.html");
+            match fs::read(p) {
+                Ok(bytes) => ("200 OK", "text/html; charset=utf-8", bytes),
+                Err(_) => ("404 Not Found", "text/plain", b"Not Found".to_vec()),
+            }
+        }
+        "/newtab.css" => {
+            let p = repo_root.join("changes/browser/base/content/hilal/newtab/newtab.css");
+            match fs::read(p) {
+                Ok(bytes) => ("200 OK", "text/css; charset=utf-8", bytes),
+                Err(_) => ("404 Not Found", "text/plain", b"Not Found".to_vec()),
+            }
+        }
+        "/newtab.js" => {
+            let p = repo_root.join("changes/browser/base/content/hilal/newtab/newtab.js");
+            match fs::read(p) {
+                Ok(bytes) => ("200 OK", "application/javascript; charset=utf-8", bytes),
+                Err(_) => ("404 Not Found", "text/plain", b"Not Found".to_vec()),
+            }
+        }
+        "/assets/branding/about-logo.svg" => {
+            let p = repo_root.join("changes/browser/branding/hilal/content/about-logo.svg");
+            match fs::read(p) {
+                Ok(bytes) => ("200 OK", "image/svg+xml", bytes),
+                Err(_) => ("404 Not Found", "text/plain", b"Not Found".to_vec()),
+            }
+        }
+        p if p.starts_with("/assets/tippytop/") => {
+            let file_name = &p["/assets/tippytop/".len()..];
+            let target = repo_root
+                .join("engine/browser/components/topsites/content/tippytop/images")
+                .join(file_name);
+            match fs::read(target) {
+                Ok(bytes) => {
+                    let mime = if file_name.ends_with(".svg") {
+                        "image/svg+xml"
+                    } else {
+                        "image/png"
+                    };
+                    ("200 OK", mime, bytes)
+                }
+                Err(_) => ("404 Not Found", "text/plain", b"Not Found".to_vec()),
+            }
+        }
+        p if p.starts_with("/changes/") => {
+            let rel = &p[1..];
+            let target = repo_root.join(rel);
+            match fs::read(&target) {
+                Ok(bytes) => {
+                    let mime = if rel.ends_with(".css") {
+                        "text/css; charset=utf-8"
+                    } else if rel.ends_with(".js") {
+                        "application/javascript; charset=utf-8"
+                    } else if rel.ends_with(".svg") {
+                        "image/svg+xml"
+                    } else if rel.ends_with(".png") {
+                        "image/png"
+                    } else if rel.ends_with(".woff2") {
+                        "font/woff2"
+                    } else {
+                        "application/octet-stream"
+                    };
+                    ("200 OK", mime, bytes)
+                }
+                Err(_) => ("404 Not Found", "text/plain", b"Not Found".to_vec()),
+            }
+        }
+        _ => ("404 Not Found", "text/plain", b"Not Found".to_vec()),
+    };
+
+    let header = format!(
+        "HTTP/1.1 {}\r\nContent-Type: {}\r\nContent-Length: {}\r\nConnection: close\r\nAccess-Control-Allow-Origin: *\r\n\r\n",
+        status,
+        content_type,
+        body.len()
+    );
+
+    let _ = stream.write_all(header.as_bytes());
+    let _ = stream.write_all(&body);
+    let _ = stream.flush();
+    Ok(())
+}
+
+fn preview(
+    repo_root: &Path,
+    page: &str,
+    stage: Option<usize>,
+    screenshot: Option<PathBuf>,
+    open: bool,
+    port: u16,
+) -> Result<()> {
+    let listener = TcpListener::bind(format!("127.0.0.1:{}", port))
+        .with_context(|| format!("Failed to bind preview server to 127.0.0.1:{}", port))?;
+
+    let root_clone = repo_root.to_path_buf();
+    std::thread::spawn(move || {
+        for stream in listener.incoming() {
+            if let Ok(s) = stream {
+                let r = root_clone.clone();
+                std::thread::spawn(move || {
+                    let _ = handle_http_request(s, &r);
+                });
+            }
+        }
+    });
+
+    let target_page = match page {
+        "newtab" => "newtab.html".to_string(),
+        _ => match stage {
+            Some(s) => format!("welcome.html?stage={}", s),
+            None => "welcome.html".to_string(),
+        },
+    };
+
+    let url = format!("http://127.0.0.1:{}/{}", port, target_page);
+
+    if let Some(screenshot_path) = screenshot {
+        let chrome = find_chrome().context("Google Chrome / Chromium not found. Please install Google Chrome to take headless screenshots.")?;
+        println!("[hil] Taking headless screenshot via Chrome: {}", url);
+        let status = Command::new(&chrome)
+            .args([
+                "--headless=new",
+                &format!("--screenshot={}", screenshot_path.display()),
+                "--window-size=1280,800",
+                "--hide-scrollbars",
+                "--run-all-compositor-stages-before-draw",
+                "--virtual-time-budget=2000",
+                &url,
+            ])
+            .status()
+            .context("Failed to execute Google Chrome")?;
+
+        if !status.success() {
+            bail!("Chrome failed with status: {:?}", status);
+        }
+
+        println!("[hil] Screenshot successfully saved to: {}", screenshot_path.display());
+        return Ok(());
+    }
+
+    if open {
+        println!("[hil] Opening in Google Chrome: {}", url);
+        #[cfg(target_os = "macos")]
+        {
+            let _ = Command::new("open").args(["-a", "Google Chrome", &url]).status();
+        }
+        #[cfg(target_os = "linux")]
+        {
+            let _ = Command::new("xdg-open").arg(&url).status();
+        }
+        #[cfg(target_os = "windows")]
+        {
+            let _ = Command::new("cmd").args(["/C", "start", &url]).status();
+        }
+    } else {
+        println!("[hil] Preview server ready at: {}", url);
+        println!("[hil] Tip: use '--screenshot <path>' for headless capture or '--open' to open in Chrome.");
+    }
+
+    println!("[hil] Press Ctrl+C to exit.");
+    loop {
+        std::thread::sleep(std::time::Duration::from_secs(60));
+    }
 }
