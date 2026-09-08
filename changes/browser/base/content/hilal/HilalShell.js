@@ -466,10 +466,12 @@
 
       const headerShell = document.createElement("div");
       headerShell.id = "hilal-header-shell";
+      headerShell.className = "beer";
 
       // 1. Top Bar
       const topbar = document.createElement("header");
       topbar.id = "hilal-topbar";
+      topbar.className = "row tiny-space";
 
       // Traffic lights slot in topbar
       const topTrafficSlot = document.createElement("div");
@@ -499,16 +501,17 @@
       topTrafficSlot.appendChild(spacer);
       topbar.appendChild(topTrafficSlot);
 
-      // Nav group (Back, Forward, Reload)
-      const navGroup = document.createElement("div");
+      // Nav group (Back, Forward, Reload) — Beer CSS row with small circle transparent buttons
+      const navGroup = document.createElement("nav");
       navGroup.id = "hilal-nav-group";
+      navGroup.className = "row tiny-space";
 
       const backBtn = document.createElement("button");
-      backBtn.className = "hilal-btn";
+      backBtn.className = "circle transparent small hilal-btn";
       backBtn.id = "hilal-back-btn";
       backBtn.setAttribute("data-l10n-id", "navbar-tooltip-back");
-      backBtn.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>';
+      backBtn.title = "Back";
+      backBtn.innerHTML = "<i>arrow_back</i>";
       backBtn.addEventListener("click", () => {
         if (window.gBrowser?.canGoBack) {
           window.gBrowser.goBack();
@@ -519,11 +522,11 @@
       navGroup.appendChild(backBtn);
 
       const forwardBtn = document.createElement("button");
-      forwardBtn.className = "hilal-btn";
+      forwardBtn.className = "circle transparent small hilal-btn";
       forwardBtn.id = "hilal-forward-btn";
       forwardBtn.setAttribute("data-l10n-id", "navbar-tooltip-forward");
-      forwardBtn.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>';
+      forwardBtn.title = "Forward";
+      forwardBtn.innerHTML = "<i>arrow_forward</i>";
       forwardBtn.addEventListener("click", () => {
         if (window.gBrowser?.canGoForward) {
           window.gBrowser.goForward();
@@ -534,11 +537,11 @@
       navGroup.appendChild(forwardBtn);
 
       const reloadBtn = document.createElement("button");
-      reloadBtn.className = "hilal-btn";
+      reloadBtn.className = "circle transparent small hilal-btn";
       reloadBtn.id = "hilal-reload-btn";
       reloadBtn.setAttribute("data-l10n-id", "reload-button");
-      reloadBtn.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
+      reloadBtn.title = "Reload";
+      reloadBtn.innerHTML = "<i>refresh</i>";
       reloadBtn.addEventListener("click", () => {
         if (window.gBrowser) window.gBrowser.reload();
       });
@@ -551,20 +554,23 @@
       topWsSlot.id = "hilal-topbar-workspaces-slot";
       topbar.appendChild(topWsSlot);
 
-      // Material 3 URL Search Container
+      // Material 3 URL Search Container — Beer CSS surface-container-high with round pill shape
       const urlContainer = document.createElement("div");
       urlContainer.id = "hilal-url-container";
+      urlContainer.className = "row round tiny-space surface-container-high";
 
-      const secIcon = document.createElement("div");
+      const secIcon = document.createElement("i");
       secIcon.id = "hilal-url-security-icon";
-      secIcon.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>';
+      secIcon.className = "small primary-text";
+      secIcon.textContent = "lock";
       urlContainer.appendChild(secIcon);
 
       const urlInput = document.createElement("input");
       urlInput.id = "hilal-url-input";
+      urlInput.className = "max";
       urlInput.type = "text";
       urlInput.setAttribute("data-l10n-id", "urlbar-placeholder");
+      urlInput.setAttribute("placeholder", "Search or enter address");
       urlInput.setAttribute("autocomplete", "off");
       urlInput.setAttribute("spellcheck", "false");
       urlContainer.appendChild(urlInput);
@@ -572,10 +578,10 @@
       // Clear button
       const clearBtn = document.createElement("button");
       clearBtn.id = "hilal-url-clear-btn";
-      clearBtn.className = "hilal-btn";
+      clearBtn.className = "circle transparent small hilal-btn";
       clearBtn.setAttribute("data-l10n-id", "hilal-toolbar-clear");
-      clearBtn.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+      clearBtn.title = "Clear";
+      clearBtn.innerHTML = "<i>close</i>";
       clearBtn.style.display = "none";
       clearBtn.addEventListener("click", e => {
         e.preventDefault();
@@ -590,23 +596,21 @@
       // Copy URL Action Button
       const copyBtn = document.createElement("button");
       copyBtn.id = "hilal-url-copy-btn";
-      copyBtn.className = "hilal-btn hilal-url-action-btn";
+      copyBtn.className = "circle transparent small hilal-btn hilal-url-action-btn";
       copyBtn.setAttribute("data-l10n-id", "hilal-toolbar-copy-url");
-      copyBtn.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+      copyBtn.title = "Copy URL";
+      copyBtn.innerHTML = "<i>content_copy</i>";
       copyBtn.addEventListener("click", e => {
         e.preventDefault();
         e.stopPropagation();
         const url = window.gBrowser?.currentURI?.spec;
         if (url && url !== "about:blank" && url !== "about:newtab") {
           navigator.clipboard.writeText(url);
-          copyBtn.innerHTML =
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>';
-          copyBtn.style.color = "var(--md-sys-color-primary)";
+          copyBtn.innerHTML = "<i>check</i>";
+          copyBtn.classList.add("primary-text");
           setTimeout(() => {
-            copyBtn.innerHTML =
-              '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
-            copyBtn.style.color = "";
+            copyBtn.innerHTML = "<i>content_copy</i>";
+            copyBtn.classList.remove("primary-text");
           }, 1200);
         }
       });
@@ -615,10 +619,10 @@
       // Theme / Boosts Action Button
       const themeBtn = document.createElement("button");
       themeBtn.id = "hilal-url-theme-btn";
-      themeBtn.className = "hilal-btn hilal-url-action-btn";
+      themeBtn.className = "circle transparent small hilal-btn hilal-url-action-btn";
       themeBtn.setAttribute("data-l10n-id", "hilal-toolbar-theme");
-      themeBtn.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.17 19.59 10.54 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/><circle cx="8.5" cy="10.5" r="1.5"/><circle cx="15.5" cy="10.5" r="1.5"/><circle cx="12" cy="7.5" r="1.5"/></svg>';
+      themeBtn.title = "Palette & Theme";
+      themeBtn.innerHTML = "<i>palette</i>";
       themeBtn.addEventListener("click", e => {
         e.preventDefault();
         e.stopPropagation();
@@ -629,6 +633,7 @@
       // Page Actions wrapper slot for native Firefox page actions (#star-button-box, reader-mode, boosts)
       const pageActionsSlot = document.createElement("div");
       pageActionsSlot.id = "hilal-page-actions-slot";
+      pageActionsSlot.className = "row tiny-space";
       const nativePageActions = document.getElementById("page-action-buttons");
       if (nativePageActions) {
         pageActionsSlot.appendChild(nativePageActions);
@@ -638,6 +643,7 @@
       // Suggestions Dropdown Container (M3 Search View Specification)
       const suggestionsDropdown = document.createElement("div");
       suggestionsDropdown.id = "hilal-search-dropdown";
+      suggestionsDropdown.className = "vertical round medium-elevate surface-container-high";
       urlContainer.appendChild(suggestionsDropdown);
 
       topbar.appendChild(urlContainer);
@@ -645,15 +651,17 @@
       // Top Right Controls (Extensions, Mode Switcher, Sidebar Toggle)
       const rightGroup = document.createElement("div");
       rightGroup.id = "hilal-top-right-group";
+      rightGroup.className = "row tiny-space";
 
       // Native Extensions Slot (Pinned webextensions + Unified Extensions button)
       const extSlot = document.createElement("div");
       extSlot.id = "hilal-extensions-slot";
+      extSlot.className = "row tiny-space";
       rightGroup.appendChild(extSlot);
 
       // Tab Mode Switcher Button
       const modeBtn = document.createElement("button");
-      modeBtn.className = "hilal-btn";
+      modeBtn.className = "circle transparent small hilal-btn";
       modeBtn.id = "hilal-layout-mode-btn";
       modeBtn.addEventListener("click", () => this.cycleTabMode());
       modeBtn.addEventListener("contextmenu", e => {
@@ -664,14 +672,14 @@
 
       // Sidebar Toggle Button
       const sidebarToggle = document.createElement("button");
-      sidebarToggle.className = "hilal-btn";
+      sidebarToggle.className = "circle transparent small hilal-btn";
       sidebarToggle.id = "hilal-sidebar-toggle-btn";
       sidebarToggle.setAttribute(
         "data-l10n-id",
         "hilal-toolbar-sidebar-toggle"
       );
-      sidebarToggle.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm16 16V5H9v14h10z"/></svg>';
+      sidebarToggle.title = "Toggle Sidebar";
+      sidebarToggle.innerHTML = "<i>dock_to_left</i>";
       sidebarToggle.addEventListener("click", () => {
         const sb = document.getElementById("hilal-sidebar");
         if (sb) {
@@ -686,8 +694,9 @@
       headerShell.appendChild(topbar);
 
       // 2. Horizontal Tabs Strip (Dual & Horizontal Modes)
-      const hTabs = document.createElement("div");
+      const hTabs = document.createElement("nav");
       hTabs.id = "hilal-horizontal-tabs";
+      hTabs.className = "row tiny-space";
 
       // Traffic lights slot for horizontal Chrome-style mode
       const hTrafficSlot = document.createElement("div");
@@ -697,15 +706,16 @@
       // Horizontal tab list container
       const hTabList = document.createElement("div");
       hTabList.id = "hilal-horizontal-tab-list";
+      hTabList.className = "row tiny-space max";
       hTabs.appendChild(hTabList);
 
       // New Tab Button
       const hNewTabBtn = document.createElement("button");
-      hNewTabBtn.className = "hilal-btn";
+      hNewTabBtn.className = "circle transparent small hilal-btn";
       hNewTabBtn.id = "hilal-htab-newtab-btn";
       hNewTabBtn.setAttribute("data-l10n-id", "hilal-toolbar-newtab");
-      hNewTabBtn.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+      hNewTabBtn.title = "New Tab";
+      hNewTabBtn.innerHTML = "<i>add</i>";
       hNewTabBtn.addEventListener("click", () => this.openNewTab());
       hTabs.appendChild(hNewTabBtn);
 
@@ -725,27 +735,31 @@
 
       const sidebar = document.createElement("aside");
       sidebar.id = "hilal-sidebar";
+      sidebar.className = "beer";
 
-      // Workspaces rail (Compact Icon-Only Design)
-      const wsBar = document.createElement("div");
+      // Workspaces rail (Beer CSS row of circle buttons)
+      const wsBar = document.createElement("nav");
       wsBar.id = "hilal-workspaces-bar";
+      wsBar.className = "row";
       sidebar.appendChild(wsBar);
 
       // Tabs header (+ New Tab)
-      const tabsHeader = document.createElement("div");
+      const tabsHeader = document.createElement("nav");
       tabsHeader.id = "hilal-tabs-bar-header";
+      tabsHeader.className = "row";
 
-      const label = document.createElement("span");
-      label.className = "hilal-tabs-label";
+      const label = document.createElement("label");
+      label.className = "max hilal-tabs-label";
       label.setAttribute("data-l10n-id", "urlbar-search-mode-tabs");
+      label.textContent = "TABS";
       tabsHeader.appendChild(label);
 
       const newTabBtn = document.createElement("button");
-      newTabBtn.className = "hilal-btn";
+      newTabBtn.className = "circle transparent small hilal-btn";
       newTabBtn.id = "hilal-newtab-btn";
       newTabBtn.setAttribute("data-l10n-id", "hilal-toolbar-newtab");
-      newTabBtn.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+      newTabBtn.title = "New Tab";
+      newTabBtn.innerHTML = "<i>add</i>";
       newTabBtn.addEventListener("click", () => this.openNewTab());
       tabsHeader.appendChild(newTabBtn);
 
@@ -757,15 +771,16 @@
       sidebar.appendChild(tabList);
 
       // Sidebar Footer (Settings)
-      const footer = document.createElement("div");
+      const footer = document.createElement("nav");
       footer.id = "hilal-sidebar-footer";
+      footer.className = "row center-align";
 
       const settingsBtn = document.createElement("button");
-      settingsBtn.className = "hilal-btn";
+      settingsBtn.className = "circle transparent small hilal-btn";
       settingsBtn.id = "hilal-settings-btn";
       settingsBtn.setAttribute("data-l10n-id", "hilal-toolbar-settings");
-      settingsBtn.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>';
+      settingsBtn.title = "Settings";
+      settingsBtn.innerHTML = "<i>settings</i>";
       settingsBtn.addEventListener("click", () => {
         if (typeof window.openPreferences === "function") {
           window.openPreferences();
@@ -842,11 +857,9 @@
     },
 
     MODE_ICONS: {
-      vertical:
-        '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="5.5" y1="7" x2="6.5" y2="7"/><line x1="5.5" y1="11" x2="6.5" y2="11"/></svg>',
-      dual: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="9" y1="9" x2="21" y2="9"/></svg>',
-      horizontal:
-        '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="3" y1="8.5" x2="21" y2="8.5"/><line x1="9" y1="3" x2="9" y2="8.5"/><line x1="15" y1="3" x2="15" y2="8.5"/></svg>',
+      vertical: "<i>view_sidebar</i>",
+      dual: "<i>splitscreen</i>",
+      horizontal: "<i>tab</i>",
     },
 
     updateModeButton() {
@@ -872,32 +885,35 @@
       if (!menu) {
         menu = document.createElement("div");
         menu.id = "hilal-mode-context-menu";
-        menu.className = "hilal-dropdown-menu";
+        menu.className =
+          "beer menu vertical round medium-elevate active surface-container-high";
         document.body.appendChild(menu);
 
         const options = [
           {
             id: "vertical",
             label: "Vertical Sidebar Tabs",
-            icon: this.MODE_ICONS.vertical,
+            icon: "view_sidebar",
           },
           {
             id: "dual",
             label: "Dual Tabs (Safari Style)",
-            icon: this.MODE_ICONS.dual,
+            icon: "splitscreen",
           },
           {
             id: "horizontal",
             label: "Horizontal Tabs (Chrome Style)",
-            icon: this.MODE_ICONS.horizontal,
+            icon: "tab",
           },
         ];
 
         options.forEach(opt => {
           const item = document.createElement("button");
-          item.className = "hilal-dropdown-item";
+          item.className =
+            "row wave round tiny-space transparent" +
+            (opt.id === this.tabMode ? " secondary-container active" : "");
           item.dataset.mode = opt.id;
-          item.innerHTML = `<span class="hilal-dropdown-icon">${opt.icon}</span><span class="hilal-dropdown-label">${opt.label}</span>`;
+          item.innerHTML = `<i>${opt.icon}</i><span class="max">${opt.label}</span>`;
           item.addEventListener("click", () => {
             this.setTabMode(opt.id);
             menu.style.display = "none";
@@ -922,8 +938,10 @@
       menu.style.right = `${window.innerWidth - rect.right}px`;
       menu.style.display = "flex";
 
-      menu.querySelectorAll(".hilal-dropdown-item").forEach(el => {
-        el.classList.toggle("active", el.dataset.mode === this.tabMode);
+      menu.querySelectorAll("button[data-mode]").forEach(el => {
+        const isAct = el.dataset.mode === this.tabMode;
+        el.classList.toggle("active", isAct);
+        el.classList.toggle("secondary-container", isAct);
       });
     },
 
@@ -1167,104 +1185,96 @@
       const list = document.createElement("div");
       list.className = "hilal-search-list";
 
-      const searchSvg =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>';
-      const globeSvg =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>';
-      const tabSvg =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z"/></svg>';
-      const historySvg =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>';
-      const bangSvg =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
-
       items.forEach((item, index) => {
         const row = document.createElement("div");
-        row.className = "hilal-search-item";
+        const isSelected = index === this._selectedSuggestionIndex;
+        row.className = `hilal-search-item row wave round tiny-space ${
+          isSelected ? "secondary-container selected" : ""
+        }`;
         row.dataset.index = index;
 
-        // Fast native Favicon with fallback SVG
+        // Icon container — Beer CSS small circle with surface container background
         const iconDiv = document.createElement("div");
-        iconDiv.className = "hilal-search-item-icon";
+        iconDiv.className =
+          "circle small surface-container-highest center-align middle-align";
 
         let favSrc = null;
-        let fallbackSvg = searchSvg;
+        let iconName = "search";
 
         if (item.type === "search") {
           favSrc = this._defaultEngineIcon || null;
-          fallbackSvg = searchSvg;
+          iconName = "search";
         } else if (item.type === "suggestion") {
-          fallbackSvg = searchSvg;
+          iconName = "search";
         } else if (item.type === "tab") {
           favSrc = item.tab?.image || item.tab?.getAttribute("image");
           if (!favSrc && item.sub) {
             favSrc = `page-icon:${item.sub}`;
           }
-          fallbackSvg = tabSvg;
+          iconName = "tab";
         } else if (item.type === "url") {
           favSrc = item.url ? `page-icon:${item.url}` : null;
-          fallbackSvg = globeSvg;
+          iconName = "public";
         } else if (item.type === "history") {
           favSrc = item.url ? `page-icon:${item.url}` : null;
-          fallbackSvg = historySvg;
+          iconName = "history";
         } else if (item.type === "bang" || item.type === "bang_hint") {
           favSrc = item.url ? `page-icon:${item.url}` : null;
-          fallbackSvg = bangSvg;
+          iconName = "bolt";
         }
 
         if (favSrc) {
           const img = document.createElement("img");
-          img.className = "hilal-search-favicon";
+          img.className = "circle hilal-search-favicon";
           img.src = favSrc;
           img.onerror = () => {
             img.remove();
-            iconDiv.innerHTML = fallbackSvg;
+            iconDiv.innerHTML = `<i>${iconName}</i>`;
           };
           iconDiv.appendChild(img);
         } else {
-          iconDiv.innerHTML = fallbackSvg;
+          iconDiv.innerHTML = `<i>${iconName}</i>`;
         }
         row.appendChild(iconDiv);
 
         // Content
         const contentDiv = document.createElement("div");
-        contentDiv.className = "hilal-search-item-content";
+        contentDiv.className = "max";
 
-        const labelSpan = document.createElement("span");
-        labelSpan.className = "hilal-search-item-label";
+        const labelSpan = document.createElement("div");
+        labelSpan.className = "hilal-search-item-label bold";
         labelSpan.textContent = item.label;
         contentDiv.appendChild(labelSpan);
 
-        const subSpan = document.createElement("span");
-        subSpan.className = "hilal-search-item-sub";
-        subSpan.textContent = item.sub;
-        contentDiv.appendChild(subSpan);
+        if (item.sub) {
+          const subSpan = document.createElement("div");
+          subSpan.className = "hilal-search-item-sub small-text opacity";
+          subSpan.textContent = item.sub;
+          contentDiv.appendChild(subSpan);
+        }
 
         row.appendChild(contentDiv);
 
-        // Trailing chip
+        // Trailing Beer CSS chip or icon
         if (item.type === "tab") {
           const trail = document.createElement("span");
-          trail.className = "hilal-search-item-trailing";
+          trail.className = "chip small primary";
           trail.textContent = "SWITCH TO TAB";
           row.appendChild(trail);
         } else if (item.type === "bang") {
           const trail = document.createElement("span");
-          trail.className =
-            "hilal-search-item-trailing hilal-search-item-bang-chip";
+          trail.className = "chip small tertiary";
           trail.textContent = "BANG";
           row.appendChild(trail);
         } else if (item.type === "bang_hint") {
           const trail = document.createElement("span");
-          trail.className =
-            "hilal-search-item-trailing hilal-search-item-bang-chip";
+          trail.className = "chip small tertiary";
           trail.textContent = "SHORTCUT";
           row.appendChild(trail);
         } else if (item.type === "search" || item.type === "suggestion") {
-          const trail = document.createElement("span");
-          trail.className = "hilal-search-item-trailing-icon";
-          trail.innerHTML =
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 19h14V5H5v14zm10-10l-6 6-1.41-1.41L12.17 9H8V7h8v8h-2v-4.17z"/></svg>';
+          const trail = document.createElement("i");
+          trail.className = "small opacity";
+          trail.textContent = "call_made";
           row.appendChild(trail);
         }
 
@@ -1292,8 +1302,10 @@
       if (!dropdown) return;
       const items = dropdown.querySelectorAll(".hilal-search-item");
       items.forEach((item, i) => {
-        item.classList.toggle("selected", i === index);
-        if (i === index) {
+        const isSel = i === index;
+        item.classList.toggle("selected", isSel);
+        item.classList.toggle("secondary-container", isSel);
+        if (isSel) {
           item.scrollIntoView({ block: "nearest" });
         }
       });
@@ -1545,13 +1557,13 @@
       // In horizontal Chrome mode, render a compact active workspace pill to prevent topbar overflow
       if (this.tabMode === "horizontal") {
         const pill = document.createElement("button");
-        pill.className = "hilal-ws-pill-btn";
+        pill.className = "chip border round wave";
         pill.id = "hilal-ws-dropdown-pill";
         pill.title = `Current Workspace: ${activeWs.name || activeWs.id} (Click to switch)`;
         pill.innerHTML = `
-          <span class="hilal-ws-pill-emoji">${activeWs.emoji || "\u{1F4C1}"}</span>
-          <span class="hilal-ws-pill-name">${activeWs.name || activeWs.id}</span>
-          <svg class="hilal-ws-pill-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+          <span>${activeWs.emoji || "\u{1F4C1}"}</span>
+          <span class="max">${activeWs.name || activeWs.id}</span>
+          <i>arrow_drop_down</i>
         `;
         pill.addEventListener("click", e => {
           e.stopPropagation();
@@ -1568,9 +1580,9 @@
       }
 
       workspaces.forEach(ws => {
+        const isAct = ws.id === activeId;
         const chip = document.createElement("button");
-        chip.className =
-          "hilal-ws-chip" + (ws.id === activeId ? " active" : "");
+        chip.className = `circle small ${isAct ? "primary active" : "secondary-container"} hilal-ws-chip`;
         chip.textContent = ws.emoji || "\u{1F5C2}";
         chip.title = `${ws.name || ws.id} (Right click to edit)`;
         chip.setAttribute("aria-label", ws.name || ws.id);
@@ -1600,9 +1612,9 @@
       });
 
       const addWsBtn = document.createElement("button");
-      addWsBtn.className = "hilal-ws-chip hilal-ws-add";
+      addWsBtn.className = "circle small border hilal-ws-chip hilal-ws-add";
       addWsBtn.title = "New Workspace";
-      addWsBtn.textContent = "+";
+      addWsBtn.innerHTML = "<i>add</i>";
       addWsBtn.addEventListener("click", () => {
         if (manager && typeof manager._showCreateDialog === "function") {
           manager._showCreateDialog();
@@ -1645,7 +1657,8 @@
       } else {
         menu = document.createElement("div");
         menu.id = "hilal-workspaces-dropdown-menu";
-        menu.className = "hilal-dropdown-menu hilal-ws-dropdown-menu";
+        menu.className =
+          "beer menu vertical round medium-elevate active surface-container-high";
         document.body.appendChild(menu);
 
         document.addEventListener("mousedown", e => {
@@ -1662,19 +1675,21 @@
       const manager = window.gHilalWorkspaces;
 
       // Header
-      const header = document.createElement("div");
-      header.className = "hilal-dropdown-header";
+      const header = document.createElement("label");
+      header.className = "bold uppercase small-text opacity padding";
       header.textContent = "WORKSPACES";
       menu.appendChild(header);
 
       workspaces.forEach(ws => {
         const item = document.createElement("button");
         const isActive = ws.id === activeId;
-        item.className = "hilal-dropdown-item" + (isActive ? " active" : "");
+        item.className =
+          "row wave round tiny-space transparent" +
+          (isActive ? " secondary-container active" : "");
         item.innerHTML = `
-          <span class="hilal-dropdown-icon">${ws.emoji || "\u{1F4C1}"}</span>
-          <span class="hilal-dropdown-label">${ws.name || ws.id}</span>
-          ${isActive ? '<span class="hilal-ws-check-indicator">✓</span>' : ""}
+          <span class="small">${ws.emoji || "\u{1F4C1}"}</span>
+          <span class="max">${ws.name || ws.id}</span>
+          ${isActive ? "<i>check</i>" : ""}
         `;
 
         item.addEventListener("click", () => {
@@ -1702,15 +1717,14 @@
         menu.appendChild(item);
       });
 
-      const sep = document.createElement("div");
-      sep.className = "hilal-dropdown-divider";
+      const sep = document.createElement("hr");
       menu.appendChild(sep);
 
       const addBtn = document.createElement("button");
-      addBtn.className = "hilal-dropdown-item hilal-dropdown-item-add";
+      addBtn.className = "row wave round tiny-space transparent";
       addBtn.innerHTML = `
-        <span class="hilal-dropdown-icon">+</span>
-        <span class="hilal-dropdown-label">New Workspace</span>
+        <i>add</i>
+        <span class="max">New Workspace</span>
       `;
       addBtn.addEventListener("click", () => {
         menu.style.display = "none";
@@ -1759,10 +1773,11 @@
 
       const menu = document.createElement("div");
       menu.id = "hilal-theme-menu";
-      menu.className = "hilal-m3-menu";
+      menu.className =
+        "beer menu vertical round medium-elevate active surface-container-high";
 
-      const title = document.createElement("div");
-      title.className = "hilal-theme-menu-title";
+      const title = document.createElement("label");
+      title.className = "bold uppercase small-text opacity padding";
       title.textContent = "Material You Color";
       menu.appendChild(title);
 
@@ -1784,7 +1799,7 @@
 
       colors.forEach(({ name, hex }) => {
         const swatch = document.createElement("button");
-        swatch.className = "hilal-theme-swatch";
+        swatch.className = "circle hilal-theme-swatch";
         if (name === currentActiveColor) {
           swatch.classList.add("active");
         }
@@ -2080,8 +2095,11 @@
 
     // Horizontal Tab DOM Creator
     createHorizontalTab(tab) {
+      const isSelected = tab.selected || tab === window.gBrowser?.selectedTab;
       const htab = document.createElement("div");
-      htab.className = "hilal-htab";
+      htab.className = `hilal-htab row wave round tiny-space ${
+        isSelected ? "secondary-container active" : ""
+      }`;
       htab._tab = tab;
       htab.tab = tab;
       htab.setAttribute("draggable", "true");
@@ -2090,18 +2108,20 @@
       const iconDiv = document.createElement("div");
       iconDiv.className = "hilal-htab-icon";
       const iconImg = document.createElement("img");
+      iconImg.className = "circle hilal-htab-favicon";
       iconDiv.appendChild(iconImg);
       htab.appendChild(iconDiv);
 
       // Title
       const titleSpan = document.createElement("span");
-      titleSpan.className = "hilal-htab-title";
+      titleSpan.className = "max hilal-htab-title";
       htab.appendChild(titleSpan);
 
       // Sound indicator
       const soundBtn = document.createElement("button");
-      soundBtn.className = "hilal-htab-sound-btn";
+      soundBtn.className = "circle transparent small hilal-htab-sound-btn";
       soundBtn.style.display = "none";
+      soundBtn.innerHTML = "<i>volume_up</i>";
       soundBtn.addEventListener("click", e => {
         e.stopPropagation();
         tab.toggleMuteAudio?.();
@@ -2109,13 +2129,13 @@
       });
       htab.appendChild(soundBtn);
 
-      // Close button — span with role="button" so it is immune to button CSS rules
-      const closeBtn = document.createElement("span");
-      closeBtn.className = "hilal-htab-close-btn";
-      closeBtn.setAttribute("role", "button");
+      // Close button — Beer CSS circle transparent button with Material Symbols close icon
+      const closeBtn = document.createElement("button");
+      closeBtn.className = "circle transparent small hilal-htab-close-btn";
       closeBtn.setAttribute("aria-label", "Close tab");
       closeBtn.setAttribute("data-l10n-id", "tabbrowser-menuitem-close-tab");
-      closeBtn.textContent = "\u00D7";
+      closeBtn.title = "Close tab";
+      closeBtn.innerHTML = "<i>close</i>";
       closeBtn.addEventListener("click", e => {
         e.stopPropagation();
         window.gBrowser.removeTab(tab);
@@ -2226,11 +2246,9 @@
       const soundBtn = htab.querySelector(".hilal-htab-sound-btn");
       if (soundBtn) {
         if (tab.soundPlaying || tab.muted) {
-          soundBtn.style.display = "flex";
+          soundBtn.style.display = "inline-flex";
           soundBtn.title = tab.muted ? "Unmute Tab" : "Mute Tab";
-          soundBtn.innerHTML = tab.muted
-            ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>'
-            : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
+          soundBtn.innerHTML = tab.muted ? "<i>volume_off</i>" : "<i>volume_up</i>";
         } else {
           soundBtn.style.display = "none";
         }
@@ -2239,8 +2257,9 @@
 
     // Vertical Tab DOM Creator
     createTabPill(tab) {
+      const isSelected = tab.selected || tab === window.gBrowser?.selectedTab;
       const pill = document.createElement("div");
-      pill.className = "hilal-tab-pill";
+      pill.className = `hilal-tab-pill row wave round tiny-space ${isSelected ? "secondary-container active" : ""}`;
       pill._tab = tab;
       pill.tab = tab;
       pill.setAttribute("draggable", "true");
@@ -2249,21 +2268,21 @@
       const iconDiv = document.createElement("div");
       iconDiv.className = "hilal-tab-icon";
       const iconImg = document.createElement("img");
+      iconImg.className = "circle hilal-tab-favicon";
       iconDiv.appendChild(iconImg);
       pill.appendChild(iconDiv);
 
       // Title container
       const titleSpan = document.createElement("span");
-      titleSpan.className = "hilal-tab-title";
+      titleSpan.className = "max hilal-tab-title";
       pill.appendChild(titleSpan);
 
-      // Close button — span with role="button" so it is immune to button CSS rules
-      const closeBtn = document.createElement("span");
-      closeBtn.className = "hilal-tab-close-btn";
-      closeBtn.setAttribute("role", "button");
+      // Close button — Beer CSS circle transparent button with Material Symbols close icon
+      const closeBtn = document.createElement("button");
+      closeBtn.className = "circle transparent small hilal-tab-close-btn";
       closeBtn.setAttribute("aria-label", "Close tab");
       closeBtn.setAttribute("data-l10n-id", "tabbrowser-menuitem-close-tab");
-      closeBtn.textContent = "\u00D7";
+      closeBtn.innerHTML = "<i>close</i>";
       closeBtn.addEventListener("click", e => {
         e.stopPropagation();
         window.gBrowser.removeTab(tab);
@@ -2471,6 +2490,7 @@
         }
 
         pill.classList.toggle("active", isSelected);
+        pill.classList.toggle("secondary-container", isSelected);
         this.updateTabPillContent(pill, tab);
 
         const currentChild = container.children[index];
@@ -2508,6 +2528,7 @@
         }
 
         htab.classList.toggle("active", isSelected);
+        htab.classList.toggle("secondary-container", isSelected);
         this.updateHorizontalTabContent(htab, tab);
 
         const currentChild = container.children[index];
@@ -2581,11 +2602,11 @@
       if (secIcon && window.gBrowser.currentURI) {
         const scheme = window.gBrowser.currentURI.scheme;
         if (scheme === "https") {
-          secIcon.innerHTML =
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>';
+          secIcon.className = "small primary-text";
+          secIcon.textContent = "lock";
         } else {
-          secIcon.innerHTML =
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>';
+          secIcon.className = "small";
+          secIcon.textContent = "language";
         }
       }
 

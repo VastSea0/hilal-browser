@@ -144,63 +144,7 @@
   font-size: 14px !important;
 }
 
-/* Compact Active Workspace Pill in Horizontal Mode */
-.hilal-ws-pill-btn {
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  height: 28px !important;
-  padding: 0 10px 0 8px !important;
-  background-color: var(--md-sys-color-surface-container-high) !important;
-  color: var(--md-sys-color-on-surface) !important;
-  border: 1px solid var(--md-sys-color-outline-variant, transparent) !important;
-  border-radius: var(--md-sys-shape-corner-full, 9999px) !important;
-  cursor: pointer !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  white-space: nowrap !important;
-  transition:
-    background-color 150ms ease,
-    color 150ms ease,
-    transform 200ms var(--md-sys-motion-spring-spatial) !important;
-  -moz-window-dragging: no-drag !important;
-}
-
-.hilal-ws-pill-btn:hover {
-  background-color: var(--md-sys-color-surface-container-highest) !important;
-  color: var(--md-sys-color-primary) !important;
-  transform: scale(1.03) !important;
-}
-
-.hilal-ws-pill-btn:active {
-  transform: scale(0.96) !important;
-}
-
-.hilal-ws-pill-emoji {
-  font-size: 14px;
-  line-height: 1;
-}
-
-.hilal-ws-pill-name {
-  max-width: 90px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.hilal-ws-pill-arrow {
-  width: 14px;
-  height: 14px;
-  fill: currentColor;
-  opacity: 0.7;
-  transition: transform 150ms ease;
-}
-
-.hilal-ws-pill-btn:hover .hilal-ws-pill-arrow {
-  opacity: 1;
-}
-
-/* Navigation buttons */
+/* Navigation buttons (Beer CSS circle transparent buttons) */
 #hilal-nav-group {
   display: flex;
   align-items: center;
@@ -209,54 +153,11 @@
 }
 
 .hilal-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--md-sys-shape-corner-full, 9999px);
-  border: none;
-  background: transparent;
-  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
-  cursor: pointer;
-  padding: 0;
-  transition:
-    background-color 150ms ease,
-    color 150ms ease,
-    transform 250ms var(--md-sys-motion-spring-spatial),
-    border-radius 250ms var(--md-sys-motion-spring-spatial);
   -moz-window-dragging: no-drag;
 }
 
-.hilal-btn:hover:not([disabled]) {
-  background-color: var(--md-sys-color-surface-container-high, #262b32);
-  color: var(--md-sys-color-on-surface, #e1e2e9);
-  transform: scale(1.06);
-  border-radius: 40%;
-}
-
-.hilal-btn:active:not([disabled]) {
-  background-color: var(--md-sys-color-surface-container-highest, #31363e);
-  color: var(--md-sys-color-primary, #a8c7fa);
-  transform: scale(0.9) !important;
-  border-radius: 10px !important;
-}
-
-.hilal-btn[disabled] {
-  opacity: 0.35;
-  cursor: default;
-}
-
-.hilal-btn svg {
-  width: 18px;
-  height: 18px;
-  fill: currentColor;
-}
-
-.hilal-btn svg[fill="none"],
-#hilal-layout-mode-btn svg {
-  fill: none !important;
-  stroke: currentColor !important;
+.hilal-btn i {
+  font-size: 18px !important;
 }
 
 #hilal-top-right-group {
@@ -416,106 +317,63 @@
   max-width: 620px;
   margin: 0 auto;
   position: relative;
-  display: flex;
-  align-items: center;
-  background-color: var(--md-sys-color-surface-container-high, #262b32);
-  border: none !important;
-  border-radius: var(--md-sys-shape-corner-full, 9999px);
-  height: 34px;
+  height: 36px;
   padding: 0 12px;
-  gap: 8px;
-  transition:
-    background-color 200ms ease,
-    box-shadow 200ms ease;
+  background-color: var(--surface-container-high, var(--md-sys-color-surface-container-high, #262b32)) !important;
+  border: none !important;
   -moz-window-dragging: no-drag;
   box-sizing: border-box;
 }
 
 #hilal-url-container:focus-within {
-  background-color: var(--md-sys-color-surface-container-highest, #31363e);
-  box-shadow: 0 0 0 2px var(--md-sys-color-primary, #a8c7fa);
+  background-color: var(--surface-container-highest, var(--md-sys-color-surface-container-highest, #31363e)) !important;
+  box-shadow: 0 0 0 2px var(--primary, var(--md-sys-color-primary, #a8c7fa)) !important;
 }
 
 #hilal-url-security-icon {
   display: flex;
   align-items: center;
-  color: var(--md-sys-color-primary, #a8c7fa);
-}
-
-#hilal-url-security-icon svg {
-  width: 15px;
-  height: 15px;
-  fill: currentColor;
+  justify-content: center;
+  font-size: 16px !important;
+  cursor: default;
 }
 
 #hilal-url-input {
   flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--md-sys-color-on-surface, #e1e2e9);
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  color: var(--on-surface, var(--md-sys-color-on-surface, #e1e2e9)) !important;
   font-family: inherit;
   font-size: 13.5px;
   padding: 0;
   margin: 0;
+  min-height: auto;
 }
 
 #hilal-url-input::placeholder {
-  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+  color: var(--on-surface-variant, var(--md-sys-color-on-surface-variant, #c3c7cf));
   opacity: 0.7;
 }
 
-#hilal-url-clear-btn {
-  width: 20px;
-  height: 20px;
-  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
-}
-
-#hilal-url-clear-btn svg {
-  width: 14px;
-  height: 14px;
-}
-
+#hilal-url-clear-btn,
 #hilal-url-copy-btn,
 #hilal-url-theme-btn {
-  display: none;
-  align-items: center;
-  justify-content: center;
   width: 26px !important;
   height: 26px !important;
   min-width: 26px !important;
   min-height: 26px !important;
-  border-radius: var(--md-sys-shape-corner-full, 9999px) !important;
-  border: none !important;
-  background: transparent !important;
-  color: var(--md-sys-color-on-surface-variant, #c3c7cf) !important;
-  cursor: pointer !important;
+  max-width: 26px !important;
+  max-height: 26px !important;
   padding: 0 !important;
-  margin: 0 !important;
-  transition:
-    background-color 150ms ease,
-    color 150ms ease,
-    transform 180ms var(--md-sys-motion-spring-spatial) !important;
-  -moz-window-dragging: no-drag !important;
+  -moz-window-dragging: no-drag;
 }
 
-#hilal-url-copy-btn:hover,
-#hilal-url-theme-btn:hover {
-  background-color: var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.1)) !important;
-  color: var(--md-sys-color-on-surface, #e2e2e9) !important;
-  transform: scale(1.08) !important;
-}
-
-#hilal-url-copy-btn:active,
-#hilal-url-theme-btn:active {
-  transform: scale(0.92) !important;
-}
-
-#hilal-url-copy-btn svg,
-#hilal-url-theme-btn svg {
-  width: 14px !important;
-  height: 14px !important;
-  fill: currentColor !important;
+#hilal-url-clear-btn i,
+#hilal-url-copy-btn i,
+#hilal-url-theme-btn i {
+  font-size: 16px !important;
 }
 
 /* Page Actions inside M3 URL Bar Container */
@@ -630,92 +488,47 @@
 /* Material 3 Theme / Palette Menu */
 #hilal-theme-menu {
   position: fixed;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  background-color: var(--md-sys-color-surface-container-high, #21252d);
-  border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.1));
-  border-radius: var(--md-sys-shape-corner-large, 16px);
-  box-shadow:
-    0 16px 36px rgba(0, 0, 0, 0.55),
-    0 2px 6px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(24px);
-  z-index: 100000;
   min-width: 180px;
-  animation: hilal-menu-enter 180ms var(--md-sys-motion-spring-spatial);
-}
-
-.hilal-theme-menu-title {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
-  padding: 0 4px 4px 4px;
 }
 
 .hilal-theme-swatches-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
-  padding: 2px 4px;
+  padding: 4px;
 }
 
 .hilal-theme-swatch {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid transparent;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
   cursor: pointer;
-  transition:
-    transform 150ms ease,
-    border-color 150ms ease;
-  padding: 0;
-  outline: none;
-}
-
-.hilal-theme-swatch:hover {
-  transform: scale(1.15);
+  padding: 0 !important;
+  border: 2px solid transparent !important;
 }
 
 .hilal-theme-swatch.active {
-  border-color: var(--md-sys-color-on-surface, #ffffff);
-  transform: scale(1.1);
-  box-shadow: 0 0 0 2px var(--md-sys-color-primary, #a8c7fa);
+  border-color: var(--on-surface, #ffffff) !important;
+  box-shadow: 0 0 0 2px var(--primary, #a8c7fa) !important;
 }
 
-/* Material 3 Search Suggestions Dropdown Card */
+/* Material 3 Search Suggestions Dropdown Card (Beer CSS Surface) */
 #hilal-search-dropdown {
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
   right: 0;
-  background-color: var(--md-sys-color-surface-container-high, #21252d);
-  border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.1));
-  border-radius: 20px;
-  box-shadow:
-    0 16px 36px rgba(0, 0, 0, 0.55),
-    0 2px 6px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
+  background-color: var(--surface-container-high, var(--md-sys-color-surface-container-high, #21252d)) !important;
+  border: 1px solid var(--outline-variant, var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.1))) !important;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
   z-index: 100000;
   display: none;
   flex-direction: column;
-  padding: 8px 0;
-  backdrop-filter: blur(24px);
+  padding: 6px;
   max-height: 460px;
   overflow-y: auto;
-  animation: hilal-search-enter 220ms var(--md-sys-motion-spring-spatial);
-}
-
-@keyframes hilal-search-enter {
-  from {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
 .hilal-search-header {
@@ -723,121 +536,21 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: var(--md-sys-color-outline, #8c9199);
-  padding: 6px 18px 4px 18px;
+  color: var(--outline, var(--md-sys-color-outline, #8c9199));
+  padding: 6px 12px 4px 12px;
   user-select: none;
 }
 
 .hilal-search-list {
   display: flex;
   flex-direction: column;
-}
-
-.hilal-search-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 8px 14px;
-  margin: 2px 8px;
-  border-radius: 14px;
-  cursor: pointer;
-  user-select: none;
-  transition:
-    background-color 150ms ease,
-    transform 150ms var(--md-sys-motion-spring-spatial);
-}
-
-.hilal-search-item:hover {
-  background-color: var(--md-sys-color-surface-container-highest, #2d323b);
-}
-
-.hilal-search-item.selected {
-  background-color: var(--md-sys-color-primary-container, #0842a0) !important;
-  color: var(--md-sys-color-on-primary-container, #d3e3fd) !important;
-}
-
-.hilal-search-item:active {
-  transform: scale(0.98);
-}
-
-.hilal-search-item-icon {
-  width: 34px;
-  height: 34px;
-  min-width: 34px;
-  border-radius: 50%;
-  background-color: var(--md-sys-color-surface-container-highest, #2d323b);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--md-sys-color-primary, #a8c7fa);
-  transition: all 180ms ease;
-}
-
-.hilal-search-item.selected .hilal-search-item-icon {
-  background-color: var(--md-sys-color-primary, #a8c7fa);
-  color: var(--md-sys-color-on-primary, #003063);
-  border-radius: 10px;
-}
-
-.hilal-search-item-icon svg {
-  width: 17px;
-  height: 17px;
-  fill: currentColor;
-}
-
-.hilal-search-item-content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
   gap: 2px;
 }
 
-.hilal-search-item-label {
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--md-sys-color-on-surface, #e1e2e9);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.hilal-search-item.selected .hilal-search-item-label {
-  color: var(--md-sys-color-on-primary-container, #d3e3fd);
-}
-
-.hilal-search-item-sub {
-  font-size: 11.5px;
-  color: var(--md-sys-color-on-surface-variant, #a0a5ad);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.hilal-search-item.selected .hilal-search-item-sub {
-  color: var(--md-sys-color-on-primary-container, #d3e3fd);
-  opacity: 0.85;
-}
-
-.hilal-search-item-trailing {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--md-sys-color-primary, #a8c7fa);
-  padding: 3px 8px;
-  background-color: var(--md-sys-color-surface-container, #1c2027);
-  border-radius: 8px;
-  white-space: nowrap;
-}
-
-.hilal-search-item.selected .hilal-search-item-trailing {
-  background-color: var(--md-sys-color-on-primary-container, #d3e3fd);
-  color: var(--md-sys-color-primary-container, #0842a0);
-}
-
-.hilal-search-item-trailing-icon svg {
-  width: 16px;
-  height: 16px;
-  fill: var(--md-sys-color-outline, #8c9199);
+.hilal-search-item {
+  cursor: pointer;
+  user-select: none;
+  padding: 6px 10px;
 }
 
 .hilal-search-favicon {
@@ -847,21 +560,24 @@
   min-height: 18px;
   object-fit: contain;
   border-radius: 4px;
+  flex-shrink: 0;
 }
 
-.hilal-search-item-trailing.hilal-search-item-bang-chip {
-  background-color: var(--md-sys-color-tertiary-container, rgba(175, 81, 245, 0.2));
-  color: var(--md-sys-color-on-tertiary-container, #d0bcff);
-  font-weight: 700;
-  letter-spacing: 0.5px;
+.hilal-search-item-label {
+  font-size: 13.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.hilal-search-item.selected .hilal-search-item-trailing.hilal-search-item-bang-chip {
-  background-color: var(--md-sys-color-on-primary-container, #d3e3fd);
-  color: var(--md-sys-color-primary-container, #0842a0);
+.hilal-search-item-sub {
+  font-size: 11.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* 3c. Horizontal Tab Bar (Safari Dual Mode & Chrome Horizontal Mode) */
+/* 3c. Horizontal Tab Bar (Beer CSS Row of Tabs) */
 #hilal-horizontal-tabs {
   display: flex;
   align-items: center;
@@ -869,7 +585,7 @@
   min-height: 38px;
   max-height: 38px;
   padding: 0 12px;
-  gap: 8px;
+  gap: 6px;
   background-color: transparent;
   border-bottom: none !important;
   user-select: none;
@@ -886,7 +602,7 @@
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   overflow-x: auto;
   scrollbar-width: none;
   -moz-window-dragging: drag;
@@ -897,54 +613,28 @@
 }
 
 .hilal-htab {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 30px;
+  height: 32px;
   min-width: 120px;
   max-width: 220px;
   flex: 0 1 200px;
-  padding: 0 10px;
-  border-radius: var(--md-sys-shape-corner-medium, 10px);
-  background-color: var(--md-sys-color-surface-container, #1a1e26);
-  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+  padding: 0 8px 0 10px !important;
+  background-color: var(--surface-container, var(--md-sys-color-surface-container, #1a1e26));
+  color: var(--on-surface-variant, var(--md-sys-color-on-surface-variant, #c3c7cf));
   cursor: pointer;
   border: none !important;
   -moz-window-dragging: no-drag;
-  transition:
-    transform 200ms var(--md-sys-motion-spring-spatial),
-    background-color 150ms ease,
-    color 150ms ease,
-    border-radius 180ms var(--md-sys-motion-spring-spatial);
-  position: relative;
+  box-sizing: border-box;
 }
 
-.hilal-htab:hover {
-  background-color: var(--md-sys-color-surface-container-high, #242933);
-  color: var(--md-sys-color-on-surface, #e1e2e9);
-  transform: translateY(-1px);
-}
-
-.hilal-htab:active {
-  transform: scale(0.97);
+.hilal-htab:not(.active):hover {
+  background-color: var(--surface-container-high, var(--md-sys-color-surface-container-high, #242933));
+  color: var(--on-surface, var(--md-sys-color-on-surface, #e1e2e9));
 }
 
 .hilal-htab.active {
-  background-color: var(--md-sys-color-surface-container-highest, #31363e);
-  color: var(--md-sys-color-primary, #a8c7fa);
+  background-color: var(--secondary-container, var(--md-sys-color-secondary-container, #31363e)) !important;
+  color: var(--on-secondary-container, var(--md-sys-color-primary, #a8c7fa)) !important;
   font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-}
-
-.hilal-htab.active::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 20%;
-  right: 20%;
-  height: 2px;
-  background-color: var(--md-sys-color-primary, #a8c7fa);
-  border-radius: 2px;
 }
 
 .hilal-htab.dragging {
@@ -953,165 +643,78 @@
 }
 
 .hilal-htab.drop-before {
-  box-shadow: inset 2px 0 0 0 var(--md-sys-color-primary, #a8c7fa) !important;
+  box-shadow: inset 2px 0 0 0 var(--primary, var(--md-sys-color-primary, #a8c7fa)) !important;
 }
 
 .hilal-htab.drop-after {
-  box-shadow: inset -2px 0 0 0 var(--md-sys-color-primary, #a8c7fa) !important;
+  box-shadow: inset -2px 0 0 0 var(--primary, var(--md-sys-color-primary, #a8c7fa)) !important;
 }
 
-.hilal-htab-icon {
+.hilal-htab-favicon {
   width: 16px;
   height: 16px;
   min-width: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hilal-htab-icon img {
-  width: 16px;
-  height: 16px;
+  min-height: 16px;
   object-fit: contain;
   border-radius: 2px;
+  flex-shrink: 0;
 }
 
 .hilal-htab-title {
-  flex: 1;
   font-size: 12.5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.hilal-htab-sound-btn {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  color: var(--md-sys-color-primary, #a8c7fa);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0;
+.hilal-htab-sound-btn,
+.hilal-htab-close-btn {
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  min-height: 22px !important;
+  max-width: 22px !important;
+  max-height: 22px !important;
+  padding: 0 !important;
+  flex-shrink: 0;
 }
 
-.hilal-htab-sound-btn svg {
-  width: 14px;
-  height: 14px;
-  fill: currentColor;
+.hilal-htab-sound-btn i,
+.hilal-htab-close-btn i {
+  font-size: 15px !important;
 }
 
 .hilal-htab-close-btn {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
   opacity: 0;
-  transition:
-    opacity 150ms ease,
-    background-color 150ms ease;
-  padding: 0;
-  font-size: 13px;
-  line-height: 1;
+  transition: opacity 120ms ease;
 }
 
 .hilal-htab:hover .hilal-htab-close-btn,
 .hilal-htab.active .hilal-htab-close-btn {
-  opacity: 0.8;
+  opacity: 0.7;
 }
 
 .hilal-htab-close-btn:hover {
-  background-color: var(--md-sys-color-surface-container-highest, #383e49);
-  color: var(--md-sys-color-on-surface, #e1e2e9);
   opacity: 1 !important;
 }
 
 #hilal-htab-newtab-btn {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
   flex-shrink: 0;
 }
 
-/* 3d. Mode Switcher Context Menu */
-.hilal-dropdown-menu {
-  display: none;
-  flex-direction: column;
-  background-color: var(--md-sys-color-surface-container-high, #262b32);
-  border: 1px solid var(--md-sys-color-outline-variant, #31363e);
-  border-radius: var(--md-sys-shape-corner-medium, 14px);
-  padding: 6px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+/* 3d. Beer CSS Menus & Dropdowns */
+#hilal-mode-context-menu,
+#hilal-workspaces-dropdown-menu,
+#hilal-theme-menu {
   z-index: 100002;
+  border: 1px solid var(--outline-variant, var(--md-sys-color-outline-variant, #31363e)) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  padding: 6px;
   gap: 2px;
-}
-
-.hilal-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: var(--md-sys-color-on-surface, #e1e2e9);
-  font-size: 13px;
-  cursor: pointer;
-  text-align: left;
-  transition: background-color 150ms ease;
-}
-
-.hilal-dropdown-item:hover {
-  background-color: var(--md-sys-color-surface-container-highest, #31363e);
-}
-
-.hilal-dropdown-item.active {
-  background-color: var(--md-sys-color-primary-container, #0842a0);
-  color: var(--md-sys-color-on-primary-container, #d3e3fd);
-}
-
-.hilal-dropdown-header {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--md-sys-color-on-surface-variant);
-  padding: 6px 10px 4px 10px;
-  text-transform: uppercase;
-}
-
-.hilal-dropdown-divider {
-  height: 1px;
-  background-color: var(--md-sys-color-outline-variant);
-  margin: 4px 6px;
-}
-
-.hilal-ws-check-indicator {
-  margin-left: auto;
-  font-weight: 700;
-  color: var(--md-sys-color-primary);
-}
-
-.hilal-dropdown-icon {
-  display: flex;
-  align-items: center;
-}
-
-.hilal-dropdown-icon svg {
-  width: 18px;
-  height: 18px;
-  fill: currentColor;
-}
-
-.hilal-dropdown-icon svg[fill="none"],
-#hilal-mode-context-menu svg {
-  fill: none !important;
-  stroke: currentColor !important;
 }
 
 /* 4. Main Body: Flex layout containing sidebar + canvas */
@@ -1203,82 +806,19 @@
 }
 
 .hilal-ws-chip {
-  all: unset !important;
-  box-sizing: border-box !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 34px !important;
-  height: 34px !important;
-  min-width: 34px !important;
-  min-height: 34px !important;
-  max-width: 34px !important;
-  max-height: 34px !important;
-  border-radius: 50% !important;
-  border: none !important;
-  background: var(--surface-container-high, var(--md-sys-color-surface-container-high, rgba(255, 255, 255, 0.08))) !important;
-  color: var(--on-surface-variant, var(--md-sys-color-on-surface-variant, #c3c7cf)) !important;
-  font-size: 16px !important;
-  line-height: 1 !important;
-  cursor: pointer !important;
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
   padding: 0 !important;
-  transition:
-    transform 180ms cubic-bezier(0.2, 0, 0, 1),
-    border-radius 180ms cubic-bezier(0.2, 0, 0, 1),
-    background-color 150ms ease,
-    box-shadow 150ms ease !important;
-}
-
-.hilal-ws-chip:hover {
-  background-color: var(--surface-container-highest, var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.15))) !important;
-  color: var(--on-surface, var(--md-sys-color-on-surface, #ffffff)) !important;
-  transform: scale(1.06) !important;
-}
-
-.hilal-ws-chip:active {
-  transform: scale(0.92) !important;
-}
-
-.hilal-ws-chip.active {
-  background-color: var(--primary-container, var(--md-sys-color-primary-container, #0b57d0)) !important;
-  color: var(--on-primary-container, var(--md-sys-color-on-primary-container, #ffffff)) !important;
-  border-radius: 12px !important;
-  transform: scale(1.04) !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
-}
-
-.hilal-ws-add {
-  font-size: 18px !important;
-  font-weight: 400 !important;
-  background: transparent !important;
-  border: 1.5px dashed var(--outline-variant, var(--md-sys-color-outline-variant, #43474e)) !important;
-  color: var(--on-surface-variant, var(--md-sys-color-on-surface-variant, #c3c7cf)) !important;
-  transition:
-    transform 180ms cubic-bezier(0.2, 0, 0, 1),
-    border-color 150ms ease,
-    background-color 150ms ease,
-    color 150ms ease !important;
-}
-
-.hilal-ws-add:hover {
-  background-color: var(--surface-container-highest, var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.12))) !important;
-  border-color: var(--primary, var(--md-sys-color-primary, #a8c7fa)) !important;
-  color: var(--primary, var(--md-sys-color-primary, #a8c7fa)) !important;
-  border-style: solid !important;
-  transform: scale(1.06) !important;
-}
-
-.hilal-ws-add:active {
-  transform: scale(0.92) !important;
+  font-size: 15px !important;
+  flex-shrink: 0 !important;
 }
 
 /* Tabs Header */
 #hilal-tabs-bar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 4px 6px 6px 8px;
   flex-shrink: 0;
 }
@@ -1293,44 +833,13 @@
 }
 
 #hilal-newtab-btn {
-  all: unset !important;
-  box-sizing: border-box !important;
   width: 28px !important;
   height: 28px !important;
   min-width: 28px !important;
   min-height: 28px !important;
-  border-radius: 50% !important;
-  border: none !important;
-  background: transparent !important;
-  color: var(--on-surface-variant, var(--md-sys-color-on-surface-variant, #c3c7cf)) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  padding: 0 !important;
-  transition:
-    background-color 150ms ease,
-    color 150ms ease,
-    transform 150ms ease !important;
 }
 
-#hilal-newtab-btn:hover {
-  background-color: var(--surface-container-high, var(--md-sys-color-surface-container-high, rgba(255, 255, 255, 0.1))) !important;
-  color: var(--on-surface, var(--md-sys-color-on-surface, #ffffff)) !important;
-  transform: scale(1.08) !important;
-}
-
-#hilal-newtab-btn:active {
-  transform: scale(0.92) !important;
-}
-
-#hilal-newtab-btn svg {
-  width: 18px;
-  height: 18px;
-  fill: currentColor;
-}
-
-/* Vertical Tab List (M3 Expressive Navigation Drawer List) */
+/* Vertical Tab List (Beer CSS Navigation Drawer Rows) */
 #hilal-tab-list {
   flex: 1;
   display: flex;
@@ -1350,24 +859,18 @@
 }
 
 .hilal-tab-pill {
-  display: flex;
-  align-items: center;
-  height: 38px;
   min-height: 38px;
-  padding: 0 10px 0 8px;
-  border-radius: 12px;
-  background-color: transparent;
-  color: var(--on-surface-variant, var(--md-sys-color-on-surface-variant, #c3c7cf));
-  cursor: pointer;
-  gap: 8px;
+  height: 38px;
+  padding: 0 8px 0 10px !important;
   position: relative;
   user-select: none;
-  border: none !important;
+  cursor: pointer;
   box-sizing: border-box;
-  transition:
-    background-color 140ms ease,
-    color 140ms ease,
-    transform 140ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.hilal-tab-pill:not(.active):hover {
+  background-color: var(--surface-container-high, rgba(255, 255, 255, 0.06));
+  color: var(--on-surface);
 }
 
 .hilal-tab-pill.hilal-tab-entering {
@@ -1376,7 +879,6 @@
 
 .hilal-tab-pill.dragging {
   opacity: 0.35 !important;
-  transform: scale(0.96) !important;
 }
 
 .hilal-tab-pill.drop-before {
@@ -1385,23 +887,6 @@
 
 .hilal-tab-pill.drop-after {
   box-shadow: inset 0 -2px 0 0 var(--primary, var(--md-sys-color-primary, #a8c7fa)) !important;
-}
-
-.hilal-tab-pill:hover {
-  background-color: var(--surface-container-high, var(--md-sys-color-surface-container-high, rgba(255, 255, 255, 0.08)));
-  color: var(--on-surface, var(--md-sys-color-on-surface, #ffffff));
-}
-
-.hilal-tab-pill:active {
-  transform: scale(0.98);
-}
-
-.hilal-tab-pill.active {
-  background-color: var(--secondary-container, var(--md-sys-color-secondary-container, #243042)) !important;
-  color: var(--on-secondary-container, var(--md-sys-color-on-secondary-container, #d3e4fd)) !important;
-  font-weight: 500;
-  border: none !important;
-  border-radius: 12px;
 }
 
 @keyframes hilal-tab-enter {
@@ -1416,75 +901,56 @@
 }
 
 .hilal-tab-icon {
-  width: 16px;
-  height: 16px;
-  min-width: 16px;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.hilal-tab-icon img {
-  width: 16px;
-  height: 16px;
-  border-radius: 3px;
+.hilal-tab-icon img,
+.hilal-tab-favicon {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 4px;
   object-fit: contain;
 }
 
 .hilal-tab-title {
-  flex: 1;
   font-size: 13px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   line-height: 1.3;
 }
 
 .hilal-tab-close-btn {
-  all: unset !important;
-  box-sizing: border-box !important;
-  width: 20px !important;
-  height: 20px !important;
-  min-width: 20px !important;
-  min-height: 20px !important;
-  max-width: 20px !important;
-  max-height: 20px !important;
-  border-radius: 50% !important;
-  border: none !important;
-  background: transparent !important;
-  color: inherit !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  opacity: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  font-size: 15px !important;
-  line-height: 1 !important;
-  transition:
-    opacity 120ms ease,
-    background-color 120ms ease,
-    transform 120ms ease !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  max-width: 24px !important;
+  max-height: 24px !important;
+  opacity: 0;
+  transition: opacity 120ms ease;
+  flex-shrink: 0;
+}
+
+.hilal-tab-close-btn i {
+  font-size: 16px !important;
 }
 
 .hilal-tab-pill:hover .hilal-tab-close-btn,
 .hilal-tab-pill.active .hilal-tab-close-btn {
-  opacity: 0.65 !important;
+  opacity: 0.7;
 }
 
 .hilal-tab-close-btn:hover {
-  background-color: var(--surface-container-highest, var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.18))) !important;
-  color: var(--on-surface, var(--md-sys-color-on-surface, #ffffff)) !important;
   opacity: 1 !important;
-  transform: scale(1.1) !important;
 }
 
 /* Sidebar Footer */
 #hilal-sidebar-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
   padding-top: 6px;
   border-top: 1px solid var(--outline-variant, var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.08))) !important;
   margin-top: 4px;
@@ -1492,41 +958,10 @@
 }
 
 #hilal-settings-btn {
-  all: unset !important;
-  box-sizing: border-box !important;
   width: 32px !important;
   height: 32px !important;
   min-width: 32px !important;
   min-height: 32px !important;
-  border-radius: 50% !important;
-  border: none !important;
-  background: transparent !important;
-  color: var(--on-surface-variant, var(--md-sys-color-on-surface-variant, #c3c7cf)) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  padding: 0 !important;
-  transition:
-    background-color 150ms ease,
-    color 150ms ease,
-    transform 150ms ease !important;
-}
-
-#hilal-settings-btn:hover {
-  background-color: var(--surface-container-high, var(--md-sys-color-surface-container-high, rgba(255, 255, 255, 0.1))) !important;
-  color: var(--on-surface, var(--md-sys-color-on-surface, #ffffff)) !important;
-  transform: scale(1.08) !important;
-}
-
-#hilal-settings-btn:active {
-  transform: scale(0.92) !important;
-}
-
-#hilal-settings-btn svg {
-  width: 18px;
-  height: 18px;
-  fill: currentColor;
 }
 
 

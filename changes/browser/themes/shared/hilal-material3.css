@@ -16,6 +16,25 @@
  */
 
 @media -moz-pref("hilal.material3.enabled") {
+  /* Normalize Beer CSS button defaults so existing Firefox chrome buttons don't break */
+  button,
+  .button {
+    box-sizing: border-box !important;
+    font-family: inherit;
+  }
+
+  button.transparent,
+  .button.transparent {
+    color: var(--on-surface) !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  button.transparent:hover,
+  .button.transparent:hover {
+    background-color: color-mix(in srgb, var(--on-surface) 8%, transparent) !important;
+  }
+
   /* ------------------------------------------------------------------
    * 1. Root — Firefox toolbar variables bridged from Beer CSS tokens
    * ---------------------------------------------------------------- */
