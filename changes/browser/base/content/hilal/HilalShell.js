@@ -2109,11 +2109,13 @@
       });
       htab.appendChild(soundBtn);
 
-      // Close button
-      const closeBtn = document.createElement("button");
+      // Close button — span with role="button" so it is immune to button CSS rules
+      const closeBtn = document.createElement("span");
       closeBtn.className = "hilal-htab-close-btn";
-      closeBtn.textContent = "\u00D7";
+      closeBtn.setAttribute("role", "button");
+      closeBtn.setAttribute("aria-label", "Close tab");
       closeBtn.setAttribute("data-l10n-id", "tabbrowser-menuitem-close-tab");
+      closeBtn.textContent = "\u00D7";
       closeBtn.addEventListener("click", e => {
         e.stopPropagation();
         window.gBrowser.removeTab(tab);
@@ -2255,11 +2257,13 @@
       titleSpan.className = "hilal-tab-title";
       pill.appendChild(titleSpan);
 
-      // Close button
-      const closeBtn = document.createElement("button");
+      // Close button — span with role="button" so it is immune to button CSS rules
+      const closeBtn = document.createElement("span");
       closeBtn.className = "hilal-tab-close-btn";
-      closeBtn.textContent = "\u00D7";
+      closeBtn.setAttribute("role", "button");
+      closeBtn.setAttribute("aria-label", "Close tab");
       closeBtn.setAttribute("data-l10n-id", "tabbrowser-menuitem-close-tab");
+      closeBtn.textContent = "\u00D7";
       closeBtn.addEventListener("click", e => {
         e.stopPropagation();
         window.gBrowser.removeTab(tab);
