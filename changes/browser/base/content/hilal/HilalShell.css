@@ -62,16 +62,16 @@
 
 /* 3a. Topbar */
 #hilal-topbar {
-  display: flex;
-  align-items: center;
-  height: 44px;
-  min-height: 44px;
-  max-height: 44px;
-  padding: 0 14px;
-  gap: 10px;
-  background: transparent;
-  -moz-window-dragging: drag;
-  box-sizing: border-box;
+  display: flex !important;
+  align-items: center !important;
+  height: 50px !important;
+  min-height: 50px !important;
+  max-height: 50px !important;
+  padding: 7px 16px !important;
+  gap: 10px !important;
+  background: transparent !important;
+  -moz-window-dragging: drag !important;
+  box-sizing: border-box !important;
 }
 
 /* Traffic lights spacer on macOS */
@@ -153,11 +153,23 @@
 }
 
 .hilal-btn {
-  -moz-window-dragging: no-drag;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  padding: 0 !important;
+  -moz-window-dragging: no-drag !important;
 }
 
-.hilal-btn i {
+.hilal-btn i,
+#hilal-nav-group i,
+#hilal-top-right-group i {
   font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
 }
 
 #hilal-top-right-group {
@@ -313,16 +325,19 @@
 
 /* 3b. Material 3 Search Container & Autocomplete View */
 #hilal-url-container {
-  flex: 1;
-  max-width: 620px;
-  margin: 0 auto;
-  position: relative;
-  height: 36px;
-  padding: 0 12px;
+  flex: 1 !important;
+  max-width: 620px !important;
+  margin: 0 auto !important;
+  position: relative !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  align-self: center !important;
+  padding: 0 12px !important;
   background-color: var(--surface-container-high, var(--md-sys-color-surface-container-high, #262b32)) !important;
   border: none !important;
-  -moz-window-dragging: no-drag;
-  box-sizing: border-box;
+  -moz-window-dragging: no-drag !important;
+  box-sizing: border-box !important;
 }
 
 #hilal-url-container:focus-within {
@@ -331,15 +346,19 @@
 }
 
 #hilal-url-security-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   font-size: 16px !important;
-  cursor: default;
+  width: 16px !important;
+  height: 16px !important;
+  line-height: 16px !important;
+  cursor: default !important;
+  flex-shrink: 0 !important;
 }
 
 #hilal-url-input {
-  flex: 1;
+  flex: 1 !important;
   background: transparent !important;
   border: none !important;
   outline: none !important;
@@ -360,20 +379,24 @@
 #hilal-url-clear-btn,
 #hilal-url-copy-btn,
 #hilal-url-theme-btn {
-  width: 26px !important;
-  height: 26px !important;
-  min-width: 26px !important;
-  min-height: 26px !important;
-  max-width: 26px !important;
-  max-height: 26px !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  max-width: 24px !important;
+  max-height: 24px !important;
   padding: 0 !important;
-  -moz-window-dragging: no-drag;
+  -moz-window-dragging: no-drag !important;
+  flex-shrink: 0 !important;
 }
 
 #hilal-url-clear-btn i,
 #hilal-url-copy-btn i,
 #hilal-url-theme-btn i {
-  font-size: 16px !important;
+  font-size: 15px !important;
+  width: 15px !important;
+  height: 15px !important;
+  line-height: 15px !important;
 }
 
 /* Page Actions inside M3 URL Bar Container */
@@ -550,17 +573,55 @@
 .hilal-search-item {
   cursor: pointer;
   user-select: none;
-  padding: 6px 10px;
+  padding: 6px 12px !important;
+  min-height: 38px !important;
+  gap: 10px !important;
 }
 
+.hilal-search-icon-slot {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.hilal-search-icon-slot img,
 .hilal-search-favicon {
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
-  min-height: 18px;
-  object-fit: contain;
-  border-radius: 4px;
-  flex-shrink: 0;
+  --_size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  max-width: 18px !important;
+  max-height: 18px !important;
+  object-fit: contain !important;
+  border-radius: 4px !important;
+  flex-shrink: 0 !important;
+}
+
+.hilal-search-icon-slot i,
+.hilal-search-item i {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
+  flex-shrink: 0 !important;
+}
+
+.hilal-search-item .chip.small {
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  padding: 0 8px !important;
+  letter-spacing: 0.4px !important;
+  border-radius: 9999px !important;
 }
 
 .hilal-search-item-label {
@@ -651,13 +712,16 @@
 }
 
 .hilal-htab-favicon {
-  width: 16px;
-  height: 16px;
-  min-width: 16px;
-  min-height: 16px;
-  object-fit: contain;
-  border-radius: 2px;
-  flex-shrink: 0;
+  --_size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  max-width: 16px !important;
+  max-height: 16px !important;
+  object-fit: contain !important;
+  border-radius: 2px !important;
+  flex-shrink: 0 !important;
 }
 
 .hilal-htab-title {
@@ -669,19 +733,22 @@
 
 .hilal-htab-sound-btn,
 .hilal-htab-close-btn {
-  width: 22px !important;
-  height: 22px !important;
-  min-width: 22px !important;
-  min-height: 22px !important;
-  max-width: 22px !important;
-  max-height: 22px !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
   padding: 0 !important;
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
 }
 
 .hilal-htab-sound-btn i,
 .hilal-htab-close-btn i {
-  font-size: 15px !important;
+  font-size: 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+  line-height: 14px !important;
 }
 
 .hilal-htab-close-btn {
@@ -715,6 +782,14 @@
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
   padding: 6px;
   gap: 2px;
+}
+
+#hilal-mode-context-menu button i,
+#hilal-workspaces-dropdown-menu button i {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
 }
 
 /* 4. Main Body: Flex layout containing sidebar + canvas */
@@ -901,22 +976,37 @@
 }
 
 .hilal-tab-icon {
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  max-width: 18px !important;
+  max-height: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
 }
 
 .hilal-tab-icon img,
 .hilal-tab-favicon {
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
-  border-radius: 4px;
-  object-fit: contain;
+  --_size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  max-width: 16px !important;
+  max-height: 16px !important;
+  border-radius: 3px !important;
+  object-fit: contain !important;
+}
+
+.hilal-tab-icon i,
+.hilal-tab-favicon i {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  line-height: 16px !important;
 }
 
 .hilal-tab-title {
@@ -925,19 +1015,23 @@
 }
 
 .hilal-tab-close-btn {
-  width: 24px !important;
-  height: 24px !important;
-  min-width: 24px !important;
-  min-height: 24px !important;
-  max-width: 24px !important;
-  max-height: 24px !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  padding: 0 !important;
   opacity: 0;
   transition: opacity 120ms ease;
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
 }
 
 .hilal-tab-close-btn i {
-  font-size: 16px !important;
+  font-size: 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+  line-height: 14px !important;
 }
 
 .hilal-tab-pill:hover .hilal-tab-close-btn,
@@ -962,6 +1056,14 @@
   height: 32px !important;
   min-width: 32px !important;
   min-height: 32px !important;
+}
+
+#hilal-settings-btn i,
+#hilal-newtab-btn i {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
 }
 
 

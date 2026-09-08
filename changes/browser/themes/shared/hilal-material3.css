@@ -35,6 +35,20 @@
     background-color: color-mix(in srgb, var(--on-surface) 8%, transparent) !important;
   }
 
+  /* Material Symbols sizing in browser chrome */
+  i.tiny {
+    font-size: 16px !important;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+  }
+  i.small {
+    font-size: 18px !important;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+  }
+
   /* ------------------------------------------------------------------
    * 1. Root — Firefox toolbar variables bridged from Beer CSS tokens
    * ---------------------------------------------------------------- */

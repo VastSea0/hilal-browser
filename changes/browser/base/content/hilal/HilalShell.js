@@ -469,7 +469,7 @@
       headerShell.className = "beer";
 
       // 1. Top Bar
-      const topbar = document.createElement("header");
+      const topbar = document.createElement("div");
       topbar.id = "hilal-topbar";
       topbar.className = "row tiny-space";
 
@@ -561,7 +561,7 @@
 
       const secIcon = document.createElement("i");
       secIcon.id = "hilal-url-security-icon";
-      secIcon.className = "small primary-text";
+      secIcon.className = "primary-text";
       secIcon.textContent = "lock";
       urlContainer.appendChild(secIcon);
 
@@ -1193,10 +1193,9 @@
         }`;
         row.dataset.index = index;
 
-        // Icon container — Beer CSS small circle with surface container background
+        // Icon container
         const iconDiv = document.createElement("div");
-        iconDiv.className =
-          "circle small surface-container-highest center-align middle-align";
+        iconDiv.className = "hilal-search-icon-slot";
 
         let favSrc = null;
         let iconName = "search";
@@ -1225,15 +1224,15 @@
 
         if (favSrc) {
           const img = document.createElement("img");
-          img.className = "circle hilal-search-favicon";
+          img.className = "hilal-search-favicon";
           img.src = favSrc;
           img.onerror = () => {
             img.remove();
-            iconDiv.innerHTML = `<i>${iconName}</i>`;
+            iconDiv.innerHTML = `<i class="tiny">${iconName}</i>`;
           };
           iconDiv.appendChild(img);
         } else {
-          iconDiv.innerHTML = `<i>${iconName}</i>`;
+          iconDiv.innerHTML = `<i class="tiny">${iconName}</i>`;
         }
         row.appendChild(iconDiv);
 
@@ -2108,7 +2107,7 @@
       const iconDiv = document.createElement("div");
       iconDiv.className = "hilal-htab-icon";
       const iconImg = document.createElement("img");
-      iconImg.className = "circle hilal-htab-favicon";
+      iconImg.className = "hilal-htab-favicon";
       iconDiv.appendChild(iconImg);
       htab.appendChild(iconDiv);
 
@@ -2121,7 +2120,7 @@
       const soundBtn = document.createElement("button");
       soundBtn.className = "circle transparent small hilal-htab-sound-btn";
       soundBtn.style.display = "none";
-      soundBtn.innerHTML = "<i>volume_up</i>";
+      soundBtn.innerHTML = "<i class=\"tiny\">volume_up</i>";
       soundBtn.addEventListener("click", e => {
         e.stopPropagation();
         tab.toggleMuteAudio?.();
@@ -2135,7 +2134,7 @@
       closeBtn.setAttribute("aria-label", "Close tab");
       closeBtn.setAttribute("data-l10n-id", "tabbrowser-menuitem-close-tab");
       closeBtn.title = "Close tab";
-      closeBtn.innerHTML = "<i>close</i>";
+      closeBtn.innerHTML = "<i class=\"tiny\">close</i>";
       closeBtn.addEventListener("click", e => {
         e.stopPropagation();
         window.gBrowser.removeTab(tab);
@@ -2268,7 +2267,7 @@
       const iconDiv = document.createElement("div");
       iconDiv.className = "hilal-tab-icon";
       const iconImg = document.createElement("img");
-      iconImg.className = "circle hilal-tab-favicon";
+      iconImg.className = "hilal-tab-favicon";
       iconDiv.appendChild(iconImg);
       pill.appendChild(iconDiv);
 
@@ -2282,7 +2281,7 @@
       closeBtn.className = "circle transparent small hilal-tab-close-btn";
       closeBtn.setAttribute("aria-label", "Close tab");
       closeBtn.setAttribute("data-l10n-id", "tabbrowser-menuitem-close-tab");
-      closeBtn.innerHTML = "<i>close</i>";
+      closeBtn.innerHTML = "<i class=\"tiny\">close</i>";
       closeBtn.addEventListener("click", e => {
         e.stopPropagation();
         window.gBrowser.removeTab(tab);
