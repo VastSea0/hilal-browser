@@ -169,158 +169,63 @@
         isDark ? "dark" : "light"
       );
 
+      const setToken = (name, val) => {
+        rootStyle.setProperty(`--md-sys-color-${name}`, val);
+        rootStyle.setProperty(`--${name}`, val);
+      };
+
       if (isDark) {
         // Material 3 Dark Scheme Dynamic Tonal Tokens
-        rootStyle.setProperty(
-          "--md-sys-color-primary",
-          `oklch(0.82 ${chroma.toFixed(3)} ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-on-primary",
-          `oklch(0.20 ${chroma.toFixed(3)} ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-primary-container",
-          `oklch(0.32 ${(chroma * 0.85).toFixed(3)} ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-on-primary-container",
-          `oklch(0.92 ${(chroma * 0.35).toFixed(3)} ${h})`
-        );
+        setToken("primary", `oklch(0.82 ${chroma.toFixed(3)} ${h})`);
+        setToken("on-primary", `oklch(0.20 ${chroma.toFixed(3)} ${h})`);
+        setToken("primary-container", `oklch(0.32 ${(chroma * 0.85).toFixed(3)} ${h})`);
+        setToken("on-primary-container", `oklch(0.92 ${(chroma * 0.35).toFixed(3)} ${h})`);
 
-        // Surface tinting (M3 Expressive dark tones 6, 12, 17, 22)
-        rootStyle.setProperty(
-          "--md-sys-color-surface",
-          `oklch(0.12 0.015 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-surface-dim",
-          `oklch(0.09 0.012 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-surface-container-lowest",
-          `oklch(0.08 0.010 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-surface-container-low",
-          `oklch(0.14 0.014 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-surface-container",
-          `oklch(0.17 0.018 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-surface-container-high",
-          `oklch(0.21 0.022 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-surface-container-highest",
-          `oklch(0.25 0.026 ${h})`
-        );
+        // Surface tinting (M3 Expressive dark tones)
+        setToken("surface", `oklch(0.12 0.015 ${h})`);
+        setToken("surface-dim", `oklch(0.09 0.012 ${h})`);
+        setToken("surface-container-lowest", `oklch(0.08 0.010 ${h})`);
+        setToken("surface-container-low", `oklch(0.14 0.014 ${h})`);
+        setToken("surface-container", `oklch(0.17 0.018 ${h})`);
+        setToken("surface-container-high", `oklch(0.21 0.022 ${h})`);
+        setToken("surface-container-highest", `oklch(0.25 0.026 ${h})`);
 
         // Text & outline
-        rootStyle.setProperty(
-          "--md-sys-color-on-surface",
-          `oklch(0.92 0.008 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-on-surface-variant",
-          `oklch(0.80 0.015 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-outline",
-          `oklch(0.58 0.022 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-outline-variant",
-          `oklch(0.32 0.020 ${h})`
-        );
+        setToken("on-surface", `oklch(0.92 0.008 ${h})`);
+        setToken("on-surface-variant", `oklch(0.80 0.015 ${h})`);
+        setToken("outline", `oklch(0.58 0.022 ${h})`);
+        setToken("outline-variant", `oklch(0.32 0.020 ${h})`);
 
         // Secondary & Tertiary
-        rootStyle.setProperty(
-          "--md-sys-color-secondary",
-          `oklch(0.80 0.05 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-secondary-container",
-          `oklch(0.30 0.05 ${h})`
-        );
+        setToken("secondary", `oklch(0.80 0.05 ${h})`);
+        setToken("secondary-container", `oklch(0.30 0.05 ${h})`);
+        setToken("on-secondary-container", `oklch(0.92 0.03 ${h})`);
       } else {
         // Material 3 Light Scheme Dynamic Tonal Tokens
-        rootStyle.setProperty(
-          "--md-sys-color-primary",
-          `oklch(0.42 ${chroma.toFixed(3)} ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-on-primary",
-          `oklch(0.98 0.005 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-primary-container",
-          `oklch(0.88 ${(chroma * 0.65).toFixed(3)} ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-on-primary-container",
-          `oklch(0.18 ${(chroma * 0.85).toFixed(3)} ${h})`
-        );
+        setToken("primary", `oklch(0.42 ${chroma.toFixed(3)} ${h})`);
+        setToken("on-primary", `oklch(0.98 0.005 ${h})`);
+        setToken("primary-container", `oklch(0.88 ${(chroma * 0.65).toFixed(3)} ${h})`);
+        setToken("on-primary-container", `oklch(0.18 ${(chroma * 0.85).toFixed(3)} ${h})`);
 
-        // Surface tinting (M3 Expressive light tones 98, 96, 93, 89, 85)
-        rootStyle.setProperty(
-          "--md-sys-color-surface",
-          `oklch(0.98 0.008 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-surface-dim",
-          `oklch(0.93 0.012 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-surface-container-lowest",
-          `oklch(1.00 0.000 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-surface-container-low",
-          `oklch(0.96 0.010 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-surface-container",
-          `oklch(0.93 0.014 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-surface-container-high",
-          `oklch(0.89 0.018 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-surface-container-highest",
-          `oklch(0.85 0.022 ${h})`
-        );
+        // Surface tinting (M3 Expressive light tones)
+        setToken("surface", `oklch(0.98 0.008 ${h})`);
+        setToken("surface-dim", `oklch(0.93 0.012 ${h})`);
+        setToken("surface-container-lowest", `oklch(1.00 0.000 ${h})`);
+        setToken("surface-container-low", `oklch(0.96 0.010 ${h})`);
+        setToken("surface-container", `oklch(0.93 0.014 ${h})`);
+        setToken("surface-container-high", `oklch(0.89 0.018 ${h})`);
+        setToken("surface-container-highest", `oklch(0.85 0.022 ${h})`);
 
         // Text & outline
-        rootStyle.setProperty(
-          "--md-sys-color-on-surface",
-          `oklch(0.18 0.015 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-on-surface-variant",
-          `oklch(0.38 0.022 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-outline",
-          `oklch(0.52 0.025 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-outline-variant",
-          `oklch(0.80 0.018 ${h})`
-        );
+        setToken("on-surface", `oklch(0.18 0.015 ${h})`);
+        setToken("on-surface-variant", `oklch(0.38 0.022 ${h})`);
+        setToken("outline", `oklch(0.52 0.025 ${h})`);
+        setToken("outline-variant", `oklch(0.80 0.018 ${h})`);
 
         // Secondary & Tertiary
-        rootStyle.setProperty(
-          "--md-sys-color-secondary",
-          `oklch(0.45 0.06 ${h})`
-        );
-        rootStyle.setProperty(
-          "--md-sys-color-secondary-container",
-          `oklch(0.88 0.04 ${h})`
-        );
+        setToken("secondary", `oklch(0.45 0.06 ${h})`);
+        setToken("secondary-container", `oklch(0.88 0.04 ${h})`);
+        setToken("on-secondary-container", `oklch(0.15 0.06 ${h})`);
       }
 
       try {
