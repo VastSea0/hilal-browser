@@ -27,31 +27,13 @@
   opacity: 0 !important;
 }
 
-:root[hilal-welcome-stage] #navigator-toolbox {
-  position: relative !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-  transform: none !important;
-  width: auto !important;
-  left: auto !important;
-  margin: 0 !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  border: none !important;
-}
-
-:root[hilal-welcome-stage] #sidebar-main {
-  position: relative !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-  transform: none !important;
-  width: 280px !important;
-  min-width: 280px !important;
-  max-width: 280px !important;
-  margin: 0 !important;
-  border: none !important;
+:root[hilal-welcome-stage] #navigator-toolbox,
+:root[hilal-welcome-stage] #sidebar-main,
+:root[hilal-welcome-stage] #hilal-header-shell,
+:root[hilal-welcome-stage] #hilal-sidebar {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 /* ============================================================
@@ -270,31 +252,36 @@
    ============================================================ */
 
 .hw-overlay-center {
+  width: 100vw;
+  height: 100vh;
   min-height: 100vh;
-  width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 24px;
+  justify-content: flex-start;
+  padding: 0;
   box-sizing: border-box;
+  background-color: var(--surface) !important;
+  overflow: hidden;
 }
 
 .hw-card {
-  background-color: var(--surface-container) !important;
-  border: 1px solid var(--outline-variant) !important;
-  box-shadow: 0 16px 48px var(--shadow) !important;
-  border-radius: 28px !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
   box-sizing: border-box;
-  transition: box-shadow var(--speed) var(--ease), background-color var(--speed) var(--ease);
 }
 
 .hw-intro-card {
   max-width: 640px;
   width: 100%;
-  padding: 52px 44px;
+  flex: 1 1 auto;
+  padding: 24px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
@@ -369,10 +356,12 @@
 .hw-flow-card {
   max-width: 880px !important;
   width: 100% !important;
-  padding: 22px 32px 16px !important;
+  flex: 1 1 auto !important;
+  height: calc(100vh - 48px) !important;
+  max-height: calc(100vh - 48px) !important;
+  padding: 8px 32px 16px !important;
   display: flex !important;
   flex-direction: column !important;
-  max-height: calc(100vh - 32px) !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
 }
@@ -383,11 +372,56 @@
   align-items: center !important;
   justify-content: space-between !important;
   gap: 16px !important;
-  min-height: 38px !important;
-  padding: 0 0 10px 0 !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  padding: 0 20px 0 16px !important;
+  width: 100% !important;
   border-bottom: 1px solid var(--outline-variant) !important;
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
+  -moz-window-dragging: drag !important;
+}
+
+.hw-header-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+  -moz-window-dragging: drag !important;
+}
+
+.hw-header-traffic-spacer {
+  display: flex !important;
+  align-items: center !important;
+  width: 72px !important;
+  min-width: 72px !important;
+  height: 100% !important;
+  flex-shrink: 0 !important;
+  -moz-window-dragging: drag !important;
+}
+
+.hw-header-traffic-spacer .titlebar-buttonbox-container {
+  display: flex !important;
+  visibility: visible !important;
+  align-items: center !important;
+  height: 100% !important;
+  -moz-window-dragging: no-drag !important;
+}
+
+.hw-header-traffic-spacer .titlebar-buttonbox {
+  display: flex !important;
+  visibility: visible !important;
+  appearance: auto !important;
+  -moz-default-appearance: -moz-window-button-box !important;
+  height: 16px !important;
+  align-items: center !important;
+}
+
+.hw-header-right {
+  display: flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
 }
 
 .hw-header-brand {
@@ -398,6 +432,7 @@
   font-size: 0.9375rem !important;
   color: var(--on-surface) !important;
   flex-shrink: 0 !important;
+  -moz-window-dragging: drag !important;
 }
 
 .hw-header-logo {
@@ -802,37 +837,39 @@
 }
 
 .hw-segment-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border: none;
-  background: transparent;
-  color: var(--on-surface-variant);
-  cursor: pointer;
-  transition: all 160ms ease;
-  box-sizing: border-box;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 5px 14px !important;
+  border-radius: 9999px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  border: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  color: var(--on-surface-variant) !important;
+  cursor: pointer !important;
+  transition: all 160ms ease !important;
+  box-sizing: border-box !important;
 }
 
-.hw-segment-btn i {
-  font-size: 16px;
+.hw-segment-btn:hover {
+  background-color: var(--surface-container-high) !important;
+  color: var(--on-surface) !important;
 }
 
 .hw-segment-btn.active {
-  background-color: var(--surface-container-lowest);
-  color: var(--primary);
-  box-shadow: 0 2px 8px var(--shadow);
+  background-color: var(--surface-container-lowest) !important;
+  color: var(--primary) !important;
+  box-shadow: 0 2px 8px var(--shadow) !important;
 }
 
 .hw-accent-swatches-box {
-  margin-top: 8px;
-  padding: 10px 14px;
-  border-radius: 16px;
-  background-color: var(--surface-container-lowest);
-  border: 1px solid var(--outline-variant);
+  margin-top: 8px !important;
+  padding: 10px 14px !important;
+  border-radius: 16px !important;
+  background-color: var(--surface-container-lowest) !important;
+  border: 1px solid var(--outline-variant) !important;
 }
 
 .hw-swatches-label {
@@ -850,28 +887,32 @@
 }
 
 .hw-swatch-circle {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background-color: var(--swatch-color);
-  border: 2px solid transparent;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  transition: transform 160ms ease, box-shadow 160ms ease;
-  box-sizing: border-box;
-  padding: 0;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  border-radius: 50% !important;
+  background-color: var(--swatch-color) !important;
+  border: 2px solid transparent !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #ffffff !important;
+  transition: transform 160ms ease, box-shadow 160ms ease !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
 }
 
 .hw-swatch-circle:hover {
-  transform: scale(1.15);
+  transform: scale(1.15) !important;
+  background-color: var(--swatch-color) !important;
 }
 
 .hw-swatch-circle[selected="true"] {
-  box-shadow: 0 0 0 2px var(--surface-container-lowest), 0 0 0 4px var(--swatch-color);
-  transform: scale(1.1);
+  box-shadow: 0 0 0 2px var(--surface-container-lowest, #ffffff), 0 0 0 4px var(--swatch-color) !important;
+  transform: scale(1.1) !important;
+  background-color: var(--swatch-color) !important;
 }
 
 .hw-swatch-circle i {
@@ -880,17 +921,18 @@
 }
 
 .hw-custom-color-wrap {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1.5px dashed var(--outline);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--on-surface-variant);
-  position: relative;
-  overflow: hidden;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  border: 1.5px dashed var(--outline) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  color: var(--on-surface-variant) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 
 .hw-custom-color-wrap i {

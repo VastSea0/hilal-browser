@@ -2114,6 +2114,10 @@
       // Title
       const titleSpan = document.createElement("span");
       titleSpan.className = "max hilal-htab-title";
+      const initialTitle = tab.label || tab.getAttribute("label") || "New Tab";
+      titleSpan.textContent = initialTitle;
+      titleSpan.title = initialTitle;
+      htab.title = initialTitle;
       htab.appendChild(titleSpan);
 
       // Split indicator badge
@@ -2256,6 +2260,8 @@
         if (titleSpan.textContent !== newTitle) {
           titleSpan.textContent = newTitle;
         }
+        titleSpan.title = newTitle;
+        htab.title = newTitle;
       }
 
       const soundBtn = htab.querySelector(".hilal-htab-sound-btn");
@@ -2290,6 +2296,10 @@
       // Title container
       const titleSpan = document.createElement("span");
       titleSpan.className = "max hilal-tab-title";
+      const initialTitle = tab.label || tab.getAttribute("label") || "New Tab";
+      titleSpan.textContent = initialTitle;
+      titleSpan.title = initialTitle;
+      pill.title = initialTitle;
       pill.appendChild(titleSpan);
 
       // Split indicator badge
@@ -2419,6 +2429,8 @@
         if (titleSpan.textContent !== newTitle) {
           titleSpan.textContent = newTitle;
         }
+        titleSpan.title = newTitle;
+        pill.title = newTitle;
       }
     },
 

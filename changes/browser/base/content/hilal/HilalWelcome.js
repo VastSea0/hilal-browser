@@ -195,7 +195,9 @@
 
       // Theme & Accent Colors (M3 Expressive)
       this._selectedThemeMode = prefService?.getIntPref(PREF_THEME_OVERRIDE, 2) ?? 2;
-      this._selectedAccentMode = prefService?.getStringPref(PREF_ACCENT_MODE, "workspace") || "workspace";
+      this._selectedAccentMode = prefService?.prefHasUserValue(PREF_ACCENT_MODE)
+        ? prefService.getStringPref(PREF_ACCENT_MODE)
+        : "global";
       this._selectedGlobalAccent = prefService?.getStringPref(PREF_GLOBAL_ACCENT, "#0b57d0") || "#0b57d0";
 
       // Workflow & Layout
@@ -218,6 +220,35 @@
     }
 
     async start() {
+      // Optimize window size to appropriate welcome dialog dimensions if window is oversized
+      if (typeof window !== "undefined" && typeof window.resizeTo === "function") {
+        try {
+          if (!this._previousWindowDims) {
+            this._previousWindowDims = {
+              width: window.outerWidth,
+              height: window.outerHeight,
+              screenX: window.screenX,
+              screenY: window.screenY,
+              maximized:
+                typeof Ci !== "undefined" &&
+                window.windowState === Ci.nsIDOMChromeWindow?.STATE_MAXIMIZED,
+            };
+          }
+          if (window.outerWidth > 960 || window.outerHeight > 680) {
+            const targetW = 920;
+            const targetH = 650;
+            const availW = window.screen?.availWidth || 1440;
+            const availH = window.screen?.availHeight || 900;
+            const targetX = Math.max(0, Math.round((availW - targetW) / 2));
+            const targetY = Math.max(0, Math.round((availH - targetH) / 2));
+            window.resizeTo(targetW, targetH);
+            window.moveTo(targetX, targetY);
+          }
+        } catch (e) {
+          console.warn("HilalWelcome: could not adjust window size", e);
+        }
+      }
+
       this._injectStyles();
       this._enterWelcomeStage();
       this._createOverlay();
@@ -431,7 +462,22 @@
 
       const markup = `
         <div class="hw-overlay-center">
-          <article class="hw-card hw-intro-card" role="dialog" aria-modal="true" aria-labelledby="hw-intro-title">
+          <header class="hw-header hw-intro-header">
+            <div class="hw-header-left">
+              <div class="hw-header-traffic-spacer"></div>
+              <div class="hw-header-brand">
+                <img src="${BRAND_LOGO_URL}" class="hw-header-logo" alt="" />
+                <span class="hw-header-title" data-l10n-id="hilal-welcome-brand-text">Hilal Browser</span>
+              </div>
+            </div>
+            <div class="hw-header-right">
+              <button type="button" class="hw-btn-icon" id="hw-intro-skip-btn" title="Skip" aria-label="Skip">
+                <i>close</i>
+              </button>
+            </div>
+          </header>
+
+          <article class="hw-card hw-intro-card hw-stage-enter" role="dialog" aria-modal="true" aria-labelledby="hw-intro-title">
             <div class="hw-intro-logo-wrap">
               <img src="${BRAND_LOGO_URL}" class="hw-intro-logo" alt="" />
             </div>
@@ -458,6 +504,10 @@
         </div>
       `;
       this._setHTML(this._overlay, markup);
+      this._attachTrafficLights();
+      document.getElementById("hw-intro-skip-btn")?.addEventListener("click", () => {
+        this._dismiss();
+      });
       document.getElementById("hw-start-btn")?.addEventListener("click", () => {
         this._beginFlow();
       });
@@ -481,18 +531,23 @@
     _initFlowShell() {
       const markup = `
         <div class="hw-overlay-center">
-          <article class="hw-card hw-flow-card" role="dialog" aria-modal="true" aria-labelledby="hw-stage-title">
-            <header class="hw-header">
+          <header class="hw-header">
+            <div class="hw-header-left">
+              <div class="hw-header-traffic-spacer"></div>
               <div class="hw-header-brand">
                 <img src="${BRAND_LOGO_URL}" class="hw-header-logo" alt="" />
                 <span class="hw-header-title" data-l10n-id="hilal-welcome-brand-text">Hilal Browser</span>
               </div>
-              <div class="hw-stepper-wrap" id="hw-stepper"></div>
+            </div>
+            <div class="hw-stepper-wrap" id="hw-stepper"></div>
+            <div class="hw-header-right">
               <button type="button" class="hw-btn-icon" id="hw-skip-btn" title="Skip" aria-label="Skip">
                 <i>close</i>
               </button>
-            </header>
+            </div>
+          </header>
 
+          <article class="hw-card hw-flow-card" role="dialog" aria-modal="true" aria-labelledby="hw-stage-title">
             <div id="hw-stage-container" class="hw-stage-scroll hw-stage-enter">
               <div id="hw-stage-head" class="hw-stage-head"></div>
               <div id="hw-stage-body" class="hw-stage-body"></div>
@@ -505,6 +560,7 @@
         </div>
       `;
       this._setHTML(this._overlay, markup);
+      this._attachTrafficLights();
 
       document.getElementById("hw-skip-btn")?.addEventListener("click", () => {
         this._dismiss();
@@ -735,7 +791,7 @@
               ${ACCENT_COLOR_SWATCHES.map(swatch => {
                 const isSelected = currentGlobalAccent === swatch.hex.toLowerCase();
                 return `
-                  <button type="button" class="hw-swatch-circle" data-swatch-hex="${swatch.hex}" style="--swatch-color: ${swatch.hex};"${isSelected ? ' selected="true"' : ""} title="${swatch.label}">
+                  <button type="button" class="hw-swatch-circle" data-swatch-hex="${swatch.hex}" style="background-color: ${swatch.hex} !important; --swatch-color: ${swatch.hex};"${isSelected ? ' selected="true"' : ""} title="${swatch.label}">
                     ${isSelected ? `<i>check</i>` : ""}
                   </button>
                 `;
@@ -1281,7 +1337,35 @@
       }
     }
 
+    _attachTrafficLights() {
+      try {
+        const nativeButtons = document.querySelector(".titlebar-buttonbox-container");
+        const trafficSlot = this._overlay?.querySelector(".hw-header-traffic-spacer");
+        if (nativeButtons && trafficSlot && nativeButtons.parentNode !== trafficSlot) {
+          if (!this._savedTrafficParent) {
+            this._savedTrafficParent = nativeButtons.parentNode;
+          }
+          trafficSlot.appendChild(nativeButtons);
+        }
+      } catch (e) {
+        console.warn("HilalWelcome: could not attach traffic lights", e);
+      }
+    }
+
+    _restoreTrafficLights() {
+      try {
+        const nativeButtons = document.querySelector(".titlebar-buttonbox-container");
+        if (nativeButtons && this._savedTrafficParent && this._savedTrafficParent.isConnected) {
+          this._savedTrafficParent.appendChild(nativeButtons);
+          this._savedTrafficParent = null;
+        }
+      } catch (e) {
+        console.warn("HilalWelcome: could not restore traffic lights", e);
+      }
+    }
+
     _teardown() {
+      this._restoreTrafficLights();
       this._overlay?.remove();
       this._overlay = null;
       this._style?.remove();
@@ -1297,9 +1381,25 @@
         }
       }
 
-      try {
-        window.maximize?.();
-      } catch (e) {}
+      if (this._previousWindowDims) {
+        try {
+          if (this._previousWindowDims.maximized) {
+            window.maximize?.();
+          } else {
+            window.resizeTo(this._previousWindowDims.width, this._previousWindowDims.height);
+            window.moveTo(this._previousWindowDims.screenX, this._previousWindowDims.screenY);
+          }
+        } catch (e) {
+          try {
+            window.maximize?.();
+          } catch (err) {}
+        }
+        this._previousWindowDims = null;
+      } else {
+        try {
+          window.maximize?.();
+        } catch (e) {}
+      }
     }
 
     _normalizePrivacyLevel(value) {
