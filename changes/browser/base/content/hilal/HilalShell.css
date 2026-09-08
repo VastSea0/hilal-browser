@@ -698,6 +698,43 @@
   font-weight: 500;
 }
 
+/* Multi-selected Horizontal Tab */
+.hilal-htab.multiselected {
+  background-color: color-mix(in srgb, var(--primary, #a8c7fa) 16%, var(--surface-container-high, #262b32)) !important;
+  color: var(--on-surface, #e1e2e9) !important;
+  box-shadow: inset 0 0 0 1.5px var(--primary, #a8c7fa) !important;
+}
+
+.hilal-htab.multiselected:hover {
+  background-color: color-mix(in srgb, var(--primary, #a8c7fa) 24%, var(--surface-container-high, #262b32)) !important;
+}
+
+/* Split View — Horizontal Tabs */
+.hilal-htab.split-tab {
+  position: relative !important;
+  transition: background-color 150ms ease, border-radius 150ms ease, box-shadow 150ms ease !important;
+}
+
+.hilal-htab.split-tab.split-first {
+  border-top-right-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
+  margin-right: 0 !important;
+  border-right: none !important;
+}
+
+.hilal-htab.split-tab.split-last {
+  border-top-left-radius: 4px !important;
+  border-bottom-left-radius: 4px !important;
+  margin-left: 0 !important;
+  border-left: 1px solid var(--outline-variant, #43474e) !important;
+}
+
+.hilal-htab.split-tab.split-partner {
+  background-color: color-mix(in srgb, var(--secondary-container, #3a4857) 48%, var(--surface-container-high, #262b32)) !important;
+  color: var(--on-surface, #e1e2e9) !important;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--primary, #a8c7fa) 65%, transparent) !important;
+}
+
 .hilal-htab.dragging {
   opacity: 0.35 !important;
   transform: scale(0.96) !important;
@@ -762,6 +799,41 @@
 }
 
 .hilal-htab-close-btn:hover {
+  opacity: 1 !important;
+}
+
+/* Split View Badge Indicator — hidden by default, visible only on split tabs */
+.hilal-split-badge {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  border-radius: 4px !important;
+  color: var(--on-surface-variant, #c3c7cf) !important;
+  opacity: 0.7;
+  flex-shrink: 0 !important;
+  margin-left: 2px !important;
+  margin-right: 2px !important;
+  transition: opacity 120ms ease, color 120ms ease !important;
+}
+
+.split-tab .hilal-split-badge {
+  display: inline-flex !important;
+}
+
+.hilal-split-badge i {
+  font-size: 13px !important;
+  width: 13px !important;
+  height: 13px !important;
+  line-height: 13px !important;
+}
+
+.split-active .hilal-split-badge,
+.hilal-split-badge.active {
+  color: var(--primary, var(--md-sys-color-primary, #a8c7fa)) !important;
   opacity: 1 !important;
 }
 
@@ -946,6 +1018,47 @@
 .hilal-tab-pill:not(.active):hover {
   background-color: var(--surface-container-high, rgba(255, 255, 255, 0.06));
   color: var(--on-surface);
+}
+
+/* Multi-selected Vertical Tab Pill */
+.hilal-tab-pill.multiselected {
+  background-color: color-mix(in srgb, var(--primary, #a8c7fa) 16%, var(--surface-container-high, #262b32)) !important;
+  color: var(--on-surface, #e1e2e9) !important;
+  box-shadow: inset 0 0 0 1.5px var(--primary, #a8c7fa) !important;
+}
+
+.hilal-tab-pill.multiselected:hover {
+  background-color: color-mix(in srgb, var(--primary, #a8c7fa) 24%, var(--surface-container-high, #262b32)) !important;
+}
+
+/* Split View — Vertical Tab Pills */
+.hilal-tab-pill.split-tab {
+  position: relative !important;
+  transition: background-color 150ms ease, border-radius 150ms ease, border-color 150ms ease, box-shadow 150ms ease !important;
+}
+
+.hilal-tab-pill.split-tab.split-first {
+  border-bottom-left-radius: 6px !important;
+  border-bottom-right-radius: 6px !important;
+  margin-bottom: 1px !important;
+  border-left: 3px solid var(--outline-variant, #43474e) !important;
+}
+
+.hilal-tab-pill.split-tab.split-last {
+  border-top-left-radius: 6px !important;
+  border-top-right-radius: 6px !important;
+  margin-top: 0 !important;
+  border-left: 3px solid var(--outline-variant, #43474e) !important;
+}
+
+.hilal-tab-pill.split-tab.split-active {
+  border-left-color: var(--primary, var(--md-sys-color-primary, #a8c7fa)) !important;
+}
+
+.hilal-tab-pill.split-tab.split-partner {
+  background-color: color-mix(in srgb, var(--secondary-container, #3a4857) 48%, var(--surface-container-high, #262b32)) !important;
+  color: var(--on-surface, #e1e2e9) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary, #a8c7fa) 45%, transparent) !important;
 }
 
 .hilal-tab-pill.hilal-tab-entering {

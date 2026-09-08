@@ -2116,6 +2116,14 @@
       titleSpan.className = "max hilal-htab-title";
       htab.appendChild(titleSpan);
 
+      // Split indicator badge
+      const splitBadge = document.createElement("span");
+      splitBadge.className = "hilal-split-badge";
+      splitBadge.title = "Split View";
+      splitBadge.style.display = "none";
+      splitBadge.innerHTML = "<i class=\"tiny\">splitscreen</i>";
+      htab.appendChild(splitBadge);
+
       // Sound indicator
       const soundBtn = document.createElement("button");
       soundBtn.className = "circle transparent small hilal-htab-sound-btn";
@@ -2137,21 +2145,29 @@
       closeBtn.innerHTML = "<i class=\"tiny\">close</i>";
       closeBtn.addEventListener("click", e => {
         e.stopPropagation();
-        window.gBrowser.removeTab(tab);
+        const isMulti =
+          tab.multiselected ||
+          (tab === window.gBrowser?.selectedTab &&
+            window.gBrowser?.selectedTabs?.length > 1);
+        if (isMulti && window.gBrowser?.selectedTabs?.length > 1) {
+          window.gBrowser.removeTabs(window.gBrowser.selectedTabs);
+        } else {
+          window.gBrowser.removeTab(tab);
+        }
         this.renderTabs();
       });
       htab.appendChild(closeBtn);
 
-      // Click to select
-      htab.addEventListener("click", () => {
-        window.gBrowser.selectedTab = tab;
+      // Click to select or multi-select
+      htab.addEventListener("click", e => {
+        this.handleTabClick(tab, e);
       });
 
       // Context menu
       htab.addEventListener("contextmenu", e => {
         e.preventDefault();
         e.stopPropagation();
-        this.openTabContextMenu(tab, htab, e);
+        this.handleTabContextMenu(tab, htab, e);
       });
 
       // Drag and drop horizontal reordering
@@ -2276,6 +2292,14 @@
       titleSpan.className = "max hilal-tab-title";
       pill.appendChild(titleSpan);
 
+      // Split indicator badge
+      const splitBadge = document.createElement("span");
+      splitBadge.className = "hilal-split-badge";
+      splitBadge.title = "Split View";
+      splitBadge.style.display = "none";
+      splitBadge.innerHTML = "<i class=\"tiny\">splitscreen</i>";
+      pill.appendChild(splitBadge);
+
       // Close button — Beer CSS circle transparent button with Material Symbols close icon
       const closeBtn = document.createElement("button");
       closeBtn.className = "circle transparent small hilal-tab-close-btn";
@@ -2284,21 +2308,29 @@
       closeBtn.innerHTML = "<i class=\"tiny\">close</i>";
       closeBtn.addEventListener("click", e => {
         e.stopPropagation();
-        window.gBrowser.removeTab(tab);
+        const isMulti =
+          tab.multiselected ||
+          (tab === window.gBrowser?.selectedTab &&
+            window.gBrowser?.selectedTabs?.length > 1);
+        if (isMulti && window.gBrowser?.selectedTabs?.length > 1) {
+          window.gBrowser.removeTabs(window.gBrowser.selectedTabs);
+        } else {
+          window.gBrowser.removeTab(tab);
+        }
         this.renderTabs();
       });
       pill.appendChild(closeBtn);
 
-      // Tab click -> Select
-      pill.addEventListener("click", () => {
-        window.gBrowser.selectedTab = tab;
+      // Tab click -> Select or multi-select
+      pill.addEventListener("click", e => {
+        this.handleTabClick(tab, e);
       });
 
       // Tab Context Menu
       pill.addEventListener("contextmenu", e => {
         e.preventDefault();
         e.stopPropagation();
-        this.openTabContextMenu(tab, pill, e);
+        this.handleTabContextMenu(tab, pill, e);
       });
 
       // Drag and Drop Vertical Reordering
@@ -2390,6 +2422,75 @@
       }
     },
 
+    handleTabClick(tab, event) {
+      if (!window.gBrowser) return;
+
+      const isMac =
+        Services?.appinfo?.OS === "Darwin" ||
+        (typeof navigator !== "undefined" &&
+          (navigator.platform?.includes("Mac") ||
+            navigator.userAgent?.includes("Mac")));
+      const accelKey = isMac ? event.metaKey : event.ctrlKey;
+      const shiftKey = event.shiftKey;
+
+      if (shiftKey) {
+        event.preventDefault();
+        const lastSelected =
+          window.gBrowser.lastMultiSelectedTab || window.gBrowser.selectedTab;
+        if (!accelKey) {
+          window.gBrowser.selectedTab = lastSelected;
+          window.gBrowser.clearMultiSelectedTabs?.();
+        }
+        if (typeof window.gBrowser.addRangeToMultiSelectedTabs === "function") {
+          window.gBrowser.addRangeToMultiSelectedTabs(lastSelected, tab);
+        } else {
+          window.gBrowser.addToMultiSelectedTabs?.(tab);
+        }
+        this.renderTabs();
+      } else if (accelKey) {
+        event.preventDefault();
+        if (tab.multiselected) {
+          window.gBrowser.removeFromMultiSelectedTabs?.(tab);
+        } else if (tab !== window.gBrowser.selectedTab) {
+          window.gBrowser.addToMultiSelectedTabs?.(tab);
+          window.gBrowser.lastMultiSelectedTab = tab;
+        }
+        this.renderTabs();
+      } else {
+        // Plain click
+        if (
+          window.gBrowser.selectedTabs &&
+          window.gBrowser.selectedTabs.length > 1
+        ) {
+          window.gBrowser.clearMultiSelectedTabs?.();
+        }
+        window.gBrowser.selectedTab = tab;
+        window.gBrowser.lastMultiSelectedTab = tab;
+      }
+    },
+
+    handleTabContextMenu(tab, triggerEl, event) {
+      if (!window.gBrowser) return;
+
+      const isPartOfMulti =
+        tab.multiselected ||
+        (tab === window.gBrowser.selectedTab &&
+          window.gBrowser.selectedTabs?.length > 1);
+
+      if (!isPartOfMulti) {
+        if (
+          window.gBrowser.selectedTabs &&
+          window.gBrowser.selectedTabs.length > 1
+        ) {
+          window.gBrowser.clearMultiSelectedTabs?.();
+        }
+        window.gBrowser.selectedTab = tab;
+        window.gBrowser.lastMultiSelectedTab = tab;
+      }
+
+      this.openTabContextMenu(tab, triggerEl, event);
+    },
+
     openTabContextMenu(tab, triggerEl, event) {
       this.ensureTabContextMenuReady();
       const contextMenu = document.getElementById("tabContextMenu");
@@ -2397,7 +2498,13 @@
         triggerEl.tab = tab;
         if (typeof TabContextMenu !== "undefined") {
           TabContextMenu.contextTab = tab;
-          TabContextMenu.contextTabs = [tab];
+          const isMulti =
+            window.gBrowser?.selectedTabs?.length > 1 &&
+            (tab.multiselected || tab === window.gBrowser?.selectedTab);
+          TabContextMenu.multiselected = isMulti;
+          TabContextMenu.contextTabs = isMulti
+            ? Array.from(window.gBrowser.selectedTabs)
+            : [tab];
           if (typeof TabContextMenu.updateContextMenu === "function") {
             TabContextMenu.updateContextMenu(contextMenu);
           }
@@ -2474,6 +2581,14 @@
       visibleTabs.forEach((tab, index) => {
         let pill = existingPills.get(tab);
         const isSelected = tab.selected || tab === window.gBrowser.selectedTab;
+        const isMultiSelected = !!tab.multiselected;
+        const splitview = tab.splitview;
+        const isSplit = !!splitview;
+        const isSplitActive = isSplit && splitview.hasActiveTab;
+        const isSplitPartner = isSplitActive && !isSelected;
+        const splitIndex = isSplit ? splitview.tabs.indexOf(tab) : -1;
+        const isSplitFirst = splitIndex === 0;
+        const isSplitLast = isSplit && splitIndex === splitview.tabs.length - 1;
 
         if (!pill) {
           pill = this.createTabPill(tab);
@@ -2490,6 +2605,25 @@
 
         pill.classList.toggle("active", isSelected);
         pill.classList.toggle("secondary-container", isSelected);
+        pill.classList.toggle("multiselected", isMultiSelected && !isSelected);
+        pill.classList.toggle("split-tab", isSplit);
+        pill.classList.toggle("split-active", isSplitActive);
+        pill.classList.toggle("split-partner", isSplitPartner);
+        pill.classList.toggle("split-first", isSplitFirst);
+        pill.classList.toggle("split-last", isSplitLast);
+        if (isSplit) {
+          pill.dataset.splitId = splitview.splitViewId || "";
+        } else {
+          delete pill.dataset.splitId;
+        }
+
+        const splitBadge = pill.querySelector(".hilal-split-badge");
+        if (splitBadge) {
+          splitBadge.style.display = isSplit ? "inline-flex" : "none";
+          splitBadge.classList.toggle("active", isSplitActive);
+          splitBadge.title = isSplitActive ? "Split View (Active)" : "Split View";
+        }
+
         this.updateTabPillContent(pill, tab);
 
         const currentChild = container.children[index];
@@ -2520,6 +2654,14 @@
       visibleTabs.forEach((tab, index) => {
         let htab = existingTabs.get(tab);
         const isSelected = tab.selected || tab === window.gBrowser.selectedTab;
+        const isMultiSelected = !!tab.multiselected;
+        const splitview = tab.splitview;
+        const isSplit = !!splitview;
+        const isSplitActive = isSplit && splitview.hasActiveTab;
+        const isSplitPartner = isSplitActive && !isSelected;
+        const splitIndex = isSplit ? splitview.tabs.indexOf(tab) : -1;
+        const isSplitFirst = splitIndex === 0;
+        const isSplitLast = isSplit && splitIndex === splitview.tabs.length - 1;
 
         if (!htab) {
           htab = this.createHorizontalTab(tab);
@@ -2528,6 +2670,25 @@
 
         htab.classList.toggle("active", isSelected);
         htab.classList.toggle("secondary-container", isSelected);
+        htab.classList.toggle("multiselected", isMultiSelected && !isSelected);
+        htab.classList.toggle("split-tab", isSplit);
+        htab.classList.toggle("split-active", isSplitActive);
+        htab.classList.toggle("split-partner", isSplitPartner);
+        htab.classList.toggle("split-first", isSplitFirst);
+        htab.classList.toggle("split-last", isSplitLast);
+        if (isSplit) {
+          htab.dataset.splitId = splitview.splitViewId || "";
+        } else {
+          delete htab.dataset.splitId;
+        }
+
+        const splitBadge = htab.querySelector(".hilal-split-badge");
+        if (splitBadge) {
+          splitBadge.style.display = isSplit ? "inline-flex" : "none";
+          splitBadge.classList.toggle("active", isSplitActive);
+          splitBadge.title = isSplitActive ? "Split View (Active)" : "Split View";
+        }
+
         this.updateHorizontalTabContent(htab, tab);
 
         const currentChild = container.children[index];
@@ -2664,7 +2825,15 @@
         tc.addEventListener("TabAttrModified", () => this.renderTabs());
         tc.addEventListener("TabHide", () => this.renderTabs());
         tc.addEventListener("TabShow", () => this.renderTabs());
+        tc.addEventListener("TabMultiSelect", () => this.renderTabs());
       }
+
+      window.addEventListener("TabMultiSelect", () => this.renderTabs());
+      window.addEventListener("TabSplitViewActivate", () => this.renderTabs());
+      window.addEventListener("TabSplitViewDeactivate", () => this.renderTabs());
+      window.addEventListener("SplitViewCreated", () => this.renderTabs());
+      window.addEventListener("SplitViewRemoved", () => this.renderTabs());
+      window.addEventListener("SplitViewTabChange", () => this.renderTabs());
 
       window.gBrowser.addProgressListener({
         onLocationChange: (aWebProgress, aRequest, aLocation, aFlags) => {
@@ -2696,10 +2865,15 @@
           this.openNewTab();
         } else if (isAccel && e.key.toLowerCase() === "w") {
           e.preventDefault();
-          if (window.gBrowser?.selectedTab) {
+          if (
+            window.gBrowser?.selectedTabs &&
+            window.gBrowser.selectedTabs.length > 1
+          ) {
+            window.gBrowser.removeTabs(window.gBrowser.selectedTabs);
+          } else if (window.gBrowser?.selectedTab) {
             window.gBrowser.removeTab(window.gBrowser.selectedTab);
-            this.renderTabs();
           }
+          this.renderTabs();
         } else if (isAccel && e.key.toLowerCase() === "r") {
           e.preventDefault();
           if (window.gBrowser) {
