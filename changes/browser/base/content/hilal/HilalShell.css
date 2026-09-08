@@ -1,8 +1,6 @@
-/* Hilal Browser - Beer CSS Material 3 Expressive Shell */
+/* Hilal Browser - Pure Material 3 Expressive Shell (Gecko as an Engine) */
 
-/* ============================================================
- * 1. XUL Suppression — hide Firefox native chrome
- * ========================================================== */
+/* 1. Complete wipe of Firefox legacy XUL toolbars */
 #navigator-toolbox,
 #sidebar-container,
 #sidebar-box,
@@ -16,74 +14,67 @@
   pointer-events: none !important;
 }
 
-/* ============================================================
- * 2. Window root — layout & font
- * ========================================================== */
+/* 2. Window Root & Dynamic Variables */
 :root[windowtype="navigator:browser"] {
-  background-color: var(--surface, #f8f9ff) !important;
-  color: var(--on-surface, #181c22) !important;
-  font-family: var(--font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif) !important;
+  background-color: var(--md-sys-color-surface, #101319) !important;
+  color: var(--md-sys-color-on-surface, #e1e2e9) !important;
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif) !important;
   overflow: hidden !important;
   height: 100vh !important;
   display: flex !important;
   flex-direction: column !important;
+  transition:
+    background-color 300ms ease,
+    color 300ms ease;
 
+  /* Force zero-border variables across gecko content canvas */
   --chrome-content-separator-color: transparent !important;
   --card-border-color: transparent !important;
   --tabs-navbar-separator-color: transparent !important;
   --focus-outline-color: transparent !important;
   --chrome-window-gap: 0px !important;
+
+  /* Material 3 Expressive Motion Physics Tokens */
+  --md-sys-motion-spring-spatial: cubic-bezier(0.38, 1.21, 0.22, 1);
+  --md-sys-motion-spring-effects: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --md-sys-motion-duration-short: 150ms;
+  --md-sys-motion-duration-medium: 250ms;
+  --md-sys-motion-duration-long: 400ms;
 }
 
-/* ============================================================
- * 3. Beer CSS scoped stylesheet link injected by HilalShell.js
- *    All shell HTML is wrapped in class="beer" — scoped styles
- *    handle component appearance; rules below handle layout/structure only.
- * ========================================================== */
-
-/* Shell wrapper — fills the remaining window height */
-#hilal-shell-root {
-  display: flex !important;
-  flex-direction: column !important;
-  flex: 1 !important;
-  overflow: hidden !important;
-  background-color: var(--surface, #f8f9ff) !important;
-}
-
-/* ============================================================
- * 4. Header shell — topbar + optional horizontal tab bar
- * ========================================================== */
+/* 3. Header Shell (Topbar + Horizontal Tab Bar) */
 #hilal-header-shell {
   display: flex;
   flex-direction: column;
   width: 100%;
-  background-color: var(--surface, #f8f9ff);
+  background-color: var(--md-sys-color-surface, #101319);
   flex-shrink: 0;
   z-index: 1000;
   -moz-window-dragging: drag;
   box-sizing: border-box;
+  transition: background-color 300ms ease;
 }
 
+/* In horizontal Chrome mode, tab strip is placed on top, navigation bar below */
 [data-tab-mode="horizontal"] #hilal-header-shell {
   flex-direction: column-reverse;
 }
 
-/* ============================================================
- * 5. Topbar row
- * ========================================================== */
+/* 3a. Topbar */
 #hilal-topbar {
   display: flex;
   align-items: center;
-  height: 48px;
-  min-height: 48px;
-  padding: 0 10px;
-  gap: 6px;
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+  padding: 0 14px;
+  gap: 10px;
   background: transparent;
   -moz-window-dragging: drag;
   box-sizing: border-box;
 }
 
-/* macOS traffic lights spacer */
+/* Traffic lights spacer on macOS */
 #hilal-traffic-lights-spacer {
   display: flex !important;
   align-items: center !important;
@@ -124,129 +115,150 @@
   display: none !important;
 }
 
+/* Slots for traffic lights */
 #hilal-topbar-traffic-slot,
 #hilal-htabs-traffic-slot {
   display: flex;
   align-items: center;
 }
 
+/* Workspaces slot in topbar (active in dual and horizontal modes) */
 #hilal-topbar-workspaces-slot {
   display: flex;
   align-items: center;
 }
 
-/* ============================================================
- * 6. URL bar container — layout only, Beer CSS field handles styling
- * ========================================================== */
-#hilal-url-container {
-  flex: 1;
-  max-width: 620px;
-  margin: 0 auto;
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 38px;
-  -moz-window-dragging: no-drag;
-  box-sizing: border-box;
-}
-
-/* Beer CSS field wrapper inside the URL container */
-#hilal-url-field {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-#hilal-url-field input {
-  -moz-window-dragging: no-drag !important;
-}
-
-/* Page actions — layout only */
-#hilal-page-actions-slot {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  -moz-window-dragging: no-drag;
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* Firefox native page action buttons inside our slot */
-#page-action-buttons {
+#hilal-topbar-workspaces-slot #hilal-workspaces-bar {
+  margin-bottom: 0 !important;
+  padding: 0 2px !important;
+  gap: 6px !important;
   display: flex !important;
   align-items: center !important;
-  gap: 2px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  background: transparent !important;
 }
 
-#page-action-buttons > :is([hidden], [hidden="true"], [hidden=""], [aria-hidden="true"]) {
-  display: none !important;
+#hilal-topbar-workspaces-slot .hilal-ws-chip {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  font-size: 14px !important;
 }
 
-#page-action-buttons > :is(
-  #pageActionButton,
-  #userContext-icons,
-  #picture-in-picture-button,
-  #taskbar-tabs-button,
-  #split-view-button,
-  #share-button,
-  #contextual-feature-recommendation,
-  toolbartabstop
-) {
-  display: none !important;
-}
-
-#translations-button:not([translationsactive="true"]) {
-  display: none !important;
-}
-
-#reader-mode-button:is([hidden], [hidden="true"], [hidden=""]) {
-  display: none !important;
-}
-
-#page-action-buttons > .urlbar-page-action:not([hidden]):not([hidden="true"]):not([hidden=""]):not(#pageActionButton):not(#userContext-icons):not(#picture-in-picture-button):not(#taskbar-tabs-button):not(#split-view-button):not(#share-button):not(#contextual-feature-recommendation),
-#urlbar-zoom-button:not([hidden]):not([hidden="true"]) {
-  display: inline-flex !important;
+/* Compact Active Workspace Pill in Horizontal Mode */
+.hilal-ws-pill-btn {
+  display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
-  width: 26px !important;
-  height: 26px !important;
-  min-width: 26px !important;
-  min-height: 26px !important;
-  border-radius: 9999px !important;
-  border: none !important;
-  background: transparent !important;
-  color: var(--on-surface-variant, #43474e) !important;
+  gap: 6px !important;
+  height: 28px !important;
+  padding: 0 10px 0 8px !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border: 1px solid var(--md-sys-color-outline-variant, transparent) !important;
+  border-radius: var(--md-sys-shape-corner-full, 9999px) !important;
   cursor: pointer !important;
-  padding: 0 !important;
-  margin: 0 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 200ms var(--md-sys-motion-spring-spatial) !important;
   -moz-window-dragging: no-drag !important;
 }
 
-/* Search suggestions dropdown */
-#hilal-search-dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  z-index: 10000;
-  display: none;
+.hilal-ws-pill-btn:hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  color: var(--md-sys-color-primary) !important;
+  transform: scale(1.03) !important;
 }
 
-#hilal-search-dropdown.visible {
-  display: block;
+.hilal-ws-pill-btn:active {
+  transform: scale(0.96) !important;
 }
 
-/* ============================================================
- * 7. Top right group — layout only
- * ========================================================== */
-#hilal-nav-group,
+.hilal-ws-pill-emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.hilal-ws-pill-name {
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hilal-ws-pill-arrow {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  opacity: 0.7;
+  transition: transform 150ms ease;
+}
+
+.hilal-ws-pill-btn:hover .hilal-ws-pill-arrow {
+  opacity: 1;
+}
+
+/* Navigation buttons */
+#hilal-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  -moz-window-dragging: no-drag;
+}
+
+.hilal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--md-sys-shape-corner-full, 9999px);
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 250ms var(--md-sys-motion-spring-spatial),
+    border-radius 250ms var(--md-sys-motion-spring-spatial);
+  -moz-window-dragging: no-drag;
+}
+
+.hilal-btn:hover:not([disabled]) {
+  background-color: var(--md-sys-color-surface-container-high, #262b32);
+  color: var(--md-sys-color-on-surface, #e1e2e9);
+  transform: scale(1.06);
+  border-radius: 40%;
+}
+
+.hilal-btn:active:not([disabled]) {
+  background-color: var(--md-sys-color-surface-container-highest, #31363e);
+  color: var(--md-sys-color-primary, #a8c7fa);
+  transform: scale(0.9) !important;
+  border-radius: 10px !important;
+}
+
+.hilal-btn[disabled] {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.hilal-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.hilal-btn svg[fill="none"],
+#hilal-layout-mode-btn svg {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
 #hilal-top-right-group {
   display: flex;
   align-items: center;
@@ -254,7 +266,7 @@
   -moz-window-dragging: no-drag;
 }
 
-/* Extensions slot — moves Firefox extension buttons into our topbar */
+/* Native Extensions Slot in Topbar Right Group */
 #hilal-extensions-slot {
   display: flex;
   align-items: center;
@@ -302,16 +314,39 @@
   min-height: 32px !important;
   max-width: 32px !important;
   max-height: 32px !important;
-  border-radius: 9999px !important;
+  border-radius: var(--md-sys-shape-corner-full, 9999px) !important;
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
   background: transparent !important;
-  color: var(--on-surface-variant, #43474e) !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
   cursor: pointer !important;
   padding: 0 !important;
   margin: 0 !important;
+  position: relative !important;
+  overflow: visible !important;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 250ms var(--md-sys-motion-spring-spatial),
+    border-radius 250ms var(--md-sys-motion-spring-spatial) !important;
   -moz-window-dragging: no-drag !important;
+}
+
+#hilal-extensions-slot .unified-extensions-item-action-button:hover:not([disabled]),
+#hilal-extensions-slot #unified-extensions-button:hover:not([disabled]),
+#hilal-extensions-slot > toolbarbutton:not(.unified-extensions-item-menu-button):hover:not([disabled]) {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  transform: scale(1.06) !important;
+}
+
+#hilal-extensions-slot .unified-extensions-item-action-button:active:not([disabled]),
+#hilal-extensions-slot #unified-extensions-button:active:not([disabled]),
+#hilal-extensions-slot > toolbarbutton:not(.unified-extensions-item-menu-button):active:not([disabled]) {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+  color: var(--md-sys-color-primary) !important;
+  transform: scale(0.9) !important;
 }
 
 #hilal-extensions-slot toolbarbutton[hidden="true"],
@@ -354,153 +389,611 @@
   font-size: 8.5px !important;
   font-weight: 700 !important;
   line-height: 13px !important;
-  border-radius: 9999px !important;
-  background-color: var(--error, #b3261e) !important;
-  color: var(--on-error, #ffffff) !important;
+  text-align: center !important;
+  border-radius: var(--md-sys-shape-corner-full, 9999px) !important;
+  background-color: var(--md-sys-color-error, #b3261e) !important;
+  color: var(--md-sys-color-on-error, #ffffff) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   pointer-events: none !important;
 }
 
+#hilal-sidebar-toggle-btn.collapsed {
+  opacity: 0.6;
+  transform: scale(0.95);
+}
+
+/* Hide sidebar toggle in horizontal-only mode */
 [data-tab-mode="horizontal"] #hilal-sidebar-toggle-btn {
   display: none !important;
 }
 
-/* ============================================================
- * 8. Horizontal tabs strip (Chrome/Dual mode)
- * ========================================================== */
-#hilal-horizontal-tabs {
-  display: none;
-  align-items: center;
-  height: 40px;
-  min-height: 40px;
-  padding: 0 10px;
-  gap: 4px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  background: transparent;
-  -moz-window-dragging: drag;
-}
-
-#hilal-horizontal-tabs::-webkit-scrollbar {
-  display: none;
-}
-
-[data-tab-mode="horizontal"] #hilal-horizontal-tabs,
-[data-tab-mode="dual"] #hilal-horizontal-tabs {
-  display: flex;
-}
-
-#hilal-horizontal-tab-list {
-  display: flex;
-  align-items: center;
-  gap: 3px;
+/* 3b. Material 3 Search Container & Autocomplete View */
+#hilal-url-container {
   flex: 1;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-/* Horizontal tab chip — Beer CSS chip with custom favicon slot */
-.hilal-htab {
+  max-width: 620px;
+  margin: 0 auto;
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 6px;
-  height: 32px;
-  max-width: 200px;
-  min-width: 80px;
-  padding: 0 8px 0 6px;
-  border-radius: 9999px;
+  background-color: var(--md-sys-color-surface-container-high, #262b32);
+  border: none !important;
+  border-radius: var(--md-sys-shape-corner-full, 9999px);
+  height: 34px;
+  padding: 0 12px;
+  gap: 8px;
+  transition:
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+  -moz-window-dragging: no-drag;
+  box-sizing: border-box;
+}
+
+#hilal-url-container:focus-within {
+  background-color: var(--md-sys-color-surface-container-highest, #31363e);
+  box-shadow: 0 0 0 2px var(--md-sys-color-primary, #a8c7fa);
+}
+
+#hilal-url-security-icon {
+  display: flex;
+  align-items: center;
+  color: var(--md-sys-color-primary, #a8c7fa);
+}
+
+#hilal-url-security-icon svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
+#hilal-url-input {
+  flex: 1;
   background: transparent;
-  border: 1px solid transparent;
-  color: var(--on-surface-variant, #43474e);
-  cursor: pointer;
-  flex-shrink: 0;
-  user-select: none;
-  font-size: 12.5px;
-  font-weight: 400;
-  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+  border: none;
+  outline: none;
+  color: var(--md-sys-color-on-surface, #e1e2e9);
+  font-family: inherit;
+  font-size: 13.5px;
+  padding: 0;
+  margin: 0;
+}
+
+#hilal-url-input::placeholder {
+  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+  opacity: 0.7;
+}
+
+#hilal-url-clear-btn {
+  width: 20px;
+  height: 20px;
+  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+}
+
+#hilal-url-clear-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+#hilal-url-copy-btn,
+#hilal-url-theme-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  min-height: 26px !important;
+  border-radius: var(--md-sys-shape-corner-full, 9999px) !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--md-sys-color-on-surface-variant, #c3c7cf) !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 180ms var(--md-sys-motion-spring-spatial) !important;
+  -moz-window-dragging: no-drag !important;
+}
+
+#hilal-url-copy-btn:hover,
+#hilal-url-theme-btn:hover {
+  background-color: var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.1)) !important;
+  color: var(--md-sys-color-on-surface, #e2e2e9) !important;
+  transform: scale(1.08) !important;
+}
+
+#hilal-url-copy-btn:active,
+#hilal-url-theme-btn:active {
+  transform: scale(0.92) !important;
+}
+
+#hilal-url-copy-btn svg,
+#hilal-url-theme-btn svg {
+  width: 14px !important;
+  height: 14px !important;
+  fill: currentColor !important;
+}
+
+/* Page Actions inside M3 URL Bar Container */
+#hilal-page-actions-slot {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   -moz-window-dragging: no-drag;
 }
 
+#page-action-buttons {
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Strict Suppression of Inactive/Broken/Legacy Firefox Page Actions */
+#page-action-buttons > :is([hidden], [hidden="true"], [hidden=""], [aria-hidden="true"]) {
+  display: none !important;
+}
+
+#page-action-buttons
+  > :is(
+    #pageActionButton,
+    #userContext-icons,
+    #picture-in-picture-button,
+    #taskbar-tabs-button,
+    #split-view-button,
+    #share-button,
+    #contextual-feature-recommendation,
+    toolbartabstop
+  ) {
+  display: none !important;
+}
+
+/* Only display translations if active */
+#translations-button:not([translationsactive="true"]) {
+  display: none !important;
+}
+
+/* Reader Mode: only display when active/article (and not hidden) */
+#reader-mode-button:is([hidden], [hidden="true"], [hidden=""]) {
+  display: none !important;
+}
+
+/* Only allow legit interactive buttons (#star-button-box, reader-mode when available, zoom when active) */
+#page-action-buttons
+  > .urlbar-page-action:not([hidden]):not([hidden="true"]):not([hidden=""]):not(#pageActionButton):not(#userContext-icons):not(#picture-in-picture-button):not(
+    #taskbar-tabs-button
+  ):not(#split-view-button):not(#share-button):not(#contextual-feature-recommendation),
+#urlbar-zoom-button:not([hidden]):not([hidden="true"]) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  min-height: 26px !important;
+  border-radius: var(--md-sys-shape-corner-full, 9999px) !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--md-sys-color-on-surface-variant, #c3c7cf) !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 180ms var(--md-sys-motion-spring-spatial) !important;
+  -moz-window-dragging: no-drag !important;
+}
+
+#page-action-buttons > .urlbar-page-action:hover,
+#urlbar-zoom-button:hover {
+  background-color: var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.1)) !important;
+  color: var(--md-sys-color-on-surface, #e2e2e9) !important;
+  transform: scale(1.08) !important;
+}
+
+#page-action-buttons > .urlbar-page-action:active,
+#urlbar-zoom-button:active {
+  transform: scale(0.92) !important;
+}
+
+#page-action-buttons image,
+#page-action-buttons .urlbar-icon {
+  width: 15px !important;
+  height: 15px !important;
+  fill: currentColor !important;
+  color: currentColor !important;
+  -moz-context-properties: fill, fill-opacity, stroke, stroke-opacity !important;
+}
+
+/* Star Button Active / Bookmarked State */
+#star-button-box[starred="true"],
+#star-button-box:has(#star-button[starred]),
+#star-button[starred] {
+  color: var(--md-sys-color-primary, #a8c7fa) !important;
+  fill: var(--md-sys-color-primary, #a8c7fa) !important;
+}
+
+/* Reader Mode Active State */
+#reader-mode-button[readeractive="true"] {
+  background-color: var(--md-sys-color-primary-container, rgba(168, 199, 250, 0.2)) !important;
+  color: var(--md-sys-color-on-primary-container, #a8c7fa) !important;
+}
+
+/* Material 3 Theme / Palette Menu */
+#hilal-theme-menu {
+  position: fixed;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background-color: var(--md-sys-color-surface-container-high, #21252d);
+  border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.1));
+  border-radius: var(--md-sys-shape-corner-large, 16px);
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(24px);
+  z-index: 100000;
+  min-width: 180px;
+  animation: hilal-menu-enter 180ms var(--md-sys-motion-spring-spatial);
+}
+
+.hilal-theme-menu-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+  padding: 0 4px 4px 4px;
+}
+
+.hilal-theme-swatches-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 2px 4px;
+}
+
+.hilal-theme-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease;
+  padding: 0;
+  outline: none;
+}
+
+.hilal-theme-swatch:hover {
+  transform: scale(1.15);
+}
+
+.hilal-theme-swatch.active {
+  border-color: var(--md-sys-color-on-surface, #ffffff);
+  transform: scale(1.1);
+  box-shadow: 0 0 0 2px var(--md-sys-color-primary, #a8c7fa);
+}
+
+/* Material 3 Search Suggestions Dropdown Card */
+#hilal-search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background-color: var(--md-sys-color-surface-container-high, #21252d);
+  border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.1));
+  border-radius: 20px;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  z-index: 100000;
+  display: none;
+  flex-direction: column;
+  padding: 8px 0;
+  backdrop-filter: blur(24px);
+  max-height: 460px;
+  overflow-y: auto;
+  animation: hilal-search-enter 220ms var(--md-sys-motion-spring-spatial);
+}
+
+@keyframes hilal-search-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hilal-search-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--md-sys-color-outline, #8c9199);
+  padding: 6px 18px 4px 18px;
+  user-select: none;
+}
+
+.hilal-search-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.hilal-search-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 14px;
+  margin: 2px 8px;
+  border-radius: 14px;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 150ms ease,
+    transform 150ms var(--md-sys-motion-spring-spatial);
+}
+
+.hilal-search-item:hover {
+  background-color: var(--md-sys-color-surface-container-highest, #2d323b);
+}
+
+.hilal-search-item.selected {
+  background-color: var(--md-sys-color-primary-container, #0842a0) !important;
+  color: var(--md-sys-color-on-primary-container, #d3e3fd) !important;
+}
+
+.hilal-search-item:active {
+  transform: scale(0.98);
+}
+
+.hilal-search-item-icon {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 50%;
+  background-color: var(--md-sys-color-surface-container-highest, #2d323b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--md-sys-color-primary, #a8c7fa);
+  transition: all 180ms ease;
+}
+
+.hilal-search-item.selected .hilal-search-item-icon {
+  background-color: var(--md-sys-color-primary, #a8c7fa);
+  color: var(--md-sys-color-on-primary, #003063);
+  border-radius: 10px;
+}
+
+.hilal-search-item-icon svg {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+}
+
+.hilal-search-item-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hilal-search-item-label {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface, #e1e2e9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hilal-search-item.selected .hilal-search-item-label {
+  color: var(--md-sys-color-on-primary-container, #d3e3fd);
+}
+
+.hilal-search-item-sub {
+  font-size: 11.5px;
+  color: var(--md-sys-color-on-surface-variant, #a0a5ad);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hilal-search-item.selected .hilal-search-item-sub {
+  color: var(--md-sys-color-on-primary-container, #d3e3fd);
+  opacity: 0.85;
+}
+
+.hilal-search-item-trailing {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--md-sys-color-primary, #a8c7fa);
+  padding: 3px 8px;
+  background-color: var(--md-sys-color-surface-container, #1c2027);
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.hilal-search-item.selected .hilal-search-item-trailing {
+  background-color: var(--md-sys-color-on-primary-container, #d3e3fd);
+  color: var(--md-sys-color-primary-container, #0842a0);
+}
+
+.hilal-search-item-trailing-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: var(--md-sys-color-outline, #8c9199);
+}
+
+.hilal-search-favicon {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.hilal-search-item-trailing.hilal-search-item-bang-chip {
+  background-color: var(--md-sys-color-tertiary-container, rgba(175, 81, 245, 0.2));
+  color: var(--md-sys-color-on-tertiary-container, #d0bcff);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.hilal-search-item.selected .hilal-search-item-trailing.hilal-search-item-bang-chip {
+  background-color: var(--md-sys-color-on-primary-container, #d3e3fd);
+  color: var(--md-sys-color-primary-container, #0842a0);
+}
+
+/* 3c. Horizontal Tab Bar (Safari Dual Mode & Chrome Horizontal Mode) */
+#hilal-horizontal-tabs {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  min-height: 38px;
+  max-height: 38px;
+  padding: 0 12px;
+  gap: 8px;
+  background-color: transparent;
+  border-bottom: none !important;
+  user-select: none;
+  -moz-window-dragging: drag;
+  box-sizing: border-box;
+}
+
+/* Hidden in vertical mode */
+[data-tab-mode="vertical"] #hilal-horizontal-tabs {
+  display: none !important;
+}
+
+#hilal-horizontal-tab-list {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -moz-window-dragging: drag;
+}
+
+#hilal-horizontal-tab-list::-webkit-scrollbar {
+  display: none;
+}
+
+.hilal-htab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  min-width: 120px;
+  max-width: 220px;
+  flex: 0 1 200px;
+  padding: 0 10px;
+  border-radius: var(--md-sys-shape-corner-medium, 10px);
+  background-color: var(--md-sys-color-surface-container, #1a1e26);
+  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+  cursor: pointer;
+  border: none !important;
+  -moz-window-dragging: no-drag;
+  transition:
+    transform 200ms var(--md-sys-motion-spring-spatial),
+    background-color 150ms ease,
+    color 150ms ease,
+    border-radius 180ms var(--md-sys-motion-spring-spatial);
+  position: relative;
+}
+
 .hilal-htab:hover {
-  background-color: var(--surface-container, #eceef5);
-  color: var(--on-surface, #181c22);
+  background-color: var(--md-sys-color-surface-container-high, #242933);
+  color: var(--md-sys-color-on-surface, #e1e2e9);
+  transform: translateY(-1px);
+}
+
+.hilal-htab:active {
+  transform: scale(0.97);
 }
 
 .hilal-htab.active {
-  background-color: var(--surface-container-high, #e6e8ef);
-  color: var(--on-surface, #181c22);
-  border-color: var(--outline-variant, #c3c7cf);
+  background-color: var(--md-sys-color-surface-container-highest, #31363e);
+  color: var(--md-sys-color-primary, #a8c7fa);
   font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
-.hilal-htab.dragging { opacity: 0.35; }
-.hilal-htab.drop-before { box-shadow: inset 2px 0 0 var(--primary, #0b57d0); }
-.hilal-htab.drop-after  { box-shadow: inset -2px 0 0 var(--primary, #0b57d0); }
+.hilal-htab.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background-color: var(--md-sys-color-primary, #a8c7fa);
+  border-radius: 2px;
+}
+
+.hilal-htab.dragging {
+  opacity: 0.35 !important;
+  transform: scale(0.96) !important;
+}
+
+.hilal-htab.drop-before {
+  box-shadow: inset 2px 0 0 0 var(--md-sys-color-primary, #a8c7fa) !important;
+}
+
+.hilal-htab.drop-after {
+  box-shadow: inset -2px 0 0 0 var(--md-sys-color-primary, #a8c7fa) !important;
+}
 
 .hilal-htab-icon {
-  width: 15px;
-  height: 15px;
-  min-width: 15px;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .hilal-htab-icon img {
-  width: 15px;
-  height: 15px;
-  border-radius: 2px;
+  width: 16px;
+  height: 16px;
   object-fit: contain;
+  border-radius: 2px;
 }
 
 .hilal-htab-title {
   flex: 1;
+  font-size: 12.5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 12.5px;
-}
-
-.hilal-htab-close-btn {
-  width: 18px;
-  height: 18px;
-  border-radius: 9999px;
-  border: none;
-  background: transparent;
-  color: var(--on-surface-variant, #43474e);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  font-size: 13px;
-  padding: 0;
-  transition: opacity 0.12s ease, background-color 0.12s ease;
-}
-
-.hilal-htab:hover .hilal-htab-close-btn,
-.hilal-htab.active .hilal-htab-close-btn {
-  opacity: 0.75;
-}
-
-.hilal-htab-close-btn:hover {
-  background-color: var(--surface-container-highest, #e0e2e9);
-  opacity: 1 !important;
-  color: var(--on-surface, #181c22);
 }
 
 .hilal-htab-sound-btn {
   width: 18px;
   height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-primary, #a8c7fa);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 9999px;
-  border: none;
-  background: transparent;
-  color: var(--on-surface-variant, #43474e);
   cursor: pointer;
   padding: 0;
 }
@@ -511,40 +1004,156 @@
   fill: currentColor;
 }
 
-/* ============================================================
- * 9. Browser area — sidebar + web canvas row
- * ========================================================== */
-#browser {
-  display: flex !important;
-  flex: 1 !important;
-  overflow: hidden !important;
-  background-color: var(--surface, #f8f9ff) !important;
-  padding: 0 8px 8px 8px !important;
-  gap: 8px !important;
+.hilal-htab-close-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 150ms ease,
+    background-color 150ms ease;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1;
 }
 
-/* ============================================================
- * 10. Sidebar — nav drawer layout
- * ========================================================== */
+.hilal-htab:hover .hilal-htab-close-btn,
+.hilal-htab.active .hilal-htab-close-btn {
+  opacity: 0.8;
+}
+
+.hilal-htab-close-btn:hover {
+  background-color: var(--md-sys-color-surface-container-highest, #383e49);
+  color: var(--md-sys-color-on-surface, #e1e2e9);
+  opacity: 1 !important;
+}
+
+#hilal-htab-newtab-btn {
+  flex-shrink: 0;
+}
+
+/* 3d. Mode Switcher Context Menu */
+.hilal-dropdown-menu {
+  display: none;
+  flex-direction: column;
+  background-color: var(--md-sys-color-surface-container-high, #262b32);
+  border: 1px solid var(--md-sys-color-outline-variant, #31363e);
+  border-radius: var(--md-sys-shape-corner-medium, 14px);
+  padding: 6px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  z-index: 100002;
+  gap: 2px;
+}
+
+.hilal-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface, #e1e2e9);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 150ms ease;
+}
+
+.hilal-dropdown-item:hover {
+  background-color: var(--md-sys-color-surface-container-highest, #31363e);
+}
+
+.hilal-dropdown-item.active {
+  background-color: var(--md-sys-color-primary-container, #0842a0);
+  color: var(--md-sys-color-on-primary-container, #d3e3fd);
+}
+
+.hilal-dropdown-header {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--md-sys-color-on-surface-variant);
+  padding: 6px 10px 4px 10px;
+  text-transform: uppercase;
+}
+
+.hilal-dropdown-divider {
+  height: 1px;
+  background-color: var(--md-sys-color-outline-variant);
+  margin: 4px 6px;
+}
+
+.hilal-ws-check-indicator {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+}
+
+.hilal-dropdown-icon {
+  display: flex;
+  align-items: center;
+}
+
+.hilal-dropdown-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.hilal-dropdown-icon svg[fill="none"],
+#hilal-mode-context-menu svg {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+/* 4. Main Body: Flex layout containing sidebar + canvas */
+#browser {
+  background-color: var(--md-sys-color-surface, #101319) !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex: 1 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  width: 100vw !important;
+  padding: 0 10px 10px 10px !important;
+  box-sizing: border-box !important;
+  gap: 8px !important;
+  transition: background-color 300ms ease;
+}
+
+/* 5. Material 3 Vertical Sidebar */
 #hilal-sidebar {
-  width: 220px;
-  min-width: 220px;
-  max-width: 220px;
+  width: 230px;
+  min-width: 230px;
+  max-width: 230px;
   display: flex;
   flex-direction: column;
-  padding: 4px 0;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 4px 6px 6px 2px;
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: auto;
   user-select: none;
   transition:
-    width 320ms cubic-bezier(0.38, 1.21, 0.22, 1),
-    min-width 320ms cubic-bezier(0.38, 1.21, 0.22, 1),
-    max-width 320ms cubic-bezier(0.38, 1.21, 0.22, 1),
-    opacity 200ms ease,
-    transform 320ms cubic-bezier(0.38, 1.21, 0.22, 1);
+    width 380ms var(--md-sys-motion-spring-spatial),
+    min-width 380ms var(--md-sys-motion-spring-spatial),
+    max-width 380ms var(--md-sys-motion-spring-spatial),
+    padding 380ms var(--md-sys-motion-spring-spatial),
+    margin 380ms var(--md-sys-motion-spring-spatial),
+    opacity 200ms var(--md-sys-motion-spring-effects),
+    transform 380ms var(--md-sys-motion-spring-spatial);
   transform-origin: left center;
-  background-color: transparent;
 }
 
 #hilal-sidebar[collapsed="true"] {
@@ -554,127 +1163,225 @@
   padding: 0 !important;
   margin: 0 !important;
   opacity: 0 !important;
-  transform: translateX(-20px) scaleX(0.94);
+  transform: translateX(-24px) scaleX(0.92);
   pointer-events: none !important;
   overflow: hidden !important;
 }
 
+/* In horizontal mode, sidebar is completely eliminated */
 [data-tab-mode="horizontal"] #hilal-sidebar {
   display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
-/* Workspaces rail */
+/* Workspaces rail (Compact Icon-Only Design) */
 #hilal-workspaces-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px 8px 8px;
-  border-bottom: 1px solid var(--outline-variant, #c3c7cf);
-  margin-bottom: 4px;
+  gap: 8px;
+  padding: 4px 4px 8px 4px;
+  border-bottom: none !important;
+  margin-bottom: 6px;
   overflow-x: auto;
   scrollbar-width: none;
+  scroll-behavior: smooth;
 }
 
-#hilal-workspaces-bar::-webkit-scrollbar { display: none; }
+#hilal-workspaces-bar::-webkit-scrollbar {
+  display: none;
+}
 
-/* Workspace chip — layout only (Beer CSS handles appearance via class="circle") */
 .hilal-ws-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  font-size: 17px;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 50%;
+  border: none !important;
+  background: var(--md-sys-color-surface-container, #1c2027);
+  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+  font-size: 16px;
+  line-height: 1;
   cursor: pointer;
+  white-space: nowrap;
   flex-shrink: 0;
   padding: 0;
-  -moz-window-dragging: no-drag;
+  transition:
+    transform 280ms var(--md-sys-motion-spring-spatial),
+    border-radius 280ms var(--md-sys-motion-spring-spatial),
+    background-color 250ms ease,
+    color 250ms ease;
 }
 
-/* Tabs header row */
+.hilal-ws-chip:hover {
+  background-color: var(--md-sys-color-surface-container-high, #262b32);
+  color: var(--md-sys-color-on-surface, #e1e2e9);
+  transform: scale(1.08);
+  border-radius: 40%;
+}
+
+.hilal-ws-chip:active {
+  transform: scale(0.9) !important;
+  border-radius: 10px !important;
+}
+
+.hilal-ws-chip.active {
+  background-color: var(--md-sys-color-primary-container, #0842a0);
+  color: var(--md-sys-color-on-primary-container, #d3e3fd);
+  border-radius: 12px;
+  transform: scale(1.08);
+}
+
+.hilal-ws-add {
+  font-size: 18px;
+  font-weight: 400;
+  background: transparent;
+  border: 1px dashed var(--md-sys-color-outline-variant, #31363e) !important;
+  transition:
+    transform 280ms var(--md-sys-motion-spring-spatial),
+    border-radius 280ms var(--md-sys-motion-spring-spatial),
+    background-color 250ms ease,
+    border-color 250ms ease;
+}
+
+.hilal-ws-add:hover {
+  background-color: var(--md-sys-color-surface-container-high, #262b32);
+  border-color: var(--md-sys-color-primary, #a8c7fa) !important;
+  color: var(--md-sys-color-primary, #a8c7fa);
+  transform: scale(1.08);
+  border-radius: 40%;
+}
+
+.hilal-ws-add:active {
+  transform: scale(0.9) !important;
+  border-radius: 10px !important;
+}
+
+/* Tabs Header */
 #hilal-tabs-bar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 2px 8px 6px 10px;
+  padding: 4px 4px 6px 6px;
 }
 
 .hilal-tabs-label {
-  font-size: 10.5px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   font-weight: 700;
-  color: var(--on-surface-variant, #43474e);
-  opacity: 0.7;
+  color: var(--md-sys-color-outline, #8c9199);
 }
 
-/* Vertical tab list */
+/* Vertical Tab List */
 #hilal-tab-list {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0 4px;
+  padding-right: 2px;
 }
 
-#hilal-tab-list::-webkit-scrollbar { width: 4px; }
+#hilal-tab-list::-webkit-scrollbar {
+  width: 4px;
+}
 #hilal-tab-list::-webkit-scrollbar-thumb {
-  background: var(--outline-variant, #c3c7cf);
+  background: var(--md-sys-color-surface-container-highest, #31363e);
   border-radius: 4px;
 }
 
-/* Tab pill — layout; Beer CSS list item handles appearance */
 .hilal-tab-pill {
   display: flex;
   align-items: center;
   height: 36px;
   min-height: 36px;
-  padding: 0 8px;
+  padding: 0 10px;
+  border-radius: var(--md-sys-shape-corner-medium, 12px);
+  background-color: transparent;
+  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
   cursor: pointer;
   gap: 8px;
   position: relative;
   user-select: none;
-  border-radius: 12px;
-  transition: background-color 140ms ease, color 140ms ease;
-  -moz-window-dragging: no-drag;
-  color: var(--on-surface-variant, #43474e);
-}
-
-.hilal-tab-pill:hover {
-  background-color: var(--surface-container, #eceef5);
-  color: var(--on-surface, #181c22);
-}
-
-.hilal-tab-pill.active {
-  background-color: var(--secondary-container, #d9e3f5);
-  color: var(--on-secondary-container, #121c2a);
-  font-weight: 500;
+  border: none !important;
+  transition:
+    transform 220ms var(--md-sys-motion-spring-spatial),
+    background-color 160ms ease,
+    color 160ms ease,
+    border-radius 200ms var(--md-sys-motion-spring-spatial);
 }
 
 .hilal-tab-pill.hilal-tab-entering {
-  animation: hilal-tab-enter 240ms cubic-bezier(0.38, 1.21, 0.22, 1) both;
+  animation: hilal-tab-enter 280ms var(--md-sys-motion-spring-spatial) both;
 }
 
-.hilal-tab-pill.dragging { opacity: 0.35; }
-.hilal-tab-pill.drop-before { box-shadow: inset 0 2px 0 var(--primary, #0b57d0); }
-.hilal-tab-pill.drop-after  { box-shadow: inset 0 -2px 0 var(--primary, #0b57d0); }
+.hilal-tab-pill.dragging {
+  opacity: 0.35 !important;
+  transform: scale(0.96) !important;
+}
+
+.hilal-tab-pill.drop-before {
+  box-shadow: inset 0 2px 0 0 var(--md-sys-color-primary, #a8c7fa) !important;
+}
+
+.hilal-tab-pill.drop-after {
+  box-shadow: inset 0 -2px 0 0 var(--md-sys-color-primary, #a8c7fa) !important;
+}
+
+.hilal-tab-pill:hover {
+  background-color: var(--md-sys-color-surface-container, #1c2027);
+  color: var(--md-sys-color-on-surface, #e1e2e9);
+  transform: translateX(2px);
+}
+
+.hilal-tab-pill:active {
+  transform: scale(0.97);
+}
+
+.hilal-tab-pill.active {
+  background-color: var(--md-sys-color-surface-container-highest, #31363e);
+  color: var(--md-sys-color-primary, #a8c7fa);
+  font-weight: 500;
+  border: none !important;
+  border-radius: var(--md-sys-shape-corner-large, 16px);
+}
 
 @keyframes hilal-tab-enter {
-  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .hilal-tab-icon {
-  width: 16px; height: 16px; min-width: 16px;
-  display: flex; align-items: center; justify-content: center;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hilal-tab-icon img {
-  width: 16px; height: 16px; border-radius: 2px; object-fit: contain;
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  object-fit: contain;
 }
 
 .hilal-tab-title {
@@ -686,57 +1393,78 @@
 }
 
 .hilal-tab-close-btn {
-  width: 20px; height: 20px;
-  border-radius: 9999px; border: none; background: transparent;
-  color: var(--on-surface-variant, #43474e);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; opacity: 0; padding: 0; font-size: 14px;
-  transition: opacity 0.12s ease, background-color 0.12s ease;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--md-sys-shape-corner-full, 9999px);
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant, #c3c7cf);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
 }
 
 .hilal-tab-pill:hover .hilal-tab-close-btn,
-.hilal-tab-pill.active .hilal-tab-close-btn { opacity: 0.75; }
-
-.hilal-tab-close-btn:hover {
-  background-color: var(--surface-container-high, #e6e8ef);
-  color: var(--on-surface, #181c22); opacity: 1 !important;
+.hilal-tab-pill.active .hilal-tab-close-btn {
+  opacity: 0.8;
 }
 
-/* Sidebar footer */
+.hilal-tab-close-btn:hover {
+  background-color: var(--md-sys-color-surface-container-high, #262b32);
+  color: var(--md-sys-color-on-surface, #e1e2e9);
+  opacity: 1 !important;
+}
+
+/* Sidebar Footer */
 #hilal-sidebar-footer {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 8px 4px 4px;
-  border-top: 1px solid var(--outline-variant, #c3c7cf);
-  margin-top: 4px;
+  padding-top: 8px;
+  border-top: none !important;
+  margin-top: 6px;
 }
 
-/* ============================================================
- * 11. Web view canvas — floating card
- * ========================================================== */
+/* 6. Single Floating Webview Canvas (Zero-border, Rounded Card) */
 #tabbrowser-tabbox {
   flex: 1 !important;
-  border-radius: 16px !important;
+  border-radius: var(--md-sys-shape-corner-large, 16px) !important;
   border: 0 !important;
   border-width: 0 !important;
   border-style: none !important;
   border-color: transparent !important;
   padding: 0 !important;
   margin: 0 !important;
-  background-color: var(--surface-container-lowest, #ffffff) !important;
+  background-color: var(--md-sys-color-surface, #101319) !important;
   box-shadow: none !important;
+  outline: none !important;
+  outline-width: 0 !important;
   overflow: hidden !important;
-  clip-path: inset(0 round 16px) !important;
+  clip-path: inset(0 round var(--md-sys-shape-corner-large, 16px)) !important;
+  transition:
+    flex 380ms var(--md-sys-motion-spring-spatial),
+    background-color 300ms ease;
 }
 
 #tabbrowser-tabpanels {
   height: 100% !important;
   width: 100% !important;
   flex: 1 !important;
-  padding: 0 !important; margin: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
   border: 0 !important;
-  border-radius: 16px !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  border-radius: var(--md-sys-shape-corner-large, 16px) !important;
   background: transparent !important;
   overflow: hidden !important;
 }
@@ -744,27 +1472,36 @@
 #tabbrowser-tabpanels > :not(.split-view-panel) .browserContainer,
 #tabbrowser-tabpanels .browserContainer,
 .browserSidebarContainer,
-.browserContainer, .browserStack,
+.browserContainer,
+.browserStack,
 browser[type="content"],
 .split-view-panel {
-  height: 100% !important; width: 100% !important; flex: 1 !important;
-  border: 0 !important; padding: 0 !important; margin: 0 !important;
-  border-radius: 16px !important;
-  box-shadow: none !important; background: transparent !important;
+  height: 100% !important;
+  width: 100% !important;
+  flex: 1 !important;
+  border: 0 !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  border-radius: var(--md-sys-shape-corner-large, 16px) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  outline-width: 0 !important;
+  background: transparent !important;
   overflow: hidden !important;
 }
 
-/* ============================================================
- * 12. Tab context menu — XUL menupopup M3 override
- * ========================================================== */
+/* 7. Material 3 Expressive Context Menu */
 #tabContextMenu {
   appearance: none !important;
-  background-color: var(--surface-container-high, #e6e8ef) !important;
-  color: var(--on-surface, #181c22) !important;
-  border-radius: 14px !important;
-  border: 1px solid var(--outline-variant, #c3c7cf) !important;
+  background-color: var(--md-sys-color-surface-container-high, #262b32) !important;
+  color: var(--md-sys-color-on-surface, #e1e2e9) !important;
+  border-radius: var(--md-sys-shape-corner-medium, 14px) !important;
+  border: 1px solid var(--md-sys-color-outline-variant, #31363e) !important;
   padding: 6px !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.18) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
 }
 
 #tabContextMenu menuitem,
@@ -772,31 +1509,34 @@ browser[type="content"],
   appearance: none !important;
   border-radius: 8px !important;
   padding: 6px 12px !important;
-  color: var(--on-surface, #181c22) !important;
+  color: var(--md-sys-color-on-surface, #e1e2e9) !important;
   font-size: 13px !important;
-  transition: background-color 120ms ease;
+  transition:
+    background-color 150ms ease,
+    transform 150ms var(--md-sys-motion-spring-spatial);
 }
 
 #tabContextMenu menuitem:hover:not([disabled="true"]),
 #tabContextMenu menu:hover:not([disabled="true"]) {
-  background-color: var(--surface-container-highest, #e0e2e9) !important;
-  color: var(--primary, #0b57d0) !important;
+  background-color: var(--md-sys-color-surface-container-highest, #31363e) !important;
+  color: var(--md-sys-color-primary, #a8c7fa) !important;
+  transform: translateX(2px);
 }
 
 #tabContextMenu menuitem[disabled="true"],
-#tabContextMenu menu[disabled="true"] { opacity: 0.38 !important; }
+#tabContextMenu menu[disabled="true"] {
+  opacity: 0.38 !important;
+}
 
 #tabContextMenu menuseparator {
   appearance: none !important;
   height: 1px !important;
-  background-color: var(--outline-variant, #c3c7cf) !important;
+  background-color: var(--md-sys-color-outline-variant, #31363e) !important;
   margin: 4px 6px !important;
   border: none !important;
 }
 
-/* ============================================================
- * 13. Workspace dialog — positioned inside Beer CSS modal overlay
- * ========================================================== */
+/* 8. Material 3 Expressive Workspace Dialog */
 #hilal-ws-dialog-overlay {
   position: fixed !important;
   inset: 0 !important;
@@ -806,12 +1546,62 @@ browser[type="content"],
   align-items: center !important;
   justify-content: center !important;
   z-index: 999999 !important;
-  background: rgba(0,0,0,0.5) !important;
+  background: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(8px) !important;
 }
 
 #hilal-ws-dialog {
-  width: 440px;
-  max-width: 90vw;
+  background: var(--md-sys-color-surface-container-high, #21252d) !important;
+  color: var(--md-sys-color-on-surface, #f3f4f6) !important;
+  border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.14)) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+  padding: 24px !important;
+  width: 440px !important;
+  max-width: 90vw !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  box-sizing: border-box !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+#hilal-ws-dialog h3 {
+  margin: 0 !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: var(--md-sys-color-on-surface, #ffffff) !important;
+}
+
+#hilal-ws-dialog label {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  color: var(--md-sys-color-on-surface-variant, #c3c7cf) !important;
+}
+
+#hilal-ws-name-input {
+  appearance: none !important;
+  background: var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.08)) !important;
+  color: var(--md-sys-color-on-surface, #ffffff) !important;
+  border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.16)) !important;
+  border-radius: 10px !important;
+  padding: 10px 14px !important;
+  font-size: 14px !important;
+  outline: none !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  transition: border-color 140ms ease !important;
+}
+
+#hilal-ws-name-input:focus {
+  border-color: var(--md-sys-color-primary, #af51f5) !important;
+  box-shadow: 0 0 0 2px var(--md-sys-color-primary, #af51f5) !important;
+}
+
+#hilal-ws-name-input[aria-invalid] {
+  border-color: var(--md-sys-color-error, #ef4444) !important;
 }
 
 #hilal-ws-emoji-grid {
@@ -820,6 +1610,10 @@ browser[type="content"],
   gap: 6px !important;
   max-height: 130px !important;
   overflow-y: auto !important;
+  padding: 8px !important;
+  background: var(--md-sys-color-surface-container, rgba(0, 0, 0, 0.25)) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.08)) !important;
   scrollbar-width: thin !important;
 }
 
@@ -827,207 +1621,78 @@ browser[type="content"],
   display: flex !important;
   flex-wrap: wrap !important;
   gap: 10px !important;
+  padding: 4px 0 !important;
+}
+
+.hilal-ws-choice {
+  appearance: none !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  width: 38px !important;
+  height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 120ms ease !important;
+}
+
+.hilal-ws-emoji-choice {
+  font-size: 20px !important;
+}
+
+.hilal-ws-emoji-choice:hover {
+  background: var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.1)) !important;
+}
+
+.hilal-ws-emoji-choice.hilal-ws-choice-selected {
+  background: var(--md-sys-color-primary-container, rgba(175, 81, 245, 0.25)) !important;
+  border-color: var(--md-sys-color-primary, #af51f5) !important;
 }
 
 .hilal-ws-color-choice {
-  width: 34px !important; height: 34px !important;
+  width: 34px !important;
+  height: 34px !important;
   border-radius: 50% !important;
   border: 2px solid transparent !important;
   padding: 0 !important;
-  cursor: pointer;
-  transition: transform 120ms ease;
+}
+
+.hilal-ws-color-choice::before {
+  content: "" !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  background: var(--hilal-ws-accent) !important;
+}
+
+.hilal-ws-color-choice:hover {
+  transform: scale(1.1) !important;
 }
 
 .hilal-ws-color-choice.hilal-ws-choice-selected {
-  border-color: var(--primary, #0b57d0) !important;
-  transform: scale(1.1);
+  border-color: var(--md-sys-color-primary, #af51f5) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
 }
 
 #hilal-ws-dialog-actions {
   display: flex !important;
-  gap: 8px !important;
+  gap: 10px !important;
   justify-content: flex-end !important;
   align-items: center !important;
+  margin-top: 8px !important;
+}
+
+#hilal-ws-dialog-actions moz-button,
+#hilal-ws-dialog-actions button {
+  border-radius: 9999px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
 }
 
 #hilal-ws-dialog-delete {
   margin-inline-end: auto !important;
-}
-
-/* ============================================================
- * 14. Beer CSS tone override for dark mode via brighttext
- *     Beer CSS reads prefers-color-scheme; we also react to
- *     Firefox's brighttext attribute.
- * ========================================================== */
-:root[brighttext="true"] #hilal-shell-root,
-:root[lwtheme-brighttext="true"] #hilal-shell-root {
-  /* Force Beer CSS dark mode on the shell wrapper */
-  color-scheme: dark;
-}
-
-/* ============================================================
- * 15. Workspace pill (horizontal/dual mode compact button)
- * ========================================================== */
-.hilal-ws-pill-btn {
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  height: 30px !important;
-  padding: 0 10px 0 8px !important;
-  background-color: var(--surface-container-high, #e6e8ef) !important;
-  color: var(--on-surface, #181c22) !important;
-  border: 1px solid var(--outline-variant, #c3c7cf) !important;
-  border-radius: 9999px !important;
-  cursor: pointer !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  white-space: nowrap !important;
-  transition: background-color 140ms ease, color 140ms ease !important;
-  -moz-window-dragging: no-drag !important;
-}
-
-.hilal-ws-pill-btn:hover {
-  background-color: var(--surface-container-highest, #e0e2e9) !important;
-  color: var(--primary, #0b57d0) !important;
-}
-
-.hilal-ws-pill-name {
-  max-width: 90px; overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap;
-}
-
-.hilal-ws-pill-arrow {
-  width: 14px; height: 14px; fill: currentColor; opacity: 0.7;
-}
-
-/* ============================================================
- * 16. Topbar workspace slot in horizontal mode
- * ========================================================== */
-#hilal-topbar-workspaces-slot #hilal-workspaces-bar {
-  margin-bottom: 0 !important;
-  padding: 0 2px !important;
-  gap: 6px !important;
-  display: flex !important;
-  align-items: center !important;
-  border-bottom: none !important;
-}
-
-#hilal-topbar-workspaces-slot .hilal-ws-chip {
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
-  min-height: 28px !important;
-  font-size: 14px !important;
-}
-
-/* ============================================================
- * 17. Dropdown menus (workspace picker in horizontal mode)
- * ========================================================== */
-.hilal-dropdown-menu {
-  position: fixed;
-  z-index: 99999;
-  display: none;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px;
-  background: var(--surface-container-high, #e6e8ef);
-  border: 1px solid var(--outline-variant, #c3c7cf);
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-  min-width: 200px;
-}
-
-.hilal-dropdown-header {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  font-weight: 700;
-  color: var(--on-surface-variant, #43474e);
-  padding: 2px 8px 6px;
-}
-
-.hilal-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: none;
-  background: transparent;
-  color: var(--on-surface, #181c22);
-  cursor: pointer;
-  font-size: 13px;
-  text-align: left;
-  transition: background-color 120ms ease;
-}
-
-.hilal-dropdown-item:hover {
-  background-color: var(--surface-container-highest, #e0e2e9);
-}
-
-.hilal-dropdown-item.active {
-  background-color: var(--secondary-container, #d9e3f5);
-  color: var(--on-secondary-container, #121c2a);
-  font-weight: 500;
-}
-
-.hilal-dropdown-divider {
-  height: 1px;
-  background: var(--outline-variant, #c3c7cf);
-  margin: 4px 0;
-}
-
-/* ============================================================
- * 18. Theme / boosts picker popup
- * ========================================================== */
-.hilal-m3-menu {
-  position: fixed;
-  z-index: 99999;
-  padding: 14px;
-  background: var(--surface-container-high, #e6e8ef);
-  border: 1px solid var(--outline-variant, #c3c7cf);
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-  min-width: 220px;
-}
-
-.hilal-theme-menu-title {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--on-surface-variant, #43474e);
-  margin-bottom: 10px;
-}
-
-.hilal-theme-swatches-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.hilal-theme-swatch {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  transition: transform 120ms ease, border-color 120ms ease;
-  padding: 0;
-}
-
-.hilal-theme-swatch:hover { transform: scale(1.12); }
-.hilal-theme-swatch.active { border-color: var(--primary, #0b57d0); transform: scale(1.1); }
-
-/* ============================================================
- * 19. URL bar security icon & clear button (shared layout)
- * ========================================================== */
-#hilal-url-security-icon {
-  display: flex; align-items: center;
-  color: var(--primary, #0b57d0);
-  padding-left: 4px;
-}
-
-#hilal-url-security-icon svg {
-  width: 15px; height: 15px; fill: currentColor;
 }
 

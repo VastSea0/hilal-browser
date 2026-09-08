@@ -365,7 +365,6 @@
 # Beer CSS M3E bundle (real Material 3 Expressive library)
   skin/classic/browser/beer.min.css                          (../shared/beer.min.css)
   skin/classic/browser/beer.min.js                           (../shared/beer.min.js)
-  skin/classic/browser/beer.scoped.min.css                   (../shared/beer.scoped.min.css)
   skin/classic/browser/material-symbols-outlined.woff2       (../shared/material-symbols-outlined.woff2)
   skin/classic/browser/icons/add-device.svg                                (../shared/icons/add-device.svg)
   skin/classic/browser/icons/addons-logo.svg                               (../shared/icons/addons-logo.svg)
