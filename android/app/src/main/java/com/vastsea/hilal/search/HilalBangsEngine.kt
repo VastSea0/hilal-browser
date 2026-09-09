@@ -16,7 +16,25 @@ object HilalBangsEngine {
         Bang("!tr", "Google Çeviri", "https://translate.google.com/?text=%s")
     )
 
-    fun resolveUrl(query: String): String {
+    val customBangs = androidx.compose.runtime.mutableStateListOf<Bang>()
+
+    val allBangs: List<Bang>
+        get() = customBangs + defaultBangs
+
+    fun addCustomBang(prefix: String, name: String, urlTemplate: String): Boolean {
+        val cleanPrefix = if (prefix.startsWith("!")) prefix.trim() else "!${prefix.trim()}"
+        if (cleanPrefix.length <= 1 || urlTemplate.isBlank()) return false
+        val template = if (urlTemplate.contains("%s")) urlTemplate.trim() else "${urlTemplate.trim()}%s"
+        customBangs.removeAll { it.prefix.equals(cleanPrefix, ignoreCase = true) }
+        customBangs.add(0, Bang(cleanPrefix, name.trim().ifBlank { cleanPrefix }, template, isCustom = true))
+        return true
+    }
+
+    fun removeCustomBang(prefix: String) {
+        customBangs.removeAll { it.prefix.equals(prefix, ignoreCase = true) }
+    }
+
+    fun resolveUrl(query: String, defaultEngine: String = "DuckDuckGo"): String {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return "about:newtab"
 
@@ -26,7 +44,7 @@ object HilalBangsEngine {
             val bangPrefix = if (spaceIndex != -1) trimmed.substring(0, spaceIndex) else trimmed
             val searchTerm = if (spaceIndex != -1) trimmed.substring(spaceIndex + 1).trim() else ""
 
-            val match = defaultBangs.find { it.prefix.equals(bangPrefix, ignoreCase = true) }
+            val match = allBangs.find { it.prefix.equals(bangPrefix, ignoreCase = true) }
             if (match != null) {
                 val encodedTerm = URLEncoder.encode(searchTerm, "UTF-8")
                 return match.urlTemplate.replace("%s", encodedTerm)
@@ -49,8 +67,12 @@ object HilalBangsEngine {
         return if (looksLikeDomain) {
             "https://$trimmed"
         } else {
-            // Default search on DuckDuckGo
-            "https://duckduckgo.com/?q=${URLEncoder.encode(trimmed, "UTF-8")}"
+            val encoded = URLEncoder.encode(trimmed, "UTF-8")
+            when (defaultEngine) {
+                "Google" -> "https://www.google.com/search?q=$encoded"
+                "Bing" -> "https://www.bing.com/search?q=$encoded"
+                else -> "https://duckduckgo.com/?q=$encoded"
+            }
         }
     }
 
@@ -58,6 +80,6 @@ object HilalBangsEngine {
         val trimmed = query.trim()
         if (!trimmed.startsWith("!")) return emptyList()
         val prefix = trimmed.split(" ").firstOrNull() ?: ""
-        return defaultBangs.filter { it.prefix.startsWith(prefix, ignoreCase = true) }
+        return allBangs.filter { it.prefix.startsWith(prefix, ignoreCase = true) }
     }
 }
