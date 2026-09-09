@@ -36,6 +36,7 @@ fun Omnibox(
     title: String,
     onNavigate: (String) -> Unit,
     onReload: () -> Unit,
+    isFloating: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     var isEditing by remember { mutableStateOf(false) }
@@ -68,14 +69,17 @@ fun Omnibox(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(
+                        horizontal = if (isFloating) 16.dp else 10.dp,
+                        vertical = if (isFloating) 8.dp else 4.dp
+                    ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // M3 Expressive Pill Omnibox (Search / URL Bar)
+                // M3 Expressive Omnibox (Search / URL Bar)
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    shape = CircleShape,
+                    shape = if (isFloating) CircleShape else RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp)

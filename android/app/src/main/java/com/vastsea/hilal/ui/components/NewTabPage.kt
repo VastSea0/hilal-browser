@@ -17,27 +17,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.vastsea.hilal.R
 
-data class ShortcutItem(val name: String, val url: String, val icon: ImageVector)
+data class ShortcutItem(
+    val name: String,
+    val url: String,
+    val domain: String,
+    val fallbackIcon: ImageVector
+)
 
 val DefaultShortcuts = listOf(
-    ShortcutItem("Google", "https://www.google.com", Icons.Default.Search),
-    ShortcutItem("YouTube", "https://www.youtube.com", Icons.Default.PlayArrow),
-    ShortcutItem("GitHub", "https://github.com", Icons.Default.Code),
-    ShortcutItem("Wikipedia", "https://wikipedia.org", Icons.Default.Book),
-    ShortcutItem("DuckDuckGo", "https://duckduckgo.com", Icons.Default.Security),
-    ShortcutItem("Reddit", "https://www.reddit.com", Icons.Default.Forum)
+    ShortcutItem("Google", "https://www.google.com", "google.com", Icons.Default.Search),
+    ShortcutItem("YouTube", "https://www.youtube.com", "youtube.com", Icons.Default.PlayArrow),
+    ShortcutItem("GitHub", "https://github.com", "github.com", Icons.Default.Code),
+    ShortcutItem("Wikipedia", "https://wikipedia.org", "wikipedia.org", Icons.Default.Book),
+    ShortcutItem("DuckDuckGo", "https://duckduckgo.com", "duckduckgo.com", Icons.Default.Security),
+    ShortcutItem("Reddit", "https://www.reddit.com", "reddit.com", Icons.Default.Forum)
 )
 
 @Composable
 fun NewTabPage(
     workspaceName: String,
+    workspaceEmoji: String = "🌐",
     onOpenUrl: (String) -> Unit,
     onFocusSearch: () -> Unit,
     modifier: Modifier = Modifier
@@ -50,16 +59,11 @@ fun NewTabPage(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Workspace Badge
+        // Workspace Badge with Emoji
         AssistChip(
             onClick = {},
             leadingIcon = {
-                Icon(
-                    Icons.Default.Dashboard,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                Text(workspaceEmoji, fontSize = 14.sp)
             },
             label = { Text(workspaceName, style = MaterialTheme.typography.labelMedium) },
             shape = CircleShape,
@@ -155,16 +159,36 @@ fun NewTabPage(
                         modifier = Modifier.padding(8.dp)
                     ) {
                         Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer,
+                            color = MaterialTheme.colorScheme.surfaceContainerHighest,
                             shape = CircleShape,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(34.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = shortcut.icon,
+                                SubcomposeAsyncImage(
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .data("https://www.google.com/s2/favicons?domain=${shortcut.domain}&sz=128")
+                                        .crossfade(true)
+                                        .build(),
                                     contentDescription = shortcut.name,
-                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .clip(CircleShape),
+                                    error = {
+                                        Icon(
+                                            imageVector = shortcut.fallbackIcon,
+                                            contentDescription = shortcut.name,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    },
+                                    loading = {
+                                        Icon(
+                                            imageVector = shortcut.fallbackIcon,
+                                            contentDescription = shortcut.name,
+                                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
                                 )
                             }
                         }
