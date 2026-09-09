@@ -1,0 +1,97 @@
+name: Android Release
+
+on:
+  push:
+    tags:
+      - 'mobile-*'
+      - 'mobile-v*'
+      - 'v*-android'
+      - 'android-*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag (e.g. mobile-v1.0.0)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x android/gradlew
+
+      - name: Build Android Release APK
+        run: |
+          cd android
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Determine tag name
+        id: tag_info
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "tag=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Rename APK artifact
+        run: |
+          TAG="${{ steps.tag_info.outputs.tag }}"
+          CLEAN_TAG="${TAG#mobile-}"
+          CLEAN_TAG="${CLEAN_TAG#android-}"
+          cp android/app/build/outputs/apk/release/app-release.apk "hilal-browser-android-${CLEAN_TAG}.apk"
+
+      - name: Create GitHub Release and Upload APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag_info.outputs.tag }}
+          name: Hilal Browser Android ${{ steps.tag_info.outputs.tag }}
+          body: |
+            ## Hilal Browser for Android (${{ steps.tag_info.outputs.tag }})
+            
+            Initial mobile release of Hilal Browser powered by Mozilla GeckoView and Material 3 Expressive (M3E).
+            
+            ### Features
+            - GeckoView rendering engine with enhanced tracking protection
+            - Material 3 Expressive UI design system
+            - Private Browsing Mode with session isolation
+            - Workspace management with custom emojis
+            - Hilal Bangs search shortcuts (!g, !yt, !wiki, etc.) and custom bangs manager
+            - Pull-to-refresh, hide bars on scroll, and full edge-to-edge webview
+            - History and Bookmarks management with swipe actions
+            - Dark mode for websites support
+            - Fully localized (Turkish and English)
+            
+            ### Assets
+            - Installable release APK attached below.
+          files: hilal-browser-android-*.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
