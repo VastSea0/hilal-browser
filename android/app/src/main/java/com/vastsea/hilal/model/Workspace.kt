@@ -1,0 +1,7 @@
+package com.vastsea.hilal.model
+
+data class Workspace(
+    val id: String,
+    val name: String,
+    val iconName: String = "folder"
+)
