@@ -20,6 +20,7 @@ import {
   Users,
   Smartphone,
   ShieldCheck,
+  BookOpen,
 } from "lucide-react";
 
 import { GithubRelease } from "./types";
@@ -34,7 +35,7 @@ import {
 
 import DownloadModal from "./components/DownloadModal";
 import ChangelogPage from "./components/ChangelogPage";
-import MobileDocsPage from "./components/MobileDocsPage";
+import DocsPage from "./components/DocsPage";
 import PrivacyPage from "./components/PrivacyPage";
 import { CONTRIBUTORS_DATA } from "./data/changelogData";
 
@@ -76,15 +77,15 @@ export default function App() {
     return saved === "en" || saved === "tr" ? saved : "tr";
   });
 
-  const [currentView, setCurrentView] = useState<"home" | "changelog" | "mobile" | "privacy">(() => {
+  const [currentView, setCurrentView] = useState<"home" | "docs" | "changelog" | "privacy">(() => {
     if (typeof window !== "undefined") {
       const p = window.location.pathname;
       const h = window.location.hash;
       if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
         return "changelog";
       }
-      if (p === "/mobile" || h === "#mobile" || h === "#docs") {
-        return "mobile";
+      if (p === "/docs" || h.startsWith("#docs") || p === "/mobile" || h === "#mobile") {
+        return "docs";
       }
       if (p === "/privacy" || h === "#privacy") {
         return "privacy";
@@ -108,8 +109,8 @@ export default function App() {
       const h = window.location.hash;
       if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
         setCurrentView("changelog");
-      } else if (p === "/mobile" || h === "#mobile" || h === "#docs") {
-        setCurrentView("mobile");
+      } else if (p === "/docs" || h.startsWith("#docs") || p === "/mobile" || h === "#mobile") {
+        setCurrentView("docs");
       } else if (p === "/privacy" || h === "#privacy") {
         setCurrentView("privacy");
       } else {
@@ -159,13 +160,13 @@ export default function App() {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
-  const navigateTo = (view: "home" | "changelog" | "mobile" | "privacy", targetId?: string) => {
+  const navigateTo = (view: "home" | "docs" | "changelog" | "privacy", targetId?: string) => {
     setCurrentView(view);
-    if (view === "changelog") {
-      window.history.pushState(null, "", "#changelog");
+    if (view === "docs") {
+      window.history.pushState(null, "", targetId ? `#docs/${targetId}` : "#docs");
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } else if (view === "mobile") {
-      window.history.pushState(null, "", "#mobile");
+    } else if (view === "changelog") {
+      window.history.pushState(null, "", "#changelog");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (view === "privacy") {
       window.history.pushState(null, "", "#privacy");
@@ -215,7 +216,7 @@ export default function App() {
       nav: {
         features: "Özellikler",
         architecture: "Açık Kaynak",
-        mobile: "Mobil",
+        docs: "Belgeler",
         changelog: "Sürüm Notları",
         download: "İndir",
         github: "GitHub",
@@ -248,7 +249,7 @@ export default function App() {
           chip: "Çalışma Alanları",
           title: "İş ve kişisel hesapları birbirinden ayırın.",
           description:
-            "Her çalışma alanı bağımsız çerez ve oturum konteynerleri kullanır. Farklı hesaplar için onlarca ayrı pencere açmaya gerek kalmaz.",
+            "Her çalışma alanı kendi çerezleri ve oturumlarıyla yalıtılmış ayrı bir konteynerde çalışır. Onlarca pencere açmadan tek tarayıcıda çoklu hesap yönetin.",
           image: "/welcome-workspaces-on.png",
           alt: "Hilal Çalışma Alanları",
         },
@@ -256,39 +257,39 @@ export default function App() {
           chip: "Gizlilik",
           title: "Dahili uBlock Origin ve sıfır telemetri.",
           description:
-            "uBlock Origin varsayılan olarak kurulu gelir. Arka plan izleyicileri ve telemetri sunucuları tamamen devre dışıdır.",
+            "uBlock Origin tarayıcıya gömülü gelir. Arka planda çalışan takip mekanizmaları ve telemetri uç noktaları tamamen devre dışıdır.",
           image: "/welcome-toolbar-hidden.png",
-          alt: "Hilal Gizlilik ve Güvenlik",
+          alt: "Hilal Gizlilik Koruması",
         },
         {
           chip: "Eklentiler",
-          title: "Tüm Firefox eklentileriyle tam uyum.",
+          title: "Firefox eklentileriyle tam uyumluluk.",
           description:
-            "Gecko motoru sayesinde Firefox Add-ons mağazasındaki tüm eklentilerinizi doğrudan yükleyip kullanabilirsiniz.",
+            "Gecko motoru sayesinde Firefox Add-ons (AMO) mağazasındaki eklentilerin tamamı hiçbir ek ayar gerektirmeden çalışır.",
           image: "/welcome-home-preview.png",
-          alt: "Hilal Firefox Eklenti Uyumu",
+          alt: "Hilal Eklenti Uyumluluğu",
         },
       ],
       openSourceSection: {
         chip: "Açık Kaynak",
-        title: "Firefox tabanında, yamalarla inşa edildi.",
+        title: "Firefox üzerinde temiz bir yama katmanı.",
         description:
-          "Hilal bağımsız bir fork değildir; resmi Firefox kaynak kodu üzerine Rust tabanlı 'hil' aracıyla uygulanan açık kaynaklı bir yama katmanıdır.",
-        commandLabel: "Depoyu klonlayıp derleyin:",
+          "Hilal kopuk bir çatal (fork) değildir. 'hil' Rust yöneticisi aracılığıyla güncel Firefox Gecko motoruna metin tabanlı yamalar uygular, güvenlik güncellemelerini gecikmeden alır.",
+        commandLabel: "Depoyu klonlayıp yerel ortamda derleyin:",
       },
       downloadSection: {
-        chip: "İndirme Seçenekleri",
-        title: "Hilal'i İndirin.",
+        chip: "Resmi Sürümler",
+        title: "Hilal'i edinin.",
         subtitle: "İşletim sisteminize uygun derlemeyi seçin.",
         platforms: [
           {
             name: "macOS",
-            spec: "Apple Silicon & Intel • Universal .dmg",
+            spec: "Apple Silicon & Intel • Evrensel .dmg",
             icon: <Apple className="w-6 h-6" />,
           },
           {
             name: "Windows",
-            spec: "Windows 10/11 • 64-bit .exe & Taşınabilir .zip",
+            spec: "Windows 10/11 • 64-bit .exe ve Taşınabilir .zip",
             icon: <Laptop className="w-6 h-6" />,
           },
           {
@@ -298,14 +299,14 @@ export default function App() {
           },
           {
             name: "Android",
-            spec: "GeckoView 135 • APK & Google Play",
+            spec: "GeckoView 135 • APK ve Google Play",
             icon: <Smartphone className="w-6 h-6" />,
           },
         ],
         directDownload: "İndir",
       },
       faq: {
-        chip: "Sıkça Sorulanlar",
+        chip: "S.S.S.",
         title: "Sıkça Sorulan Sorular",
         items: [
           {
@@ -329,10 +330,10 @@ export default function App() {
       footer: {
         copyright: "Hilal Browser Projesi. Mozilla Kamu Lisansı (MPL 2.0).",
         authorBy: "Egehan Kahraman",
+        docs: "Belgeler",
+        privacy: "Gizlilik Politikası",
         source: "Kaynak Kodu",
         releases: "Sürüm Notları",
-        mobileDocs: "Mobil Dokümanları",
-        privacy: "Gizlilik Politikası",
         discord: "Discord",
       },
     },
@@ -340,7 +341,7 @@ export default function App() {
       nav: {
         features: "Features",
         architecture: "Open Source",
-        mobile: "Mobile",
+        docs: "Docs",
         changelog: "Changelog",
         download: "Download",
         github: "GitHub",
@@ -454,10 +455,10 @@ export default function App() {
       footer: {
         copyright: "Hilal Browser Project. Mozilla Public License 2.0.",
         authorBy: "Egehan Kahraman",
+        docs: "Docs",
+        privacy: "Privacy Policy",
         source: "Source Code",
         releases: "Changelog",
-        mobileDocs: "Mobile Docs",
-        privacy: "Privacy Policy",
         discord: "Discord",
       },
     },
@@ -512,15 +513,15 @@ export default function App() {
               {activeT.nav.architecture}
             </button>
             <button
-              onClick={() => navigateTo("mobile")}
+              onClick={() => navigateTo("docs")}
               className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                currentView === "mobile"
+                currentView === "docs"
                   ? "bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]"
                   : "text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8"
               }`}
             >
-              <Smartphone className="w-3.5 h-3.5" />
-              <span>{activeT.nav.mobile}</span>
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>{activeT.nav.docs}</span>
             </button>
             <button
               onClick={() => navigateTo("changelog")}
@@ -585,14 +586,14 @@ export default function App() {
       </nav>
 
       {/* Main View Router */}
-      {currentView === "changelog" ? (
-        <ChangelogPage
+      {currentView === "docs" ? (
+        <DocsPage
           lang={lang}
           onBack={() => navigateTo("home")}
           onOpenDownload={() => setIsDownloadOpen(true)}
         />
-      ) : currentView === "mobile" ? (
-        <MobileDocsPage
+      ) : currentView === "changelog" ? (
+        <ChangelogPage
           lang={lang}
           onBack={() => navigateTo("home")}
           onOpenDownload={() => setIsDownloadOpen(true)}
@@ -959,10 +960,10 @@ export default function App() {
           </div>
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-5 font-semibold">
             <button
-              onClick={() => navigateTo("mobile")}
+              onClick={() => navigateTo("docs")}
               className="hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer"
             >
-              {activeT.footer.mobileDocs}
+              {activeT.footer.docs}
             </button>
             <button
               onClick={() => navigateTo("privacy")}
