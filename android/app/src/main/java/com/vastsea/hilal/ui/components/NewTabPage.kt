@@ -10,28 +10,29 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Workspaces
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vastsea.hilal.R
 
-data class Shortcut(val name: String, val url: String, val iconText: String)
+data class ShortcutItem(val name: String, val url: String, val icon: ImageVector)
 
 val DefaultShortcuts = listOf(
-    Shortcut("Google", "https://www.google.com", "G"),
-    Shortcut("YouTube", "https://www.youtube.com", "YT"),
-    Shortcut("GitHub", "https://github.com", "GH"),
-    Shortcut("Vikipedi", "https://tr.wikipedia.org", "W"),
-    Shortcut("DuckDuckGo", "https://duckduckgo.com", "DDG"),
-    Shortcut("Reddit", "https://www.reddit.com", "R")
+    ShortcutItem("Google", "https://www.google.com", Icons.Default.Search),
+    ShortcutItem("YouTube", "https://www.youtube.com", Icons.Default.PlayArrow),
+    ShortcutItem("GitHub", "https://github.com", Icons.Default.Code),
+    ShortcutItem("Wikipedia", "https://wikipedia.org", Icons.Default.Book),
+    ShortcutItem("DuckDuckGo", "https://duckduckgo.com", Icons.Default.Security),
+    ShortcutItem("Reddit", "https://www.reddit.com", Icons.Default.Forum)
 )
 
 @Composable
@@ -54,7 +55,7 @@ fun NewTabPage(
             onClick = {},
             leadingIcon = {
                 Icon(
-                    Icons.Default.Workspaces,
+                    Icons.Default.Dashboard,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.primary
@@ -72,7 +73,7 @@ fun NewTabPage(
         // Official Hilal Logo
         Image(
             painter = painterResource(id = R.drawable.ic_hilal_logo),
-            contentDescription = "Hilal Logo",
+            contentDescription = stringResource(R.string.app_name),
             modifier = Modifier
                 .size(72.dp)
                 .clip(CircleShape)
@@ -81,7 +82,7 @@ fun NewTabPage(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Hilal Browser",
+            text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontWeight = FontWeight.Bold,
                 letterSpacing = (-0.5).sp
@@ -109,13 +110,13 @@ fun NewTabPage(
             ) {
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = "Ara",
+                    contentDescription = stringResource(R.string.search),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Arayın veya web adresi yazın...",
+                    text = stringResource(R.string.search_or_enter_url),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -126,8 +127,8 @@ fun NewTabPage(
 
         // Quick Shortcuts Grid
         Text(
-            text = "Kısayollar",
-            style = MaterialTheme.typography.titleMedium,
+            text = stringResource(R.string.shortcuts),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.align(Alignment.Start)
         )
@@ -143,9 +144,9 @@ fun NewTabPage(
             items(DefaultShortcuts) { shortcut ->
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(18.dp),
                     modifier = Modifier
-                        .height(72.dp)
+                        .height(76.dp)
                         .clickable { onOpenUrl(shortcut.url) }
                 ) {
                     Column(
@@ -156,18 +157,18 @@ fun NewTabPage(
                         Surface(
                             color = MaterialTheme.colorScheme.primaryContainer,
                             shape = CircleShape,
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(32.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    text = shortcut.iconText,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                Icon(
+                                    imageVector = shortcut.icon,
+                                    contentDescription = shortcut.name,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(18.dp)
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = shortcut.name,
                             style = MaterialTheme.typography.labelSmall,

@@ -4,10 +4,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -24,19 +22,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.vastsea.hilal.R
 import com.vastsea.hilal.search.HilalBangsEngine
 
 @Composable
 fun Omnibox(
     currentUrl: String,
     title: String,
-    isLoading: Boolean,
-    progress: Int,
     onNavigate: (String) -> Unit,
     onReload: () -> Unit,
     modifier: Modifier = Modifier
@@ -94,7 +91,7 @@ fun Omnibox(
                     ) {
                         Icon(
                             imageVector = if (currentUrl.startsWith("https://")) Icons.Default.Lock else Icons.Default.Security,
-                            contentDescription = "Güvenlik",
+                            contentDescription = stringResource(R.string.security),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
@@ -134,7 +131,7 @@ fun Omnibox(
                                 ) {
                                     Icon(
                                         Icons.Default.Clear,
-                                        contentDescription = "Temizle",
+                                        contentDescription = stringResource(R.string.clear),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(16.dp)
                                     )
@@ -142,7 +139,7 @@ fun Omnibox(
                             }
                         } else {
                             Text(
-                                text = if (currentUrl == "about:newtab") "Arayın veya URL girin" else currentUrl,
+                                text = if (currentUrl == "about:newtab") stringResource(R.string.search_or_enter_url_short) else currentUrl,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = if (currentUrl == "about:newtab") MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
@@ -159,7 +156,7 @@ fun Omnibox(
                             searchText = if (currentUrl == "about:newtab") "" else currentUrl
                         }
                     ) {
-                        Text("İptal")
+                        Text(stringResource(R.string.cancel))
                     }
                 } else {
                     IconButton(
@@ -168,15 +165,12 @@ fun Omnibox(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Yenile"
+                            contentDescription = stringResource(R.string.refresh)
                         )
                     }
                 }
             }
         }
-
-        // Progress bar during page loading
-        PageProgressBar(progress = progress, isLoading = isLoading)
 
         // Dropdown Overlay for Search Suggestions & Bangs
         AnimatedVisibility(
@@ -196,7 +190,7 @@ fun Omnibox(
                     // Hilal Bangs suggestion chips if query starts with '!'
                     if (matchingBangs.isNotEmpty()) {
                         Text(
-                            text = "Hilal Arama Kısayolları (Bangs)",
+                            text = stringResource(R.string.bangs_title),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
@@ -248,7 +242,7 @@ fun Omnibox(
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(
-                                    text = "\"$searchText\" ara",
+                                    text = stringResource(R.string.search_query_format, searchText),
                                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
