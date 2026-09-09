@@ -39,11 +39,21 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 474;
+export const REPO_COMMITS_TOTAL = 475;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "a12776cc6c11d5e8647fe2d46e874a1a7290c05b",
+    "shortHash": "a12776c",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T22:37:11+03:00",
+    "subject": "feat(www): add mobile developer docs, privacy policy, and android release support",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a12776cc6c11d5e8647fe2d46e874a1a7290c05b"
+  },
   {
     "hash": "a6ea631c553502a349ca09aa8ca395d76e1e278b",
     "shortHash": "a6ea631",
@@ -4791,9 +4801,19 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-09T22:36:51+03:00",
-    "commitCount": 33,
+    "date": "2026-09-09T22:37:11+03:00",
+    "commitCount": 34,
     "commits": [
+      {
+        "hash": "a12776cc6c11d5e8647fe2d46e874a1a7290c05b",
+        "shortHash": "a12776c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T22:37:11+03:00",
+        "subject": "feat(www): add mobile developer docs, privacy policy, and android release support",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a12776cc6c11d5e8647fe2d46e874a1a7290c05b"
+      },
       {
         "hash": "a6ea631c553502a349ca09aa8ca395d76e1e278b",
         "shortHash": "a6ea631",
@@ -9793,7 +9813,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 462,
+    "contributions": 463,
     "role": "Lead Developer"
   },
   {

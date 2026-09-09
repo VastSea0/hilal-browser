@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -8,11 +8,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..");
 
 // 1. Get all tags
-const tagsOutput = execSync("git tag --list --sort=-creatordate", {
-  cwd: repoRoot,
-  encoding: "utf8",
-}).trim();
-const rawTags = tagsOutput.split("\n").filter(Boolean);
+let rawTags = [];
+try {
+  const tagsOutput = execSync("git tag --list --sort=-creatordate", {
+    cwd: repoRoot,
+    encoding: "utf8",
+  }).trim();
+  rawTags = tagsOutput.split("\n").filter(Boolean);
+} catch {}
 
 // Define standard release tags list
 const releaseTags = [
@@ -102,10 +105,13 @@ function parseChangelogSections(content) {
 const changelogHighlights = parseChangelogSections(changelogMd);
 
 // 3. Get all git commits
-const rawCommits = execSync(
-  "git log --date=iso-strict --pretty=format:\"%H%x09%h%x09%an%x09%ad%x09%s%x09%b%x1e\"",
-  { cwd: repoRoot, encoding: "utf8" }
-);
+let rawCommits = "";
+try {
+  rawCommits = execSync(
+    "git log --date=iso-strict --pretty=format:\"%H%x09%h%x09%an%x09%ad%x09%s%x09%b%x1e\"",
+    { cwd: repoRoot, encoding: "utf8" }
+  );
+} catch {}
 
 function categorizeCommit(subject) {
   const s = subject.toLowerCase().trim();
@@ -159,12 +165,17 @@ const releases = [];
 
 // A. Unreleased / latest commits on main
 const latestTag = releaseTags[0];
-const unreleasedHashes = new Set(
-  execSync(`git rev-list ${latestTag}..HEAD`, { cwd: repoRoot, encoding: "utf8" })
+let unreleasedHashes = new Set();
+try {
+  const hashes = execSync(`git rev-list ${latestTag}..HEAD`, { cwd: repoRoot, encoding: "utf8" })
     .trim()
     .split("\n")
-    .filter(Boolean)
-);
+    .filter(Boolean);
+  unreleasedHashes = new Set(hashes);
+} catch {
+  // If tag doesn't exist in shallow clone or git history, fallback gracefully
+  unreleasedHashes = new Set(allCommits.slice(0, 50).map(c => c.hash));
+}
 
 const unreleasedCommits = allCommits.filter(c => unreleasedHashes.has(c.hash));
 if (unreleasedCommits.length > 0) {
@@ -216,13 +227,16 @@ for (let i = 0; i < releaseTags.length; i++) {
 }
 
 // 5. Parse Contributors
-const rawAuthors = execSync('git log --pretty=format:"%an%x09%ae"', {
-  cwd: repoRoot,
-  encoding: "utf8",
-})
-  .trim()
-  .split("\n")
-  .filter(Boolean);
+let rawAuthors = [];
+try {
+  rawAuthors = execSync('git log --pretty=format:"%an%x09%ae"', {
+    cwd: repoRoot,
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+} catch {}
 
 const authorCounts = {};
 for (const line of rawAuthors) {
@@ -327,8 +341,15 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = ${JSON.stringify(contributor
 `;
 
 const outputDir = resolve(repoRoot, "www/src/data");
+const targetFile = resolve(outputDir, "changelogData.ts");
+
+if (allCommits.length === 0 && existsSync(targetFile)) {
+  console.log("Git history unavailable or shallow clone detected. Preserving existing changelogData.ts.");
+  process.exit(0);
+}
+
 mkdirSync(outputDir, { recursive: true });
-writeFileSync(resolve(outputDir, "changelogData.ts"), outputTs, "utf8");
+writeFileSync(targetFile, outputTs, "utf8");
 
 console.log(`Generated changelog and contributor data:`);
 console.log(`- Total commits: ${allCommits.length}`);
