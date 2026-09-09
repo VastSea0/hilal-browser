@@ -53,6 +53,7 @@ import org.mozilla.geckoview.ContentBlocking
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
 import org.mozilla.geckoview.GeckoSession
+import org.mozilla.geckoview.GeckoSessionSettings
 import org.mozilla.geckoview.GeckoView
 import java.util.Locale
 import java.util.UUID
@@ -227,10 +228,17 @@ fun HilalBrowserApp(
     val emojiOptions = listOf("🌐", "💼", "🔬", "📚", "🎨", "🚀", "🎮", "🏠", "💡", "🛡️", "✈️", "☕")
 
     // Helper: Create a new tab
-    fun createNewTab(url: String = "about:newtab", workspaceId: String = currentWorkspaceId): BrowserTab {
+    fun createNewTab(
+        url: String = "about:newtab",
+        workspaceId: String = currentWorkspaceId,
+        isPrivate: Boolean = false
+    ): BrowserTab {
         val tabId = UUID.randomUUID().toString()
         val session = if (!isPreview && geckoRuntime != null) {
-            val s = GeckoSession()
+            val settings = GeckoSessionSettings.Builder()
+                .usePrivateMode(isPrivate)
+                .build()
+            val s = GeckoSession(settings)
             s.open(geckoRuntime)
             s
         } else null
@@ -240,6 +248,7 @@ fun HilalBrowserApp(
             initialUrl = url,
             initialTitle = if (url == "about:newtab") newTabDefaultTitle else loadingDefaultTitle,
             workspaceId = workspaceId,
+            isPrivate = isPrivate,
             session = session
         )
 
@@ -260,7 +269,7 @@ fun HilalBrowserApp(
             ) {
                 if (url != null && url != "about:blank") {
                     tab.url = url
-                    if (url != "about:newtab") {
+                    if (!isPrivate && url != "about:newtab") {
                         historyItems.removeAll { it.url == url }
                         historyItems.add(0, HistoryItem(title = tab.title, url = url))
                     }
@@ -272,10 +281,12 @@ fun HilalBrowserApp(
             override fun onTitleChange(session: GeckoSession, title: String?) {
                 if (title != null) {
                     tab.title = title
-                    val existing = historyItems.find { it.url == tab.url }
-                    if (existing != null) {
-                        historyItems.remove(existing)
-                        historyItems.add(0, existing.copy(title = title))
+                    if (!isPrivate) {
+                        val existing = historyItems.find { it.url == tab.url }
+                        if (existing != null) {
+                            historyItems.remove(existing)
+                            historyItems.add(0, existing.copy(title = title))
+                        }
                     }
                 }
             }
@@ -290,7 +301,7 @@ fun HilalBrowserApp(
             override fun onPageStop(session: GeckoSession, success: Boolean) {
                 tab.isLoading = false
                 tab.progress = 100
-                if (tab.url != "about:newtab" && tab.url != "about:blank") {
+                if (!isPrivate && tab.url != "about:newtab" && tab.url != "about:blank") {
                     historyItems.removeAll { it.url == tab.url }
                     historyItems.add(0, HistoryItem(title = tab.title, url = tab.url))
                 }
@@ -488,12 +499,13 @@ fun HilalBrowserApp(
                     NewTabPage(
                         workspaceName = currentWorkspace.name,
                         workspaceEmoji = currentWorkspace.emoji,
+                        isPrivate = activeTab?.isPrivate == true,
                         onOpenUrl = { url ->
                             val resolved = HilalBangsEngine.resolveUrl(url, defaultSearchEngine)
                             activeTab?.let { tab ->
                                 tab.url = resolved
                                 tab.session?.loadUri(resolved)
-                            } ?: createNewTab(url = resolved)
+                            } ?: createNewTab(url = resolved, isPrivate = activeTab?.isPrivate == true)
                         },
                         onFocusSearch = {
                             // Omnibox focused
@@ -559,11 +571,12 @@ fun HilalBrowserApp(
                 currentUrl = activeTab?.url ?: "about:newtab",
                 title = activeTab?.title ?: "Hilal",
                 isFloating = urlBarStyle == 0,
+                isPrivate = activeTab?.isPrivate == true,
                 onNavigate = { resolvedUrl ->
                     activeTab?.let { tab ->
                         tab.url = resolvedUrl
                         tab.session?.loadUri(resolvedUrl)
-                    }
+                    } ?: createNewTab(url = resolvedUrl, isPrivate = activeTab?.isPrivate == true)
                 },
                 onReload = {
                     activeTab?.session?.reload()
@@ -754,32 +767,38 @@ fun HilalBrowserApp(
                 activeTabId = selectedId
             },
             onCloseTab = { closedId ->
-                val tabToClose = tabs.find { it.id == closedId }
-                tabToClose?.session?.close()
-                tabs.remove(tabToClose)
-                if (activeTabId == closedId) {
-                    activeTabId = tabs.find { it.workspaceId == currentWorkspaceId }?.id
-                        ?: tabs.firstOrNull()?.id
-                        ?: createNewTab().id
+                val index = tabs.indexOfFirst { it.id == closedId }
+                if (index != -1) {
+                    val closedTab = tabs.removeAt(index)
+                    closedTab.session?.close()
+                    if (activeTabId == closedId) {
+                        activeTabId = tabs.lastOrNull()?.id ?: run {
+                            val newTab = createNewTab()
+                            newTab.id
+                        }
+                    }
                 }
             },
             onNewTab = {
-                createNewTab(url = "about:newtab")
+                createNewTab(url = "about:newtab", workspaceId = currentWorkspaceId, isPrivate = false)
+            },
+            onNewPrivateTab = {
+                createNewTab(url = "about:newtab", workspaceId = currentWorkspaceId, isPrivate = true)
             },
             onSelectWorkspace = { wsId ->
                 currentWorkspaceId = wsId
-                val existingTab = tabs.find { it.workspaceId == wsId }
-                if (existingTab != null) {
-                    activeTabId = existingTab.id
+                val wsTabs = tabs.filter { it.workspaceId == wsId && !it.isPrivate }
+                if (wsTabs.isNotEmpty()) {
+                    activeTabId = wsTabs.first().id
                 } else {
-                    createNewTab(url = "about:newtab", workspaceId = wsId)
+                    createNewTab(url = "about:newtab", workspaceId = wsId, isPrivate = false)
                 }
             },
             onCreateWorkspace = { name, emoji ->
                 val newWs = Workspace(UUID.randomUUID().toString(), name, emoji)
                 workspaces.add(newWs)
                 currentWorkspaceId = newWs.id
-                createNewTab(url = "about:newtab", workspaceId = newWs.id)
+                createNewTab(url = "about:newtab", workspaceId = newWs.id, isPrivate = false)
             },
             onDismiss = { showTabsTray = false }
         )
@@ -797,11 +816,11 @@ fun HilalBrowserApp(
             currentWorkspaceId = currentWorkspaceId,
             onSelectWorkspace = { wsId ->
                 currentWorkspaceId = wsId
-                val existing = tabs.find { it.workspaceId == wsId }
-                if (existing != null) {
-                    activeTabId = existing.id
+                val wsTabs = tabs.filter { it.workspaceId == wsId && !it.isPrivate }
+                if (wsTabs.isNotEmpty()) {
+                    activeTabId = wsTabs.first().id
                 } else {
-                    createNewTab(url = "about:newtab", workspaceId = wsId)
+                    createNewTab(url = "about:newtab", workspaceId = wsId, isPrivate = false)
                 }
             },
             onReload = { activeTab?.session?.reload() },
@@ -811,6 +830,9 @@ fun HilalBrowserApp(
             onOpenBookmarks = { showBookmarksScreen = true },
             onOpenHistory = { showHistoryScreen = true },
             onOpenSettings = { showSettingsScreen = true },
+            onNewPrivateTab = {
+                createNewTab(url = "about:newtab", isPrivate = true)
+            },
             onDismiss = { showOptionsSheet = false }
         )
     }

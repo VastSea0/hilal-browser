@@ -38,10 +38,12 @@ fun TabsTray(
     onSelectTab: (String) -> Unit,
     onCloseTab: (String) -> Unit,
     onNewTab: () -> Unit,
+    onNewPrivateTab: () -> Unit = {},
     onSelectWorkspace: (String) -> Unit,
     onCreateWorkspace: (String, String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    var isPrivateMode by remember { mutableStateOf(tabs.find { it.id == activeTabId }?.isPrivate == true) }
     var showWorkspaceMenu by remember { mutableStateOf(false) }
     var showNewWorkspaceDialog by remember { mutableStateOf(false) }
     var newWorkspaceName by remember { mutableStateOf("") }
@@ -49,7 +51,9 @@ fun TabsTray(
     val emojiOptions = listOf("🌐", "💼", "🔬", "📚", "🎨", "🚀", "🎮", "🏠", "💡", "🛡️", "✈️", "☕")
 
     val currentWorkspace = workspaces.find { it.id == currentWorkspaceId } ?: workspaces.first()
-    val filteredTabs = tabs.filter { it.workspaceId == currentWorkspaceId }
+    val regularTabs = tabs.filter { !it.isPrivate && it.workspaceId == currentWorkspaceId }
+    val privateTabs = tabs.filter { it.isPrivate }
+    val displayTabs = if (isPrivateMode) privateTabs else regularTabs
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -171,10 +175,43 @@ fun TabsTray(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Normal Tabs / Private Tabs Filter Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = !isPrivateMode,
+                    onClick = { isPrivateMode = false },
+                    label = { Text("${stringResource(R.string.normal_tabs)} (${regularTabs.size})") },
+                    leadingIcon = {
+                        Icon(Icons.Default.Tab, contentDescription = null, modifier = Modifier.size(16.dp))
+                    },
+                    shape = RoundedCornerShape(20.dp)
+                )
+
+                FilterChip(
+                    selected = isPrivateMode,
+                    onClick = { isPrivateMode = true },
+                    label = { Text("${stringResource(R.string.private_tabs)} (${privateTabs.size})") },
+                    leadingIcon = {
+                        Icon(Icons.Default.VisibilityOff, contentDescription = null, modifier = Modifier.size(16.dp))
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                        selectedLeadingIconColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    ),
+                    shape = RoundedCornerShape(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
 
             // Tab Cards Grid (2 Columns)
-            if (filteredTabs.isEmpty()) {
+            if (displayTabs.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -182,7 +219,7 @@ fun TabsTray(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = stringResource(R.string.tabs_empty),
+                        text = if (isPrivateMode) stringResource(R.string.private_tabs_empty) else stringResource(R.string.tabs_empty),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -194,7 +231,7 @@ fun TabsTray(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.weight(1f)
                 ) {
-                    items(filteredTabs, key = { it.id }) { tab ->
+                    items(displayTabs, key = { it.id }) { tab ->
                         val isActive = tab.id == activeTabId
                         val dismissState = rememberSwipeToDismissBoxState(
                             confirmValueChange = { value ->
@@ -227,9 +264,9 @@ fun TabsTray(
                             }
                         ) {
                             Surface(
-                                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                color = if (tab.isPrivate) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerLow,
                                 shape = RoundedCornerShape(16.dp),
-                                border = if (isActive) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+                                border = if (isActive) BorderStroke(2.dp, if (tab.isPrivate) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary) else null,
                                 shadowElevation = if (isActive) 4.dp else 1.dp,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -243,16 +280,16 @@ fun TabsTray(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .padding(12.dp)
-                                ) {
+                                    ) {
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.Public,
+                                            imageVector = if (tab.isPrivate) Icons.Default.VisibilityOff else Icons.Default.Public,
                                             contentDescription = null,
-                                            tint = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            tint = if (tab.isPrivate) MaterialTheme.colorScheme.tertiary else (if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant),
                                             modifier = Modifier.size(16.dp)
                                         )
                                         IconButton(
@@ -291,22 +328,36 @@ fun TabsTray(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Bottom Actions: + Yeni Sekme FAB
+            // Bottom Actions: Dynamic FAB based on isPrivateMode
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        onNewTab()
-                        onDismiss()
-                    },
-                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text(stringResource(R.string.new_tab)) },
-                    shape = CircleShape,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                if (isPrivateMode) {
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            onNewPrivateTab()
+                            onDismiss()
+                        },
+                        icon = { Icon(Icons.Default.VisibilityOff, contentDescription = null) },
+                        text = { Text(stringResource(R.string.new_private_tab)) },
+                        shape = CircleShape,
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                } else {
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            onNewTab()
+                            onDismiss()
+                        },
+                        icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                        text = { Text(stringResource(R.string.new_tab)) },
+                        shape = CircleShape,
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
             }
         }
     }

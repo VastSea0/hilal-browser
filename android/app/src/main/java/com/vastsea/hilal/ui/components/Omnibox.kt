@@ -40,6 +40,7 @@ fun Omnibox(
     onNavigate: (String) -> Unit,
     onReload: () -> Unit,
     isFloating: Boolean = true,
+    isPrivate: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var isEditing by remember { mutableStateOf(false) }
@@ -96,13 +97,39 @@ fun Omnibox(
                             .fillMaxSize()
                             .padding(horizontal = 16.dp)
                     ) {
-                        Icon(
-                            imageVector = if (currentUrl.startsWith("https://")) Icons.Default.Lock else Icons.Default.Security,
-                            contentDescription = stringResource(R.string.security),
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
+                        if (isPrivate) {
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.tertiaryContainer,
+                                modifier = Modifier.padding(end = 8.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.VisibilityOff,
+                                        contentDescription = stringResource(R.string.private_mode),
+                                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.private_mode),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                                    )
+                                }
+                            }
+                        } else {
+                            Icon(
+                                imageVector = if (currentUrl.startsWith("https://")) Icons.Default.Lock else Icons.Default.Security,
+                                contentDescription = stringResource(R.string.security),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                        }
 
                         if (isEditing) {
                             BasicTextField(

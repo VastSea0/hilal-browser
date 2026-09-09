@@ -104,4 +104,13 @@
     <string name="save">Save</string>
     <string name="swipe_to_delete">Swipe to delete</string>
     <string name="swipe_to_close">Swipe to close</string>
+    <string name="more_apps_by_developer">More apps by Egehan</string>
+    <string name="google_play_store">Google Play Store</string>
+    <string name="private_mode">Private Mode</string>
+    <string name="private_tabs">Private Tabs</string>
+    <string name="normal_tabs">Standard Tabs</string>
+    <string name="new_private_tab">New Private Tab</string>
+    <string name="private_mode_desc">You are in private mode. Hilal Browser will not save your browsing history, cookies, or site data in this tab.</string>
+    <string name="close_all_private_tabs">Close All Private Tabs</string>
+    <string name="private_tabs_empty">No open private tabs</string>
 </resources>

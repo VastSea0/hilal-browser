@@ -50,6 +50,7 @@ val DefaultShortcuts = listOf(
 fun NewTabPage(
     workspaceName: String,
     workspaceEmoji: String = "🌐",
+    isPrivate: Boolean = false,
     onOpenUrl: (String) -> Unit,
     onFocusSearch: () -> Unit,
     modifier: Modifier = Modifier
@@ -62,18 +63,38 @@ fun NewTabPage(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Workspace Badge with Emoji
-        AssistChip(
-            onClick = {},
-            leadingIcon = {
-                Text(workspaceEmoji, fontSize = 14.sp)
-            },
-            label = { Text(workspaceName, style = MaterialTheme.typography.labelMedium) },
-            shape = CircleShape,
-            colors = AssistChipDefaults.assistChipColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        if (isPrivate) {
+            AssistChip(
+                onClick = {},
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.VisibilityOff,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                label = { Text(stringResource(R.string.private_mode), style = MaterialTheme.typography.labelMedium) },
+                shape = CircleShape,
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    labelColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    leadingIconContentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                )
             )
-        )
+        } else {
+            // Workspace Badge with Emoji
+            AssistChip(
+                onClick = {},
+                leadingIcon = {
+                    Text(workspaceEmoji, fontSize = 14.sp)
+                },
+                label = { Text(workspaceName, style = MaterialTheme.typography.labelMedium) },
+                shape = CircleShape,
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                )
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -130,7 +151,34 @@ fun NewTabPage(
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        if (isPrivate) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Security,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = stringResource(R.string.private_mode_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
 
         // Quick Shortcuts Grid
         Text(

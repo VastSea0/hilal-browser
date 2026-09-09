@@ -11,6 +11,7 @@ class BrowserTab(
     initialUrl: String = "about:newtab",
     initialTitle: String = "Yeni Sekme",
     var workspaceId: String,
+    val isPrivate: Boolean = false,
     val session: GeckoSession? = null
 ) {
     var url by mutableStateOf(initialUrl)

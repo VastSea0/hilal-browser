@@ -104,4 +104,13 @@
     <string name="save">Kaydet</string>
     <string name="swipe_to_delete">Silmek için kaydırın</string>
     <string name="swipe_to_close">Kapatmak için kaydırın</string>
+    <string name="more_apps_by_developer">Egehan tarafından daha fazla uygulama</string>
+    <string name="google_play_store">Google Play Store</string>
+    <string name="private_mode">Gizli Mod</string>
+    <string name="private_tabs">Gizli Sekmeler</string>
+    <string name="normal_tabs">Standart Sekmeler</string>
+    <string name="new_private_tab">Yeni Gizli Sekme</string>
+    <string name="private_mode_desc">Gizli moddasınız. Hilal Browser bu sekmedeki tarama geçmişinizi, çerezleri ve site verilerini kaydetmez.</string>
+    <string name="close_all_private_tabs">Tüm Gizli Sekmeleri Kapat</string>
+    <string name="private_tabs_empty">Açık gizli sekme yok</string>
 </resources>

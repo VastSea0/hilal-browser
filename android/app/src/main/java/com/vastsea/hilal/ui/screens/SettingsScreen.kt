@@ -427,6 +427,18 @@ fun SettingsScreen(
 
                 SettingsDivider()
 
+                // More apps by Egehan (Google Play)
+                SettingsExternalRow(
+                    icon = Icons.Outlined.Shop,
+                    iconBgColor = MaterialTheme.colorScheme.primaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    title = stringResource(R.string.more_apps_by_developer),
+                    subtitle = stringResource(R.string.google_play_store),
+                    onClick = { onOpenUrl("https://play.google.com/store/apps/dev?id=6056059908674965746") }
+                )
+
+                SettingsDivider()
+
                 // Open Source Libraries
                 SettingsNavRow(
                     icon = Icons.Outlined.Description,

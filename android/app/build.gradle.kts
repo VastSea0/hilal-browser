@@ -12,8 +12,8 @@ android {
         applicationId = "com.vastsea.hilal"
         minSdk = 26
         targetSdk = 35
-        versionCode = 20260909
-        versionName = "0.3.0-alpha"
+        versionCode = 1
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -25,6 +25,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
