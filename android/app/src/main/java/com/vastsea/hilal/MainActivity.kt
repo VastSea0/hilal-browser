@@ -35,6 +35,8 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.vastsea.hilal.model.BookmarkItem
 import com.vastsea.hilal.model.BrowserTab
@@ -893,5 +895,23 @@ fun HilalBrowserApp(
                 }
             }
         )
+    }
+}
+
+@Preview(
+    name = "Hilal Browser - Pixel 7 Light",
+    device = Devices.PIXEL_7,
+    showSystemUi = true
+)
+@Preview(
+    name = "Hilal Browser - Pixel 7 Dark",
+    device = Devices.PIXEL_7,
+    showSystemUi = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+private fun HilalBrowserAppPreview() {
+    HilalTheme {
+        HilalBrowserApp()
     }
 }

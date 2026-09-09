@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.vastsea.hilal.ui.theme.HilalTheme
 import com.vastsea.hilal.R
 
 data class ShortcutItem(
@@ -203,5 +206,19 @@ fun NewTabPage(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, name = "New Tab Light")
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "New Tab Dark")
+@Composable
+private fun NewTabPagePreview() {
+    HilalTheme {
+        NewTabPage(
+            workspaceName = "Genel",
+            workspaceEmoji = "🌐",
+            onOpenUrl = {},
+            onFocusSearch = {}
+        )
     }
 }

@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vastsea.hilal.R
 import com.vastsea.hilal.model.Workspace
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.vastsea.hilal.ui.theme.HilalTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -401,4 +404,33 @@ private fun shareUrl(context: Context, url: String, title: String) {
         putExtra(Intent.EXTRA_TEXT, url)
     }
     context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_page)))
+}
+
+@Preview(showBackground = true, name = "Options Sheet Light")
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Options Sheet Dark")
+@Composable
+private fun OptionsBottomSheetPreview() {
+    HilalTheme {
+        OptionsBottomSheet(
+            url = "https://github.com/VastSea0/hilal-browser",
+            title = "VastSea0/hilal-browser — GitHub",
+            canGoBack = true,
+            canGoForward = false,
+            isBookmarked = true,
+            workspaces = listOf(
+                Workspace("default", "Genel", "🌐"),
+                Workspace("dev", "Geliştirme", "💻")
+            ),
+            currentWorkspaceId = "default",
+            onSelectWorkspace = {},
+            onReload = {},
+            onGoBack = {},
+            onGoForward = {},
+            onToggleBookmark = {},
+            onOpenBookmarks = {},
+            onOpenHistory = {},
+            onOpenSettings = {},
+            onDismiss = {}
+        )
+    }
 }

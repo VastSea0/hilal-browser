@@ -23,6 +23,9 @@ import androidx.compose.ui.unit.sp
 import com.vastsea.hilal.R
 import com.vastsea.hilal.model.BrowserTab
 import com.vastsea.hilal.model.Workspace
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.vastsea.hilal.ui.theme.HilalTheme
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -379,6 +382,33 @@ fun TabsTray(
                     Text(stringResource(R.string.cancel))
                 }
             }
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Tabs Tray Light")
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Tabs Tray Dark")
+@Composable
+private fun TabsTrayPreview() {
+    HilalTheme {
+        TabsTray(
+            tabs = listOf(
+                BrowserTab("1", "https://duckduckgo.com", "DuckDuckGo — Gizlilik Odaklı Arama Motoru", "default"),
+                BrowserTab("2", "https://github.com", "GitHub: Let's build from here", "default"),
+                BrowserTab("3", "https://news.ycombinator.com", "Hacker News", "default")
+            ),
+            activeTabId = "1",
+            workspaces = listOf(
+                Workspace("default", "Genel", "🌐"),
+                Workspace("work", "İş & Çalışma", "💼")
+            ),
+            currentWorkspaceId = "default",
+            onSelectTab = {},
+            onCloseTab = {},
+            onNewTab = {},
+            onSelectWorkspace = {},
+            onCreateWorkspace = { _, _ -> },
+            onDismiss = {}
         )
     }
 }

@@ -37,6 +37,9 @@ import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.vastsea.hilal.ui.theme.HilalTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -363,6 +366,25 @@ fun HistoryScreen(
             },
             shape = RoundedCornerShape(24.dp),
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "History Screen Light")
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "History Screen Dark")
+@Composable
+private fun HistoryScreenPreview() {
+    HilalTheme {
+        HistoryScreen(
+            historyItems = listOf(
+                HistoryItem(title = "DuckDuckGo — Privacy, simplified.", url = "https://duckduckgo.com"),
+                HistoryItem(title = "GitHub: Let's build from here", url = "https://github.com"),
+                HistoryItem(title = "VastSea0/hilal-browser", url = "https://github.com/VastSea0/hilal-browser")
+            ),
+            onNavigateToUrl = {},
+            onDeleteHistoryItem = {},
+            onClearHistory = {},
+            onClose = {}
         )
     }
 }

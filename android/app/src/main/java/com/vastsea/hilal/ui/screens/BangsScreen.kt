@@ -32,6 +32,9 @@ import androidx.compose.ui.unit.sp
 import com.vastsea.hilal.R
 import com.vastsea.hilal.model.Bang
 import com.vastsea.hilal.search.HilalBangsEngine
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.vastsea.hilal.ui.theme.HilalTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -372,5 +375,14 @@ private fun BangCard(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Bangs Screen Light")
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Bangs Screen Dark")
+@Composable
+private fun BangsScreenPreview() {
+    HilalTheme {
+        BangsScreen(onClose = {})
     }
 }

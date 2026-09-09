@@ -27,6 +27,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.vastsea.hilal.ui.theme.HilalTheme
 import com.vastsea.hilal.R
 import com.vastsea.hilal.search.HilalBangsEngine
 
@@ -255,6 +258,23 @@ fun Omnibox(
                     }
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Omnibox Light")
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Omnibox Dark")
+@Composable
+private fun OmniboxPreview() {
+    HilalTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            Omnibox(
+                currentUrl = "https://duckduckgo.com",
+                title = "DuckDuckGo",
+                onNavigate = {},
+                onReload = {},
+                isFloating = true
+            )
         }
     }
 }

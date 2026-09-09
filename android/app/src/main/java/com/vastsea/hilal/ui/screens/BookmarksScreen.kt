@@ -27,6 +27,9 @@ import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import com.vastsea.hilal.R
 import com.vastsea.hilal.model.BookmarkItem
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.vastsea.hilal.ui.theme.HilalTheme
 import java.net.URI
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -301,5 +304,23 @@ fun BookmarksScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Bookmarks Screen Light")
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Bookmarks Screen Dark")
+@Composable
+private fun BookmarksScreenPreview() {
+    HilalTheme {
+        BookmarksScreen(
+            bookmarkItems = listOf(
+                BookmarkItem(title = "DuckDuckGo", url = "https://duckduckgo.com"),
+                BookmarkItem(title = "GitHub", url = "https://github.com"),
+                BookmarkItem(title = "Hilal Browser Docs", url = "https://hilal-browser.vercel.app")
+            ),
+            onNavigateToUrl = {},
+            onDeleteBookmark = {},
+            onClose = {}
+        )
     }
 }

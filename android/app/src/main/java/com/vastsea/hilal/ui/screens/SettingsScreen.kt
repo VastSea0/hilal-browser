@@ -27,6 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vastsea.hilal.BuildConfig
 import com.vastsea.hilal.R
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.vastsea.hilal.ui.theme.HilalTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -985,5 +988,17 @@ private fun LibraryItem(
                 color = MaterialTheme.colorScheme.outline
             )
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Settings Light")
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Settings Dark")
+@Composable
+private fun SettingsScreenPreview() {
+    HilalTheme {
+        SettingsScreen(
+            onNavigateBack = {},
+            onClearData = {}
+        )
     }
 }
