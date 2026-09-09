@@ -22,10 +22,28 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            val uploadKeystore = file("hilal-upload-key.jks")
+            if (uploadKeystore.exists()) {
+                storeFile = uploadKeystore
+                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "hilalBrowser2026UploadKey!"
+                keyAlias = System.getenv("KEY_ALIAS") ?: "hilal-upload"
+                keyPassword = System.getenv("KEY_PASSWORD") ?: "hilalBrowser2026UploadKey!"
+            } else {
+                val debugConfig = getByName("debug")
+                storeFile = debugConfig.storeFile
+                storePassword = debugConfig.storePassword
+                keyAlias = debugConfig.keyAlias
+                keyPassword = debugConfig.keyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

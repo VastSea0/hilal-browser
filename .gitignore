@@ -30,6 +30,8 @@ flatpak-build/
 *.tar.xz
 *.tar.gz
 *.zip
+*.apk
+*.aab
 
 # === Mach / Mozilla state ===================================================
 .mozbuild/
@@ -84,3 +86,11 @@ scratch/
 *.log
 *.rej
 *.orig
+
+# === Android Keystores & Signing ============================================
+*.jks
+*.keystore
+keystore.properties
+android/keystore/
+keystore-backup/
+
