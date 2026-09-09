@@ -11,14 +11,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vastsea.hilal.BuildConfig
@@ -27,37 +31,82 @@ import com.vastsea.hilal.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    currentLanguage: Int = 0, // 0: System, 1: Turkish, 2: English
+    onLanguageChange: (Int) -> Unit = {},
     themeMode: Int = 0, // 0: System, 1: Light, 2: Dark
     onThemeChange: (Int) -> Unit = {},
+    urlBarStyle: Int = 0, // 0: Floating, 1: Docked
+    onUrlBarStyleChange: (Int) -> Unit = {},
+    toolbarStyle: Int = 0, // 0: Floating, 1: Docked
+    onToolbarStyleChange: (Int) -> Unit = {},
+    hideOnScroll: Boolean = true,
+    onHideOnScrollChange: (Boolean) -> Unit = {},
+    darkWebsites: Boolean = false,
+    onDarkWebsitesChange: (Boolean) -> Unit = {},
     privacyLevel: Int = 1, // 0: Standard, 1: Strict, 2: Hilal Ultra
     onPrivacyLevelChange: (Int) -> Unit = {},
+    defaultSearchEngine: String = "DuckDuckGo",
+    onDefaultSearchEngineChange: (String) -> Unit = {},
+    onOpenBangs: () -> Unit = {},
+    onOpenHistory: () -> Unit = {},
+    onOpenBookmarks: () -> Unit = {},
     onNavigateBack: () -> Unit,
     onClearData: () -> Unit,
     onOpenUrl: (String) -> Unit = {}
 ) {
-    var selectedSearchEngine by remember { mutableStateOf("DuckDuckGo") }
+    var searchQuery by remember { mutableStateOf("") }
     var showClearedSnackbar by remember { mutableStateOf(false) }
     var showLicensesDialog by remember { mutableStateOf(false) }
+
+    // Dialog pickers
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    var showThemeDialog by remember { mutableStateOf(false) }
+    var showUrlBarDialog by remember { mutableStateOf(false) }
+    var showToolbarDialog by remember { mutableStateOf(false) }
+    var showSearchEngineDialog by remember { mutableStateOf(false) }
+    var showPrivacyDialog by remember { mutableStateOf(false) }
 
     val privacyLabels = listOf(
         stringResource(R.string.privacy_standard),
         stringResource(R.string.privacy_strict),
         stringResource(R.string.privacy_custom)
     )
+    val privacyDescs = listOf(
+        stringResource(R.string.privacy_standard_desc),
+        stringResource(R.string.privacy_strict_desc),
+        stringResource(R.string.privacy_custom_desc)
+    )
     val themeLabels = listOf(
         stringResource(R.string.theme_system),
         stringResource(R.string.theme_light),
         stringResource(R.string.theme_dark)
+    )
+    val languageLabels = listOf(
+        stringResource(R.string.language_system),
+        stringResource(R.string.language_tr),
+        stringResource(R.string.language_en)
+    )
+    val barStyleLabels = listOf(
+        stringResource(R.string.style_floating),
+        stringResource(R.string.style_docked)
     )
     val searchEngines = listOf("DuckDuckGo", "Google", "Bing")
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.settings), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
+                title = {
+                    Text(
+                        stringResource(R.string.settings),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -78,397 +127,447 @@ fun SettingsScreen(
                     Text(stringResource(R.string.data_cleared_msg))
                 }
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Section 1: Appearance & Theme
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Palette,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.theme),
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                        themeLabels.forEachIndexed { index, label ->
-                            SegmentedButton(
-                                shape = SegmentedButtonDefaults.itemShape(index = index, count = themeLabels.size),
-                                onClick = { onThemeChange(index) },
-                                selected = index == themeMode
-                            ) {
-                                Text(label)
-                            }
+            // Search Bar
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = { Text(stringResource(R.string.search_settings_hint)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.Search,
+                        contentDescription = stringResource(R.string.search),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery = "" }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Clear,
+                                contentDescription = stringResource(R.string.clear)
+                            )
                         }
                     }
-                }
-            }
+                },
+                shape = RoundedCornerShape(24.dp),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = Color.Transparent
+                )
+            )
 
-            // Section 2: Hilal Privacy Levels
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Security,
+            // Header Profile Card
+            if (searchQuery.isBlank()) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    shape = RoundedCornerShape(24.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    tonalElevation = 1.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_hilal_logo),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.privacy_level),
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                        privacyLabels.forEachIndexed { index, label ->
-                            SegmentedButton(
-                                shape = SegmentedButtonDefaults.itemShape(index = index, count = privacyLabels.size),
-                                onClick = { onPrivacyLevelChange(index) },
-                                selected = index == privacyLevel
-                            ) {
-                                Text(label)
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = when (privacyLevel) {
-                            0 -> stringResource(R.string.privacy_standard_desc)
-                            1 -> stringResource(R.string.privacy_strict_desc)
-                            else -> stringResource(R.string.privacy_custom_desc)
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            // Section 3: Default Search Engine
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = stringResource(R.string.default_search_engine),
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    searchEngines.forEach { engine ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { selectedSearchEngine = engine }
-                                .padding(vertical = 4.dp, horizontal = 4.dp)
-                        ) {
-                            RadioButton(
-                                selected = selectedSearchEngine == engine,
-                                onClick = { selectedSearchEngine = engine }
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = engine,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Section 4: Privacy & Data Clearing
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = stringResource(R.string.privacy_and_cleanup),
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Button(
-                        onClick = {
-                            onClearData()
-                            showClearedSnackbar = true
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer
-                        ),
-                        shape = CircleShape,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.Delete, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.clear_browsing_data))
-                    }
-                }
-            }
-
-            // Section 5: About & Project Info Card
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = stringResource(R.string.about),
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Version & Build Number
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.version_info),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                                .size(56.dp)
+                                .clip(CircleShape)
                         )
-                        Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = CircleShape
-                        ) {
-                            Text(
-                                text = "v${BuildConfig.VERSION_NAME} (Build ${BuildConfig.VERSION_CODE})",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                            )
-                        }
-                    }
-
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                    // Website link
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { onOpenUrl("https://hilal-browser.vercel.app") }
-                            .padding(vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.Language,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = stringResource(R.string.website),
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                                text = "Hilal Browser",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "hilal-browser.vercel.app",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Icon(
-                            Icons.AutoMirrored.Filled.OpenInNew,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                    // GitHub Repository
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { onOpenUrl("https://github.com/VastSea0/hilal-browser") }
-                            .padding(vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.Code,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.source_code),
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = "github.com/VastSea0/hilal-browser",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Icon(
-                            Icons.AutoMirrored.Filled.OpenInNew,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                    // Creator Attribution
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { onOpenUrl("https://egehankahraman.vercel.app") }
-                            .padding(vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.Person,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.developer),
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = stringResource(R.string.developer_credit),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Icon(
-                            Icons.AutoMirrored.Filled.OpenInNew,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                    // Open Source Libraries
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { showLicensesDialog = true }
-                            .padding(vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.Description,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.open_source_libraries),
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = "GeckoView, Jetpack Compose, KotlinX...",
+                                text = stringResource(R.string.brand_tagline),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Surface(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = CircleShape
+                            ) {
+                                Text(
+                                    text = "v${BuildConfig.VERSION_NAME} (Build ${BuildConfig.VERSION_CODE})",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp)
+                                )
+                            }
                         }
-                        Icon(
-                            Icons.Default.ChevronRight,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(18.dp)
-                        )
                     }
                 }
             }
 
-            // Section 6: Brand Footer
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            // Category 1: Appearance & Layout (Görünüm ve Düzen)
+            SettingsGroupCard(
+                categoryTitle = stringResource(R.string.category_appearance)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_hilal_logo),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
+                // Dil (Language)
+                SettingsNavRow(
+                    icon = Icons.Outlined.Translate,
+                    iconBgColor = MaterialTheme.colorScheme.primaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    title = stringResource(R.string.language),
+                    subtitle = languageLabels[currentLanguage.coerceIn(0, 2)],
+                    onClick = { showLanguageDialog = true }
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Hilal Browser",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
+
+                SettingsDivider()
+
+                // Tema (Theme)
+                SettingsNavRow(
+                    icon = Icons.Outlined.Palette,
+                    iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    title = stringResource(R.string.theme),
+                    subtitle = themeLabels[themeMode.coerceIn(0, 2)],
+                    onClick = { showThemeDialog = true }
                 )
-                Text(
-                    text = stringResource(R.string.brand_tagline),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+
+                SettingsDivider()
+
+                // Web Sitelerinde Koyu Mod (Dark Mode for Websites) Switch
+                SettingsSwitchRow(
+                    icon = Icons.Outlined.DarkMode,
+                    iconBgColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    iconTint = MaterialTheme.colorScheme.onSurface,
+                    title = stringResource(R.string.dark_websites),
+                    subtitle = stringResource(R.string.dark_websites_desc),
+                    checked = darkWebsites,
+                    onCheckedChange = onDarkWebsitesChange
+                )
+
+                SettingsDivider()
+
+                // Kaydırınca Çubukları Gizle (Hide Bars on Scroll) Switch
+                SettingsSwitchRow(
+                    icon = Icons.Outlined.SwipeDown,
+                    iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onTertiaryContainer,
+                    title = stringResource(R.string.hide_on_scroll),
+                    subtitle = stringResource(R.string.hide_on_scroll_desc),
+                    checked = hideOnScroll,
+                    onCheckedChange = onHideOnScrollChange
+                )
+
+                SettingsDivider()
+
+                // URL Bar Style
+                SettingsNavRow(
+                    icon = Icons.Outlined.ViewStream,
+                    iconBgColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    iconTint = MaterialTheme.colorScheme.onSurface,
+                    title = stringResource(R.string.url_bar_style),
+                    subtitle = barStyleLabels[urlBarStyle.coerceIn(0, 1)],
+                    onClick = { showUrlBarDialog = true }
+                )
+
+                SettingsDivider()
+
+                // Toolbar Style
+                SettingsNavRow(
+                    icon = Icons.Outlined.WebAsset,
+                    iconBgColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    iconTint = MaterialTheme.colorScheme.onSurface,
+                    title = stringResource(R.string.toolbar_style),
+                    subtitle = barStyleLabels[toolbarStyle.coerceIn(0, 1)],
+                    onClick = { showToolbarDialog = true }
                 )
             }
+
+            // Category 2: Search & Shortcuts (Arama ve Kısayollar)
+            SettingsGroupCard(
+                categoryTitle = stringResource(R.string.category_search)
+            ) {
+                // Default Search Engine
+                SettingsNavRow(
+                    icon = Icons.Outlined.Search,
+                    iconBgColor = MaterialTheme.colorScheme.primaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    title = stringResource(R.string.default_search_engine),
+                    subtitle = defaultSearchEngine,
+                    onClick = { showSearchEngineDialog = true }
+                )
+
+                SettingsDivider()
+
+                // Hilal Bangs Screen Navigation
+                SettingsNavRow(
+                    icon = Icons.Outlined.Bolt,
+                    iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    title = stringResource(R.string.bangs_manager),
+                    subtitle = stringResource(R.string.bangs_manager_desc),
+                    onClick = onOpenBangs
+                )
+            }
+
+            // Category 3: Privacy & Security (Gizlilik ve Güvenlik)
+            SettingsGroupCard(
+                categoryTitle = stringResource(R.string.category_privacy)
+            ) {
+                // Hilal Privacy Level
+                SettingsNavRow(
+                    icon = Icons.Outlined.Shield,
+                    iconBgColor = MaterialTheme.colorScheme.primaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    title = stringResource(R.string.privacy_level),
+                    subtitle = privacyLabels[privacyLevel.coerceIn(0, 2)],
+                    onClick = { showPrivacyDialog = true }
+                )
+
+                SettingsDivider()
+
+                // Clear Browsing Data
+                SettingsActionRow(
+                    icon = Icons.Outlined.DeleteSweep,
+                    iconBgColor = MaterialTheme.colorScheme.errorContainer,
+                    iconTint = MaterialTheme.colorScheme.onErrorContainer,
+                    title = stringResource(R.string.clear_browsing_data),
+                    subtitle = stringResource(R.string.privacy_and_cleanup),
+                    actionText = stringResource(R.string.clear),
+                    onAction = {
+                        onClearData()
+                        showClearedSnackbar = true
+                    }
+                )
+            }
+
+            // Category 4: Data & Pages (Veriler ve Sayfalar)
+            SettingsGroupCard(
+                categoryTitle = stringResource(R.string.category_data)
+            ) {
+                // Bookmarks
+                SettingsNavRow(
+                    icon = Icons.Outlined.Bookmarks,
+                    iconBgColor = MaterialTheme.colorScheme.primaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    title = stringResource(R.string.bookmarks),
+                    subtitle = stringResource(R.string.swipe_to_delete),
+                    onClick = onOpenBookmarks
+                )
+
+                SettingsDivider()
+
+                // History
+                SettingsNavRow(
+                    icon = Icons.Outlined.History,
+                    iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    title = stringResource(R.string.history),
+                    subtitle = stringResource(R.string.swipe_to_delete),
+                    onClick = onOpenHistory
+                )
+            }
+
+            // Category 5: About (Hakkında)
+            SettingsGroupCard(
+                categoryTitle = stringResource(R.string.category_about)
+            ) {
+                // Website link
+                SettingsExternalRow(
+                    icon = Icons.Outlined.Language,
+                    iconBgColor = MaterialTheme.colorScheme.primaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    title = stringResource(R.string.website),
+                    subtitle = "hilal-browser.vercel.app",
+                    onClick = { onOpenUrl("https://hilal-browser.vercel.app") }
+                )
+
+                SettingsDivider()
+
+                // GitHub Repository
+                SettingsExternalRow(
+                    icon = Icons.Outlined.Code,
+                    iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    title = stringResource(R.string.source_code),
+                    subtitle = "github.com/VastSea0/hilal-browser",
+                    onClick = { onOpenUrl("https://github.com/VastSea0/hilal-browser") }
+                )
+
+                SettingsDivider()
+
+                // Creator Attribution
+                SettingsExternalRow(
+                    icon = Icons.Outlined.Person,
+                    iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onTertiaryContainer,
+                    title = stringResource(R.string.developer),
+                    subtitle = stringResource(R.string.developer_credit),
+                    onClick = { onOpenUrl("https://egehankahraman.vercel.app") }
+                )
+
+                SettingsDivider()
+
+                // Open Source Libraries
+                SettingsNavRow(
+                    icon = Icons.Outlined.Description,
+                    iconBgColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    iconTint = MaterialTheme.colorScheme.onSurface,
+                    title = stringResource(R.string.open_source_libraries),
+                    subtitle = "GeckoView, Compose, Coil, KotlinX...",
+                    onClick = { showLicensesDialog = true }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 
-    // Open Source Licenses Dialog
+    // Dialog Pickers
+    if (showLanguageDialog) {
+        RadioChoiceDialog(
+            title = stringResource(R.string.language),
+            options = languageLabels,
+            selectedIndex = currentLanguage,
+            onSelect = {
+                onLanguageChange(it)
+                showLanguageDialog = false
+            },
+            onDismiss = { showLanguageDialog = false }
+        )
+    }
+
+    if (showThemeDialog) {
+        RadioChoiceDialog(
+            title = stringResource(R.string.theme),
+            options = themeLabels,
+            selectedIndex = themeMode,
+            onSelect = {
+                onThemeChange(it)
+                showThemeDialog = false
+            },
+            onDismiss = { showThemeDialog = false }
+        )
+    }
+
+    if (showUrlBarDialog) {
+        RadioChoiceDialog(
+            title = stringResource(R.string.url_bar_style),
+            options = barStyleLabels,
+            selectedIndex = urlBarStyle,
+            onSelect = {
+                onUrlBarStyleChange(it)
+                showUrlBarDialog = false
+            },
+            onDismiss = { showUrlBarDialog = false }
+        )
+    }
+
+    if (showToolbarDialog) {
+        RadioChoiceDialog(
+            title = stringResource(R.string.toolbar_style),
+            options = barStyleLabels,
+            selectedIndex = toolbarStyle,
+            onSelect = {
+                onToolbarStyleChange(it)
+                showToolbarDialog = false
+            },
+            onDismiss = { showToolbarDialog = false }
+        )
+    }
+
+    if (showSearchEngineDialog) {
+        RadioChoiceDialog(
+            title = stringResource(R.string.default_search_engine),
+            options = searchEngines,
+            selectedIndex = searchEngines.indexOf(defaultSearchEngine).coerceAtLeast(0),
+            onSelect = {
+                onDefaultSearchEngineChange(searchEngines[it])
+                showSearchEngineDialog = false
+            },
+            onDismiss = { showSearchEngineDialog = false }
+        )
+    }
+
+    if (showPrivacyDialog) {
+        AlertDialog(
+            onDismissRequest = { showPrivacyDialog = false },
+            title = {
+                Text(
+                    stringResource(R.string.privacy_level),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    privacyLabels.forEachIndexed { index, label ->
+                        Surface(
+                            shape = RoundedCornerShape(14.dp),
+                            color = if (index == privacyLevel) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceContainerHigh,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onPrivacyLevelChange(index)
+                                    showPrivacyDialog = false
+                                }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = index == privacyLevel,
+                                    onClick = {
+                                        onPrivacyLevelChange(index)
+                                        showPrivacyDialog = false
+                                    }
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column {
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = privacyDescs[index],
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPrivacyDialog = false }) {
+                    Text(stringResource(R.string.close))
+                }
+            },
+            shape = RoundedCornerShape(24.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    }
+
     if (showLicensesDialog) {
         AlertDialog(
             onDismissRequest = { showLicensesDialog = false },
@@ -483,7 +582,7 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     LibraryItem(
                         name = "Mozilla GeckoView Omni",
@@ -496,6 +595,12 @@ fun SettingsScreen(
                         version = "1.4.0-alpha10",
                         license = "Apache License 2.0",
                         url = "https://developer.android.com/jetpack/compose"
+                    )
+                    LibraryItem(
+                        name = "Coil Image Loader",
+                        version = "2.7.0",
+                        license = "Apache License 2.0",
+                        url = "https://coil-kt.github.io/coil"
                     )
                     LibraryItem(
                         name = "KotlinX Coroutines & Serialization",
@@ -520,6 +625,329 @@ fun SettingsScreen(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
     }
+}
+
+@Composable
+private fun SettingsGroupCard(
+    categoryTitle: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = categoryTitle,
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(start = 12.dp, bottom = 6.dp)
+        )
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            shape = RoundedCornerShape(24.dp),
+            modifier = Modifier.fillMaxWidth(),
+            tonalElevation = 1.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                content()
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsNavRow(
+    icon: ImageVector,
+    iconBgColor: Color,
+    iconTint: Color,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .clickable { onClick() }
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            color = iconBgColor,
+            shape = CircleShape,
+            modifier = Modifier.size(42.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(1.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+        )
+    }
+}
+
+@Composable
+private fun SettingsSwitchRow(
+    icon: ImageVector,
+    iconBgColor: Color,
+    iconTint: Color,
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .clickable { onCheckedChange(!checked) }
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            color = iconBgColor,
+            shape = CircleShape,
+            modifier = Modifier.size(42.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(1.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
+    }
+}
+
+@Composable
+private fun SettingsActionRow(
+    icon: ImageVector,
+    iconBgColor: Color,
+    iconTint: Color,
+    title: String,
+    subtitle: String,
+    actionText: String,
+    onAction: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .clickable { onAction() }
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            color = iconBgColor,
+            shape = CircleShape,
+            modifier = Modifier.size(42.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(1.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        FilledTonalButton(
+            onClick = onAction,
+            shape = CircleShape,
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer
+            ),
+            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+        ) {
+            Text(actionText, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+        }
+    }
+}
+
+@Composable
+private fun SettingsExternalRow(
+    icon: ImageVector,
+    iconBgColor: Color,
+    iconTint: Color,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .clickable { onClick() }
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            color = iconBgColor,
+            shape = CircleShape,
+            modifier = Modifier.size(42.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(1.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            modifier = Modifier.size(18.dp)
+        )
+    }
+}
+
+@Composable
+private fun SettingsDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(vertical = 10.dp),
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f)
+    )
+}
+
+@Composable
+private fun RadioChoiceDialog(
+    title: String,
+    options: List<String>,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                title,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                options.forEachIndexed { index, option ->
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (index == selectedIndex) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else Color.Transparent,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(index) }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = index == selectedIndex,
+                                onClick = { onSelect(index) }
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = option,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = if (index == selectedIndex) FontWeight.Bold else FontWeight.Normal
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close))
+            }
+        },
+        shape = RoundedCornerShape(24.dp),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    )
 }
 
 @Composable
