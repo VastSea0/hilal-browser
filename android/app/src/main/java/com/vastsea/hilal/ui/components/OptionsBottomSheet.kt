@@ -18,10 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vastsea.hilal.R
 import com.vastsea.hilal.model.Workspace
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,14 +86,14 @@ fun OptionsBottomSheet(
                     Spacer(modifier = Modifier.width(14.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = title.ifBlank { if (url == "about:newtab" || url.isBlank()) "Yeni Sekme" else url },
+                            text = title.ifBlank { if (url == "about:newtab" || url.isBlank()) stringResource(R.string.new_tab) else url },
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = if (url == "about:newtab" || url.isBlank()) "Hilal Hızlı Başlangıç" else url,
+                            text = if (url == "about:newtab" || url.isBlank()) stringResource(R.string.quick_start) else url,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
@@ -109,7 +111,7 @@ fun OptionsBottomSheet(
                 // 1. Reload
                 ExpressiveActionButton(
                     icon = Icons.Default.Refresh,
-                    label = "Yenile",
+                    label = stringResource(R.string.refresh),
                     enabled = true,
                     onClick = {
                         onReload()
@@ -121,7 +123,7 @@ fun OptionsBottomSheet(
                 // 2. Back
                 ExpressiveActionButton(
                     icon = Icons.AutoMirrored.Filled.ArrowBack,
-                    label = "Geri",
+                    label = stringResource(R.string.back),
                     enabled = canGoBack,
                     onClick = {
                         onGoBack()
@@ -133,7 +135,7 @@ fun OptionsBottomSheet(
                 // 3. Forward
                 ExpressiveActionButton(
                     icon = Icons.AutoMirrored.Filled.ArrowForward,
-                    label = "İleri",
+                    label = stringResource(R.string.forward),
                     enabled = canGoForward,
                     onClick = {
                         onGoForward()
@@ -145,7 +147,7 @@ fun OptionsBottomSheet(
                 // 4. Share
                 ExpressiveActionButton(
                     icon = Icons.Default.Share,
-                    label = "Paylaş",
+                    label = stringResource(R.string.share),
                     enabled = true,
                     onClick = {
                         shareUrl(context, url, title)
@@ -169,7 +171,7 @@ fun OptionsBottomSheet(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Çalışma Alanı",
+                        text = stringResource(R.string.workspace),
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -237,7 +239,7 @@ fun OptionsBottomSheet(
                         }
                         Spacer(modifier = Modifier.width(14.dp))
                         Text(
-                            text = "Ayarlar",
+                            text = stringResource(R.string.settings),
                             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f)
@@ -296,5 +298,5 @@ private fun shareUrl(context: Context, url: String, title: String) {
         putExtra(Intent.EXTRA_SUBJECT, title)
         putExtra(Intent.EXTRA_TEXT, url)
     }
-    context.startActivity(Intent.createChooser(intent, "Sayfayı Paylaş"))
+    context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_page)))
 }

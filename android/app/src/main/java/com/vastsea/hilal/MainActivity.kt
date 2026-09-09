@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,6 +25,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.vastsea.hilal.search.HilalBangsEngine
@@ -32,6 +34,7 @@ import com.vastsea.hilal.model.Workspace
 import com.vastsea.hilal.ui.components.*
 import com.vastsea.hilal.ui.screens.SettingsScreen
 import com.vastsea.hilal.ui.theme.HilalTheme
+import org.mozilla.geckoview.ContentBlocking
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
 import org.mozilla.geckoview.GeckoSession
@@ -48,8 +51,8 @@ class MainActivity : ComponentActivity() {
 
         val settings = GeckoRuntimeSettings.Builder()
             .contentBlocking(
-                org.mozilla.geckoview.ContentBlocking.Settings.Builder()
-                    .antiTracking(org.mozilla.geckoview.ContentBlocking.AntiTracking.DEFAULT)
+                ContentBlocking.Settings.Builder()
+                    .antiTracking(ContentBlocking.AntiTracking.STRICT)
                     .build()
             )
             .build()
@@ -57,8 +60,18 @@ class MainActivity : ComponentActivity() {
         geckoRuntime = GeckoRuntime.create(this, settings)
 
         setContent {
-            HilalTheme {
-                HilalBrowserApp(geckoRuntime = geckoRuntime)
+            var themeMode by remember { mutableIntStateOf(0) } // 0: System, 1: Light, 2: Dark
+            val isDark = when (themeMode) {
+                1 -> false
+                2 -> true
+                else -> isSystemInDarkTheme()
+            }
+            HilalTheme(darkTheme = isDark) {
+                HilalBrowserApp(
+                    geckoRuntime = geckoRuntime,
+                    themeMode = themeMode,
+                    onThemeChange = { themeMode = it }
+                )
             }
         }
     }
@@ -67,16 +80,24 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HilalBrowserApp(
-    geckoRuntime: GeckoRuntime? = null
+    geckoRuntime: GeckoRuntime? = null,
+    themeMode: Int = 0,
+    onThemeChange: (Int) -> Unit = {}
 ) {
     val isPreview = LocalInspectionMode.current || geckoRuntime == null
+
+    val defaultWsName = stringResource(R.string.default_workspace_name)
+    val workWsName = stringResource(R.string.work_workspace_name)
+    val researchWsName = stringResource(R.string.research_workspace_name)
+    val newTabDefaultTitle = stringResource(R.string.new_tab)
+    val loadingDefaultTitle = stringResource(R.string.loading)
 
     // Workspaces
     val workspaces = remember {
         mutableStateListOf(
-            Workspace("default", "Genel Alan"),
-            Workspace("work", "İş"),
-            Workspace("research", "Araştırma")
+            Workspace("default", defaultWsName),
+            Workspace("work", workWsName),
+            Workspace("research", researchWsName)
         )
     }
     var currentWorkspaceId by remember { mutableStateOf("default") }
@@ -84,6 +105,45 @@ fun HilalBrowserApp(
     // Multi-Tab state
     val tabs = remember { mutableStateListOf<BrowserTab>() }
     var activeTabId by remember { mutableStateOf("") }
+
+    // Privacy Level (0: Standard, 1: Strict, 2: Hilal Ultra)
+    var privacyLevel by remember { mutableIntStateOf(1) }
+
+    fun applyPrivacyLevel(level: Int) {
+        privacyLevel = level
+        geckoRuntime?.settings?.contentBlocking?.let { cb ->
+            when (level) {
+                0 -> {
+                    cb.setEnhancedTrackingProtectionLevel(ContentBlocking.EtpLevel.DEFAULT)
+                    cb.setAntiTracking(ContentBlocking.AntiTracking.DEFAULT)
+                    cb.setCookieBehavior(ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS)
+                    cb.setStrictSocialTrackingProtection(false)
+                    cb.setCookiePurging(false)
+                    cb.setQueryParameterStrippingEnabled(false)
+                }
+                1 -> {
+                    cb.setEnhancedTrackingProtectionLevel(ContentBlocking.EtpLevel.STRICT)
+                    cb.setAntiTracking(ContentBlocking.AntiTracking.STRICT)
+                    cb.setCookieBehavior(ContentBlocking.CookieBehavior.ACCEPT_FIRST_PARTY_AND_ISOLATE_OTHERS)
+                    cb.setStrictSocialTrackingProtection(true)
+                    cb.setCookiePurging(true)
+                    cb.setQueryParameterStrippingEnabled(true)
+                }
+                else -> {
+                    cb.setEnhancedTrackingProtectionLevel(ContentBlocking.EtpLevel.STRICT)
+                    cb.setAntiTracking(ContentBlocking.AntiTracking.STRICT)
+                    cb.setCookieBehavior(ContentBlocking.CookieBehavior.ACCEPT_FIRST_PARTY)
+                    cb.setStrictSocialTrackingProtection(true)
+                    cb.setCookiePurging(true)
+                    cb.setQueryParameterStrippingEnabled(true)
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        applyPrivacyLevel(privacyLevel)
+    }
 
     // Navigation / Overlay sheets
     var showTabsTray by remember { mutableStateOf(false) }
@@ -102,7 +162,7 @@ fun HilalBrowserApp(
         val tab = BrowserTab(
             id = tabId,
             initialUrl = url,
-            initialTitle = if (url == "about:newtab") "Yeni Sekme" else "Yükleniyor...",
+            initialTitle = if (url == "about:newtab") newTabDefaultTitle else loadingDefaultTitle,
             workspaceId = workspaceId,
             session = session
         )
@@ -180,6 +240,10 @@ fun HilalBrowserApp(
 
     if (showSettingsScreen) {
         SettingsScreen(
+            themeMode = themeMode,
+            onThemeChange = onThemeChange,
+            privacyLevel = privacyLevel,
+            onPrivacyLevelChange = { applyPrivacyLevel(it) },
             onNavigateBack = { showSettingsScreen = false },
             onClearData = {
                 // Clear GeckoRuntime data
@@ -204,9 +268,7 @@ fun HilalBrowserApp(
         topBar = {
             Omnibox(
                 currentUrl = activeTab?.url ?: "about:newtab",
-                title = activeTab?.title ?: "Hilal Browser",
-                isLoading = activeTab?.isLoading ?: false,
-                progress = activeTab?.progress ?: 0,
+                title = activeTab?.title ?: "Hilal",
                 onNavigate = { resolvedUrl ->
                     activeTab?.let { tab ->
                         tab.url = resolvedUrl
@@ -232,7 +294,7 @@ fun HilalBrowserApp(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Geri",
+                            contentDescription = stringResource(R.string.back),
                             tint = if (activeTab?.canGoBack == true) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     }
@@ -244,7 +306,7 @@ fun HilalBrowserApp(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = "İleri",
+                            contentDescription = stringResource(R.string.forward),
                             tint = if (activeTab?.canGoForward == true) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     }
@@ -262,7 +324,7 @@ fun HilalBrowserApp(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Yeni Sekme",
+                            contentDescription = stringResource(R.string.new_tab),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
@@ -281,7 +343,7 @@ fun HilalBrowserApp(
                         IconButton(onClick = { showTabsTray = true }) {
                             Icon(
                                 imageVector = Icons.Default.Tab,
-                                contentDescription = "Sekmeler"
+                                contentDescription = stringResource(R.string.tabs)
                             )
                         }
                     }
@@ -290,7 +352,7 @@ fun HilalBrowserApp(
                     IconButton(onClick = { showOptionsSheet = true }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Seçenekler"
+                            contentDescription = stringResource(R.string.options)
                         )
                     }
                 }
@@ -318,10 +380,11 @@ fun HilalBrowserApp(
                     }
                 )
             } else {
-                // Pull-to-refresh wrapper around GeckoView
+                // Pull-to-refresh wrapper around GeckoView with disabled duplicate spinner
                 PullToRefreshBox(
                     isRefreshing = activeTab.isLoading,
                     onRefresh = { activeTab.session?.reload() },
+                    indicator = {}, // Disables PullToRefreshBox default spinner to ensure strictly 1 indicator
                     modifier = Modifier.fillMaxSize()
                 ) {
                     if (isPreview) {
@@ -357,26 +420,16 @@ fun HilalBrowserApp(
                 }
             }
 
-            // Morphing loading indicator overlay when page is loading
+            // Exactly ONE Morphing Loading Indicator overlay when page is loading
             AnimatedVisibility(
-                visible = activeTab?.isLoading == true && (activeTab.progress < 70),
+                visible = activeTab?.isLoading == true,
                 enter = fadeIn() + scaleIn(),
                 exit = fadeOut() + scaleOut(),
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = 16.dp)
             ) {
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    shape = CircleShape,
-                    shadowElevation = 6.dp,
-                    tonalElevation = 6.dp,
-                    modifier = Modifier.size(44.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        MorphingLoadingIndicator(size = 28)
-                    }
-                }
+                MorphingLoadingIndicator()
             }
         }
     }

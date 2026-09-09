@@ -15,10 +15,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vastsea.hilal.R
 import com.vastsea.hilal.model.BrowserTab
 import com.vastsea.hilal.model.Workspace
 import java.util.UUID
@@ -104,7 +106,7 @@ fun TabsTray(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = "Çalışma Alanları",
+                                    contentDescription = stringResource(R.string.workspaces),
                                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
@@ -134,7 +136,7 @@ fun TabsTray(
                         }
                         HorizontalDivider()
                         DropdownMenuItem(
-                            text = { Text("+ Yeni Alan Oluştur") },
+                            text = { Text(stringResource(R.string.add_workspace_button)) },
                             leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
                             onClick = {
                                 showWorkspaceMenu = false
@@ -149,7 +151,7 @@ fun TabsTray(
                     onClick = onDismiss,
                     colors = IconButtonDefaults.filledTonalIconButtonColors()
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = "Kapat")
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close))
                 }
             }
 
@@ -164,7 +166,7 @@ fun TabsTray(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Bu alanda henüz sekme yok",
+                        text = stringResource(R.string.tabs_empty),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -213,7 +215,7 @@ fun TabsTray(
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Close,
-                                            contentDescription = "Sekmeyi Kapat",
+                                            contentDescription = stringResource(R.string.close),
                                             modifier = Modifier.size(14.dp)
                                         )
                                     }
@@ -253,7 +255,7 @@ fun TabsTray(
                         onDismiss()
                     },
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("Yeni Sekme") },
+                    text = { Text(stringResource(R.string.new_tab)) },
                     shape = CircleShape,
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -267,12 +269,12 @@ fun TabsTray(
         AlertDialog(
             onDismissRequest = { showNewWorkspaceDialog = false },
             shape = RoundedCornerShape(28.dp),
-            title = { Text("Yeni Çalışma Alanı") },
+            title = { Text(stringResource(R.string.new_workspace)) },
             text = {
                 OutlinedTextField(
                     value = newWorkspaceName,
                     onValueChange = { newWorkspaceName = it },
-                    label = { Text("Alan Adı (Örn: İş, Proje)") },
+                    label = { Text(stringResource(R.string.workspace_name_hint)) },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -289,12 +291,12 @@ fun TabsTray(
                     },
                     shape = CircleShape
                 ) {
-                    Text("Oluştur")
+                    Text(stringResource(R.string.create))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showNewWorkspaceDialog = false }) {
-                    Text("İptal")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )

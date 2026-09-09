@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,25 +27,37 @@ import com.vastsea.hilal.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    themeMode: Int = 0, // 0: System, 1: Light, 2: Dark
+    onThemeChange: (Int) -> Unit = {},
+    privacyLevel: Int = 1, // 0: Standard, 1: Strict, 2: Hilal Ultra
+    onPrivacyLevelChange: (Int) -> Unit = {},
     onNavigateBack: () -> Unit,
     onClearData: () -> Unit,
     onOpenUrl: (String) -> Unit = {}
 ) {
-    var selectedPrivacyLevel by remember { mutableIntStateOf(1) } // 0: Standart, 1: Sıkı, 2: Hilal Özel
     var selectedSearchEngine by remember { mutableStateOf("DuckDuckGo") }
     var showClearedSnackbar by remember { mutableStateOf(false) }
     var showLicensesDialog by remember { mutableStateOf(false) }
 
-    val privacyLevels = listOf("Standart", "Sıkı", "Hilal Özel")
+    val privacyLabels = listOf(
+        stringResource(R.string.privacy_standard),
+        stringResource(R.string.privacy_strict),
+        stringResource(R.string.privacy_custom)
+    )
+    val themeLabels = listOf(
+        stringResource(R.string.theme_system),
+        stringResource(R.string.theme_light),
+        stringResource(R.string.theme_dark)
+    )
     val searchEngines = listOf("DuckDuckGo", "Google", "Bing")
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ayarlar", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
+                title = { Text(stringResource(R.string.settings), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -57,11 +71,11 @@ fun SettingsScreen(
                     modifier = Modifier.padding(16.dp),
                     action = {
                         TextButton(onClick = { showClearedSnackbar = false }) {
-                            Text("Tamam")
+                            Text(stringResource(R.string.ok))
                         }
                     }
                 ) {
-                    Text("Tarama verileri ve çerezler temizlendi.")
+                    Text(stringResource(R.string.data_cleared_msg))
                 }
             }
         }
@@ -74,7 +88,45 @@ fun SettingsScreen(
                 .padding(horizontal = 20.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Section 1: Hilal Privacy Levels
+            // Section 1: Appearance & Theme
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Palette,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.theme),
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                        themeLabels.forEachIndexed { index, label ->
+                            SegmentedButton(
+                                shape = SegmentedButtonDefaults.itemShape(index = index, count = themeLabels.size),
+                                onClick = { onThemeChange(index) },
+                                selected = index == themeMode
+                            ) {
+                                Text(label)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Section 2: Hilal Privacy Levels
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                 shape = RoundedCornerShape(20.dp),
@@ -90,7 +142,7 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Hilal Gizlilik Seviyesi",
+                            text = stringResource(R.string.privacy_level),
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -99,11 +151,11 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                        privacyLevels.forEachIndexed { index, label ->
+                        privacyLabels.forEachIndexed { index, label ->
                             SegmentedButton(
-                                shape = SegmentedButtonDefaults.itemShape(index = index, count = privacyLevels.size),
-                                onClick = { selectedPrivacyLevel = index },
-                                selected = index == selectedPrivacyLevel
+                                shape = SegmentedButtonDefaults.itemShape(index = index, count = privacyLabels.size),
+                                onClick = { onPrivacyLevelChange(index) },
+                                selected = index == privacyLevel
                             ) {
                                 Text(label)
                             }
@@ -112,10 +164,10 @@ fun SettingsScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = when (selectedPrivacyLevel) {
-                            0 -> "Temel izleyicileri engeller, siteler tam uyumlu çalışır."
-                            1 -> "Bilinen tüm üçüncü taraf reklam ve analiz izleyicilerini engeller."
-                            else -> "Maksimum koruma: Parmak izi (fingerprinting) ve WebRTC sızıntılarını engeller."
+                        text = when (privacyLevel) {
+                            0 -> stringResource(R.string.privacy_standard_desc)
+                            1 -> stringResource(R.string.privacy_strict_desc)
+                            else -> stringResource(R.string.privacy_custom_desc)
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -123,7 +175,7 @@ fun SettingsScreen(
                 }
             }
 
-            // Section 2: Default Search Engine
+            // Section 3: Default Search Engine
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                 shape = RoundedCornerShape(20.dp),
@@ -131,7 +183,7 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Varsayılan Arama Motoru",
+                        text = stringResource(R.string.default_search_engine),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -161,7 +213,7 @@ fun SettingsScreen(
                 }
             }
 
-            // Section 3: Privacy & Data Clearing
+            // Section 4: Privacy & Data Clearing
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                 shape = RoundedCornerShape(20.dp),
@@ -169,7 +221,7 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Gizlilik ve Temizlik",
+                        text = stringResource(R.string.privacy_and_cleanup),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -188,12 +240,12 @@ fun SettingsScreen(
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Tarama Verilerini Temizle")
+                        Text(stringResource(R.string.clear_browsing_data))
                     }
                 }
             }
 
-            // Section 4: About & Project Info Card
+            // Section 5: About & Project Info Card
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                 shape = RoundedCornerShape(20.dp),
@@ -201,7 +253,7 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Hakkında",
+                        text = stringResource(R.string.about),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -216,7 +268,7 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Sürüm Bilgisi",
+                            text = stringResource(R.string.version_info),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -253,7 +305,7 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Web Sitesi",
+                                text = stringResource(R.string.website),
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -264,7 +316,7 @@ fun SettingsScreen(
                             )
                         }
                         Icon(
-                            Icons.Default.OpenInNew,
+                            Icons.AutoMirrored.Filled.OpenInNew,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(16.dp)
@@ -291,7 +343,7 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Kaynak Kodu",
+                                text = stringResource(R.string.source_code),
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -302,7 +354,7 @@ fun SettingsScreen(
                             )
                         }
                         Icon(
-                            Icons.Default.OpenInNew,
+                            Icons.AutoMirrored.Filled.OpenInNew,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(16.dp)
@@ -329,18 +381,18 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Geliştirici",
+                                text = stringResource(R.string.developer),
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "by Egehan Kahraman (egehankahraman.vercel.app)",
+                                text = stringResource(R.string.developer_credit),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
                         Icon(
-                            Icons.Default.OpenInNew,
+                            Icons.AutoMirrored.Filled.OpenInNew,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(16.dp)
@@ -367,7 +419,7 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Açık Kaynak Kütüphaneleri",
+                                text = stringResource(R.string.open_source_libraries),
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -387,7 +439,7 @@ fun SettingsScreen(
                 }
             }
 
-            // Section 5: Brand Footer
+            // Section 6: Brand Footer
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -408,7 +460,7 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Material 3 Expressive & GeckoView • VastSea",
+                    text = stringResource(R.string.brand_tagline),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -422,7 +474,7 @@ fun SettingsScreen(
             onDismissRequest = { showLicensesDialog = false },
             title = {
                 Text(
-                    text = "Açık Kaynak Kütüphaneleri",
+                    text = stringResource(R.string.open_source_libraries),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
             },
@@ -461,7 +513,7 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showLicensesDialog = false }) {
-                    Text("Kapat")
+                    Text(stringResource(R.string.close))
                 }
             },
             shape = RoundedCornerShape(24.dp),
@@ -490,12 +542,12 @@ private fun LibraryItem(
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "Sürüm: $version",
+                text = stringResource(R.string.version_prefix, version),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Lisans: $license",
+                text = stringResource(R.string.license_prefix, license),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
