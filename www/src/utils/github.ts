@@ -216,7 +216,7 @@ export function formatBytes(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 }
 
-export type DetectionOS = "windows" | "macos" | "linux" | "other";
+export type DetectionOS = "windows" | "macos" | "linux" | "android" | "other";
 
 /**
  * Clean and reliable helper to detect the user's Operating System
@@ -227,6 +227,9 @@ export function detectOS(): DetectionOS {
   }
   const userAgent = window.navigator.userAgent.toLowerCase();
   
+  if (userAgent.includes("android")) {
+    return "android";
+  }
   if (userAgent.includes("win")) {
     return "windows";
   }
@@ -245,7 +248,10 @@ export function detectOS(): DetectionOS {
 export function getRecommendedAsset(assets: GithubAsset[], os: DetectionOS): GithubAsset | null {
   if (!assets || assets.length === 0) return null;
   
-  if (os === "windows") {
+  if (os === "android") {
+    const apk = assets.find(a => a.name.toLowerCase().endsWith(".apk"));
+    if (apk) return apk;
+  } else if (os === "windows") {
     const exe = assets.find(a => a.name.toLowerCase().endsWith(".exe"));
     if (exe) return exe;
   } else if (os === "macos") {

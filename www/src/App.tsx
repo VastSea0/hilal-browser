@@ -18,6 +18,8 @@ import {
   Boxes,
   GitCommit,
   Users,
+  Smartphone,
+  ShieldCheck,
 } from "lucide-react";
 
 import { GithubRelease } from "./types";
@@ -32,6 +34,8 @@ import {
 
 import DownloadModal from "./components/DownloadModal";
 import ChangelogPage from "./components/ChangelogPage";
+import MobileDocsPage from "./components/MobileDocsPage";
+import PrivacyPage from "./components/PrivacyPage";
 import { CONTRIBUTORS_DATA } from "./data/changelogData";
 
 // M3 Expressive Spring Motion Physics
@@ -72,12 +76,18 @@ export default function App() {
     return saved === "en" || saved === "tr" ? saved : "tr";
   });
 
-  const [currentView, setCurrentView] = useState<"home" | "changelog">(() => {
+  const [currentView, setCurrentView] = useState<"home" | "changelog" | "mobile" | "privacy">(() => {
     if (typeof window !== "undefined") {
       const p = window.location.pathname;
       const h = window.location.hash;
       if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
         return "changelog";
+      }
+      if (p === "/mobile" || h === "#mobile" || h === "#docs") {
+        return "mobile";
+      }
+      if (p === "/privacy" || h === "#privacy") {
+        return "privacy";
       }
     }
     return "home";
@@ -98,6 +108,10 @@ export default function App() {
       const h = window.location.hash;
       if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
         setCurrentView("changelog");
+      } else if (p === "/mobile" || h === "#mobile" || h === "#docs") {
+        setCurrentView("mobile");
+      } else if (p === "/privacy" || h === "#privacy") {
+        setCurrentView("privacy");
       } else {
         setCurrentView("home");
       }
@@ -145,10 +159,16 @@ export default function App() {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
-  const navigateTo = (view: "home" | "changelog", targetId?: string) => {
+  const navigateTo = (view: "home" | "changelog" | "mobile" | "privacy", targetId?: string) => {
     setCurrentView(view);
     if (view === "changelog") {
       window.history.pushState(null, "", "#changelog");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (view === "mobile") {
+      window.history.pushState(null, "", "#mobile");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (view === "privacy") {
+      window.history.pushState(null, "", "#privacy");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       window.history.pushState(null, "", "/");
@@ -195,6 +215,7 @@ export default function App() {
       nav: {
         features: "Özellikler",
         architecture: "Açık Kaynak",
+        mobile: "Mobil",
         changelog: "Sürüm Notları",
         download: "İndir",
         github: "GitHub",
@@ -204,14 +225,15 @@ export default function App() {
         chip: "Açık Kaynak • Alpha",
         tagline: "Web sizin kontrolünüzde.",
         subtitle:
-          "Gizlilik odaklı, dikey sekmeli ve konteyner destekli masaüstü web tarayıcısı. Açık kaynaklı, hızlı ve telemetrisiz.",
+          "Gizlilik odaklı, dikey sekmeli ve konteyner destekli masaüstü ve mobil web tarayıcısı. Açık kaynaklı, hızlı ve bağımsız.",
         downloadBtn: {
           macos: "macOS için İndir",
           windows: "Windows için İndir",
           linux: "Linux için İndir",
+          android: "Android için İndir",
           other: "İndir",
         },
-        viewAllDownloads: "Tüm platformlar (.dmg, .exe, .deb, .zip)",
+        viewAllDownloads: "Tüm platformlar (.dmg, .exe, .deb, .zip, .apk)",
       },
       stories: [
         {
@@ -274,6 +296,11 @@ export default function App() {
             spec: "Ubuntu / Debian .deb • AppImage • Tarball",
             icon: <Terminal className="w-6 h-6" />,
           },
+          {
+            name: "Android",
+            spec: "GeckoView 135 • APK & Google Play",
+            icon: <Smartphone className="w-6 h-6" />,
+          },
         ],
         directDownload: "İndir",
       },
@@ -295,7 +322,7 @@ export default function App() {
           },
           {
             q: "Telemetri veya veri toplanıyor mu?",
-            a: "Hayır. Tarayıcıda telemetri ve arka plan veri gönderimi tamamen devre dışı bırakılmıştır.",
+            a: "Hayır. Tarayıcıda tarama geçmişi veya kişisel veri toplanmaz. Yalnızca GeckoView kararlılığı için tamamen anonim teknik kullanım istatistikleri işlenir. Proje yalnızca topluluk sponsorluklarıyla finanse edilir.",
           },
         ],
       },
@@ -304,6 +331,8 @@ export default function App() {
         authorBy: "Egehan Kahraman",
         source: "Kaynak Kodu",
         releases: "Sürüm Notları",
+        mobileDocs: "Mobil Dokümanları",
+        privacy: "Gizlilik Politikası",
         discord: "Discord",
       },
     },
@@ -311,6 +340,7 @@ export default function App() {
       nav: {
         features: "Features",
         architecture: "Open Source",
+        mobile: "Mobile",
         changelog: "Changelog",
         download: "Download",
         github: "GitHub",
@@ -320,14 +350,15 @@ export default function App() {
         chip: "Open Source • Alpha",
         tagline: "Browse on your terms.",
         subtitle:
-          "A privacy-focused desktop browser with vertical tabs, isolated workspaces, and zero telemetry. Built on Firefox Gecko.",
+          "A privacy-focused desktop & mobile web browser with vertical tabs, isolated workspaces, and zero telemetry. Built on Firefox Gecko.",
         downloadBtn: {
           macos: "Download for macOS",
           windows: "Download for Windows",
           linux: "Download for Linux",
+          android: "Download for Android",
           other: "Download",
         },
-        viewAllDownloads: "All platforms (.dmg, .exe, .deb, .zip)",
+        viewAllDownloads: "All platforms (.dmg, .exe, .deb, .zip, .apk)",
       },
       stories: [
         {
@@ -390,6 +421,11 @@ export default function App() {
             spec: "Ubuntu / Debian .deb • AppImage • Tarball",
             icon: <Terminal className="w-6 h-6" />,
           },
+          {
+            name: "Android",
+            spec: "GeckoView 135 • APK & Google Play",
+            icon: <Smartphone className="w-6 h-6" />,
+          },
         ],
         directDownload: "Download",
       },
@@ -411,7 +447,7 @@ export default function App() {
           },
           {
             q: "Is there any telemetry or tracking?",
-            a: "No. All telemetry endpoints and background analytics pingers are disabled.",
+            a: "No personal or browsing data is ever collected. Only anonymous technical stats are processed for GeckoView engine stability. The project is funded purely by community sponsors.",
           },
         ],
       },
@@ -420,6 +456,8 @@ export default function App() {
         authorBy: "Egehan Kahraman",
         source: "Source Code",
         releases: "Changelog",
+        mobileDocs: "Mobile Docs",
+        privacy: "Privacy Policy",
         discord: "Discord",
       },
     },
@@ -431,6 +469,7 @@ export default function App() {
     if (detectedOS === "macos") return activeT.hero.downloadBtn.macos;
     if (detectedOS === "windows") return activeT.hero.downloadBtn.windows;
     if (detectedOS === "linux") return activeT.hero.downloadBtn.linux;
+    if (detectedOS === "android") return activeT.hero.downloadBtn.android;
     return activeT.hero.downloadBtn.other;
   };
 
@@ -471,6 +510,17 @@ export default function App() {
               className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors cursor-pointer"
             >
               {activeT.nav.architecture}
+            </button>
+            <button
+              onClick={() => navigateTo("mobile")}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                currentView === "mobile"
+                  ? "bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]"
+                  : "text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8"
+              }`}
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>{activeT.nav.mobile}</span>
             </button>
             <button
               onClick={() => navigateTo("changelog")}
@@ -540,6 +590,17 @@ export default function App() {
           lang={lang}
           onBack={() => navigateTo("home")}
           onOpenDownload={() => setIsDownloadOpen(true)}
+        />
+      ) : currentView === "mobile" ? (
+        <MobileDocsPage
+          lang={lang}
+          onBack={() => navigateTo("home")}
+          onOpenDownload={() => setIsDownloadOpen(true)}
+        />
+      ) : currentView === "privacy" ? (
+        <PrivacyPage
+          lang={lang}
+          onBack={() => navigateTo("home")}
         />
       ) : (
         <>
@@ -799,8 +860,8 @@ export default function App() {
               {activeT.downloadSection.subtitle}
             </p>
 
-            {/* 3 M3 Tonal Container Cards */}
-            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {/* 4 M3 Tonal Container Cards */}
+            <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {activeT.downloadSection.platforms.map((p, idx) => (
                 <motion.div
                   key={idx}
@@ -896,7 +957,19 @@ export default function App() {
               {activeT.footer.authorBy}
             </a>
           </div>
-          <div className="flex items-center gap-6 font-semibold">
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-5 font-semibold">
+            <button
+              onClick={() => navigateTo("mobile")}
+              className="hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer"
+            >
+              {activeT.footer.mobileDocs}
+            </button>
+            <button
+              onClick={() => navigateTo("privacy")}
+              className="hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer"
+            >
+              {activeT.footer.privacy}
+            </button>
             <a
               href="https://github.com/VastSea0/hilal-browser"
               target="_blank"

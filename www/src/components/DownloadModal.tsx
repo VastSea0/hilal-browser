@@ -8,7 +8,8 @@ import {
   Terminal,
   ExternalLink,
   CheckCircle2,
-  Package
+  Package,
+  Smartphone
 } from "lucide-react";
 import { GithubRelease, GithubAsset } from "../types";
 import { formatBytes } from "../utils/github";
@@ -43,7 +44,9 @@ export default function DownloadModal({
         windowsZip: "Windows Taşınabilir (.zip)",
         linuxDeb: "Linux Debian / Ubuntu (.deb)",
         linuxAppImage: "Linux Evrensel (.AppImage)",
-        linuxTar: "Linux Kaynak Paketi (.tar.gz)"
+        linuxTar: "Linux Kaynak Paketi (.tar.gz)",
+        androidApk: "Android Paketi (.apk)",
+        androidAab: "Android App Bundle (.aab)"
       }
     },
     en: {
@@ -60,7 +63,9 @@ export default function DownloadModal({
         windowsZip: "Windows Portable (.zip)",
         linuxDeb: "Linux Debian / Ubuntu (.deb)",
         linuxAppImage: "Linux Universal (.AppImage)",
-        linuxTar: "Linux Tarball (.tar.gz)"
+        linuxTar: "Linux Tarball (.tar.gz)",
+        androidApk: "Android Package (.apk)",
+        androidAab: "Android App Bundle (.aab)"
       }
     }
   };
@@ -81,6 +86,8 @@ export default function DownloadModal({
 
   function getPlatformInfo(name: string) {
     const n = name.toLowerCase();
+    if (n.endsWith(".apk")) return { label: activeT.platforms.androidApk, icon: <Smartphone className="w-5 h-5" /> };
+    if (n.endsWith(".aab")) return { label: activeT.platforms.androidAab, icon: <Smartphone className="w-5 h-5" /> };
     if (n.endsWith(".dmg")) return { label: activeT.platforms.macos, icon: <Apple className="w-5 h-5" /> };
     if (n.endsWith(".installer.exe") || (n.endsWith(".exe") && !n.includes("zip")))
       return { label: activeT.platforms.windowsExe, icon: <Laptop className="w-5 h-5" /> };

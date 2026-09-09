@@ -39,11 +39,181 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 457;
+export const REPO_COMMITS_TOTAL = 474;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "a6ea631c553502a349ca09aa8ca395d76e1e278b",
+    "shortHash": "a6ea631",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T22:36:51+03:00",
+    "subject": "docs(android): add play store metadata, graphics, and mobile architecture docs",
+    "body": "",
+    "category": "docs",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a6ea631c553502a349ca09aa8ca395d76e1e278b"
+  },
+  {
+    "hash": "accb406e836cb18102319372a5a34c800d0bb09b",
+    "shortHash": "accb406",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T20:24:58+03:00",
+    "subject": "feat(android): bump compileSdk and targetSdk to 36, increment versionCode to 2",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/accb406e836cb18102319372a5a34c800d0bb09b"
+  },
+  {
+    "hash": "fb16875c8605f79aa211a2e85a42e7a8da7fc188",
+    "shortHash": "fb16875",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T19:56:04+03:00",
+    "subject": "feat(android): configure release signing with upload keystore and ignore keystores",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/fb16875c8605f79aa211a2e85a42e7a8da7fc188"
+  },
+  {
+    "hash": "d55a101101e4cbcaab7117cf0922f2334e3402ea",
+    "shortHash": "d55a101",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T08:26:11+03:00",
+    "subject": "Merge pull request #36 from VastSea0/feat/android-browser",
+    "body": "feat(android): introduce Hilal Browser for Android with GeckoView and M3E",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d55a101101e4cbcaab7117cf0922f2334e3402ea"
+  },
+  {
+    "hash": "5620c6730ab7610fd61e0c8769ce3eea9749c43a",
+    "shortHash": "5620c67",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T08:24:50+03:00",
+    "subject": "feat(android): add private browsing mode, Google Play developer link, release workflow, and version 1.0.0",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5620c6730ab7610fd61e0c8769ce3eea9749c43a"
+  },
+  {
+    "hash": "21c895810bcef6d8425e2e40c58f8cbe53823387",
+    "shortHash": "21c8958",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T08:03:31+03:00",
+    "subject": "feat(android): add Compose Previews for all screens and components in light and dark modes",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/21c895810bcef6d8425e2e40c58f8cbe53823387"
+  },
+  {
+    "hash": "cecab3cfdce65dcb89fb9f0f5720ce3ce4a7fd14",
+    "shortHash": "cecab3c",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T08:00:13+03:00",
+    "subject": "feat(android): redesign Settings screen with M3E grouped rows, fullscreen webview, and typography upgrades",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cecab3cfdce65dcb89fb9f0f5720ce3ce4a7fd14"
+  },
+  {
+    "hash": "ed861e9730c15b3a8b104c7c3326f8b544e5cb0d",
+    "shortHash": "ed861e9",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T08:00:11+03:00",
+    "subject": "feat(android): update TabsTray with workspace emojis, swipe-to-dismiss, and options sheet actions",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ed861e9730c15b3a8b104c7c3326f8b544e5cb0d"
+  },
+  {
+    "hash": "f8fc0de63615f81cecd993f111bba960478fff46",
+    "shortHash": "f8fc0de",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T08:00:02+03:00",
+    "subject": "feat(android): add BangsScreen, HistoryScreen, and BookmarksScreen with swipe actions",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f8fc0de63615f81cecd993f111bba960478fff46"
+  },
+  {
+    "hash": "09f4dc88ff5fa60246acd5d35f93f4808601c6f3",
+    "shortHash": "09f4dc8",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T07:59:03+03:00",
+    "subject": "feat(android): add models for bookmarks, history, and workspace emoji",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/09f4dc88ff5fa60246acd5d35f93f4808601c6f3"
+  },
+  {
+    "hash": "e8bd28a23f4329f0d317271b13a532e721251e2b",
+    "shortHash": "e8bd28a",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T07:28:45+03:00",
+    "subject": "feat(android): add dark theme toggle, GeckoView content blocking and full localization",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e8bd28a23f4329f0d317271b13a532e721251e2b"
+  },
+  {
+    "hash": "82eaeaf86296f9bfb99d98741aec4974f3c150b1",
+    "shortHash": "82eaeaf",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T07:28:40+03:00",
+    "subject": "feat(android): implement M3 Expressive morphing loading indicator and genuine shortcut icons",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/82eaeaf86296f9bfb99d98741aec4974f3c150b1"
+  },
+  {
+    "hash": "cb60d505d01ead30c88fbad576e3b50f4990c9e9",
+    "shortHash": "cb60d50",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T07:28:34+03:00",
+    "subject": "feat(android): add Turkish and English string resources for UI localization",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cb60d505d01ead30c88fbad576e3b50f4990c9e9"
+  },
+  {
+    "hash": "2bf0edb71ce2365f8d6a33a11917ab3ba6fb933d",
+    "shortHash": "2bf0edb",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T07:16:13+03:00",
+    "subject": "feat(android): introduce Hilal Browser for Android with GeckoView and M3E",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2bf0edb71ce2365f8d6a33a11917ab3ba6fb933d"
+  },
+  {
+    "hash": "565690bd3672f36035f8a1c2dfd8680f75145014",
+    "shortHash": "565690b",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T07:13:23+03:00",
+    "subject": "chore: update Firefox upstream version to 157.0a1",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/565690bd3672f36035f8a1c2dfd8680f75145014"
+  },
+  {
+    "hash": "1f1d74fdbef8c7e81a8d313927d62e5f3ba87df8",
+    "shortHash": "1f1d74f",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T07:12:08+03:00",
+    "subject": "remove obsolete project documentation",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1f1d74fdbef8c7e81a8d313927d62e5f3ba87df8"
+  },
+  {
+    "hash": "56915631df94bf7e1dc81d51a6f50e8a92a39eaf",
+    "shortHash": "5691563",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-06T07:00:55+03:00",
+    "subject": "docs(www): rewrite copy across landing page to be direct, natural, and authentic",
+    "body": "",
+    "category": "docs",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/56915631df94bf7e1dc81d51a6f50e8a92a39eaf"
+  },
   {
     "hash": "cbd8f3274531afad949586733cf2ccf9242bcaca",
     "shortHash": "cbd8f32",
@@ -4621,9 +4791,179 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-06T06:58:08+03:00",
-    "commitCount": 16,
+    "date": "2026-09-09T22:36:51+03:00",
+    "commitCount": 33,
     "commits": [
+      {
+        "hash": "a6ea631c553502a349ca09aa8ca395d76e1e278b",
+        "shortHash": "a6ea631",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T22:36:51+03:00",
+        "subject": "docs(android): add play store metadata, graphics, and mobile architecture docs",
+        "body": "",
+        "category": "docs",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a6ea631c553502a349ca09aa8ca395d76e1e278b"
+      },
+      {
+        "hash": "accb406e836cb18102319372a5a34c800d0bb09b",
+        "shortHash": "accb406",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T20:24:58+03:00",
+        "subject": "feat(android): bump compileSdk and targetSdk to 36, increment versionCode to 2",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/accb406e836cb18102319372a5a34c800d0bb09b"
+      },
+      {
+        "hash": "fb16875c8605f79aa211a2e85a42e7a8da7fc188",
+        "shortHash": "fb16875",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T19:56:04+03:00",
+        "subject": "feat(android): configure release signing with upload keystore and ignore keystores",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/fb16875c8605f79aa211a2e85a42e7a8da7fc188"
+      },
+      {
+        "hash": "d55a101101e4cbcaab7117cf0922f2334e3402ea",
+        "shortHash": "d55a101",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T08:26:11+03:00",
+        "subject": "Merge pull request #36 from VastSea0/feat/android-browser",
+        "body": "feat(android): introduce Hilal Browser for Android with GeckoView and M3E",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d55a101101e4cbcaab7117cf0922f2334e3402ea"
+      },
+      {
+        "hash": "5620c6730ab7610fd61e0c8769ce3eea9749c43a",
+        "shortHash": "5620c67",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T08:24:50+03:00",
+        "subject": "feat(android): add private browsing mode, Google Play developer link, release workflow, and version 1.0.0",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5620c6730ab7610fd61e0c8769ce3eea9749c43a"
+      },
+      {
+        "hash": "21c895810bcef6d8425e2e40c58f8cbe53823387",
+        "shortHash": "21c8958",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T08:03:31+03:00",
+        "subject": "feat(android): add Compose Previews for all screens and components in light and dark modes",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/21c895810bcef6d8425e2e40c58f8cbe53823387"
+      },
+      {
+        "hash": "cecab3cfdce65dcb89fb9f0f5720ce3ce4a7fd14",
+        "shortHash": "cecab3c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T08:00:13+03:00",
+        "subject": "feat(android): redesign Settings screen with M3E grouped rows, fullscreen webview, and typography upgrades",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cecab3cfdce65dcb89fb9f0f5720ce3ce4a7fd14"
+      },
+      {
+        "hash": "ed861e9730c15b3a8b104c7c3326f8b544e5cb0d",
+        "shortHash": "ed861e9",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T08:00:11+03:00",
+        "subject": "feat(android): update TabsTray with workspace emojis, swipe-to-dismiss, and options sheet actions",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ed861e9730c15b3a8b104c7c3326f8b544e5cb0d"
+      },
+      {
+        "hash": "f8fc0de63615f81cecd993f111bba960478fff46",
+        "shortHash": "f8fc0de",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T08:00:02+03:00",
+        "subject": "feat(android): add BangsScreen, HistoryScreen, and BookmarksScreen with swipe actions",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f8fc0de63615f81cecd993f111bba960478fff46"
+      },
+      {
+        "hash": "09f4dc88ff5fa60246acd5d35f93f4808601c6f3",
+        "shortHash": "09f4dc8",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T07:59:03+03:00",
+        "subject": "feat(android): add models for bookmarks, history, and workspace emoji",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/09f4dc88ff5fa60246acd5d35f93f4808601c6f3"
+      },
+      {
+        "hash": "e8bd28a23f4329f0d317271b13a532e721251e2b",
+        "shortHash": "e8bd28a",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T07:28:45+03:00",
+        "subject": "feat(android): add dark theme toggle, GeckoView content blocking and full localization",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e8bd28a23f4329f0d317271b13a532e721251e2b"
+      },
+      {
+        "hash": "82eaeaf86296f9bfb99d98741aec4974f3c150b1",
+        "shortHash": "82eaeaf",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T07:28:40+03:00",
+        "subject": "feat(android): implement M3 Expressive morphing loading indicator and genuine shortcut icons",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/82eaeaf86296f9bfb99d98741aec4974f3c150b1"
+      },
+      {
+        "hash": "cb60d505d01ead30c88fbad576e3b50f4990c9e9",
+        "shortHash": "cb60d50",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T07:28:34+03:00",
+        "subject": "feat(android): add Turkish and English string resources for UI localization",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cb60d505d01ead30c88fbad576e3b50f4990c9e9"
+      },
+      {
+        "hash": "2bf0edb71ce2365f8d6a33a11917ab3ba6fb933d",
+        "shortHash": "2bf0edb",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T07:16:13+03:00",
+        "subject": "feat(android): introduce Hilal Browser for Android with GeckoView and M3E",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2bf0edb71ce2365f8d6a33a11917ab3ba6fb933d"
+      },
+      {
+        "hash": "565690bd3672f36035f8a1c2dfd8680f75145014",
+        "shortHash": "565690b",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T07:13:23+03:00",
+        "subject": "chore: update Firefox upstream version to 157.0a1",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/565690bd3672f36035f8a1c2dfd8680f75145014"
+      },
+      {
+        "hash": "1f1d74fdbef8c7e81a8d313927d62e5f3ba87df8",
+        "shortHash": "1f1d74f",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T07:12:08+03:00",
+        "subject": "remove obsolete project documentation",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1f1d74fdbef8c7e81a8d313927d62e5f3ba87df8"
+      },
+      {
+        "hash": "56915631df94bf7e1dc81d51a6f50e8a92a39eaf",
+        "shortHash": "5691563",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T07:00:55+03:00",
+        "subject": "docs(www): rewrite copy across landing page to be direct, natural, and authentic",
+        "body": "",
+        "category": "docs",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/56915631df94bf7e1dc81d51a6f50e8a92a39eaf"
+      },
       {
         "hash": "cbd8f3274531afad949586733cf2ccf9242bcaca",
         "shortHash": "cbd8f32",
@@ -9453,7 +9793,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 445,
+    "contributions": 462,
     "role": "Lead Developer"
   },
   {
