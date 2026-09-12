@@ -1,5 +1,6 @@
 package com.vastsea.hilal.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -7,6 +8,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalContext
+import com.vastsea.hilal.search.SearchEngineManager
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
@@ -44,8 +47,10 @@ fun SettingsScreen(
     onUrlBarStyleChange: (Int) -> Unit = {},
     toolbarStyle: Int = 0, // 0: Floating, 1: Docked
     onToolbarStyleChange: (Int) -> Unit = {},
-    hideOnScroll: Boolean = true,
-    onHideOnScrollChange: (Boolean) -> Unit = {},
+    hideTopBarOnScroll: Boolean = true,
+    onHideTopBarOnScrollChange: (Boolean) -> Unit = {},
+    hideBottomBarOnScroll: Boolean = true,
+    onHideBottomBarOnScrollChange: (Boolean) -> Unit = {},
     darkWebsites: Boolean = false,
     onDarkWebsitesChange: (Boolean) -> Unit = {},
     privacyLevel: Int = 1, // 0: Standard, 1: Strict, 2: Hilal Ultra
@@ -53,12 +58,14 @@ fun SettingsScreen(
     defaultSearchEngine: String = "DuckDuckGo",
     onDefaultSearchEngineChange: (String) -> Unit = {},
     onOpenBangs: () -> Unit = {},
+    onOpenAddons: () -> Unit = {},
     onOpenHistory: () -> Unit = {},
     onOpenBookmarks: () -> Unit = {},
     onNavigateBack: () -> Unit,
     onClearData: () -> Unit,
     onOpenUrl: (String) -> Unit = {}
 ) {
+    val context = LocalContext.current
     var searchQuery by remember { mutableStateOf("") }
     var showClearedSnackbar by remember { mutableStateOf(false) }
     var showLicensesDialog by remember { mutableStateOf(false) }
@@ -69,6 +76,9 @@ fun SettingsScreen(
     var showUrlBarDialog by remember { mutableStateOf(false) }
     var showToolbarDialog by remember { mutableStateOf(false) }
     var showSearchEngineDialog by remember { mutableStateOf(false) }
+    var showAddSearchEngineDialog by remember { mutableStateOf(false) }
+    var newEngineName by remember { mutableStateOf("") }
+    var newEngineUrl by remember { mutableStateOf("") }
     var showPrivacyDialog by remember { mutableStateOf(false) }
 
     val privacyLabels = listOf(
@@ -268,15 +278,28 @@ fun SettingsScreen(
 
                 SettingsDivider()
 
-                // Kaydırınca Çubukları Gizle (Hide Bars on Scroll) Switch
+                // Kaydırınca Üst Çubuğu Gizle (Hide Top Toolbar on Scroll) Switch
+                SettingsSwitchRow(
+                    icon = Icons.Outlined.SwipeUp,
+                    iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onTertiaryContainer,
+                    title = stringResource(R.string.hide_top_toolbar_on_scroll),
+                    subtitle = stringResource(R.string.hide_top_toolbar_on_scroll_desc),
+                    checked = hideTopBarOnScroll,
+                    onCheckedChange = onHideTopBarOnScrollChange
+                )
+
+                SettingsDivider()
+
+                // Kaydırınca Alt Çubuğu Gizle (Hide Bottom Toolbar on Scroll) Switch
                 SettingsSwitchRow(
                     icon = Icons.Outlined.SwipeDown,
                     iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
                     iconTint = MaterialTheme.colorScheme.onTertiaryContainer,
-                    title = stringResource(R.string.hide_on_scroll),
-                    subtitle = stringResource(R.string.hide_on_scroll_desc),
-                    checked = hideOnScroll,
-                    onCheckedChange = onHideOnScrollChange
+                    title = stringResource(R.string.hide_bottom_toolbar_on_scroll),
+                    subtitle = stringResource(R.string.hide_bottom_toolbar_on_scroll_desc),
+                    checked = hideBottomBarOnScroll,
+                    onCheckedChange = onHideBottomBarOnScrollChange
                 )
 
                 SettingsDivider()
@@ -320,6 +343,18 @@ fun SettingsScreen(
 
                 SettingsDivider()
 
+                // Custom Search Engines
+                SettingsNavRow(
+                    icon = Icons.Outlined.ManageSearch,
+                    iconBgColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    iconTint = MaterialTheme.colorScheme.onSurface,
+                    title = stringResource(R.string.custom_search_engines),
+                    subtitle = stringResource(R.string.custom_search_engines_desc),
+                    onClick = { showSearchEngineDialog = true }
+                )
+
+                SettingsDivider()
+
                 // Hilal Bangs Screen Navigation
                 SettingsNavRow(
                     icon = Icons.Outlined.Bolt,
@@ -328,6 +363,18 @@ fun SettingsScreen(
                     title = stringResource(R.string.bangs_manager),
                     subtitle = stringResource(R.string.bangs_manager_desc),
                     onClick = onOpenBangs
+                )
+
+                SettingsDivider()
+
+                // Firefox Add-ons Screen Navigation
+                SettingsNavRow(
+                    icon = Icons.Outlined.Extension,
+                    iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onTertiaryContainer,
+                    title = stringResource(R.string.addons_manager),
+                    subtitle = stringResource(R.string.addons_manager_desc),
+                    onClick = onOpenAddons
                 )
             }
 
@@ -510,15 +557,181 @@ fun SettingsScreen(
     }
 
     if (showSearchEngineDialog) {
-        RadioChoiceDialog(
-            title = stringResource(R.string.default_search_engine),
-            options = searchEngines,
-            selectedIndex = searchEngines.indexOf(defaultSearchEngine).coerceAtLeast(0),
-            onSelect = {
-                onDefaultSearchEngineChange(searchEngines[it])
-                showSearchEngineDialog = false
+        val allEngines = SearchEngineManager.getAllEngines()
+        AlertDialog(
+            onDismissRequest = { showSearchEngineDialog = false },
+            title = {
+                Text(
+                    stringResource(R.string.custom_search_engines),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                )
             },
-            onDismiss = { showSearchEngineDialog = false }
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    allEngines.forEach { engine ->
+                        val isSelected = engine.name.equals(defaultSearchEngine, ignoreCase = true)
+                        Surface(
+                            shape = ShapeCache.smooth16,
+                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceContainerHigh,
+                            border = if (isSelected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onDefaultSearchEngineChange(engine.name)
+                                    showSearchEngineDialog = false
+                                }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = isSelected,
+                                    onClick = {
+                                        onDefaultSearchEngineChange(engine.name)
+                                        showSearchEngineDialog = false
+                                    }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = engine.name,
+                                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        if (isSelected) {
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Surface(
+                                                shape = ShapeCache.smoothPill,
+                                                color = MaterialTheme.colorScheme.primary
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.default_badge),
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Text(
+                                        text = engine.queryUrl,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+
+                                if (engine.isCustom) {
+                                    IconButton(
+                                        onClick = {
+                                            SearchEngineManager.removeCustomEngine(context, engine.id)
+                                            if (defaultSearchEngine.equals(engine.name, ignoreCase = true)) {
+                                                onDefaultSearchEngineChange("DuckDuckGo")
+                                            }
+                                        },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = stringResource(R.string.delete),
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Button(
+                        onClick = {
+                            newEngineName = ""
+                            newEngineUrl = ""
+                            showAddSearchEngineDialog = true
+                        },
+                        shape = ShapeCache.smoothPill,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(stringResource(R.string.add_search_engine))
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showSearchEngineDialog = false }) {
+                    Text(stringResource(R.string.close))
+                }
+            },
+            shape = ShapeCache.smooth28,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    }
+
+    if (showAddSearchEngineDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddSearchEngineDialog = false },
+            title = {
+                Text(
+                    stringResource(R.string.add_search_engine),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = newEngineName,
+                        onValueChange = { newEngineName = it },
+                        label = { Text(stringResource(R.string.engine_name_hint)) },
+                        singleLine = true,
+                        shape = ShapeCache.smooth14,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = newEngineUrl,
+                        onValueChange = { newEngineUrl = it },
+                        label = { Text(stringResource(R.string.engine_url_hint)) },
+                        singleLine = true,
+                        shape = ShapeCache.smooth14,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val added = SearchEngineManager.addCustomEngine(context, newEngineName, newEngineUrl)
+                        if (added != null) {
+                            onDefaultSearchEngineChange(added.name)
+                            showAddSearchEngineDialog = false
+                        }
+                    },
+                    shape = ShapeCache.smoothPill,
+                    enabled = newEngineName.isNotBlank() && newEngineUrl.isNotBlank()
+                ) {
+                    Text(stringResource(R.string.save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAddSearchEngineDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+            shape = ShapeCache.smooth28,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
     }
 

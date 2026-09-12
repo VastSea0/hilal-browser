@@ -1,5 +1,6 @@
 package com.vastsea.hilal
 
+import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -38,18 +39,23 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import com.vastsea.hilal.extensions.AddonManager
 import com.vastsea.hilal.model.BookmarkItem
 import com.vastsea.hilal.model.BrowserTab
 import com.vastsea.hilal.model.HistoryItem
 import com.vastsea.hilal.model.Workspace
 import com.vastsea.hilal.search.HilalBangsEngine
+import com.vastsea.hilal.search.SearchEngineManager
 import com.vastsea.hilal.ui.components.*
+import com.vastsea.hilal.ui.screens.AddonsScreen
 import com.vastsea.hilal.ui.screens.BangsScreen
 import com.vastsea.hilal.ui.screens.BookmarksScreen
 import com.vastsea.hilal.ui.screens.HistoryScreen
 import com.vastsea.hilal.ui.screens.SettingsScreen
 import com.vastsea.hilal.ui.theme.HilalTheme
+import org.mozilla.geckoview.AllowOrDeny
 import org.mozilla.geckoview.ContentBlocking
+import org.mozilla.geckoview.GeckoResult
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
 import org.mozilla.geckoview.GeckoSession
@@ -65,6 +71,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        SearchEngineManager.init(this)
 
         val settings = GeckoRuntimeSettings.Builder()
             .contentBlocking(
@@ -75,6 +82,7 @@ class MainActivity : ComponentActivity() {
             .build()
 
         geckoRuntime = GeckoRuntime.create(this, settings)
+        AddonManager.initialize(this, geckoRuntime)
 
         setContent {
             var themeMode by remember { mutableIntStateOf(0) } // 0: System, 1: Light, 2: Dark
@@ -150,12 +158,16 @@ fun HilalBrowserApp(
     val historyItems = remember { mutableStateListOf<HistoryItem>() }
     val bookmarkItems = remember { mutableStateListOf<BookmarkItem>() }
 
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("hilal_app_prefs", Context.MODE_PRIVATE) }
+
     // UI Styles & Toggles
-    var urlBarStyle by remember { mutableIntStateOf(0) } // 0: Floating, 1: Docked
-    var toolbarStyle by remember { mutableIntStateOf(0) } // 0: Floating, 1: Docked
-    var hideOnScroll by remember { mutableStateOf(true) }
-    var darkWebsites by remember { mutableStateOf(false) }
-    var defaultSearchEngine by remember { mutableStateOf("DuckDuckGo") }
+    var urlBarStyle by remember { mutableIntStateOf(prefs.getInt("url_bar_style", 0)) } // 0: Floating, 1: Docked
+    var toolbarStyle by remember { mutableIntStateOf(prefs.getInt("toolbar_style", 0)) } // 0: Floating, 1: Docked
+    var hideTopBarOnScroll by remember { mutableStateOf(prefs.getBoolean("hide_top_bar_on_scroll", true)) }
+    var hideBottomBarOnScroll by remember { mutableStateOf(prefs.getBoolean("hide_bottom_bar_on_scroll", true)) }
+    var darkWebsites by remember { mutableStateOf(prefs.getBoolean("dark_websites", false)) }
+    var defaultSearchEngine by remember { mutableStateOf(prefs.getString("default_search_engine", "DuckDuckGo") ?: "DuckDuckGo") }
 
     // Hide-on-scroll state
     var isBarsVisible by remember { mutableStateOf(true) }
@@ -222,6 +234,7 @@ fun HilalBrowserApp(
     var showBangsScreen by remember { mutableStateOf(false) }
     var showHistoryScreen by remember { mutableStateOf(false) }
     var showBookmarksScreen by remember { mutableStateOf(false) }
+    var showAddonsScreen by remember { mutableStateOf(false) }
     var showNewWorkspaceDialog by remember { mutableStateOf(false) }
     var newWorkspaceNameDialog by remember { mutableStateOf("") }
     var newWorkspaceEmojiDialog by remember { mutableStateOf("🌐") }
@@ -260,6 +273,18 @@ fun HilalBrowserApp(
             }
             override fun onCanGoForward(session: GeckoSession, canGoForward: Boolean) {
                 tab.canGoForward = canGoForward
+            }
+            override fun onLoadRequest(
+                session: GeckoSession,
+                request: GeckoSession.NavigationDelegate.LoadRequest
+            ): GeckoResult<AllowOrDeny>? {
+                if (request.uri.endsWith(".xpi", ignoreCase = true)) {
+                    geckoRuntime?.let { rt ->
+                        AddonManager.installFromUrl(rt, request.uri) {}
+                    }
+                    return GeckoResult.fromValue(AllowOrDeny.DENY)
+                }
+                return null
             }
             override fun onLocationChange(
                 session: GeckoSession,
@@ -313,7 +338,7 @@ fun HilalBrowserApp(
 
         session?.scrollDelegate = object : GeckoSession.ScrollDelegate {
             override fun onScrollChanged(session: GeckoSession, scrollX: Int, scrollY: Int) {
-                if (!hideOnScroll) {
+                if (!hideTopBarOnScroll && !hideBottomBarOnScroll) {
                     isBarsVisible = true
                     return
                 }
@@ -365,9 +390,10 @@ fun HilalBrowserApp(
 
     // Android Hardware / Predictive Back handling
     BackHandler(
-        enabled = showTabsTray || showSettingsScreen || showBangsScreen || showHistoryScreen || showBookmarksScreen || showOptionsSheet || (activeTab?.canGoBack == true)
+        enabled = showTabsTray || showSettingsScreen || showBangsScreen || showHistoryScreen || showBookmarksScreen || showAddonsScreen || showOptionsSheet || (activeTab?.canGoBack == true)
     ) {
         when {
+            showAddonsScreen -> showAddonsScreen = false
             showBangsScreen -> showBangsScreen = false
             showSettingsScreen -> showSettingsScreen = false
             showHistoryScreen -> showHistoryScreen = false
@@ -379,13 +405,14 @@ fun HilalBrowserApp(
     }
 
     // Animated bar offsets for hide-on-scroll
-    val shouldShowBars = !hideOnScroll || isBarsVisible || activeTab?.url == "about:newtab" || activeTab?.url == "about:blank"
+    val shouldShowTopBar = !hideTopBarOnScroll || isBarsVisible || activeTab?.url == "about:newtab" || activeTab?.url == "about:blank"
+    val shouldShowBottomBar = !hideBottomBarOnScroll || isBarsVisible || activeTab?.url == "about:newtab" || activeTab?.url == "about:blank"
     val topBarOffset by animateDpAsState(
-        targetValue = if (shouldShowBars) 0.dp else (-120).dp,
+        targetValue = if (shouldShowTopBar) 0.dp else (-120).dp,
         label = "topBarOffset"
     )
     val bottomBarOffset by animateDpAsState(
-        targetValue = if (shouldShowBars) 0.dp else 140.dp,
+        targetValue = if (shouldShowBottomBar) 0.dp else 140.dp,
         label = "bottomBarOffset"
     )
 
@@ -396,20 +423,47 @@ fun HilalBrowserApp(
             themeMode = themeMode,
             onThemeChange = onThemeChange,
             urlBarStyle = urlBarStyle,
-            onUrlBarStyleChange = { urlBarStyle = it },
+            onUrlBarStyleChange = {
+                urlBarStyle = it
+                prefs.edit().putInt("url_bar_style", it).apply()
+            },
             toolbarStyle = toolbarStyle,
-            onToolbarStyleChange = { toolbarStyle = it },
-            hideOnScroll = hideOnScroll,
-            onHideOnScrollChange = { hideOnScroll = it },
+            onToolbarStyleChange = {
+                toolbarStyle = it
+                prefs.edit().putInt("toolbar_style", it).apply()
+            },
+            hideTopBarOnScroll = hideTopBarOnScroll,
+            onHideTopBarOnScrollChange = {
+                hideTopBarOnScroll = it
+                prefs.edit().putBoolean("hide_top_bar_on_scroll", it).apply()
+            },
+            hideBottomBarOnScroll = hideBottomBarOnScroll,
+            onHideBottomBarOnScrollChange = {
+                hideBottomBarOnScroll = it
+                prefs.edit().putBoolean("hide_bottom_bar_on_scroll", it).apply()
+            },
             darkWebsites = darkWebsites,
-            onDarkWebsitesChange = { darkWebsites = it },
+            onDarkWebsitesChange = {
+                darkWebsites = it
+                prefs.edit().putBoolean("dark_websites", it).apply()
+            },
             privacyLevel = privacyLevel,
-            onPrivacyLevelChange = { applyPrivacyLevel(it) },
+            onPrivacyLevelChange = {
+                applyPrivacyLevel(it)
+                prefs.edit().putInt("privacy_level", it).apply()
+            },
             defaultSearchEngine = defaultSearchEngine,
-            onDefaultSearchEngineChange = { defaultSearchEngine = it },
+            onDefaultSearchEngineChange = {
+                defaultSearchEngine = it
+                prefs.edit().putString("default_search_engine", it).apply()
+            },
             onOpenBangs = {
                 showSettingsScreen = false
                 showBangsScreen = true
+            },
+            onOpenAddons = {
+                showSettingsScreen = false
+                showAddonsScreen = true
             },
             onOpenHistory = {
                 showSettingsScreen = false
@@ -475,6 +529,22 @@ fun HilalBrowserApp(
         return
     }
 
+    if (showAddonsScreen) {
+        AddonsScreen(
+            geckoRuntime = geckoRuntime,
+            onNavigateBack = { showAddonsScreen = false },
+            onOpenUrl = { targetUrl ->
+                showAddonsScreen = false
+                val resolved = HilalBangsEngine.resolveUrl(targetUrl, defaultSearchEngine)
+                activeTab?.let { tab ->
+                    tab.url = resolved
+                    tab.session?.loadUri(resolved)
+                } ?: createNewTab(url = resolved)
+            }
+        )
+        return
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -487,10 +557,10 @@ fun HilalBrowserApp(
                     .fillMaxSize()
                     .padding(
                         top = if (urlBarStyle == 1) {
-                            animateDpAsState(if (shouldShowBars) 64.dp else 0.dp, label = "dockedTopPad").value
+                            animateDpAsState(if (shouldShowTopBar) 68.dp else 0.dp, label = "dockedTopPad").value
                         } else 0.dp,
                         bottom = if (toolbarStyle == 1) {
-                            animateDpAsState(if (shouldShowBars) 72.dp else 0.dp, label = "dockedBottomPad").value
+                            animateDpAsState(if (shouldShowBottomBar) 76.dp else 0.dp, label = "dockedBottomPad").value
                         } else 0.dp
                     )
             ) {
@@ -574,6 +644,7 @@ fun HilalBrowserApp(
                 isPrivate = activeTab?.isPrivate == true,
                 isLoading = activeTab?.isLoading == true,
                 loadingProgress = ((activeTab?.progress ?: 0).toFloat() / 100f).coerceIn(0f, 1f),
+                defaultSearchEngine = defaultSearchEngine,
                 onNavigate = { resolvedUrl ->
                     activeTab?.let { tab ->
                         tab.url = resolvedUrl
@@ -695,6 +766,10 @@ fun HilalBrowserApp(
             onOpenBookmarks = { showBookmarksScreen = true },
             onOpenHistory = { showHistoryScreen = true },
             onOpenSettings = { showSettingsScreen = true },
+            onOpenAddons = {
+                showOptionsSheet = false
+                showAddonsScreen = true
+            },
             onNewPrivateTab = {
                 createNewTab(url = "about:newtab", isPrivate = true)
             },

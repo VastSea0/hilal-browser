@@ -51,28 +51,25 @@ object HilalBangsEngine {
             }
         }
 
-        // Check if already an absolute URL
-        if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("about:")) {
+        // Check if already an absolute URL or scheme
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://") ||
+            trimmed.startsWith("about:") || trimmed.startsWith("file:") ||
+            trimmed.startsWith("javascript:") || trimmed.startsWith("content:")
+        ) {
             return trimmed
         }
 
-        // Check if looks like a web address (e.g. "google.com" or "news.ycombinator.com/path")
-        val looksLikeDomain = !trimmed.contains(" ") && (
-            trimmed.contains(".com") || trimmed.contains(".org") ||
-            trimmed.contains(".net") || trimmed.contains(".io") ||
-            trimmed.contains(".dev") || trimmed.contains(".tr") ||
-            trimmed.contains(".me") || trimmed.contains("localhost")
+        // Robust domain and host check without spaces
+        val isDomainOrHost = !trimmed.contains(" ") && (
+            trimmed.startsWith("localhost", ignoreCase = true) ||
+            trimmed.matches(Regex("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(:\\d+)?(/.*)?$")) ||
+            trimmed.matches(Regex("^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\\.[a-zA-Z]{2,}(:\\d+)?(/.*)?$"))
         )
 
-        return if (looksLikeDomain) {
+        return if (isDomainOrHost) {
             "https://$trimmed"
         } else {
-            val encoded = URLEncoder.encode(trimmed, "UTF-8")
-            when (defaultEngine) {
-                "Google" -> "https://www.google.com/search?q=$encoded"
-                "Bing" -> "https://www.bing.com/search?q=$encoded"
-                else -> "https://duckduckgo.com/?q=$encoded"
-            }
+            SearchEngineManager.buildSearchUrl(trimmed, defaultEngine)
         }
     }
 
