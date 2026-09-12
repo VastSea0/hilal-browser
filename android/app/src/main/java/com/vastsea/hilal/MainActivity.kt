@@ -19,7 +19,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import com.vastsea.hilal.ui.theme.ShapeCache
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -572,6 +572,8 @@ fun HilalBrowserApp(
                 title = activeTab?.title ?: "Hilal",
                 isFloating = urlBarStyle == 0,
                 isPrivate = activeTab?.isPrivate == true,
+                isLoading = activeTab?.isLoading == true,
+                loadingProgress = ((activeTab?.progress ?: 0).toFloat() / 100f).coerceIn(0f, 1f),
                 onNavigate = { resolvedUrl ->
                     activeTab?.let { tab ->
                         tab.url = resolvedUrl
@@ -581,178 +583,41 @@ fun HilalBrowserApp(
                 onReload = {
                     activeTab?.session?.reload()
                 },
+                onSwipePreviousTab = {
+                    val currentWsTabs = tabs.filter { it.workspaceId == currentWorkspaceId && it.isPrivate == (activeTab?.isPrivate == true) }
+                    val currentIndex = currentWsTabs.indexOfFirst { it.id == activeTabId }
+                    if (currentIndex > 0) {
+                        activeTabId = currentWsTabs[currentIndex - 1].id
+                    }
+                },
+                onSwipeNextTab = {
+                    val currentWsTabs = tabs.filter { it.workspaceId == currentWorkspaceId && it.isPrivate == (activeTab?.isPrivate == true) }
+                    val currentIndex = currentWsTabs.indexOfFirst { it.id == activeTabId }
+                    if (currentIndex in 0 until currentWsTabs.size - 1) {
+                        activeTabId = currentWsTabs[currentIndex + 1].id
+                    }
+                },
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .offset(y = topBarOffset)
             )
 
-            // Bottom Toolbar overlay (Floating or Docked)
-            if (toolbarStyle == 0) {
-                HorizontalFloatingToolbar(
-                    expanded = true,
-                    shape = CircleShape,
-                    colors = FloatingToolbarDefaults.standardFloatingToolbarColors(),
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .navigationBarsPadding()
-                        .padding(bottom = 16.dp)
-                        .offset(y = bottomBarOffset),
-                    content = {
-                        // 1. Back
-                        IconButton(
-                            onClick = { activeTab?.session?.goBack() },
-                            enabled = activeTab?.canGoBack ?: false
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = if (activeTab?.canGoBack == true) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            )
-                        }
-
-                        // 2. Forward
-                        IconButton(
-                            onClick = { activeTab?.session?.goForward() },
-                            enabled = activeTab?.canGoForward ?: false
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = stringResource(R.string.forward),
-                                tint = if (activeTab?.canGoForward == true) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            )
-                        }
-
-                        // 3. New Tab Pill Button with Long-Press for Workspace Creation
-                        Box(
-                            modifier = Modifier
-                                .size(width = 56.dp, height = 42.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(MaterialTheme.colorScheme.primary)
-                                .combinedClickable(
-                                    onClick = { createNewTab(url = "about:newtab") },
-                                    onLongClick = { showNewWorkspaceDialog = true }
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = stringResource(R.string.new_tab),
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-
-                        // 4. Tabs Tray with badge
-                        BadgedBox(
-                            badge = {
-                                Badge(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                ) {
-                                    Text(tabsInCurrentWorkspace.size.toString())
-                                }
-                            }
-                        ) {
-                            IconButton(onClick = { showTabsTray = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.Tab,
-                                    contentDescription = stringResource(R.string.tabs)
-                                )
-                            }
-                        }
-
-                        // 5. Options Menu
-                        IconButton(onClick = { showOptionsSheet = true }) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = stringResource(R.string.options)
-                            )
-                        }
-                    }
-                )
-            } else {
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainer,
-                    tonalElevation = 3.dp,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .offset(y = bottomBarOffset)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .navigationBarsPadding()
-                            .padding(horizontal = 16.dp, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = { activeTab?.session?.goBack() },
-                            enabled = activeTab?.canGoBack ?: false
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = if (activeTab?.canGoBack == true) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            )
-                        }
-
-                        IconButton(
-                            onClick = { activeTab?.session?.goForward() },
-                            enabled = activeTab?.canGoForward ?: false
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = stringResource(R.string.forward),
-                                tint = if (activeTab?.canGoForward == true) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            )
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .size(width = 56.dp, height = 42.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(MaterialTheme.colorScheme.primary)
-                                .combinedClickable(
-                                    onClick = { createNewTab(url = "about:newtab") },
-                                    onLongClick = { showNewWorkspaceDialog = true }
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = stringResource(R.string.new_tab),
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-
-                        BadgedBox(
-                            badge = {
-                                Badge(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                ) {
-                                    Text(tabsInCurrentWorkspace.size.toString())
-                                }
-                            }
-                        ) {
-                            IconButton(onClick = { showTabsTray = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.Tab,
-                                    contentDescription = stringResource(R.string.tabs)
-                                )
-                            }
-                        }
-
-                        IconButton(onClick = { showOptionsSheet = true }) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = stringResource(R.string.options)
-                            )
-                        }
-                    }
-                }
-            }
+            // Bottom Toolbar (M3 Expressive BrowserBottomBar with squish-and-stretch & gestures)
+            BrowserBottomBar(
+                canGoBack = activeTab?.canGoBack == true,
+                canGoForward = activeTab?.canGoForward == true,
+                tabCount = tabsInCurrentWorkspace.size,
+                isDocked = toolbarStyle == 1,
+                onGoBack = { activeTab?.session?.goBack() },
+                onGoForward = { activeTab?.session?.goForward() },
+                onNewTab = { createNewTab(url = "about:newtab") },
+                onNewWorkspaceLongPress = { showNewWorkspaceDialog = true },
+                onOpenTabsTray = { showTabsTray = true },
+                onOpenOptions = { showOptionsSheet = true },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(y = bottomBarOffset)
+            )
         }
     }
 
@@ -841,7 +706,7 @@ fun HilalBrowserApp(
     if (showNewWorkspaceDialog) {
         AlertDialog(
             onDismissRequest = { showNewWorkspaceDialog = false },
-            shape = RoundedCornerShape(28.dp),
+            shape = ShapeCache.smooth28,
             title = { Text(stringResource(R.string.new_workspace)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -855,7 +720,7 @@ fun HilalBrowserApp(
                             }
                         },
                         singleLine = true,
-                        shape = RoundedCornerShape(16.dp),
+                        shape = ShapeCache.smooth16,
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -906,7 +771,7 @@ fun HilalBrowserApp(
                             showNewWorkspaceDialog = false
                         }
                     },
-                    shape = CircleShape
+                    shape = ShapeCache.smoothPill
                 ) {
                     Text(stringResource(R.string.create))
                 }

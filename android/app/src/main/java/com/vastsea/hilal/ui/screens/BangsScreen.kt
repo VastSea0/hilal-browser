@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import com.vastsea.hilal.ui.theme.ShapeCache
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -128,7 +128,7 @@ fun BangsScreen(
                             }
                         }
                     },
-                    shape = RoundedCornerShape(24.dp),
+                    shape = ShapeCache.smoothPill,
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -143,7 +143,7 @@ fun BangsScreen(
             item {
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    shape = RoundedCornerShape(24.dp),
+                    shape = ShapeCache.smooth24,
                     modifier = Modifier.fillMaxWidth(),
                     tonalElevation = 1.dp
                 ) {
@@ -202,7 +202,7 @@ fun BangsScreen(
                                     onValueChange = { newPrefix = it },
                                     label = { Text(stringResource(R.string.bang_prefix_hint)) },
                                     singleLine = true,
-                                    shape = RoundedCornerShape(16.dp),
+                                    shape = ShapeCache.smooth16,
                                     modifier = Modifier.fillMaxWidth()
                                 )
                                 OutlinedTextField(
@@ -210,7 +210,7 @@ fun BangsScreen(
                                     onValueChange = { newName = it },
                                     label = { Text(stringResource(R.string.bang_name_hint)) },
                                     singleLine = true,
-                                    shape = RoundedCornerShape(16.dp),
+                                    shape = ShapeCache.smooth16,
                                     modifier = Modifier.fillMaxWidth()
                                 )
                                 OutlinedTextField(
@@ -218,7 +218,7 @@ fun BangsScreen(
                                     onValueChange = { newUrl = it },
                                     label = { Text(stringResource(R.string.bang_url_hint)) },
                                     singleLine = true,
-                                    shape = RoundedCornerShape(16.dp),
+                                    shape = ShapeCache.smooth16,
                                     modifier = Modifier.fillMaxWidth()
                                 )
                                 Row(
@@ -266,7 +266,7 @@ fun BangsScreen(
                 item {
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceContainerLow,
-                        shape = RoundedCornerShape(20.dp),
+                        shape = ShapeCache.smooth20,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Box(
@@ -322,7 +322,7 @@ private fun BangCard(
 ) {
     Surface(
         color = if (isCustom) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f) else MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(18.dp),
+        shape = ShapeCache.smooth16,
         modifier = Modifier.fillMaxWidth(),
         tonalElevation = 1.dp
     ) {
@@ -334,7 +334,7 @@ private fun BangCard(
         ) {
             Surface(
                 color = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(12.dp),
+                shape = ShapeCache.smooth12,
                 modifier = Modifier.size(width = 46.dp, height = 36.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {

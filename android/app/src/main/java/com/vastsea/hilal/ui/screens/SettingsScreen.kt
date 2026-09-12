@@ -30,6 +30,7 @@ import com.vastsea.hilal.R
 import android.content.res.Configuration
 import androidx.compose.ui.tooling.preview.Preview
 import com.vastsea.hilal.ui.theme.HilalTheme
+import com.vastsea.hilal.ui.theme.ShapeCache
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -163,7 +164,7 @@ fun SettingsScreen(
                         }
                     }
                 },
-                shape = RoundedCornerShape(24.dp),
+                shape = ShapeCache.smoothPill,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -178,7 +179,7 @@ fun SettingsScreen(
             if (searchQuery.isBlank()) {
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    shape = RoundedCornerShape(24.dp),
+                    shape = ShapeCache.smooth24,
                     modifier = Modifier.fillMaxWidth(),
                     tonalElevation = 1.dp
                 ) {
@@ -533,7 +534,7 @@ fun SettingsScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     privacyLabels.forEachIndexed { index, label ->
                         Surface(
-                            shape = RoundedCornerShape(14.dp),
+                            shape = ShapeCache.smooth14,
                             color = if (index == privacyLevel) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceContainerHigh,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -578,7 +579,7 @@ fun SettingsScreen(
                     Text(stringResource(R.string.close))
                 }
             },
-            shape = RoundedCornerShape(24.dp),
+            shape = ShapeCache.smooth28,
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
     }
@@ -636,7 +637,7 @@ fun SettingsScreen(
                     Text(stringResource(R.string.close))
                 }
             },
-            shape = RoundedCornerShape(24.dp),
+            shape = ShapeCache.smooth28,
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
     }
@@ -656,7 +657,7 @@ private fun SettingsGroupCard(
         )
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainerLow,
-            shape = RoundedCornerShape(24.dp),
+            shape = ShapeCache.smooth24,
             modifier = Modifier.fillMaxWidth(),
             tonalElevation = 1.dp
         ) {
@@ -683,7 +684,7 @@ private fun SettingsNavRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(ShapeCache.smooth14)
             .clickable { onClick() }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -739,7 +740,7 @@ private fun SettingsSwitchRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(ShapeCache.smooth14)
             .clickable { onCheckedChange(!checked) }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -795,7 +796,7 @@ private fun SettingsActionRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(ShapeCache.smooth14)
             .clickable { onAction() }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -854,7 +855,7 @@ private fun SettingsExternalRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(ShapeCache.smooth14)
             .clickable { onClick() }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -926,7 +927,7 @@ private fun RadioChoiceDialog(
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 options.forEachIndexed { index, option ->
                     Surface(
-                        shape = RoundedCornerShape(14.dp),
+                        shape = ShapeCache.smooth14,
                         color = if (index == selectedIndex) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else Color.Transparent,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -960,7 +961,7 @@ private fun RadioChoiceDialog(
                 Text(stringResource(R.string.close))
             }
         },
-        shape = RoundedCornerShape(24.dp),
+        shape = ShapeCache.smooth28,
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     )
 }
@@ -974,7 +975,7 @@ private fun LibraryItem(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(12.dp),
+        shape = ShapeCache.smooth12,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(12.dp)) {

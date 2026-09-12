@@ -1,14 +1,11 @@
 package com.vastsea.hilal.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -17,18 +14,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import android.content.res.Configuration
-import androidx.compose.ui.tooling.preview.Preview
-import com.vastsea.hilal.ui.theme.HilalTheme
 import com.vastsea.hilal.R
+import com.vastsea.hilal.ui.theme.ShapeCache
 
 data class ShortcutItem(
     val name: String,
@@ -55,6 +51,8 @@ fun NewTabPage(
     onFocusSearch: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val haptic = LocalHapticFeedback.current
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -64,71 +62,75 @@ fun NewTabPage(
         verticalArrangement = Arrangement.Center
     ) {
         if (isPrivate) {
-            AssistChip(
-                onClick = {},
-                leadingIcon = {
+            Surface(
+                shape = ShapeCache.smoothPill,
+                color = MaterialTheme.colorScheme.tertiaryContainer
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
                         imageVector = Icons.Default.VisibilityOff,
                         contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier.size(16.dp)
                     )
-                },
-                label = { Text(stringResource(R.string.private_mode), style = MaterialTheme.typography.labelMedium) },
-                shape = CircleShape,
-                colors = AssistChipDefaults.assistChipColors(
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    labelColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    leadingIconContentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                )
-            )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = stringResource(R.string.private_mode),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                }
+            }
         } else {
-            // Workspace Badge with Emoji
-            AssistChip(
-                onClick = {},
-                leadingIcon = {
-                    Text(workspaceEmoji, fontSize = 14.sp)
-                },
-                label = { Text(workspaceName, style = MaterialTheme.typography.labelMedium) },
-                shape = CircleShape,
-                colors = AssistChipDefaults.assistChipColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                )
-            )
+            Surface(
+                shape = ShapeCache.smoothPill,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = workspaceEmoji, fontSize = 14.sp)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = workspaceName,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Official Hilal Logo
-        Image(
-            painter = painterResource(id = R.drawable.ic_hilal_logo),
-            contentDescription = stringResource(R.string.app_name),
-            modifier = Modifier
-                .size(72.dp)
-                .clip(CircleShape)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
+        // Brand Wordmark
         Text(
             text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = (-0.5).sp
-            ),
-            color = MaterialTheme.colorScheme.onSurface
+            style = MaterialTheme.typography.displayLarge,
+            fontWeight = FontWeight.ExtraBold,
+            color = if (isPrivate) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+            letterSpacing = (-0.5).sp
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        // Large M3 Expressive Pill Search Bar
+        // Expressive Search Hero Bar
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            shape = CircleShape,
+            shape = ShapeCache.smoothPill,
             shadowElevation = 2.dp,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(54.dp)
-                .clickable { onFocusSearch() }
+                .height(56.dp)
+                .clickable {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onFocusSearch()
+                }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -140,9 +142,9 @@ fun NewTabPage(
                     imageVector = Icons.Default.Search,
                     contentDescription = stringResource(R.string.search),
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(22.dp)
                 )
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(14.dp))
                 Text(
                     text = stringResource(R.string.search_or_enter_url),
                     style = MaterialTheme.typography.bodyLarge,
@@ -151,58 +153,27 @@ fun NewTabPage(
             }
         }
 
-        if (isPrivate) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Security,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = stringResource(R.string.private_mode_desc),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-
         Spacer(modifier = Modifier.height(28.dp))
 
-        // Quick Shortcuts Grid
-        Text(
-            text = stringResource(R.string.shortcuts),
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.align(Alignment.Start)
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
+        // Shortcuts Grid
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             items(DefaultShortcuts) { shortcut ->
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    shape = RoundedCornerShape(18.dp),
+                    shape = ShapeCache.smooth16,
+                    shadowElevation = 1.dp,
                     modifier = Modifier
-                        .height(76.dp)
-                        .clickable { onOpenUrl(shortcut.url) }
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .clickable {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onOpenUrl(shortcut.url)
+                        }
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -210,9 +181,9 @@ fun NewTabPage(
                         modifier = Modifier.padding(8.dp)
                     ) {
                         Surface(
+                            shape = ShapeCache.smooth12,
                             color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            shape = CircleShape,
-                            modifier = Modifier.size(34.dp)
+                            modifier = Modifier.size(42.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 SubcomposeAsyncImage(
@@ -221,32 +192,33 @@ fun NewTabPage(
                                         .crossfade(true)
                                         .build(),
                                     contentDescription = shortcut.name,
-                                    modifier = Modifier
-                                        .size(22.dp)
-                                        .clip(CircleShape),
-                                    error = {
-                                        Icon(
-                                            imageVector = shortcut.fallbackIcon,
-                                            contentDescription = shortcut.name,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    },
+                                    modifier = Modifier.size(24.dp),
                                     loading = {
                                         Icon(
                                             imageVector = shortcut.fallbackIcon,
-                                            contentDescription = shortcut.name,
-                                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                                            modifier = Modifier.size(18.dp)
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    },
+                                    error = {
+                                        Icon(
+                                            imageVector = shortcut.fallbackIcon,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(20.dp)
                                         )
                                     }
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         Text(
                             text = shortcut.name,
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1
                         )
@@ -254,19 +226,41 @@ fun NewTabPage(
                 }
             }
         }
-    }
-}
 
-@Preview(showBackground = true, name = "New Tab Light")
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "New Tab Dark")
-@Composable
-private fun NewTabPagePreview() {
-    HilalTheme {
-        NewTabPage(
-            workspaceName = "Genel",
-            workspaceEmoji = "🌐",
-            onOpenUrl = {},
-            onFocusSearch = {}
-        )
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // Privacy Status / Explainer Card
+        Surface(
+            color = if (isPrivate) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainerLow,
+            shape = ShapeCache.smooth20,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Icon(
+                    imageVector = if (isPrivate) Icons.Default.VisibilityOff else Icons.Default.Shield,
+                    contentDescription = null,
+                    tint = if (isPrivate) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(28.dp)
+                )
+                Spacer(modifier = Modifier.width(14.dp))
+                Column {
+                    Text(
+                        text = if (isPrivate) stringResource(R.string.private_mode) else stringResource(R.string.privacy_level),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = if (isPrivate) stringResource(R.string.private_mode_desc) else stringResource(R.string.privacy_strict_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
     }
 }

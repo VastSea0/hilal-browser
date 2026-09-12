@@ -76,6 +76,13 @@ fun HilalTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
+        shapes = androidx.compose.material3.Shapes(
+            extraSmall = ShapeCache.smooth8,
+            small = ShapeCache.smooth12,
+            medium = ShapeCache.smooth16,
+            large = ShapeCache.smooth24,
+            extraLarge = ShapeCache.smooth32
+        ),
         content = content
     )
 }

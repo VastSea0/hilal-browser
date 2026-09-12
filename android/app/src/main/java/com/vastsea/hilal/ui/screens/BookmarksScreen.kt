@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import com.vastsea.hilal.ui.theme.ShapeCache
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Bookmarks
@@ -109,7 +109,7 @@ fun BookmarksScreen(
                         }
                     }
                 },
-                shape = RoundedCornerShape(20.dp),
+                shape = ShapeCache.smoothPill,
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -181,7 +181,7 @@ fun BookmarksScreen(
                             backgroundContent = {
                                 Surface(
                                     color = MaterialTheme.colorScheme.errorContainer,
-                                    shape = RoundedCornerShape(16.dp),
+                                    shape = ShapeCache.smooth16,
                                     modifier = Modifier.fillMaxSize()
                                 ) {
                                     Row(
@@ -208,12 +208,12 @@ fun BookmarksScreen(
                             Surface(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(16.dp))
+                                    .clip(ShapeCache.smooth16)
                                     .clickable {
                                         onNavigateToUrl(item.url)
                                         onClose()
                                     },
-                                shape = RoundedCornerShape(16.dp),
+                                shape = ShapeCache.smooth16,
                                 color = MaterialTheme.colorScheme.surfaceContainerLow,
                                 tonalElevation = 1.dp
                             ) {

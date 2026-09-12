@@ -28,6 +28,7 @@ import com.vastsea.hilal.model.Workspace
 import android.content.res.Configuration
 import androidx.compose.ui.tooling.preview.Preview
 import com.vastsea.hilal.ui.theme.HilalTheme
+import com.vastsea.hilal.ui.theme.ShapeCache
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +55,7 @@ fun OptionsBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+        shape = ShapeCache.groupedTop(32.dp),
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         tonalElevation = 4.dp
     ) {
@@ -68,7 +69,7 @@ fun OptionsBottomSheet(
             // Header: Card with Active Page Info
             Surface(
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
-                shape = RoundedCornerShape(20.dp),
+                shape = ShapeCache.smooth20,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -226,7 +227,7 @@ fun OptionsBottomSheet(
             // More Options Container Card
             Surface(
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
-                shape = RoundedCornerShape(20.dp),
+                shape = ShapeCache.smooth20,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
@@ -417,7 +418,7 @@ private fun ExpressiveActionButton(
     Surface(
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(18.dp),
+        shape = ShapeCache.smooth16,
         color = if (enabled) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.5f),
         modifier = modifier.height(68.dp)
     ) {
