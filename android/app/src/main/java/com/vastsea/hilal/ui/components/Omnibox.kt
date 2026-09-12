@@ -23,10 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -34,8 +32,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.vastsea.hilal.R
 import com.vastsea.hilal.search.HilalBangsEngine
-import com.vastsea.hilal.ui.theme.HilalMotion
-import com.vastsea.hilal.ui.theme.ShapeCache
+import com.vastsea.hilal.ui.theme.*
 import kotlin.math.abs
 
 @Composable
@@ -55,7 +52,7 @@ fun Omnibox(
     var isEditing by remember { mutableStateOf(false) }
     var searchText by remember(currentUrl) { mutableStateOf(if (currentUrl == "about:newtab") "" else currentUrl) }
     val focusRequester = remember { FocusRequester() }
-    val haptic = LocalHapticFeedback.current
+    val haptics = rememberHilalHaptics()
 
     LaunchedEffect(currentUrl) {
         if (currentUrl != "about:newtab") {
@@ -75,18 +72,28 @@ fun Omnibox(
 
     var horizontalDragAmount by remember { mutableFloatStateOf(0f) }
     val density = LocalDensity.current
-    val minSwipeDistancePx = with(density) { 60.dp.toPx() }
+    val minSwipeDistancePx = with(density) { 56.dp.toPx() }
+    val tickStepPx = with(density) { 28.dp.toPx() }
+    var lastTickBucket by remember { mutableIntStateOf(0) }
 
     val swipeGestureModifier = if (!isEditing) {
         Modifier.pointerInput(Unit) {
             detectHorizontalDragGestures(
-                onDragStart = { horizontalDragAmount = 0f },
+                onDragStart = {
+                    horizontalDragAmount = 0f
+                    lastTickBucket = 0
+                },
                 onHorizontalDrag = { _, dragAmount ->
                     horizontalDragAmount += dragAmount
+                    val currentBucket = (horizontalDragAmount / tickStepPx).toInt()
+                    if (currentBucket != lastTickBucket) {
+                        haptics.perform(HilalHapticType.LightTick)
+                        lastTickBucket = currentBucket
+                    }
                 },
                 onDragEnd = {
                     if (abs(horizontalDragAmount) >= minSwipeDistancePx) {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        haptics.perform(HilalHapticType.Confirm)
                         if (horizontalDragAmount > 0) {
                             onSwipePreviousTab?.invoke()
                         } else {
@@ -94,8 +101,12 @@ fun Omnibox(
                         }
                     }
                     horizontalDragAmount = 0f
+                    lastTickBucket = 0
                 },
-                onDragCancel = { horizontalDragAmount = 0f }
+                onDragCancel = {
+                    horizontalDragAmount = 0f
+                    lastTickBucket = 0
+                }
             )
         }
     } else Modifier
@@ -118,7 +129,7 @@ fun Omnibox(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // M3 Expressive Omnibox Container
+                    // M3 Expressive Omnibox Container with Bouncy Interaction
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceContainerHigh,
                         shape = if (isFloating) ShapeCache.smoothPill else ShapeCache.smooth16,
@@ -126,9 +137,15 @@ fun Omnibox(
                             .weight(1f)
                             .height(48.dp)
                             .then(swipeGestureModifier)
-                            .clickable(enabled = !isEditing) {
-                                isEditing = true
-                            }
+                            .then(
+                                if (!isEditing) {
+                                    Modifier.bouncyClickable(
+                                        pressedScale = 0.97f,
+                                        hapticType = HilalHapticType.Tap,
+                                        onClick = { isEditing = true }
+                                    )
+                                } else Modifier
+                            )
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -198,9 +215,15 @@ fun Omnibox(
                                     focusRequester.requestFocus()
                                 }
                                 if (searchText.isNotEmpty()) {
-                                    IconButton(
-                                        onClick = { searchText = "" },
-                                        modifier = Modifier.size(24.dp)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(28.dp)
+                                            .bouncyClickable(
+                                                pressedScale = 0.82f,
+                                                hapticType = HilalHapticType.Tap,
+                                                onClick = { searchText = "" }
+                                            ),
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
                                             Icons.Default.Clear,
@@ -223,24 +246,45 @@ fun Omnibox(
                     }
 
                     if (isEditing) {
-                        TextButton(
-                            onClick = {
-                                isEditing = false
-                                searchText = if (currentUrl == "about:newtab") "" else currentUrl
-                            }
+                        Surface(
+                            shape = ShapeCache.smoothPill,
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            modifier = Modifier.bouncyClickable(
+                                pressedScale = 0.90f,
+                                hapticType = HilalHapticType.Tap,
+                                onClick = {
+                                    isEditing = false
+                                    searchText = if (currentUrl == "about:newtab") "" else currentUrl
+                                }
+                            )
                         ) {
-                            Text(stringResource(R.string.cancel))
+                            Text(
+                                text = stringResource(R.string.cancel),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                            )
                         }
                     } else {
-                        IconButton(
-                            onClick = onReload,
-                            colors = IconButtonDefaults.filledTonalIconButtonColors()
+                        Surface(
+                            shape = ShapeCache.smooth14,
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            modifier = Modifier
+                                .size(44.dp)
+                                .bouncyClickable(
+                                    pressedScale = 0.88f,
+                                    hapticType = HilalHapticType.Tap,
+                                    onClick = onReload
+                                )
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = stringResource(R.string.refresh),
-                                modifier = Modifier.size(20.dp)
-                            )
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = stringResource(R.string.refresh),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -248,11 +292,10 @@ fun Omnibox(
                 // Wavy Progress Indicator for Loading
                 if (isLoading) {
                     LinearWavyProgressIndicator(
-                        progress = { if (loadingProgress > 0f) loadingProgress else 0.4f },
+                        progress = { loadingProgress },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(4.dp)
-                            .padding(horizontal = if (isFloating) 16.dp else 0.dp),
+                            .padding(horizontal = 8.dp),
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
                     )
@@ -260,48 +303,60 @@ fun Omnibox(
             }
         }
 
-        // Matching Bangs Suggestion Chips
+        // Bangs live autocomplete tray
         AnimatedVisibility(
             visible = isEditing && matchingBangs.isNotEmpty(),
-            enter = fadeIn(),
-            exit = fadeOut()
+            enter = fadeIn(HilalMotion.FastFadeSpec),
+            exit = fadeOut(HilalMotion.FastFadeSpec)
         ) {
             Surface(
-                color = MaterialTheme.colorScheme.surfaceContainerLow,
-                modifier = Modifier.fillMaxWidth()
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shape = ShapeCache.smooth20,
+                shadowElevation = 6.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
             ) {
                 LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(matchingBangs) { bang ->
-                        AssistChip(
-                            onClick = {
-                                val query = searchText.removePrefix(bang.prefix).trim()
-                                val resolved = HilalBangsEngine.resolveUrl("${bang.prefix} $query")
-                                isEditing = false
-                                onNavigate(resolved)
-                            },
-                            shape = ShapeCache.smooth10,
-                            label = {
-                                Text(
-                                    text = "${bang.prefix} (${bang.name})",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Default.Bolt,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            },
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                        Surface(
+                            shape = ShapeCache.smoothPill,
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            modifier = Modifier.bouncyClickable(
+                                pressedScale = 0.90f,
+                                hapticType = HilalHapticType.Confirm,
+                                onClick = {
+                                    val parts = searchText.split(" ", limit = 2)
+                                    val query = if (parts.size > 1) parts[1] else ""
+                                    val newText = "!${bang.prefix} $query"
+                                    searchText = newText
+                                    val resolved = HilalBangsEngine.resolveUrl(newText)
+                                    isEditing = false
+                                    onNavigate(resolved)
+                                }
                             )
-                        )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "!${bang.prefix}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = bang.name,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+                                )
+                            }
+                        }
                     }
                 }
             }

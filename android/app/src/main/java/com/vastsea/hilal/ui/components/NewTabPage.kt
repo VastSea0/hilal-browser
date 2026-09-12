@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.vastsea.hilal.R
-import com.vastsea.hilal.ui.theme.ShapeCache
+import com.vastsea.hilal.ui.theme.*
 
 data class ShortcutItem(
     val name: String,
@@ -127,10 +127,11 @@ fun NewTabPage(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
-                .clickable {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onFocusSearch()
-                }
+                .bouncyClickable(
+                    pressedScale = 0.96f,
+                    hapticType = HilalHapticType.Tap,
+                    onClick = onFocusSearch
+                )
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -170,10 +171,11 @@ fun NewTabPage(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .clickable {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            onOpenUrl(shortcut.url)
-                        }
+                        .bouncyClickable(
+                            pressedScale = 0.90f,
+                            hapticType = HilalHapticType.Confirm,
+                            onClick = { onOpenUrl(shortcut.url) }
+                        )
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,

@@ -6,7 +6,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -19,9 +18,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,8 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.vastsea.hilal.R
 import com.vastsea.hilal.model.BrowserTab
 import com.vastsea.hilal.model.Workspace
-import com.vastsea.hilal.ui.theme.HilalMotion
-import com.vastsea.hilal.ui.theme.ShapeCache
+import com.vastsea.hilal.ui.theme.*
 
 @Composable
 fun TabsTray(
@@ -52,7 +47,7 @@ fun TabsTray(
     var newWorkspaceName by remember { mutableStateOf("") }
     var selectedEmoji by remember { mutableStateOf("🌐") }
     val emojiOptions = listOf("🌐", "💼", "🔬", "📚", "🎨", "🚀", "🎮", "🏠", "💡", "🛡️", "✈️", "☕")
-    val haptic = LocalHapticFeedback.current
+    val haptics = rememberHilalHaptics()
 
     val currentWorkspace = workspaces.find { it.id == currentWorkspaceId } ?: workspaces.first()
     val regularTabs = tabs.filter { !it.isPrivate && it.workspaceId == currentWorkspaceId }
@@ -83,17 +78,29 @@ fun TabsTray(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                IconButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onDismiss()
-                    },
-                    colors = IconButtonDefaults.filledTonalIconButtonColors()
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .bouncyClickable(
+                            pressedScale = 0.86f,
+                            hapticType = HilalHapticType.Tap,
+                            onClick = onDismiss
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = stringResource(R.string.close)
-                    )
+                    Surface(
+                        shape = ShapeCache.smooth12,
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = stringResource(R.string.close),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
                 }
             }
 
@@ -123,10 +130,11 @@ fun TabsTray(
                         shape = ShapeCache.smooth14,
                         color = containerColor,
                         border = if (isSelected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null,
-                        modifier = Modifier.clickable {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            onSelectWorkspace(ws.id)
-                        }
+                        modifier = Modifier.bouncyClickable(
+                            pressedScale = 0.90f,
+                            hapticType = HilalHapticType.Confirm,
+                            onClick = { onSelectWorkspace(ws.id) }
+                        )
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -148,10 +156,11 @@ fun TabsTray(
                     Surface(
                         shape = ShapeCache.smooth14,
                         color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        modifier = Modifier.clickable {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            showNewWorkspaceDialog = true
-                        }
+                        modifier = Modifier.bouncyClickable(
+                            pressedScale = 0.88f,
+                            hapticType = HilalHapticType.Tap,
+                            onClick = { showNewWorkspaceDialog = true }
+                        )
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -175,36 +184,63 @@ fun TabsTray(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                FilterChip(
-                    selected = !isPrivateMode,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        isPrivateMode = false
-                    },
-                    label = { Text("${stringResource(R.string.normal_tabs)} (${regularTabs.size})") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Tab, contentDescription = null, modifier = Modifier.size(16.dp))
-                    },
-                    shape = ShapeCache.smoothPill
-                )
+                Surface(
+                    shape = ShapeCache.smoothPill,
+                    color = if (!isPrivateMode) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+                    modifier = Modifier.bouncyClickable(
+                        pressedScale = 0.92f,
+                        hapticType = HilalHapticType.Confirm,
+                        onClick = { isPrivateMode = false }
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Tab,
+                            contentDescription = null,
+                            tint = if (!isPrivateMode) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "${stringResource(R.string.normal_tabs)} (${regularTabs.size})",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (!isPrivateMode) FontWeight.Bold else FontWeight.Normal,
+                            color = if (!isPrivateMode) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
 
-                FilterChip(
-                    selected = isPrivateMode,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        isPrivateMode = true
-                    },
-                    label = { Text("${stringResource(R.string.private_tabs)} (${privateTabs.size})") },
-                    leadingIcon = {
-                        Icon(Icons.Default.VisibilityOff, contentDescription = null, modifier = Modifier.size(16.dp))
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                        selectedLeadingIconColor = MaterialTheme.colorScheme.onTertiaryContainer
-                    ),
-                    shape = ShapeCache.smoothPill
-                )
+                Surface(
+                    shape = ShapeCache.smoothPill,
+                    color = if (isPrivateMode) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+                    modifier = Modifier.bouncyClickable(
+                        pressedScale = 0.92f,
+                        hapticType = HilalHapticType.Confirm,
+                        onClick = { isPrivateMode = true }
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.VisibilityOff,
+                            contentDescription = null,
+                            tint = if (isPrivateMode) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "${stringResource(R.string.private_tabs)} (${privateTabs.size})",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (isPrivateMode) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isPrivateMode) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -244,7 +280,7 @@ fun TabsTray(
                         val dismissState = rememberSwipeToDismissBoxState(
                             confirmValueChange = { value ->
                                 if (value == SwipeToDismissBoxValue.StartToEnd || value == SwipeToDismissBoxValue.EndToStart) {
-                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    haptics.perform(HilalHapticType.Reject)
                                     onCloseTab(tab.id)
                                     true
                                 } else false
@@ -282,11 +318,14 @@ fun TabsTray(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(170.dp)
-                                    .clickable {
-                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                        onSelectTab(tab.id)
-                                        onDismiss()
-                                    }
+                                    .bouncyClickable(
+                                        pressedScale = 0.94f,
+                                        hapticType = HilalHapticType.Confirm,
+                                        onClick = {
+                                            onSelectTab(tab.id)
+                                            onDismiss()
+                                        }
+                                    )
                             ) {
                                 Column(modifier = Modifier.fillMaxSize()) {
                                     // Card Header
@@ -322,12 +361,15 @@ fun TabsTray(
                                             )
                                         }
 
-                                        IconButton(
-                                            onClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                onCloseTab(tab.id)
-                                            },
-                                            modifier = Modifier.size(24.dp)
+                                        Box(
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .bouncyClickable(
+                                                    pressedScale = 0.80f,
+                                                    hapticType = HilalHapticType.Reject,
+                                                    onClick = { onCloseTab(tab.id) }
+                                                ),
+                                            contentAlignment = Alignment.Center
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.Close,
@@ -350,26 +392,27 @@ fun TabsTray(
                                             color = MaterialTheme.colorScheme.surface,
                                             modifier = Modifier.fillMaxSize()
                                         ) {
-                                            Box(
-                                                contentAlignment = Alignment.Center,
-                                                modifier = Modifier.padding(8.dp)
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .padding(10.dp),
+                                                verticalArrangement = Arrangement.Center,
+                                                horizontalAlignment = Alignment.CenterHorizontally
                                             ) {
-                                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.Public,
-                                                        contentDescription = null,
-                                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                                                        modifier = Modifier.size(28.dp)
-                                                    )
-                                                    Spacer(modifier = Modifier.height(4.dp))
-                                                    Text(
-                                                        text = if (tab.url == "about:newtab") stringResource(R.string.new_tab) else tab.url.removePrefix("https://").removePrefix("http://"),
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                        maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis
-                                                    )
-                                                }
+                                                Icon(
+                                                    imageVector = if (tab.url.startsWith("https://")) Icons.Default.Lock else Icons.Default.Public,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                                    modifier = Modifier.size(28.dp)
+                                                )
+                                                Spacer(modifier = Modifier.height(6.dp))
+                                                Text(
+                                                    text = tab.url.removePrefix("https://").removePrefix("http://").removePrefix("about:"),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
                                             }
                                         }
                                     }
@@ -382,19 +425,26 @@ fun TabsTray(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Bottom Actions inside TabsTray
+            // Bottom Actions Strip
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 if (isPrivateMode && privateTabs.isNotEmpty()) {
                     OutlinedButton(
                         onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             privateTabs.forEach { onCloseTab(it.id) }
                         },
                         shape = ShapeCache.smoothPill,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .bouncyClickable(
+                                pressedScale = 0.92f,
+                                hapticType = HilalHapticType.Reject,
+                                onClick = {
+                                    privateTabs.forEach { onCloseTab(it.id) }
+                                }
+                            )
                     ) {
                         Icon(Icons.Default.DeleteSweep, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
@@ -404,13 +454,21 @@ fun TabsTray(
 
                 Button(
                     onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         if (isPrivateMode) onNewPrivateTab() else onNewTab()
                         onDismiss()
                     },
                     shape = ShapeCache.smoothPill,
                     colors = if (isPrivateMode) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary) else ButtonDefaults.buttonColors(),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .bouncyClickable(
+                            pressedScale = 0.92f,
+                            hapticType = HilalHapticType.Tap,
+                            onClick = {
+                                if (isPrivateMode) onNewPrivateTab() else onNewTab()
+                                onDismiss()
+                            }
+                        )
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
@@ -418,87 +476,105 @@ fun TabsTray(
                 }
             }
         }
-    }
 
-    // New Workspace Dialog
-    if (showNewWorkspaceDialog) {
-        AlertDialog(
-            onDismissRequest = { showNewWorkspaceDialog = false },
-            shape = ShapeCache.smooth28,
-            title = {
-                Text(
-                    text = stringResource(R.string.new_workspace),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        value = newWorkspaceName,
-                        onValueChange = { newWorkspaceName = it },
-                        label = { Text(stringResource(R.string.workspace_name_hint)) },
-                        singleLine = true,
-                        shape = ShapeCache.smooth14,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
+        // Dialog for New Workspace
+        if (showNewWorkspaceDialog) {
+            AlertDialog(
+                onDismissRequest = { showNewWorkspaceDialog = false },
+                shape = ShapeCache.smooth28,
+                title = {
                     Text(
-                        text = stringResource(R.string.choose_emoji),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = stringResource(R.string.new_workspace),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                },
+                text = {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = newWorkspaceName,
+                            onValueChange = { newWorkspaceName = it },
+                            label = { Text(stringResource(R.string.workspace_name_hint)) },
+                            singleLine = true,
+                            shape = ShapeCache.smooth14,
+                            modifier = Modifier.fillMaxWidth()
+                        )
 
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(emojiOptions) { emoji ->
-                            val isEmojiSelected = emoji == selectedEmoji
-                            Surface(
-                                shape = ShapeCache.smooth12,
-                                color = if (isEmojiSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
-                                border = if (isEmojiSelected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null,
-                                modifier = Modifier
-                                    .size(44.dp)
-                                    .clickable {
-                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                        selectedEmoji = emoji
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = stringResource(R.string.choose_emoji),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(emojiOptions) { emoji ->
+                                val isEmojiSelected = emoji == selectedEmoji
+                                Surface(
+                                    shape = ShapeCache.smooth12,
+                                    color = if (isEmojiSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    border = if (isEmojiSelected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null,
+                                    modifier = Modifier
+                                        .size(44.dp)
+                                        .bouncyClickable(
+                                            pressedScale = 0.84f,
+                                            hapticType = HilalHapticType.LightTick,
+                                            onClick = { selectedEmoji = emoji }
+                                        )
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(text = emoji, fontSize = 20.sp)
                                     }
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(text = emoji, fontSize = 20.sp)
                                 }
                             }
                         }
                     }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            if (newWorkspaceName.isNotBlank()) {
+                                onCreateWorkspace(newWorkspaceName.trim(), selectedEmoji)
+                                newWorkspaceName = ""
+                                showNewWorkspaceDialog = false
+                            }
+                        },
+                        shape = ShapeCache.smoothPill,
+                        enabled = newWorkspaceName.isNotBlank(),
+                        modifier = Modifier.bouncyClickable(
+                            enabled = newWorkspaceName.isNotBlank(),
+                            pressedScale = 0.90f,
+                            hapticType = HilalHapticType.Confirm,
+                            onClick = {
+                                if (newWorkspaceName.isNotBlank()) {
+                                    onCreateWorkspace(newWorkspaceName.trim(), selectedEmoji)
+                                    newWorkspaceName = ""
+                                    showNewWorkspaceDialog = false
+                                }
+                            }
+                        )
+                    ) {
+                        Text(stringResource(R.string.create))
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showNewWorkspaceDialog = false },
+                        shape = ShapeCache.smoothPill,
+                        modifier = Modifier.bouncyClickable(
+                            pressedScale = 0.90f,
+                            hapticType = HilalHapticType.Tap,
+                            onClick = { showNewWorkspaceDialog = false }
+                        )
+                    ) {
+                        Text(stringResource(R.string.cancel))
+                    }
                 }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (newWorkspaceName.isNotBlank()) {
-                            onCreateWorkspace(newWorkspaceName.trim(), selectedEmoji)
-                            newWorkspaceName = ""
-                            showNewWorkspaceDialog = false
-                        }
-                    },
-                    shape = ShapeCache.smoothPill,
-                    enabled = newWorkspaceName.isNotBlank()
-                ) {
-                    Text(stringResource(R.string.create))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showNewWorkspaceDialog = false },
-                    shape = ShapeCache.smoothPill
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
+            )
+        }
     }
 }

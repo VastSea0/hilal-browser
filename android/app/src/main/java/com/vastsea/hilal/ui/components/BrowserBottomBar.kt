@@ -5,11 +5,8 @@ package com.vastsea.hilal.ui.components
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -21,15 +18,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vastsea.hilal.R
-import com.vastsea.hilal.ui.theme.HilalMotion
-import com.vastsea.hilal.ui.theme.ShapeCache
+import com.vastsea.hilal.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -52,18 +46,18 @@ fun BrowserBottomBar(
     modifier: Modifier = Modifier
 ) {
     var activePressedButton by remember { mutableStateOf<ToolbarButtonId?>(null) }
-    val haptic = LocalHapticFeedback.current
+    val haptics = rememberHilalHaptics()
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
     val dragThresholdPx = with(density) { HilalMotion.OverviewDragThreshold.toPx() }
     var totalDragY by remember { mutableFloatStateOf(0f) }
+    var thresholdTriggered by remember { mutableStateOf(false) }
 
     fun triggerButton(buttonId: ToolbarButtonId, action: () -> Unit) {
         activePressedButton = buttonId
-        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         action()
         scope.launch {
-            delay(180)
+            delay(220)
             activePressedButton = null
         }
     }
@@ -104,17 +98,28 @@ fun BrowserBottomBar(
 
     val dragGestureModifier = Modifier.pointerInput(Unit) {
         detectVerticalDragGestures(
-            onDragStart = { totalDragY = 0f },
+            onDragStart = {
+                totalDragY = 0f
+                thresholdTriggered = false
+                haptics.perform(HilalHapticType.GestureStart)
+            },
             onVerticalDrag = { _, dragAmount ->
                 totalDragY += dragAmount
-                if (totalDragY <= -dragThresholdPx) {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                if (!thresholdTriggered && totalDragY <= -dragThresholdPx) {
+                    thresholdTriggered = true
+                    haptics.perform(HilalHapticType.Confirm)
                     onOpenTabsTray()
-                    totalDragY = 0f
                 }
             },
-            onDragEnd = { totalDragY = 0f },
-            onDragCancel = { totalDragY = 0f }
+            onDragEnd = {
+                haptics.perform(HilalHapticType.GestureEnd)
+                totalDragY = 0f
+                thresholdTriggered = false
+            },
+            onDragCancel = {
+                totalDragY = 0f
+                thresholdTriggered = false
+            }
         )
     }
 
@@ -135,46 +140,52 @@ fun BrowserBottomBar(
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 10.dp),
+                    .padding(horizontal = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // 1. Back Button
+                // 1. Back Button Segment
                 Box(
                     modifier = Modifier
                         .weight(backWeight)
-                        .fillMaxHeight(),
+                        .fillMaxHeight()
+                        .clip(ShapeCache.smooth14)
+                        .bouncyClickable(
+                            enabled = canGoBack,
+                            pressedScale = 0.88f,
+                            hapticType = HilalHapticType.Tap,
+                            onClick = { triggerButton(ToolbarButtonId.BACK, onGoBack) }
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    IconButton(
-                        onClick = { triggerButton(ToolbarButtonId.BACK, onGoBack) },
-                        enabled = canGoBack
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                            tint = if (canGoBack) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back),
+                        tint = if (canGoBack) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
 
-                // 2. Forward Button
+                // 2. Forward Button Segment
                 Box(
                     modifier = Modifier
                         .weight(forwardWeight)
-                        .fillMaxHeight(),
+                        .fillMaxHeight()
+                        .clip(ShapeCache.smooth14)
+                        .bouncyClickable(
+                            enabled = canGoForward,
+                            pressedScale = 0.88f,
+                            hapticType = HilalHapticType.Tap,
+                            onClick = { triggerButton(ToolbarButtonId.FORWARD, onGoForward) }
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    IconButton(
-                        onClick = { triggerButton(ToolbarButtonId.FORWARD, onGoForward) },
-                        enabled = canGoForward
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = stringResource(R.string.forward),
-                            tint = if (canGoForward) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = stringResource(R.string.forward),
+                        tint = if (canGoForward) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
 
                 // 3. New Tab Pill Button with Long-press for Workspace
@@ -189,12 +200,10 @@ fun BrowserBottomBar(
                             .size(width = 54.dp, height = 40.dp)
                             .clip(ShapeCache.smooth16)
                             .background(MaterialTheme.colorScheme.primary)
-                            .combinedClickable(
-                                onClick = { triggerButton(ToolbarButtonId.NEW_TAB, onNewTab) },
-                                onLongClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onNewWorkspaceLongPress()
-                                }
+                            .bouncyClickable(
+                                pressedScale = 0.88f,
+                                onLongClick = onNewWorkspaceLongPress,
+                                onClick = { triggerButton(ToolbarButtonId.NEW_TAB, onNewTab) }
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -207,11 +216,18 @@ fun BrowserBottomBar(
                     }
                 }
 
-                // 4. Tabs Tray with Badge
+                // 4. Tabs Tray Segment with Badge
                 Box(
                     modifier = Modifier
                         .weight(tabsWeight)
-                        .fillMaxHeight(),
+                        .fillMaxHeight()
+                        .clip(ShapeCache.smooth14)
+                        .bouncyClickable(
+                            enabled = true,
+                            pressedScale = 0.88f,
+                            hapticType = HilalHapticType.Tap,
+                            onClick = { triggerButton(ToolbarButtonId.TABS, onOpenTabsTray) }
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     BadgedBox(
@@ -224,30 +240,35 @@ fun BrowserBottomBar(
                             }
                         }
                     ) {
-                        IconButton(onClick = { triggerButton(ToolbarButtonId.TABS, onOpenTabsTray) }) {
-                            Icon(
-                                imageVector = Icons.Default.Tab,
-                                contentDescription = stringResource(R.string.tabs),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Tab,
+                            contentDescription = stringResource(R.string.tabs),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
 
-                // 5. Options Menu Button
+                // 5. Options Menu Segment
                 Box(
                     modifier = Modifier
                         .weight(optionsWeight)
-                        .fillMaxHeight(),
+                        .fillMaxHeight()
+                        .clip(ShapeCache.smooth14)
+                        .bouncyClickable(
+                            enabled = true,
+                            pressedScale = 0.88f,
+                            hapticType = HilalHapticType.Tap,
+                            onClick = { triggerButton(ToolbarButtonId.OPTIONS, onOpenOptions) }
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    IconButton(onClick = { triggerButton(ToolbarButtonId.OPTIONS, onOpenOptions) }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = stringResource(R.string.options),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(R.string.options),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
         }
@@ -266,51 +287,70 @@ fun BrowserBottomBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .padding(horizontal = 8.dp),
+                    .padding(horizontal = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 // 1. Back
-                Box(modifier = Modifier.weight(backWeight), contentAlignment = Alignment.Center) {
-                    IconButton(
-                        onClick = { triggerButton(ToolbarButtonId.BACK, onGoBack) },
-                        enabled = canGoBack
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                            tint = if (canGoBack) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                    }
+                Box(
+                    modifier = Modifier
+                        .weight(backWeight)
+                        .fillMaxHeight()
+                        .clip(ShapeCache.smooth14)
+                        .bouncyClickable(
+                            enabled = canGoBack,
+                            pressedScale = 0.88f,
+                            hapticType = HilalHapticType.Tap,
+                            onClick = { triggerButton(ToolbarButtonId.BACK, onGoBack) }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back),
+                        tint = if (canGoBack) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                        modifier = Modifier.size(22.dp)
+                    )
                 }
 
                 // 2. Forward
-                Box(modifier = Modifier.weight(forwardWeight), contentAlignment = Alignment.Center) {
-                    IconButton(
-                        onClick = { triggerButton(ToolbarButtonId.FORWARD, onGoForward) },
-                        enabled = canGoForward
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = stringResource(R.string.forward),
-                            tint = if (canGoForward) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                    }
+                Box(
+                    modifier = Modifier
+                        .weight(forwardWeight)
+                        .fillMaxHeight()
+                        .clip(ShapeCache.smooth14)
+                        .bouncyClickable(
+                            enabled = canGoForward,
+                            pressedScale = 0.88f,
+                            hapticType = HilalHapticType.Tap,
+                            onClick = { triggerButton(ToolbarButtonId.FORWARD, onGoForward) }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = stringResource(R.string.forward),
+                        tint = if (canGoForward) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                        modifier = Modifier.size(22.dp)
+                    )
                 }
 
                 // 3. New Tab
-                Box(modifier = Modifier.weight(newTabWeight), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .weight(newTabWeight)
+                        .fillMaxHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
                     Box(
                         modifier = Modifier
                             .size(width = 50.dp, height = 36.dp)
                             .clip(ShapeCache.smooth14)
                             .background(MaterialTheme.colorScheme.primary)
-                            .combinedClickable(
-                                onClick = { triggerButton(ToolbarButtonId.NEW_TAB, onNewTab) },
-                                onLongClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onNewWorkspaceLongPress()
-                                }
+                            .bouncyClickable(
+                                pressedScale = 0.88f,
+                                onLongClick = onNewWorkspaceLongPress,
+                                onClick = { triggerButton(ToolbarButtonId.NEW_TAB, onNewTab) }
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -324,7 +364,19 @@ fun BrowserBottomBar(
                 }
 
                 // 4. Tabs
-                Box(modifier = Modifier.weight(tabsWeight), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .weight(tabsWeight)
+                        .fillMaxHeight()
+                        .clip(ShapeCache.smooth14)
+                        .bouncyClickable(
+                            enabled = true,
+                            pressedScale = 0.88f,
+                            hapticType = HilalHapticType.Tap,
+                            onClick = { triggerButton(ToolbarButtonId.TABS, onOpenTabsTray) }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
                     BadgedBox(
                         badge = {
                             Badge(
@@ -335,25 +387,35 @@ fun BrowserBottomBar(
                             }
                         }
                     ) {
-                        IconButton(onClick = { triggerButton(ToolbarButtonId.TABS, onOpenTabsTray) }) {
-                            Icon(
-                                imageVector = Icons.Default.Tab,
-                                contentDescription = stringResource(R.string.tabs),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Tab,
+                            contentDescription = stringResource(R.string.tabs),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(22.dp)
+                        )
                     }
                 }
 
                 // 5. Options
-                Box(modifier = Modifier.weight(optionsWeight), contentAlignment = Alignment.Center) {
-                    IconButton(onClick = { triggerButton(ToolbarButtonId.OPTIONS, onOpenOptions) }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = stringResource(R.string.options),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
+                Box(
+                    modifier = Modifier
+                        .weight(optionsWeight)
+                        .fillMaxHeight()
+                        .clip(ShapeCache.smooth14)
+                        .bouncyClickable(
+                            enabled = true,
+                            pressedScale = 0.88f,
+                            hapticType = HilalHapticType.Tap,
+                            onClick = { triggerButton(ToolbarButtonId.OPTIONS, onOpenOptions) }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(R.string.options),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(22.dp)
+                    )
                 }
             }
         }

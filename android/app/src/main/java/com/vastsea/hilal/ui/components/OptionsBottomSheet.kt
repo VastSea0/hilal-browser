@@ -27,8 +27,7 @@ import com.vastsea.hilal.R
 import com.vastsea.hilal.model.Workspace
 import android.content.res.Configuration
 import androidx.compose.ui.tooling.preview.Preview
-import com.vastsea.hilal.ui.theme.HilalTheme
-import com.vastsea.hilal.ui.theme.ShapeCache
+import com.vastsea.hilal.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -204,22 +203,32 @@ fun OptionsBottomSheet(
                 ) {
                     items(workspaces) { ws ->
                         val isSelected = ws.id == currentWorkspaceId
-                        FilterChip(
-                            selected = isSelected,
-                            onClick = {
-                                onSelectWorkspace(ws.id)
-                                onDismiss()
-                            },
-                            label = { Text("${ws.emoji} ${ws.name}", style = MaterialTheme.typography.labelMedium) },
-                            leadingIcon = if (isSelected) {
-                                { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                            } else null,
-                            shape = CircleShape,
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        Surface(
+                            shape = ShapeCache.smoothPill,
+                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+                            modifier = Modifier.bouncyClickable(
+                                pressedScale = 0.90f,
+                                hapticType = HilalHapticType.Confirm,
+                                onClick = {
+                                    onSelectWorkspace(ws.id)
+                                    onDismiss()
+                                }
                             )
-                        )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(text = ws.emoji, fontSize = 16.sp)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = ws.name,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -235,10 +244,14 @@ fun OptionsBottomSheet(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                onOpenBookmarks()
-                                onDismiss()
-                            }
+                            .bouncyClickable(
+                                pressedScale = 0.98f,
+                                hapticType = HilalHapticType.Tap,
+                                onClick = {
+                                    onOpenBookmarks()
+                                    onDismiss()
+                                }
+                            )
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -279,10 +292,14 @@ fun OptionsBottomSheet(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                onOpenHistory()
-                                onDismiss()
-                            }
+                            .bouncyClickable(
+                                pressedScale = 0.98f,
+                                hapticType = HilalHapticType.Tap,
+                                onClick = {
+                                    onOpenHistory()
+                                    onDismiss()
+                                }
+                            )
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -323,10 +340,14 @@ fun OptionsBottomSheet(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                onNewPrivateTab()
-                                onDismiss()
-                            }
+                            .bouncyClickable(
+                                pressedScale = 0.98f,
+                                hapticType = HilalHapticType.Tap,
+                                onClick = {
+                                    onNewPrivateTab()
+                                    onDismiss()
+                                }
+                            )
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -367,10 +388,14 @@ fun OptionsBottomSheet(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                onOpenSettings()
-                                onDismiss()
-                            }
+                            .bouncyClickable(
+                                pressedScale = 0.98f,
+                                hapticType = HilalHapticType.Tap,
+                                onClick = {
+                                    onOpenSettings()
+                                    onDismiss()
+                                }
+                            )
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -416,11 +441,16 @@ private fun ExpressiveActionButton(
     modifier: Modifier = Modifier
 ) {
     Surface(
-        onClick = onClick,
-        enabled = enabled,
         shape = ShapeCache.smooth16,
         color = if (enabled) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.5f),
-        modifier = modifier.height(68.dp)
+        modifier = modifier
+            .height(68.dp)
+            .bouncyClickable(
+                enabled = enabled,
+                pressedScale = 0.88f,
+                hapticType = HilalHapticType.Tap,
+                onClick = onClick
+            )
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),

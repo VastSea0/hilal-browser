@@ -25,12 +25,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import com.vastsea.hilal.BuildConfig
 import com.vastsea.hilal.R
 import android.content.res.Configuration
 import androidx.compose.ui.tooling.preview.Preview
-import com.vastsea.hilal.ui.theme.HilalTheme
-import com.vastsea.hilal.ui.theme.ShapeCache
+import com.vastsea.hilal.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -685,7 +686,11 @@ private fun SettingsNavRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(ShapeCache.smooth14)
-            .clickable { onClick() }
+            .bouncyClickable(
+                pressedScale = 0.98f,
+                hapticType = HilalHapticType.Tap,
+                onClick = onClick
+            )
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -737,11 +742,16 @@ private fun SettingsSwitchRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    val haptics = rememberHilalHaptics()
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(ShapeCache.smooth14)
-            .clickable { onCheckedChange(!checked) }
+            .bouncyClickable(
+                pressedScale = 0.98f,
+                hapticType = if (!checked) HilalHapticType.Confirm else HilalHapticType.Reject,
+                onClick = { onCheckedChange(!checked) }
+            )
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -778,7 +788,23 @@ private fun SettingsSwitchRow(
         Spacer(modifier = Modifier.width(8.dp))
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = { newValue ->
+                haptics.perform(if (newValue) HilalHapticType.Confirm else HilalHapticType.Reject)
+                onCheckedChange(newValue)
+            },
+            thumbContent = {
+                AnimatedContent(
+                    targetState = checked,
+                    transitionSpec = { fadeIn(tween(100)) togetherWith fadeOut(tween(100)) },
+                    label = "switch_thumb"
+                ) { isChecked ->
+                    Icon(
+                        imageVector = if (isChecked) Icons.Default.Check else Icons.Default.Close,
+                        contentDescription = null,
+                        modifier = Modifier.size(SwitchDefaults.IconSize)
+                    )
+                }
+            }
         )
     }
 }
@@ -797,7 +823,6 @@ private fun SettingsActionRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(ShapeCache.smooth14)
-            .clickable { onAction() }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -831,12 +856,17 @@ private fun SettingsActionRow(
         }
         FilledTonalButton(
             onClick = onAction,
-            shape = CircleShape,
+            shape = ShapeCache.smoothPill,
             colors = ButtonDefaults.filledTonalButtonColors(
                 containerColor = MaterialTheme.colorScheme.errorContainer,
                 contentColor = MaterialTheme.colorScheme.onErrorContainer
             ),
-            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+            modifier = Modifier.bouncyClickable(
+                pressedScale = 0.90f,
+                hapticType = HilalHapticType.Reject,
+                onClick = onAction
+            )
         ) {
             Text(actionText, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
         }
@@ -856,7 +886,11 @@ private fun SettingsExternalRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(ShapeCache.smooth14)
-            .clickable { onClick() }
+            .bouncyClickable(
+                pressedScale = 0.98f,
+                hapticType = HilalHapticType.Tap,
+                onClick = onClick
+            )
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -931,7 +965,11 @@ private fun RadioChoiceDialog(
                         color = if (index == selectedIndex) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else Color.Transparent,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onSelect(index) }
+                            .bouncyClickable(
+                                pressedScale = 0.96f,
+                                hapticType = HilalHapticType.Confirm,
+                                onClick = { onSelect(index) }
+                            )
                     ) {
                         Row(
                             modifier = Modifier
