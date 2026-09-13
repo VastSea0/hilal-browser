@@ -44,7 +44,20 @@ export default async function handler(
     const configuredSecret = process.env.TELEMETRY_ADMIN_SECRET;
 
     // If correct admin secret provided, return real-time stats
-    if (adminKey && adminKey === configuredSecret) {
+    if (configuredSecret && adminKey && adminKey === configuredSecret) {
+      if (!FIREBASE_PROJECT_ID || !FIREBASE_API_KEY) {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+        res.end(
+          JSON.stringify({
+            status: "ok",
+            service: "hilal-browser-telemetry",
+            warning: "FIREBASE_PROJECT_ID or FIREBASE_API_KEY environment variable is not configured.",
+          })
+        );
+        return;
+      }
+
       const todayStr = new Date().toISOString().slice(0, 10);
       const summaryUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${STATS_COLLECTION}/summary?key=${FIREBASE_API_KEY}`;
       const dailyUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${STATS_COLLECTION}/daily_${todayStr}?key=${FIREBASE_API_KEY}`;
@@ -148,6 +161,13 @@ export default async function handler(
         },
       },
     };
+
+    if (!FIREBASE_PROJECT_ID || !FIREBASE_API_KEY) {
+      res.statusCode = 503;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.end(JSON.stringify({ error: "Telemetry backend not configured on server" }));
+      return;
+    }
 
     // 1. Forward raw event to Firestore REST API
     const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${FIRESTORE_COLLECTION}?key=${FIREBASE_API_KEY}`;
