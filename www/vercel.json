@@ -5,6 +5,7 @@
   "rewrites": [
     { "source": "/update/:path*", "destination": "/api/update?path=:path*" },
     { "source": "/releases.json", "destination": "/api/releases" },
+    { "source": "/api/telemetry", "destination": "/api/telemetry" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

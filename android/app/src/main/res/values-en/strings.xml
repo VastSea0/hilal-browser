@@ -154,4 +154,6 @@
     <string name="shortcut_added">Shortcut added.</string>
     <string name="shortcut_deleted">Shortcut deleted.</string>
     <string name="no_addons_installed">No other add-ons installed yet</string>
+    <string name="anonymous_telemetry">Anonymous Usage Reports</string>
+    <string name="anonymous_telemetry_desc">Sends strictly anonymous technical metrics to help improve Hilal Browser. URLs or personal data are never collected.</string>
 </resources>

@@ -55,6 +55,8 @@ fun SettingsScreen(
     onDarkWebsitesChange: (Boolean) -> Unit = {},
     privacyLevel: Int = 1, // 0: Standard, 1: Strict, 2: Hilal Ultra
     onPrivacyLevelChange: (Int) -> Unit = {},
+    anonymousTelemetry: Boolean = true,
+    onAnonymousTelemetryChange: (Boolean) -> Unit = {},
     defaultSearchEngine: String = "DuckDuckGo",
     onDefaultSearchEngineChange: (String) -> Unit = {},
     onOpenBangs: () -> Unit = {},
@@ -390,6 +392,19 @@ fun SettingsScreen(
                     title = stringResource(R.string.privacy_level),
                     subtitle = privacyLabels[privacyLevel.coerceIn(0, 2)],
                     onClick = { showPrivacyDialog = true }
+                )
+
+                SettingsDivider()
+
+                // Anonim Kullanım Raporları (Anonymous Telemetry) Switch
+                SettingsSwitchRow(
+                    icon = Icons.Outlined.Analytics,
+                    iconBgColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onTertiaryContainer,
+                    title = stringResource(R.string.anonymous_telemetry),
+                    subtitle = stringResource(R.string.anonymous_telemetry_desc),
+                    checked = anonymousTelemetry,
+                    onCheckedChange = onAnonymousTelemetryChange
                 )
 
                 SettingsDivider()

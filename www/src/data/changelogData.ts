@@ -39,11 +39,51 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 476;
+export const REPO_COMMITS_TOTAL = 480;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "5c0f76f0519e29ef17de82d9de6519aef43ae8b9",
+    "shortHash": "5c0f76f",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-12T21:22:00+03:00",
+    "subject": "feat(android): add default ublock origin, add-ons manager, tab vault, and customizable new tab",
+    "body": "- Bundle uBlock Origin extension by default and auto-enable on launch\n- Add Firefox WebExtensions management screen with AMO link and custom XPI installer\n- Redesign minimal new tab page with customizable shortcuts grid and workspace badge\n- Implement Candy Browser-style Tab Vault with coverflow depth transforms and spring dismiss\n- Decouple top and bottom toolbar scroll-hide behaviors and fix floating omnibox layout\n- Add custom search engine management with %s query parameter formatting",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5c0f76f0519e29ef17de82d9de6519aef43ae8b9"
+  },
+  {
+    "hash": "9c3e3349132b319e059e9e44bd83786dc399ce0a",
+    "shortHash": "9c3e334",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-12T21:00:39+03:00",
+    "subject": "feat(android): implement tactile haptics and pixelplayer-style bouncy spring motion",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9c3e3349132b319e059e9e44bd83786dc399ce0a"
+  },
+  {
+    "hash": "434a74f3ca2e821e9af6d3320bd2fe182e629530",
+    "shortHash": "434a74f",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-12T20:51:06+03:00",
+    "subject": "feat(android): rewrite ui and ux with material 3 expressive design",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/434a74f3ca2e821e9af6d3320bd2fe182e629530"
+  },
+  {
+    "hash": "2c2309390e868d22009c93a243b09aeab9d5a118",
+    "shortHash": "2c23093",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-09T22:53:09+03:00",
+    "subject": "refactor(www): restore full docs page layout and integrate mobile architecture subcategory",
+    "body": "",
+    "category": "refactor",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2c2309390e868d22009c93a243b09aeab9d5a118"
+  },
   {
     "hash": "06eece43011c31afa08e43a085428645cd0da154",
     "shortHash": "06eece4",
@@ -4811,9 +4851,49 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-09T22:40:03+03:00",
-    "commitCount": 35,
+    "date": "2026-09-12T21:22:00+03:00",
+    "commitCount": 39,
     "commits": [
+      {
+        "hash": "5c0f76f0519e29ef17de82d9de6519aef43ae8b9",
+        "shortHash": "5c0f76f",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-12T21:22:00+03:00",
+        "subject": "feat(android): add default ublock origin, add-ons manager, tab vault, and customizable new tab",
+        "body": "- Bundle uBlock Origin extension by default and auto-enable on launch\n- Add Firefox WebExtensions management screen with AMO link and custom XPI installer\n- Redesign minimal new tab page with customizable shortcuts grid and workspace badge\n- Implement Candy Browser-style Tab Vault with coverflow depth transforms and spring dismiss\n- Decouple top and bottom toolbar scroll-hide behaviors and fix floating omnibox layout\n- Add custom search engine management with %s query parameter formatting",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5c0f76f0519e29ef17de82d9de6519aef43ae8b9"
+      },
+      {
+        "hash": "9c3e3349132b319e059e9e44bd83786dc399ce0a",
+        "shortHash": "9c3e334",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-12T21:00:39+03:00",
+        "subject": "feat(android): implement tactile haptics and pixelplayer-style bouncy spring motion",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9c3e3349132b319e059e9e44bd83786dc399ce0a"
+      },
+      {
+        "hash": "434a74f3ca2e821e9af6d3320bd2fe182e629530",
+        "shortHash": "434a74f",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-12T20:51:06+03:00",
+        "subject": "feat(android): rewrite ui and ux with material 3 expressive design",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/434a74f3ca2e821e9af6d3320bd2fe182e629530"
+      },
+      {
+        "hash": "2c2309390e868d22009c93a243b09aeab9d5a118",
+        "shortHash": "2c23093",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T22:53:09+03:00",
+        "subject": "refactor(www): restore full docs page layout and integrate mobile architecture subcategory",
+        "body": "",
+        "category": "refactor",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2c2309390e868d22009c93a243b09aeab9d5a118"
+      },
       {
         "hash": "06eece43011c31afa08e43a085428645cd0da154",
         "shortHash": "06eece4",
@@ -9833,7 +9913,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 464,
+    "contributions": 468,
     "role": "Lead Developer"
   },
   {
