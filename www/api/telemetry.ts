@@ -37,43 +37,60 @@ export default async function handler(
     return;
   }
 
-  // Live stats & health check on GET
+  // Health check on GET — stats are strictly private
   if (req.method === "GET") {
-    const todayStr = new Date().toISOString().slice(0, 10);
-    const summaryUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${STATS_COLLECTION}/summary?key=${FIREBASE_API_KEY}`;
-    const dailyUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${STATS_COLLECTION}/daily_${todayStr}?key=${FIREBASE_API_KEY}`;
+    const parsedUrl = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+    const adminKey = parsedUrl.searchParams.get("key") || req.headers["x-telemetry-admin-key"];
+    const configuredSecret = process.env.TELEMETRY_ADMIN_SECRET || "hilal-admin-2026";
 
-    let summaryData: any = null;
-    let dailyData: any = null;
+    // If correct admin secret provided, return real-time stats
+    if (adminKey && adminKey === configuredSecret) {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const summaryUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${STATS_COLLECTION}/summary?key=${FIREBASE_API_KEY}`;
+      const dailyUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${STATS_COLLECTION}/daily_${todayStr}?key=${FIREBASE_API_KEY}`;
 
-    try {
-      const [sRes, dRes] = await Promise.all([
-        fetch(summaryUrl),
-        fetch(dailyUrl),
-      ]);
-      if (sRes.ok) summaryData = await sRes.json();
-      if (dRes.ok) dailyData = await dRes.json();
-    } catch {
-      // Non-fatal, fallback to 0
+      let summaryData: any = null;
+      let dailyData: any = null;
+
+      try {
+        const [sRes, dRes] = await Promise.all([
+          fetch(summaryUrl),
+          fetch(dailyUrl),
+        ]);
+        if (sRes.ok) summaryData = await sRes.json();
+        if (dRes.ok) dailyData = await dRes.json();
+      } catch {
+        // Fallback
+      }
+
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.end(
+        JSON.stringify({
+          status: "ok",
+          service: "hilal-browser-telemetry",
+          stats: {
+            total_installs: Number(summaryData?.fields?.total_installs?.integerValue || 0),
+            total_daily_pings: Number(summaryData?.fields?.total_pings?.integerValue || 0),
+            today: {
+              date: todayStr,
+              new_installs: Number(dailyData?.fields?.installs?.integerValue || 0),
+              active_users: Number(dailyData?.fields?.active_pings?.integerValue || 0),
+            },
+          },
+          timestamp: new Date().toISOString(),
+        })
+      );
+      return;
     }
 
+    // Default public response: zero metric exposure, only health status
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.end(
       JSON.stringify({
         status: "ok",
         service: "hilal-browser-telemetry",
-        targetCollection: FIRESTORE_COLLECTION,
-        stats: {
-          total_installs: Number(summaryData?.fields?.total_installs?.integerValue || 0),
-          total_daily_pings: Number(summaryData?.fields?.total_pings?.integerValue || 0),
-          today: {
-            date: todayStr,
-            new_installs: Number(dailyData?.fields?.installs?.integerValue || 0),
-            active_users: Number(dailyData?.fields?.active_pings?.integerValue || 0),
-          },
-        },
-        timestamp: new Date().toISOString(),
       })
     );
     return;
