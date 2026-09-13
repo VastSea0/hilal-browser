@@ -94,3 +94,9 @@ keystore.properties
 android/keystore/
 keystore-backup/
 
+# === Secrets & Environment ==================================================
+.env
+.env.*
+!.env.example
+
+

@@ -41,10 +41,10 @@ export default async function handler(
   if (req.method === "GET") {
     const parsedUrl = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
     const adminKey = parsedUrl.searchParams.get("key") || req.headers["x-telemetry-admin-key"];
-    const configuredSecret = process.env.TELEMETRY_ADMIN_SECRET || "hilal-admin-2026";
+    const configuredSecret = process.env.TELEMETRY_ADMIN_SECRET;
 
     // If correct admin secret provided, return real-time stats
-    if (adminKey && adminKey === configuredSecret) {
+    if (configuredSecret && adminKey && adminKey === configuredSecret) {
       const todayStr = new Date().toISOString().slice(0, 10);
       const summaryUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${STATS_COLLECTION}/summary?key=${FIREBASE_API_KEY}`;
       const dailyUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${STATS_COLLECTION}/daily_${todayStr}?key=${FIREBASE_API_KEY}`;
