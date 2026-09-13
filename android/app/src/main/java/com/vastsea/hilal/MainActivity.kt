@@ -46,6 +46,7 @@ import com.vastsea.hilal.model.HistoryItem
 import com.vastsea.hilal.model.Workspace
 import com.vastsea.hilal.search.HilalBangsEngine
 import com.vastsea.hilal.search.SearchEngineManager
+import com.vastsea.hilal.telemetry.TelemetryManager
 import com.vastsea.hilal.ui.components.*
 import com.vastsea.hilal.ui.screens.AddonsScreen
 import com.vastsea.hilal.ui.screens.BangsScreen
@@ -168,6 +169,7 @@ fun HilalBrowserApp(
     var hideBottomBarOnScroll by remember { mutableStateOf(prefs.getBoolean("hide_bottom_bar_on_scroll", true)) }
     var darkWebsites by remember { mutableStateOf(prefs.getBoolean("dark_websites", false)) }
     var defaultSearchEngine by remember { mutableStateOf(prefs.getString("default_search_engine", "DuckDuckGo") ?: "DuckDuckGo") }
+    var anonymousTelemetry by remember { mutableStateOf(prefs.getBoolean("anonymous_telemetry_enabled", true)) }
 
     // Hide-on-scroll state
     var isBarsVisible by remember { mutableStateOf(true) }
@@ -361,11 +363,19 @@ fun HilalBrowserApp(
         return tab
     }
 
-    // Initial tab setup
+    // Initial tab setup & anonymous telemetry ping
     LaunchedEffect(Unit) {
         if (tabs.isEmpty()) {
             createNewTab(url = "https://duckduckgo.com")
         }
+        TelemetryManager.sendDailyPingIfAllowed(
+            context = context,
+            searchEngine = defaultSearchEngine,
+            ublockEnabled = AddonManager.installedAddons.any { it.id == "uBlock0@raymondhill.net" && it.isEnabled },
+            themeMode = themeMode,
+            tabCount = tabs.size,
+            privacyLevel = privacyLevel
+        )
     }
 
     val activeTab = tabs.find { it.id == activeTabId } ?: tabs.firstOrNull()
@@ -451,6 +461,11 @@ fun HilalBrowserApp(
             onPrivacyLevelChange = {
                 applyPrivacyLevel(it)
                 prefs.edit().putInt("privacy_level", it).apply()
+            },
+            anonymousTelemetry = anonymousTelemetry,
+            onAnonymousTelemetryChange = {
+                anonymousTelemetry = it
+                prefs.edit().putBoolean("anonymous_telemetry_enabled", it).apply()
             },
             defaultSearchEngine = defaultSearchEngine,
             onDefaultSearchEngineChange = {

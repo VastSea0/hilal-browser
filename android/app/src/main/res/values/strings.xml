@@ -154,4 +154,6 @@
     <string name="shortcut_added">Kısayol eklendi.</string>
     <string name="shortcut_deleted">Kısayol silindi.</string>
     <string name="no_addons_installed">Henüz başka eklenti yüklenmedi</string>
+    <string name="anonymous_telemetry">Anonim Kullanım Raporları</string>
+    <string name="anonymous_telemetry_desc">Hilal Browser\'ı geliştirmemize yardımcı olmak için tamamen anonim teknik metrikler gönderir. URL veya kişisel veri asla toplanmaz.</string>
 </resources>
