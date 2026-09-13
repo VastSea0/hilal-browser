@@ -39,11 +39,21 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 480;
+export const REPO_COMMITS_TOTAL = 481;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "f047f3db6851f7d7d7d4c2be4d0ac8eb0da274fa",
+    "shortHash": "f047f3d",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-13T12:09:21+03:00",
+    "subject": "feat: add zero-sdk anonymous telemetry endpoint and privacy opt-out toggle",
+    "body": "- Add TelemetryManager in Android with pure Kotlin HttpURLConnection and 24h throttling\n- Add user-facing Anonymous Usage Reports toggle in SettingsScreen under Privacy & Security\n- Add /api/telemetry serverless endpoint in Vercel to sanitize Zero-PII and forward to Firestore /hilal-browser collection\n- Add rewrite rule in vercel.json for /api/telemetry",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f047f3db6851f7d7d7d4c2be4d0ac8eb0da274fa"
+  },
   {
     "hash": "5c0f76f0519e29ef17de82d9de6519aef43ae8b9",
     "shortHash": "5c0f76f",
@@ -4851,9 +4861,19 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-12T21:22:00+03:00",
-    "commitCount": 39,
+    "date": "2026-09-13T12:09:21+03:00",
+    "commitCount": 40,
     "commits": [
+      {
+        "hash": "f047f3db6851f7d7d7d4c2be4d0ac8eb0da274fa",
+        "shortHash": "f047f3d",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-13T12:09:21+03:00",
+        "subject": "feat: add zero-sdk anonymous telemetry endpoint and privacy opt-out toggle",
+        "body": "- Add TelemetryManager in Android with pure Kotlin HttpURLConnection and 24h throttling\n- Add user-facing Anonymous Usage Reports toggle in SettingsScreen under Privacy & Security\n- Add /api/telemetry serverless endpoint in Vercel to sanitize Zero-PII and forward to Firestore /hilal-browser collection\n- Add rewrite rule in vercel.json for /api/telemetry",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f047f3db6851f7d7d7d4c2be4d0ac8eb0da274fa"
+      },
       {
         "hash": "5c0f76f0519e29ef17de82d9de6519aef43ae8b9",
         "shortHash": "5c0f76f",
@@ -9913,7 +9933,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 468,
+    "contributions": 469,
     "role": "Lead Developer"
   },
   {
