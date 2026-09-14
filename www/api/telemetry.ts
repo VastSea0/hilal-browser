@@ -17,8 +17,8 @@ interface TelemetryPayload {
   };
 }
 
-const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "notia-c87c6";
-const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || "AIzaSyCJyRFqaFmhWIIiBEFwVhzJsNYYM5zPbfg";
+const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID;
+const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY;
 const FIRESTORE_COLLECTION = "hilal-browser";
 const STATS_COLLECTION = "hilal-browser-stats";
 
