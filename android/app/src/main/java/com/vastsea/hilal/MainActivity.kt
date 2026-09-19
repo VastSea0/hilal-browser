@@ -1,6 +1,10 @@
 package com.vastsea.hilal
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.net.Uri
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -75,6 +79,15 @@ import org.mozilla.geckoview.GeckoView
 import org.mozilla.geckoview.WebResponse
 import java.util.Locale
 import java.util.UUID
+
+private fun Context.findActivity(): Activity? {
+    var ctx = this
+    while (ctx is ContextWrapper) {
+        if (ctx is Activity) return ctx
+        ctx = ctx.baseContext
+    }
+    return null
+}
 
 class MainActivity : ComponentActivity() {
 
@@ -310,11 +323,12 @@ fun HilalBrowserApp(
                 session: GeckoSession,
                 request: GeckoSession.NavigationDelegate.LoadRequest
             ): GeckoResult<AllowOrDeny>? {
-                if (request.uri.endsWith(".xpi", ignoreCase = true) || request.uri.contains("/firefox/downloads/")) {
-                    val addonName = request.uri.substringAfterLast("/").substringBefore(".xpi").replace("-", " ")
+                val uri = request.uri
+                if (uri.endsWith(".xpi", ignoreCase = true) || uri.contains("/firefox/downloads/")) {
+                    val addonName = uri.substringAfterLast("/").substringBefore(".xpi").replace("-", " ")
                     Toast.makeText(context, context.getString(R.string.addon_installing, addonName), Toast.LENGTH_SHORT).show()
                     geckoRuntime?.let { rt ->
-                        AddonManager.installFromUrl(rt, request.uri) { success ->
+                        AddonManager.installFromUrl(rt, uri) { success ->
                             android.os.Handler(android.os.Looper.getMainLooper()).post {
                                 if (success) {
                                     haptics.perform(HilalHapticType.Confirm)
@@ -327,6 +341,57 @@ fun HilalBrowserApp(
                         }
                     }
                     return GeckoResult.fromValue(AllowOrDeny.DENY)
+                }
+
+                // Handle external application deep links and intent schemes (market, intent, mailto, tel, etc.)
+                val isStandardWebScheme = uri.startsWith("http://", ignoreCase = true) ||
+                        uri.startsWith("https://", ignoreCase = true) ||
+                        uri.startsWith("about:", ignoreCase = true) ||
+                        uri.startsWith("javascript:", ignoreCase = true) ||
+                        uri.startsWith("data:", ignoreCase = true) ||
+                        uri.startsWith("blob:", ignoreCase = true)
+
+                val isPlayStoreUrl = uri.startsWith("https://play.google.com/store/", ignoreCase = true) ||
+                        uri.startsWith("http://play.google.com/store/", ignoreCase = true)
+
+                if (!isStandardWebScheme || isPlayStoreUrl) {
+                    try {
+                        val intent = if (uri.startsWith("intent:", ignoreCase = true)) {
+                            Intent.parseUri(uri, Intent.URI_INTENT_SCHEME)
+                        } else {
+                            Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+                        }
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        if (isPlayStoreUrl) {
+                            intent.setPackage("com.android.vending")
+                        }
+                        val act = context.findActivity()
+                        if (act != null) {
+                            act.startActivity(intent)
+                        } else {
+                            context.startActivity(intent)
+                        }
+                        return GeckoResult.fromValue(AllowOrDeny.DENY)
+                    } catch (_: Exception) {
+                        // If Play Store app was not found, let standard web URL load inside browser
+                        if (isPlayStoreUrl) {
+                            return null
+                        }
+                        // Handle browser fallback url for intent scheme if present
+                        if (uri.startsWith("intent:", ignoreCase = true)) {
+                            try {
+                                val parsed = Intent.parseUri(uri, Intent.URI_INTENT_SCHEME)
+                                val fallback = parsed.getStringExtra("browser_fallback_url")
+                                if (!fallback.isNullOrBlank()) {
+                                    android.os.Handler(android.os.Looper.getMainLooper()).post {
+                                        session.loadUri(fallback)
+                                    }
+                                    return GeckoResult.fromValue(AllowOrDeny.DENY)
+                                }
+                            } catch (_: Exception) {}
+                        }
+                        return GeckoResult.fromValue(AllowOrDeny.DENY)
+                    }
                 }
                 return null
             }

@@ -1,5 +1,7 @@
 package com.vastsea.hilal.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -498,7 +500,26 @@ fun SettingsScreen(
                     iconTint = MaterialTheme.colorScheme.onPrimaryContainer,
                     title = stringResource(R.string.more_apps_by_developer),
                     subtitle = stringResource(R.string.google_play_store),
-                    onClick = { onOpenUrl("https://play.google.com/store/apps/dev?id=6056059908674965746") }
+                    onClick = {
+                        val devUrl = "https://play.google.com/store/apps/dev?id=6056059908674965746"
+                        val devMarketUrl = "market://dev?id=6056059908674965746"
+                        try {
+                            val marketIntent = Intent(Intent.ACTION_VIEW, Uri.parse(devMarketUrl)).apply {
+                                setPackage("com.android.vending")
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            context.startActivity(marketIntent)
+                        } catch (_: Exception) {
+                            try {
+                                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(devUrl)).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(webIntent)
+                            } catch (_: Exception) {
+                                onOpenUrl(devUrl)
+                            }
+                        }
+                    }
                 )
 
                 SettingsDivider()
