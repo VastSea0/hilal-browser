@@ -169,4 +169,8 @@
     <string name="theme_forest">Orman</string>
     <string name="theme_lavender">Lavanta</string>
     <string name="tab_preview">Sekme Önizlemesi</string>
+    <string name="stop_loading">Durdur</string>
+    <string name="paste_from_clipboard">Panodan Yapıştır: %1$s</string>
+    <string name="paste">Yapıştır</string>
+    <string name="search_with">Arama: %1$s</string>
 </resources>

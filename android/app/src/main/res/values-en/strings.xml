@@ -169,4 +169,8 @@
     <string name="theme_forest">Forest</string>
     <string name="theme_lavender">Lavender</string>
     <string name="tab_preview">Tab Preview</string>
+    <string name="stop_loading">Stop</string>
+    <string name="paste_from_clipboard">Paste from clipboard: %1$s</string>
+    <string name="paste">Paste</string>
+    <string name="search_with">Search: %1$s</string>
 </resources>

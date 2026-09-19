@@ -728,6 +728,9 @@ fun HilalBrowserApp(
                 onReload = {
                     activeTab?.session?.reload()
                 },
+                onStop = {
+                    activeTab?.session?.stop()
+                },
                 onSwipePreviousTab = {
                     val currentWsTabs = tabs.filter { it.workspaceId == currentWorkspaceId && it.isPrivate == (activeTab?.isPrivate == true) }
                     val currentIndex = currentWsTabs.indexOfFirst { it.id == activeTabId }
