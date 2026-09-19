@@ -1,6 +1,8 @@
 package com.vastsea.hilal.ui.components
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -522,13 +524,35 @@ private fun ExpressiveActionButton(
     }
 }
 
-private fun shareUrl(context: Context, url: String, title: String) {
-    val intent = Intent(Intent.ACTION_SEND).apply {
-        type = "text/plain"
-        putExtra(Intent.EXTRA_SUBJECT, title)
-        putExtra(Intent.EXTRA_TEXT, url)
+private fun Context.findActivity(): Activity? {
+    var ctx = this
+    while (ctx is ContextWrapper) {
+        if (ctx is Activity) return ctx
+        ctx = ctx.baseContext
     }
-    context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_page)))
+    return null
+}
+
+private fun shareUrl(context: Context, url: String, title: String) {
+    try {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, title)
+            putExtra(Intent.EXTRA_TEXT, url)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        val shareIntent = Intent.createChooser(intent, context.getString(R.string.share_page)).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        val activity = context.findActivity()
+        if (activity != null) {
+            activity.startActivity(shareIntent)
+        } else {
+            context.startActivity(shareIntent)
+        }
+    } catch (_: Exception) {
+        // Fallback
+    }
 }
 
 @Preview(showBackground = true, name = "Options Sheet Light")
