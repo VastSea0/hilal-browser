@@ -1,18 +1,17 @@
 package com.vastsea.hilal.ui.theme
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 fun Modifier.bouncyClickable(
     enabled: Boolean = true,
@@ -22,30 +21,32 @@ fun Modifier.bouncyClickable(
     onClick: () -> Unit
 ): Modifier = composed {
     val haptics = rememberHilalHaptics()
-    var isPressed by remember { mutableStateOf(false) }
+    val scale = remember { Animatable(1f) }
 
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed && enabled) pressedScale else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "bouncy_click_scale"
+    val pressSpec = spring<Float>(
+        dampingRatio = 0.52f,
+        stiffness = Spring.StiffnessMediumLow
+    )
+    val releaseSpec = spring<Float>(
+        dampingRatio = Spring.DampingRatioMediumBouncy,
+        stiffness = Spring.StiffnessMedium
     )
 
     this
         .graphicsLayer {
-            scaleX = scale
-            scaleY = scale
+            scaleX = scale.value
+            scaleY = scale.value
         }
         .pointerInput(enabled, onLongClick, onClick) {
             if (!enabled) return@pointerInput
             detectTapGestures(
                 onPress = {
-                    isPressed = true
-                    haptics.perform(hapticType)
-                    tryAwaitRelease()
-                    isPressed = false
+                    coroutineScope {
+                        launch { scale.animateTo(pressedScale, pressSpec) }
+                        haptics.perform(hapticType)
+                        tryAwaitRelease()
+                        launch { scale.animateTo(1f, releaseSpec) }
+                    }
                 },
                 onLongPress = if (onLongClick != null) {
                     {
@@ -65,13 +66,15 @@ fun rememberBouncyScale(
     isPressed: Boolean,
     pressedScale: Float = 0.92f
 ): Float {
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) pressedScale else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "bouncy_scale"
+    val scale = remember { Animatable(1f) }
+    val pressSpec = spring<Float>(dampingRatio = 0.52f, stiffness = Spring.StiffnessMediumLow)
+    val releaseSpec = spring<Float>(
+        dampingRatio = Spring.DampingRatioMediumBouncy,
+        stiffness = Spring.StiffnessMedium
     )
-    return scale
+    val targetValue = if (isPressed) pressedScale else 1f
+    androidx.compose.runtime.LaunchedEffect(isPressed) {
+        scale.animateTo(targetValue, if (isPressed) pressSpec else releaseSpec)
+    }
+    return scale.value
 }

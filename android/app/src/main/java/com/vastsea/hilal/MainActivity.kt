@@ -7,8 +7,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -53,6 +56,7 @@ import com.vastsea.hilal.ui.screens.BangsScreen
 import com.vastsea.hilal.ui.screens.BookmarksScreen
 import com.vastsea.hilal.ui.screens.HistoryScreen
 import com.vastsea.hilal.ui.screens.SettingsScreen
+import com.vastsea.hilal.ui.theme.HilalMotion
 import com.vastsea.hilal.ui.theme.HilalTheme
 import org.mozilla.geckoview.AllowOrDeny
 import org.mozilla.geckoview.ContentBlocking
@@ -419,10 +423,12 @@ fun HilalBrowserApp(
     val shouldShowBottomBar = !hideBottomBarOnScroll || isBarsVisible || activeTab?.url == "about:newtab" || activeTab?.url == "about:blank"
     val topBarOffset by animateDpAsState(
         targetValue = if (shouldShowTopBar) 0.dp else (-120).dp,
+        animationSpec = if (shouldShowTopBar) HilalMotion.BarRevealDp else HilalMotion.BarHideDp,
         label = "topBarOffset"
     )
     val bottomBarOffset by animateDpAsState(
         targetValue = if (shouldShowBottomBar) 0.dp else 140.dp,
+        animationSpec = if (shouldShowBottomBar) HilalMotion.BarRevealDp else HilalMotion.BarHideDp,
         label = "bottomBarOffset"
     )
 
@@ -707,8 +713,20 @@ fun HilalBrowserApp(
         }
     }
 
-    // Tabs Tray Modal Sheet
-    if (showTabsTray) {
+    // Tabs Tray — full-screen modal with slide-up spring enter
+    AnimatedVisibility(
+        visible = showTabsTray,
+        enter = fadeIn(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)) +
+                androidx.compose.animation.slideInVertically(
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow),
+                    initialOffsetY = { it / 4 }
+                ),
+        exit = fadeOut(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessHigh)) +
+               androidx.compose.animation.slideOutVertically(
+                   animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessHigh),
+                   targetOffsetY = { it / 4 }
+               )
+    ) {
         TabsTray(
             tabs = tabs,
             activeTabId = activeTabId,

@@ -37,6 +37,22 @@ object HilalMotion {
         easing = EaseOutQuart
     )
 
+    // Bar hide-on-scroll: fast to hide, low-bouncy spring to reveal
+    val BarHideDp = tween<Dp>(durationMillis = 200, easing = EaseInQuart)
+    val BarRevealDp = spring<Dp>(
+        dampingRatio = Spring.DampingRatioLowBouncy,
+        stiffness = Spring.StiffnessMedium
+    )
+
+    // Button press: tight spring with noticeable overshoot
+    val PressSpring = spring<Float>(
+        dampingRatio = 0.52f,
+        stiffness = Spring.StiffnessMediumLow
+    )
+
+    // Item stagger delay base (ms per index)
+    const val ItemStaggerMs = 30
+
     const val BaseWeight = 1f
     const val ExpansionWeight = 1.18f
     const val CompressionWeight = 0.68f

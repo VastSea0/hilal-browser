@@ -7,9 +7,15 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -154,13 +160,38 @@ fun Omnibox(
                     .statusBarsPadding()
                     .padding(horizontal = 14.dp, vertical = 6.dp)
             ) {
+                val pillBorderColor by androidx.compose.animation.animateColorAsState(
+                    targetValue = if (isEditing)
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                    else
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    ),
+                    label = "pillBorder"
+                )
+                val pillElevation by androidx.compose.animation.core.animateDpAsState(
+                    targetValue = if (isEditing) 12.dp else 6.dp,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    ),
+                    label = "pillElevation"
+                )
                 Surface(
                     shape = ShapeCache.smoothPill,
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    shadowElevation = 6.dp,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
+                    shadowElevation = pillElevation,
+                    border = BorderStroke(1.dp, pillBorderColor),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .animateContentSize(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        )
                         .then(swipeGestureModifier)
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {

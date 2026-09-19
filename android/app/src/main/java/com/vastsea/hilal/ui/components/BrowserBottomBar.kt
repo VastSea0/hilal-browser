@@ -2,7 +2,9 @@
 
 package com.vastsea.hilal.ui.components
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -24,11 +26,30 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.vastsea.hilal.R
 import com.vastsea.hilal.ui.theme.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private enum class ToolbarButtonId {
     BACK, FORWARD, NEW_TAB, TABS, OPTIONS
+}
+
+// Animatable weight for each button: springs to ExpansionWeight on press, then bounces back
+@Composable
+private fun rememberButtonWeight(buttonId: ToolbarButtonId): Pair<Animatable<Float, *>, suspend (ToolbarButtonId?) -> Unit> {
+    val weight = remember { Animatable(HilalMotion.BaseWeight) }
+    val expandSpec = spring<Float>(dampingRatio = 0.40f, stiffness = Spring.StiffnessMediumLow)
+    val returnSpec = spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium)
+
+    suspend fun animateFor(active: ToolbarButtonId?) {
+        val target = when (active) {
+            buttonId -> HilalMotion.ExpansionWeight
+            null -> HilalMotion.BaseWeight
+            else -> HilalMotion.CompressionWeight
+        }
+        val spec = if (active == null) returnSpec else expandSpec
+        weight.animateTo(target, spec)
+    }
+
+    return Pair(weight, ::animateFor)
 }
 
 @Composable
@@ -45,7 +66,6 @@ fun BrowserBottomBar(
     onOpenOptions: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var activePressedButton by remember { mutableStateOf<ToolbarButtonId?>(null) }
     val haptics = rememberHilalHaptics()
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
@@ -53,48 +73,34 @@ fun BrowserBottomBar(
     var totalDragY by remember { mutableFloatStateOf(0f) }
     var thresholdTriggered by remember { mutableStateOf(false) }
 
-    fun triggerButton(buttonId: ToolbarButtonId, action: () -> Unit) {
-        activePressedButton = buttonId
+    // Per-button Animatable weights — react independently and concurrently
+    val backWeight = remember { Animatable(HilalMotion.BaseWeight) }
+    val forwardWeight = remember { Animatable(HilalMotion.BaseWeight) }
+    val newTabWeight = remember { Animatable(HilalMotion.BaseWeight) }
+    val tabsWeight = remember { Animatable(HilalMotion.BaseWeight) }
+    val optionsWeight = remember { Animatable(HilalMotion.BaseWeight) }
+
+    val allWeights = listOf(backWeight, forwardWeight, newTabWeight, tabsWeight, optionsWeight)
+    val expandSpec = spring<Float>(dampingRatio = 0.42f, stiffness = Spring.StiffnessMediumLow)
+    val returnSpec = spring<Float>(
+        dampingRatio = Spring.DampingRatioMediumBouncy,
+        stiffness = Spring.StiffnessMedium
+    )
+
+    fun triggerButton(pressedWeight: Animatable<Float, *>, action: () -> Unit) {
         action()
         scope.launch {
-            delay(220)
-            activePressedButton = null
+            // Compress siblings, expand pressed
+            for (w in allWeights) {
+                if (w !== pressedWeight) launch { w.animateTo(HilalMotion.CompressionWeight, expandSpec) }
+            }
+            pressedWeight.animateTo(HilalMotion.ExpansionWeight, expandSpec)
+            // Spring everything back
+            for (w in allWeights) {
+                launch { w.animateTo(HilalMotion.BaseWeight, returnSpec) }
+            }
         }
     }
-
-    fun computeWeight(buttonId: ToolbarButtonId): Float {
-        return when (activePressedButton) {
-            buttonId -> HilalMotion.ExpansionWeight
-            null -> HilalMotion.BaseWeight
-            else -> HilalMotion.CompressionWeight
-        }
-    }
-
-    val backWeight by animateFloatAsState(
-        targetValue = computeWeight(ToolbarButtonId.BACK),
-        animationSpec = HilalMotion.SpringBouncy,
-        label = "backWeight"
-    )
-    val forwardWeight by animateFloatAsState(
-        targetValue = computeWeight(ToolbarButtonId.FORWARD),
-        animationSpec = HilalMotion.SpringBouncy,
-        label = "forwardWeight"
-    )
-    val newTabWeight by animateFloatAsState(
-        targetValue = computeWeight(ToolbarButtonId.NEW_TAB),
-        animationSpec = HilalMotion.SpringBouncy,
-        label = "newTabWeight"
-    )
-    val tabsWeight by animateFloatAsState(
-        targetValue = computeWeight(ToolbarButtonId.TABS),
-        animationSpec = HilalMotion.SpringBouncy,
-        label = "tabsWeight"
-    )
-    val optionsWeight by animateFloatAsState(
-        targetValue = computeWeight(ToolbarButtonId.OPTIONS),
-        animationSpec = HilalMotion.SpringBouncy,
-        label = "optionsWeight"
-    )
 
     val dragGestureModifier = Modifier.pointerInput(Unit) {
         detectVerticalDragGestures(
@@ -124,7 +130,6 @@ fun BrowserBottomBar(
     }
 
     if (!isDocked) {
-        // Floating Mode — Squircle Pill with soft elevation
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             shape = ShapeCache.smoothPill,
@@ -144,17 +149,16 @@ fun BrowserBottomBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // 1. Back Button Segment
                 Box(
                     modifier = Modifier
-                        .weight(backWeight)
+                        .weight(backWeight.value)
                         .fillMaxHeight()
                         .clip(ShapeCache.smooth14)
                         .bouncyClickable(
                             enabled = canGoBack,
                             pressedScale = 0.88f,
                             hapticType = HilalHapticType.Tap,
-                            onClick = { triggerButton(ToolbarButtonId.BACK, onGoBack) }
+                            onClick = { triggerButton(backWeight, onGoBack) }
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -166,17 +170,16 @@ fun BrowserBottomBar(
                     )
                 }
 
-                // 2. Forward Button Segment
                 Box(
                     modifier = Modifier
-                        .weight(forwardWeight)
+                        .weight(forwardWeight.value)
                         .fillMaxHeight()
                         .clip(ShapeCache.smooth14)
                         .bouncyClickable(
                             enabled = canGoForward,
                             pressedScale = 0.88f,
                             hapticType = HilalHapticType.Tap,
-                            onClick = { triggerButton(ToolbarButtonId.FORWARD, onGoForward) }
+                            onClick = { triggerButton(forwardWeight, onGoForward) }
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -188,10 +191,9 @@ fun BrowserBottomBar(
                     )
                 }
 
-                // 3. New Tab Pill Button with Long-press for Workspace
                 Box(
                     modifier = Modifier
-                        .weight(newTabWeight)
+                        .weight(newTabWeight.value)
                         .fillMaxHeight(),
                     contentAlignment = Alignment.Center
                 ) {
@@ -203,7 +205,7 @@ fun BrowserBottomBar(
                             .bouncyClickable(
                                 pressedScale = 0.88f,
                                 onLongClick = onNewWorkspaceLongPress,
-                                onClick = { triggerButton(ToolbarButtonId.NEW_TAB, onNewTab) }
+                                onClick = { triggerButton(newTabWeight, onNewTab) }
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -216,17 +218,15 @@ fun BrowserBottomBar(
                     }
                 }
 
-                // 4. Tabs Tray Segment with Badge
                 Box(
                     modifier = Modifier
-                        .weight(tabsWeight)
+                        .weight(tabsWeight.value)
                         .fillMaxHeight()
                         .clip(ShapeCache.smooth14)
                         .bouncyClickable(
-                            enabled = true,
                             pressedScale = 0.88f,
                             hapticType = HilalHapticType.Tap,
-                            onClick = { triggerButton(ToolbarButtonId.TABS, onOpenTabsTray) }
+                            onClick = { triggerButton(tabsWeight, onOpenTabsTray) }
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -249,17 +249,15 @@ fun BrowserBottomBar(
                     }
                 }
 
-                // 5. Options Menu Segment
                 Box(
                     modifier = Modifier
-                        .weight(optionsWeight)
+                        .weight(optionsWeight.value)
                         .fillMaxHeight()
                         .clip(ShapeCache.smooth14)
                         .bouncyClickable(
-                            enabled = true,
                             pressedScale = 0.88f,
                             hapticType = HilalHapticType.Tap,
-                            onClick = { triggerButton(ToolbarButtonId.OPTIONS, onOpenOptions) }
+                            onClick = { triggerButton(optionsWeight, onOpenOptions) }
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -273,7 +271,6 @@ fun BrowserBottomBar(
             }
         }
     } else {
-        // Docked Mode — Edge-to-edge bar with continuous top squircle
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = ShapeCache.groupedTop(20.dp),
@@ -291,17 +288,16 @@ fun BrowserBottomBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // 1. Back
                 Box(
                     modifier = Modifier
-                        .weight(backWeight)
+                        .weight(backWeight.value)
                         .fillMaxHeight()
                         .clip(ShapeCache.smooth14)
                         .bouncyClickable(
                             enabled = canGoBack,
                             pressedScale = 0.88f,
                             hapticType = HilalHapticType.Tap,
-                            onClick = { triggerButton(ToolbarButtonId.BACK, onGoBack) }
+                            onClick = { triggerButton(backWeight, onGoBack) }
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -313,17 +309,16 @@ fun BrowserBottomBar(
                     )
                 }
 
-                // 2. Forward
                 Box(
                     modifier = Modifier
-                        .weight(forwardWeight)
+                        .weight(forwardWeight.value)
                         .fillMaxHeight()
                         .clip(ShapeCache.smooth14)
                         .bouncyClickable(
                             enabled = canGoForward,
                             pressedScale = 0.88f,
                             hapticType = HilalHapticType.Tap,
-                            onClick = { triggerButton(ToolbarButtonId.FORWARD, onGoForward) }
+                            onClick = { triggerButton(forwardWeight, onGoForward) }
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -335,10 +330,9 @@ fun BrowserBottomBar(
                     )
                 }
 
-                // 3. New Tab
                 Box(
                     modifier = Modifier
-                        .weight(newTabWeight)
+                        .weight(newTabWeight.value)
                         .fillMaxHeight(),
                     contentAlignment = Alignment.Center
                 ) {
@@ -350,7 +344,7 @@ fun BrowserBottomBar(
                             .bouncyClickable(
                                 pressedScale = 0.88f,
                                 onLongClick = onNewWorkspaceLongPress,
-                                onClick = { triggerButton(ToolbarButtonId.NEW_TAB, onNewTab) }
+                                onClick = { triggerButton(newTabWeight, onNewTab) }
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -363,17 +357,15 @@ fun BrowserBottomBar(
                     }
                 }
 
-                // 4. Tabs
                 Box(
                     modifier = Modifier
-                        .weight(tabsWeight)
+                        .weight(tabsWeight.value)
                         .fillMaxHeight()
                         .clip(ShapeCache.smooth14)
                         .bouncyClickable(
-                            enabled = true,
                             pressedScale = 0.88f,
                             hapticType = HilalHapticType.Tap,
-                            onClick = { triggerButton(ToolbarButtonId.TABS, onOpenTabsTray) }
+                            onClick = { triggerButton(tabsWeight, onOpenTabsTray) }
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -396,17 +388,15 @@ fun BrowserBottomBar(
                     }
                 }
 
-                // 5. Options
                 Box(
                     modifier = Modifier
-                        .weight(optionsWeight)
+                        .weight(optionsWeight.value)
                         .fillMaxHeight()
                         .clip(ShapeCache.smooth14)
                         .bouncyClickable(
-                            enabled = true,
                             pressedScale = 0.88f,
                             hapticType = HilalHapticType.Tap,
-                            onClick = { triggerButton(ToolbarButtonId.OPTIONS, onOpenOptions) }
+                            onClick = { triggerButton(optionsWeight, onOpenOptions) }
                         ),
                     contentAlignment = Alignment.Center
                 ) {

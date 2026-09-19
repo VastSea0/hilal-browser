@@ -3,6 +3,7 @@
 package com.vastsea.hilal.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
@@ -306,7 +307,25 @@ fun TabsTray(
                     itemsIndexed(displayTabs, key = { _, tab -> tab.id }) { index, tab ->
                         val isActive = tab.id == activeTabId
                         val isEven = index % 2 == 0
-                        val tiltAngle = if (isActive) 0f else if (isEven) -1.2f else 1.2f
+
+                        val targetTilt = if (isActive) 0f else if (isEven) -1.4f else 1.4f
+                        val tiltAngle by animateFloatAsState(
+                            targetValue = targetTilt,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            ),
+                            label = "cardTilt"
+                        )
+                        val targetScale = if (isActive) 1.03f else 0.97f
+                        val cardScale by animateFloatAsState(
+                            targetValue = targetScale,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            ),
+                            label = "cardScale"
+                        )
 
                         val dismissState = rememberSwipeToDismissBoxState(
                             confirmValueChange = { value ->
@@ -320,6 +339,11 @@ fun TabsTray(
 
                         SwipeToDismissBox(
                             state = dismissState,
+                            modifier = Modifier.animateItem(
+                                fadeInSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow),
+                                placementSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+                                fadeOutSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                            ),
                             backgroundContent = {
                                 Surface(
                                     color = MaterialTheme.colorScheme.errorContainer,
@@ -340,7 +364,6 @@ fun TabsTray(
                                 }
                             }
                         ) {
-                            // Coverflow & Depth Transformation Layer
                             Surface(
                                 shape = ShapeCache.smooth20,
                                 color = if (isActive) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -353,8 +376,8 @@ fun TabsTray(
                                     .height(175.dp)
                                     .graphicsLayer {
                                         rotationZ = tiltAngle
-                                        scaleX = if (isActive) 1.02f else 0.98f
-                                        scaleY = if (isActive) 1.02f else 0.98f
+                                        scaleX = cardScale
+                                        scaleY = cardScale
                                     }
                                     .bouncyClickable(
                                         pressedScale = 0.93f,
@@ -366,7 +389,6 @@ fun TabsTray(
                                     )
                             ) {
                                 Column(modifier = Modifier.fillMaxSize()) {
-                                    // Card Header: Site Info + Close Action
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -418,7 +440,6 @@ fun TabsTray(
                                         }
                                     }
 
-                                    // Card Body Preview
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
@@ -460,6 +481,7 @@ fun TabsTray(
                     }
                 }
             }
+
 
             Spacer(modifier = Modifier.height(12.dp))
 
