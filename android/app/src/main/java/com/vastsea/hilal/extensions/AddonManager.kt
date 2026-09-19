@@ -16,6 +16,7 @@ data class InstalledAddon(
     val isEnabled: Boolean,
     val isBuiltIn: Boolean,
     val optionsPageUrl: String?,
+    val iconUrl: String?,
     val extension: WebExtension
 )
 
@@ -23,7 +24,8 @@ data class FeaturedAddon(
     val id: String,
     val name: String,
     val description: String,
-    val xpiUrl: String
+    val xpiUrl: String,
+    val iconUrl: String
 )
 
 object AddonManager {
@@ -35,37 +37,43 @@ object AddonManager {
             id = "uBlock0@raymondhill.net",
             name = "uBlock Origin",
             description = "Verimli ve geniş spektrumlu reklam ve içerik engelleyici.",
-            xpiUrl = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"
+            xpiUrl = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi",
+            iconUrl = "https://addons.mozilla.org/user-media/addon_icons/607/607454-64.png"
         ),
         FeaturedAddon(
             id = "addon@darkreader.org",
             name = "Dark Reader",
             description = "Tüm web siteleri için göz koruyucu koyu tema.",
-            xpiUrl = "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi"
+            xpiUrl = "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi",
+            iconUrl = "https://addons.mozilla.org/user-media/addon_icons/959/959954-64.png"
         ),
         FeaturedAddon(
             id = "jid1-MnnAQBPgBpAAng@jetpack",
             name = "Privacy Badger",
             description = "Görünmez izleyicileri otomatik olarak engeller.",
-            xpiUrl = "https://addons.mozilla.org/firefox/downloads/latest/privacy-badger17/latest.xpi"
+            xpiUrl = "https://addons.mozilla.org/firefox/downloads/latest/privacy-badger17/latest.xpi",
+            iconUrl = "https://addons.mozilla.org/user-media/addon_icons/506/506646-64.png"
         ),
         FeaturedAddon(
             id = "{446900e4-71c2-419f-a6a7-df9c091e268b}",
             name = "Bitwarden",
             description = "Güvenli ve açık kaynaklı şifre yöneticisi.",
-            xpiUrl = "https://addons.mozilla.org/firefox/downloads/latest/bitwarden-password-manager/latest.xpi"
+            xpiUrl = "https://addons.mozilla.org/firefox/downloads/latest/bitwarden-password-manager/latest.xpi",
+            iconUrl = "https://addons.mozilla.org/user-media/addon_icons/814/814407-64.png"
         ),
         FeaturedAddon(
             id = "sponsorBlocker@ajay.app",
             name = "SponsorBlock",
             description = "YouTube videolarındaki sponsor ve reklam bölümlerini atlar.",
-            xpiUrl = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi"
+            xpiUrl = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi",
+            iconUrl = "https://addons.mozilla.org/user-media/addon_icons/1041/1041535-64.png"
         ),
         FeaturedAddon(
             id = "{0d7cafdd-501c-49ca-8ebb-e3341caaa55e}",
             name = "TWP - Translate Web Pages",
             description = "Web sayfalarını gerçek zamanlı olarak çevirir.",
-            xpiUrl = "https://addons.mozilla.org/firefox/downloads/latest/traduzir-paginas-web/latest.xpi"
+            xpiUrl = "https://addons.mozilla.org/firefox/downloads/latest/traduzir-paginas-web/latest.xpi",
+            iconUrl = "https://addons.mozilla.org/user-media/addon_icons/972/972758-64.png"
         )
     )
 
@@ -135,6 +143,7 @@ object AddonManager {
         geckoRuntime.webExtensionController.list().then({ list ->
             installedAddons.clear()
             list?.forEach { ext ->
+                val matchedIcon = featuredAddons.find { it.id == ext.id }?.iconUrl
                 installedAddons.add(
                     InstalledAddon(
                         id = ext.id,
@@ -144,6 +153,7 @@ object AddonManager {
                         isEnabled = ext.metaData.enabled,
                         isBuiltIn = ext.isBuiltIn,
                         optionsPageUrl = ext.metaData.optionsPageUrl,
+                        iconUrl = matchedIcon,
                         extension = ext
                     )
                 )

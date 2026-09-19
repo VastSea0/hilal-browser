@@ -17,11 +17,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.vastsea.hilal.R
 import com.vastsea.hilal.extensions.AddonManager
 import com.vastsea.hilal.extensions.InstalledAddon
@@ -152,12 +154,30 @@ fun AddonsScreen(
                                             .padding(12.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Extension,
-                                            contentDescription = null,
-                                            tint = if (addon.isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.size(24.dp)
-                                        )
+                                        Surface(
+                                            shape = ShapeCache.smooth12,
+                                            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                            modifier = Modifier.size(38.dp)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                if (!addon.iconUrl.isNullOrBlank()) {
+                                                    AsyncImage(
+                                                        model = addon.iconUrl,
+                                                        contentDescription = addon.name,
+                                                        modifier = Modifier
+                                                            .size(28.dp)
+                                                            .clip(ShapeCache.smooth10)
+                                                    )
+                                                } else {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Extension,
+                                                        contentDescription = null,
+                                                        tint = if (addon.isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        modifier = Modifier.size(22.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
                                         Spacer(modifier = Modifier.width(12.dp))
                                         Column(modifier = Modifier.weight(1f)) {
                                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -270,12 +290,21 @@ fun AddonsScreen(
                                         .padding(12.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Extension,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.secondary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
+                                    Surface(
+                                        shape = ShapeCache.smooth12,
+                                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                        modifier = Modifier.size(38.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            AsyncImage(
+                                                model = feat.iconUrl,
+                                                contentDescription = feat.name,
+                                                modifier = Modifier
+                                                    .size(28.dp)
+                                                    .clip(ShapeCache.smooth10)
+                                            )
+                                        }
+                                    }
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
@@ -321,13 +350,28 @@ fun AddonsScreen(
                                                 if (!isInstallingThis && geckoRuntime != null) {
                                                     isInstallingThis = true
                                                     haptics.perform(HilalHapticType.Confirm)
+                                                    Toast.makeText(
+                                                        context,
+                                                        context.getString(R.string.addon_installing, feat.name),
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
                                                     AddonManager.installFromUrl(geckoRuntime, feat.xpiUrl) { success ->
                                                         isInstallingThis = false
-                                                        Toast.makeText(
-                                                            context,
-                                                            if (success) "${feat.name} yüklendi." else "Yükleme başarısız.",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
+                                                        if (success) {
+                                                            haptics.perform(HilalHapticType.Confirm)
+                                                            Toast.makeText(
+                                                                context,
+                                                                context.getString(R.string.addon_installed_success, feat.name),
+                                                                Toast.LENGTH_SHORT
+                                                            ).show()
+                                                        } else {
+                                                            haptics.perform(HilalHapticType.Reject)
+                                                            Toast.makeText(
+                                                                context,
+                                                                context.getString(R.string.addon_install_failed),
+                                                                Toast.LENGTH_SHORT
+                                                            ).show()
+                                                        }
                                                     }
                                                 }
                                             },
@@ -335,6 +379,14 @@ fun AddonsScreen(
                                             enabled = !isInstallingThis,
                                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
                                         ) {
+                                            if (isInstallingThis) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(16.dp),
+                                                    strokeWidth = 2.dp,
+                                                    color = MaterialTheme.colorScheme.onPrimary
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                            }
                                             Text(
                                                 text = if (isInstallingThis) stringResource(R.string.installing) else stringResource(R.string.install_addon),
                                                 style = MaterialTheme.typography.labelMedium

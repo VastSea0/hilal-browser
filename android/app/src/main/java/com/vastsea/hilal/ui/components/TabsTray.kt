@@ -7,6 +7,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,8 +22,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import coil.compose.AsyncImage
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -389,6 +394,13 @@ fun TabsTray(
                                     )
                             ) {
                                 Column(modifier = Modifier.fillMaxSize()) {
+                                    val domain = remember(tab.url) {
+                                        try {
+                                            java.net.URI(tab.url).host?.removePrefix("www.")
+                                        } catch (_: Exception) { null }
+                                    }
+                                    val tabFavicon = tab.faviconUrl ?: if (!domain.isNullOrBlank()) "https://www.google.com/s2/favicons?domain=$domain&sz=64" else null
+
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -404,77 +416,109 @@ fun TabsTray(
                                             verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier.weight(1f)
                                         ) {
-                                            Icon(
-                                                imageVector = if (tab.isPrivate) Icons.Default.VisibilityOff else Icons.Default.Language,
-                                                contentDescription = null,
-                                                tint = if (tab.isPrivate) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(15.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text(
-                                                text = if (tab.title.isNotBlank()) tab.title else stringResource(R.string.new_tab),
-                                                style = MaterialTheme.typography.labelMedium,
-                                                fontWeight = FontWeight.SemiBold,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
-                                        }
+                                             if (!tabFavicon.isNullOrBlank() && !tab.isPrivate) {
+                                                 AsyncImage(
+                                                     model = tabFavicon,
+                                                     contentDescription = null,
+                                                     modifier = Modifier
+                                                         .size(16.dp)
+                                                         .clip(ShapeCache.smoothPill)
+                                                 )
+                                             } else {
+                                                 Icon(
+                                                     imageVector = if (tab.isPrivate) Icons.Default.VisibilityOff else Icons.Default.Language,
+                                                     contentDescription = null,
+                                                     tint = if (tab.isPrivate) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                                                     modifier = Modifier.size(15.dp)
+                                                 )
+                                             }
+                                             Spacer(modifier = Modifier.width(6.dp))
+                                             Text(
+                                                 text = if (tab.title.isNotBlank()) tab.title else stringResource(R.string.new_tab),
+                                                 style = MaterialTheme.typography.labelMedium,
+                                                 fontWeight = FontWeight.SemiBold,
+                                                 maxLines = 1,
+                                                 overflow = TextOverflow.Ellipsis,
+                                                 color = MaterialTheme.colorScheme.onSurface
+                                             )
+                                         }
 
-                                        Box(
-                                            modifier = Modifier
-                                                .size(24.dp)
-                                                .bouncyClickable(
-                                                    pressedScale = 0.80f,
-                                                    hapticType = HilalHapticType.Reject,
-                                                    onClick = { onCloseTab(tab.id) }
-                                                ),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Close,
-                                                contentDescription = stringResource(R.string.close),
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                modifier = Modifier.size(14.dp)
-                                            )
-                                        }
-                                    }
+                                         Box(
+                                             modifier = Modifier
+                                                 .size(24.dp)
+                                                 .bouncyClickable(
+                                                     pressedScale = 0.80f,
+                                                     hapticType = HilalHapticType.Reject,
+                                                     onClick = { onCloseTab(tab.id) }
+                                                 ),
+                                             contentAlignment = Alignment.Center
+                                         ) {
+                                             Icon(
+                                                 imageVector = Icons.Default.Close,
+                                                 contentDescription = stringResource(R.string.close),
+                                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                 modifier = Modifier.size(14.dp)
+                                             )
+                                         }
+                                     }
 
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(8.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Surface(
-                                            shape = ShapeCache.smooth12,
-                                            color = MaterialTheme.colorScheme.surface,
-                                            modifier = Modifier.fillMaxSize()
-                                        ) {
-                                            Column(
-                                                modifier = Modifier
-                                                    .fillMaxSize()
-                                                    .padding(8.dp),
-                                                verticalArrangement = Arrangement.Center,
-                                                horizontalAlignment = Alignment.CenterHorizontally
-                                            ) {
-                                                Icon(
-                                                    imageVector = if (tab.url.startsWith("https://")) Icons.Default.Lock else Icons.Default.Public,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                                    modifier = Modifier.size(26.dp)
-                                                )
-                                                Spacer(modifier = Modifier.height(6.dp))
-                                                Text(
-                                                    text = tab.url.removePrefix("https://").removePrefix("http://").removePrefix("about:"),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-                                        }
-                                    }
+                                     Box(
+                                         modifier = Modifier
+                                             .fillMaxSize()
+                                             .padding(6.dp),
+                                         contentAlignment = Alignment.Center
+                                     ) {
+                                         if (tab.thumbnail != null) {
+                                             Image(
+                                                 bitmap = tab.thumbnail!!.asImageBitmap(),
+                                                 contentDescription = stringResource(R.string.tab_preview),
+                                                 contentScale = ContentScale.Crop,
+                                                 modifier = Modifier
+                                                     .fillMaxSize()
+                                                     .clip(ShapeCache.smooth12)
+                                             )
+                                         } else {
+                                             Surface(
+                                                 shape = ShapeCache.smooth12,
+                                                 color = MaterialTheme.colorScheme.surface,
+                                                 modifier = Modifier.fillMaxSize()
+                                             ) {
+                                                 Column(
+                                                     modifier = Modifier
+                                                         .fillMaxSize()
+                                                         .padding(8.dp),
+                                                     verticalArrangement = Arrangement.Center,
+                                                     horizontalAlignment = Alignment.CenterHorizontally
+                                                 ) {
+                                                     if (!tabFavicon.isNullOrBlank() && !tab.isPrivate) {
+                                                         AsyncImage(
+                                                             model = "https://www.google.com/s2/favicons?domain=${domain}&sz=128",
+                                                             contentDescription = null,
+                                                             modifier = Modifier
+                                                                 .size(34.dp)
+                                                                 .clip(ShapeCache.smooth10)
+                                                         )
+                                                     } else {
+                                                         Icon(
+                                                             imageVector = if (tab.url.startsWith("https://")) Icons.Default.Lock else Icons.Default.Public,
+                                                             contentDescription = null,
+                                                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                                             modifier = Modifier.size(26.dp)
+                                                         )
+                                                     }
+                                                     Spacer(modifier = Modifier.height(6.dp))
+                                                     Text(
+                                                         text = if (tab.url == "about:newtab" || tab.url == "about:blank") stringResource(R.string.new_tab)
+                                                                else tab.url.removePrefix("https://").removePrefix("http://").removePrefix("about:"),
+                                                         style = MaterialTheme.typography.bodySmall,
+                                                         maxLines = 1,
+                                                         overflow = TextOverflow.Ellipsis,
+                                                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                     )
+                                                 }
+                                             }
+                                         }
+                                     }
                                 }
                             }
                         }

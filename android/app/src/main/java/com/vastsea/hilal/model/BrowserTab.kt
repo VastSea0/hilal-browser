@@ -20,4 +20,6 @@ class BrowserTab(
     var progress by mutableIntStateOf(0)
     var canGoBack by mutableStateOf(false)
     var canGoForward by mutableStateOf(false)
+    var thumbnail by mutableStateOf<android.graphics.Bitmap?>(null)
+    var faviconUrl by mutableStateOf<String?>(null)
 }

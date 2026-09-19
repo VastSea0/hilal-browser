@@ -47,6 +47,10 @@ import com.vastsea.hilal.model.BookmarkItem
 import com.vastsea.hilal.model.BrowserTab
 import com.vastsea.hilal.model.HistoryItem
 import com.vastsea.hilal.model.Workspace
+import android.graphics.Bitmap
+import android.webkit.URLUtil
+import android.widget.Toast
+import com.vastsea.hilal.download.DownloadHelper
 import com.vastsea.hilal.search.HilalBangsEngine
 import com.vastsea.hilal.search.SearchEngineManager
 import com.vastsea.hilal.telemetry.TelemetryManager
@@ -56,8 +60,10 @@ import com.vastsea.hilal.ui.screens.BangsScreen
 import com.vastsea.hilal.ui.screens.BookmarksScreen
 import com.vastsea.hilal.ui.screens.HistoryScreen
 import com.vastsea.hilal.ui.screens.SettingsScreen
+import com.vastsea.hilal.ui.theme.HilalHapticType
 import com.vastsea.hilal.ui.theme.HilalMotion
 import com.vastsea.hilal.ui.theme.HilalTheme
+import com.vastsea.hilal.ui.theme.rememberHilalHaptics
 import org.mozilla.geckoview.AllowOrDeny
 import org.mozilla.geckoview.ContentBlocking
 import org.mozilla.geckoview.GeckoResult
@@ -66,6 +72,7 @@ import org.mozilla.geckoview.GeckoRuntimeSettings
 import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.GeckoSessionSettings
 import org.mozilla.geckoview.GeckoView
+import org.mozilla.geckoview.WebResponse
 import java.util.Locale
 import java.util.UUID
 
@@ -246,6 +253,25 @@ fun HilalBrowserApp(
     var newWorkspaceEmojiDialog by remember { mutableStateOf("🌐") }
     val emojiOptions = listOf("🌐", "💼", "🔬", "📚", "🎨", "🚀", "🎮", "🏠", "💡", "🛡️", "✈️", "☕")
 
+    val haptics = rememberHilalHaptics()
+    var currentGeckoView by remember { mutableStateOf<GeckoView?>(null) }
+
+    fun captureCurrentTabThumbnail(targetTab: BrowserTab?) {
+        if (targetTab != null && targetTab.url != "about:newtab" && targetTab.url != "about:blank") {
+            currentGeckoView?.capturePixels()?.then({ bmp ->
+                if (bmp != null) {
+                    val ratio = bmp.height.toFloat() / bmp.width.toFloat()
+                    val thumbWidth = 360
+                    val thumbHeight = (thumbWidth * ratio).toInt().coerceAtLeast(1)
+                    targetTab.thumbnail = Bitmap.createScaledBitmap(bmp, thumbWidth, thumbHeight, true)
+                }
+                GeckoResult.fromValue(null)
+            }, {
+                GeckoResult.fromValue(null)
+            })
+        }
+    }
+
     // Helper: Create a new tab
     fun createNewTab(
         url: String = "about:newtab",
@@ -284,9 +310,21 @@ fun HilalBrowserApp(
                 session: GeckoSession,
                 request: GeckoSession.NavigationDelegate.LoadRequest
             ): GeckoResult<AllowOrDeny>? {
-                if (request.uri.endsWith(".xpi", ignoreCase = true)) {
+                if (request.uri.endsWith(".xpi", ignoreCase = true) || request.uri.contains("/firefox/downloads/")) {
+                    val addonName = request.uri.substringAfterLast("/").substringBefore(".xpi").replace("-", " ")
+                    Toast.makeText(context, context.getString(R.string.addon_installing, addonName), Toast.LENGTH_SHORT).show()
                     geckoRuntime?.let { rt ->
-                        AddonManager.installFromUrl(rt, request.uri) {}
+                        AddonManager.installFromUrl(rt, request.uri) { success ->
+                            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                                if (success) {
+                                    haptics.perform(HilalHapticType.Confirm)
+                                    Toast.makeText(context, context.getString(R.string.addon_installed_success, addonName), Toast.LENGTH_SHORT).show()
+                                } else {
+                                    haptics.perform(HilalHapticType.Reject)
+                                    Toast.makeText(context, context.getString(R.string.addon_install_failed), Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
                     }
                     return GeckoResult.fromValue(AllowOrDeny.DENY)
                 }
@@ -300,6 +338,12 @@ fun HilalBrowserApp(
             ) {
                 if (url != null && url != "about:blank") {
                     tab.url = url
+                    val domain = try {
+                        java.net.URI(url).host?.removePrefix("www.")
+                    } catch (_: Exception) { null }
+                    if (!domain.isNullOrBlank()) {
+                        tab.faviconUrl = "https://www.google.com/s2/favicons?domain=$domain&sz=128"
+                    }
                     if (!isPrivate && url != "about:newtab") {
                         historyItems.removeAll { it.url == url }
                         historyItems.add(0, HistoryItem(title = tab.title, url = url))
@@ -321,6 +365,10 @@ fun HilalBrowserApp(
                     }
                 }
             }
+            override fun onExternalResponse(session: GeckoSession, response: WebResponse) {
+                val suggestedName = URLUtil.guessFileName(response.uri, null, null)
+                DownloadHelper.startDownload(context, response.uri, suggestedName, null, haptics)
+            }
         }
 
         session?.progressDelegate = object : GeckoSession.ProgressDelegate {
@@ -335,6 +383,9 @@ fun HilalBrowserApp(
                 if (!isPrivate && tab.url != "about:newtab" && tab.url != "about:blank") {
                     historyItems.removeAll { it.url == tab.url }
                     historyItems.add(0, HistoryItem(title = tab.title, url = tab.url))
+                }
+                if (success) {
+                    captureCurrentTabThumbnail(tab)
                 }
             }
             override fun onProgressChange(session: GeckoSession, progress: Int) {
@@ -631,10 +682,12 @@ fun HilalBrowserApp(
                             AndroidView(
                                 factory = { context ->
                                     GeckoView(context).apply {
+                                        currentGeckoView = this
                                         activeTab.session?.let { setSession(it) }
                                     }
                                 },
                                 update = { geckoView ->
+                                    currentGeckoView = geckoView
                                     activeTab.session?.let { geckoView.setSession(it) }
                                 },
                                 modifier = Modifier.fillMaxSize()
@@ -679,6 +732,7 @@ fun HilalBrowserApp(
                     val currentWsTabs = tabs.filter { it.workspaceId == currentWorkspaceId && it.isPrivate == (activeTab?.isPrivate == true) }
                     val currentIndex = currentWsTabs.indexOfFirst { it.id == activeTabId }
                     if (currentIndex > 0) {
+                        captureCurrentTabThumbnail(activeTab)
                         activeTabId = currentWsTabs[currentIndex - 1].id
                     }
                 },
@@ -686,6 +740,7 @@ fun HilalBrowserApp(
                     val currentWsTabs = tabs.filter { it.workspaceId == currentWorkspaceId && it.isPrivate == (activeTab?.isPrivate == true) }
                     val currentIndex = currentWsTabs.indexOfFirst { it.id == activeTabId }
                     if (currentIndex in 0 until currentWsTabs.size - 1) {
+                        captureCurrentTabThumbnail(activeTab)
                         activeTabId = currentWsTabs[currentIndex + 1].id
                     }
                 },
@@ -702,9 +757,15 @@ fun HilalBrowserApp(
                 isDocked = toolbarStyle == 1,
                 onGoBack = { activeTab?.session?.goBack() },
                 onGoForward = { activeTab?.session?.goForward() },
-                onNewTab = { createNewTab(url = "about:newtab") },
+                onNewTab = {
+                    captureCurrentTabThumbnail(activeTab)
+                    createNewTab(url = "about:newtab")
+                },
                 onNewWorkspaceLongPress = { showNewWorkspaceDialog = true },
-                onOpenTabsTray = { showTabsTray = true },
+                onOpenTabsTray = {
+                    captureCurrentTabThumbnail(activeTab)
+                    showTabsTray = true
+                },
                 onOpenOptions = { showOptionsSheet = true },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)

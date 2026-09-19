@@ -10,7 +10,10 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -25,6 +28,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -34,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.vastsea.hilal.R
 import com.vastsea.hilal.ui.theme.*
 import org.json.JSONArray
@@ -71,6 +77,36 @@ fun NewTabPage(
     // Customization states saved in SharedPreferences
     var showShortcuts by remember { mutableStateOf(prefs.getBoolean("show_shortcuts", true)) }
     var showWorkspaceBadge by remember { mutableStateOf(prefs.getBoolean("show_workspace_badge", true)) }
+    var newTabTheme by remember { mutableIntStateOf(prefs.getInt("new_tab_theme", 0)) }
+
+    val isDark = isSystemInDarkTheme()
+    val bgModifier = when (newTabTheme) {
+        1 -> Modifier.background(
+            Brush.verticalGradient(
+                if (isDark) listOf(Color(0xFF281C1C), Color(0xFF1E1822))
+                else listOf(Color(0xFFFFF7F5), Color(0xFFFDECE8))
+            )
+        )
+        2 -> Modifier.background(
+            Brush.verticalGradient(
+                if (isDark) listOf(Color(0xFF122030), Color(0xFF0F1824))
+                else listOf(Color(0xFFF0F7FF), Color(0xFFE3F2FD))
+            )
+        )
+        3 -> Modifier.background(
+            Brush.verticalGradient(
+                if (isDark) listOf(Color(0xFF15261C), Color(0xFF101C16))
+                else listOf(Color(0xFFF2F8F5), Color(0xFFE8F5E9))
+            )
+        )
+        4 -> Modifier.background(
+            Brush.verticalGradient(
+                if (isDark) listOf(Color(0xFF241A30), Color(0xFF1B1424))
+                else listOf(Color(0xFFF9F4FF), Color(0xFFF3E5F5))
+            )
+        )
+        else -> Modifier.background(MaterialTheme.colorScheme.surface)
+    }
 
     // Shortcuts state
     val shortcuts = remember { mutableStateListOf<Shortcut>() }
@@ -127,7 +163,7 @@ fun NewTabPage(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
+            .then(bgModifier)
     ) {
         // Top-Right Customize Button
         IconButton(
@@ -325,14 +361,35 @@ fun NewTabPage(
                                         Surface(
                                             shape = ShapeCache.smooth16,
                                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                                            modifier = Modifier.size(52.dp)
+                                            shadowElevation = 2.dp,
+                                            modifier = Modifier.size(54.dp)
                                         ) {
                                             Box(contentAlignment = Alignment.Center) {
-                                                Text(
-                                                    text = sc.title.take(1).uppercase(),
-                                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                                    color = MaterialTheme.colorScheme.primary
-                                                )
+                                                val domain = remember(sc.url) {
+                                                    try {
+                                                        java.net.URI(sc.url).host?.removePrefix("www.")
+                                                    } catch (_: Exception) { null }
+                                                }
+                                                val faviconUrl = if (!domain.isNullOrBlank()) "https://www.google.com/s2/favicons?domain=$domain&sz=128" else null
+                                                var loadFailed by remember(sc.url) { mutableStateOf(false) }
+
+                                                if (!faviconUrl.isNullOrBlank() && !loadFailed) {
+                                                    AsyncImage(
+                                                        model = faviconUrl,
+                                                        contentDescription = sc.title,
+                                                        modifier = Modifier
+                                                            .size(30.dp)
+                                                            .clip(ShapeCache.smooth10),
+                                                        onError = { loadFailed = true }
+                                                    )
+                                                }
+                                                if (faviconUrl.isNullOrBlank() || loadFailed) {
+                                                    Text(
+                                                        text = sc.title.take(1).uppercase(),
+                                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                                        color = MaterialTheme.colorScheme.primary
+                                                    )
+                                                }
                                             }
                                         }
                                         Spacer(modifier = Modifier.height(6.dp))
@@ -446,6 +503,54 @@ fun NewTabPage(
                             prefs.edit().putBoolean("show_workspace_badge", it).apply()
                         }
                     )
+                }
+
+                // New Tab Theme Picker
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.new_tab_theme),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        val themes = listOf(
+                            Pair(0, R.string.theme_clean),
+                            Pair(1, R.string.theme_sunset),
+                            Pair(2, R.string.theme_ocean),
+                            Pair(3, R.string.theme_forest),
+                            Pair(4, R.string.theme_lavender)
+                        )
+                        items(themes) { (id, labelRes) ->
+                            val isSelected = newTabTheme == id
+                            Surface(
+                                shape = ShapeCache.smoothPill,
+                                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+                                border = if (isSelected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null,
+                                modifier = Modifier.bouncyClickable(
+                                    pressedScale = 0.92f,
+                                    hapticType = HilalHapticType.Confirm,
+                                    onClick = {
+                                        newTabTheme = id
+                                        prefs.edit().putInt("new_tab_theme", id).apply()
+                                    }
+                                )
+                            ) {
+                                Text(
+                                    text = stringResource(labelRes),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                                )
+                            }
+                        }
+                    }
                 }
 
                 Button(

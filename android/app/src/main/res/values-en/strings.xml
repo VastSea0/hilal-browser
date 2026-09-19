@@ -156,4 +156,17 @@
     <string name="no_addons_installed">No other add-ons installed yet</string>
     <string name="anonymous_telemetry">Anonymous Usage Reports</string>
     <string name="anonymous_telemetry_desc">Sends strictly anonymous technical metrics to help improve Hilal Browser. URLs or personal data are never collected.</string>
+    <string name="download_started">Download started: %1$s</string>
+    <string name="downloading_file">Downloading: %1$s</string>
+    <string name="download_failed">Download failed: %1$s</string>
+    <string name="addon_installing">Downloading and installing add-on: %1$s</string>
+    <string name="addon_installed_success">Add-on successfully installed: %1$s</string>
+    <string name="addon_install_failed">Add-on installation failed.</string>
+    <string name="new_tab_theme">New Tab Theme</string>
+    <string name="theme_clean">Clean</string>
+    <string name="theme_sunset">Sunset</string>
+    <string name="theme_ocean">Ocean</string>
+    <string name="theme_forest">Forest</string>
+    <string name="theme_lavender">Lavender</string>
+    <string name="tab_preview">Tab Preview</string>
 </resources>

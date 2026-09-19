@@ -156,4 +156,17 @@
     <string name="no_addons_installed">Henüz başka eklenti yüklenmedi</string>
     <string name="anonymous_telemetry">Anonim Kullanım Raporları</string>
     <string name="anonymous_telemetry_desc">Hilal Browser\'ı geliştirmemize yardımcı olmak için tamamen anonim teknik metrikler gönderir. URL veya kişisel veri asla toplanmaz.</string>
+    <string name="download_started">İndirme başlatıldı: %1$s</string>
+    <string name="downloading_file">İndiriliyor: %1$s</string>
+    <string name="download_failed">İndirme başarısız: %1$s</string>
+    <string name="addon_installing">Eklenti indiriliyor ve kuruluyor: %1$s</string>
+    <string name="addon_installed_success">Eklenti başarıyla kuruldu: %1$s</string>
+    <string name="addon_install_failed">Eklenti kurulumu başarısız oldu.</string>
+    <string name="new_tab_theme">Yeni Sekme Teması</string>
+    <string name="theme_clean">Sade</string>
+    <string name="theme_sunset">Gün Batımı</string>
+    <string name="theme_ocean">Okyanus</string>
+    <string name="theme_forest">Orman</string>
+    <string name="theme_lavender">Lavanta</string>
+    <string name="tab_preview">Sekme Önizlemesi</string>
 </resources>
