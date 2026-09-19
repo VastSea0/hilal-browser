@@ -277,17 +277,25 @@ fun BrowserBottomBar(
             tonalElevation = 2.dp,
             modifier = modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
                 .then(dragGestureModifier)
         ) {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
+                    .navigationBarsPadding()
             ) {
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.30f)
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(horizontal = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
                 Box(
                     modifier = Modifier
                         .weight(backWeight.value)
@@ -410,4 +418,5 @@ fun BrowserBottomBar(
             }
         }
     }
+}
 }

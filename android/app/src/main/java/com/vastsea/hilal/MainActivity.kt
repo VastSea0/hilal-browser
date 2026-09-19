@@ -473,7 +473,7 @@ fun HilalBrowserApp(
     val shouldShowTopBar = !hideTopBarOnScroll || isBarsVisible || activeTab?.url == "about:newtab" || activeTab?.url == "about:blank"
     val shouldShowBottomBar = !hideBottomBarOnScroll || isBarsVisible || activeTab?.url == "about:newtab" || activeTab?.url == "about:blank"
     val topBarOffset by animateDpAsState(
-        targetValue = if (shouldShowTopBar) 0.dp else (-120).dp,
+        targetValue = if (shouldShowTopBar) 0.dp else (-140).dp,
         animationSpec = if (shouldShowTopBar) HilalMotion.BarRevealDp else HilalMotion.BarHideDp,
         label = "topBarOffset"
     )
@@ -623,17 +623,37 @@ fun HilalBrowserApp(
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { _ ->
         Box(modifier = Modifier.fillMaxSize()) {
+            val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+            val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
+            val dockedTopHeight = statusBarTop + 56.dp
+            val dockedBottomHeight = navBarBottom + 56.dp
+
+            val isNewTab = activeTab == null || activeTab.url == "about:newtab" || activeTab.url == "about:blank"
+
+            val webTopPadding by animateDpAsState(
+                targetValue = if (urlBarStyle == 1) {
+                    if (shouldShowTopBar) dockedTopHeight else 0.dp
+                } else 0.dp,
+                animationSpec = if (shouldShowTopBar) HilalMotion.BarRevealDp else HilalMotion.BarHideDp,
+                label = "dockedTopPad"
+            )
+
+            val webBottomPadding by animateDpAsState(
+                targetValue = if (toolbarStyle == 1) {
+                    if (shouldShowBottomBar) dockedBottomHeight else 0.dp
+                } else 0.dp,
+                animationSpec = if (shouldShowBottomBar) HilalMotion.BarRevealDp else HilalMotion.BarHideDp,
+                label = "dockedBottomPad"
+            )
+
             // Full-screen WebView or NewTabPage (no empty gap when bars slide away)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(
-                        top = if (urlBarStyle == 1) {
-                            animateDpAsState(if (shouldShowTopBar) 68.dp else 0.dp, label = "dockedTopPad").value
-                        } else 0.dp,
-                        bottom = if (toolbarStyle == 1) {
-                            animateDpAsState(if (shouldShowBottomBar) 76.dp else 0.dp, label = "dockedBottomPad").value
-                        } else 0.dp
+                        top = if (isNewTab) 0.dp else webTopPadding,
+                        bottom = webBottomPadding
                     )
             ) {
                 if (activeTab == null || activeTab.url == "about:newtab" || activeTab.url == "about:blank") {
