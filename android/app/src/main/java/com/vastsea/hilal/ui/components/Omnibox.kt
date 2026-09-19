@@ -2,23 +2,22 @@
 
 package com.vastsea.hilal.ui.components
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -30,6 +29,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -40,14 +40,17 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,6 +59,15 @@ import com.vastsea.hilal.R
 import com.vastsea.hilal.search.HilalBangsEngine
 import com.vastsea.hilal.ui.theme.*
 import kotlin.math.abs
+
+private fun Context.findActivity(): Activity? {
+    var ctx = this
+    while (ctx is ContextWrapper) {
+        if (ctx is Activity) return ctx
+        ctx = ctx.baseContext
+    }
+    return null
+}
 
 @Composable
 fun Omnibox(
@@ -74,28 +86,65 @@ fun Omnibox(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val clipboardManager = remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager }
     val urlCopiedMessage = stringResource(R.string.url_copied_msg)
-
-    var isEditing by remember { mutableStateOf(false) }
-    var searchText by remember(currentUrl) { mutableStateOf(if (currentUrl == "about:newtab" || currentUrl == "about:blank") "" else currentUrl) }
     val focusRequester = remember { FocusRequester() }
     val haptics = rememberHilalHaptics()
 
+    var isEditing by remember { mutableStateOf(false) }
+
+    fun normalizeUrlText(url: String): String =
+        if (url == "about:newtab" || url == "about:blank") "" else url
+
+    var textFieldValue by remember {
+        val initial = normalizeUrlText(currentUrl)
+        mutableStateOf(TextFieldValue(text = initial, selection = TextRange(0, initial.length)))
+    }
+
     LaunchedEffect(currentUrl) {
-        if (currentUrl != "about:newtab" && currentUrl != "about:blank") {
-            searchText = currentUrl
-            isEditing = false
+        if (!isEditing) {
+            val updated = normalizeUrlText(currentUrl)
+            textFieldValue = TextFieldValue(text = updated, selection = TextRange(0, updated.length))
+        }
+    }
+
+    fun startEditing() {
+        val currentText = normalizeUrlText(currentUrl)
+        textFieldValue = TextFieldValue(text = currentText, selection = TextRange(0, currentText.length))
+        isEditing = true
+        haptics.perform(HilalHapticType.Tap)
+    }
+
+    fun stopEditing() {
+        isEditing = false
+        val currentText = normalizeUrlText(currentUrl)
+        textFieldValue = TextFieldValue(text = currentText, selection = TextRange(0, currentText.length))
+        keyboardController?.hide()
+    }
+
+    fun commitNavigation(queryOrUrl: String) {
+        val target = queryOrUrl.trim()
+        if (target.isNotBlank()) {
+            val resolved = HilalBangsEngine.resolveUrl(target, defaultSearchEngine)
+            stopEditing()
+            onNavigate(resolved)
+        }
+    }
+
+    LaunchedEffect(isEditing) {
+        if (isEditing) {
+            focusRequester.requestFocus()
+            keyboardController?.show()
         }
     }
 
     BackHandler(enabled = isEditing) {
-        isEditing = false
-        searchText = if (currentUrl == "about:newtab" || currentUrl == "about:blank") "" else currentUrl
+        stopEditing()
     }
 
-    val matchingBangs = remember(searchText) {
-        if (searchText.startsWith("!")) HilalBangsEngine.getSuggestions(searchText) else emptyList()
+    val matchingBangs = remember(textFieldValue.text) {
+        if (textFieldValue.text.startsWith("!")) HilalBangsEngine.getSuggestions(textFieldValue.text) else emptyList()
     }
 
     fun copyCurrentUrl(targetUrl: String = currentUrl) {
@@ -109,17 +158,28 @@ fun Omnibox(
     fun shareCurrentUrl() {
         if (currentUrl.isNotBlank() && currentUrl != "about:newtab" && currentUrl != "about:blank") {
             haptics.perform(HilalHapticType.Tap)
-            val sendIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, currentUrl)
-                type = "text/plain"
+            try {
+                val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, currentUrl)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                val shareIntent = Intent.createChooser(sendIntent, title.ifBlank { currentUrl }).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                val activity = context.findActivity()
+                if (activity != null) {
+                    activity.startActivity(shareIntent)
+                } else {
+                    context.startActivity(shareIntent)
+                }
+            } catch (_: Exception) {
+                copyCurrentUrl(currentUrl)
             }
-            val shareIntent = Intent.createChooser(sendIntent, title.ifBlank { currentUrl })
-            context.startActivity(shareIntent)
         }
     }
 
-    // Domain and path syntax breakdown
+    // Domain & path breakdown for clean, readable URL syntax display
     val parsedUri = remember(currentUrl) {
         try {
             java.net.URI(currentUrl)
@@ -141,7 +201,7 @@ fun Omnibox(
         if (domain.isNotBlank()) "https://www.google.com/s2/favicons?domain=$domain&sz=128" else null
     }
 
-    // Smart clipboard paste URL suggestion in edit mode
+    // Clipboard suggestion check when in edit mode
     val clipboardUrl = remember(isEditing) {
         if (isEditing) {
             try {
@@ -197,7 +257,7 @@ fun Omnibox(
 
     Column(modifier = modifier.fillMaxWidth()) {
         if (isFloating) {
-            // True Floating Toolbar Pill
+            // Floating Toolbar Pill
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -208,7 +268,7 @@ fun Omnibox(
                     targetValue = if (isEditing)
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.65f)
                     else
-                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.40f),
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
                     animationSpec = spring(
                         dampingRatio = Spring.DampingRatioNoBouncy,
                         stiffness = Spring.StiffnessMediumLow
@@ -216,7 +276,7 @@ fun Omnibox(
                     label = "pillBorder"
                 )
                 val pillElevation by animateDpAsState(
-                    targetValue = if (isEditing) 12.dp else 4.dp,
+                    targetValue = if (isEditing) 8.dp else 3.dp,
                     animationSpec = spring(
                         dampingRatio = Spring.DampingRatioNoBouncy,
                         stiffness = Spring.StiffnessMediumLow
@@ -243,191 +303,159 @@ fun Omnibox(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(52.dp)
-                                .padding(horizontal = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                .padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Left Site Identity & Security Chip
                             if (isEditing) {
-                                Surface(
-                                    shape = ShapeCache.smoothPill,
-                                    color = MaterialTheme.colorScheme.primaryContainer,
-                                    modifier = Modifier.padding(end = 2.dp)
+                                // EDIT MODE: Back Arrow to Cancel
+                                IconButton(
+                                    onClick = {
+                                        haptics.perform(HilalHapticType.Tap)
+                                        stopEditing()
+                                    },
+                                    modifier = Modifier.size(36.dp)
                                 ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Search,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                            modifier = Modifier.size(13.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(
-                                            text = defaultSearchEngine,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                    }
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = stringResource(R.string.cancel),
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.size(20.dp)
+                                    )
                                 }
-                            } else if (isPrivate) {
-                                Surface(
-                                    shape = ShapeCache.smoothPill,
-                                    color = MaterialTheme.colorScheme.tertiaryContainer,
-                                    modifier = Modifier.padding(end = 2.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.VisibilityOff,
-                                            contentDescription = stringResource(R.string.private_mode),
-                                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                                            modifier = Modifier.size(13.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(
-                                            text = stringResource(R.string.private_mode),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onTertiaryContainer
-                                        )
-                                    }
-                                }
-                            } else if (!faviconUrl.isNullOrBlank()) {
-                                Surface(
-                                    shape = ShapeCache.smoothPill,
-                                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                    modifier = Modifier.padding(end = 2.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        AsyncImage(
-                                            model = faviconUrl,
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .size(16.dp)
-                                                .clip(ShapeCache.smoothPill)
-                                        )
-                                        if (currentUrl.startsWith("https://")) {
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Icon(
-                                                imageVector = Icons.Default.Lock,
-                                                contentDescription = stringResource(R.string.security),
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(11.dp)
-                                            )
+
+                                // Full-width Text Input
+                                BasicTextField(
+                                    value = textFieldValue,
+                                    onValueChange = { textFieldValue = it },
+                                    singleLine = true,
+                                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontSize = 16.sp
+                                    ),
+                                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                    keyboardOptions = KeyboardOptions(
+                                        keyboardType = KeyboardType.Uri,
+                                        imeAction = ImeAction.Go
+                                    ),
+                                    keyboardActions = KeyboardActions(
+                                        onGo = { commitNavigation(textFieldValue.text) }
+                                    ),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(horizontal = 8.dp)
+                                        .focusRequester(focusRequester),
+                                    decorationBox = { innerTextField ->
+                                        Box(contentAlignment = Alignment.CenterStart) {
+                                            if (textFieldValue.text.isEmpty()) {
+                                                Text(
+                                                    text = stringResource(R.string.search_or_enter_url_short),
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    fontSize = 16.sp,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                )
+                                            }
+                                            innerTextField()
                                         }
+                                    }
+                                )
+
+                                // Clear Button when there is text
+                                if (textFieldValue.text.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = {
+                                            haptics.perform(HilalHapticType.Tap)
+                                            textFieldValue = TextFieldValue("", TextRange.Zero)
+                                        },
+                                        modifier = Modifier.size(36.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = stringResource(R.string.clear),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(18.dp)
+                                        )
                                     }
                                 }
                             } else {
-                                Surface(
-                                    shape = ShapeCache.smoothPill,
-                                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                    modifier = Modifier.padding(end = 2.dp)
-                                ) {
+                                // NORMAL MODE: Left Site Identity & Security Chip
+                                if (isPrivate) {
+                                    Surface(
+                                        shape = ShapeCache.smoothPill,
+                                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                                        modifier = Modifier.padding(start = 4.dp, end = 6.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.VisibilityOff,
+                                                contentDescription = stringResource(R.string.private_mode),
+                                                tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                modifier = Modifier.size(13.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(
+                                                text = stringResource(R.string.private_mode),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                                            )
+                                        }
+                                    }
+                                } else if (!faviconUrl.isNullOrBlank()) {
+                                    Surface(
+                                        shape = ShapeCache.smoothPill,
+                                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                        modifier = Modifier.padding(start = 4.dp, end = 6.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            AsyncImage(
+                                                model = faviconUrl,
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .size(16.dp)
+                                                    .clip(ShapeCache.smoothPill)
+                                            )
+                                            if (currentUrl.startsWith("https://")) {
+                                                Spacer(modifier = Modifier.width(4.dp))
+                                                Icon(
+                                                    imageVector = Icons.Default.Lock,
+                                                    contentDescription = stringResource(R.string.security),
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(11.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                } else {
                                     Box(
-                                        modifier = Modifier.padding(6.dp),
+                                        modifier = Modifier
+                                            .padding(start = 4.dp, end = 6.dp)
+                                            .size(32.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
                                             imageVector = if (currentUrl.startsWith("https://")) Icons.Default.Lock else Icons.Default.Search,
                                             contentDescription = null,
                                             tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                    }
-                                }
-                            }
-
-                            // Center URL or Editable Input Field
-                            if (isEditing) {
-                                BasicTextField(
-                                    value = searchText,
-                                    onValueChange = { searchText = it },
-                                    singleLine = true,
-                                    textStyle = MaterialTheme.typography.bodyMedium.copy(
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                                    keyboardOptions = KeyboardOptions(
-                                        keyboardType = KeyboardType.Uri,
-                                        imeAction = ImeAction.Search
-                                    ),
-                                    keyboardActions = KeyboardActions(
-                                        onSearch = {
-                                            val resolved = HilalBangsEngine.resolveUrl(searchText, defaultSearchEngine)
-                                            isEditing = false
-                                            onNavigate(resolved)
-                                        }
-                                    ),
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .focusRequester(focusRequester)
-                                )
-                                LaunchedEffect(Unit) {
-                                    focusRequester.requestFocus()
-                                }
-
-                                if (searchText.isNotBlank()) {
-                                    IconButton(
-                                        onClick = { copyCurrentUrl(searchText) },
-                                        modifier = Modifier.size(30.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.ContentCopy,
-                                            contentDescription = stringResource(R.string.copy_url),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.size(15.dp)
-                                        )
-                                    }
-
-                                    IconButton(
-                                        onClick = {
-                                            searchText = ""
-                                            haptics.perform(HilalHapticType.Tap)
-                                        },
-                                        modifier = Modifier.size(30.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Clear,
-                                            contentDescription = stringResource(R.string.clear),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier.size(16.dp)
                                         )
                                     }
                                 }
 
-                                TextButton(
-                                    onClick = {
-                                        isEditing = false
-                                        searchText = if (currentUrl == "about:newtab" || currentUrl == "about:blank") "" else currentUrl
-                                    },
-                                    contentPadding = PaddingValues(horizontal = 6.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.cancel),
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            } else {
-                                // Domain & Path Syntax Highlighting
+                                // Center Domain & Path Display
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
                                         .combinedClickable(
-                                            onClick = { isEditing = true },
+                                            onClick = { startEditing() },
                                             onLongClick = { copyCurrentUrl() }
                                         )
-                                        .padding(vertical = 4.dp),
+                                        .padding(vertical = 8.dp),
                                     contentAlignment = Alignment.CenterStart
                                 ) {
                                     if (domain.isBlank()) {
@@ -469,26 +497,26 @@ fun Omnibox(
                                             haptics.perform(HilalHapticType.Reject)
                                             onStop?.invoke()
                                         },
-                                        modifier = Modifier.size(32.dp)
+                                        modifier = Modifier.size(34.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Close,
                                             contentDescription = stringResource(R.string.stop_loading),
                                             tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(17.dp)
+                                            modifier = Modifier.size(18.dp)
                                         )
                                     }
                                 } else {
                                     if (domain.isNotBlank()) {
                                         IconButton(
                                             onClick = { shareCurrentUrl() },
-                                            modifier = Modifier.size(30.dp)
+                                            modifier = Modifier.size(32.dp)
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.Share,
                                                 contentDescription = stringResource(R.string.share),
                                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                modifier = Modifier.size(16.dp)
+                                                modifier = Modifier.size(17.dp)
                                             )
                                         }
                                     }
@@ -498,7 +526,7 @@ fun Omnibox(
                                             haptics.perform(HilalHapticType.Tap)
                                             onReload()
                                         },
-                                        modifier = Modifier.size(30.dp)
+                                        modifier = Modifier.size(32.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Refresh,
@@ -517,7 +545,7 @@ fun Omnibox(
                                 progress = { loadingProgress },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(4.dp)
+                                    .height(3.dp)
                                     .clip(ShapeCache.smoothPill),
                                 color = MaterialTheme.colorScheme.primary,
                                 trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
@@ -539,8 +567,7 @@ fun Omnibox(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 10.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Surface(
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -554,101 +581,116 @@ fun Omnibox(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(horizontal = 10.dp),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    .padding(horizontal = 8.dp)
                             ) {
                                 if (isEditing) {
-                                    Icon(
-                                        imageVector = Icons.Default.Search,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                } else if (isPrivate) {
-                                    Surface(
-                                        shape = ShapeCache.smoothPill,
-                                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                                        modifier = Modifier.padding(end = 2.dp)
+                                    IconButton(
+                                        onClick = {
+                                            haptics.perform(HilalHapticType.Tap)
+                                            stopEditing()
+                                        },
+                                        modifier = Modifier.size(34.dp)
                                     ) {
-                                        Row(
-                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.VisibilityOff,
-                                                contentDescription = stringResource(R.string.private_mode),
-                                                tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                                                modifier = Modifier.size(12.dp)
-                                            )
-                                        }
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = stringResource(R.string.cancel),
+                                            tint = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.size(18.dp)
+                                        )
                                     }
-                                } else if (!faviconUrl.isNullOrBlank()) {
-                                    AsyncImage(
-                                        model = faviconUrl,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .size(16.dp)
-                                            .clip(ShapeCache.smoothPill)
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = if (currentUrl.startsWith("https://")) Icons.Default.Lock else Icons.Default.Search,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
 
-                                if (isEditing) {
                                     BasicTextField(
-                                        value = searchText,
-                                        onValueChange = { searchText = it },
+                                        value = textFieldValue,
+                                        onValueChange = { textFieldValue = it },
                                         singleLine = true,
-                                        textStyle = MaterialTheme.typography.bodyMedium.copy(
-                                            color = MaterialTheme.colorScheme.onSurface
+                                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            fontSize = 15.sp
                                         ),
                                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                                         keyboardOptions = KeyboardOptions(
                                             keyboardType = KeyboardType.Uri,
-                                            imeAction = ImeAction.Search
+                                            imeAction = ImeAction.Go
                                         ),
                                         keyboardActions = KeyboardActions(
-                                            onSearch = {
-                                                val resolved = HilalBangsEngine.resolveUrl(searchText, defaultSearchEngine)
-                                                isEditing = false
-                                                onNavigate(resolved)
-                                            }
+                                            onGo = { commitNavigation(textFieldValue.text) }
                                         ),
                                         modifier = Modifier
                                             .weight(1f)
-                                            .focusRequester(focusRequester)
+                                            .padding(horizontal = 6.dp)
+                                            .focusRequester(focusRequester),
+                                        decorationBox = { innerTextField ->
+                                            Box(contentAlignment = Alignment.CenterStart) {
+                                                if (textFieldValue.text.isEmpty()) {
+                                                    Text(
+                                                        text = stringResource(R.string.search_or_enter_url_short),
+                                                        style = MaterialTheme.typography.bodyLarge,
+                                                        fontSize = 15.sp,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                    )
+                                                }
+                                                innerTextField()
+                                            }
+                                        }
                                     )
-                                    LaunchedEffect(Unit) {
-                                        focusRequester.requestFocus()
-                                    }
 
-                                    if (searchText.isNotBlank()) {
+                                    if (textFieldValue.text.isNotEmpty()) {
                                         IconButton(
                                             onClick = {
-                                                searchText = ""
                                                 haptics.perform(HilalHapticType.Tap)
+                                                textFieldValue = TextFieldValue("", TextRange.Zero)
                                             },
-                                            modifier = Modifier.size(28.dp)
+                                            modifier = Modifier.size(32.dp)
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.Clear,
                                                 contentDescription = stringResource(R.string.clear),
                                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                modifier = Modifier.size(15.dp)
+                                                modifier = Modifier.size(16.dp)
                                             )
                                         }
                                     }
                                 } else {
+                                    if (isPrivate) {
+                                        Surface(
+                                            shape = ShapeCache.smoothPill,
+                                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                                            modifier = Modifier.padding(end = 4.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.VisibilityOff,
+                                                contentDescription = stringResource(R.string.private_mode),
+                                                tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                modifier = Modifier
+                                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                                                    .size(12.dp)
+                                            )
+                                        }
+                                    } else if (!faviconUrl.isNullOrBlank()) {
+                                        AsyncImage(
+                                            model = faviconUrl,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .padding(end = 4.dp)
+                                                .size(16.dp)
+                                                .clip(ShapeCache.smoothPill)
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = if (currentUrl.startsWith("https://")) Icons.Default.Lock else Icons.Default.Search,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier
+                                                .padding(end = 4.dp)
+                                                .size(16.dp)
+                                        )
+                                    }
+
                                     Box(
                                         modifier = Modifier
                                             .weight(1f)
                                             .combinedClickable(
-                                                onClick = { isEditing = true },
+                                                onClick = { startEditing() },
                                                 onLongClick = { copyCurrentUrl() }
                                             ),
                                         contentAlignment = Alignment.CenterStart
@@ -698,6 +740,20 @@ fun Omnibox(
                                             )
                                         }
                                     } else {
+                                        if (domain.isNotBlank()) {
+                                            IconButton(
+                                                onClick = { shareCurrentUrl() },
+                                                modifier = Modifier.size(28.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Share,
+                                                    contentDescription = stringResource(R.string.share),
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.size(15.dp)
+                                                )
+                                            }
+                                        }
+
                                         IconButton(
                                             onClick = {
                                                 haptics.perform(HilalHapticType.Tap)
@@ -723,7 +779,7 @@ fun Omnibox(
                             progress = { loadingProgress },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(4.dp),
+                                .height(3.dp),
                             color = MaterialTheme.colorScheme.primary,
                             trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
                         )
@@ -732,50 +788,44 @@ fun Omnibox(
             }
         }
 
-        // Smart Clipboard Suggestion Chip in Edit Mode
+        // Quick Actions Tray in Edit Mode: Copy, Share, Paste
         AnimatedVisibility(
-            visible = isEditing && !clipboardUrl.isNullOrBlank(),
+            visible = isEditing,
             enter = fadeIn(HilalMotion.FastFadeSpec),
             exit = fadeOut(HilalMotion.FastFadeSpec)
         ) {
-            Surface(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = ShapeCache.smoothPill,
-                shadowElevation = 4.dp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
-                    .bouncyClickable(
-                        pressedScale = 0.95f,
-                        hapticType = HilalHapticType.Confirm,
-                        onClick = {
-                            clipboardUrl?.let { url ->
-                                searchText = url
-                                isEditing = false
-                                onNavigate(url)
-                            }
-                        }
-                    )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ContentPaste,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.paste_from_clipboard, clipboardUrl?.take(32) ?: ""),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                if (currentUrl.isNotBlank() && currentUrl != "about:newtab" && currentUrl != "about:blank") {
+                    item {
+                        OmniboxActionChip(
+                            icon = Icons.Default.ContentCopy,
+                            label = stringResource(R.string.copy_url),
+                            onClick = { copyCurrentUrl(currentUrl) }
+                        )
+                    }
+                    item {
+                        OmniboxActionChip(
+                            icon = Icons.Default.Share,
+                            label = stringResource(R.string.share),
+                            onClick = { shareCurrentUrl() }
+                        )
+                    }
+                }
+
+                if (!clipboardUrl.isNullOrBlank()) {
+                    item {
+                        OmniboxActionChip(
+                            icon = Icons.Default.ContentPaste,
+                            label = stringResource(R.string.paste_from_clipboard, clipboardUrl.take(24)),
+                            isPrimary = true,
+                            onClick = { commitNavigation(clipboardUrl) }
+                        )
+                    }
                 }
             }
         }
@@ -806,13 +856,10 @@ fun Omnibox(
                                 pressedScale = 0.90f,
                                 hapticType = HilalHapticType.Confirm,
                                 onClick = {
-                                    val parts = searchText.split(" ", limit = 2)
+                                    val parts = textFieldValue.text.split(" ", limit = 2)
                                     val query = if (parts.size > 1) parts[1] else ""
                                     val newText = "!${bang.prefix} $query"
-                                    searchText = newText
-                                    val resolved = HilalBangsEngine.resolveUrl(newText, defaultSearchEngine)
-                                    isEditing = false
-                                    onNavigate(resolved)
+                                    commitNavigation(newText)
                                 }
                             )
                         ) {
@@ -837,6 +884,53 @@ fun Omnibox(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun OmniboxActionChip(
+    icon: ImageVector,
+    label: String,
+    isPrimary: Boolean = false,
+    onClick: () -> Unit
+) {
+    val haptics = rememberHilalHaptics()
+    Surface(
+        shape = ShapeCache.smoothPill,
+        color = if (isPrimary) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+        border = BorderStroke(
+            1.dp,
+            if (isPrimary) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+        ),
+        modifier = Modifier.bouncyClickable(
+            pressedScale = 0.94f,
+            hapticType = HilalHapticType.Tap,
+            onClick = {
+                haptics.perform(HilalHapticType.Confirm)
+                onClick()
+            }
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (isPrimary) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(15.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium,
+                color = if (isPrimary) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
