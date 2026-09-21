@@ -11,3 +11,6 @@ MOZ_APP_REMOTINGNAME=hilal
 # macOS bundle id suffix. Combined with --with-distribution-id (org.hilal)
 # this produces a full CFBundleIdentifier of org.hilal.browser.
 MOZ_MACBUNDLE_ID=browser
+
+# Profile directory name under the platform user-data directory.
+MOZ_APP_PROFILE=Hilal

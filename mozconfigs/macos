@@ -1,5 +1,7 @@
 . "$topsrcdir/../mozconfigs/base"
 
+mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj-aarch64-apple-darwin25.5.0
+
 # Enable sccache for compiler caching if installed
 if which sccache >/dev/null 2>&1; then
   ac_add_options --with-ccache=sccache
