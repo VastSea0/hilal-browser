@@ -408,6 +408,7 @@
       this.createHeaderShell();
       this.createSidebar();
       this.setupUrlSearchAndSuggestions();
+      this.installPopupAnchorFallback();
       this.mountNativeToolbarElements();
       this.bindBrowserEvents();
       this.hookWorkspaces();
@@ -565,7 +566,17 @@
       const secIcon = document.createElement("i");
       secIcon.id = "hilal-url-security-icon";
       secIcon.className = "primary-text";
-      secIcon.textContent = "lock";
+      secIcon.textContent = "info";
+      secIcon.setAttribute("role", "button");
+      secIcon.setAttribute("tabindex", "0");
+      secIcon.setAttribute("data-l10n-id", "urlbar-identity-button");
+      secIcon.addEventListener("click", e => this.openIdentityPanel(e));
+      secIcon.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          this.openIdentityPanel(e);
+        }
+      });
       urlContainer.appendChild(secIcon);
 
       const urlInput = document.createElement("input");
@@ -2754,19 +2765,80 @@
         }
       }
 
-      if (secIcon && window.gBrowser.currentURI) {
-        const scheme = window.gBrowser.currentURI.scheme;
-        if (scheme === "https") {
-          secIcon.className = "small primary-text";
-          secIcon.textContent = "lock";
-        } else {
-          secIcon.className = "small";
-          secIcon.textContent = "language";
-        }
-      }
-
+      this.updateSecurityIcon();
       this.mountNativeToolbarElements();
       this.updateNavButtons();
+    },
+
+    // Mirrors Firefox's identity state rather than the URL scheme, so broken
+    // HTTPS (mixed content, certificate errors or overrides) is not shown
+    // as secure.
+    updateSecurityIcon() {
+      const icon = document.getElementById("hilal-url-security-icon");
+      const handler = window.gIdentityHandler;
+      const uri = window.gBrowser?.currentURI;
+      if (!icon || !handler || !uri) {
+        return;
+      }
+      let name = "info";
+      let secure = false;
+      if (uri.schemeIs("https") || uri.schemeIs("http")) {
+        secure =
+          !!handler._isSecureConnection &&
+          !handler._isCertUserOverridden &&
+          !handler._isMixedActiveContentLoaded;
+        name = secure ? "lock" : "no_encryption";
+      } else if (handler._isCertErrorPage) {
+        name = "no_encryption";
+      }
+      icon.textContent = name;
+      icon.className = secure ? "small primary-text" : "small";
+      icon.toggleAttribute("insecure", name === "no_encryption");
+    },
+
+    // Firefox's identity panel anchors to #identity-icon-box, which the shell
+    // hides, so open it against the shell's own icon for this one call.
+    openIdentityPanel(event) {
+      const handler = window.gIdentityHandler;
+      const anchor = document.getElementById("hilal-url-security-icon");
+      if (!handler?._openPopup || !anchor) {
+        return;
+      }
+      const nativeBox = handler._identityIconBox;
+      Object.defineProperty(handler, "_identityIconBox", {
+        value: anchor,
+        configurable: true,
+        writable: true,
+      });
+      try {
+        handler._openPopup(event);
+      } finally {
+        Object.defineProperty(handler, "_identityIconBox", {
+          value: nativeBox,
+          configurable: true,
+          writable: true,
+        });
+      }
+    },
+
+    // Permission, password and add-on prompts anchor to icons inside the
+    // hidden native urlbar; without a visible fallback they open at the
+    // window's corner.
+    installPopupAnchorFallback() {
+      const notifications = window.PopupNotifications;
+      if (!notifications || notifications._hilalAnchorFallback) {
+        return;
+      }
+      const original = notifications._getVisibleAnchorElement;
+      notifications._getVisibleAnchorElement = anchor => {
+        const visible = original ? original(anchor) : anchor;
+        if (visible?.checkVisibility()) {
+          return visible;
+        }
+        const own = document.getElementById("hilal-url-security-icon");
+        return own?.checkVisibility() ? own : visible;
+      };
+      notifications._hilalAnchorFallback = true;
     },
 
     updateNavButtons() {
@@ -2838,6 +2910,16 @@
           }
         },
       });
+
+      // gIdentityHandler updates after progress listeners such as the one
+      // above, so follow the native identity box it restyles instead.
+      const identityBox = document.getElementById("identity-box");
+      if (identityBox) {
+        new MutationObserver(() => this.updateSecurityIcon()).observe(
+          identityBox,
+          { attributes: true, attributeFilter: ["class"] }
+        );
+      }
 
       // Keyboard shortcuts
       window.addEventListener("keydown", e => {
