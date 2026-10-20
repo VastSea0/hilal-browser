@@ -5,16 +5,19 @@ hilal-settings-header = Hilal Tarayıcı
 ## Workspaces
 
 hilal-workspaces-header = Çalışma Alanları
-hilal-workspaces-enabled =
+hilal-workspaces-enabled = Çalışma alanlarını etkinleştir
     .label = Çalışma alanlarını etkinleştir
-hilal-workspaces-pinned-public =
+hilal-workspaces-pinned-public = Sabitlenmiş sekmeleri tüm çalışma alanlarında görünür yap
     .label = Sabitlenmiş sekmeleri tüm çalışma alanlarında görünür yap
-hilal-workspaces-groups-public =
+hilal-workspaces-groups-public = Sekme gruplarını tüm çalışma alanlarında görünür yap
     .label = Sekme gruplarını tüm çalışma alanlarında görünür yap
+hilal-workspaces-enabled-desc = Kişisel, iş ve sosyal sekmeleri ayrı alanlarda tutun
+hilal-workspaces-pinned-public-desc = Sabitlenmiş sekmeleri her çalışma alanında göster
+hilal-workspaces-groups-public-desc = Sekme gruplarını her çalışma alanında göster
 hilal-urlbar-show-workspace-name =
     .label = Çalışma alanı ismini adres çubuğunda göster
 hilal-workspaces-reset-description = Tüm çalışma alanı verilerini sıfırla (geri alınamaz).
-hilal-workspaces-reset-button =
+hilal-workspaces-reset-button = Çalışma Alanlarını Sıfırla
     .label = Çalışma Alanlarını Sıfırla
 hilal-workspaces-reset-confirm-title = Çalışma Alanlarını Sıfırla
 hilal-workspaces-reset-confirm-message = Bu işlem tüm çalışma alanı verilerini silecek ve geri alınamaz. Devam edilsin mi?
@@ -70,6 +73,10 @@ hilal-sidebar-custom-cancel =
 
 hilal-privacy-header = Gizlilik Seviyesi
 hilal-privacy-description = Hilal gizlilik seviyeleri açık koruma profilleridir. Genel IP adresinizi gizlemezler, Tor Tarayıcı'nın yerini almazlar ve parmak izi çıkarma, WebGL, WebRTC, kalıcı çerezler, kayıtlı parolalar veya JavaScript'e bağlı olan siteleri bozabilirler.
+hilal-privacy-level-title = Koruma seviyesi
+hilal-privacy-level-standard = Dengeli
+hilal-privacy-level-strict = Sıkı
+hilal-privacy-level-extreme = Maksimum
 hilal-privacy-standard =
     .label = Dengeli (LibreWolf benzeri): sıkı takipçi koruması, RFP, sadece HTTPS, URL temizleme, WebGL kapalı, azaltılmış WebRTC sızıntısı, kapanışta çerez/önbellek temizliği.
 hilal-privacy-strict =
@@ -104,13 +111,13 @@ hilal-boosts-browser-ui =
 ## Bangs
 
 hilal-bangs-header = Bang Özelliği
-hilal-bangs-add-button =
+hilal-bangs-add-button = Bang Ekle
     .label = Bang Ekle
-hilal-bangs-remove-button =
+hilal-bangs-remove-button = Seçileni Kaldır
     .label = Seçileni Kaldır
-hilal-bangs-save-button =
+hilal-bangs-save-button = Kaydet
     .label = Kaydet
-hilal-bangs-cancel-button =
+hilal-bangs-cancel-button = İptal
     .label = İptal
 hilal-bangs-trigger-label = Tetikleyici:
 hilal-bangs-searchurl-label = Arama URL'si:
@@ -121,14 +128,28 @@ hilal-bangs-default-label = (varsayılan)
 
 hilal-language-header = Dil Seçimi
 hilal-language-description = Tarayıcının arayüz dilini seçin. Değişikliklerin etkili olması için tarayıcının yeniden başlatılması gerekir.
-hilal-language-apply-button =
+hilal-language-apply-button = Uygula ve Yeniden Başlat
     .label = Uygula ve Yeniden Başlat
 
 ## Keyboard Shortcuts
 
 hilal-shortcuts-header = Klavye Kısayolları
 hilal-shortcuts-description = Hilal eylemleri ve yerleşik tarayıcı işlevleri için klavye kısayollarını özelleştirin.
-hilal-shortcuts-reset =
+hilal-shortcuts-reset = Varsayılana Dön
     .label = Varsayılana Dön
 
-
+hilal-about-header = Hilal Browser Bilgileri
+hilal-about-version-button = Sürüm Ayrıntıları
+    .label = Sürüm Ayrıntıları
+hilal-about-version-subtitle = Firefox ESR tabanlı
+hilal-about-version-title = { -brand-full-name }
+hilal-accent-mode-desc = Vurgu renginin çalışma alanları ve tarayıcı genelinde nasıl belirleneceğini seçin
+hilal-accent-mode-global = Genel Vurgu
+    .label = Genel Vurgu
+hilal-accent-mode-title = Vurgu Rengi Modu
+hilal-accent-mode-workspace = Çalışma Alanları
+    .label = Çalışma Alanları
+hilal-global-color-desc = Tüm çalışma alanlarında ve tarayıcı arayüzünde tek bir vurgu rengi kullan
+hilal-global-color-title = Ana Vurgu Rengi
+hilal-theme-color-header = Vurgu Rengi ve Tema
+hilal-workspace-colors-subdesc = Her çalışma alanı için ayrı bir vurgu rengi seçin. Çalışma alanı değiştiğinde tarayıcı teması da güncellenir.

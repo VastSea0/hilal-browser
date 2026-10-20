@@ -1,5 +1,17 @@
+diff --git a/browser/components/preferences/jar.mn b/browser/components/preferences/jar.mn
+index de83282c2c8a..5e67f723b792 100644
+--- a/browser/components/preferences/jar.mn
++++ b/browser/components/preferences/jar.mn
+@@ -8,6 +8,7 @@ browser.jar:
+ *  content/browser/preferences/preferences.xhtml
+ 
+    content/browser/preferences/main.js
++   content/browser/preferences/m3e-web.all.min.mjs
+    content/browser/preferences/translations.js
+    content/browser/preferences/home.js
+    content/browser/preferences/search.js
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index b66ff919d..2479dca43 100644
+index b66ff919d93b..3ba70cfd3fb7 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
 @@ -13,7 +13,7 @@
@@ -16,23 +28,117 @@ index b66ff919d..2479dca43 100644
  ChromeUtils.defineESModuleGetters(this, {
    BackgroundUpdate: "resource://gre/modules/BackgroundUpdate.sys.mjs",
 +  ContextualIdentityService:
-+    "resource://gre/modules/ContextualIdentityService.sys.mjs",
++    "moz-src:///toolkit/components/contextualidentity/ContextualIdentityService.sys.mjs",
    UpdateListener: "resource://gre/modules/UpdateListener.sys.mjs",
    LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
    MigrationUtils: "resource:///modules/MigrationUtils.sys.mjs",
-@@ -1815,6 +1817,103 @@ gMainPane.initialized = new Promise(res => {
+@@ -116,6 +118,23 @@ Preferences.addAll([
+     id: "privacy.userContext.newTabContainerOnLeftClick.enabled",
+     type: "bool",
+   },
++
++  // Hilal Browser settings
++  { id: "hilal.boosts.auto_palette.enabled", type: "bool" },
++  { id: "hilal.workspaces.enabled", type: "bool" },
++  { id: "hilal.workspaces.pinned.public", type: "bool" },
++  { id: "hilal.workspaces.groups.public", type: "bool" },
++  { id: "hilal.urlbar.showWorkspaceName", type: "bool" },
++  { id: "hilal.compact.hideToolbar", type: "bool" },
++  { id: "hilal.sidebar.footer.bookmarks", type: "bool" },
++  { id: "hilal.sidebar.footer.history", type: "bool" },
++  { id: "hilal.sidebar.footer.passwords", type: "bool" },
++  { id: "hilal.sidebar.footer.downloads", type: "bool" },
++  { id: "hilal.sidebar.footer.privacy", type: "bool" },
++  { id: "hilal.sidebar.footer.settings", type: "bool" },
++  { id: "hilal.theme.accentMode", type: "string" },
++  { id: "hilal.theme.globalAccentColor", type: "string" },
++  { id: "hilal.privacy.level", type: "string" },
+ ]);
+ 
+ if (AppConstants.HAVE_SHELL_SERVICE) {
+@@ -1815,6 +1834,1377 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
 +var gHilalPane = {
 +  init() {
++    import("chrome://browser/content/preferences/m3e-web.all.min.mjs").catch(
++      err => {
++        console.error("Failed to load m3e-web.all.min.mjs", err);
++      }
++    );
 +    function setEventListener(aId, aEventType, aCallback) {
-+      document.getElementById(aId).addEventListener(aEventType, aCallback);
++      const el = document.getElementById(aId);
++      if (el) {
++        el.addEventListener(aEventType, aCallback);
++        if (aEventType === "command") {
++          el.addEventListener("click", aCallback);
++        }
++      }
++    }
++
++    function wireCheckbox(checkbox, prefName, defaultValue) {
++      if (!checkbox) return;
++      const initialVal = Services.prefs.getBoolPref(prefName, defaultValue);
++      checkbox.checked = initialVal;
++      checkbox.toggleAttribute("checked", initialVal);
++      if (initialVal) {
++        checkbox.setAttribute("checked", "true");
++      } else {
++        checkbox.removeAttribute("checked");
++      }
++
++      if (customElements?.whenDefined) {
++        customElements.whenDefined(checkbox.localName || "m3e-switch").then(() => {
++          const currentVal = Services.prefs.getBoolPref(prefName, defaultValue);
++          checkbox.checked = currentVal;
++          checkbox.toggleAttribute("checked", currentVal);
++        }).catch(() => {});
++      }
++
++      function onToggle() {
++        const isChecked = !!(checkbox.checked ?? checkbox.hasAttribute("checked"));
++        Services.prefs.setBoolPref(prefName, isChecked);
++        checkbox.checked = isChecked;
++        checkbox.toggleAttribute("checked", isChecked);
++        if (isChecked) {
++          checkbox.setAttribute("checked", "true");
++        } else {
++          checkbox.removeAttribute("checked");
++        }
++      }
++
++      checkbox.addEventListener("command", onToggle);
++      checkbox.addEventListener("change", onToggle);
++      checkbox.addEventListener("input", onToggle);
++      checkbox.addEventListener("click", onToggle);
++    }
++
++    // Interactive row click delegation: clicking on any settings-row toggles its switch
++    const mainPane = document.getElementById("mainPrefPane");
++    if (mainPane && !mainPane._hilalRowClickDelegated) {
++      mainPane._hilalRowClickDelegated = true;
++      mainPane.addEventListener("click", e => {
++        const row = e.target.closest(".settings-row");
++        if (!row) return;
++        if (e.target.closest("button, m3e-button, html\\:m3e-button, a, input, select, m3e-segmented-button, html\\:m3e-segmented-button, m3e-button-segment, html\\:m3e-button-segment, radiogroup, radio, .m3-swatch-circle, richlistbox, richlistitem")) {
++          return;
++        }
++        const switchEl = row.querySelector("m3e-switch, html\\:m3e-switch, checkbox.settings-switch, .settings-switch, moz-toggle");
++        if (switchEl && e.target !== switchEl && !switchEl.contains(e.target)) {
++          switchEl.click();
++        }
++      });
 +    }
 +
 +    const hilalWsCheckbox = document.getElementById("hilalWorkspacesEnabled");
 +    const hilalWsPinnedPublicCheckbox = document.getElementById("hilalWorkspacesPinnedPublic");
 +    const hilalWsGroupsPublicCheckbox = document.getElementById("hilalWorkspacesGroupsPublic");
++    const hilalPrivacyLevelRadioGroup = /** @type {HTMLElement|null} */ (
++      document.getElementById("hilalPrivacyLevel")
++    );
++    const normalizePrivacyLevel = value =>
++      ["standard", "strict", "extreme"].includes(value) ? value : "standard";
 +    const resetHilalWorkspaceContainers = () => {
 +      let workspaces = [];
 +      try {
@@ -49,7 +155,9 @@ index b66ff919d..2479dca43 100644
 +        const containerId = Number.parseInt(workspace?.containerId, 10);
 +        if (containerId) {
 +          try {
-+            ContextualIdentityService.remove(containerId);
++            if (lazy.ContextualIdentityService) {
++              lazy.ContextualIdentityService.remove(containerId);
++            }
 +          } catch (e) {
 +            console.warn("Failed to remove Hilal workspace container", e);
 +          }
@@ -57,43 +165,270 @@ index b66ff919d..2479dca43 100644
 +      }
 +    };
 +
-+    if (hilalWsCheckbox) {
-+      hilalWsCheckbox.checked = Services.prefs.getBoolPref(
-+        "hilal.workspaces.enabled",
-+        true
-+      );
-+      hilalWsCheckbox.addEventListener("command", function () {
-+        Services.prefs.setBoolPref(
-+          "hilal.workspaces.enabled",
-+          hilalWsCheckbox.checked
++    try {
++      wireCheckbox(hilalWsCheckbox, "hilal.workspaces.enabled", true);
++      wireCheckbox(hilalWsPinnedPublicCheckbox, "hilal.workspaces.pinned.public", true);
++      wireCheckbox(hilalWsGroupsPublicCheckbox, "hilal.workspaces.groups.public", false);
++    } catch (e) {
++      console.error("Hilal workspaces checkbox init error:", e);
++    }
++
++    try {
++      const hilalPrefMappings = [
++        ["hilalUrlbarShowWorkspaceName", "hilal.urlbar.showWorkspaceName", false],
++        ["hilalSidebarCompactEnabled", "hilal.compact.enabled", false],
++        ["hilalSidebarCompactHideToolbar", "hilal.compact.hideToolbar", false],
++        ["hilalSidebarShowHorizontalTabs", "sidebar.verticalTabs.showHorizontal", false],
++        ["hilalBoostsAutoPalette", "hilal.boosts.auto_palette.enabled", false],
++      ];
++      for (const [elementId, prefName, defaultValue] of hilalPrefMappings) {
++        const checkbox = document.getElementById(elementId);
++        wireCheckbox(checkbox, prefName, defaultValue);
++      }
++    } catch (e) {
++      console.error("Hilal pref mappings init error:", e);
++    }
++
++    try {
++      const hilalSidebarFooterCheckboxes = [
++        ["hilalSidebarFooterBookmarks", "hilal.sidebar.footer.bookmarks", false],
++        ["hilalSidebarFooterHistory", "hilal.sidebar.footer.history", true],
++        ["hilalSidebarFooterPasswords", "hilal.sidebar.footer.passwords", false],
++        ["hilalSidebarFooterDownloads", "hilal.sidebar.footer.downloads", true],
++        ["hilalSidebarFooterPrivacy", "hilal.sidebar.footer.privacy", true],
++        ["hilalSidebarFooterSettings", "hilal.sidebar.footer.settings", true],
++      ];
++      for (const [elementId, prefName, defaultValue] of hilalSidebarFooterCheckboxes) {
++        const checkbox = document.getElementById(elementId);
++        wireCheckbox(checkbox, prefName, defaultValue);
++      }
++    } catch (e) {
++      console.error("Hilal sidebar footer checkboxes init error:", e);
++    }
++
++    const getHilalSidebarCustomItems = () => {
++      try {
++        const parsed = JSON.parse(
++          Services.prefs.getStringPref("hilal.sidebar.customItems", "[]")
 +        );
++        return Array.isArray(parsed) ? parsed : [];
++      } catch (e) {
++        console.warn("Failed to parse hilal.sidebar.customItems", e);
++        return [];
++      }
++    };
++    const setHilalSidebarCustomItems = items => {
++      Services.prefs.setStringPref(
++        "hilal.sidebar.customItems",
++        JSON.stringify(items)
++      );
++    };
++
++    const customList = document.getElementById("hilalSidebarCustomList");
++    const customAddBtn = document.getElementById("hilalSidebarCustomAdd");
++    const customRemoveBtn = document.getElementById("hilalSidebarCustomRemove");
++    const customForm = document.getElementById("hilalSidebarCustomForm");
++    const customNameInput = document.getElementById("hilalSidebarCustomName");
++    const customUrlInput = document.getElementById("hilalSidebarCustomUrl");
++    const customIconSelect = document.getElementById("hilalSidebarCustomIcon");
++    const customSaveBtn = document.getElementById("hilalSidebarCustomSave");
++    const customCancelBtn = document.getElementById("hilalSidebarCustomCancel");
++    let editingCustomItemId = null;
++
++    const refreshHilalSidebarCustomList = () => {
++      if (!customList) {
++        return;
++      }
++      customList.textContent = "";
++      for (const item of getHilalSidebarCustomItems()) {
++        if (!item?.id) {
++          continue;
++        }
++        const row = document.createXULElement("richlistitem");
++        row.setAttribute("itemId", item.id);
++        row.setAttribute(
++          "style",
++          "padding: 6px; border-bottom: 1px solid var(--in-content-border-color); align-items: center; display: flex; flex-direction: row;"
++        );
++
++        const nameLabel = document.createXULElement("label");
++        nameLabel.setAttribute("value", item.name || item.url || item.id);
++        nameLabel.setAttribute(
++          "style",
++          "font-weight: bold; width: 160px; min-width: 160px; margin-right: 10px;"
++        );
++        row.appendChild(nameLabel);
++
++        const urlLabel = document.createXULElement("label");
++        urlLabel.setAttribute("value", item.url || "");
++        urlLabel.setAttribute("flex", "1");
++        urlLabel.setAttribute("crop", "end");
++        row.appendChild(urlLabel);
++
++        customList.appendChild(row);
++      }
++      if (customRemoveBtn) {
++        customRemoveBtn.disabled = true;
++      }
++    };
++
++    const resetHilalSidebarCustomForm = () => {
++      editingCustomItemId = null;
++      if (customForm) {
++        customForm.hidden = true;
++      }
++      if (customNameInput) {
++        customNameInput.value = "";
++      }
++      if (customUrlInput) {
++        customUrlInput.value = "";
++      }
++      if (customIconSelect) {
++        customIconSelect.value = "link";
++      }
++    };
++
++    const showHilalSidebarCustomForm = item => {
++      if (customForm) {
++        customForm.hidden = false;
++      }
++      editingCustomItemId = item?.id || null;
++      if (customNameInput) {
++        customNameInput.value = item?.name || "";
++        customNameInput.focus();
++      }
++      if (customUrlInput) {
++        customUrlInput.value = item?.url || "";
++      }
++      if (customIconSelect) {
++        customIconSelect.value = item?.icon || "link";
++      }
++    };
++
++    if (customList) {
++      customList.addEventListener("select", () => {
++        if (customRemoveBtn) {
++          customRemoveBtn.disabled = !customList.selectedItem;
++        }
 +      });
 +    }
-+    if (hilalWsPinnedPublicCheckbox) {
-+      hilalWsPinnedPublicCheckbox.checked = Services.prefs.getBoolPref(
-+        "hilal.workspaces.pinned.public",
-+        true
-+      );
-+      hilalWsPinnedPublicCheckbox.addEventListener("command", function () {
-+        Services.prefs.setBoolPref(
-+          "hilal.workspaces.pinned.public",
-+          hilalWsPinnedPublicCheckbox.checked
-+        );
++
++    if (customAddBtn) {
++      customAddBtn.addEventListener("command", () => {
++        showHilalSidebarCustomForm(null);
 +      });
 +    }
-+    if (hilalWsGroupsPublicCheckbox) {
-+      hilalWsGroupsPublicCheckbox.checked = Services.prefs.getBoolPref(
-+        "hilal.workspaces.groups.public",
-+        false
-+      );
-+      hilalWsGroupsPublicCheckbox.addEventListener("command", function () {
-+        Services.prefs.setBoolPref(
-+          "hilal.workspaces.groups.public",
-+          hilalWsGroupsPublicCheckbox.checked
-+        );
++
++    if (customCancelBtn) {
++      customCancelBtn.addEventListener("command", resetHilalSidebarCustomForm);
++    }
++
++    if (customSaveBtn) {
++      customSaveBtn.addEventListener("command", () => {
++        const name = customNameInput ? customNameInput.value.trim() : "";
++        const url = customUrlInput ? customUrlInput.value.trim() : "";
++        const icon = customIconSelect ? customIconSelect.value : "link";
++        if (!name || !url) {
++          Services.prompt.alert(
++            window,
++            "Invalid Input",
++            "Name and URL are required."
++          );
++          return;
++        }
++
++        const items = getHilalSidebarCustomItems();
++        const itemId =
++          editingCustomItemId ||
++          `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
++        const nextItem = { id: itemId, name, url, icon };
++        const existingIndex = items.findIndex(item => item.id === itemId);
++        if (existingIndex >= 0) {
++          items[existingIndex] = nextItem;
++        } else {
++          items.push(nextItem);
++        }
++        setHilalSidebarCustomItems(items);
++        refreshHilalSidebarCustomList();
++        resetHilalSidebarCustomForm();
 +      });
 +    }
-+    setEventListener("hilalWorkspacesReset", "command", function () {
++
++    if (customRemoveBtn) {
++      customRemoveBtn.addEventListener("command", () => {
++        const selected = customList ? customList.selectedItem : null;
++        if (!selected) {
++          return;
++        }
++        const itemId = selected.getAttribute("itemId");
++        if (
++          !itemId ||
++          !Services.prompt.confirm(
++            window,
++            "Remove Shortcut",
++            "Remove this custom sidebar shortcut?"
++          )
++        ) {
++          return;
++        }
++        setHilalSidebarCustomItems(
++          getHilalSidebarCustomItems().filter(item => item.id !== itemId)
++        );
++        refreshHilalSidebarCustomList();
++        resetHilalSidebarCustomForm();
++      });
++    }
++
++    refreshHilalSidebarCustomList();
++
++    if (hilalPrivacyLevelRadioGroup) {
++      const updatePrivacyLevelUI = (level) => {
++        const normalized = normalizePrivacyLevel(level);
++        hilalPrivacyLevelRadioGroup.value = normalized;
++        const segments = hilalPrivacyLevelRadioGroup.querySelectorAll("m3e-button-segment, m3e-button, radio");
++        for (const s of segments) {
++          const isSel = (s.value === normalized);
++          s.checked = isSel;
++          s.selected = isSel;
++          if (isSel) {
++            s.setAttribute("selected", "true");
++            s.setAttribute("checked", "true");
++          } else {
++            s.removeAttribute("selected");
++            s.removeAttribute("checked");
++          }
++        }
++      };
++
++      const initialLevel = Services.prefs.getStringPref("hilal.privacy.level", "standard");
++      updatePrivacyLevelUI(initialLevel);
++
++      const onPrivacyChange = (val) => {
++        const level = normalizePrivacyLevel(val || hilalPrivacyLevelRadioGroup.value);
++        updatePrivacyLevelUI(level);
++        Services.prefs.setStringPref("hilal.privacy.level", level);
++      };
++
++      hilalPrivacyLevelRadioGroup.addEventListener("command", () => onPrivacyChange());
++      hilalPrivacyLevelRadioGroup.addEventListener("change", (e) => {
++        const val = hilalPrivacyLevelRadioGroup.value || e.target?.value;
++        if (val) onPrivacyChange(val);
++      });
++      hilalPrivacyLevelRadioGroup.addEventListener("input", (e) => {
++        const val = hilalPrivacyLevelRadioGroup.value || e.target?.value;
++        if (val) onPrivacyChange(val);
++      });
++      hilalPrivacyLevelRadioGroup.addEventListener("click", e => {
++        const seg = e.target.closest("m3e-button-segment, m3e-button, radio");
++        if (seg && seg.value) {
++          onPrivacyChange(seg.value);
++        }
++      });
++    }
++    setEventListener("hilalAboutVersionBtn", "click", () => {
++      window.browsingContext.topChromeWindow.openAboutDialog();
++    });
++    setEventListener("hilalWorkspacesReset", "click", function () {
 +      if (
 +        Services.prompt.confirm(
 +          window,
@@ -107,6 +442,7 @@ index b66ff919d..2479dca43 100644
 +        Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
 +        Services.prefs.setBoolPref("hilal.workspaces.pinned.public", true);
 +        Services.prefs.setBoolPref("hilal.workspaces.groups.public", false);
++        Services.prefs.setStringPref("hilal.privacy.level", "standard");
 +        if (hilalWsCheckbox) {
 +          hilalWsCheckbox.checked = true;
 +        }
@@ -116,19 +452,1013 @@ index b66ff919d..2479dca43 100644
 +        if (hilalWsGroupsPublicCheckbox) {
 +          hilalWsGroupsPublicCheckbox.checked = false;
 +        }
++        if (hilalPrivacyLevelRadioGroup) {
++          hilalPrivacyLevelRadioGroup.value = "standard";
++        }
 +      }
 +    });
++
++    // -- Hilal Accent Color & Theme Customization ----------------------------
++    const accentModeRadioGroup = document.getElementById("hilalAccentMode");
++    const workspaceColorsSection = document.getElementById("hilalWorkspaceColorsSection");
++    const globalColorSection = document.getElementById("hilalGlobalColorSection");
++    const boostsColorSection = document.getElementById("hilalBoostsColorSection");
++    const workspaceColorList = document.getElementById("hilalWorkspaceColorList");
++    const globalColorSwatches = document.getElementById("hilalGlobalColorSwatches");
++    const globalCustomColor = document.getElementById("hilalGlobalCustomColor");
++
++    const WORKSPACE_COLOR_CHOICES = [
++      { id: "purple", hex: "#af51f5", label: "Purple" },
++      { id: "blue", hex: "#37adff", label: "Blue" },
++      { id: "turquoise", hex: "#00c79a", label: "Turquoise" },
++      { id: "green", hex: "#51cd00", label: "Green" },
++      { id: "yellow", hex: "#ffcb00", label: "Yellow" },
++      { id: "orange", hex: "#ff9f00", label: "Orange" },
++      { id: "red", hex: "#ff613d", label: "Red" },
++      { id: "pink", hex: "#ff4bda", label: "Pink" },
++    ];
++
++    const getWorkspacesData = () => {
++      try {
++        const raw = Services.prefs.getStringPref("hilal.workspaces.data", "[]");
++        const parsed = JSON.parse(raw);
++        return Array.isArray(parsed) && parsed.length > 0
++          ? parsed
++          : [{ id: "default", name: "Default", emoji: "\u{1F5C2}", color: "purple" }];
++      } catch (e) {
++        return [{ id: "default", name: "Default", emoji: "\u{1F5C2}", color: "purple" }];
++      }
++    };
++
++    const setWorkspacesData = data => {
++      Services.prefs.setStringPref("hilal.workspaces.data", JSON.stringify(data));
++    };
++
++    const refreshWorkspaceColorsUI = () => {
++      if (!workspaceColorList) return;
++      workspaceColorList.textContent = "";
++      const workspaces = getWorkspacesData();
++      const activeId = Services.prefs.getStringPref("hilal.workspaces.active", workspaces[0]?.id || "default");
++
++      for (const ws of workspaces) {
++        const row = document.createElement("div");
++        row.className = "workspace-color-row";
++
++        // Meta (emoji badge, name label, active badge)
++        const meta = document.createElement("div");
++        meta.className = "workspace-meta";
++
++        const emojiBadge = document.createElement("div");
++        emojiBadge.className = "workspace-emoji-badge";
++        emojiBadge.textContent = ws.emoji || "\u{1F5C2}";
++        meta.appendChild(emojiBadge);
++
++        const nameLabel = document.createElement("span");
++        nameLabel.className = "workspace-name-label";
++        nameLabel.textContent = ws.name || ws.id;
++        meta.appendChild(nameLabel);
++
++        if (ws.id === activeId) {
++          const activeBadge = document.createElement("span");
++          activeBadge.className = "workspace-active-badge";
++          activeBadge.textContent = "Aktif";
++          activeBadge.setAttribute("data-l10n-id", "hilal-workspace-active-badge");
++          meta.appendChild(activeBadge);
++        }
++
++        row.appendChild(meta);
++
++        // Swatches
++        const swatches = document.createElement("div");
++        swatches.className = "m3-color-swatches";
++
++        for (const choice of WORKSPACE_COLOR_CHOICES) {
++          const swatch = document.createElement("button");
++          swatch.className = "m3-swatch-circle";
++          swatch.style.setProperty("--swatch-color", choice.hex);
++          swatch.style.backgroundColor = choice.hex;
++          swatch.title = choice.label;
++          swatch.setAttribute("aria-label", choice.label);
++
++          if (ws.color === choice.id || ws.color === choice.hex) {
++            swatch.setAttribute("selected", "true");
++          }
++
++          swatch.addEventListener("click", () => {
++            ws.color = choice.id;
++            setWorkspacesData(workspaces);
++            refreshWorkspaceColorsUI();
++            applyPreferencesTheme();
++          });
++
++          swatches.appendChild(swatch);
++        }
++
++        row.appendChild(swatches);
++        workspaceColorList.appendChild(row);
++      }
++    };
++
++    const refreshGlobalColorUI = () => {
++      if (!globalColorSwatches) return;
++      globalColorSwatches.textContent = "";
++      const currentColor = Services.prefs.getStringPref("hilal.theme.globalAccentColor", "#af51f5");
++
++      for (const choice of WORKSPACE_COLOR_CHOICES) {
++        const swatch = document.createElement("button");
++        swatch.className = "m3-swatch-circle";
++        swatch.style.setProperty("--swatch-color", choice.hex);
++        swatch.style.backgroundColor = choice.hex;
++        swatch.title = choice.label;
++        swatch.setAttribute("aria-label", choice.label);
++
++        if (currentColor.toLowerCase() === choice.hex.toLowerCase() || currentColor === choice.id) {
++          swatch.setAttribute("selected", "true");
++        }
++
++        swatch.addEventListener("click", () => {
++          Services.prefs.setStringPref("hilal.theme.globalAccentColor", choice.hex);
++          refreshGlobalColorUI();
++          applyPreferencesTheme();
++          if (globalCustomColor) {
++            globalCustomColor.value = choice.hex;
++          }
++        });
++
++        globalColorSwatches.appendChild(swatch);
++      }
++
++      if (globalCustomColor) {
++        if (/^#[0-9A-Fa-f]{6}$/.test(currentColor)) {
++          globalCustomColor.value = currentColor;
++        }
++      }
++    };
++
++    if (globalCustomColor) {
++      globalCustomColor.addEventListener("input", () => {
++        const hex = globalCustomColor.value;
++        Services.prefs.setStringPref("hilal.theme.globalAccentColor", hex);
++        refreshGlobalColorUI();
++        applyPreferencesTheme();
++      });
++    }
++
++    const updateAccentModeUI = (mode) => {
++      if (workspaceColorsSection) {
++        workspaceColorsSection.hidden = (mode !== "workspace");
++      }
++      if (globalColorSection) {
++        globalColorSection.hidden = (mode !== "global");
++      }
++      if (boostsColorSection) {
++        boostsColorSection.hidden = (mode !== "boosts");
++      }
++      if (accentModeRadioGroup) {
++        accentModeRadioGroup.value = mode;
++        const segments = accentModeRadioGroup.querySelectorAll("m3e-button-segment, m3e-button, radio");
++        for (const s of segments) {
++          const val = s.getAttribute("value") || s.value;
++          const isSel = (val === mode);
++          s.checked = isSel;
++          s.selected = isSel;
++          if (isSel) {
++            s.setAttribute("selected", "true");
++            s.setAttribute("checked", "true");
++          } else {
++            s.removeAttribute("selected");
++            s.removeAttribute("checked");
++          }
++        }
++      }
++    };
++
++    const applyPreferencesTheme = () => {
++      // 1. Resolve Accent Color
++      const mode = Services.prefs.getStringPref("hilal.theme.accentMode", "workspace");
++      let hex = "#0b57d0";
++      const colorChoices = {
++        purple: "#af51f5",
++        blue: "#37adff",
++        turquoise: "#00c79a",
++        green: "#51cd00",
++        yellow: "#ffcb00",
++        orange: "#ff9f00",
++        red: "#ff613d",
++        pink: "#ff4bda",
++      };
++
++      if (mode === "global") {
++        const globalHex = Services.prefs.getStringPref("hilal.theme.globalAccentColor", "#af51f5");
++        hex = colorChoices[globalHex] || globalHex || "#af51f5";
++      } else if (mode === "boosts") {
++        hex = "#7c5cff";
++      } else {
++        try {
++          const workspaces = JSON.parse(Services.prefs.getStringPref("hilal.workspaces.data", "[]"));
++          const activeId = Services.prefs.getStringPref("hilal.workspaces.active", workspaces[0]?.id || "default");
++          const activeWs = workspaces.find(w => w.id === activeId) || workspaces[0];
++          hex = colorChoices[activeWs?.color] || activeWs?.color || "#af51f5";
++        } catch (e) {
++          hex = "#af51f5";
++        }
++      }
++
++      // 2. Resolve Dark / Light Mode
++      const contentOverride = Services.prefs.getIntPref("layout.css.prefers-color-scheme.content-override", 2);
++      let isDark = false;
++      if (contentOverride === 0) {
++        isDark = true;
++      } else if (contentOverride === 1) {
++        isDark = false;
++      } else {
++        isDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
++      }
++
++      document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
++
++      // Apply dynamic tokens
++      document.documentElement.style.setProperty("--md-sys-color-primary", hex);
++      document.documentElement.style.setProperty("--color-accent-primary", hex);
++      if (isDark) {
++        document.documentElement.style.setProperty(
++          "--md-sys-color-primary-container",
++          `color-mix(in srgb, ${hex} 32%, #1b1e25)`
++        );
++        document.documentElement.style.setProperty(
++          "--md-sys-color-on-primary-container",
++          `color-mix(in srgb, ${hex} 35%, #ffffff)`
++        );
++      } else {
++        document.documentElement.style.setProperty(
++          "--md-sys-color-primary-container",
++          `color-mix(in srgb, ${hex} 20%, #f2f3fa)`
++        );
++        document.documentElement.style.setProperty(
++          "--md-sys-color-on-primary-container",
++          `color-mix(in srgb, ${hex} 75%, #181c22)`
++        );
++      }
++    };
++
++    if (accentModeRadioGroup) {
++      const currentMode = Services.prefs.getStringPref("hilal.theme.accentMode", "workspace");
++      updateAccentModeUI(currentMode);
++
++      const onModeChange = (modeVal) => {
++        const selected = modeVal || accentModeRadioGroup.value;
++        if (!selected) return;
++        Services.prefs.setStringPref("hilal.theme.accentMode", selected);
++        if (selected === "boosts") {
++          Services.prefs.setBoolPref("hilal.boosts.auto_palette.enabled", true);
++          Services.prefs.setBoolPref("hilal.boosts.browser_ui.enabled", true);
++          Services.prefs.setBoolPref("hilal.boosts.enabled", true);
++        }
++        updateAccentModeUI(selected);
++        applyPreferencesTheme();
++      };
++
++      accentModeRadioGroup.addEventListener("command", () => onModeChange());
++      accentModeRadioGroup.addEventListener("change", (e) => {
++        const val = accentModeRadioGroup.value || e.target?.value;
++        if (val) onModeChange(val);
++      });
++      accentModeRadioGroup.addEventListener("input", (e) => {
++        const val = accentModeRadioGroup.value || e.target?.value;
++        if (val) onModeChange(val);
++      });
++
++      const segButtons = accentModeRadioGroup.querySelectorAll("m3e-button-segment, m3e-button, radio");
++      for (const seg of segButtons) {
++        seg.addEventListener("click", () => {
++          const val = seg.getAttribute("value") || seg.value;
++          if (val) onModeChange(val);
++        });
++      }
++    }
++
++    refreshWorkspaceColorsUI();
++    refreshGlobalColorUI();
++    applyPreferencesTheme();
++
++    const themePrefObserver = () => {
++      refreshWorkspaceColorsUI();
++      refreshGlobalColorUI();
++      applyPreferencesTheme();
++    };
++    try {
++      Services.prefs.addObserver("hilal.workspaces.data", themePrefObserver);
++      Services.prefs.addObserver("hilal.workspaces.active", themePrefObserver);
++      Services.prefs.addObserver("hilal.theme.accentMode", themePrefObserver);
++      Services.prefs.addObserver("hilal.theme.globalAccentColor", themePrefObserver);
++      Services.prefs.addObserver("layout.css.prefers-color-scheme.content-override", themePrefObserver);
++      if (window.matchMedia) {
++        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyPreferencesTheme);
++      }
++      window.addEventListener("unload", () => {
++        try {
++          Services.prefs.removeObserver("hilal.workspaces.data", themePrefObserver);
++          Services.prefs.removeObserver("hilal.workspaces.active", themePrefObserver);
++          Services.prefs.removeObserver("hilal.theme.accentMode", themePrefObserver);
++          Services.prefs.removeObserver("hilal.theme.globalAccentColor", themePrefObserver);
++          Services.prefs.removeObserver("layout.css.prefers-color-scheme.content-override", themePrefObserver);
++        } catch (e) {}
++      });
++    } catch (e) {}
++
++    // -- Hilal Bangs Customization -------------------------------------------
++    const { HilalBangs } = ChromeUtils.importESModule(
++      "resource:///modules/HilalBangs.sys.mjs"
++    );
++
++    const bangsList = document.getElementById("hilalBangsList");
++    const bangsAddBtn = document.getElementById("hilalBangsAdd");
++    const bangsRemoveBtn = document.getElementById("hilalBangsRemove");
++    const bangsForm = document.getElementById("hilalBangsForm");
++    const bangsTriggerInput = document.getElementById("hilalBangsTrigger");
++    const bangsSearchUrlInput = document.getElementById("hilalBangsSearchUrl");
++    const bangsHomeUrlInput = document.getElementById("hilalBangsHomeUrl");
++    const bangsSaveBtn = document.getElementById("hilalBangsSave");
++    const bangsCancelBtn = document.getElementById("hilalBangsCancel");
++
++    const refreshBangsList = () => {
++      if (!bangsList) {
++        return;
++      }
++      bangsList.textContent = "";
++
++      const defaults = HilalBangs.getDefaultBangs();
++      const customs = HilalBangs.getCustomBangs() || [];
++
++      const addRow = (trigger, search, home, isCustom) => {
++        const item = document.createXULElement("richlistitem");
++        item.setAttribute("style", "padding: 6px; border-bottom: 1px solid var(--in-content-border-color); align-items: center; display: flex; flex-direction: row;");
++        item.setAttribute("trigger", trigger);
++        item.setAttribute("isCustom", isCustom ? "true" : "false");
++
++        const triggerLabel = document.createXULElement("label");
++        triggerLabel.setAttribute("value", "!" + trigger);
++        triggerLabel.setAttribute("style", "font-weight: bold; width: 80px; min-width: 80px; margin-right: 10px;");
++        item.appendChild(triggerLabel);
++
++        const typeLabel = document.createXULElement("label");
++        typeLabel.setAttribute("value", isCustom ? "(custom)" : "(default)");
++        typeLabel.setAttribute("style", "color: gray; width: 80px; min-width: 80px; margin-right: 10px;");
++        item.appendChild(typeLabel);
++
++        const urlLabel = document.createXULElement("label");
++        urlLabel.setAttribute("value", search);
++        urlLabel.setAttribute("flex", "1");
++        urlLabel.setAttribute("crop", "end");
++        item.appendChild(urlLabel);
++
++        bangsList.appendChild(item);
++      };
++
++      // Add custom bangs first
++      for (const entry of customs) {
++        if (entry && entry.trigger) {
++          addRow(entry.trigger, entry.search, entry.home || "", true);
++        }
++      }
++
++      // Add default bangs
++      for (const [trigger, data] of Object.entries(defaults)) {
++        addRow(trigger, data.search, data.home, false);
++      }
++    };
++
++    if (bangsList) {
++      bangsList.addEventListener("select", () => {
++        const selected = bangsList.selectedItem;
++        if (selected) {
++          const isCustom = selected.getAttribute("isCustom") === "true";
++          if (bangsRemoveBtn) {
++            bangsRemoveBtn.disabled = !isCustom;
++          }
++        } else {
++          if (bangsRemoveBtn) {
++            bangsRemoveBtn.disabled = true;
++          }
++        }
++      });
++    }
++
++    if (bangsAddBtn) {
++      bangsAddBtn.addEventListener("click", () => {
++        if (bangsForm) {
++          bangsForm.hidden = false;
++        }
++        if (bangsTriggerInput) {
++          bangsTriggerInput.value = "";
++          bangsTriggerInput.focus();
++        }
++        if (bangsSearchUrlInput) {
++          bangsSearchUrlInput.value = "";
++        }
++        if (bangsHomeUrlInput) {
++          bangsHomeUrlInput.value = "";
++        }
++      });
++    }
++
++    if (bangsCancelBtn) {
++      bangsCancelBtn.addEventListener("click", () => {
++        if (bangsForm) {
++          bangsForm.hidden = true;
++        }
++      });
++    }
++
++    if (bangsSaveBtn) {
++      bangsSaveBtn.addEventListener("click", () => {
++        const trigger = bangsTriggerInput ? bangsTriggerInput.value.trim().toLowerCase().replace(/^!/, "") : "";
++        const search = bangsSearchUrlInput ? bangsSearchUrlInput.value.trim() : "";
++        const home = bangsHomeUrlInput ? bangsHomeUrlInput.value.trim() : "";
++
++        if (!trigger || !search) {
++          Services.prompt.alert(window, "Invalid Input", "Trigger and Search URL are required.");
++          return;
++        }
++
++        // Check if trigger is already in use by default bangs
++        const defaults = HilalBangs.getDefaultBangs();
++        if (trigger in defaults) {
++          Services.prompt.alert(window, "Duplicate Trigger", "The trigger '!" + trigger + "' is reserved as a default bang.");
++          return;
++        }
++
++        const customs = HilalBangs.getCustomBangs() || [];
++        const existingIndex = customs.findIndex(c => c.trigger === trigger);
++
++        if (existingIndex >= 0) {
++          customs[existingIndex] = { trigger, search, home };
++        } else {
++          customs.push({ trigger, search, home });
++        }
++
++        HilalBangs.setCustomBangs(customs);
++        refreshBangsList();
++
++        if (bangsForm) {
++          bangsForm.hidden = true;
++        }
++      });
++    }
++
++    if (bangsRemoveBtn) {
++      bangsRemoveBtn.addEventListener("click", () => {
++        const selected = bangsList ? bangsList.selectedItem : null;
++        if (!selected) {
++          return;
++        }
++
++        const trigger = selected.getAttribute("trigger");
++        const isCustom = selected.getAttribute("isCustom") === "true";
++
++        if (isCustom && trigger) {
++          if (Services.prompt.confirm(window, "Remove Bang", "Are you sure you want to remove the custom bang '!" + trigger + "'?")) {
++            const customs = HilalBangs.getCustomBangs() || [];
++            const filtered = customs.filter(c => c.trigger !== trigger);
++            HilalBangs.setCustomBangs(filtered);
++            refreshBangsList();
++          }
++        }
++      });
++    }
++
++    refreshBangsList();
++
++    // -- Hilal Language Customization -----------------------------------------
++    const languageSelect = document.getElementById("hilalLanguageSelect");
++    const languageApplyBtn = document.getElementById("hilalLanguageApply");
++
++    try {
++      if (languageSelect && languageApplyBtn) {
++        const initLanguageUI = async () => {
++          let available = [];
++          try {
++            const matcher = window.LangPackMatcher || ChromeUtils.importESModule(
++              "moz-src:///intl/locale/LangPackMatcher.sys.mjs"
++            ).LangPackMatcher;
++            if (matcher && matcher.getAvailableLocales) {
++              available = await matcher.getAvailableLocales();
++            }
++          } catch (e) {
++            // fallback
++          }
++
++          if (!available || !available.length) {
++            available = ["en-US", "tr"];
++          }
++
++          if (!available.includes("en-US")) {
++            available.push("en-US");
++          }
++          if (!available.includes("tr")) {
++            available.push("tr");
++          }
++
++          let localeNames = [];
++          try {
++            localeNames = Services.intl.getLocaleDisplayNames(undefined, available, {
++              preferNative: true,
++            });
++          } catch (e) {
++            localeNames = available.map(code =>
++              code.startsWith("tr") ? "Türkçe" : (code.startsWith("en") ? "English (US)" : code)
++            );
++          }
++
++          languageSelect.textContent = "";
++
++          const currentLocale = Services.locale.appLocaleAsBCP47;
++          const systemLabel = currentLocale.startsWith("tr")
++            ? "Sistem Dili (Varsayılan)"
++            : "System Language (Default)";
++
++          const systemOption = document.createElement("option");
++          systemOption.value = "";
++          systemOption.textContent = systemLabel;
++          languageSelect.appendChild(systemOption);
++
++          for (let i = 0; i < available.length; i++) {
++            const code = available[i];
++            const name = localeNames[i] || code;
++            const option = document.createElement("option");
++            option.value = code;
++            option.textContent = name;
++            languageSelect.appendChild(option);
++          }
++
++          const requestedLocales = Services.locale.requestedLocales || [];
++          const currentPrimary = requestedLocales[0] || "";
++          if (currentPrimary && !available.includes(currentPrimary)) {
++            const option = document.createElement("option");
++            option.value = currentPrimary;
++            option.textContent = currentPrimary;
++            languageSelect.appendChild(option);
++          }
++          languageSelect.value = currentPrimary;
++        };
++
++        initLanguageUI();
++
++        languageApplyBtn.addEventListener("click", () => {
++          const selected = languageSelect.value;
++          const requestedLocales = Services.locale.requestedLocales || [];
++          const currentPrimary = requestedLocales[0] || "";
++
++          if (selected === currentPrimary) {
++            return;
++          }
++          const nextLocales = selected
++            ? Array.from(new Set([selected, ...requestedLocales]).values())
++            : [];
++
++          const currentLocale = Services.locale.appLocaleAsBCP47;
++          const title = currentLocale.startsWith("tr") ? "Yeniden Başlatma Gerekli" : "Restart Required";
++          const message = currentLocale.startsWith("tr")
++            ? "Dil değişikliğini uygulamak için tarayıcının yeniden başlatılması gerekiyor. Şimdi yeniden başlatılsın mı?"
++            : "The browser needs to be restarted to apply language changes. Restart now?";
++
++          if (Services.prompt.confirm(window, title, message)) {
++            Multilingual.applyAndRestart(nextLocales);
++          }
++        });
++      }
++    } catch (e) {
++      console.error("Hilal language settings init error:", e);
++    }
++
++    try {
++      gHilalShortcutsSettings.init();
++    } catch (e) {
++      console.error("Hilal shortcuts settings init error:", e);
++    }
 +  },
++};
++
++var gHilalShortcutsSettings = {
++  init() {
++    this._container = document.getElementById("hilalShortcutsContainer");
++    this._defaultsBtn = document.getElementById("hilalShortcutsRestoreDefaults");
++
++    if (!this._container) return;
++
++    this.refresh();
++
++    if (this._defaultsBtn) {
++      const onRestore = () => {
++        if (Services.prompt.confirm(window, "Restore Defaults", "Are you sure you want to restore all keyboard shortcuts to their default settings?")) {
++          Services.prefs.clearUserPref("hilal.keyboard.shortcuts.data");
++          this.refresh();
++        }
++      };
++      this._defaultsBtn.addEventListener("command", onRestore);
++      this._defaultsBtn.addEventListener("click", onRestore);
++    }
++  },
++
++  getShortcut(id) {
++    let userShortcuts = {};
++    try {
++      userShortcuts = JSON.parse(Services.prefs.getStringPref("hilal.keyboard.shortcuts.data", "{}"));
++    } catch (e) {}
++
++    if (userShortcuts[id] !== undefined) {
++      return userShortcuts[id];
++    }
++    return this.getDefaultShortcut(id);
++  },
++
++  getDefaultShortcut(id) {
++    const isMac = AppConstants.platform === "macosx";
++    const defaults = {
++      "key_toggleSidebar": isMac ? { key: "Z", modifiers: "control" } : { key: "Z", modifiers: "control,alt" },
++      "key_hilalNewWorkspace": { key: "W", modifiers: "accel,alt" },
++      "key_hilalNextWorkspace": { key: "]", modifiers: "accel,alt" },
++      "key_hilalPrevWorkspace": { key: "[", modifiers: "accel,alt" },
++      "key_hilalToggleWorkspaces": { key: "E", modifiers: "accel,alt" },
++      "key_hilalToggleCompactMode": { key: "M", modifiers: "accel,alt" },
++      "key_toggleCompactHideToolbar": { key: "T", modifiers: "accel,alt" },
++      "key_focusUrlbar": { key: "L", modifiers: "accel" },
++      "key_newNavigator": { key: "N", modifiers: "accel" },
++      "key_newNavigatorTab": { key: "T", modifiers: "accel" },
++      "key_closeWindow": { key: "W", modifiers: "accel,shift" },
++      "key_close": { key: "W", modifiers: "accel" },
++      "key_undoCloseTab": { key: "T", modifiers: "accel,shift" },
++      "key_gotoHistory": isMac ? { key: "H", modifiers: "accel,shift" } : { key: "H", modifiers: "accel" },
++      "key_viewBookmarksSidebar": { key: "B", modifiers: "accel" }
++    };
++    return defaults[id] || { key: "", modifiers: "" };
++  },
++
++  refresh() {
++    this._container.textContent = "";
++
++    const categories = [
++      {
++        id: "workspaces",
++        title: "Workspaces",
++        items: [
++          { id: "key_hilalNewWorkspace", name: "New Workspace", desc: "Create a new workspace to organize your tabs" },
++          { id: "key_hilalToggleWorkspaces", name: "Toggle Workspaces Panel", desc: "Show or hide the workspace list sidebar" },
++          { id: "key_hilalNextWorkspace", name: "Next Workspace", desc: "Switch to the next active workspace" },
++          { id: "key_hilalPrevWorkspace", name: "Previous Workspace", desc: "Switch to the previous active workspace" }
++        ]
++      },
++      {
++        id: "sidebar",
++        title: "Sidebar & Compact Mode",
++        items: [
++          { id: "key_toggleSidebar", name: "Toggle Primary Sidebar", desc: "Show or hide the primary vertical sidebar" },
++          { id: "key_hilalToggleCompactMode", name: "Toggle Compact Mode", desc: "Enable or disable compact mode spacing" },
++          { id: "key_toggleCompactHideToolbar", name: "Toggle Top Toolbar", desc: "Show or hide the top toolbar in compact mode" },
++          { id: "key_viewBookmarksSidebar", name: "Bookmarks Sidebar", desc: "Toggle bookmarks sidebar panel" },
++          { id: "key_gotoHistory", name: "History Sidebar", desc: "Toggle history sidebar panel" }
++        ]
++      },
++      {
++        id: "tabs",
++        title: "Tabs & Windows",
++        items: [
++          { id: "key_newNavigatorTab", name: "New Tab", desc: "Open a new tab in the active window" },
++          { id: "key_close", name: "Close Active Tab", desc: "Close the currently selected tab" },
++          { id: "key_undoCloseTab", name: "Reopen Closed Tab", desc: "Restore the last tab you closed" },
++          { id: "key_newNavigator", name: "New Window", desc: "Open a new browser window" },
++          { id: "key_closeWindow", name: "Close Window", desc: "Close the current browser window" }
++        ]
++      },
++      {
++        id: "navigation",
++        title: "Navigation",
++        items: [
++          { id: "key_focusUrlbar", name: "Focus Address Bar", desc: "Highlight address bar for search or web address entry" }
++        ]
++      }
++    ];
++
++    for (let cat of categories) {
++      let card = this._createCategoryCard(cat);
++      this._container.appendChild(card);
++    }
++  },
++
++  _createCategoryCard(cat) {
++    let card = document.createElement("div");
++    card.setAttribute("class", "shortcuts-category-card");
++
++    let title = document.createElement("div");
++    title.setAttribute("class", "shortcuts-category-title");
++    title.textContent = cat.title;
++    card.appendChild(title);
++
++    for (let item of cat.items) {
++      let rowContainer = document.createElement("div");
++      rowContainer.setAttribute("class", "shortcut-row-container");
++      rowContainer.setAttribute("id", `container_${item.id}`);
++
++      let row = document.createElement("div");
++      row.setAttribute("class", "shortcut-row");
++
++      let info = document.createElement("div");
++      info.setAttribute("class", "shortcut-info");
++
++      let label = document.createElement("span");
++      label.setAttribute("class", "shortcut-label");
++      label.textContent = item.name;
++
++      let desc = document.createElement("span");
++      desc.setAttribute("class", "shortcut-desc");
++      desc.textContent = item.desc;
++
++      info.appendChild(label);
++      info.appendChild(desc);
++      row.appendChild(info);
++
++      let controls = document.createElement("div");
++      controls.setAttribute("class", "shortcut-controls");
++
++      let kbdContainer = document.createElement("div");
++      kbdContainer.setAttribute("class", "kbd-container");
++      
++      let shortcut = this.getShortcut(item.id);
++      this._renderKeycaps(kbdContainer, shortcut.key, shortcut.modifiers);
++      controls.appendChild(kbdContainer);
++
++      let btnEdit = document.createElement("button");
++      btnEdit.setAttribute("class", "shortcut-action-btn");
++      btnEdit.textContent = "Edit";
++      btnEdit.addEventListener("click", () => {
++        this._startCapture(item.id, btnEdit, kbdContainer, rowContainer);
++      });
++      controls.appendChild(btnEdit);
++
++      let btnClear = document.createElement("button");
++      btnClear.setAttribute("class", "shortcut-clear-btn");
++      btnClear.textContent = "×";
++      btnClear.setAttribute("title", "Clear shortcut");
++      btnClear.addEventListener("click", () => {
++        this._save(item.id, "", "");
++      });
++      controls.appendChild(btnClear);
++
++      row.appendChild(controls);
++      rowContainer.appendChild(row);
++      card.appendChild(rowContainer);
++    }
++
++    return card;
++  },
++
++  _renderKeycaps(container, key, modifiers) {
++    container.textContent = "";
++    if (!key && !modifiers) {
++      let span = document.createElement("span");
++      span.style.opacity = "0.5";
++      span.textContent = "Disabled";
++      container.appendChild(span);
++      return;
++    }
++
++    let parts = [];
++    if (modifiers) {
++      if (modifiers.includes("accel") || modifiers.includes("control")) {
++        parts.push(AppConstants.platform === "macosx" ? "Cmd" : "Ctrl");
++      }
++      if (modifiers.includes("alt")) {
++        parts.push(AppConstants.platform === "macosx" ? "Option" : "Alt");
++      }
++      if (modifiers.includes("shift")) {
++        parts.push("Shift");
++      }
++    }
++    if (key) {
++      parts.push(key);
++    }
++
++    for (let part of parts) {
++      let kbd = document.createElement("kbd");
++      kbd.setAttribute("class", "shortcut-keycap");
++      kbd.textContent = part;
++      container.appendChild(kbd);
++    }
++  },
++
++  _startCapture(id, btn, kbdContainer, rowContainer) {
++    btn.setAttribute("class", "shortcut-action-btn recording-active");
++    btn.textContent = "Recording...";
++    btn.focus();
++
++    // Clear conflict banners if any
++    let activeBanner = rowContainer.querySelector(".shortcut-conflict-banner");
++    if (activeBanner) activeBanner.remove();
++
++    const updateLivePreview = (e) => {
++      let mods = [];
++      if (e.metaKey) mods.push("accel");
++      if (e.ctrlKey) mods.push("control");
++      if (e.altKey) mods.push("alt");
++      if (e.shiftKey) mods.push("shift");
++
++      let k = e.key;
++      if (["Meta", "Control", "Alt", "Shift"].includes(k)) {
++        k = "";
++      } else if (k.length === 1) {
++        k = k.toUpperCase();
++      }
++
++      this._renderKeycaps(kbdContainer, k, mods.join(","));
++    };
++
++    const handler = (e) => {
++      e.preventDefault();
++      e.stopPropagation();
++
++      if (e.key === "Escape") {
++        cleanup();
++        this.refresh();
++        return;
++      }
++
++      let modifiers = [];
++      if (e.metaKey) modifiers.push("accel");
++      if (e.ctrlKey) modifiers.push("control");
++      if (e.altKey) modifiers.push("alt");
++      if (e.shiftKey) modifiers.push("shift");
++
++      let key = e.key;
++      // Filter out isolated modifier key presses
++      if (["Meta", "Control", "Alt", "Shift"].includes(key)) {
++        updateLivePreview(e);
++        return;
++      }
++
++      if (key.length === 1) {
++        key = key.toUpperCase();
++      }
++
++      cleanup();
++      this._handleCapturedShortcut(id, key, modifiers.join(","), rowContainer);
++    };
++
++    const keyupHandler = (e) => {
++      updateLivePreview(e);
++    };
++
++    const blurHandler = () => {
++      cleanup();
++      this.refresh();
++    };
++
++    const cleanup = () => {
++      btn.removeEventListener("keydown", handler, true);
++      btn.removeEventListener("keyup", keyupHandler, true);
++      btn.removeEventListener("blur", blurHandler, true);
++      btn.setAttribute("class", "shortcut-action-btn");
++      btn.textContent = "Edit";
++    };
++
++    btn.addEventListener("keydown", handler, true);
++    btn.addEventListener("keyup", keyupHandler, true);
++    btn.addEventListener("blur", blurHandler, true);
++  },
++
++  _handleCapturedShortcut(id, key, modifiers, rowContainer) {
++    let conflict = this._detectConflict(id, key, modifiers);
++    if (conflict) {
++      this._showConflictBanner(id, key, modifiers, conflict, rowContainer);
++    } else {
++      this._save(id, key, modifiers);
++    }
++  },
++
++  _detectConflict(id, key, modifiers) {
++    if (!key && !modifiers) return null;
++
++    const categories = [
++      {
++        items: [
++          { id: "key_hilalNewWorkspace", name: "New Workspace" },
++          { id: "key_hilalToggleWorkspaces", name: "Toggle Workspaces Panel" },
++          { id: "key_hilalNextWorkspace", name: "Next Workspace" },
++          { id: "key_hilalPrevWorkspace", name: "Previous Workspace" },
++          { id: "key_toggleSidebar", name: "Toggle Primary Sidebar" },
++          { id: "key_hilalToggleCompactMode", name: "Toggle Compact Mode" },
++          { id: "key_toggleCompactHideToolbar", name: "Toggle Top Toolbar" },
++          { id: "key_viewBookmarksSidebar", name: "Bookmarks Sidebar" },
++          { id: "key_gotoHistory", name: "History Sidebar" },
++          { id: "key_newNavigatorTab", name: "New Tab" },
++          { id: "key_close", name: "Close Active Tab" },
++          { id: "key_undoCloseTab", name: "Reopen Closed Tab" },
++          { id: "key_newNavigator", name: "New Window" },
++          { id: "key_closeWindow", name: "Close Window" },
++          { id: "key_focusUrlbar", name: "Focus Address Bar" }
++        ]
++      }
++    ];
++
++    for (let cat of categories) {
++      for (let item of cat.items) {
++        if (item.id === id) continue;
++        let other = this.getShortcut(item.id);
++        if (other.key === key && other.modifiers === modifiers) {
++          return item;
++        }
++      }
++    }
++    return null;
++  },
++
++  _showConflictBanner(id, key, modifiers, conflict, rowContainer) {
++    let activeBanner = rowContainer.querySelector(".shortcut-conflict-banner");
++    if (activeBanner) activeBanner.remove();
++
++    let banner = document.createElement("div");
++    banner.setAttribute("class", "shortcut-conflict-banner");
++
++    let text = document.createElement("span");
++    text.setAttribute("class", "shortcut-conflict-text");
++    text.textContent = `Conflicts with "${conflict.name}"`;
++    banner.appendChild(text);
++
++    let actions = document.createElement("div");
++    actions.setAttribute("class", "shortcut-conflict-actions");
++
++    let btnOverwrite = document.createElement("button");
++    btnOverwrite.setAttribute("class", "conflict-action-link");
++    btnOverwrite.textContent = "Overwrite";
++    btnOverwrite.addEventListener("click", () => {
++      this._overwrite(id, key, modifiers, conflict.id);
++    });
++    actions.appendChild(btnOverwrite);
++
++    let btnCancel = document.createElement("button");
++    btnCancel.setAttribute("class", "conflict-action-link");
++    btnCancel.textContent = "Cancel";
++    btnCancel.addEventListener("click", () => {
++      this.refresh();
++    });
++    actions.appendChild(btnCancel);
++
++    banner.appendChild(actions);
++    rowContainer.appendChild(banner);
++  },
++
++  _overwrite(id, key, modifiers, conflictId) {
++    let userShortcuts = {};
++    try {
++      userShortcuts = JSON.parse(Services.prefs.getStringPref("hilal.keyboard.shortcuts.data", "{}"));
++    } catch (e) {}
++
++    userShortcuts[conflictId] = { key: "", modifiers: "" };
++    userShortcuts[id] = { key, modifiers };
++
++    Services.prefs.setStringPref("hilal.keyboard.shortcuts.data", JSON.stringify(userShortcuts));
++    this.refresh();
++  },
++
++  _save(id, key, modifiers) {
++    let userShortcuts = {};
++    try {
++      userShortcuts = JSON.parse(Services.prefs.getStringPref("hilal.keyboard.shortcuts.data", "{}"));
++    } catch (e) {}
++
++    userShortcuts[id] = { key, modifiers };
++    Services.prefs.setStringPref("hilal.keyboard.shortcuts.data", JSON.stringify(userShortcuts));
++    this.refresh();
++  }
 +};
 +
  var {
    InternalHandlerInfoWrapper,
    getFileDisplayName,
 diff --git a/browser/components/preferences/preferences.js b/browser/components/preferences/preferences.js
-index c76a0647e..63f1a887e 100644
+index c76a0647e14b..1f76a41d521b 100644
 --- a/browser/components/preferences/preferences.js
 +++ b/browser/components/preferences/preferences.js
-@@ -524,6 +524,7 @@ function init_all() {
+@@ -483,7 +483,7 @@ function register_module(categoryName, categoryObject) {
+       }
+       this._initted = true;
+       let template = document.getElementById("template-" + categoryName);
+-      if (template && !srdSectionPrefs.all) {
++      if (template && (!srdSectionPrefs.all || categoryName === "paneHilal")) {
+         // Replace the template element with the nodes inside of it.
+         template.replaceWith(template.content);
+ 
+@@ -494,7 +494,9 @@ function register_module(categoryName, categoryObject) {
+         Preferences.queueUpdateOfAllElements();
+       }
+ 
+-      categoryObject.init();
++      if (categoryObject?.init) {
++        categoryObject.init();
++      }
+       ChromeUtils.addProfilerMarker(
+         "Preferences",
+         { startTime },
+@@ -524,6 +526,7 @@ function init_all() {
      document.getElementById("category-general").hidden = false;
      document.getElementById("nav-separator").hidden = true;
    }
@@ -136,11 +1466,55 @@ index c76a0647e..63f1a887e 100644
    register_module("paneHome", gHomePane);
    register_module("paneSearch", gSearchPane);
    register_module("panePrivacy", gPrivacyPane);
+@@ -655,10 +658,8 @@ async function gotoPref(
+ ) {
+   let redesignEnabled = srdSectionPrefs.all;
+   let categories = document.getElementById("categories");
+-  const kDefaultCategoryInternalName = redesignEnabled
+-    ? "paneSync"
+-    : "paneGeneral";
+-  const kDefaultCategory = redesignEnabled ? "sync" : "general";
++  const kDefaultCategoryInternalName = "paneHilal";
++  const kDefaultCategory = "hilal";
+   let hash = document.location.hash;
+   let category = aCategory || hash.substring(1) || kDefaultCategoryInternalName;
+ 
 diff --git a/browser/components/preferences/preferences.xhtml b/browser/components/preferences/preferences.xhtml
-index 1b8c38159..d271b6efd 100644
+index 1b8c38159314..855cb3c5a45f 100644
 --- a/browser/components/preferences/preferences.xhtml
 +++ b/browser/components/preferences/preferences.xhtml
-@@ -124,6 +124,11 @@
+@@ -20,10 +20,6 @@
+   <link rel="stylesheet" href="chrome://global/skin/global.css" />
+ 
+   <link rel="stylesheet" href="chrome://global/skin/in-content/common.css" />
+-  <link
+-    rel="stylesheet"
+-    href="chrome://browser/skin/preferences/preferences.css"
+-  />
+   <link
+     rel="stylesheet"
+     href="chrome://browser/content/preferences/dialogs/handlers.css"
+@@ -38,6 +34,11 @@
+   <link rel="stylesheet" href="chrome://browser/content/preferences/widgets/setting-group.css" />
+   <link rel="stylesheet" href="chrome://browser/content/preferences/widgets/setting-pane.css" />
+   <link rel="stylesheet" href="chrome://browser/content/preferences/widgets/setting-control.css" />
++  <!-- Hilal's Material restyle loads last so it wins over the upstream sheets. -->
++  <link
++    rel="stylesheet"
++    href="chrome://browser/skin/preferences/preferences.css"
++  />
+ 
+   <link rel="localization" href="branding/brand.ftl"/>
+   <link rel="localization" href="browser/browser.ftl"/>
+@@ -98,6 +99,7 @@
+   <script type="module" src="chrome://browser/content/preferences/widgets/update-information.mjs"></script>
+   <script type="module" src="chrome://browser/content/preferences/widgets/update-state.mjs"></script>
+   <script type="module" src="chrome://browser/content/ipprotection/bandwidth-usage.mjs"></script>
++  <script type="module" src="chrome://browser/content/preferences/m3e-web.all.min.mjs"></script>
+ </head>
+ 
+ <html:body xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+@@ -124,6 +126,11 @@
          iconsrc="chrome://browser/skin/preferences/category-sync.svg"
          data-l10n-id="pane-sync-title3">
        </html:moz-page-nav-button>
@@ -152,7 +1526,7 @@ index 1b8c38159..d271b6efd 100644
        <html:moz-page-nav-button id="category-home"
          view="paneHome"
          iconsrc="chrome://browser/skin/home.svg"
-@@ -243,6 +248,7 @@
+@@ -243,6 +250,7 @@
          <vbox id="mainPrefPane">
  #include searchResults.inc.xhtml
  #include main.inc.xhtml

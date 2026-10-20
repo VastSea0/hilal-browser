@@ -33,12 +33,18 @@ pref("app.update.badgeWaitTime", 14400);
 // If this is less than 5, then pasting code into the web console is disabled.
 pref("devtools.selfxss.count", 5);
 
-// Sidebar and vertical tabs are enabled by default in Hilal.
-pref("sidebar.revamp", true);
-pref("sidebar.verticalTabs", true);
-pref("sidebar.verticalTabs.showHorizontal", false);
-pref("sidebar.visibility", "always-show");
+// Material 3 Expressive Shell defaults
+pref("hilal.material3.enabled", true);
+pref("sidebar.revamp", false);
+pref("sidebar.verticalTabs", false);
+pref("sidebar.visibility", "hide-sidebar");
 pref("hilal.tahoe.enabled", false);
+
+// Follow the OS language when a matching locale is installed; otherwise use en-US.
+pref("intl.locale.requested", "");
+
+// Allow custom compiled unsigned language packs
+pref("extensions.langpacks.signatures.required", false);
 
 // Privacy-first Hilal defaults, informed by Betterfox and arkenfox.
 // These are default prefs rather than locked prefs, so users can still opt in.
@@ -194,3 +200,7 @@ pref("hilal.toolbar.initialized", false);
 // Site Customizer and dynamic UI tinting preferences
 pref("hilal.boosts.auto_palette.enabled", false);
 pref("hilal.boosts.browser_ui.enabled", false);
+
+// Theme and accent color preferences ("workspace" | "global" | "boosts")
+pref("hilal.theme.accentMode", "workspace");
+pref("hilal.theme.globalAccentColor", "#af51f5");

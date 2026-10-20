@@ -1,0 +1,497 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*
+ * Hilal Material 3 — Firefox XUL Token Bridge
+ *
+ * beer.min.css provides the real M3E design system (loaded before this
+ * file in browser-shared.css). This file bridges Beer CSS tokens into
+ * Firefox-specific XUL variables so the browser chrome adopts the same
+ * color system and shape language.
+ *
+ * Component visual rules (border-radius, transitions, hover colors) are
+ * now driven by the Beer CSS token values via --md-sys-* aliases defined
+ * in hilal-m3-tokens.css — we no longer hand-roll them here.
+ */
+
+@media -moz-pref("hilal.material3.enabled") {
+  /* Normalize Beer CSS button defaults so existing Firefox chrome buttons don't break */
+  button,
+  .button {
+    box-sizing: border-box !important;
+    font-family: inherit;
+  }
+
+  button.transparent,
+  .button.transparent {
+    color: var(--on-surface) !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  button.transparent:hover,
+  .button.transparent:hover {
+    background-color: color-mix(in srgb, var(--on-surface) 8%, transparent) !important;
+  }
+
+  /* Material Symbols sizing in browser chrome */
+  i.tiny {
+    font-size: 16px !important;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+  }
+  i.small {
+    font-size: 18px !important;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+  }
+
+  /* ------------------------------------------------------------------
+   * 1. Root — Firefox toolbar variables bridged from Beer CSS tokens
+   * ---------------------------------------------------------------- */
+  :root[windowtype="navigator:browser"] {
+    font-family: var(--font-sans) !important;
+    background-color: var(--surface) !important;
+    color: var(--on-surface) !important;
+
+    /* Toolbar system variables */
+    --toolbar-bgcolor: transparent !important;
+    --toolbar-color: var(--on-surface) !important;
+    --toolbar-field-background-color: var(--surface-container-high) !important;
+    --toolbar-field-color: var(--on-surface) !important;
+    --toolbar-field-border-color: var(--outline-variant) !important;
+    --toolbar-field-focus-background-color: var(--surface-container-highest) !important;
+
+    /* Button & toolbarbutton shape */
+    --toolbarbutton-border-radius: var(--md-sys-shape-corner-full) !important;
+    --button-border-radius: var(--md-sys-shape-corner-full) !important;
+    --toolbarbutton-hover-background: var(--surface-container-high) !important;
+    --toolbarbutton-active-background: var(--surface-container-highest) !important;
+
+    /* URL bar */
+    --urlbar-box-focus-bgcolor: color-mix(in srgb, var(--primary) 12%, transparent) !important;
+    --urlbar-box-background-color: var(--surface-container-high) !important;
+    --urlbar-box-background-color-hover: var(--surface-container-highest) !important;
+
+    /* Sidebar */
+    --sidebar-background-color: var(--surface-container-low) !important;
+    --sidebar-text-color: var(--on-surface) !important;
+    --sidebar-border-color: var(--outline-variant) !important;
+
+    /* Panel/popup */
+    --panel-background: var(--surface-container-high) !important;
+    --panel-color: var(--on-surface) !important;
+    --panel-border-color: var(--outline-variant) !important;
+    --panel-border-radius: var(--md-sys-shape-corner-large) !important;
+  }
+
+  /* ------------------------------------------------------------------
+   * 2. Navigator toolbox & nav bar — surface reset
+   * ---------------------------------------------------------------- */
+  :root[windowtype="navigator:browser"] #navigator-toolbox {
+    background-color: var(--surface) !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding-block: 4px 2px !important;
+    padding-inline: 8px !important;
+  }
+
+  :root[windowtype="navigator:browser"] #toolbar-menubar {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  :root[windowtype="navigator:browser"] #nav-bar {
+    background: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding-block: 2px 4px !important;
+    padding-inline: 4px !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  :root[windowtype="navigator:browser"] #nav-bar-customization-target {
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  /* ------------------------------------------------------------------
+   * 3. URL bar container & pill shape
+   * ---------------------------------------------------------------- */
+  :root[windowtype="navigator:browser"] #urlbar-container {
+    margin-inline: auto !important;
+    max-width: 700px !important;
+    min-width: 300px !important;
+    padding-block: 1px !important;
+  }
+
+  :root[windowtype="navigator:browser"] #urlbar {
+    min-height: 36px !important;
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    background-color: var(--surface-container-high) !important;
+    border: 1px solid var(--outline-variant) !important;
+    box-shadow: none !important;
+    color: var(--on-surface) !important;
+    transition:
+      background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized),
+      border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized),
+      box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
+    top: 0 !important;
+  }
+
+  :root[windowtype="navigator:browser"] #urlbar-background {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: var(--md-sys-shape-corner-full) !important;
+  }
+
+  :root[windowtype="navigator:browser"] #urlbar:hover:not([focused="true"]) {
+    background-color: var(--surface-container-highest) !important;
+    border-color: var(--outline) !important;
+  }
+
+  :root[windowtype="navigator:browser"] #urlbar[focused="true"],
+  :root[windowtype="navigator:browser"] #urlbar[open="true"] {
+    background-color: var(--surface-container-highest) !important;
+    border-color: var(--primary) !important;
+    border-width: 2px !important;
+    box-shadow: var(--md-sys-elevation-2) !important;
+  }
+
+  :root[windowtype="navigator:browser"] #urlbar-input {
+    font-family: var(--font-sans) !important;
+    font-size: 13.5px !important;
+    color: var(--on-surface) !important;
+    padding-inline: 8px !important;
+  }
+
+  /* URL bar suggestion dropdown */
+  :root[windowtype="navigator:browser"] #urlbar-results {
+    background-color: var(--surface-container-high) !important;
+    border-radius: var(--md-sys-shape-corner-large) !important;
+    border: 1px solid var(--outline-variant) !important;
+    box-shadow: var(--md-sys-elevation-3) !important;
+    margin-top: 4px !important;
+    padding: 6px !important;
+  }
+
+  :root[windowtype="navigator:browser"] .urlbarView-row {
+    border-radius: var(--md-sys-shape-corner-small) !important;
+    margin-block: 2px !important;
+    padding: 6px 10px !important;
+  }
+
+  :root[windowtype="navigator:browser"] .urlbarView-row:hover,
+  :root[windowtype="navigator:browser"] .urlbarView-row[selected] {
+    background-color: var(--surface-container-highest) !important;
+    color: var(--on-surface) !important;
+  }
+
+  /* ------------------------------------------------------------------
+   * 4. Tabs toolbar
+   * ---------------------------------------------------------------- */
+  :root[windowtype="navigator:browser"] #TabsToolbar {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin-block-end: 2px !important;
+  }
+
+  :root[windowtype="navigator:browser"] .tabbrowser-tab {
+    margin-inline: 2px !important;
+    padding-block: 2px !important;
+    color: var(--on-surface-variant) !important;
+    font-family: var(--font-sans) !important;
+    font-size: 13px !important;
+  }
+
+  :root[windowtype="navigator:browser"] .tab-background {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: var(--md-sys-shape-corner-medium) !important;
+    transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
+  }
+
+  :root[windowtype="navigator:browser"] .tabbrowser-tab:hover:not([selected="true"]) .tab-background {
+    background-color: var(--surface-container) !important;
+  }
+
+  :root[windowtype="navigator:browser"] .tabbrowser-tab[selected="true"] {
+    color: var(--on-surface) !important;
+    font-weight: 500 !important;
+  }
+
+  :root[windowtype="navigator:browser"] .tabbrowser-tab[selected="true"] .tab-background {
+    background-color: var(--surface-container-high) !important;
+    border: 1px solid var(--outline-variant) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  :root[windowtype="navigator:browser"] .tab-close-button {
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    padding: 3px !important;
+    width: 20px !important;
+    height: 20px !important;
+    color: var(--on-surface-variant) !important;
+    transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
+  }
+
+  :root[windowtype="navigator:browser"] .tab-close-button:hover {
+    background-color: var(--surface-container-highest) !important;
+    color: var(--on-surface) !important;
+  }
+
+  /* New tab & nav buttons — shape from Beer CSS token */
+  :root[windowtype="navigator:browser"] #nav-bar .toolbarbutton-1,
+  :root[windowtype="navigator:browser"] #TabsToolbar .toolbarbutton-1 {
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--on-surface-variant) !important;
+    fill: currentColor !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    padding: 6px !important;
+    margin-inline: 1px !important;
+    transition:
+      background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized),
+      color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
+  }
+
+  :root[windowtype="navigator:browser"] #nav-bar .toolbarbutton-1:hover:not([disabled="true"]),
+  :root[windowtype="navigator:browser"] #TabsToolbar .toolbarbutton-1:hover:not([disabled="true"]) {
+    background-color: var(--surface-container-high) !important;
+    color: var(--on-surface) !important;
+  }
+
+  :root[windowtype="navigator:browser"] #nav-bar .toolbarbutton-1:active:not([disabled="true"]),
+  :root[windowtype="navigator:browser"] #TabsToolbar .toolbarbutton-1:active:not([disabled="true"]),
+  :root[windowtype="navigator:browser"] #nav-bar .toolbarbutton-1[open="true"] {
+    background-color: var(--surface-container-highest) !important;
+    color: var(--primary) !important;
+  }
+
+  :root[windowtype="navigator:browser"] #tabs-newtab-button,
+  :root[windowtype="navigator:browser"] #new-tab-button,
+  :root[windowtype="navigator:browser"] #alltabs-button,
+  :root[windowtype="navigator:browser"] #tabbrowser-arrowscrollbox::part(scrollbutton-up),
+  :root[windowtype="navigator:browser"] #tabbrowser-arrowscrollbox::part(scrollbutton-down) {
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--on-surface-variant) !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    padding: 6px !important;
+    transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
+  }
+
+  :root[windowtype="navigator:browser"] #tabs-newtab-button:hover,
+  :root[windowtype="navigator:browser"] #new-tab-button:hover,
+  :root[windowtype="navigator:browser"] #alltabs-button:hover,
+  :root[windowtype="navigator:browser"] #tabbrowser-arrowscrollbox::part(scrollbutton-up):hover,
+  :root[windowtype="navigator:browser"] #tabbrowser-arrowscrollbox::part(scrollbutton-down):hover {
+    background-color: var(--surface-container-high) !important;
+    color: var(--on-surface) !important;
+  }
+
+  /* ------------------------------------------------------------------
+   * 5. Web view frame — floating canvas
+   * ---------------------------------------------------------------- */
+  :root[windowtype="navigator:browser"]:not([customizing]):not([sizemode="fullscreen"]) #browser {
+    background-color: var(--surface) !important;
+    padding: 0 8px 8px 8px !important;
+    gap: 8px !important;
+  }
+
+  :root[windowtype="navigator:browser"]:not([customizing]):not([sizemode="fullscreen"]) #tabbrowser-tabbox,
+  :root[windowtype="navigator:browser"]:not([customizing]):not([sizemode="fullscreen"]) .browserSidebarContainer {
+    border-radius: var(--md-sys-shape-corner-large) !important;
+    border: 1px solid var(--outline-variant) !important;
+    overflow: hidden !important;
+    background-color: var(--surface-container-lowest) !important;
+    box-shadow: var(--md-sys-elevation-1) !important;
+  }
+
+  /* ------------------------------------------------------------------
+   * 6. Sidebar / Navigation drawer
+   * ---------------------------------------------------------------- */
+  :root[windowtype="navigator:browser"] #sidebar-box,
+  :root[windowtype="navigator:browser"] #sidebar-container {
+    background-color: var(--surface-container-low) !important;
+    border: 1px solid var(--outline-variant) !important;
+    border-radius: var(--md-sys-shape-corner-large) !important;
+    box-shadow: var(--md-sys-elevation-1) !important;
+    overflow: hidden !important;
+  }
+
+  :root[windowtype="navigator:browser"] #sidebar-header {
+    background: transparent !important;
+    border-bottom: 1px solid var(--outline-variant) !important;
+    padding: 8px 12px !important;
+  }
+
+  :root[windowtype="navigator:browser"] #sidebar-title {
+    font-family: var(--font-sans) !important;
+    font-weight: 500 !important;
+    color: var(--on-surface) !important;
+  }
+
+  :root[windowtype="navigator:browser"] #sidebar-splitter {
+    border: none !important;
+    background: transparent !important;
+    width: 4px !important;
+  }
+
+  /* ------------------------------------------------------------------
+   * 7. Menus, popups, and context panels
+   * ---------------------------------------------------------------- */
+  :root[windowtype="navigator:browser"] menupopup,
+  :root[windowtype="navigator:browser"] panel[type="arrow"] {
+    --panel-background: var(--surface-container-high) !important;
+    --panel-color: var(--on-surface) !important;
+    --panel-border-color: var(--outline-variant) !important;
+    --panel-border-radius: var(--md-sys-shape-corner-large) !important;
+    border-radius: var(--md-sys-shape-corner-large) !important;
+    box-shadow: var(--md-sys-elevation-3) !important;
+  }
+
+  /* ------------------------------------------------------------------
+   * 8. URL bar identity & action chips
+   * ---------------------------------------------------------------- */
+  :root[windowtype="navigator:browser"] #identity-box,
+  :root[windowtype="navigator:browser"] #identity-permission-box,
+  :root[windowtype="navigator:browser"] #notification-popup-box {
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    margin-inline: 2px !important;
+    padding-inline: 4px !important;
+    transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
+  }
+
+  :root[windowtype="navigator:browser"] #identity-box:hover,
+  :root[windowtype="navigator:browser"] #identity-permission-box:hover,
+  :root[windowtype="navigator:browser"] #notification-popup-box:hover {
+    background-color: var(--surface-container-highest) !important;
+  }
+
+  :root[windowtype="navigator:browser"] #page-action-buttons .urlbar-page-action,
+  :root[windowtype="navigator:browser"] #urlbar-search-mode-indicator {
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
+  }
+
+  :root[windowtype="navigator:browser"] #page-action-buttons .urlbar-page-action:hover {
+    background-color: var(--surface-container-highest) !important;
+  }
+
+  /* ------------------------------------------------------------------
+   * 9. Findbar — floating search pill
+   * ---------------------------------------------------------------- */
+  :root[windowtype="navigator:browser"] findbar {
+    background-color: var(--surface-container-high) !important;
+    border: 1px solid var(--outline-variant) !important;
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    box-shadow: var(--md-sys-elevation-2) !important;
+    padding: 4px 8px !important;
+    margin-inline: auto 16px !important;
+    margin-block: 8px !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  :root[windowtype="navigator:browser"] findbar .findbar-textbox {
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    background-color: var(--surface-container) !important;
+    border: 1px solid var(--outline-variant) !important;
+    padding-inline: 10px !important;
+    color: var(--on-surface) !important;
+  }
+
+  :root[windowtype="navigator:browser"] findbar .findbar-find-previous,
+  :root[windowtype="navigator:browser"] findbar .findbar-find-next,
+  :root[windowtype="navigator:browser"] findbar .findbar-closebutton {
+    border-radius: var(--md-sys-shape-corner-full) !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--on-surface-variant) !important;
+  }
+
+  :root[windowtype="navigator:browser"] findbar .findbar-find-previous:hover,
+  :root[windowtype="navigator:browser"] findbar .findbar-find-next:hover,
+  :root[windowtype="navigator:browser"] findbar .findbar-closebutton:hover {
+    background-color: var(--surface-container-highest) !important;
+    color: var(--on-surface) !important;
+  }
+
+  /* ------------------------------------------------------------------
+   * 10. Status panel (URL hover preview)
+   * ---------------------------------------------------------------- */
+  :root[windowtype="navigator:browser"] #statuspanel-label {
+    background-color: var(--surface-container-high) !important;
+    color: var(--on-surface) !important;
+    border: 1px solid var(--outline-variant) !important;
+    border-radius: var(--md-sys-shape-corner-small) !important;
+    box-shadow: var(--md-sys-elevation-1) !important;
+    font-family: var(--font-sans) !important;
+    font-size: 12px !important;
+    padding: 3px 8px !important;
+    margin: 4px 8px !important;
+  }
+
+  /* ------------------------------------------------------------------
+   * 11. Workspace rail & dialog
+   * ---------------------------------------------------------------- */
+  :root[windowtype="navigator:browser"] #hilal-workspace-strip {
+    background-color: var(--surface-container-low) !important;
+    border-right: 1px solid var(--outline-variant) !important;
+    padding: 6px 4px !important;
+    gap: 6px !important;
+  }
+
+  :root[windowtype="navigator:browser"] .hilal-ws-btn {
+    border-radius: var(--md-sys-shape-corner-medium) !important;
+    transition:
+      background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized),
+      color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
+  }
+
+  :root[windowtype="navigator:browser"] .hilal-ws-btn:hover {
+    background-color: var(--surface-container-high) !important;
+  }
+
+  :root[windowtype="navigator:browser"] .hilal-ws-btn-active {
+    background-color: var(--primary-container) !important;
+    color: var(--on-primary-container) !important;
+  }
+
+  :root[windowtype="navigator:browser"] #hilal-ws-dialog {
+    background-color: var(--surface-container-high) !important;
+    border-radius: var(--md-sys-shape-corner-extra-large) !important;
+    box-shadow: var(--md-sys-elevation-3) !important;
+    border: 1px solid var(--outline-variant) !important;
+    font-family: var(--font-sans) !important;
+  }
+
+  :root[windowtype="navigator:browser"] .hilal-ws-choice {
+    border-radius: var(--md-sys-shape-corner-small) !important;
+    transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-emphasized) !important;
+  }
+
+  :root[windowtype="navigator:browser"] .hilal-ws-choice:hover {
+    background-color: var(--surface-container-highest) !important;
+  }
+
+  :root[windowtype="navigator:browser"] .hilal-ws-choice-selected {
+    background-color: var(--primary-container) !important;
+    border-color: var(--primary) !important;
+  }
+}

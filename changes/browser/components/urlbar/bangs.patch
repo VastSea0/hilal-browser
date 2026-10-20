@@ -1,5 +1,5 @@
 diff --git a/browser/components/urlbar/UrlbarUtils.sys.mjs b/browser/components/urlbar/UrlbarUtils.sys.mjs
-index e4ef36076..4abaea243 100644
+index e4ef360762ba..4abaea24391c 100644
 --- a/browser/components/urlbar/UrlbarUtils.sys.mjs
 +++ b/browser/components/urlbar/UrlbarUtils.sys.mjs
 @@ -46,6 +46,7 @@ const lazy = XPCOMUtils.declareLazy({

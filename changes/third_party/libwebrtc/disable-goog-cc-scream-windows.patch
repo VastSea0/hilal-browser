@@ -1,5 +1,5 @@
 diff --git a/third_party/libwebrtc/api/transport/goog_cc_factory.cc b/third_party/libwebrtc/api/transport/goog_cc_factory.cc
-index 97ace33d8..218c9a4f7 100644
+index 97ace33d8836..218c9a4f7a6a 100644
 --- a/third_party/libwebrtc/api/transport/goog_cc_factory.cc
 +++ b/third_party/libwebrtc/api/transport/goog_cc_factory.cc
 @@ -19,7 +19,6 @@
@@ -26,7 +26,7 @@ index 97ace33d8..218c9a4f7 100644
                                                     std::move(goog_cc_config));
  }
 diff --git a/third_party/libwebrtc/moz.build b/third_party/libwebrtc/moz.build
-index dd7816f70..143b74d8a 100644
+index dd7816f701a1..143b74d8ae93 100644
 --- a/third_party/libwebrtc/moz.build
 +++ b/third_party/libwebrtc/moz.build
 @@ -294,7 +294,6 @@ DIRS += [

@@ -1,134 +1,50 @@
 diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/browser/browser.ftl
-index 759a6d263..abee78442 100644
+index 759a6d2638c3..30a7a1b252b4 100644
 --- a/browser/locales/en-US/browser/browser.ftl
 +++ b/browser/locales/en-US/browser/browser.ftl
-@@ -1676,3 +1676,148 @@ reduced-protection-infobar-reload-button = Reload
+@@ -1022,7 +1022,6 @@ picture-in-picture-enable-toggle =
+ fullscreen-warning-domain = <span data-l10n-name="domain">{ $domain }</span> is now full screen
+ fullscreen-warning-no-domain = This document is now full screen
+ 
+-
+ fullscreen-exit-button = Exit Full Screen (Esc)
+ # "esc" is lowercase on mac keyboards, but uppercase elsewhere.
+ fullscreen-exit-mac-button = Exit Full Screen (esc)
+@@ -1676,3 +1675,113 @@ reduced-protection-infobar-reload-button = Reload
    .accesskey = R
  reduced-protection-infobar-never-show-button = Don’t show again
    .accesskey = D
 +
 +## Hilal Welcome Screen
 +
-+hilal-welcome-skip = Skip
 +# Variables:
 +#   $current (Number) - The current setup step.
 +#   $total (Number) - The total setup step count.
 +hilal-welcome-step-count = Step { $current }/{ $total }
-+hilal-welcome-recommended = Recommended
 +
 +hilal-welcome-brand-text = Hilal Browser
-+hilal-welcome-intro-line-1 = Hilal starts here
-+hilal-welcome-intro-line-2 = Keep the window quiet
 +
-+hilal-welcome-step-label-moon = Welcome
-+hilal-welcome-step-label-settings = Settings
-+hilal-welcome-step-label-layout = Look
-+hilal-welcome-step-label-shield = Privacy
-+hilal-welcome-step-label-search = Search
-+hilal-welcome-step-label-tabs = Tabs
-+hilal-welcome-step-label-spaces = Spaces
-+hilal-welcome-step-label-pin = Pinned tabs
-+hilal-welcome-step-label-check = Ready
++hilal-welcome-stage-0-kicker = Appearance
++hilal-welcome-stage-0-title = Make Hilal uniquely yours
++hilal-welcome-stage-0-subtitle = Choose your preferred theme appearance and accent color palette.
 +
-+hilal-welcome-stage-0-kicker = First choices
-+hilal-welcome-stage-0-title = Choose what starts with Hilal.
-+hilal-welcome-stage-0-subtitle = Bring only the data you need and decide whether links from the system should open here.
++hilal-welcome-stage-1-kicker = Workflow & Tabs
++hilal-welcome-stage-1-title = Organize your workflow
++hilal-welcome-stage-1-subtitle = Select your tab orientation and set up clean workspace contexts.
 +
-+hilal-welcome-stage-1-kicker = Layout
-+hilal-welcome-stage-1-title = Pick a density.
-+hilal-welcome-stage-1-subtitle = Standard keeps the toolbar visible at all times. Compact hides it until you need it.
++hilal-welcome-stage-2-kicker = Privacy & Search
++hilal-welcome-stage-2-title = Protected and powered by your choice
++hilal-welcome-stage-2-subtitle = Pick a protection profile and configure your primary search engine.
 +
-+hilal-welcome-stage-2-kicker = Tabs
-+hilal-welcome-stage-2-title = Choose a tab direction.
-+hilal-welcome-stage-2-subtitle = Vertical tabs sit in a sidebar. Horizontal tabs line up across the top of the window.
-+
-+hilal-welcome-stage-3-kicker = Spaces
-+hilal-welcome-stage-3-title = Separate your contexts.
-+hilal-welcome-stage-3-subtitle = Spaces keep personal, work, and social tabs in their own groups so they never mix.
-+
-+hilal-welcome-stage-4-kicker = Toolbar
-+hilal-welcome-stage-4-title = Control the toolbar.
-+hilal-welcome-stage-4-subtitle = Auto-hide reveals the address bar only when you hover the top edge. Always visible keeps it fixed.
-+
-+hilal-welcome-stage-5-kicker = Privacy
-+hilal-welcome-stage-5-title = Pick a protection posture.
-+hilal-welcome-stage-5-subtitle = Hilal can stay comfortable for daily browsing or tighten the surfaces that websites use to recognize you.
-+
-+hilal-welcome-stage-6-kicker = Search
-+hilal-welcome-stage-6-title = Choose the address-bar engine.
-+hilal-welcome-stage-6-subtitle = This is the engine Hilal uses when you type into the bar. You can change it whenever the browser is open.
-+
-+hilal-welcome-stage-7-kicker = Pinned tabs
-+hilal-welcome-stage-7-title = Keep essentials one click away.
-+hilal-welcome-stage-7-subtitle = Choose the sites Hilal should pin at startup. Netflix, Spotify, YouTube, GitHub, Reddit, Notion, and Gemini are ready to add.
-+
-+hilal-welcome-stage-8-kicker = Spaces
-+hilal-welcome-stage-8-title = Start with fewer mixed tabs.
-+hilal-welcome-stage-8-subtitle = Create a small set of spaces now, or leave the browser empty and shape it later.
-+
-+hilal-welcome-stage-9-kicker = Finish
-+hilal-welcome-stage-9-title = Ready for a clean window.
-+hilal-welcome-stage-9-subtitle = Your choices are saved locally. Hilal will leave the setup layer and return the browser chrome.
-+
-+hilal-welcome-home-preview-image-alt =
-+    .alt = Hilal Browser home page preview
-+
-+hilal-welcome-feature-privacy = Privacy focused
-+hilal-welcome-feature-workspaces = Workspaces
-+hilal-welcome-feature-clean = Clean interface
-+
-+hilal-welcome-default-browser-label = Default browser
-+hilal-welcome-default-browser-desc = Make Hilal Browser your default browser for system links.
-+hilal-welcome-import-label = Bookmarks and passwords
-+hilal-welcome-import-desc = Import your existing bookmarks, history, and passwords from another browser.
-+hilal-welcome-import-button = Import
-+hilal-welcome-imported-button = Imported
-+
-+hilal-welcome-layout-standard-label = Standard
-+hilal-welcome-layout-standard-desc = Full toolbar, familiar spacing.
-+hilal-welcome-layout-compact-label = Compact
-+hilal-welcome-layout-compact-desc = More page, less chrome.
-+hilal-welcome-tabs-layout-label = Tabs
-+hilal-welcome-tabs-layout-desc = Choose the direction that keeps your pages easiest to scan.
-+hilal-welcome-tabs-layout-vertical = Vertical
-+hilal-welcome-tabs-layout-horizontal = Horizontal
-+hilal-welcome-workspaces-enabled-label = Spaces
-+hilal-welcome-workspaces-enabled-desc = Keep personal, work, and social tabs separated from the start.
-+hilal-welcome-compact-toolbar-label = Hide top toolbar
-+hilal-welcome-compact-toolbar-desc = In compact mode, reveal the address bar only when you need it.
++hilal-welcome-stage-3-kicker = Getting Started
++hilal-welcome-stage-3-title = You're all set
++hilal-welcome-stage-3-subtitle = Import existing data, set your default browser, or jump straight in.
 +
 +hilal-welcome-workspace-label-personal = Personal
 +hilal-welcome-workspace-label-work = Work
 +hilal-welcome-workspace-label-social = Social
 +
-+hilal-welcome-workspace-state-added = Will be added
-+hilal-welcome-workspace-state-skipped = Skipped
-+hilal-welcome-workspaces-disabled-label = Spaces are off
-+hilal-welcome-workspaces-disabled-desc = Hilal will open with one clean browser space. You can turn spaces on later in Settings.
-+
-+hilal-welcome-pinned-preview-title = Pinned tabs
-+hilal-welcome-pinned-public-label = Show pinned tabs in every space
-+hilal-welcome-pinned-public-desc = On by default so the sites you pin stay visible when you switch workspaces.
-+hilal-welcome-pinned-site-state-selected = Will be pinned
-+hilal-welcome-pinned-site-state-skipped = Not selected
-+
-+hilal-welcome-summary-layout = Layout
-+hilal-welcome-summary-layout-standard = Standard
-+hilal-welcome-summary-layout-compact = Compact
-+hilal-welcome-summary-tabs = Tabs
-+hilal-welcome-summary-tabs-vertical = Vertical
-+hilal-welcome-summary-tabs-horizontal = Horizontal
-+hilal-welcome-summary-search = Search
-+hilal-welcome-summary-privacy = Privacy
-+hilal-welcome-summary-pinned-tabs = Pinned tabs
-+hilal-welcome-summary-pinned-everywhere = Pinned tabs in every space
-+hilal-welcome-summary-workspaces = Workspaces
-+hilal-welcome-summary-default-browser = Default browser
-+hilal-welcome-summary-on = On
-+hilal-welcome-summary-off = Off
-+hilal-welcome-summary-none = None
-+hilal-welcome-summary-default-set = Set as default
-+hilal-welcome-summary-default-no-change = Do not change
++hilal-welcome-imported-button = Imported
 +
 +hilal-welcome-action-back = Back
 +hilal-welcome-action-continue = Continue
@@ -140,25 +56,83 @@ index 759a6d263..abee78442 100644
 +hilal-welcome-privacy-standard-label = Balanced
 +hilal-welcome-privacy-standard-badge = Everyday
 +hilal-welcome-privacy-standard-desc = RFP, strict tracking protection, HTTPS-only, URL cleanup, WebGL off, and cookie/cache cleanup on close.
-+hilal-welcome-privacy-standard-detail = WebRTC stays enabled for compatibility, with local leak surfaces reduced.
 +
 +hilal-welcome-privacy-strict-label = Strict
 +hilal-welcome-privacy-strict-badge = Tighter
 +hilal-welcome-privacy-strict-desc = Adds First Party Isolation on top of Balanced and disables WebRTC entirely.
-+hilal-welcome-privacy-strict-detail = Video calls and some sign-in flows may break.
 +
 +hilal-welcome-privacy-extreme-label = Maximum
 +hilal-welcome-privacy-extreme-badge = Local
 +hilal-welcome-privacy-extreme-desc = Adds JavaScript, camera, microphone, location, and history blocking on top of Strict.
-+hilal-welcome-privacy-extreme-detail = Does not hide your IP address; many modern sites may not work as expected.
++
++## Hilal New Tab
++
++hilal-newtab-title = New Tab
++hilal-newtab-active-workspace =
++    .title = Active Workspace
++hilal-newtab-default-workspace = Default
++hilal-newtab-search-input =
++    .placeholder = Search the web or enter address…
++    .title = Search the web or enter address
++    .aria-label = Search the web or enter address
++hilal-newtab-search-clear =
++    .title = Clear
++    .aria-label = Clear
++hilal-newtab-search-submit =
++    .title = Search
++    .aria-label = Search
++hilal-newtab-bookmarks = Bookmarks
++hilal-newtab-history = History
++hilal-newtab-downloads = Downloads
++hilal-newtab-settings-chip = Settings
++hilal-newtab-customize = Customize
++hilal-newtab-add-shortcut = Add shortcut
++hilal-newtab-remove-shortcut =
++    .title = Remove
++    .aria-label = Remove
++hilal-newtab-edit-shortcut =
++    .title = More actions
++    .aria-label = More actions
++hilal-newtab-dialog-title = Add shortcut
++hilal-newtab-dialog-edit-title = Edit shortcut
++hilal-newtab-field-name = Name
++hilal-newtab-field-name-input =
++    .placeholder = e.g. GitHub
++    .aria-label = Shortcut name
++hilal-newtab-field-url = URL
++hilal-newtab-field-url-input =
++    .placeholder = https://…
++    .aria-label = Shortcut URL
++hilal-newtab-dialog-cancel = Cancel
++hilal-newtab-dialog-save = Save
++hilal-newtab-dialog-delete = Remove
++
++## Hilal Toolbar
++
++hilal-toolbar-clear =
++    .title = Clear
++hilal-toolbar-copy-url =
++    .title = Copy Page URL
++hilal-toolbar-theme =
++    .title = Page Theme & Tone
++hilal-toolbar-sidebar-toggle =
++    .title = Toggle Sidebar
++hilal-toolbar-settings =
++    .title = Settings
++hilal-toolbar-newtab =
++    .title = New Tab
++
++hilal-welcome-intro-title = Welcome to Hilal
++hilal-welcome-intro-sub = A fast, private, and expressive web browser built around workspaces and solid Material 3 design.
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
-index a890aeb55..55e2e1136 100644
+index a890aeb558f8..e1bb18f91875 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2686,3 +2686,114 @@ security-privacy-issue-warning-ech =
+@@ -2686,3 +2686,180 @@ security-privacy-issue-warning-ech =
  security-privacy-issue-warning-proxy-autodetection =
    .label = Proxy auto-configuration is enabled
    .description = Proxy auto-configuration could let untrusted networks to monitor your activity.
++
 +## Hilal Browser Settings
 +
 +hilal-settings-header = Hilal Browser
@@ -166,21 +140,54 @@ index a890aeb55..55e2e1136 100644
 +## Workspaces
 +
 +hilal-workspaces-header = Workspaces
-+hilal-workspaces-enabled =
++hilal-workspaces-enabled = Enable workspaces
 +    .label = Enable workspaces
-+hilal-workspaces-pinned-public =
++hilal-workspaces-pinned-public = Make pinned tabs visible in all workspaces
 +    .label = Make pinned tabs visible in all workspaces
-+hilal-workspaces-groups-public =
++hilal-workspaces-groups-public = Make tab groups visible in all workspaces
 +    .label = Make tab groups visible in all workspaces
++hilal-workspaces-enabled-desc = Keep personal, work, and social tabs in separate spaces
++hilal-workspaces-pinned-public-desc = Show pinned tabs in every workspace
++hilal-workspaces-groups-public-desc = Show tab groups in every workspace
++hilal-urlbar-show-workspace-name = Show workspace name in address bar
++    .label = Show workspace name in address bar
 +hilal-workspaces-reset-description = Reset all workspace data (cannot be undone).
-+hilal-workspaces-reset-button =
++hilal-workspaces-reset-button = Reset Workspaces
 +    .label = Reset Workspaces
 +hilal-workspaces-reset-confirm-title = Reset Workspaces
 +hilal-workspaces-reset-confirm-message = This will delete all workspace data and cannot be undone. Continue?
 +
++## Theme & Accent Color
++
++hilal-theme-color-header = Accent Color & Theme
++hilal-accent-mode-title = Accent Color Mode
++hilal-accent-mode-desc = Choose how theme accent colors are determined across workspaces and the browser
++hilal-accent-mode-workspace = Workspaces
++    .label = Workspaces
++hilal-accent-mode-global = Global Accent
++    .label = Global Accent
++hilal-accent-mode-boosts = Dynamic Boosts
++    .label = Dynamic Boosts
++hilal-workspace-colors-subdesc = Set a distinct accent color for each workspace. When you switch workspaces, the browser theme updates dynamically.
++hilal-workspace-active-badge = Active
++    .label = Active
++hilal-global-color-title = Master Accent Color
++hilal-global-color-desc = Override all workspaces and chrome elements with a single unified accent color
++hilal-boosts-mode-title = Hilal Boosts Active Color
++hilal-boosts-mode-desc = Automatically extracts the dominant accent color from the visited website and applies it dynamically throughout the entire browser
++hilal-boosts-live-status = Live Web Tinting Active
++    .label = Live Web Tinting Active
++
 +## Sidebar Options
 +
 +hilal-sidebar-header = Sidebar Options
++hilal-sidebar-compact-enabled = Enable Compact Mode (hover near screen edges to reveal sidebar and toolbar)
++    .label = Enable Compact Mode (hover near screen edges to reveal sidebar and toolbar)
++hilal-sidebar-compact-hide-toolbar = Auto-hide top toolbar in compact mode
++    .label = Auto-hide top toolbar in compact mode
++hilal-sidebar-compact-hide-toolbar-desc = When enabled, the top navigation and tab bar automatically hides and slides down with a smooth blur when the cursor nears the top edge.
++hilal-sidebar-show-horizontal-tabs = Show horizontal tabs
++    .label = Show horizontal tabs
 +hilal-sidebar-footer-items-label = Standard Footer Items:
 +hilal-sidebar-footer-bookmarks =
 +    .label = Bookmarks
@@ -195,6 +202,33 @@ index a890aeb55..55e2e1136 100644
 +hilal-sidebar-footer-settings =
 +    .label = Settings
 +
++## UI Enhancements & Tahoe
++
++hilal-tahoe-header = Appearance & Tahoe Aesthetics
++hilal-tahoe-enabled = macOS Tahoe Glass Effect
++    .label = macOS Tahoe Glass Effect
++hilal-tahoe-enabled-desc = Window translucency, dynamic background blur, and lighting reflections.
++hilal-uifix-header = UI Enhancements
++hilal-uifix-enabled = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
++    .label = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
++hilal-uifix-connect-to-window = Connected Tabs (Connect tab borders to the window)
++    .label = Connected Tabs (Connect tab borders to the window)
++hilal-uifix-compact-padding = Compact Tab Padding (Slimmer tabs)
++    .label = Compact Tab Padding (Slimmer tabs)
++hilal-uifix-dynamic-separator = Dynamic Tab Separators
++    .label = Dynamic Tab Separators
++hilal-uifix-bottom-rounded = Rounded Bottom Tab Corners
++    .label = Rounded Bottom Tab Corners
++hilal-uifix-close-on-hover = Show Tab Close Button Only on Hover
++    .label = Show Tab Close Button Only on Hover
++
++## Site Customizer & Dynamic Coloring
++
++hilal-boosts-header = Site Customizer & Dynamic Coloring
++hilal-boosts-auto-palette = Automatically extract and apply website color palette to browser UI
++    .label = Automatically extract and apply website color palette to browser UI
++hilal-boosts-browser-ui = Apply site customizer colors to browser UI by default
++    .label = Apply site customizer colors to browser UI by default
 +hilal-sidebar-custom-shortcuts-label = Custom Sidebar Shortcuts:
 +hilal-sidebar-custom-shortcuts-desc = Add custom pages, bookmarks, or external links to the sidebar footer. Hilal shows favicons from Firefox's favicon cache for web links; it does not contact a site just to fetch its icon.
 +hilal-sidebar-custom-add =
@@ -224,6 +258,10 @@ index a890aeb55..55e2e1136 100644
 +
 +hilal-privacy-header = Privacy Level
 +hilal-privacy-description = Hilal privacy levels are explicit hardening profiles. They do not hide your public IP address, do not replace Tor Browser, and may break sites that depend on fingerprinting surfaces, WebGL, WebRTC, persistent cookies, saved passwords, or JavaScript.
++hilal-privacy-level-title = Protection level
++hilal-privacy-level-standard = Balanced
++hilal-privacy-level-strict = Strict
++hilal-privacy-level-extreme = Maximum
 +hilal-privacy-standard =
 +    .label = Balanced (LibreWolf-like): strict tracking protection, RFP, HTTPS-only, URL cleanup, WebGL off, reduced WebRTC exposure, cookies/cache cleared on close.
 +hilal-privacy-strict =
@@ -231,42 +269,43 @@ index a890aeb55..55e2e1136 100644
 +hilal-privacy-extreme =
 +    .label = Maximum local hardening (not Tor): Strict plus JavaScript off, camera/microphone/location blocked, and browsing history cleared on close.
 +
-+## UI Enhancements
-+
-+hilal-uifix-header = UI Enhancements
-+hilal-uifix-enabled =
-+    .label = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
-+hilal-uifix-connect-to-window =
-+    .label = Connected Tabs (Connect tab borders to the window)
-+hilal-uifix-compact-padding =
-+    .label = Compact Tab Padding (Slimmer, Lepton-style tabs)
-+hilal-uifix-dynamic-separator =
-+    .label = Dynamic Tab Separators
-+hilal-uifix-bottom-rounded =
-+    .label = Rounded Bottom Tab Corners
-+hilal-uifix-close-on-hover =
-+    .label = Show Tab Close Button Only on Hover
-+
-+## Site Customizer & Dynamic Coloring
-+
-+hilal-boosts-header = Site Customizer & Dynamic Coloring
-+hilal-boosts-auto-palette =
-+    .label = Automatically extract and apply website color palette to browser UI
-+hilal-boosts-browser-ui =
-+    .label = Apply site customizer colors to browser UI by default
-+
 +## Bangs
 +
 +hilal-bangs-header = Bangs
-+hilal-bangs-add-button =
++hilal-bangs-add-button = Add Bang
 +    .label = Add Bang
-+hilal-bangs-remove-button =
++hilal-bangs-remove-button = Remove Selected
 +    .label = Remove Selected
-+hilal-bangs-save-button =
++hilal-bangs-save-button = Save
 +    .label = Save
-+hilal-bangs-cancel-button =
++hilal-bangs-cancel-button = Cancel
 +    .label = Cancel
 +hilal-bangs-trigger-label = Trigger:
 +hilal-bangs-searchurl-label = Search URL:
 +hilal-bangs-homeurl-label = Home URL (optional):
 +hilal-bangs-default-label = (default)
++hilal-bangs-custom-label = (custom)
++
++## Language Selection
++
++hilal-language-header = Language Selection
++hilal-language-description = Select the interface language for the browser. The browser must be restarted for changes to take effect.
++hilal-language-apply-button = Apply and Restart
++    .label = Apply and Restart
++
++## Keyboard Shortcuts
++
++hilal-shortcuts-header = Keyboard Shortcuts
++hilal-shortcuts-description = Customize keyboard shortcuts for Hilal actions and native browser functions.
++hilal-shortcuts-reset = Restore Defaults
++    .label = Restore Defaults
++
++## Hilal About
++
++hilal-about-header = Hilal Browser Information
++hilal-about-version-title = { -brand-full-name }
++hilal-about-version-subtitle = Built on Firefox ESR
++hilal-about-version-button = Version Details
++    .label = Version Details
++
++

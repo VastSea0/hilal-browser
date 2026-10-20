@@ -7,7 +7,7 @@ loss and page reloads.
 
 ---
 diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/components/tabbrowser/content/tabbrowser.js
-index c42b1a1a8..23e6d4749 100644
+index c42b1a1a8df6..9684c95ba9d3 100644
 --- a/browser/components/tabbrowser/content/tabbrowser.js
 +++ b/browser/components/tabbrowser/content/tabbrowser.js
 @@ -4159,8 +4159,12 @@
@@ -24,3 +24,17 @@ index c42b1a1a8..23e6d4749 100644
        }
  
        if (!noInitialLabel) {
+@@ -8346,11 +8350,11 @@
+     }
+ 
+     on_activate() {
+-      this.selectedTab.updateLastSeenActive();
++      this.selectedTab?.updateLastSeenActive();
+     }
+ 
+     on_deactivate() {
+-      this.selectedTab.updateLastSeenActive();
++      this.selectedTab?.updateLastSeenActive();
+     }
+ 
+     on_change() {

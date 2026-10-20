@@ -1,5 +1,5 @@
 diff --git a/browser/base/content/browser-places.js b/browser/base/content/browser-places.js
-index 6531738de..7e60e3f5c 100644
+index 6531738de028..7e60e3f5c832 100644
 --- a/browser/base/content/browser-places.js
 +++ b/browser/base/content/browser-places.js
 @@ -1120,8 +1120,21 @@ var PlacesToolbarHelper = {
@@ -26,7 +26,7 @@ index 6531738de..7e60e3f5c 100644
        viewElt
      );
 diff --git a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs b/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
-index 624cb2adc..a7b7db275 100644
+index 624cb2adcc31..a7b7db275b09 100644
 --- a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
 +++ b/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
 @@ -804,6 +804,69 @@ class MuxerUnifiedComplete extends UrlbarMuxer {

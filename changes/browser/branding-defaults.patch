@@ -1,5 +1,5 @@
 diff --git a/browser/confvars.sh b/browser/confvars.sh
-index 6c27951bf..f861aacae 100755
+index 6c27951bfaf5..f861aacae082 100755
 --- a/browser/confvars.sh
 +++ b/browser/confvars.sh
 @@ -9,5 +9,5 @@
@@ -11,7 +11,7 @@ index 6c27951bf..f861aacae 100755
 +MOZ_BRANDING_DIRECTORY=browser/branding/hilal
 +MOZ_OFFICIAL_BRANDING_DIRECTORY=browser/branding/hilal
 diff --git a/browser/moz.configure b/browser/moz.configure
-index 3ea3d88b9..ae77a32d0 100644
+index 3ea3d88b9360..ae77a32d0525 100644
 --- a/browser/moz.configure
 +++ b/browser/moz.configure
 @@ -11,8 +11,12 @@ imply_option("MOZ_NORMANDY", True)

@@ -1,5 +1,5 @@
 diff --git a/browser/base/content/aboutDialog.xhtml b/browser/base/content/aboutDialog.xhtml
-index 3ffd464b9..2a57b9f13 100644
+index 3ffd464b960a..2a57b9f13877 100644
 --- a/browser/base/content/aboutDialog.xhtml
 +++ b/browser/base/content/aboutDialog.xhtml
 @@ -120,17 +120,17 @@
@@ -36,7 +36,7 @@ index 3ffd464b9..2a57b9f13 100644
        <description id="trademark" data-l10n-id="trademarkInfo"></description>
      </vbox>
 diff --git a/browser/base/content/utilityOverlay.js b/browser/base/content/utilityOverlay.js
-index bdfabc3f7..c80767afb 100644
+index bdfabc3f75c7..c80767afb8ab 100644
 --- a/browser/base/content/utilityOverlay.js
 +++ b/browser/base/content/utilityOverlay.js
 @@ -536,6 +536,9 @@ function makeURLAbsolute(aBase, aUrl) {

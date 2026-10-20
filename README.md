@@ -15,7 +15,7 @@
   <img src="changes/browser/base/content/hilal/black-white.png" alt="Hilal Browser interface" width="800" />
 </p>
 
-Hilal is an experimental desktop browser built on Firefox. It combines isolated workspaces, a compact sidebar-first interface, per-site customization, and configurable privacy profiles while retaining Gecko and Firefox extension compatibility.
+Hilal is an experimental desktop browser built on Firefox ESR. It combines isolated workspaces, a Material 3 Expressive interface, and configurable privacy profiles while retaining Gecko and Firefox extension compatibility.
 
 The project is in alpha and was previously developed as Huma Browser.
 
@@ -23,25 +23,17 @@ The project is in alpha and was previously developed as Huma Browser.
 
 ### Interface
 
-- Vertical sidebar tabs and an optional horizontal tab strip
-- Tahoe interface with a translucent sidebar, floating toolbar, and site-aware window colors
-- Compact mode with an auto-hiding toolbar and support for left- or right-aligned sidebars
-- Drag and drop across the sidebar and horizontal tab strip
-- Customizable sidebar footer with built-in actions and user-defined links
+- Material 3 Expressive shell with its own top bar, address bar, and sidebar
+- Vertical sidebar tabs or a horizontal tab strip, switchable at any time
+- Light, dark, and system themes with per-workspace or global accent colors
+- Material 3 new tab page and settings page
 
 ### Workspaces
 
 - Separate container context for each workspace
 - Optional shared pinned tabs and tab groups
 - Workspace creation, switching, and visibility controls
-- First-run setup for tab layout, workspaces, pinned sites, toolbar behavior, and privacy level
-
-### Site Customizer
-
-- Per-site font, text scale, capitalization, smart invert, and custom CSS
-- Element Zapper for hiding selected page elements
-- Accent and gradient controls with automatic color extraction from websites
-- Optional browser chrome tinting and Tahoe page-color blending
+- First-run setup for theme, tab layout, workspaces, privacy level, search engine, and pinned sites
 
 ### Browser controls
 

@@ -1,0 +1,13 @@
+diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+index 838ce4cd8481..174252872681 100644
+--- a/browser/app/profile/firefox.js
++++ b/browser/app/profile/firefox.js
+@@ -59,7 +59,7 @@ pref("extensions.systemAddon.update.enabled", true);
+ // See the SCOPE constants in AddonManager.sys.mjs for values to use here.
+ pref("extensions.autoDisableScopes", 15);
+ // Scopes to scan for changes at startup.
+-pref("extensions.startupScanScopes", 0);
++pref("extensions.startupScanScopes", 8);
+ 
+ pref("extensions.geckoProfiler.acceptedExtensionIds", "geckoprofiler@mozilla.com,quantum-foxfooding@mozilla.com,raptor@mozilla.org");
+ 
