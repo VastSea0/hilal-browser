@@ -1,16 +1,4 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import {
-  Download,
-  X,
-  Apple,
-  Laptop,
-  Terminal,
-  ExternalLink,
-  CheckCircle2,
-  Package,
-  Smartphone
-} from "lucide-react";
 import { GithubRelease, GithubAsset } from "../types";
 import { formatBytes } from "../utils/github";
 
@@ -33,8 +21,11 @@ export default function DownloadModal({
     tr: {
       headline: "Hilal Browser Kurulum Paketleri",
       supportingText: "İşletim sisteminize uygun resmi derleme paketini seçin.",
+      downloadBtn: "İndir",
       downloadStarted: "İndirme Başlatıldı",
       downloadDesc: "Dosya doğrudan GitHub Releases sunucularından aktarılıyor.",
+      directLinkHint: "İndirme otomatik başlamadıysa doğrudan indirme bağlantısına tıklayın:",
+      directDownload: "Doğrudan İndir",
       closeBtn: "Kapat",
       redownloadBtn: "Tekrar İndir",
       viewAllOnGh: "GitHub Releases'de Tümünü Gör",
@@ -52,8 +43,11 @@ export default function DownloadModal({
     en: {
       headline: "Download Hilal Browser",
       supportingText: "Select the official build artifact for your system.",
+      downloadBtn: "Download",
       downloadStarted: "Download Initiated",
       downloadDesc: "Transferring directly from GitHub Releases.",
+      directLinkHint: "If the download didn't start automatically, click the direct download link:",
+      directDownload: "Direct Download",
       closeBtn: "Close",
       redownloadBtn: "Download Again",
       viewAllOnGh: "View All on GitHub Releases",
@@ -76,155 +70,223 @@ export default function DownloadModal({
   useEffect(() => {
     if (isOpen) {
       setDownloadedAsset(null);
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   const handleDownload = (asset: GithubAsset) => {
     setDownloadedAsset(asset);
-    window.location.href = asset.browser_download_url;
+    try {
+      const link = document.createElement("a");
+      link.href = asset.browser_download_url;
+      link.download = asset.name;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch {
+      window.open(asset.browser_download_url, "_blank");
+    }
   };
 
   function getPlatformInfo(name: string) {
     const n = name.toLowerCase();
-    if (n.endsWith(".apk")) return { label: activeT.platforms.androidApk, icon: <Smartphone className="w-5 h-5" /> };
-    if (n.endsWith(".aab")) return { label: activeT.platforms.androidAab, icon: <Smartphone className="w-5 h-5" /> };
-    if (n.endsWith(".dmg")) return { label: activeT.platforms.macos, icon: <Apple className="w-5 h-5" /> };
+    if (n.endsWith(".apk")) return { label: activeT.platforms.androidApk, iconName: "smartphone" };
+    if (n.endsWith(".aab")) return { label: activeT.platforms.androidAab, iconName: "smartphone" };
+    if (n.endsWith(".dmg")) return { label: activeT.platforms.macos, iconName: "desktop_mac" };
     if (n.endsWith(".installer.exe") || (n.endsWith(".exe") && !n.includes("zip")))
-      return { label: activeT.platforms.windowsExe, icon: <Laptop className="w-5 h-5" /> };
-    if (n.endsWith(".zip")) return { label: activeT.platforms.windowsZip, icon: <Laptop className="w-5 h-5" /> };
-    if (n.endsWith(".deb")) return { label: activeT.platforms.linuxDeb, icon: <Terminal className="w-5 h-5" /> };
-    if (n.endsWith(".appimage")) return { label: activeT.platforms.linuxAppImage, icon: <Terminal className="w-5 h-5" /> };
-    return { label: activeT.platforms.linuxTar, icon: <Terminal className="w-5 h-5" /> };
+      return { label: activeT.platforms.windowsExe, iconName: "desktop_windows" };
+    if (n.endsWith(".zip")) return { label: activeT.platforms.windowsZip, iconName: "desktop_windows" };
+    if (n.endsWith(".deb")) return { label: activeT.platforms.linuxDeb, iconName: "terminal" };
+    if (n.endsWith(".appimage")) return { label: activeT.platforms.linuxAppImage, iconName: "terminal" };
+    return { label: activeT.platforms.linuxTar, iconName: "terminal" };
   }
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-          {/* M3 Scrim Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-          />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      {/* Backdrop overlay */}
+      <div 
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[101] transition-opacity cursor-pointer"
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
-          {/* M3 Expressive Dialog Container */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 16 }}
-            transition={{ type: "spring", stiffness: 380, damping: 28 }}
-            className="relative w-full max-w-lg rounded-[32px] p-6 sm:p-8 bg-m3-container-high text-[var(--md-sys-color-on-surface)] shadow-2xl border border-[var(--md-sys-color-outline-variant)]/40 overflow-hidden"
-          >
-            {/* Header Icon + Close */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center">
-                <Package className="w-5 h-5" />
-              </div>
-              <button
-                onClick={onClose}
-                className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-highest)] transition-colors m3-state-layer"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      {/* Modal Dialog Card: Spacious M3 container */}
+      <div 
+        className="relative z-[102] w-full max-w-2xl lg:max-w-3xl rounded-[32px] bg-m3-container text-[var(--on-surface)] border border-[var(--outline-variant)]/30 p-6 sm:p-8 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="flex items-center justify-between pb-5 border-b border-[var(--outline-variant)]/20 shrink-0">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-[var(--primary-container)] text-[var(--primary)] flex items-center justify-center shrink-0 shadow-xs">
+              <i className="text-2xl">cloud_download</i>
             </div>
-
-            {downloadedAsset ? (
-              <div className="text-center py-4 space-y-3">
-                <div className="mx-auto w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
-                  <CheckCircle2 className="w-7 h-7" />
-                </div>
-                <h3 className="text-2xl font-bold tracking-tight text-[var(--md-sys-color-on-surface)]">
-                  {activeT.downloadStarted}
+            <div>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h3 className="text-lg sm:text-xl font-bold tracking-tight text-[var(--on-surface)] m-0 leading-tight">
+                  {downloadedAsset ? activeT.downloadStarted : activeT.headline}
                 </h3>
-                <p className="text-sm text-[var(--md-sys-color-on-surface-variant)]">
+                {release?.tag_name && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[var(--primary-container)] text-[var(--on-primary-container)] text-xs font-mono font-semibold">
+                    {release.tag_name}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs sm:text-sm text-[var(--on-surface-variant)] m-0 mt-1">
+                {downloadedAsset ? activeT.downloadDesc : activeT.supportingText}
+              </p>
+            </div>
+          </div>
+          <button 
+            type="button"
+            className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/10 transition-colors cursor-pointer border-0 bg-transparent shrink-0 ml-2" 
+            onClick={onClose}
+            aria-label={activeT.closeBtn}
+          >
+            <i className="text-2xl">close</i>
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div className="pt-5 overflow-y-auto pr-1">
+          {downloadedAsset ? (
+            <div className="text-center py-8 px-4 space-y-5">
+              <div className="mx-auto w-16 h-16 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
+                <i className="text-4xl text-emerald-500">check_circle</i>
+              </div>
+              <div>
+                <h4 className="text-xl font-bold text-[var(--on-surface)] m-0">
+                  {activeT.downloadStarted}
+                </h4>
+                <p className="text-sm text-[var(--on-surface-variant)] mt-1.5 max-w-md mx-auto">
                   {activeT.downloadDesc}
                 </p>
-                <div className="p-3 rounded-[20px] bg-m3-container text-xs font-mono text-[var(--md-sys-color-on-surface)] inline-block">
-                  {downloadedAsset.name} • {formatBytes(downloadedAsset.size)}
-                </div>
-                <div className="pt-4 flex justify-center gap-3">
-                  <button
-                    onClick={() => handleDownload(downloadedAsset)}
-                    className="px-6 py-3 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-semibold text-xs transition-transform hover:scale-105 active:scale-95 shadow-md"
-                  >
-                    {activeT.redownloadBtn}
-                  </button>
-                  <button
-                    onClick={onClose}
-                    className="px-6 py-3 rounded-full bg-m3-container-lowest text-[var(--md-sys-color-on-surface)] font-medium text-xs hover:bg-m3-container transition-colors"
-                  >
-                    {activeT.closeBtn}
-                  </button>
+              </div>
+              <div className="flex justify-center">
+                <div className="px-4 py-2 rounded-full bg-m3-container-high border border-[var(--outline-variant)]/30 text-xs sm:text-sm font-mono text-[var(--on-surface)] flex items-center gap-2 shadow-xs">
+                  <i className="text-base text-[var(--primary)]">inventory_2</i>
+                  <span className="font-semibold">{downloadedAsset.name}</span>
+                  <span className="text-[var(--on-surface-variant)]">•</span>
+                  <span>{formatBytes(downloadedAsset.size)}</span>
                 </div>
               </div>
-            ) : (
-              <div>
-                <div className="mb-6">
-                  <h3 className="text-2xl font-bold tracking-tight text-[var(--md-sys-color-on-surface)]">
-                    {activeT.headline}
-                  </h3>
-                  <p className="mt-1.5 text-sm text-[var(--md-sys-color-on-surface-variant)]">
-                    {activeT.supportingText}
-                  </p>
-                </div>
-
-                {/* Package list */}
-                <div className="space-y-2.5 max-h-[55vh] overflow-y-auto pr-1">
-                  {assets.map((asset) => {
-                    const info = getPlatformInfo(asset.name);
-                    return (
-                      <button
-                        key={asset.id}
-                        onClick={() => handleDownload(asset)}
-                        className="w-full flex items-center justify-between p-4 rounded-[22px] bg-m3-container-lowest hover:bg-[var(--md-sys-color-secondary-container)]/30 border border-[var(--md-sys-color-outline-variant)]/30 transition-all text-left group cursor-pointer m3-state-layer"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-m3-container flex items-center justify-center text-[var(--md-sys-color-primary)] group-hover:bg-[var(--md-sys-color-primary-container)] group-hover:text-[var(--md-sys-color-on-primary-container)] transition-colors">
-                            {info.icon}
-                          </div>
-                          <div>
-                            <div className="text-sm font-semibold text-[var(--md-sys-color-on-surface)]">
+              <div className="pt-2 text-xs text-[var(--on-surface-variant)]">
+                <span>{activeT.directLinkHint} </span>
+                <a
+                  href={downloadedAsset.browser_download_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download={downloadedAsset.name}
+                  className="text-[var(--primary)] font-semibold underline underline-offset-2 hover:opacity-80"
+                >
+                  {activeT.directDownload}
+                </a>
+              </div>
+              <div className="pt-4 flex justify-center gap-3">
+                <button
+                  type="button"
+                  className="h-11 px-6 rounded-full bg-[var(--primary)] text-[var(--on-primary)] gap-2 cursor-pointer font-semibold text-xs flex items-center border-0 shadow-sm hover:shadow transition-all"
+                  onClick={() => handleDownload(downloadedAsset)}
+                >
+                  <i className="text-base">download</i>
+                  <span>{activeT.redownloadBtn}</span>
+                </button>
+                <button
+                  type="button"
+                  className="h-11 px-6 rounded-full text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 cursor-pointer font-semibold text-xs border-0 bg-transparent transition-colors"
+                  onClick={onClose}
+                >
+                  <span>{activeT.closeBtn}</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Package list using spacious M3 Expressive cards */}
+              <div className="space-y-3.5 max-h-[58vh] overflow-y-auto pr-1 py-1">
+                {assets.map((asset) => {
+                  const info = getPlatformInfo(asset.name);
+                  return (
+                    <div
+                      key={asset.id}
+                      onClick={() => handleDownload(asset)}
+                      className="p-4 sm:p-5 rounded-2xl bg-m3-container-lowest border border-[var(--outline-variant)]/30 hover:border-[var(--primary)] hover:bg-[var(--primary-container)]/8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer transition-all shadow-xs group"
+                    >
+                      <div className="flex items-center gap-4 min-w-0 flex-1">
+                        <div className="w-12 h-12 rounded-2xl bg-[var(--primary-container)] text-[var(--primary)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs">
+                          <i className="text-2xl">{info.iconName}</i>
+                        </div>
+                        <div className="min-w-0 flex-1 text-left">
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <span className="text-sm sm:text-base font-bold text-[var(--on-surface)]">
                               {info.label}
-                            </div>
-                            <div className="text-xs font-mono text-[var(--md-sys-color-on-surface-variant)]">
-                              {asset.name}
-                            </div>
+                            </span>
+                            <span className="px-2.5 py-0.5 rounded-full bg-m3-container-high text-[11px] font-mono text-[var(--on-surface-variant)] font-medium">
+                              {formatBytes(asset.size)}
+                            </span>
+                          </div>
+                          <div className="text-xs font-mono text-[var(--on-surface-variant)] truncate mt-1">
+                            {asset.name}
                           </div>
                         </div>
+                      </div>
 
-                        <div className="flex items-center gap-3 shrink-0">
-                          <span className="text-xs font-mono text-[var(--md-sys-color-on-surface-variant)]">
-                            {formatBytes(asset.size)}
-                          </span>
-                          <div className="w-8 h-8 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] flex items-center justify-center shadow-sm">
-                            <Download className="w-4 h-4" />
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-[var(--md-sys-color-outline-variant)]/30 text-center">
-                  <a
-                    href={release?.html_url || "https://github.com/VastSea0/hilal-browser/releases"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--md-sys-color-primary)] hover:underline"
-                  >
-                    <span>{activeT.viewAllOnGh}</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
+                      <div className="flex items-center justify-end shrink-0 sm:pl-2">
+                        <button
+                          type="button"
+                          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[var(--primary)] text-[var(--on-primary)] font-semibold text-xs shadow-sm group-hover:shadow group-hover:scale-[1.02] active:scale-95 transition-all cursor-pointer border-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownload(asset);
+                          }}
+                        >
+                          <i className="text-lg">download</i>
+                          <span>{activeT.downloadBtn}</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            )}
-          </motion.div>
+
+              <div className="pt-3 border-t border-[var(--outline-variant)]/20 text-center">
+                <a
+                  className="inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-full text-xs font-semibold text-[var(--primary)] hover:bg-[var(--primary-container)]/25 transition-colors cursor-pointer no-underline border-0 bg-transparent"
+                  href={release?.html_url || "https://github.com/VastSea0/hilal-browser/releases"}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <span>{activeT.viewAllOnGh}</span>
+                  <i className="text-base">open_in_new</i>
+                </a>
+              </div>
+            </div>
+          )}
         </div>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   );
 }
+

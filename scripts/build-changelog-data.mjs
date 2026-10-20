@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -15,7 +15,9 @@ try {
     encoding: "utf8",
   }).trim();
   rawTags = tagsOutput.split("\n").filter(Boolean);
-} catch {}
+} catch (e) {
+  console.warn("Notice: Could not query git tags:", e.message);
+}
 
 // Define standard release tags list
 const releaseTags = [
@@ -111,7 +113,9 @@ try {
     "git log --date=iso-strict --pretty=format:\"%H%x09%h%x09%an%x09%ad%x09%s%x09%b%x1e\"",
     { cwd: repoRoot, encoding: "utf8" }
   );
-} catch {}
+} catch (e) {
+  console.warn("Notice: Could not retrieve git log:", e.message);
+}
 
 function categorizeCommit(subject) {
   const s = subject.toLowerCase().trim();
@@ -160,6 +164,28 @@ const allCommits = rawCommits
     };
   });
 
+// If git history is incomplete or shallow (common in Vercel/CI shallow clones)
+// and changelogData.ts already exists with data, preserve it and exit cleanly!
+const targetChangelogPath = resolve(repoRoot, "www/src/data/changelogData.ts");
+let existingChangelogSize = 0;
+try {
+  if (existsSync(targetChangelogPath)) {
+    existingChangelogSize = statSync(targetChangelogPath).size;
+  }
+} catch {}
+
+if (allCommits.length === 0) {
+  if (existingChangelogSize > 0) {
+    console.log("No git commits found. Preserving existing changelogData.ts.");
+    process.exit(0);
+  }
+} else if (allCommits.length < 50 && existingChangelogSize > 5000) {
+  console.log(
+    `Git history is shallow or incomplete (${allCommits.length} commits found). Preserving existing changelogData.ts (${existingChangelogSize} bytes).`
+  );
+  process.exit(0);
+}
+
 // 4. Map commits into Release Buckets
 const releases = [];
 
@@ -167,14 +193,15 @@ const releases = [];
 const latestTag = releaseTags[0];
 let unreleasedHashes = new Set();
 try {
-  const hashes = execSync(`git rev-list ${latestTag}..HEAD`, { cwd: repoRoot, encoding: "utf8" })
-    .trim()
-    .split("\n")
-    .filter(Boolean);
-  unreleasedHashes = new Set(hashes);
-} catch {
-  // If tag doesn't exist in shallow clone or git history, fallback gracefully
-  unreleasedHashes = new Set(allCommits.slice(0, 50).map(c => c.hash));
+  const unreleasedOutput = execSync(`git rev-list ${latestTag}..HEAD`, {
+    cwd: repoRoot,
+    encoding: "utf8",
+  }).trim();
+  if (unreleasedOutput) {
+    unreleasedHashes = new Set(unreleasedOutput.split("\n").filter(Boolean));
+  }
+} catch (e) {
+  console.warn(`Notice: Could not resolve git rev-list for ${latestTag}..HEAD:`, e.message);
 }
 
 const unreleasedCommits = allCommits.filter(c => unreleasedHashes.has(c.hash));
@@ -236,7 +263,9 @@ try {
     .trim()
     .split("\n")
     .filter(Boolean);
-} catch {}
+} catch (e) {
+  console.warn("Notice: Could not parse git authors:", e.message);
+}
 
 const authorCounts = {};
 for (const line of rawAuthors) {
@@ -341,15 +370,8 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = ${JSON.stringify(contributor
 `;
 
 const outputDir = resolve(repoRoot, "www/src/data");
-const targetFile = resolve(outputDir, "changelogData.ts");
-
-if (allCommits.length === 0 && existsSync(targetFile)) {
-  console.log("Git history unavailable or shallow clone detected. Preserving existing changelogData.ts.");
-  process.exit(0);
-}
-
 mkdirSync(outputDir, { recursive: true });
-writeFileSync(targetFile, outputTs, "utf8");
+writeFileSync(resolve(outputDir, "changelogData.ts"), outputTs, "utf8");
 
 console.log(`Generated changelog and contributor data:`);
 console.log(`- Total commits: ${allCommits.length}`);

@@ -39,20 +39,140 @@ export interface ContributorItem {
   role: string;
 }
 
-export const REPO_COMMITS_TOTAL = 481;
+export const REPO_COMMITS_TOTAL = 493;
 export const REPO_RELEASES_TOTAL = 11;
 export const LATEST_RELEASE_TAG = "v0.3.0-alpha.6";
 
 export const ALL_COMMITS: CommitEntry[] = [
   {
-    "hash": "f047f3db6851f7d7d7d4c2be4d0ac8eb0da274fa",
-    "shortHash": "f047f3d",
+    "hash": "bbfc33118f3f78ff0c39498cf7ff6c5040ce71cd",
+    "shortHash": "bbfc331",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-21T20:21:19+03:00",
+    "subject": "Fix desktop profile initialization by setting MOZ_APP_PROFILE to Hilal",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/bbfc33118f3f78ff0c39498cf7ff6c5040ce71cd"
+  },
+  {
+    "hash": "9c7432cc0b7d01ecc4a73268e844b35324588374",
+    "shortHash": "9c7432c",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-20T01:30:55+03:00",
+    "subject": "chore(android): bump version to 1.1.0 (versionCode 3)",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9c7432cc0b7d01ecc4a73268e844b35324588374"
+  },
+  {
+    "hash": "96b2fbc57de29387663e358bb218b211f186508a",
+    "shortHash": "96b2fbc",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-20T00:24:53+03:00",
+    "subject": "feat(android): support deep linking and external application intents",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/96b2fbc57de29387663e358bb218b211f186508a"
+  },
+  {
+    "hash": "7c1a098264867c2763fd882c3c85e017f2093a2e",
+    "shortHash": "7c1a098",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-20T00:09:12+03:00",
+    "subject": "fix(android): resolve content cut-off under docked Omnibox and bottom bar",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/7c1a098264867c2763fd882c3c85e017f2093a2e"
+  },
+  {
+    "hash": "1f3ca960f82dee0504bf2c2b55e9c11efe207878",
+    "shortHash": "1f3ca96",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-20T00:04:27+03:00",
+    "subject": "fix(android): resolve share crash in OptionsBottomSheet",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1f3ca960f82dee0504bf2c2b55e9c11efe207878"
+  },
+  {
+    "hash": "4cf3d61e80770734687aa88df51a125fda81a907",
+    "shortHash": "4cf3d61",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-20T00:01:03+03:00",
+    "subject": "fix(android): resolve share crash and streamline Omnibox editing UX",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/4cf3d61e80770734687aa88df51a125fda81a907"
+  },
+  {
+    "hash": "a5cbc0d12d08560d2a36420f90340a98771d6bb6",
+    "shortHash": "a5cbc0d",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-19T23:56:08+03:00",
+    "subject": "android: redesign Omnibox with site identity badge, syntax highlighting, smart paste, and action parking",
+    "body": "- Site identity chip: display live high-res favicon with HTTPS lock badge\n  on web pages, private incognito badge in private tabs, and search engine\n  badge in edit mode\n- URL syntax highlighting: bold prominent domain with muted path/query\n- Action parking: contextual animated Stop button when loading, Share and\n  Refresh actions when idle\n- Smart clipboard paste: automatically suggest clipboard URL in edit mode\n- onStop hook: wire up GeckoSession.stop() to cancel loading immediately",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a5cbc0d12d08560d2a36420f90340a98771d6bb6"
+  },
+  {
+    "hash": "67a352c8f427bdca2557a2e1c70b6d070c573baf",
+    "shortHash": "67a352c",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-19T23:43:19+03:00",
+    "subject": "android: add tab previews, addon icons, download manager notifications, and new tab customization",
+    "body": "- Tab previews: capture GeckoView pixels as scaled bitmap thumbnails on page\n  finish and tray open; display in TabsTray with live website favicons\n- Addon management: display official AMO icons for featured and installed\n  extensions; add progress spinner and toast/haptic feedback on install\n- Download manager: implement onExternalResponse with Android DownloadManager,\n  providing native download tray notifications and progress tracking\n- New tab customization: replace letter placeholders with high-res domain\n  favicons; add wallpaper theme palette selector with smooth gradients",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/67a352c8f427bdca2557a2e1c70b6d070c573baf"
+  },
+  {
+    "hash": "70fbe927f4c6c84f00e61dacfcbf108f1b2d78ec",
+    "shortHash": "70fbe92",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-19T23:05:10+03:00",
+    "subject": "android: replace fake animations with genuine spring physics",
+    "body": "- BouncyModifier: Animatable spring loop replaces animateFloatAsState,\n  press/release use separate tuned springs (dampingRatio 0.52 / MediumBouncy)\n- BrowserBottomBar: per-button Animatable weights, pressed expands, siblings\n  compress, all spring back concurrently; removes delay(220) hack\n- TabsTray: tab card tilt/scale driven by animateFloatAsState spring instead\n  of hardcoded 0.98/1.02; animateItem() on LazyVerticalGrid for enter/exit\n- MainActivity: TabsTray wrapped in AnimatedVisibility with slideInVertically\n  spring + fadeIn; bar hide uses EaseInQuart tween, bar reveal uses\n  LowBouncy spring (asymmetric)\n- Omnibox: floating pill gets animateContentSize spring, animated border\n  color and elevation on focus",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/70fbe927f4c6c84f00e61dacfcbf108f1b2d78ec"
+  },
+  {
+    "hash": "84a558143f3c44fdcd20519d9a0767e18df64165",
+    "shortHash": "84a5581",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-13T12:30:24+03:00",
+    "subject": "security: enforce strict TELEMETRY_ADMIN_SECRET without hardcoded fallback",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/84a558143f3c44fdcd20519d9a0767e18df64165"
+  },
+  {
+    "hash": "395b8d02b62ed30f2863026e31824cb9b0244eea",
+    "shortHash": "395b8d0",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-13T12:27:12+03:00",
+    "subject": "fix(telemetry): restrict telemetry stats behind admin secret key",
+    "body": "",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/395b8d02b62ed30f2863026e31824cb9b0244eea"
+  },
+  {
+    "hash": "6ebbb0b7fdd42b6bdc08455000701ef0275761c1",
+    "shortHash": "6ebbb0b",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-09-13T12:20:14+03:00",
+    "subject": "feat: add first run installation tracking, anonymous installation ID, and live stats",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6ebbb0b7fdd42b6bdc08455000701ef0275761c1"
+  },
+  {
+    "hash": "29b0d6203848ecf8d5d57bcdfc117eff5c5f1426",
+    "shortHash": "29b0d62",
     "author": "Egehan KAHRAMAN",
     "date": "2026-09-13T12:09:21+03:00",
     "subject": "feat: add zero-sdk anonymous telemetry endpoint and privacy opt-out toggle",
     "body": "- Add TelemetryManager in Android with pure Kotlin HttpURLConnection and 24h throttling\n- Add user-facing Anonymous Usage Reports toggle in SettingsScreen under Privacy & Security\n- Add /api/telemetry serverless endpoint in Vercel to sanitize Zero-PII and forward to Firestore /hilal-browser collection\n- Add rewrite rule in vercel.json for /api/telemetry",
     "category": "feature",
-    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f047f3db6851f7d7d7d4c2be4d0ac8eb0da274fa"
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/29b0d6203848ecf8d5d57bcdfc117eff5c5f1426"
   },
   {
     "hash": "5c0f76f0519e29ef17de82d9de6519aef43ae8b9",
@@ -4861,18 +4981,138 @@ export const RELEASES_DATA: ReleaseGroup[] = [
     "tag": "main",
     "version": "Geliştirme / Unreleased",
     "isDev": true,
-    "date": "2026-09-13T12:09:21+03:00",
-    "commitCount": 40,
+    "date": "2026-09-21T20:21:19+03:00",
+    "commitCount": 52,
     "commits": [
       {
-        "hash": "f047f3db6851f7d7d7d4c2be4d0ac8eb0da274fa",
-        "shortHash": "f047f3d",
+        "hash": "bbfc33118f3f78ff0c39498cf7ff6c5040ce71cd",
+        "shortHash": "bbfc331",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-21T20:21:19+03:00",
+        "subject": "Fix desktop profile initialization by setting MOZ_APP_PROFILE to Hilal",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/bbfc33118f3f78ff0c39498cf7ff6c5040ce71cd"
+      },
+      {
+        "hash": "9c7432cc0b7d01ecc4a73268e844b35324588374",
+        "shortHash": "9c7432c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-20T01:30:55+03:00",
+        "subject": "chore(android): bump version to 1.1.0 (versionCode 3)",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9c7432cc0b7d01ecc4a73268e844b35324588374"
+      },
+      {
+        "hash": "96b2fbc57de29387663e358bb218b211f186508a",
+        "shortHash": "96b2fbc",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-20T00:24:53+03:00",
+        "subject": "feat(android): support deep linking and external application intents",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/96b2fbc57de29387663e358bb218b211f186508a"
+      },
+      {
+        "hash": "7c1a098264867c2763fd882c3c85e017f2093a2e",
+        "shortHash": "7c1a098",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-20T00:09:12+03:00",
+        "subject": "fix(android): resolve content cut-off under docked Omnibox and bottom bar",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/7c1a098264867c2763fd882c3c85e017f2093a2e"
+      },
+      {
+        "hash": "1f3ca960f82dee0504bf2c2b55e9c11efe207878",
+        "shortHash": "1f3ca96",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-20T00:04:27+03:00",
+        "subject": "fix(android): resolve share crash in OptionsBottomSheet",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1f3ca960f82dee0504bf2c2b55e9c11efe207878"
+      },
+      {
+        "hash": "4cf3d61e80770734687aa88df51a125fda81a907",
+        "shortHash": "4cf3d61",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-20T00:01:03+03:00",
+        "subject": "fix(android): resolve share crash and streamline Omnibox editing UX",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/4cf3d61e80770734687aa88df51a125fda81a907"
+      },
+      {
+        "hash": "a5cbc0d12d08560d2a36420f90340a98771d6bb6",
+        "shortHash": "a5cbc0d",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-19T23:56:08+03:00",
+        "subject": "android: redesign Omnibox with site identity badge, syntax highlighting, smart paste, and action parking",
+        "body": "- Site identity chip: display live high-res favicon with HTTPS lock badge\n  on web pages, private incognito badge in private tabs, and search engine\n  badge in edit mode\n- URL syntax highlighting: bold prominent domain with muted path/query\n- Action parking: contextual animated Stop button when loading, Share and\n  Refresh actions when idle\n- Smart clipboard paste: automatically suggest clipboard URL in edit mode\n- onStop hook: wire up GeckoSession.stop() to cancel loading immediately",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a5cbc0d12d08560d2a36420f90340a98771d6bb6"
+      },
+      {
+        "hash": "67a352c8f427bdca2557a2e1c70b6d070c573baf",
+        "shortHash": "67a352c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-19T23:43:19+03:00",
+        "subject": "android: add tab previews, addon icons, download manager notifications, and new tab customization",
+        "body": "- Tab previews: capture GeckoView pixels as scaled bitmap thumbnails on page\n  finish and tray open; display in TabsTray with live website favicons\n- Addon management: display official AMO icons for featured and installed\n  extensions; add progress spinner and toast/haptic feedback on install\n- Download manager: implement onExternalResponse with Android DownloadManager,\n  providing native download tray notifications and progress tracking\n- New tab customization: replace letter placeholders with high-res domain\n  favicons; add wallpaper theme palette selector with smooth gradients",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/67a352c8f427bdca2557a2e1c70b6d070c573baf"
+      },
+      {
+        "hash": "70fbe927f4c6c84f00e61dacfcbf108f1b2d78ec",
+        "shortHash": "70fbe92",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-19T23:05:10+03:00",
+        "subject": "android: replace fake animations with genuine spring physics",
+        "body": "- BouncyModifier: Animatable spring loop replaces animateFloatAsState,\n  press/release use separate tuned springs (dampingRatio 0.52 / MediumBouncy)\n- BrowserBottomBar: per-button Animatable weights, pressed expands, siblings\n  compress, all spring back concurrently; removes delay(220) hack\n- TabsTray: tab card tilt/scale driven by animateFloatAsState spring instead\n  of hardcoded 0.98/1.02; animateItem() on LazyVerticalGrid for enter/exit\n- MainActivity: TabsTray wrapped in AnimatedVisibility with slideInVertically\n  spring + fadeIn; bar hide uses EaseInQuart tween, bar reveal uses\n  LowBouncy spring (asymmetric)\n- Omnibox: floating pill gets animateContentSize spring, animated border\n  color and elevation on focus",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/70fbe927f4c6c84f00e61dacfcbf108f1b2d78ec"
+      },
+      {
+        "hash": "84a558143f3c44fdcd20519d9a0767e18df64165",
+        "shortHash": "84a5581",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-13T12:30:24+03:00",
+        "subject": "security: enforce strict TELEMETRY_ADMIN_SECRET without hardcoded fallback",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/84a558143f3c44fdcd20519d9a0767e18df64165"
+      },
+      {
+        "hash": "395b8d02b62ed30f2863026e31824cb9b0244eea",
+        "shortHash": "395b8d0",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-13T12:27:12+03:00",
+        "subject": "fix(telemetry): restrict telemetry stats behind admin secret key",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/395b8d02b62ed30f2863026e31824cb9b0244eea"
+      },
+      {
+        "hash": "6ebbb0b7fdd42b6bdc08455000701ef0275761c1",
+        "shortHash": "6ebbb0b",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-13T12:20:14+03:00",
+        "subject": "feat: add first run installation tracking, anonymous installation ID, and live stats",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6ebbb0b7fdd42b6bdc08455000701ef0275761c1"
+      },
+      {
+        "hash": "29b0d6203848ecf8d5d57bcdfc117eff5c5f1426",
+        "shortHash": "29b0d62",
         "author": "Egehan KAHRAMAN",
         "date": "2026-09-13T12:09:21+03:00",
         "subject": "feat: add zero-sdk anonymous telemetry endpoint and privacy opt-out toggle",
         "body": "- Add TelemetryManager in Android with pure Kotlin HttpURLConnection and 24h throttling\n- Add user-facing Anonymous Usage Reports toggle in SettingsScreen under Privacy & Security\n- Add /api/telemetry serverless endpoint in Vercel to sanitize Zero-PII and forward to Firestore /hilal-browser collection\n- Add rewrite rule in vercel.json for /api/telemetry",
         "category": "feature",
-        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f047f3db6851f7d7d7d4c2be4d0ac8eb0da274fa"
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/29b0d6203848ecf8d5d57bcdfc117eff5c5f1426"
       },
       {
         "hash": "5c0f76f0519e29ef17de82d9de6519aef43ae8b9",
@@ -9933,7 +10173,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 469,
+    "contributions": 481,
     "role": "Lead Developer"
   },
   {

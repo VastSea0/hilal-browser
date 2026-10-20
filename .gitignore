@@ -100,3 +100,4 @@ keystore-backup/
 !.env.example
 
 
+.vercel/

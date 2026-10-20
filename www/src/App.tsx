@@ -1,27 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  Sun,
-  Moon,
-  Github,
-  ChevronDown,
-  Download,
-  Terminal,
-  Apple,
-  Laptop,
-  Check,
-  Copy,
-  ArrowRight,
-  Layers,
-  Sparkles,
-  Cpu,
-  Boxes,
-  GitCommit,
-  Users,
-  Smartphone,
-  ShieldCheck,
-  BookOpen,
-} from "lucide-react";
+function GithubIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+    </svg>
+  );
+}
 
 import { GithubRelease } from "./types";
 import {
@@ -41,7 +26,7 @@ import { CONTRIBUTORS_DATA } from "./data/changelogData";
 
 // M3 Expressive Spring Motion Physics
 const springTransition = {
-  type: "spring",
+  type: "spring" as const,
   stiffness: 380,
   damping: 26
 };
@@ -77,15 +62,15 @@ export default function App() {
     return saved === "en" || saved === "tr" ? saved : "tr";
   });
 
-  const [currentView, setCurrentView] = useState<"home" | "docs" | "changelog" | "privacy">(() => {
+  const [currentView, setCurrentView] = useState<"home" | "changelog" | "docs" | "privacy">(() => {
     if (typeof window !== "undefined") {
       const p = window.location.pathname;
       const h = window.location.hash;
+      if (p === "/docs" || h === "#docs" || h.startsWith("#docs/") || p === "/mobile" || h === "#mobile") {
+        return "docs";
+      }
       if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
         return "changelog";
-      }
-      if (p === "/docs" || h.startsWith("#docs") || p === "/mobile" || h === "#mobile") {
-        return "docs";
       }
       if (p === "/privacy" || h === "#privacy") {
         return "privacy";
@@ -98,7 +83,6 @@ export default function App() {
   const [isDownloadOpen, setIsDownloadOpen] = useState<boolean>(false);
   const [detectedOS, setDetectedOS] = useState<string>("other");
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [copiedClone, setCopiedClone] = useState<boolean>(false);
 
   useEffect(() => {
@@ -107,10 +91,10 @@ export default function App() {
     const handleLocationChange = () => {
       const p = window.location.pathname;
       const h = window.location.hash;
-      if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
-        setCurrentView("changelog");
-      } else if (p === "/docs" || h.startsWith("#docs") || p === "/mobile" || h === "#mobile") {
+      if (p === "/docs" || h === "#docs" || h.startsWith("#docs/") || p === "/mobile" || h === "#mobile") {
         setCurrentView("docs");
+      } else if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
+        setCurrentView("changelog");
       } else if (p === "/privacy" || h === "#privacy") {
         setCurrentView("privacy");
       } else {
@@ -128,10 +112,20 @@ export default function App() {
 
   useEffect(() => {
     const root = window.document.documentElement;
+    const body = window.document.body;
     if (theme === "dark") {
       root.classList.add("dark");
+      body.classList.add("dark");
+      body.classList.remove("light");
     } else {
       root.classList.remove("dark");
+      body.classList.remove("dark");
+      body.classList.add("light");
+    }
+    if (typeof (window as any).ui === "function") {
+      try {
+        (window as any).ui("mode", theme);
+      } catch {}
     }
     localStorage.setItem("hilal-theme", theme);
   }, [theme]);
@@ -160,13 +154,13 @@ export default function App() {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
-  const navigateTo = (view: "home" | "docs" | "changelog" | "privacy", targetId?: string) => {
+  const navigateTo = (view: "home" | "changelog" | "docs" | "privacy", targetId?: string) => {
     setCurrentView(view);
-    if (view === "docs") {
-      window.history.pushState(null, "", targetId ? `#docs/${targetId}` : "#docs");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } else if (view === "changelog") {
+    if (view === "changelog") {
       window.history.pushState(null, "", "#changelog");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (view === "docs") {
+      window.history.pushState(null, "", targetId ? `#docs/${targetId}` : "#docs");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (view === "privacy") {
       window.history.pushState(null, "", "#privacy");
@@ -226,7 +220,7 @@ export default function App() {
         chip: "Açık Kaynak • Alpha",
         tagline: "Web sizin kontrolünüzde.",
         subtitle:
-          "Gizlilik odaklı, dikey sekmeli ve konteyner destekli masaüstü ve mobil web tarayıcısı. Açık kaynaklı, hızlı ve bağımsız.",
+          "Dikey sekmeler, izole çalışma alanları ve dahili reklam engelleyiciyle gelen açık kaynaklı masaüstü ve Android tarayıcısı.",
         downloadBtn: {
           macos: "macOS için İndir",
           windows: "Windows için İndir",
@@ -234,7 +228,7 @@ export default function App() {
           android: "Android için İndir",
           other: "İndir",
         },
-        viewAllDownloads: "Tüm platformlar (.dmg, .exe, .deb, .zip, .apk)",
+        viewAllDownloads: "Tüm platformlar (.dmg, .exe, .deb, .zip)",
       },
       stories: [
         {
@@ -249,90 +243,90 @@ export default function App() {
           chip: "Çalışma Alanları",
           title: "İş ve kişisel hesapları birbirinden ayırın.",
           description:
-            "Her çalışma alanı kendi çerezleri ve oturumlarıyla yalıtılmış ayrı bir konteynerde çalışır. Onlarca pencere açmadan tek tarayıcıda çoklu hesap yönetin.",
+            "Her çalışma alanı bağımsız çerez ve oturum konteynerleri kullanır. Farklı hesaplar için onlarca ayrı pencere açmaya gerek kalmaz.",
           image: "/welcome-workspaces-on.png",
           alt: "Hilal Çalışma Alanları",
         },
         {
           chip: "Gizlilik",
-          title: "Dahili uBlock Origin ve sıfır telemetri.",
+          title: "Dahili uBlock Origin, telemetrisiz masaüstü.",
           description:
-            "uBlock Origin tarayıcıya gömülü gelir. Arka planda çalışan takip mekanizmaları ve telemetri uç noktaları tamamen devre dışıdır.",
+            "uBlock Origin varsayılan olarak kurulu gelir. Masaüstü sürümünde Firefox telemetrisi ve arka plan veri gönderimi tamamen devre dışıdır.",
           image: "/welcome-toolbar-hidden.png",
-          alt: "Hilal Gizlilik Koruması",
+          alt: "Hilal Gizlilik ve Güvenlik",
         },
         {
           chip: "Eklentiler",
-          title: "Firefox eklentileriyle tam uyumluluk.",
+          title: "Firefox eklenti ekosistemiyle tam uyumlu.",
           description:
-            "Gecko motoru sayesinde Firefox Add-ons (AMO) mağazasındaki eklentilerin tamamı hiçbir ek ayar gerektirmeden çalışır.",
+            "Firefox Add-ons mağazasındaki tüm eklentilerinizi doğrudan yükleyip kullanabilirsiniz. uBlock Origin kutudan çıktığı gibi hazır.",
           image: "/welcome-home-preview.png",
-          alt: "Hilal Eklenti Uyumluluğu",
+          alt: "Hilal Eklenti Uyumu",
         },
       ],
       openSourceSection: {
         chip: "Açık Kaynak",
-        title: "Firefox üzerinde temiz bir yama katmanı.",
+        title: "Tüm kaynak kodu açık.",
         description:
-          "Hilal kopuk bir çatal (fork) değildir. 'hil' Rust yöneticisi aracılığıyla güncel Firefox Gecko motoruna metin tabanlı yamalar uygular, güvenlik güncellemelerini gecikmeden alır.",
-        commandLabel: "Depoyu klonlayıp yerel ortamda derleyin:",
+          "Hilal tamamen açık kaynaklı bir projedir. Gecko altyapısını kullanır ve güvenlik güncellemelerini doğrudan alır. Kaynak kodunu inceleyebilir, derleyebilir ve katkıda bulunabilirsiniz.",
+        commandLabel: "Depoyu klonlayıp derleyin:",
       },
       downloadSection: {
-        chip: "Resmi Sürümler",
-        title: "Hilal'i edinin.",
+        chip: "İndirme Seçenekleri",
+        title: "Hilal'i İndirin.",
         subtitle: "İşletim sisteminize uygun derlemeyi seçin.",
         platforms: [
           {
             name: "macOS",
-            spec: "Apple Silicon & Intel • Evrensel .dmg",
-            icon: <Apple className="w-6 h-6" />,
+            spec: "Apple Silicon & Intel • Universal .dmg",
+            iconName: "desktop_mac",
           },
           {
             name: "Windows",
-            spec: "Windows 10/11 • 64-bit .exe ve Taşınabilir .zip",
-            icon: <Laptop className="w-6 h-6" />,
+            spec: "Windows 10/11 • 64-bit .exe & Taşınabilir .zip",
+            iconName: "desktop_windows",
           },
           {
             name: "Linux",
             spec: "Ubuntu / Debian .deb • AppImage • Tarball",
-            icon: <Terminal className="w-6 h-6" />,
+            iconName: "terminal",
           },
           {
             name: "Android",
-            spec: "GeckoView 135 • APK ve Google Play",
-            icon: <Smartphone className="w-6 h-6" />,
+            spec: "GeckoView • APK ve Google Play",
+            iconName: "smartphone",
           },
         ],
         directDownload: "İndir",
       },
       faq: {
-        chip: "S.S.S.",
+        chip: "Sıkça Sorulanlar",
         title: "Sıkça Sorulan Sorular",
         items: [
           {
             q: "Hilal Browser nedir?",
-            a: "Hilal, Firefox Gecko motoru üzerine geliştirilmiş açık kaynaklı bir web tarayıcısıdır. Çatallama (hard fork) yerine Rust tabanlı yama yöneticisiyle Firefox'un üzerine oturur, böylece güncellemeleri gecikmeksizin alır.",
+            a: "Hilal, kişiselleştirilebilir arayüzü, izole çalışma alanları ve gizlilik odaklı yapısıyla öne çıkan açık kaynaklı bir masaüstü web tarayıcısıdır. Altyapısında Gecko motorunu kullanır.",
           },
           {
             q: "Firefox eklentilerimi kullanabilir miyim?",
-            a: "Evet. Firefox Add-ons (AMO) mağazasındaki tüm eklentilerle %100 uyumludur. uBlock Origin hazır olarak gelir.",
+            a: "Evet. Firefox Add-ons (AMO) mağazasındaki tüm eklentilerle uyumludur. uBlock Origin hazır olarak gelir.",
           },
           {
-            q: "Çalışma Alanları (Workspaces) oturumları nasıl ayırır?",
-            a: "Firefox Multi-Account Containers altyapısıyla her çalışma alanında çerezler ve oturumlar izole edilir. Farklı profiller açmadan aynı tarayıcıda iş ve kişisel hesaplarınızı yönetebilirsiniz.",
+            q: "Çalışma Alanları oturumları nasıl ayırır?",
+            a: "Her çalışma alanında çerezler ve oturum bilgileri birbirinden izole edilir. Aynı tarayıcıda iş ve kişisel hesaplarınızı ayrı profiller açmadan yönetebilirsiniz.",
           },
           {
             q: "Telemetri veya veri toplanıyor mu?",
-            a: "Hayır. Tarayıcıda tarama geçmişi veya kişisel veri toplanmaz. Yalnızca GeckoView kararlılığı için tamamen anonim teknik kullanım istatistikleri işlenir. Proje yalnızca topluluk sponsorluklarıyla finanse edilir.",
+            a: "Masaüstü sürümü hiçbir telemetri göndermez. Android uygulaması anonim kurulum ve kullanım istatistikleri gönderir; tarama geçmişi veya kişisel veri toplanmaz ve bu gönderim ayarlardan kapatılabilir. Ayrıntılar Gizlilik Politikası'ndadır.",
           },
         ],
       },
       footer: {
         copyright: "Hilal Browser Projesi. Mozilla Kamu Lisansı (MPL 2.0).",
         authorBy: "Egehan Kahraman",
+        source: "Kaynak Kodu",
         docs: "Belgeler",
         privacy: "Gizlilik Politikası",
-        source: "Kaynak Kodu",
         releases: "Sürüm Notları",
         discord: "Discord",
       },
@@ -351,7 +345,7 @@ export default function App() {
         chip: "Open Source • Alpha",
         tagline: "Browse on your terms.",
         subtitle:
-          "A privacy-focused desktop & mobile web browser with vertical tabs, isolated workspaces, and zero telemetry. Built on Firefox Gecko.",
+          "An open-source desktop and Android browser with vertical tabs, isolated workspaces, and a built-in ad blocker.",
         downloadBtn: {
           macos: "Download for macOS",
           windows: "Download for Windows",
@@ -359,7 +353,7 @@ export default function App() {
           android: "Download for Android",
           other: "Download",
         },
-        viewAllDownloads: "All platforms (.dmg, .exe, .deb, .zip, .apk)",
+        viewAllDownloads: "All platforms (.dmg, .exe, .deb, .zip)",
       },
       stories: [
         {
@@ -380,26 +374,26 @@ export default function App() {
         },
         {
           chip: "Privacy",
-          title: "Built-in uBlock Origin and zero telemetry.",
+          title: "Built-in uBlock Origin, no desktop telemetry.",
           description:
-            "uBlock Origin comes pre-installed. Background tracking and telemetry endpoints are completely disabled.",
+            "uBlock Origin comes pre-installed. On desktop, Firefox telemetry and background data reporting are completely disabled.",
           image: "/welcome-toolbar-hidden.png",
           alt: "Hilal Privacy Protection",
         },
         {
           chip: "Add-ons",
-          title: "Full Firefox add-on compatibility.",
+          title: "Compatible with the Firefox add-on ecosystem.",
           description:
-            "Powered by Gecko, Hilal supports the entire Firefox Add-ons (AMO) catalog with no workarounds required.",
+            "Install any extension from Firefox Add-ons (AMO) directly. uBlock Origin comes pre-installed out of the box.",
           image: "/welcome-home-preview.png",
           alt: "Hilal Add-on Compatibility",
         },
       ],
       openSourceSection: {
         chip: "Open Source",
-        title: "Built as a clean patch layer on Firefox.",
+        title: "Fully open source.",
         description:
-          "Hilal is not a divergent fork. It applies text-based patches to upstream Firefox Gecko using the 'hil' Rust manager, receiving security updates directly.",
+          "Hilal is a fully open-source project. It uses the Gecko engine under the hood and receives security updates directly. You can inspect the source, build it yourself, or contribute.",
         commandLabel: "Clone and build locally:",
       },
       downloadSection: {
@@ -410,22 +404,22 @@ export default function App() {
           {
             name: "macOS",
             spec: "Apple Silicon & Intel • Universal .dmg",
-            icon: <Apple className="w-6 h-6" />,
+            iconName: "desktop_mac",
           },
           {
             name: "Windows",
             spec: "Windows 10/11 • 64-bit .exe & Portable .zip",
-            icon: <Laptop className="w-6 h-6" />,
+            iconName: "desktop_windows",
           },
           {
             name: "Linux",
             spec: "Ubuntu / Debian .deb • AppImage • Tarball",
-            icon: <Terminal className="w-6 h-6" />,
+            iconName: "terminal",
           },
           {
             name: "Android",
-            spec: "GeckoView 135 • APK & Google Play",
-            icon: <Smartphone className="w-6 h-6" />,
+            spec: "GeckoView • APK & Google Play",
+            iconName: "smartphone",
           },
         ],
         directDownload: "Download",
@@ -436,28 +430,28 @@ export default function App() {
         items: [
           {
             q: "What is Hilal Browser?",
-            a: "Hilal is an open-source browser built on Firefox Gecko. Rather than maintaining a hard fork, it applies declarative patches to upstream Firefox using the 'hil' Rust manager, staying up to date with upstream security fixes.",
+            a: "Hilal is an open-source desktop browser focused on customization, privacy, and workspace isolation. It uses the Gecko engine under the hood.",
           },
           {
-            q: "Can I use standard Firefox extensions?",
-            a: "Yes. Hilal supports the full Firefox Add-ons (AMO) ecosystem, and uBlock Origin is pre-installed.",
+            q: "Can I use Firefox extensions?",
+            a: "Yes. Hilal is compatible with the full Firefox Add-ons (AMO) catalog. uBlock Origin is pre-installed.",
           },
           {
             q: "How do Workspaces isolate sessions?",
-            a: "Each workspace runs in an isolated Multi-Account Container, keeping cookies and logins strictly separated between contexts.",
+            a: "Each workspace keeps cookies and logins strictly separated. You can manage work and personal accounts side by side without opening separate profiles.",
           },
           {
             q: "Is there any telemetry or tracking?",
-            a: "No personal or browsing data is ever collected. Only anonymous technical stats are processed for GeckoView engine stability. The project is funded purely by community sponsors.",
+            a: "The desktop browser sends no telemetry. The Android app sends anonymous install and usage statistics, never browsing history or personal data, and you can turn this off in settings. See the Privacy Policy for details.",
           },
         ],
       },
       footer: {
         copyright: "Hilal Browser Project. Mozilla Public License 2.0.",
         authorBy: "Egehan Kahraman",
+        source: "Source Code",
         docs: "Docs",
         privacy: "Privacy Policy",
-        source: "Source Code",
         releases: "Changelog",
         discord: "Discord",
       },
@@ -475,10 +469,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-m3-surface text-[var(--md-sys-color-on-surface)] selection:bg-[var(--md-sys-color-primary-container)] selection:text-[var(--md-sys-color-on-primary-container)]">
-      {/* 1. M3 Floating Top App Bar */}
-      <nav className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 pointer-events-none">
-        <div className="mx-auto max-w-5xl pointer-events-auto h-14 rounded-full bg-m3-surface/80 dark:bg-m3-container-low/80 backdrop-blur-xl border border-[var(--md-sys-color-outline-variant)]/20 px-4 sm:px-5 flex items-center justify-between shadow-md shadow-black/5 transition-all">
+    <div className="min-h-screen bg-m3-surface text-[var(--on-surface)] selection:bg-[var(--primary-container)] selection:text-[var(--on-primary-container)]">
+      {/* 1. M3 Floating Top App Bar - Solid Color, No Glass */}
+      <div className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 pointer-events-none">
+        <div className="mx-auto max-w-5xl pointer-events-auto h-14 rounded-full bg-white dark:bg-[#1e2025] border border-[var(--outline-variant)]/30 px-4 sm:px-5 flex items-center justify-between shadow-md transition-all">
           {/* Logo & Name */}
           <motion.div
             whileHover={{ scale: 1.02 }}
@@ -486,57 +480,60 @@ export default function App() {
             onClick={() => navigateTo("home")}
             className="flex items-center gap-2.5 cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-full bg-[var(--md-sys-color-primary-container)]/60 flex items-center justify-center p-1.5">
+            <div className="w-8 h-8 rounded-full bg-[var(--primary-container)]/60 flex items-center justify-center p-1.5">
               <img
                 src="/default128.png"
                 alt="Hilal Logo"
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className="text-sm font-bold tracking-tight text-[var(--md-sys-color-on-surface)]">
+            <span className="text-sm font-bold tracking-tight text-[var(--on-surface)]">
               Hilal
             </span>
           </motion.div>
 
-          {/* Center Nav Links - Clean & Unnested */}
+          {/* Center Nav Links - Clean & Consistent Typography */}
           <div className="hidden md:flex items-center gap-1">
             <button
+              type="button"
               onClick={() => scrollToId("features")}
-              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 transition-colors cursor-pointer border-0 bg-transparent"
             >
               {activeT.nav.features}
             </button>
             <button
+              type="button"
               onClick={() => scrollToId("architecture")}
-              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 transition-colors cursor-pointer border-0 bg-transparent"
             >
               {activeT.nav.architecture}
             </button>
             <button
+              type="button"
               onClick={() => navigateTo("docs")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border-0 ${
                 currentView === "docs"
-                  ? "bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]"
-                  : "text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8"
+                  ? "bg-[var(--primary-container)] text-[var(--on-primary-container)]"
+                  : "bg-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8"
               }`}
             >
-              <BookOpen className="w-3.5 h-3.5" />
               <span>{activeT.nav.docs}</span>
             </button>
             <button
+              type="button"
               onClick={() => navigateTo("changelog")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border-0 ${
                 currentView === "changelog"
-                  ? "bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]"
-                  : "text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8"
+                  ? "bg-[var(--primary-container)] text-[var(--on-primary-container)]"
+                  : "bg-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8"
               }`}
             >
-              <GitCommit className="w-3.5 h-3.5" />
               <span>{activeT.nav.changelog}</span>
             </button>
             <button
+              type="button"
               onClick={() => scrollToId("download")}
-              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 transition-colors cursor-pointer border-0 bg-transparent"
             >
               {activeT.nav.download}
             </button>
@@ -544,9 +541,8 @@ export default function App() {
               href="https://github.com/VastSea0/hilal-browser"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 transition-colors no-underline"
             >
-              <Github className="w-3.5 h-3.5" />
               <span>{activeT.nav.github}</span>
             </a>
           </div>
@@ -555,8 +551,9 @@ export default function App() {
           <div className="flex items-center gap-1.5">
             {/* Lang Chip */}
             <button
+              type="button"
               onClick={() => setLang(lang === "tr" ? "en" : "tr")}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-bold text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-bold text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 transition-colors cursor-pointer border-0 bg-transparent"
               title={lang === "tr" ? "Switch to English" : "Türkçe'ye Geç"}
             >
               {lang === "tr" ? "EN" : "TR"}
@@ -564,11 +561,12 @@ export default function App() {
 
             {/* Theme Chip */}
             <button
+              type="button"
               onClick={toggleTheme}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-on-surface)]/8 transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--on-surface)]/8 transition-colors cursor-pointer border-0 bg-transparent"
               aria-label="Theme Toggle"
             >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              <i className="text-lg">{isDark ? "light_mode" : "dark_mode"}</i>
             </button>
 
             {/* CTA Pill Button */}
@@ -576,14 +574,14 @@ export default function App() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setIsDownloadOpen(true)}
-              className="h-9 px-4 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-semibold text-xs transition-all shadow-sm hover:shadow flex items-center gap-1.5 cursor-pointer ml-1"
+              className="h-9 px-4 rounded-full bg-[var(--primary)] text-[var(--on-primary)] font-semibold text-xs transition-all shadow-sm hover:shadow flex items-center gap-1.5 cursor-pointer ml-1 border-0"
             >
-              <Download className="w-3.5 h-3.5" />
+              <i className="text-base">download</i>
               <span>{activeT.nav.getHilal}</span>
             </motion.button>
           </div>
         </div>
-      </nav>
+      </div>
 
       {/* Main View Router */}
       {currentView === "docs" ? (
@@ -616,16 +614,16 @@ export default function App() {
               {/* M3 Assist Chip */}
               <motion.div
                 variants={m3FadeIn}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] text-xs font-semibold tracking-wide"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--secondary-container)] text-[var(--on-secondary-container)] text-xs font-semibold tracking-wide"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[var(--md-sys-color-primary)]" />
+                <i className="material-symbols-outlined text-[16px] text-[var(--primary)]">auto_awesome</i>
                 <span>{activeT.hero.chip}</span>
               </motion.div>
 
               {/* M3 Emphasized Display Large Tagline */}
               <motion.h1
                 variants={m3FadeIn}
-                className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-[var(--md-sys-color-on-surface)] leading-[1.05]"
+                className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-[var(--on-surface)] leading-[1.05]"
                 style={{ fontStretch: "110%" }}
               >
                 {activeT.hero.tagline}
@@ -634,7 +632,7 @@ export default function App() {
               {/* M3 Body Large Subtitle */}
               <motion.p
                 variants={m3FadeIn}
-                className="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-[var(--md-sys-color-on-surface-variant)] leading-relaxed font-normal"
+                className="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-[var(--on-surface-variant)] leading-relaxed font-normal"
               >
                 {activeT.hero.subtitle}
               </motion.p>
@@ -645,16 +643,16 @@ export default function App() {
                 className="pt-4 flex flex-col items-center gap-4"
               >
                 <div className="flex flex-wrap items-center justify-center gap-3">
-                  {/* Primary Filled Button */}
+                  {/* Primary Filled Button - BLUE! */}
                   <motion.button
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.96 }}
                     onClick={() => setIsDownloadOpen(true)}
-                    className="h-14 px-8 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-bold text-sm sm:text-base flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all cursor-pointer"
+                    className="h-14 px-8 rounded-full bg-[var(--primary)] text-[var(--on-primary)] font-bold text-sm sm:text-base flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all cursor-pointer border-0"
                   >
-                    {detectedOS === "macos" && <Apple className="w-5 h-5" />}
-                    {detectedOS === "windows" && <Laptop className="w-5 h-5" />}
-                    {detectedOS !== "macos" && detectedOS !== "windows" && <Download className="w-5 h-5" />}
+                    <i className="text-xl">
+                      {detectedOS === "macos" ? "desktop_mac" : detectedOS === "windows" ? "desktop_windows" : "download"}
+                    </i>
                     <span>{getDynamicBtnLabel()}</span>
                   </motion.button>
 
@@ -663,9 +661,9 @@ export default function App() {
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.96 }}
                     onClick={() => navigateTo("changelog")}
-                    className="h-14 px-7 rounded-full bg-m3-container text-[var(--md-sys-color-on-surface)] border border-[var(--md-sys-color-outline-variant)]/50 font-semibold text-sm sm:text-base flex items-center gap-2.5 hover:bg-m3-container-high transition-colors cursor-pointer"
+                    className="h-14 px-7 rounded-full bg-m3-container text-[var(--on-surface)] border border-[var(--outline-variant)]/50 font-semibold text-sm sm:text-base flex items-center gap-2.5 hover:bg-m3-container-high transition-colors cursor-pointer"
                   >
-                    <GitCommit className="w-5 h-5 text-[var(--md-sys-color-primary)]" />
+                    <i className="text-xl text-[var(--primary)]">history</i>
                     <span>{activeT.nav.changelog}</span>
                   </motion.button>
 
@@ -676,16 +674,16 @@ export default function App() {
                     href="https://github.com/VastSea0/hilal-browser"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="h-14 px-7 rounded-full bg-m3-container text-[var(--md-sys-color-on-surface)] border border-[var(--md-sys-color-outline-variant)]/50 font-semibold text-sm sm:text-base flex items-center gap-2.5 hover:bg-m3-container-high transition-colors"
+                    className="h-14 px-7 rounded-full bg-m3-container text-[var(--on-surface)] border border-[var(--outline-variant)]/50 font-semibold text-sm sm:text-base flex items-center gap-2.5 hover:bg-m3-container-high transition-colors no-underline"
                   >
-                    <Github className="w-5 h-5" />
+                    <GithubIcon className="w-5 h-5" />
                     <span>GitHub Repo</span>
                   </motion.a>
                 </div>
 
                 {/* Supporting artifact note */}
                 {recommendedAsset && (
-                  <p className="text-xs font-mono text-[var(--md-sys-color-on-surface-variant)]">
+                  <p className="text-xs font-mono text-[var(--on-surface-variant)]">
                     {recommendedAsset.name} • {formatBytes(recommendedAsset.size)}
                   </p>
                 )}
@@ -710,11 +708,11 @@ export default function App() {
           {/* 3. M3 Expressive Interactive Stories Showcase */}
           <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6" id="features">
             <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)] text-xs font-semibold">
-                <Layers className="w-3.5 h-3.5" />
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--tertiary-container)] text-[var(--on-tertiary-container)] text-xs font-semibold">
+                <i className="material-symbols-outlined text-[14px]">layers</i>
                 <span>{lang === "tr" ? "Öne Çıkan Özellikler" : "Key Highlights"}</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)]">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[var(--on-surface)]">
                 {lang === "tr" ? "Temel Yetenekler." : "Core Pillars."}
               </h2>
             </div>
@@ -726,10 +724,10 @@ export default function App() {
                   key={idx}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setActiveTab(idx)}
-                  className={`h-11 px-5 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+                  className={`h-11 px-5 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 border-0 ${
                     activeTab === idx
-                      ? "bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] shadow-md"
-                      : "bg-m3-container text-[var(--md-sys-color-on-surface-variant)] hover:bg-m3-container-high"
+                      ? "bg-[var(--primary)] text-[var(--on-primary)] shadow-md"
+                      : "bg-m3-container text-[var(--on-surface-variant)] hover:bg-m3-container-high"
                   }`}
                 >
                   <span>{story.chip}</span>
@@ -745,17 +743,17 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -16 }}
                 transition={springTransition}
-                className="p-6 sm:p-10 rounded-[36px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/40 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center shadow-xl"
+                className="p-6 sm:p-10 rounded-[36px] bg-m3-container-low border border-[var(--outline-variant)]/20 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center shadow-lg"
               >
                 {/* Story Text Side */}
                 <div className="lg:col-span-5 space-y-4 text-left">
-                  <span className="px-3.5 py-1 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-xs font-semibold inline-block">
+                  <span className="px-3.5 py-1 rounded-full bg-[var(--primary-container)] text-[var(--on-primary-container)] text-xs font-semibold inline-block">
                     {activeT.stories[activeTab].chip}
                   </span>
-                  <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)] leading-snug">
+                  <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--on-surface)] leading-snug">
                     {activeT.stories[activeTab].title}
                   </h3>
-                  <p className="text-sm sm:text-base text-[var(--md-sys-color-on-surface-variant)] leading-relaxed font-normal">
+                  <p className="text-sm sm:text-base text-[var(--on-surface-variant)] leading-relaxed font-normal">
                     {activeT.stories[activeTab].description}
                   </p>
                 </div>
@@ -779,43 +777,46 @@ export default function App() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={springTransition}
-              className="p-8 sm:p-12 rounded-[36px] bg-m3-container border border-[var(--md-sys-color-outline-variant)]/40 text-center space-y-6 shadow-xl"
+              className="p-8 sm:p-12 rounded-[36px] bg-m3-container border border-[var(--outline-variant)]/20 text-center space-y-6 shadow-lg"
             >
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] text-xs font-semibold">
-                <Cpu className="w-3.5 h-3.5" />
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--secondary-container)] text-[var(--on-secondary-container)] text-xs font-semibold">
+                <i className="material-symbols-outlined text-[14px]">memory</i>
                 <span>{activeT.openSourceSection.chip}</span>
               </div>
 
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-[var(--md-sys-color-on-surface)] max-w-2xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-[var(--on-surface)] max-w-2xl mx-auto">
                 {activeT.openSourceSection.title}
               </h2>
 
-              <p className="text-sm sm:text-base md:text-lg text-[var(--md-sys-color-on-surface-variant)] max-w-2xl mx-auto leading-relaxed">
+              <p className="text-sm sm:text-base md:text-lg text-[var(--on-surface-variant)] max-w-2xl mx-auto leading-relaxed">
                 {activeT.openSourceSection.description}
               </p>
 
               {/* M3 Tonal Interactive Terminal Card */}
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-m3-container-lowest border border-[var(--md-sys-color-outline-variant)]/40 text-xs font-mono text-[var(--md-sys-color-on-surface)] shadow-inner">
-                  <span className="text-[var(--md-sys-color-primary)] font-bold">$</span>
+                <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-m3-container-lowest border border-[var(--outline-variant)]/20 text-xs font-mono text-[var(--on-surface)] shadow-inner">
+                  <span className="text-[var(--primary)] font-bold">$</span>
                   <span className="select-all truncate max-w-[260px] sm:max-w-md">
                     git clone https://github.com/VastSea0/hilal-browser.git && cd hilal-browser && ./bin/hil setup
                   </span>
                   <button
+                    type="button"
                     onClick={handleCopyCommand}
-                    className="w-8 h-8 rounded-full flex items-center justify-center bg-m3-container hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-full flex items-center justify-center bg-m3-container hover:bg-[var(--primary-container)] hover:text-[var(--on-primary-container)] transition-colors cursor-pointer border-0"
                     title="Copy Command"
                   >
-                    {copiedClone ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                    <i className={`text-base ${copiedClone ? "text-emerald-500" : ""}`}>
+                      {copiedClone ? "check" : "content_copy"}
+                    </i>
                   </button>
                 </div>
               </div>
 
               {/* Contributors Grid */}
-              <div className="pt-6 border-t border-[var(--md-sys-color-outline-variant)]/20">
+              <div className="pt-6 border-t border-[var(--outline-variant)]/20">
                 <div className="flex flex-col items-center gap-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[var(--md-sys-color-on-surface-variant)] flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-[var(--md-sys-color-primary)]" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-[var(--on-surface-variant)] flex items-center gap-1.5">
+                    <i className="text-base text-[var(--primary)]">group</i>
                     <span>{lang === "tr" ? "Projeye Katkıda Bulunanlar" : "Project Contributors"}</span>
                   </span>
                   <div className="flex flex-wrap items-center justify-center gap-2.5">
@@ -825,18 +826,18 @@ export default function App() {
                         href={c.githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-m3-container-lowest hover:bg-m3-container-high border border-[var(--md-sys-color-outline-variant)]/30 text-xs transition-all hover:scale-105 group"
+                        className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-m3-container-lowest hover:bg-m3-container-high border border-[var(--outline-variant)]/30 text-xs transition-all hover:scale-105 group no-underline"
                         title={`${c.name} (@${c.username}) • ${c.contributions} commit`}
                       >
                         <img
                           src={c.avatarUrl}
                           alt={c.name}
-                          className="w-5 h-5 rounded-full object-cover ring-1 ring-[var(--md-sys-color-outline-variant)]/40"
+                          className="w-5 h-5 rounded-full object-cover ring-1 ring-[var(--outline-variant)]/40"
                         />
-                        <span className="font-semibold text-[var(--md-sys-color-on-surface)] group-hover:text-[var(--md-sys-color-primary)] transition-colors">
+                        <span className="font-semibold text-[var(--on-surface)] group-hover:text-[var(--primary)] transition-colors">
                           {c.name}
                         </span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-m3-container text-[var(--md-sys-color-on-surface-variant)]">
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-m3-container text-[var(--on-surface-variant)]">
                           {c.contributions} commit
                         </span>
                       </a>
@@ -849,43 +850,43 @@ export default function App() {
 
           {/* 5. M3 Expressive Platform Download Center */}
           <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6 text-center" id="download">
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-xs font-semibold mb-3">
-              <Boxes className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--primary-container)] text-[var(--on-primary-container)] text-xs font-semibold mb-3">
+              <i className="text-base">inventory_2</i>
               <span>{activeT.downloadSection.chip}</span>
             </div>
 
-            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-[var(--md-sys-color-on-surface)]">
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-[var(--on-surface)]">
               {activeT.downloadSection.title}
             </h2>
-            <p className="mt-2 text-base text-[var(--md-sys-color-on-surface-variant)]">
+            <p className="mt-2 text-base text-[var(--on-surface-variant)]">
               {activeT.downloadSection.subtitle}
             </p>
 
-            {/* 4 M3 Tonal Container Cards */}
-            <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* 3 M3 Tonal Container Cards */}
+            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
               {activeT.downloadSection.platforms.map((p, idx) => (
                 <motion.div
                   key={idx}
                   whileHover={{ y: -6, scale: 1.02 }}
                   transition={springTransition}
                   onClick={() => setIsDownloadOpen(true)}
-                  className="p-7 rounded-[32px] bg-m3-container-low hover:bg-m3-container border border-[var(--md-sys-color-outline-variant)]/40 transition-all text-left flex flex-col justify-between cursor-pointer group shadow-lg"
+                  className="p-7 rounded-[32px] bg-m3-container-low hover:bg-m3-container border border-[var(--outline-variant)]/20 transition-all text-left flex flex-col justify-between cursor-pointer group shadow-lg"
                 >
                   <div>
-                    <div className="w-12 h-12 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                      {p.icon}
+                    <div className="w-12 h-12 rounded-full bg-[var(--primary-container)] text-[var(--on-primary-container)] flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                      <i className="text-2xl">{p.iconName}</i>
                     </div>
-                    <h3 className="text-xl font-bold text-[var(--md-sys-color-on-surface)]">
+                    <h3 className="text-xl font-bold text-[var(--on-surface)]">
                       {p.name}
                     </h3>
-                    <p className="mt-1 text-xs text-[var(--md-sys-color-on-surface-variant)] font-normal">
+                    <p className="mt-1 text-xs text-[var(--on-surface-variant)] font-normal">
                       {p.spec}
                     </p>
                   </div>
 
-                  <div className="mt-8 flex items-center gap-2 text-xs font-bold text-[var(--md-sys-color-primary)] group-hover:translate-x-1 transition-transform">
+                  <div className="mt-8 flex items-center gap-2 text-xs font-bold text-[var(--primary)] group-hover:translate-x-1 transition-transform">
                     <span>{activeT.downloadSection.directDownload}</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <i className="text-base">arrow_forward</i>
                   </div>
                 </motion.div>
               ))}
@@ -895,49 +896,30 @@ export default function App() {
           {/* 6. M3 Expressive S.S.S. (FAQ) */}
           <section className="py-20 max-w-3xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-10 space-y-2">
-              <span className="px-3.5 py-1 rounded-full bg-m3-container text-[var(--md-sys-color-on-surface-variant)] text-xs font-semibold inline-block">
-                {activeT.faq.chip}
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--md-sys-color-on-surface)]">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--secondary-container)] text-[var(--on-secondary-container)] text-xs font-semibold">
+                <i className="text-base">help_outline</i>
+                <span>{activeT.faq.chip}</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--on-surface)]">
                 {activeT.faq.title}
               </h2>
             </div>
 
             <div className="space-y-3">
-              {activeT.faq.items.map((item, idx) => {
-                const isOpen = activeFaq === idx;
-                return (
-                  <motion.div
-                    key={idx}
-                    className="rounded-[24px] bg-m3-container-low border border-[var(--md-sys-color-outline-variant)]/35 overflow-hidden transition-colors"
-                  >
-                    <button
-                      onClick={() => setActiveFaq(isOpen ? null : idx)}
-                      className="w-full flex items-center justify-between p-5 text-left text-base font-semibold text-[var(--md-sys-color-on-surface)] hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer"
-                    >
-                      <span>{item.q}</span>
-                      <div className={`w-8 h-8 rounded-full bg-m3-container flex items-center justify-center shrink-0 ml-4 transition-transform duration-200 ${isOpen ? "rotate-180 bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)]" : ""}`}>
-                        <ChevronDown className="w-4 h-4" />
-                      </div>
-                    </button>
-                    <AnimatePresence initial={false}>
-                      {isOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={springTransition}
-                          className="overflow-hidden"
-                        >
-                          <p className="px-5 pb-5 pt-1 text-sm text-[var(--md-sys-color-on-surface-variant)] leading-relaxed border-t border-[var(--md-sys-color-outline-variant)]/20">
-                            {item.a}
-                          </p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                );
-              })}
+              {activeT.faq.items.map((item, idx) => (
+                <details
+                  key={idx}
+                  className="group rounded-2xl bg-m3-container-low border border-[var(--outline-variant)]/20 p-5 cursor-pointer transition-all open:bg-m3-container"
+                >
+                  <summary className="flex items-center justify-between font-semibold text-sm sm:text-base text-[var(--on-surface)] list-none select-none">
+                    <span>{item.q}</span>
+                    <i className="text-xl text-[var(--on-surface-variant)] transition-transform duration-200 group-open:rotate-180">expand_more</i>
+                  </summary>
+                  <p className="mt-3 text-xs sm:text-sm text-[var(--on-surface-variant)] leading-relaxed pl-0">
+                    {item.a}
+                  </p>
+                </details>
+              ))}
             </div>
           </section>
         </>
@@ -958,7 +940,15 @@ export default function App() {
               {activeT.footer.authorBy}
             </a>
           </div>
-          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-5 font-semibold">
+          <div className="flex items-center gap-6 font-semibold">
+            <a
+              href="https://github.com/VastSea0/hilal-browser"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-[var(--md-sys-color-primary)] transition-colors"
+            >
+              {activeT.footer.source}
+            </a>
             <button
               onClick={() => navigateTo("docs")}
               className="hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer"
@@ -971,14 +961,6 @@ export default function App() {
             >
               {activeT.footer.privacy}
             </button>
-            <a
-              href="https://github.com/VastSea0/hilal-browser"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-[var(--md-sys-color-primary)] transition-colors"
-            >
-              {activeT.footer.source}
-            </a>
             <button
               onClick={() => navigateTo("changelog")}
               className="hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer"
