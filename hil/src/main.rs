@@ -231,10 +231,50 @@ fn setup(repo_root: &Path, engine_path: &Path) -> Result<()> {
             );
             return Ok(());
         }
+
+        // An existing checkout only needs the new pin fetched; recloning
+        // Firefox costs gigabytes and would throw away the build directory.
+        return move_engine_to_commit(&lock.commit, engine_path);
     }
 
     // Clone the pinned upstream checkout into engine/.
     setup_git(&lock.commit, engine_path, repo_root)?;
+    Ok(())
+}
+
+fn move_engine_to_commit(commit: &str, engine_path: &Path) -> Result<()> {
+    // In CI the tree is dirty because patches are applied without commits.
+    // Locally that dirt is unrefreshed work, so refuse to discard it.
+    let dirty = run_cmd(&["git", "status", "--porcelain"], engine_path)?;
+    if !dirty.trim().is_empty() && std::env::var("GITHUB_ACTIONS").is_err() {
+        bail!(
+            "engine/ has uncommitted changes. Run 'hil refresh' to keep them, \
+             or commit/stash them inside engine/ before moving to {}.",
+            commit
+        );
+    }
+
+    let commit_spec = format!("{}^{{commit}}", commit);
+    if run_cmd(&["git", "cat-file", "-e", &commit_spec], engine_path).is_err() {
+        println!("[hil] Fetching pinned commit {}...", commit);
+        run_cmd(&["git", "fetch", "origin", commit], engine_path)?;
+    }
+
+    println!("[hil] Moving engine/ to pinned commit {}...", commit);
+    run_cmd(
+        &["git", "checkout", "-f", "-B", "hilal-upstream", commit],
+        engine_path,
+    )?;
+    // Untracked files only; ignored build directories stay for reuse.
+    run_cmd(&["git", "clean", "-fd"], engine_path)?;
+    run_cmd(&["git", "tag", "-f", "upstream-base", commit], engine_path)?;
+
+    let state_file = engine_path.join(".hilal-applied");
+    if state_file.exists() {
+        fs::remove_file(&state_file)?;
+    }
+
+    println!("[hil] Upstream setup complete.");
     Ok(())
 }
 
@@ -314,12 +354,24 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
         engine_path,
     );
 
-    // Tag the current HEAD as upstream-base if it's missing
-    if run_cmd(&["git", "rev-parse", "upstream-base"], engine_path).is_err() {
-        let _ = run_cmd(
-            &["git", "tag", "-f", "upstream-base", &lock.commit],
-            engine_path,
-        );
+    // Tag the pinned commit as upstream-base if it's missing
+    match run_cmd(&["git", "rev-parse", "upstream-base^{commit}"], engine_path) {
+        Ok(base) if base.trim() != lock.commit => {
+            // Resetting to a stale base would apply the patches to the wrong
+            // Firefox version.
+            bail!(
+                "engine/ is based on {} but upstream.lock pins {}. Run 'hil setup' first.",
+                base.trim(),
+                lock.commit
+            );
+        }
+        Ok(_) => {}
+        Err(_) => {
+            let _ = run_cmd(
+                &["git", "tag", "-f", "upstream-base", &lock.commit],
+                engine_path,
+            );
+        }
     }
 
     if force && !dry_run {
