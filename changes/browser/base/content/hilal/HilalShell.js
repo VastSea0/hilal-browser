@@ -2556,16 +2556,12 @@
           }
         }
         contextMenu.triggerNode = tab;
-        if (typeof contextMenu.openPopup === "function") {
-          contextMenu.openPopup(
-            triggerEl,
-            "after_start",
-            0,
-            0,
-            true,
-            false,
-            event
-          );
+        // Open at the pointer like Firefox's own context menus; keyboard
+        // invocations have no pointer position, so anchor to the tab row.
+        if (event?.screenX || event?.screenY) {
+          contextMenu.openPopupAtScreen(event.screenX, event.screenY, true, event);
+        } else {
+          contextMenu.openPopup(triggerEl, "after_start", 0, 0, true, false, event);
         }
       }
     },
