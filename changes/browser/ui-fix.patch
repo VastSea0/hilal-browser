@@ -1,4 +1,5 @@
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+index efeb53931..a9781e55c 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
 @@ -3615,3 +3615,92 @@ pref("browser.contentsharing.newBadge.enabled", true);
@@ -95,6 +96,7 @@ diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
 +pref("browser.urlbar.clipboard.featureGate", true);
 +pref("browser.urlbar.suggest.calculator", true);
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+index f0e9daea9..6b40f3405 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
 @@ -1881,6 +1881,150 @@ var gHilalPane = {

@@ -1,4 +1,5 @@
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+index 58b8bb99f..2adae5bbb 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
 @@ -3721,3 +3721,6 @@ pref("hilal.sidebar.footer.settings", true);
@@ -9,6 +10,7 @@ diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
 +pref("hilal.boosts.enabled", true);
 +pref("hilal.boosts.data", "{}");
 diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
+index 7bcc54d65..cf09ca25f 100644
 --- a/browser/base/content/browser.xhtml
 +++ b/browser/base/content/browser.xhtml
 @@ -155,5 +155,6 @@
@@ -19,6 +21,7 @@ diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.x
  </html:body>
  </html>
 diff --git a/browser/base/content/main-popupset.inc.xhtml b/browser/base/content/main-popupset.inc.xhtml
+index 55cfc4d36..c33baf247 100644
 --- a/browser/base/content/main-popupset.inc.xhtml
 +++ b/browser/base/content/main-popupset.inc.xhtml
 @@ -932,4 +932,742 @@
@@ -765,6 +768,7 @@ diff --git a/browser/base/content/main-popupset.inc.xhtml b/browser/base/content
 +  
  </popupset>
 diff --git a/browser/base/content/navigator-toolbox.inc.xhtml b/browser/base/content/navigator-toolbox.inc.xhtml
+index e7e94e13a..059c6c3fc 100644
 --- a/browser/base/content/navigator-toolbox.inc.xhtml
 +++ b/browser/base/content/navigator-toolbox.inc.xhtml
 @@ -440,6 +440,13 @@
@@ -782,6 +786,7 @@ diff --git a/browser/base/content/navigator-toolbox.inc.xhtml b/browser/base/con
            <html:div class="search-one-offs"
                includecurrentengine="true"
 diff --git a/browser/base/jar.mn b/browser/base/jar.mn
+index 890a1580f..947201682 100644
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
 @@ -87,6 +87,9 @@ browser.jar:
@@ -795,6 +800,7 @@ diff --git a/browser/base/jar.mn b/browser/base/jar.mn
          content/browser/main-popupset.js                    (content/main-popupset.js)
  *       content/browser/pageinfo/pageInfo.xhtml             (content/pageinfo/pageInfo.xhtml)
 diff --git a/browser/base/moz.build b/browser/base/moz.build
+index 33b90b64e..658d71e93 100644
 --- a/browser/base/moz.build
 +++ b/browser/base/moz.build
 @@ -29,6 +29,7 @@ BROWSER_CHROME_MANIFESTS += [
@@ -806,6 +812,7 @@ diff --git a/browser/base/moz.build b/browser/base/moz.build
      "content/test/keyboard/browser.toml",
      "content/test/keyboard/browserSidebarRevamp.toml",
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+index d0c8f939b..74f1c63a5 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
 @@ -2274,6 +2274,36 @@ var gHilalPane = {
@@ -846,6 +853,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
      const { HilalBangs } = ChromeUtils.importESModule(
        "resource:///modules/HilalBangs.sys.mjs"
 diff --git a/gfx/layers/AnimationInfo.cpp b/gfx/layers/AnimationInfo.cpp
+index b4941588b..0571b4fbd 100644
 --- a/gfx/layers/AnimationInfo.cpp
 +++ b/gfx/layers/AnimationInfo.cpp
 @@ -13,6 +13,7 @@
@@ -865,6 +873,7 @@ diff --git a/gfx/layers/AnimationInfo.cpp b/gfx/layers/AnimationInfo.cpp
    if (aAnimationValue.IsNull()) {
      aAnimatable = null_t();
 diff --git a/gfx/layers/wr/WebRenderCommandBuilder.cpp b/gfx/layers/wr/WebRenderCommandBuilder.cpp
+index 034355908..e6b13075b 100644
 --- a/gfx/layers/wr/WebRenderCommandBuilder.cpp
 +++ b/gfx/layers/wr/WebRenderCommandBuilder.cpp
 @@ -3,6 +3,7 @@
@@ -884,6 +893,7 @@ diff --git a/gfx/layers/wr/WebRenderCommandBuilder.cpp b/gfx/layers/wr/WebRender
    if (aItem->GetType() == DisplayItemType::TYPE_COMPOSITOR_HITTEST_INFO) {
      // The hit test information was processed above.
 diff --git a/image/AutoRestoreSVGState.h b/image/AutoRestoreSVGState.h
+index be639a7b7..731bfde2b 100644
 --- a/image/AutoRestoreSVGState.h
 +++ b/image/AutoRestoreSVGState.h
 @@ -47,6 +47,10 @@ class MOZ_STACK_CLASS AutoRestoreSVGState final {
@@ -898,6 +908,7 @@ diff --git a/image/AutoRestoreSVGState.h b/image/AutoRestoreSVGState.h
  
      aSVGDocumentWrapper->mIsDrawing = true;
 diff --git a/layout/base/PresShell.cpp b/layout/base/PresShell.cpp
+index 17c8830ba..df5d0e6ed 100644
 --- a/layout/base/PresShell.cpp
 +++ b/layout/base/PresShell.cpp
 @@ -137,6 +137,7 @@
@@ -919,6 +930,7 @@ diff --git a/layout/base/PresShell.cpp b/layout/base/PresShell.cpp
  
  void PresShell::UpdateCanvasBackground() {
 diff --git a/layout/base/nsPresContext.h b/layout/base/nsPresContext.h
+index f8fe48344..3c1a5ceb7 100644
 --- a/layout/base/nsPresContext.h
 +++ b/layout/base/nsPresContext.h
 @@ -594,6 +594,34 @@ class nsPresContext : public nsISupports,
@@ -970,6 +982,7 @@ diff --git a/layout/base/nsPresContext.h b/layout/base/nsPresContext.h
   protected:
    virtual ~nsPresContext();
 diff --git a/layout/generic/nsIFrame.h b/layout/generic/nsIFrame.h
+index 8f2c92865..0af687b75 100644
 --- a/layout/generic/nsIFrame.h
 +++ b/layout/generic/nsIFrame.h
 @@ -128,6 +128,10 @@ class nsWindowSizes;
@@ -997,6 +1010,7 @@ diff --git a/layout/generic/nsIFrame.h b/layout/generic/nsIFrame.h
  
    /**
 diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering.cpp
+index a581b039a..b9fac0fc4 100644
 --- a/layout/painting/nsCSSRendering.cpp
 +++ b/layout/painting/nsCSSRendering.cpp
 @@ -5,6 +5,7 @@
@@ -1032,6 +1046,7 @@ diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering
    aDrawBackgroundImage = shouldPaint.mImage;
    aDrawBackgroundColor = shouldPaint.mColor;
 diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.cpp
+index 4253ae097..e7ada8aaa 100644
 --- a/layout/painting/nsDisplayList.cpp
 +++ b/layout/painting/nsDisplayList.cpp
 @@ -81,6 +81,7 @@
@@ -1052,6 +1067,7 @@ diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.c
      visible = visible.Intersect(item->GetPaintRect(aBuilder, aCtx));
      if (visible.IsEmpty()) {
 diff --git a/layout/painting/nsImageRenderer.cpp b/layout/painting/nsImageRenderer.cpp
+index 6e464b48c..6b22179a7 100644
 --- a/layout/painting/nsImageRenderer.cpp
 +++ b/layout/painting/nsImageRenderer.cpp
 @@ -31,6 +31,7 @@
@@ -1072,6 +1088,7 @@ diff --git a/layout/painting/nsImageRenderer.cpp b/layout/painting/nsImageRender
  
        const int32_t appUnitsPerDevPixel = aPresContext->AppUnitsPerDevPixel();
 diff --git a/layout/style/StyleColor.cpp b/layout/style/StyleColor.cpp
+index b320186e5..ea4f7273e 100644
 --- a/layout/style/StyleColor.cpp
 +++ b/layout/style/StyleColor.cpp
 @@ -7,6 +7,7 @@
@@ -1096,19 +1113,18 @@ diff --git a/layout/style/StyleColor.cpp b/layout/style/StyleColor.cpp
  
 -  return NS_RGBA(
 -      nsStyleUtil::FloatToColorComponent(translatedColor.components._0),
--      nsStyleUtil::FloatToColorComponent(translatedColor.components._1),
--      nsStyleUtil::FloatToColorComponent(translatedColor.components._2),
--      nsStyleUtil::FloatToColorComponent(translatedColor.alpha));
 +  return hilal::nsHilalBoostsBackend::ResolveStyleColor(
 +      NS_RGBA(nsStyleUtil::FloatToColorComponent(translatedColor.components._0),
-+              nsStyleUtil::FloatToColorComponent(translatedColor.components._1),
-+              nsStyleUtil::FloatToColorComponent(translatedColor.components._2),
+       nsStyleUtil::FloatToColorComponent(translatedColor.components._1),
+       nsStyleUtil::FloatToColorComponent(translatedColor.components._2),
+-      nsStyleUtil::FloatToColorComponent(translatedColor.alpha));
 +              nsStyleUtil::FloatToColorComponent(translatedColor.alpha)),
 +      nullptr);
  }
  
  }  // namespace mozilla
 diff --git a/layout/style/moz.build b/layout/style/moz.build
+index b3886e491..0d9cc8b13 100644
 --- a/layout/style/moz.build
 +++ b/layout/style/moz.build
 @@ -99,6 +99,7 @@ EXPORTS.mozilla += [
@@ -1129,6 +1145,7 @@ diff --git a/layout/style/moz.build b/layout/style/moz.build
      "nsROCSSPrimitiveValue.cpp",
 diff --git a/layout/style/nsHilalBoostsBackend.cpp b/layout/style/nsHilalBoostsBackend.cpp
 new file mode 100644
+index 000000000..629519536
 --- /dev/null
 +++ b/layout/style/nsHilalBoostsBackend.cpp
 @@ -0,0 +1,472 @@
@@ -1606,6 +1623,7 @@ new file mode 100644
 +}  // namespace hilal
 diff --git a/layout/style/nsHilalBoostsBackend.h b/layout/style/nsHilalBoostsBackend.h
 new file mode 100644
+index 000000000..af060cba2
 --- /dev/null
 +++ b/layout/style/nsHilalBoostsBackend.h
 @@ -0,0 +1,74 @@
@@ -1684,6 +1702,7 @@ new file mode 100644
 +
 +#endif  // mozilla_HilalBoostsBackend_h_
 diff --git a/layout/svg/SVGImageContext.cpp b/layout/svg/SVGImageContext.cpp
+index ecbda963b..c976e61d6 100644
 --- a/layout/svg/SVGImageContext.cpp
 +++ b/layout/svg/SVGImageContext.cpp
 @@ -11,6 +11,7 @@
@@ -1730,6 +1749,7 @@ diff --git a/layout/svg/SVGImageContext.cpp b/layout/svg/SVGImageContext.cpp
      auto scheme = LookAndFeel::ColorSchemeForStyle(
          *aPresContext.Document(), aStyle.StyleUI()->mColorScheme.bits,
 diff --git a/layout/svg/SVGImageContext.h b/layout/svg/SVGImageContext.h
+index 159d9cbbd..28dfffaf0 100644
 --- a/layout/svg/SVGImageContext.h
 +++ b/layout/svg/SVGImageContext.h
 @@ -6,6 +6,7 @@
@@ -1740,15 +1760,6 @@ diff --git a/layout/svg/SVGImageContext.h b/layout/svg/SVGImageContext.h
  #include "mozilla/Maybe.h"
  #include "mozilla/SVGContextPaint.h"
  #include "mozilla/SVGPreserveAspectRatio.h"
-@@ -25,7 +26,7 @@ class ComputedStyle;
- // to the image's internal SVG document when it's drawn.
- class SVGImageContext {
-  public:
--  SVGImageContext() = default;
-+   SVGImageContext() = default;
- 
-   /**
-    * Currently it seems that the aViewportSize parameter ends up being used
 @@ -63,6 +64,9 @@ class SVGImageContext {
                                       nsISVGPaintContext* aPaintContext,
                                       imgIContainer* aImgContainer);
@@ -1813,6 +1824,7 @@ diff --git a/layout/svg/SVGImageContext.h b/layout/svg/SVGImageContext.h
  
  }  // namespace mozilla
 diff --git a/widget/Theme.cpp b/widget/Theme.cpp
+index 6ea267d34..3d5d05b80 100644
 --- a/widget/Theme.cpp
 +++ b/widget/Theme.cpp
 @@ -19,6 +19,7 @@

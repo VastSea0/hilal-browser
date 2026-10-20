@@ -1,4 +1,5 @@
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+index 2561c3c48..f0e9daea9 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
 @@ -13,7 +13,7 @@
@@ -124,6 +125,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
    InternalHandlerInfoWrapper,
    getFileDisplayName,
 diff --git a/browser/components/preferences/preferences.js b/browser/components/preferences/preferences.js
+index 17e226831..bc04ee0cf 100644
 --- a/browser/components/preferences/preferences.js
 +++ b/browser/components/preferences/preferences.js
 @@ -504,6 +504,7 @@ function init_all() {
@@ -135,6 +137,7 @@ diff --git a/browser/components/preferences/preferences.js b/browser/components/
    register_module("paneSearch", gSearchPane);
    register_module("panePrivacy", gPrivacyPane);
 diff --git a/browser/components/preferences/preferences.xhtml b/browser/components/preferences/preferences.xhtml
+index a11826602..bad930841 100644
 --- a/browser/components/preferences/preferences.xhtml
 +++ b/browser/components/preferences/preferences.xhtml
 @@ -136,6 +136,11 @@

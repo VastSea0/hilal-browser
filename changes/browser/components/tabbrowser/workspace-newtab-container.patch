@@ -7,6 +7,7 @@ loss and page reloads.
 
 ---
 diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/components/tabbrowser/content/tabbrowser.js
+index 37508e85d..1ec699d34 100644
 --- a/browser/components/tabbrowser/content/tabbrowser.js
 +++ b/browser/components/tabbrowser/content/tabbrowser.js
 @@ -4161,8 +4161,12 @@
@@ -14,10 +15,9 @@ diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/compo
        // Related tab inherits current tab's user context unless a different
        // usercontextid is specified
 -      if (userContextId == null && openerTab) {
--        userContextId = openerTab.getAttribute("usercontextid") || 0;
 +      if (userContextId == null) {
 +        if (openerTab) {
-+          userContextId = openerTab.getAttribute("usercontextid") || 0;
+         userContextId = openerTab.getAttribute("usercontextid") || 0;
 +        } else if (window.gHilalWorkspaces) {
 +          userContextId = window.gHilalWorkspaces.activeContainerId || 0;
 +        }

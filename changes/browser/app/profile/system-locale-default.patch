@@ -1,4 +1,5 @@
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+index a9781e55c..2a121ca17 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
 @@ -3704,3 +3704,9 @@ pref("userContent.page.proton", true);

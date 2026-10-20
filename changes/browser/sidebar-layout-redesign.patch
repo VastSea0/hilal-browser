@@ -1,4 +1,5 @@
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+index 46da45849..110e0c756 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
 @@ -3712,3 +3712,11 @@ pref("intl.locale.requested", "");
@@ -14,6 +15,7 @@ diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
 +pref("hilal.sidebar.customItems", "[]");
 +pref("hilal.compact.enabled", false);
 diff --git a/browser/base/content/browser-sets.js b/browser/base/content/browser-sets.js
+index 8b153dfac..51c1598d7 100644
 --- a/browser/base/content/browser-sets.js
 +++ b/browser/base/content/browser-sets.js
 @@ -316,15 +316,12 @@ document.addEventListener(
@@ -37,6 +39,7 @@ diff --git a/browser/base/content/browser-sets.js b/browser/base/content/browser
            SidebarController.toggle("viewHistorySidebar");
            break;
 diff --git a/browser/components/customizableui/CustomizableWidgets.sys.mjs b/browser/components/customizableui/CustomizableWidgets.sys.mjs
+index 954698aca..bbad1cd10 100644
 --- a/browser/components/customizableui/CustomizableWidgets.sys.mjs
 +++ b/browser/components/customizableui/CustomizableWidgets.sys.mjs
 @@ -294,15 +294,18 @@ export const CustomizableWidgets = [
@@ -50,7 +53,7 @@ diff --git a/browser/components/customizableui/CustomizableWidgets.sys.mjs b/bro
 +      if (HilalCompactMode) {
 +        HilalCompactMode.toggle();
        } else {
-+        const { SidebarController } = aEvent.target.documentGlobal;
++      const { SidebarController } = aEvent.target.documentGlobal;
          SidebarController.toggle();
        }
      },
@@ -63,6 +66,7 @@ diff --git a/browser/components/customizableui/CustomizableWidgets.sys.mjs b/bro
          SidebarController.updateToolbarButton(aNode);
          aNode.setAttribute("overflows", "false");
 diff --git a/browser/components/sidebar/SidebarManager.sys.mjs b/browser/components/sidebar/SidebarManager.sys.mjs
+index a9857f468..114a2b1c5 100644
 --- a/browser/components/sidebar/SidebarManager.sys.mjs
 +++ b/browser/components/sidebar/SidebarManager.sys.mjs
 @@ -224,6 +224,9 @@ class SidebarManager extends EventTarget {
@@ -76,6 +80,7 @@ diff --git a/browser/components/sidebar/SidebarManager.sys.mjs b/browser/compone
          VISIBILITY_SETTING_PREF,
          "always-show"
 diff --git a/browser/components/sidebar/SidebarState.sys.mjs b/browser/components/sidebar/SidebarState.sys.mjs
+index 15c466af3..ef8a10951 100644
 --- a/browser/components/sidebar/SidebarState.sys.mjs
 +++ b/browser/components/sidebar/SidebarState.sys.mjs
 @@ -11,6 +11,12 @@ XPCOMUtils.defineLazyPreferenceGetter(
@@ -115,6 +120,7 @@ diff --git a/browser/components/sidebar/SidebarState.sys.mjs b/browser/component
        this.#props.launcherExpanded = false;
        return;
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
+index d3178e9eb..fc65001ad 100644
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
 @@ -481,7 +481,10 @@ var SidebarController = {
@@ -154,7 +160,6 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
        }
  
        this.selectMenuItem(commandID);
--      this._box.hidden = this._splitter.hidden = false;
 +      const workspacesEnabled = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
 +      const verticalTabsEnabled = Services.prefs.getBoolPref("sidebar.verticalTabs", false);
 +      if (workspacesEnabled || verticalTabsEnabled) {
@@ -166,7 +171,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +        ].includes(commandID);
 +        this._box.hidden = this._splitter.hidden = !isStandardPanel;
 +      } else {
-+        this._box.hidden = this._splitter.hidden = false;
+       this._box.hidden = this._splitter.hidden = false;
 +      }
  
        this._box.setAttribute("checked", "true");
@@ -344,6 +349,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
 +  },
 +};
 diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
+index a8369dde3..462e0ce39 100644
 --- a/browser/components/sidebar/sidebar-main.css
 +++ b/browser/components/sidebar/sidebar-main.css
 @@ -17,6 +17,536 @@
@@ -909,6 +915,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
 +  min-height: 0;
 +}
 diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/sidebar/sidebar-main.mjs
+index 8acc798e5..7cb3728bf 100644
 --- a/browser/components/sidebar/sidebar-main.mjs
 +++ b/browser/components/sidebar/sidebar-main.mjs
 @@ -18,8 +18,9 @@ import "chrome://browser/content/sidebar/sidebar-pins-promo.mjs";
@@ -2228,6 +2235,7 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
      let enabledToolsAndExtensionsCount =
        this.enabledToolsAndExtensionsCount() + 1;
 diff --git a/browser/locales/en-US/browser/sidebar.ftl b/browser/locales/en-US/browser/sidebar.ftl
+index 6bd76b860..809df0e9b 100644
 --- a/browser/locales/en-US/browser/sidebar.ftl
 +++ b/browser/locales/en-US/browser/sidebar.ftl
 @@ -251,3 +251,38 @@ sidebar-widget-hide-sidebar2 =

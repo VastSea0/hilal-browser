@@ -1,4 +1,5 @@
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+index 6b40f3405..ca5ecee85 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
 @@ -1796,6 +1796,11 @@ var gHilalPane = {

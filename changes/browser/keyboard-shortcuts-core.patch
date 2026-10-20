@@ -1,4 +1,5 @@
 diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
+index 75130ed5f..7bcc54d65 100644
 --- a/browser/base/content/browser.xhtml
 +++ b/browser/base/content/browser.xhtml
 @@ -152,6 +152,7 @@
@@ -10,6 +11,7 @@ diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.x
    <script src="chrome://browser/content/hilal/HilalWorkspaces.js"></script>
  </html:body>
 diff --git a/browser/base/jar.mn b/browser/base/jar.mn
+index d9e447707..890a1580f 100644
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
 @@ -85,6 +85,7 @@ browser.jar:

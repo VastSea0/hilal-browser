@@ -1,4 +1,5 @@
 diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
+index 0f6e06254..75130ed5f 100644
 --- a/browser/base/content/browser.xhtml
 +++ b/browser/base/content/browser.xhtml
 @@ -75,6 +75,7 @@
@@ -19,6 +20,7 @@ diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.x
  </html:body>
  </html>
 diff --git a/browser/base/jar.mn b/browser/base/jar.mn
+index 7eaca95f7..d9e447707 100644
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
 @@ -72,6 +72,20 @@ browser.jar:

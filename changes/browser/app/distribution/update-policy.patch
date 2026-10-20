@@ -1,4 +1,5 @@
 diff --git a/browser/app/distribution/moz.build b/browser/app/distribution/moz.build
+index 31e76e3d5..ad59f6d7e 100644
 --- a/browser/app/distribution/moz.build
 +++ b/browser/app/distribution/moz.build
 @@ -6,6 +6,7 @@ DIST_SUBDIR = ""

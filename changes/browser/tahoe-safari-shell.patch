@@ -1,4 +1,5 @@
 diff --git a/browser/app/Makefile.in b/browser/app/Makefile.in
+index 561e040d2..7366ab02a 100644
 --- a/browser/app/Makefile.in
 +++ b/browser/app/Makefile.in
 @@ -90,6 +90,6 @@ ifdef MOZ_UPDATER
@@ -10,6 +11,7 @@ diff --git a/browser/app/Makefile.in b/browser/app/Makefile.in
  	printf APPLMOZB > '$(dist_dest)/Contents/PkgInfo'
  endif
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+index 2adae5bbb..e86efd22c 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
 @@ -3618,6 +3618,7 @@ pref("distribution.mozillaonline.ignore", true);
@@ -21,6 +23,7 @@ diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
  // Theme Default Options
  pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
+index cf09ca25f..f335d674f 100644
 --- a/browser/base/content/browser.xhtml
 +++ b/browser/base/content/browser.xhtml
 @@ -152,6 +152,15 @@
@@ -40,6 +43,7 @@ diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.x
    <script src="chrome://browser/content/hilal/HilalWelcome.js"></script>
    <script src="chrome://browser/content/hilal/HilalWorkspaces.js"></script>
 diff --git a/browser/base/jar.mn b/browser/base/jar.mn
+index 947201682..ac9a0ba48 100644
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
 @@ -90,6 +90,8 @@ browser.jar:
@@ -52,6 +56,7 @@ diff --git a/browser/base/jar.mn b/browser/base/jar.mn
          content/browser/main-popupset.js                    (content/main-popupset.js)
  *       content/browser/pageinfo/pageInfo.xhtml             (content/pageinfo/pageInfo.xhtml)
 diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/components/customizableui/CustomizableUI.sys.mjs
+index 2c0b6e179..57c1b7e8f 100644
 --- a/browser/components/customizableui/CustomizableUI.sys.mjs
 +++ b/browser/components/customizableui/CustomizableUI.sys.mjs
 @@ -37,6 +37,18 @@ const kPrefCustomizationHorizontalTabsBackup =
@@ -327,6 +332,7 @@ diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/
  
    /**
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+index 74f1c63a5..911605311 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
 @@ -1796,8 +1796,10 @@ var gHilalPane = {
@@ -453,6 +459,7 @@ diff --git a/browser/components/preferences/main.js b/browser/components/prefere
        hilalUiFixCheckbox.checked = Services.prefs.getBoolPref(
          "hilal.uifix.enabled",
 diff --git a/browser/components/sidebar/SidebarManager.sys.mjs b/browser/components/sidebar/SidebarManager.sys.mjs
+index 114a2b1c5..24b4d762d 100644
 --- a/browser/components/sidebar/SidebarManager.sys.mjs
 +++ b/browser/components/sidebar/SidebarManager.sys.mjs
 @@ -236,6 +236,15 @@ class SidebarManager extends EventTarget {
@@ -472,6 +479,7 @@ diff --git a/browser/components/sidebar/SidebarManager.sys.mjs b/browser/compone
          Services.prefs.setStringPref(
            VISIBILITY_SETTING_PREF,
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
+index 1c542f529..a7524ae5e 100644
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
 @@ -574,6 +574,68 @@ var SidebarController = {
@@ -940,6 +948,7 @@ diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/
      const hideToolbox =
        actualCompact && Services.prefs.getBoolPref(this.HIDE_TOOLBOX_PREF, true);
 diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
+index 462e0ce39..d77754637 100644
 --- a/browser/components/sidebar/sidebar-main.css
 +++ b/browser/components/sidebar/sidebar-main.css
 @@ -336,7 +336,10 @@
@@ -1466,6 +1475,7 @@ diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/si
    display: grid;
    grid-template-rows: auto min-content min-content;
 diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/sidebar/sidebar-main.mjs
+index 7cb3728bf..053e42812 100644
 --- a/browser/components/sidebar/sidebar-main.mjs
 +++ b/browser/components/sidebar/sidebar-main.mjs
 @@ -55,8 +55,14 @@ export default class SidebarMain extends MozLitElement {
@@ -2686,58 +2696,13 @@ diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/si
      }
      /* Add 1 to tools and extensions count for "Customize sidebar" option */
 diff --git a/browser/components/tabbrowser/content/drag-and-drop.js b/browser/components/tabbrowser/content/drag-and-drop.js
+index 20f87cf81..69c0fe901 100644
 --- a/browser/components/tabbrowser/content/drag-and-drop.js
 +++ b/browser/components/tabbrowser/content/drag-and-drop.js
-@@ -1179,69 +1179,81 @@
+@@ -1179,6 +1179,17 @@
          canvas.mozOpaque = true;
        }
  
--      canvas.width = 160 * scale;
--      canvas.height = 90 * scale;
--      let toDrag = canvas;
--      let dragImageOffset = -16;
--      let splitViewTab;
--      if (isSplitViewWrapper(tab)) {
--        splitViewTab = tab.tabs.find(t => t.selected);
--      }
--      let browser = splitViewTab
--        ? splitViewTab.linkedBrowser
--        : isTab(tab) && tab.linkedBrowser;
--      if (isTabGroupLabel(tab)) {
--        toDrag = tab;
--      } else if (gMultiProcessBrowser) {
--        var context = canvas.getContext("2d");
--        context.fillStyle = "white";
--        context.fillRect(0, 0, canvas.width, canvas.height);
--
--        let captureListener;
--        let platform = AppConstants.platform;
--        // On Windows and Mac we can update the drag image during a drag
--        // using updateDragImage. On Linux, we can use a panel.
--        if (platform == "win" || platform == "macosx") {
--          captureListener = function () {
--            dt.updateDragImage(canvas, dragImageOffset, dragImageOffset);
--          };
--        } else {
--          // Create a panel to use it in setDragImage
--          // which will tell xul to render a panel that follows
--          // the pointer while a dnd session is on.
--          if (!this._tabbrowserTabs._dndPanel) {
--            this._tabbrowserTabs._dndCanvas = canvas;
--            this._tabbrowserTabs._dndPanel = document.createXULElement("panel");
--            this._tabbrowserTabs._dndPanel.className = "dragfeedback-tab";
--            this._tabbrowserTabs._dndPanel.setAttribute("type", "drag");
--            let wrapper = document.createElementNS(
--              "http://www.w3.org/1999/xhtml",
--              "div"
--            );
--            wrapper.style.width = "160px";
--            wrapper.style.height = "90px";
--            wrapper.appendChild(canvas);
--            this._tabbrowserTabs._dndPanel.appendChild(wrapper);
--            document.documentElement.appendChild(
--              this._tabbrowserTabs._dndPanel
--            );
 +      let useTabDragImage = false;
 +      try {
 +        useTabDragImage = Services.prefs.getBoolPref("hilal.tahoe.enabled", true);
@@ -2749,88 +2714,19 @@ diff --git a/browser/components/tabbrowser/content/drag-and-drop.js b/browser/co
 +        let yOffset = event.clientY - rect.top;
 +        dt.setDragImage(tab, xOffset, yOffset);
 +      } else {
-+        canvas.width = 160 * scale;
-+        canvas.height = 90 * scale;
-+        let toDrag = canvas;
-+        let dragImageOffset = -16;
-+        let splitViewTab;
-+        if (isSplitViewWrapper(tab)) {
-+          splitViewTab = tab.tabs.find(t => t.selected);
-+        }
-+        let browser = splitViewTab
-+          ? splitViewTab.linkedBrowser
-+          : isTab(tab) && tab.linkedBrowser;
-+        if (isTabGroupLabel(tab)) {
-+          toDrag = tab;
-+        } else if (gMultiProcessBrowser) {
-+          var context = canvas.getContext("2d");
-+          context.fillStyle = "white";
-+          context.fillRect(0, 0, canvas.width, canvas.height);
-+
-+          let captureListener;
-+          let platform = AppConstants.platform;
-+          // On Windows and Mac we can update the drag image during a drag
-+          // using updateDragImage. On Linux, we can use a panel.
-+          if (platform == "win" || platform == "macosx") {
-+            captureListener = function () {
-+              dt.updateDragImage(canvas, dragImageOffset, dragImageOffset);
-+            };
-+          } else {
-+            // Create a panel to use it in setDragImage
-+            // which will tell xul to render a panel that follows
-+            // the pointer while a dnd session is on.
-+            if (!this._tabbrowserTabs._dndPanel) {
-+              this._tabbrowserTabs._dndCanvas = canvas;
-+              this._tabbrowserTabs._dndPanel = document.createXULElement("panel");
-+              this._tabbrowserTabs._dndPanel.className = "dragfeedback-tab";
-+              this._tabbrowserTabs._dndPanel.setAttribute("type", "drag");
-+              let wrapper = document.createElementNS(
-+                "http://www.w3.org/1999/xhtml",
-+                "div"
-+              );
-+              wrapper.style.width = "160px";
-+              wrapper.style.height = "90px";
-+              wrapper.appendChild(canvas);
-+              this._tabbrowserTabs._dndPanel.appendChild(wrapper);
-+              document.documentElement.appendChild(
-+                this._tabbrowserTabs._dndPanel
-+              );
-+            }
-+            toDrag = this._tabbrowserTabs._dndPanel;
-           }
--          toDrag = this._tabbrowserTabs._dndPanel;
-+          // PageThumb is async with e10s but that's fine
-+          // since we can update the image during the dnd.
-+          PageThumbs.captureToCanvas(browser, canvas)
-+            .then(captureListener)
-+            .catch(e => console.error(e));
-+        } else {
-+          // For the non e10s case we can just use PageThumbs
-+          // sync, so let's use the canvas for setDragImage.
-+          PageThumbs.captureToCanvas(browser, canvas).catch(e =>
-+            console.error(e)
-+          );
-+          dragImageOffset = dragImageOffset * scale;
-         }
--        // PageThumb is async with e10s but that's fine
--        // since we can update the image during the dnd.
--        PageThumbs.captureToCanvas(browser, canvas)
--          .then(captureListener)
--          .catch(e => console.error(e));
--      } else {
--        // For the non e10s case we can just use PageThumbs
--        // sync, so let's use the canvas for setDragImage.
--        PageThumbs.captureToCanvas(browser, canvas).catch(e =>
--          console.error(e)
--        );
--        dragImageOffset = dragImageOffset * scale;
-+        dt.setDragImage(toDrag, dragImageOffset, dragImageOffset);
+       canvas.width = 160 * scale;
+       canvas.height = 90 * scale;
+       let toDrag = canvas;
+@@ -1242,6 +1253,7 @@
+         dragImageOffset = dragImageOffset * scale;
        }
--      dt.setDragImage(toDrag, dragImageOffset, dragImageOffset);
+       dt.setDragImage(toDrag, dragImageOffset, dragImageOffset);
++      }
  
        // _dragData.offsetX/Y give the coordinates that the mouse should be
        // positioned relative to the corner of the new window created upon
 diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/components/tabbrowser/content/tabbrowser.js
+index 0580bbe1e..a93a466ca 100644
 --- a/browser/components/tabbrowser/content/tabbrowser.js
 +++ b/browser/components/tabbrowser/content/tabbrowser.js
 @@ -10150,7 +10150,8 @@ var TabBarVisibility = {
@@ -2844,6 +2740,7 @@ diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/compo
      // When `gBrowser` has not been initialized, we're opening a new window and
      // assume only a single tab is loading.
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
+index 3cb7ef86f..c398fda96 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
 @@ -2773,6 +2773,8 @@ hilal-workspaces-pinned-public =

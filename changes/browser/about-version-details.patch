@@ -1,4 +1,5 @@
 diff --git a/browser/base/content/aboutDialog.js b/browser/base/content/aboutDialog.js
+index f6e1391ba..d7e16c230 100644
 --- a/browser/base/content/aboutDialog.js
 +++ b/browser/base/content/aboutDialog.js
 @@ -52,7 +52,7 @@ function init() {
@@ -31,6 +32,7 @@ diff --git a/browser/base/content/aboutDialog.js b/browser/base/content/aboutDia
 +
  init();
 diff --git a/browser/components/preferences/config/about-firefox.mjs b/browser/components/preferences/config/about-firefox.mjs
+index 379dd4896..168ab196a 100644
 --- a/browser/components/preferences/config/about-firefox.mjs
 +++ b/browser/components/preferences/config/about-firefox.mjs
 @@ -207,20 +207,30 @@ Preferences.addSetting(

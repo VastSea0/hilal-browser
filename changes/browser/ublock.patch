@@ -1,4 +1,5 @@
 diff --git a/browser/app/distribution/moz.build b/browser/app/distribution/moz.build
+index b174449a0..31e76e3d5 100644
 --- a/browser/app/distribution/moz.build
 +++ b/browser/app/distribution/moz.build
 @@ -4,7 +4,11 @@
@@ -18,6 +19,7 @@ diff --git a/browser/app/distribution/moz.build b/browser/app/distribution/moz.b
 +    "extensions/uBlock0@raymondhill.net.xpi",
 +]
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+index a05a8e8fd..efeb53931 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
 @@ -59,7 +59,7 @@ pref("extensions.systemAddon.update.enabled", true);

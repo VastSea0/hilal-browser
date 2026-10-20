@@ -1,4 +1,5 @@
 diff --git a/browser/config/version_display.txt b/browser/config/version_display.txt
+index 6388f624c..d8c2df6a0 100644
 --- a/browser/config/version_display.txt
 +++ b/browser/config/version_display.txt
 @@ -1 +1 @@
