@@ -417,6 +417,21 @@
       this.renderTabs();
       this.syncUrl();
 
+      // Firefox focuses its own urlbar for new windows, new tabs and menu
+      // commands, but it lives in the hidden toolbar; send that focus to the
+      // shell's address bar.
+      if (window.gURLBar) {
+        window.gURLBar.focus = () => this.focusUrlInput(false);
+        window.gURLBar.select = () => this.focusUrlInput(true);
+      }
+      // The initial focus happens at DOMContentLoaded, before the shell
+      // exists, so repeat Firefox's own decision once.
+      window.gBrowserInit?._callWithURIToLoad?.(uri => {
+        if (window.isBlankPageURL(uri) || uri == "about:privatebrowsing") {
+          this.focusUrlInput(false);
+        }
+      });
+
       if (typeof CustomizableUI !== "undefined") {
         try {
           CustomizableUI.addListener({
@@ -1988,7 +2003,7 @@
               validPinnedSet.add(id);
               const node =
                 document.getElementById(id) ||
-                CustomizableUI.getWidgetNode(id, window)?.[1];
+                CustomizableUI.getWidget(id)?.forWindow(window)?.node;
               if (
                 node &&
                 node.localName !== "toolbarspring" &&
