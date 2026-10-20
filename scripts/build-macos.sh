@@ -40,7 +40,10 @@ set -- "${remaining[@]+"${remaining[@]}"}"
 
 if [ -f "$(dirname "$0")/../mozconfigs/macos" ]; then
   log "Copying mozconfigs/macos -> engine/mozconfig"
-  cp "$(dirname "$0")/../mozconfigs/macos" "$HILAL_FIREFOX_SRC/mozconfig"
+  # engine/ may be a symlink to another disk, where $topsrcdir/.. is not
+  # this repository, so point the include at the repository explicitly.
+  sed "s|\$topsrcdir/\.\./mozconfigs|$HILAL_REPO_ROOT/mozconfigs|g" \
+    "$(dirname "$0")/../mozconfigs/macos" > "$HILAL_FIREFOX_SRC/mozconfig"
 fi
 
 cmd=("./mach" "build")

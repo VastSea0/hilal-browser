@@ -8,6 +8,8 @@
 # The Firefox checkout (engine/ or legacy firefox/) lives here.
 /engine/
 engine/
+# engine may be a symlink to a checkout on another disk
+/engine
 /firefox/
 firefox/
 /bin/
