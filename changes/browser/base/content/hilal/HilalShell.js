@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/* global gBrowser, Services, ChromeUtils, Ci, TabContextMenu, PrivateBrowsingUtils */
+/* global gBrowser, Services, ChromeUtils, Ci, AppConstants, TabContextMenu, PrivateBrowsingUtils */
 
 (function () {
   const MaterialYouTheme = {
@@ -2939,41 +2939,22 @@
         );
       }
 
-      // Keyboard shortcuts
+      // Only shortcuts that would otherwise focus Firefox's hidden urlbar are
+      // taken over; everything else (close tab/window, reload, reopen closed
+      // tab) stays with Firefox's own commands.
       window.addEventListener("keydown", e => {
-        const isMac =
-          Services?.appinfo?.OS === "Darwin" ||
-          (typeof navigator !== "undefined" &&
-            (navigator.platform?.includes("Mac") ||
-              navigator.userAgent?.includes("Mac")));
+        const isMac = AppConstants.platform === "macosx";
         const isAccel = isMac ? e.metaKey : e.ctrlKey;
+        const key = e.key.toLowerCase();
+        const plainAccel = isAccel && !e.shiftKey && !e.altKey;
+        const altD = !isMac && e.altKey && !e.ctrlKey && !e.shiftKey && key === "d";
 
-        if (isAccel && e.key.toLowerCase() === "l") {
+        if ((plainAccel && key === "l") || altD) {
           e.preventDefault();
-          const input = document.getElementById("hilal-url-input");
-          if (input) {
-            input.focus();
-            input.select();
-          }
-        } else if (isAccel && e.key.toLowerCase() === "t") {
+          this.focusUrlInput();
+        } else if (plainAccel && key === "t") {
           e.preventDefault();
           this.openNewTab();
-        } else if (isAccel && e.key.toLowerCase() === "w") {
-          e.preventDefault();
-          if (
-            window.gBrowser?.selectedTabs &&
-            window.gBrowser.selectedTabs.length > 1
-          ) {
-            window.gBrowser.removeTabs(window.gBrowser.selectedTabs);
-          } else if (window.gBrowser?.selectedTab) {
-            window.gBrowser.removeTab(window.gBrowser.selectedTab);
-          }
-          this.renderTabs();
-        } else if (isAccel && e.key.toLowerCase() === "r") {
-          e.preventDefault();
-          if (window.gBrowser) {
-            window.gBrowser.reload();
-          }
         }
       });
 
@@ -2985,16 +2966,7 @@
             event.data.action === "navigate" &&
             event.data.url
           ) {
-            try {
-              if (window.gBrowser) {
-                window.gBrowser.loadURI(Services.io.newURI(event.data.url), {
-                  triggeringPrincipal:
-                    Services.scriptSecurityManager.getSystemPrincipal(),
-                });
-              }
-            } catch (err) {
-              console.error("Hilal newtab navigate error:", err);
-            }
+            this.navigate(event.data.url);
           }
         };
       } catch (err) {}
