@@ -1,5 +1,5 @@
 diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/browser/browser.ftl
-index 759a6d2638c3..9cf1fdf01459 100644
+index 759a6d2638c3..b30e1d92d5a4 100644
 --- a/browser/locales/en-US/browser/browser.ftl
 +++ b/browser/locales/en-US/browser/browser.ftl
 @@ -1022,7 +1022,6 @@ picture-in-picture-enable-toggle =
@@ -10,7 +10,7 @@ index 759a6d2638c3..9cf1fdf01459 100644
  fullscreen-exit-button = Exit Full Screen (Esc)
  # "esc" is lowercase on mac keyboards, but uppercase elsewhere.
  fullscreen-exit-mac-button = Exit Full Screen (esc)
-@@ -1676,3 +1675,111 @@ reduced-protection-infobar-reload-button = Reload
+@@ -1676,3 +1675,142 @@ reduced-protection-infobar-reload-button = Reload
    .accesskey = R
  reduced-protection-infobar-never-show-button = Don’t show again
    .accesskey = D
@@ -121,6 +121,37 @@ index 759a6d2638c3..9cf1fdf01459 100644
 +    .title = Settings
 +hilal-toolbar-newtab =
 +    .title = New Tab
++hilal-toolbar-back =
++    .title = Back
++hilal-toolbar-forward =
++    .title = Forward
++hilal-toolbar-reload =
++    .title = Reload
++hilal-toolbar-close-tab =
++    .title = Close tab
++    .aria-label = Close tab
++hilal-toolbar-split-view =
++    .title = Split view
++hilal-toolbar-new-workspace =
++    .title = New workspace
++
++## Hilal shell
++
++hilal-shell-workspaces = Workspaces
++hilal-shell-accent-color = Accent color
++hilal-shell-results = Results
++hilal-shell-switch-to-tab = Switch to tab
++hilal-shell-bang = Bang
++hilal-shell-shortcut = Shortcut
++# Variables:
++#   $engine (String) - the search engine or bang keyword
++hilal-shell-search-with = Search with { $engine }
++hilal-shell-search = Search
++hilal-shell-search-suggestion = Search suggestion
++hilal-shell-visit-website = Visit website
++hilal-shell-layout-vertical = Vertical tabs in the sidebar
++hilal-shell-layout-dual = Sidebar and tab strip
++hilal-shell-layout-horizontal = Horizontal tabs
 +
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
 index a890aeb558f8..e1bb18f91875 100644

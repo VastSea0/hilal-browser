@@ -522,7 +522,7 @@
       const backBtn = document.createElement("button");
       backBtn.className = "circle transparent small hilal-btn";
       backBtn.id = "hilal-back-btn";
-      backBtn.setAttribute("data-l10n-id", "navbar-tooltip-back");
+      backBtn.setAttribute("data-l10n-id", "hilal-toolbar-back");
       backBtn.title = "Back";
       backBtn.innerHTML = "<i>arrow_back</i>";
       backBtn.addEventListener("click", () => {
@@ -537,7 +537,7 @@
       const forwardBtn = document.createElement("button");
       forwardBtn.className = "circle transparent small hilal-btn";
       forwardBtn.id = "hilal-forward-btn";
-      forwardBtn.setAttribute("data-l10n-id", "navbar-tooltip-forward");
+      forwardBtn.setAttribute("data-l10n-id", "hilal-toolbar-forward");
       forwardBtn.title = "Forward";
       forwardBtn.innerHTML = "<i>arrow_forward</i>";
       forwardBtn.addEventListener("click", () => {
@@ -552,7 +552,7 @@
       const reloadBtn = document.createElement("button");
       reloadBtn.className = "circle transparent small hilal-btn";
       reloadBtn.id = "hilal-reload-btn";
-      reloadBtn.setAttribute("data-l10n-id", "reload-button");
+      reloadBtn.setAttribute("data-l10n-id", "hilal-toolbar-reload");
       reloadBtn.title = "Reload";
       reloadBtn.innerHTML = "<i>refresh</i>";
       reloadBtn.addEventListener("click", () => {
@@ -936,17 +936,20 @@
         const options = [
           {
             id: "vertical",
-            label: "Vertical Sidebar Tabs",
+            label: "Vertical tabs in the sidebar",
+            l10n: "hilal-shell-layout-vertical",
             icon: "view_sidebar",
           },
           {
             id: "dual",
-            label: "Dual Tabs (Safari Style)",
+            label: "Sidebar and tab strip",
+            l10n: "hilal-shell-layout-dual",
             icon: "splitscreen",
           },
           {
             id: "horizontal",
-            label: "Horizontal Tabs (Chrome Style)",
+            label: "Horizontal tabs",
+            l10n: "hilal-shell-layout-horizontal",
             icon: "tab",
           },
         ];
@@ -957,7 +960,7 @@
             "row wave round tiny-space transparent" +
             (opt.id === this.tabMode ? " secondary-container active" : "");
           item.dataset.mode = opt.id;
-          item.innerHTML = `<i>${opt.icon}</i><span class="max">${opt.label}</span>`;
+          item.innerHTML = `<i>${opt.icon}</i><span class="max" data-l10n-id="${opt.l10n}">${opt.label}</span>`;
           item.addEventListener("click", () => {
             this.setTabMode(opt.id);
             menu.style.display = "none";
@@ -1129,7 +1132,7 @@
                 items.push({
                   type: "bang_hint",
                   label: `!${trigger}`,
-                  sub: `Search with ${trigger.toUpperCase()} (${entry.home || entry.search})`,
+                  sub: { id: "hilal-shell-search-with", args: { engine: trigger.toUpperCase() } },
                   fill: `!${trigger} `,
                   url: entry.home || entry.search,
                 });
@@ -1147,7 +1150,9 @@
           items.push({
             type: "search",
             label: trimmed,
-            sub: engineName ? `Search with ${engineName}` : "Search",
+            sub: engineName
+              ? { id: "hilal-shell-search-with", args: { engine: engineName } }
+              : { id: "hilal-shell-search" },
             query: trimmed,
           });
         }
@@ -1164,7 +1169,7 @@
           items.push({
             type: "url",
             label: directUrl,
-            sub: "Visit website",
+            sub: { id: "hilal-shell-visit-website" },
             url: directUrl,
           });
         }
@@ -1207,6 +1212,7 @@
 
       const header = document.createElement("div");
       header.className = "hilal-search-header";
+      header.setAttribute("data-l10n-id", "hilal-shell-results");
       header.textContent = "Results";
       dropdown.appendChild(header);
 
@@ -1276,7 +1282,11 @@
         if (item.sub) {
           const subSpan = document.createElement("div");
           subSpan.className = "hilal-search-item-sub small-text opacity";
-          subSpan.textContent = item.sub;
+          if (typeof item.sub === "object") {
+            document.l10n.setAttributes(subSpan, item.sub.id, item.sub.args);
+          } else {
+            subSpan.textContent = item.sub;
+          }
           contentDiv.appendChild(subSpan);
         }
 
@@ -1286,17 +1296,20 @@
         if (item.type === "tab") {
           const trail = document.createElement("span");
           trail.className = "chip small primary";
-          trail.textContent = "SWITCH TO TAB";
+          trail.setAttribute("data-l10n-id", "hilal-shell-switch-to-tab");
+          trail.textContent = "Switch to tab";
           row.appendChild(trail);
         } else if (item.type === "bang") {
           const trail = document.createElement("span");
           trail.className = "chip small tertiary";
-          trail.textContent = "BANG";
+          trail.setAttribute("data-l10n-id", "hilal-shell-bang");
+          trail.textContent = "Bang";
           row.appendChild(trail);
         } else if (item.type === "bang_hint") {
           const trail = document.createElement("span");
           trail.className = "chip small tertiary";
-          trail.textContent = "SHORTCUT";
+          trail.setAttribute("data-l10n-id", "hilal-shell-shortcut");
+          trail.textContent = "Shortcut";
           row.appendChild(trail);
         } else if (item.type === "search" || item.type === "suggestion") {
           const trail = document.createElement("i");
@@ -1465,7 +1478,7 @@
         return queries.slice(0, 4).map(q => ({
           type: "suggestion",
           label: q,
-          sub: "Search suggestion",
+          sub: { id: "hilal-shell-search-suggestion" },
           query: q,
         }));
       } catch (e) {
@@ -1652,6 +1665,7 @@
 
       const addWsBtn = document.createElement("button");
       addWsBtn.className = "circle small border hilal-ws-chip hilal-ws-add";
+      addWsBtn.setAttribute("data-l10n-id", "hilal-toolbar-new-workspace");
       addWsBtn.title = "New Workspace";
       addWsBtn.innerHTML = "<i>add</i>";
       addWsBtn.addEventListener("click", () => {
@@ -1716,7 +1730,8 @@
       // Header
       const header = document.createElement("label");
       header.className = "bold uppercase small-text opacity padding";
-      header.textContent = "WORKSPACES";
+      header.setAttribute("data-l10n-id", "hilal-shell-workspaces");
+      header.textContent = "Workspaces";
       menu.appendChild(header);
 
       workspaces.forEach(ws => {
@@ -1817,7 +1832,8 @@
 
       const title = document.createElement("label");
       title.className = "bold uppercase small-text opacity padding";
-      title.textContent = "Material You Color";
+      title.setAttribute("data-l10n-id", "hilal-shell-accent-color");
+      title.textContent = "Accent color";
       menu.appendChild(title);
 
       const swatchesRow = document.createElement("div");
@@ -2139,6 +2155,7 @@
       // Split indicator badge
       const splitBadge = document.createElement("span");
       splitBadge.className = "hilal-split-badge";
+      splitBadge.setAttribute("data-l10n-id", "hilal-toolbar-split-view");
       splitBadge.title = "Split View";
       splitBadge.style.display = "none";
       splitBadge.innerHTML = "<i class=\"tiny\">splitscreen</i>";
@@ -2160,7 +2177,7 @@
       const closeBtn = document.createElement("button");
       closeBtn.className = "circle transparent small hilal-htab-close-btn";
       closeBtn.setAttribute("aria-label", "Close tab");
-      closeBtn.setAttribute("data-l10n-id", "tabbrowser-menuitem-close-tab");
+      closeBtn.setAttribute("data-l10n-id", "hilal-toolbar-close-tab");
       closeBtn.title = "Close tab";
       closeBtn.innerHTML = "<i class=\"tiny\">close</i>";
       closeBtn.addEventListener("click", e => {
@@ -2321,6 +2338,7 @@
       // Split indicator badge
       const splitBadge = document.createElement("span");
       splitBadge.className = "hilal-split-badge";
+      splitBadge.setAttribute("data-l10n-id", "hilal-toolbar-split-view");
       splitBadge.title = "Split View";
       splitBadge.style.display = "none";
       splitBadge.innerHTML = "<i class=\"tiny\">splitscreen</i>";
@@ -2330,7 +2348,7 @@
       const closeBtn = document.createElement("button");
       closeBtn.className = "circle transparent small hilal-tab-close-btn";
       closeBtn.setAttribute("aria-label", "Close tab");
-      closeBtn.setAttribute("data-l10n-id", "tabbrowser-menuitem-close-tab");
+      closeBtn.setAttribute("data-l10n-id", "hilal-toolbar-close-tab");
       closeBtn.innerHTML = "<i class=\"tiny\">close</i>";
       closeBtn.addEventListener("click", e => {
         e.stopPropagation();

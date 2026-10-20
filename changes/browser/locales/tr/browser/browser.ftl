@@ -46,3 +46,44 @@ hilal-welcome-workspace-label-personal = Kişisel
 hilal-welcome-workspace-label-work = İş
 hilal-welcome-workspace-label-social = Sosyal
 
+## Hilal toolbar and shell
+
+hilal-toolbar-clear =
+    .title = Temizle
+hilal-toolbar-copy-url =
+    .title = Sayfa adresini kopyala
+hilal-toolbar-theme =
+    .title = Sayfa teması
+hilal-toolbar-sidebar-toggle =
+    .title = Kenar çubuğunu aç veya kapat
+hilal-toolbar-settings =
+    .title = Ayarlar
+hilal-toolbar-newtab =
+    .title = Yeni sekme
+hilal-toolbar-back =
+    .title = Geri
+hilal-toolbar-forward =
+    .title = İleri
+hilal-toolbar-reload =
+    .title = Yeniden yükle
+hilal-toolbar-close-tab =
+    .title = Sekmeyi kapat
+    .aria-label = Sekmeyi kapat
+hilal-toolbar-split-view =
+    .title = Bölünmüş görünüm
+hilal-toolbar-new-workspace =
+    .title = Yeni çalışma alanı
+
+hilal-shell-workspaces = Çalışma alanları
+hilal-shell-accent-color = Vurgu rengi
+hilal-shell-results = Sonuçlar
+hilal-shell-switch-to-tab = Sekmeye geç
+hilal-shell-bang = Bang
+hilal-shell-shortcut = Kısayol
+hilal-shell-search-with = { $engine } ile ara
+hilal-shell-search = Ara
+hilal-shell-search-suggestion = Arama önerisi
+hilal-shell-visit-website = Siteye git
+hilal-shell-layout-vertical = Kenar çubuğunda dikey sekmeler
+hilal-shell-layout-dual = Kenar çubuğu ve sekme şeridi
+hilal-shell-layout-horizontal = Yatay sekmeler
