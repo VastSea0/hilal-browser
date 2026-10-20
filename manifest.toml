@@ -15,10 +15,6 @@ path   = "browser/branding-defaults.patch"
 reason = "Hilal Browser: switch default branding directory and app vendor"
 
 [[patches]]
-path   = "browser/transparent-macos-chrome.patch"
-reason = "Hilal transparent macOS chrome implementation"
-
-[[patches]]
 path   = "browser/base/workspaces.patch"
 reason = "Hilal workspace layout"
 

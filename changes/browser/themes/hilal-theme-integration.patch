@@ -1,36 +1,5 @@
-diff --git a/browser/themes/shared/browser-colors.css b/browser/themes/shared/browser-colors.css
-index 73becdf3f..855340cf9 100644
---- a/browser/themes/shared/browser-colors.css
-+++ b/browser/themes/shared/browser-colors.css
-@@ -37,6 +37,26 @@
-   --content-area-shadow: var(--card-box-shadow);
-   --chrome-content-separator-color: var(--card-border-color);
- 
-+  @media (-moz-platform: macos) {
-+    --hilal-glass-window-background: light-dark(rgba(246, 248, 252, 0.34), rgba(18, 19, 24, 0.36));
-+    --hilal-glass-toolbar-background: light-dark(rgba(248, 250, 253, 0.28), rgba(28, 29, 34, 0.28));
-+    --hilal-glass-toolbar-background-inactive: light-dark(rgba(248, 250, 253, 0.2), rgba(28, 29, 34, 0.22));
-+    --hilal-glass-sidebar-background: transparent;
-+    --hilal-glass-content-background: light-dark(rgba(255, 255, 255, 0.3), rgba(28, 29, 34, 0.28));
-+    --hilal-glass-border-color: light-dark(rgba(30, 30, 36, 0.14), rgba(255, 255, 255, 0.16));
-+    --hilal-glass-shadow: 0 20px 48px light-dark(rgba(30, 30, 36, 0.12), rgba(0, 0, 0, 0.3));
-+    --hilal-content-frame-gap: 6px;
-+    --hilal-content-frame-radius: 14px;
-+
-+    --toolbox-background-color: var(--hilal-glass-toolbar-background);
-+    --toolbox-background-color-inactive: var(--hilal-glass-toolbar-background-inactive);
-+    --toolbar-background-color: transparent;
-+    --sidebar-background-color: -moz-sidebar;
-+    --sidebar-border-color: var(--hilal-glass-border-color);
-+    --chrome-content-separator-color: var(--hilal-glass-border-color);
-+    --content-area-shadow: var(--hilal-glass-shadow);
-+  }
-+
-   @media not -moz-pref("sidebar.revamp"), -moz-pref("browser.nova.enabled") {
-     &:not([lwtheme]) {
-       --chrome-content-separator-color: ThreeDShadow;
 diff --git a/browser/themes/shared/browser-shared.css b/browser/themes/shared/browser-shared.css
-index fbc709b2b..5d7eade4f 100644
+index fbc709b2b..e775bee67 100644
 --- a/browser/themes/shared/browser-shared.css
 +++ b/browser/themes/shared/browser-shared.css
 @@ -4,6 +4,7 @@
@@ -58,99 +27,6 @@ index fbc709b2b..5d7eade4f 100644
    /* Minimum sizing comes from specific size requirements and adds on other
     * values for different scenarios that don't lend themselves to design tokens. */
    /* stylelint-disable-next-line stylelint-plugin-mozilla/use-design-tokens */
-@@ -294,6 +296,92 @@ body {
-   }
- }
- 
-+@media (-moz-platform: macos) {
-+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) {
-+    background: transparent !important;
-+  }
-+
-+  :root:not([macOSNativeFullscreen]) body {
-+    background: transparent !important;
-+  }
-+
-+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #browser {
-+    background: transparent !important;
-+    position: relative;
-+    padding: 0 !important;
-+  }
-+
-+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) .hilal-browser-generic-background {
-+    position: fixed;
-+    inset: 0;
-+    width: 100vw;
-+    height: 100vh;
-+    z-index: 0;
-+    pointer-events: none;
-+    overflow: clip;
-+    isolation: isolate;
-+    contain: content;
-+  }
-+
-+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background {
-+    -moz-default-appearance: -moz-sidebar;
-+    appearance: auto;
-+    color: AccentColor;
-+  }
-+
-+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background::before,
-+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background::after {
-+    content: "";
-+    position: absolute;
-+    inset: 0;
-+    z-index: 0;
-+    pointer-events: none;
-+  }
-+
-+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background::before {
-+    background: light-dark(rgba(255, 255, 255, 0.16), rgba(0, 0, 0, 0.12));
-+  }
-+
-+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #hilal-browser-background::after {
-+    background: var(--hilal-glass-window-background);
-+  }
-+
-+  :root[windowtype="navigator:browser"]:not([macOSNativeFullscreen]) #browser > :not(#hilal-browser-background) {
-+    position: relative;
-+    z-index: 1;
-+  }
-+
-+  :root:not([macOSNativeFullscreen]) #sidebar-main,
-+  :root:not([macOSNativeFullscreen]) #sidebar-box,
-+  :root:not([macOSNativeFullscreen]) .chrome-block {
-+    background-color: transparent !important;
-+    background-image: none !important;
-+  }
-+
-+  :root:not([macOSNativeFullscreen]) #navigator-toolbox,
-+  :root:not([macOSNativeFullscreen]) #titlebar,
-+  :root:not([macOSNativeFullscreen]) #toolbar-menubar,
-+  :root:not([macOSNativeFullscreen]) #TabsToolbar,
-+  :root:not([macOSNativeFullscreen]) .browser-toolbar:not(.browser-titlebar) {
-+    background: transparent !important;
-+    background-image: none !important;
-+  }
-+
-+  :root:not([macOSNativeFullscreen]) .urlbar:not([focused], [open]) > .urlbar-background,
-+  :root:not([macOSNativeFullscreen]) #searchbar:not(:focus-within) {
-+    background-color: transparent !important;
-+  }
-+
-+  :root:not([macOSNativeFullscreen]) .urlbar:is([focused], [open]) > .urlbar-background,
-+  :root:not([macOSNativeFullscreen]) #searchbar:focus-within {
-+    background-color: var(--hilal-glass-toolbar-background) !important;
-+  }
-+
-+  :root:not([macOSNativeFullscreen]) .browserContainer > findbar {
-+    background-color: var(--hilal-glass-toolbar-background);
-+  }
-+}
-+
- /* Images go on the body by default, unless they are aligned in the y axis in
-  * which case they go on the toolbox for backwards compatibility */
- :root:not([lwtheme-image-y-align]) body,
 diff --git a/browser/themes/shared/jar.inc.mn b/browser/themes/shared/jar.inc.mn
 index 449305353..d1053fc8a 100644
 --- a/browser/themes/shared/jar.inc.mn
@@ -365,36 +241,10 @@ index 449305353..d1053fc8a 100644
 +  skin/classic/browser/icons/welcome-back.svg                              (../shared/icons/welcome-back.svg)
 +  skin/classic/browser/icons/whatsnew.svg                                  (../shared/icons/whatsnew.svg)
 diff --git a/browser/themes/shared/sidebar.css b/browser/themes/shared/sidebar.css
-index 910b7f6c9..94eb11842 100644
+index 910b7f6c9..c969c7224 100644
 --- a/browser/themes/shared/sidebar.css
 +++ b/browser/themes/shared/sidebar.css
-@@ -224,6 +224,25 @@
-   min-width: 16em;
- }
- 
-+@media (-moz-platform: macos) {
-+  :root:not([macOSNativeFullscreen]) #sidebar-main,
-+  :root:not([macOSNativeFullscreen]) #sidebar-box {
-+    background: transparent !important;
-+    background-image: none !important;
-+  }
-+
-+  :root:not([macOSNativeFullscreen]) #sidebar {
-+    background-color: transparent !important;
-+    box-shadow: none;
-+  }
-+
-+  :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-launcher-expanded],
-+  :root:not([macOSNativeFullscreen]) #sidebar-main[sidebar-ongoing-animations]:not([sidebar-launcher-expanded]) {
-+    background-color: transparent !important;
-+    background-image: none !important;
-+  }
-+}
-+
- menuseparator + #sidebar-extensions-separator {
-   display: none;
- }
-@@ -544,3 +563,661 @@ sidebar-main,
+@@ -544,3 +544,661 @@ sidebar-main,
      display: none;
    }
  }
@@ -1056,64 +906,6 @@ index 910b7f6c9..94eb11842 100644
 +  transform: scale(0.96) !important;
 +  transition: transform 0.08s ease-out !important;
 +}
-diff --git a/browser/themes/shared/tabbrowser/content-area.css b/browser/themes/shared/tabbrowser/content-area.css
-index d3ee57803..26ff7f0b8 100644
---- a/browser/themes/shared/tabbrowser/content-area.css
-+++ b/browser/themes/shared/tabbrowser/content-area.css
-@@ -22,6 +22,12 @@
-       --tabpanel-background-color: linear-gradient(45deg, #722291 0%, #45278d 50%, #393473 100%) !important;
-     }
-   }
-+
-+  @media (-moz-platform: macos) {
-+    &:not([privatebrowsingmode="temporary"]) {
-+      --tabpanel-background-color: var(--hilal-glass-content-background, transparent);
-+    }
-+  }
- }
- 
- @media -moz-pref("browser.nova.enabled") {
-@@ -193,6 +199,40 @@
-   }
- }
- 
-+@media (-moz-platform: macos) {
-+  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) #browser,
-+  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) #tabbrowser-tabbox,
-+  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) #tabbrowser-tabpanels,
-+  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserSidebarContainer,
-+  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserStack {
-+    background: transparent !important;
-+  }
-+
-+  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) #tabbrowser-tabbox {
-+    box-sizing: border-box;
-+    padding: var(--hilal-content-frame-gap);
-+  }
-+
-+  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserSidebarContainer {
-+    background: var(--hilal-glass-content-background) !important;
-+    border: 1px solid var(--hilal-glass-border-color);
-+    border-radius: var(--hilal-content-frame-radius);
-+    box-shadow: var(--hilal-glass-shadow);
-+    overflow: clip;
-+  }
-+
-+  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) .browserContainer {
-+    background: var(--hilal-glass-content-background) !important;
-+    box-shadow: none !important;
-+    outline-color: transparent;
-+    overflow: clip;
-+  }
-+
-+  :root:not([inDOMFullscreen], [privatebrowsingmode="temporary"]) browser[type="content"][transparent="true"] {
-+    background: var(--hilal-glass-content-background) !important;
-+  }
-+}
-+
- .browserSidebarContainer {
-   position: absolute;
-   inset: 0;
 diff --git a/browser/themes/shared/tabbrowser/tabs.css b/browser/themes/shared/tabbrowser/tabs.css
 index 2a9085993..bfbd033ca 100644
 --- a/browser/themes/shared/tabbrowser/tabs.css

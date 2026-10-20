@@ -56,10 +56,6 @@
   --tab-line-color: var(--hilal-boosts-ui-accent) !important;
   --focus-outline-color: var(--hilal-boosts-ui-accent) !important;
 
-  /* Glass/Transparent Theme Variables (macOS Vibrant Windowed) */
-  --hilal-glass-window-background: color-mix(in oklch, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), rgba(18, 19, 24, 0.36)) !important;
-  --hilal-glass-toolbar-background: color-mix(in oklch, var(--hilal-boosts-ui-accent) calc(var(--hilal-boosts-ui-intensity, 12%) * 1.2), rgba(28, 29, 34, 0.28)) !important;
-  --hilal-glass-border-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 15%, rgba(255, 255, 255, 0.16)) !important;
   --sidebar-border-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 15%, rgba(255, 255, 255, 0.16)) !important;
   --chrome-content-separator-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 15%, rgba(255, 255, 255, 0.16)) !important;
 
@@ -94,10 +90,6 @@
   --lwt-accent-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), #f3f3f5) !important;
   --toolbar-bgcolor: color-mix(in oklch, var(--hilal-boosts-ui-accent) calc(var(--hilal-boosts-ui-intensity, 12%) * 1.2), #ffffff) !important;
 
-  /* Glass/Transparent Theme Variables (Light Mode) */
-  --hilal-glass-window-background: color-mix(in oklch, var(--hilal-boosts-ui-accent) var(--hilal-boosts-ui-intensity, 12%), rgba(246, 248, 252, 0.34)) !important;
-  --hilal-glass-toolbar-background: color-mix(in oklch, var(--hilal-boosts-ui-accent) calc(var(--hilal-boosts-ui-intensity, 12%) * 1.2), rgba(248, 250, 253, 0.28)) !important;
-  --hilal-glass-border-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 10%, rgba(30, 30, 36, 0.14)) !important;
   --sidebar-border-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 10%, rgba(30, 30, 36, 0.14)) !important;
   --chrome-content-separator-color: color-mix(in oklch, var(--hilal-boosts-ui-accent) 10%, rgba(30, 30, 36, 0.14)) !important;
 
