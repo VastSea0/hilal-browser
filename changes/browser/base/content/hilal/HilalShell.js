@@ -682,6 +682,20 @@
       rightGroup.id = "hilal-top-right-group";
       rightGroup.className = "row tiny-space";
 
+      // The page content is the only other private-window cue, and it is gone
+      // as soon as a site loads.
+      if (PrivateBrowsingUtils.isWindowPrivate(window)) {
+        const privateIndicator = document.createElement("div");
+        privateIndicator.id = "hilal-private-indicator";
+        const icon = document.createElement("img");
+        icon.src = "chrome://global/skin/icons/indicator-private-browsing.svg";
+        icon.alt = "";
+        const label = document.createElement("span");
+        label.setAttribute("data-l10n-id", "private-browsing-indicator-label");
+        privateIndicator.append(icon, label);
+        rightGroup.appendChild(privateIndicator);
+      }
+
       // Native Extensions Slot (Pinned webextensions + Unified Extensions button)
       const extSlot = document.createElement("div");
       extSlot.id = "hilal-extensions-slot";
@@ -2757,9 +2771,8 @@
 
       if (!isUserTyping) {
         if (
-          currentUri === "about:blank" ||
-          currentUri === "about:newtab" ||
-          currentUri === "about:home" ||
+          window.isBlankPageURL(currentUri) ||
+          currentUri === "about:privatebrowsing" ||
           currentUri.startsWith("chrome://browser/content/hilal/newtab/")
         ) {
           input.value = "";
