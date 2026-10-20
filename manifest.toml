@@ -75,6 +75,10 @@ path   = "browser/themes/shared"
 reason = "Hilal custom UI styling and overrides"
 
 [[patches]]
+path   = "browser/themes/hilal-theme-integration.patch"
+reason = "Register Hilal stylesheets and adjust upstream sidebar, tab and toolbar styles"
+
+[[patches]]
 path   = "browser/ui-fix.patch"
 reason = "Hilal custom UI style fixes and overrides"
 
