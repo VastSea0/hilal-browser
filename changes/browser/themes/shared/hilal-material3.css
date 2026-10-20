@@ -307,14 +307,14 @@
   /* ------------------------------------------------------------------
    * 5. Web view frame — floating canvas
    * ---------------------------------------------------------------- */
-  :root[windowtype="navigator:browser"]:not([customizing]):not([sizemode="fullscreen"]) #browser {
+  :root[windowtype="navigator:browser"]:not([customizing], [sizemode="fullscreen"], [inDOMFullscreen]) #browser {
     background-color: var(--surface) !important;
     padding: 0 8px 8px 8px !important;
     gap: 8px !important;
   }
 
-  :root[windowtype="navigator:browser"]:not([customizing]):not([sizemode="fullscreen"]) #tabbrowser-tabbox,
-  :root[windowtype="navigator:browser"]:not([customizing]):not([sizemode="fullscreen"]) .browserSidebarContainer {
+  :root[windowtype="navigator:browser"]:not([customizing], [sizemode="fullscreen"], [inDOMFullscreen]) #tabbrowser-tabbox,
+  :root[windowtype="navigator:browser"]:not([customizing], [sizemode="fullscreen"], [inDOMFullscreen]) .browserSidebarContainer {
     border-radius: var(--md-sys-shape-corner-large) !important;
     border: 1px solid var(--outline-variant) !important;
     overflow: hidden !important;

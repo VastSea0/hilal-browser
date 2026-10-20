@@ -1505,3 +1505,19 @@ browser[type="content"],
   margin-inline-end: auto !important;
 }
 
+
+/* Video and other DOM fullscreen: hide the shell and the content frame, as
+ * Firefox does with its own toolbars. hilal-material3.css excludes this state
+ * from its frame rules as well. */
+:root[inDOMFullscreen] :is(#hilal-header-shell, #hilal-sidebar, #hilal-horizontal-tabs) {
+  display: none !important;
+}
+
+:root[inDOMFullscreen] #browser {
+  padding: 0 !important;
+}
+
+:root[inDOMFullscreen] :is(#tabbrowser-tabbox, #tabbrowser-tabpanels, #tabbrowser-tabpanels > *, .browserContainer, .browserStack, browser) {
+  border-radius: 0 !important;
+  clip-path: none !important;
+}
