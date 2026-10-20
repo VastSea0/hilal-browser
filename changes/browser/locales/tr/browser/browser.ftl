@@ -1,49 +1,48 @@
-## Hilal Welcome Screen
 
-hilal-welcome-step-count = Adım { $current }/{ $total }
+## Hilal welcome screen
 
-hilal-welcome-brand-text = Hilal Tarayıcı
+hilal-welcome-skip = Kurulumu atla
+hilal-welcome-back = Geri
+hilal-welcome-next = Devam
+hilal-welcome-finish = Gezinmeye başla
+hilal-welcome-step = Adım { $current } / { $total }
+hilal-welcome-start = Başlayın
+hilal-welcome-intro-title = { -brand-short-name }'e hoş geldiniz
+hilal-welcome-intro-sub = Birkaç seçimden sonra gezinmeye hazırsınız.
 
-hilal-welcome-stage-0-kicker = Görünüm
-hilal-welcome-stage-0-title = Hilal'i kendinize göre ayarlayın
-hilal-welcome-stage-0-subtitle = Tema görünümünü ve vurgu rengini seçin.
+hilal-welcome-look-title = Görünümü seçin
+hilal-welcome-look-sub = Bunları daha sonra Ayarlar'dan değiştirebilirsiniz.
+hilal-welcome-theme-label = Tema
+hilal-welcome-theme-system = Sistem
+hilal-welcome-theme-light = Açık
+hilal-welcome-theme-dark = Koyu
+hilal-welcome-tabs-label = Sekmeler
+hilal-welcome-tabs-vertical = Dikey
+hilal-welcome-tabs-vertical-desc = Sekmeler solda kenar çubuğunda
+hilal-welcome-tabs-horizontal = Yatay
+hilal-welcome-tabs-horizontal-desc = Sekmeler pencerenin üstünde
 
-hilal-welcome-stage-1-kicker = Sekmeler ve Çalışma Alanları
-hilal-welcome-stage-1-title = Çalışma düzeninizi kurun
-hilal-welcome-stage-1-subtitle = Sekme yönünü seçin ve çalışma alanlarınızı oluşturun.
+hilal-welcome-privacy-title = Gizlilik ve arama
+hilal-welcome-privacy-sub = Sıkı seviyeler daha fazla izlemeyi engeller ama bazı siteleri bozabilir.
+hilal-welcome-privacy-label = Koruma seviyesi
+hilal-welcome-privacy-standard = Dengeli
+hilal-welcome-privacy-standard-desc = Sıkı izleyici koruması, yalnızca HTTPS ve izleme bağlantısı temizliği. Arama önerileri kapalı.
+hilal-welcome-privacy-strict = Sıkı
+hilal-welcome-privacy-strict-desc = Ayrıca siteleri birbirinden yalıtır ve WebRTC'yi kapatır. Bazı görüntülü aramalar çalışmayabilir.
+hilal-welcome-privacy-extreme = Maksimum
+hilal-welcome-privacy-extreme-desc = Ayrıca parmak izine karşı direnir; JavaScript, kamera, mikrofon ve konumu engeller. Geçmiş kaydedilmez. Birçok site çalışmaz.
+hilal-welcome-search-label = Arama motoru
 
-hilal-welcome-stage-2-kicker = Gizlilik ve Arama
-hilal-welcome-stage-2-title = Korumayı ve aramayı siz seçin
-hilal-welcome-stage-2-subtitle = Bir koruma profili ve varsayılan arama motorunu seçin.
-
-hilal-welcome-stage-3-kicker = Başlarken
-hilal-welcome-stage-3-title = Her şey hazır
-hilal-welcome-stage-3-subtitle = Verilerinizi içe aktarın, Hilal'i varsayılan tarayıcı yapın ya da hemen başlayın.
-
+hilal-welcome-ready-title = Neredeyse bitti
+hilal-welcome-ready-sub = Bunları şimdi ya da daha sonra Ayarlar'dan yapabilirsiniz.
+hilal-welcome-workspaces = Başlangıç çalışma alanlarını oluştur
+hilal-welcome-workspaces-desc = Kişisel, İş ve Sosyal; her birinin kendi çerezleri ve oturumları olur.
+hilal-welcome-default = { -brand-short-name }'i varsayılan tarayıcı yap
+hilal-welcome-default-desc = Diğer uygulamalardaki bağlantılar burada açılır.
+hilal-welcome-import = Başka bir tarayıcıdan içe aktar
+hilal-welcome-import-desc = Yer imleri, geçmiş ve parolalar.
+hilal-welcome-import-button = İçe aktar
 hilal-welcome-workspace-label-personal = Kişisel
 hilal-welcome-workspace-label-work = İş
 hilal-welcome-workspace-label-social = Sosyal
 
-hilal-welcome-imported-button = İçe Aktarıldı
-
-hilal-welcome-action-back = Geri
-hilal-welcome-action-continue = Devam et
-hilal-welcome-action-start = Kuruluma başla
-hilal-welcome-action-start-browsing = Hilal'i aç
-
-## Hilal Welcome - Privacy Levels
-
-hilal-welcome-privacy-standard-label = Dengeli
-hilal-welcome-privacy-standard-badge = Günlük
-hilal-welcome-privacy-standard-desc = RFP, sıkı izleme koruması, sadece HTTPS, URL temizleme, WebGL kapalı ve kapanışta çerez/önbellek temizliği.
-
-hilal-welcome-privacy-strict-label = Sıkı
-hilal-welcome-privacy-strict-badge = Daha az açık
-hilal-welcome-privacy-strict-desc = Dengeli seviyenin üzerine Birinci Taraf İzolasyonu ekler ve WebRTC'yi tamamen kapatır.
-
-hilal-welcome-privacy-extreme-label = Maksimum
-hilal-welcome-privacy-extreme-badge = Yalnızca yerel
-hilal-welcome-privacy-extreme-desc = Sıkı seviyenin üzerine JavaScript kapatma, kamera/mikrofon/konum engelleme ve kapanışta tarama geçmişi temizleme ekler.
-
-hilal-welcome-intro-title = Hilal'e hoş geldiniz
-hilal-welcome-intro-sub = Çalışma alanları ve sade Material 3 tasarımı üzerine kurulu, hızlı ve gizlilik odaklı bir web tarayıcısı.

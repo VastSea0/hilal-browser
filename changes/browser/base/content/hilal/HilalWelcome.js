@@ -2,1465 +2,648 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/* global Services, MigrationUtils, ChromeUtils, MozXULElement, gBrowser */
+/* global Services, MigrationUtils, ChromeUtils */
 
 (function () {
   "use strict";
 
-  let SearchService;
-  try {
-    SearchService = ChromeUtils.importESModule(
-      "moz-src:///toolkit/components/search/SearchService.sys.mjs"
-    ).SearchService;
-  } catch (e) {
-    try {
-      SearchService = ChromeUtils.importESModule(
-        "resource:///modules/SearchService.sys.mjs"
-      ).SearchService;
-    } catch (err) {
-      SearchService = window.SearchService;
-    }
-  }
-
-  const STAGES = [
-    { key: "appearance", title: "Appearance", kicker: "Appearance", icon: "palette" },
-    { key: "workflow", title: "Tabs & Spaces", kicker: "Workflow", icon: "view_sidebar" },
-    { key: "privacy", title: "Privacy & Search", kicker: "Protection", icon: "security" },
-    { key: "ready", title: "Getting Started", kicker: "Ready", icon: "rocket_launch" },
-  ];
-
-  const PREF_THEME_OVERRIDE = "layout.css.prefers-color-scheme.content-override";
-  const PREF_ACCENT_MODE = "hilal.theme.accentMode";
-  const PREF_GLOBAL_ACCENT = "hilal.theme.globalAccentColor";
-  const PREF_TAB_LAYOUT_MODE = "hilal.tabs.layoutMode";
-  const PREF_WORKSPACES_ENABLED = "hilal.workspaces.enabled";
-  const PREF_PINNED_PUBLIC = "hilal.workspaces.pinned.public";
-  const PREF_PRIVACY_LEVEL = "hilal.privacy.level";
-  const PREF_SEEN = "hilal.welcome-screen.seen";
-
-  const IS_HTTP_PREVIEW =
-    typeof window !== "undefined" &&
-    window.location.protocol.startsWith("http");
-
-  const BRAND_LOGO_URL = IS_HTTP_PREVIEW
-    ? "/assets/branding/about-logo@2x.png"
-    : "chrome://branding/content/about-logo@2x.png";
-
-  const TOPSITE_IMAGE_BASE = IS_HTTP_PREVIEW
-    ? "/assets/tippytop/"
-    : "chrome://activity-stream/content/data/content/tippytop/images/";
+  const { SearchService } = ChromeUtils.importESModule(
+    "moz-src:///toolkit/components/search/SearchService.sys.mjs"
+  );
 
   const HTML_NS = "http://www.w3.org/1999/xhtml";
+  const CSS_HREF = "chrome://browser/content/hilal/HilalWelcome.css";
+  const BRAND_LOGO_URL = "chrome://branding/content/about-logo@2x.png";
+  const TIPPYTOP = "chrome://activity-stream/content/data/content/tippytop/images/";
 
-  const WELCOME_CSS_HREF = IS_HTTP_PREVIEW
-    ? "/changes/browser/base/content/hilal/HilalWelcome.css"
-    : "chrome://browser/content/hilal/HilalWelcome.css";
+  const PREF_SEEN = "hilal.welcome-screen.seen";
+  const PREF_THEME = "layout.css.prefers-color-scheme.content-override";
+  const PREF_TAB_LAYOUT = "hilal.tabs.layoutMode";
+  const PREF_PRIVACY_LEVEL = "hilal.privacy.level";
+  const PREF_WORKSPACES_ENABLED = "hilal.workspaces.enabled";
 
-  const SEARCH_ENGINE_PLACEHOLDER =
-    "chrome://browser/skin/search-engine-placeholder.png";
-  const SEARCH_ENGINE_PLACEHOLDER_2X =
-    "chrome://browser/skin/search-engine-placeholder@2x.png";
+  // Values of layout.css.prefers-color-scheme.content-override.
+  const THEMES = [
+    { value: 2, key: "system", label: "System" },
+    { value: 1, key: "light", label: "Light" },
+    { value: 0, key: "dark", label: "Dark" },
+  ];
 
-  const ACCENT_COLOR_SWATCHES = [
-    { id: "blue", hex: "#0b57d0", label: "Hilal Blue" },
-    { id: "purple", hex: "#af51f5", label: "Purple" },
-    { id: "turquoise", hex: "#00c79a", label: "Turquoise" },
-    { id: "green", hex: "#51cd00", label: "Green" },
-    { id: "yellow", hex: "#ffcb00", label: "Yellow" },
-    { id: "orange", hex: "#ff9f00", label: "Orange" },
-    { id: "red", hex: "#ff613d", label: "Red" },
-    { id: "pink", hex: "#ff4bda", label: "Pink" },
+  const TAB_LAYOUTS = [
+    { value: "vertical", label: "Vertical", desc: "Tabs in a sidebar on the left" },
+    { value: "horizontal", label: "Horizontal", desc: "Tabs along the top of the window" },
   ];
 
   const PRIVACY_LEVELS = [
     {
-      key: "standard",
+      value: "standard",
       label: "Balanced",
-      badge: "Everyday",
-      description:
-        "RFP, strict tracking protection, HTTPS-only, URL cleanup, WebGL off, cookie/cache cleanup on close.",
-      l10nLabel: "hilal-welcome-privacy-standard-label",
-      l10nBadge: "hilal-welcome-privacy-standard-badge",
-      l10nDesc: "hilal-welcome-privacy-standard-desc",
+      desc: "Strict tracking protection, HTTPS-only and tracking-link cleanup. Search suggestions are off.",
     },
     {
-      key: "strict",
+      value: "strict",
       label: "Strict",
-      badge: "Less exposed",
-      description:
-        "Adds First Party Isolation on top of Balanced. WebRTC is disabled.",
-      l10nLabel: "hilal-welcome-privacy-strict-label",
-      l10nBadge: "hilal-welcome-privacy-strict-badge",
-      l10nDesc: "hilal-welcome-privacy-strict-desc",
+      desc: "Also isolates sites from each other and turns off WebRTC. Some video calls may not work.",
     },
     {
-      key: "extreme",
+      value: "extreme",
       label: "Maximum",
-      badge: "Local only",
-      description:
-        "Adds JavaScript, camera, microphone, location, and history blocking on top of Strict.",
-      l10nLabel: "hilal-welcome-privacy-extreme-label",
-      l10nBadge: "hilal-welcome-privacy-extreme-badge",
-      l10nDesc: "hilal-welcome-privacy-extreme-desc",
+      desc: "Also resists fingerprinting and blocks JavaScript, camera, microphone and location. History is not saved. Many sites will not work.",
     },
   ];
 
-  const WORKSPACE_PRESETS = [
-    {
-      key: "personal",
-      label: "Personal",
-      icon: "home",
-      workspaceColor: "blue",
-      hex: "#0b57d0",
-    },
-    {
-      key: "work",
-      label: "Work",
-      icon: "work",
-      workspaceColor: "orange",
-      hex: "#ff9f00",
-    },
-    {
-      key: "social",
-      label: "Social",
-      icon: "group",
-      workspaceColor: "pink",
-      hex: "#ff4bda",
-    },
+  const STARTER_WORKSPACES = [
+    { key: "personal", label: "Personal", color: "blue" },
+    { key: "work", label: "Work", color: "orange" },
+    { key: "social", label: "Social", color: "pink" },
   ];
 
-  const PINNED_SITE_PRESETS = [
-    {
-      key: "youtube",
-      label: "YouTube",
-      url: "https://www.youtube.com/",
-      initial: "Y",
-      color: "#ff0033",
-      iconURL: `${TOPSITE_IMAGE_BASE}youtube-com@2x.png`,
-    },
-    {
-      key: "github",
-      label: "GitHub",
-      url: "https://github.com/",
-      initial: "G",
-      color: "#24292f",
-    },
-    {
-      key: "reddit",
-      label: "Reddit",
-      url: "https://www.reddit.com/",
-      initial: "R",
-      color: "#ff4500",
-      iconURL: `${TOPSITE_IMAGE_BASE}reddit-com@2x.png`,
-    },
-    {
-      key: "google",
-      label: "Google",
-      url: "https://www.google.com/",
-      initial: "G",
-      color: "#4285f4",
-      iconURL: `${TOPSITE_IMAGE_BASE}google-com@2x.png`,
-    },
-    {
-      key: "wikipedia",
-      label: "Wikipedia",
-      url: "https://www.wikipedia.org/",
-      initial: "W",
-      color: "#ffffff",
-      iconURL: `${TOPSITE_IMAGE_BASE}wikipedia-org@2x.png`,
-    },
-    {
-      key: "twitter",
-      label: "X",
-      url: "https://twitter.com/",
-      initial: "X",
-      color: "#1da1f2",
-      iconURL: `${TOPSITE_IMAGE_BASE}twitter-com@2x.png`,
-    },
-  ];
+  const STEP_COUNT = 3;
+
+  // Small DOM builder: h("div", { class: "x", "data-l10n-id": "y" }, child, "text").
+  function h(tag, attrs = {}, ...children) {
+    const el = document.createElementNS(HTML_NS, tag);
+    for (const [name, value] of Object.entries(attrs)) {
+      if (value === false || value === null || value === undefined) {
+        continue;
+      }
+      if (name.startsWith("on") && typeof value === "function") {
+        el.addEventListener(name.slice(2), value);
+      } else {
+        el.setAttribute(name, value === true ? "" : String(value));
+      }
+    }
+    for (const child of children.flat()) {
+      if (child === null || child === undefined || child === false) {
+        continue;
+      }
+      el.append(typeof child === "string" ? document.createTextNode(child) : child);
+    }
+    return el;
+  }
 
   class HilalWelcome {
     constructor(workspacesController) {
       this._workspaces = workspacesController;
-      this._stage = 0;
+      this._step = -1;
       this._overlay = null;
       this._style = null;
       this._engines = [];
-      this._enginesReady = null;
-      this._selectedEngine = null;
 
-      const prefService = typeof Services !== "undefined" ? Services.prefs : null;
-
-      // Theme & Accent Colors (M3 Expressive)
-      this._selectedThemeMode = prefService?.getIntPref(PREF_THEME_OVERRIDE, 2) ?? 2;
-      this._selectedAccentMode = prefService?.prefHasUserValue(PREF_ACCENT_MODE)
-        ? prefService.getStringPref(PREF_ACCENT_MODE)
-        : "global";
-      // Boosts is not part of the Material shell build.
-      if (this._selectedAccentMode === "boosts") {
-        this._selectedAccentMode = "workspace";
-      }
-      this._selectedGlobalAccent = prefService?.getStringPref(PREF_GLOBAL_ACCENT, "#0b57d0") || "#0b57d0";
-
-      // Workflow & Layout
-      this._verticalTabsSelected =
-        (prefService?.getStringPref(PREF_TAB_LAYOUT_MODE, "vertical") ?? "vertical") === "vertical";
-      this._workspacesEnabledSelected = true;
-      this._pinnedPublicSelected = prefService?.getBoolPref(PREF_PINNED_PUBLIC, true) ?? true;
-      this._workspacesSelected = { personal: true, work: true, social: true };
-
-      // Privacy & Search
-      this._selectedPrivacyLevel = this._normalizePrivacyLevel(
-        prefService?.getStringPref(PREF_PRIVACY_LEVEL, "standard") || "standard"
-      );
-
-      // Getting Started
-      this._defaultBrowserSelected = false;
-      this._pinnedSitesSelected = Object.fromEntries(
-        PINNED_SITE_PRESETS.map(site => [site.key, false])
-      );
-      this._pinnedSiteTabs = {};
+      const prefs = Services.prefs;
+      this._theme = prefs.getIntPref(PREF_THEME, 2);
+      this._tabLayout =
+        prefs.getStringPref(PREF_TAB_LAYOUT, "vertical") === "horizontal"
+          ? "horizontal"
+          : "vertical";
+      const level = prefs.getStringPref(PREF_PRIVACY_LEVEL, "standard");
+      this._privacy = PRIVACY_LEVELS.some(l => l.value === level) ? level : "standard";
+      this._engine = null;
+      this._createWorkspaces = true;
+      this._makeDefault = false;
     }
 
     async start() {
-      // Optimize window size to appropriate welcome dialog dimensions if window is oversized
-      if (typeof window !== "undefined" && typeof window.resizeTo === "function") {
-        try {
-          if (!this._previousWindowDims) {
-            this._previousWindowDims = {
-              width: window.outerWidth,
-              height: window.outerHeight,
-              screenX: window.screenX,
-              screenY: window.screenY,
-              maximized:
-                typeof Ci !== "undefined" &&
-                window.windowState === Ci.nsIDOMChromeWindow?.STATE_MAXIMIZED,
-            };
-          }
-          if (window.outerWidth > 960 || window.outerHeight > 680) {
-            const targetW = 920;
-            const targetH = 650;
-            const availW = window.screen?.availWidth || 1440;
-            const availH = window.screen?.availHeight || 900;
-            const targetX = Math.max(0, Math.round((availW - targetW) / 2));
-            const targetY = Math.max(0, Math.round((availH - targetH) / 2));
-            window.resizeTo(targetW, targetH);
-            window.moveTo(targetX, targetY);
-          }
-        } catch (e) {
-          console.warn("HilalWelcome: could not adjust window size", e);
-        }
-      }
+      this._style = h("link", { id: "hilal-welcome-style", rel: "stylesheet", href: CSS_HREF });
+      (document.head || document.documentElement).appendChild(this._style);
 
-      this._injectStyles();
-      this._enterWelcomeStage();
-      this._createOverlay();
-      this._applyLiveTheme();
-      this._renderIntro();
-      this._enginesReady = this._fetchEngines();
-      await this._enginesReady;
-    }
-
-    _injectStyles() {
-      const head = document.head || document.documentElement;
-      const existing = document.getElementById("hilal-welcome-style");
-      if (existing) {
-        this._style = existing;
-        return;
-      }
-      this._style = document.createElementNS(HTML_NS, "link");
-      this._style.id = "hilal-welcome-style";
-      this._style.rel = "stylesheet";
-      this._style.href = WELCOME_CSS_HREF;
-      head.appendChild(this._style);
-    }
-
-    _enterWelcomeStage() {
+      this._overlay = h("div", {
+        id: "hilal-welcome-overlay",
+        role: "dialog",
+        "aria-modal": "true",
+        "aria-labelledby": "hw-title",
+      });
+      (document.body || document.documentElement).appendChild(this._overlay);
       document.documentElement.setAttribute("hilal-welcome-stage", "true");
+
+      this._applyTheme();
+      this._enginesReady = this._loadEngines();
+      this._render({ focus: true });
     }
 
-    _leaveWelcomeStage() {
-      document.documentElement.removeAttribute("hilal-welcome-stage");
-    }
+    // Rendering
 
-    _createOverlay() {
-      let overlay = document.getElementById("hilal-welcome-overlay");
-      if (!overlay) {
-        overlay = document.createElementNS(HTML_NS, "div");
-        overlay.id = "hilal-welcome-overlay";
-        overlay.className = "beer";
-        (document.body || document.documentElement).appendChild(overlay);
-      }
-      this._overlay = overlay;
-    }
-
-    _applyLiveTheme() {
-      if (!this._overlay) return;
-      let isDark = false;
-      if (this._selectedThemeMode === 0) {
-        isDark = true;
-      } else if (this._selectedThemeMode === 1) {
-        isDark = false;
-      } else {
-        isDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      }
-
-      this._overlay.classList.remove("light", "dark");
-      this._overlay.classList.add(isDark ? "dark" : "light");
-      this._overlay.style.colorScheme = isDark ? "dark" : "light";
-
-      if (IS_HTTP_PREVIEW && document.body) {
-        document.body.classList.remove("light", "dark");
-        document.body.classList.add(isDark ? "dark" : "light");
-      }
-
-      this._applyLiveAccentColor(isDark);
-    }
-
-    _applyLiveAccentColor(isDark) {
-      if (!this._overlay) return;
-      if (typeof isDark === "undefined") {
-        if (this._selectedThemeMode === 0) {
-          isDark = true;
-        } else if (this._selectedThemeMode === 1) {
-          isDark = false;
-        } else {
-          isDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-        }
-      }
-
-      let accent = this._selectedGlobalAccent || "#0b57d0";
-      if (this._selectedAccentMode === "workspace") {
-        accent = isDark ? "#a8c7fa" : "#0b57d0";
-      }
-
-      this._overlay.style.setProperty("--primary", accent);
-      this._overlay.style.setProperty("--primary-glow", `color-mix(in srgb, ${accent} 25%, transparent)`);
-      if (isDark) {
-        this._overlay.style.setProperty("--primary-container", `color-mix(in srgb, ${accent} 28%, #1a2234)`);
-        this._overlay.style.setProperty("--on-primary-container", `color-mix(in srgb, ${accent} 35%, #ffffff)`);
-      } else {
-        this._overlay.style.setProperty("--primary-container", `color-mix(in srgb, ${accent} 16%, #f0f4f9)`);
-        this._overlay.style.setProperty("--on-primary-container", `color-mix(in srgb, ${accent} 80%, #041e49)`);
-      }
-    }
-
-    async _fetchEngines() {
-      try {
-        if (SearchService) {
-          const list = await SearchService.getVisibleEngines();
-          this._engines = await Promise.all(
-            list
-              .filter(engine => {
-                const name = engine.name.toLowerCase();
-                return !name.includes("wikipedia") && !name.includes("ebay");
-              })
-              .map(async engine => {
-                return {
-                  name: engine.name,
-                  originalEngine: engine,
-                  iconURL: await this._getEngineIconURL(engine),
-                };
-              })
-          );
-        }
-      } catch (e) {
-        console.error("HilalWelcome: failed to fetch engines", e);
-      }
-
-      if (this._engines.length) {
-        const duckDuckGo = this._engines.find(engine =>
-          engine.name.toLowerCase().includes("duckduckgo")
-        );
-        this._selectedEngine = duckDuckGo || this._engines[0];
-      }
-
-      if (!this._engines.length) {
-        this._engines = [
-          { name: "DuckDuckGo", originalEngine: null, iconURL: "" },
-          { name: "Google", originalEngine: null, iconURL: "" },
-          { name: "Bing", originalEngine: null, iconURL: "" },
-        ];
-        this._selectedEngine = this._engines[0];
-      }
-    }
-
-    async _getEngineIconURL(engine) {
-      let url = "";
-      try {
-        if (typeof engine.getIconURL === "function") {
-          url =
-            (await engine.getIconURL(32)) ||
-            (await engine.getIconURL(16)) ||
-            (await engine.getIconURL()) ||
-            "";
-        }
-      } catch (e) {
-        console.error("HilalWelcome: failed to fetch engine icon", e);
-      }
-
-      if (!url) {
-        const iconURI = engine.iconURI || engine._iconURI;
-        url =
-          iconURI?.spec ||
-          (typeof iconURI === "string" ? iconURI : "") ||
-          engine.iconURL ||
-          engine._iconURL ||
-          this._bestIconFromMap(engine._iconMapObj) ||
-          "";
-      }
-
-      return this._sanitizeIconURL(url) || this._searchEnginePlaceholder();
-    }
-
-    _bestIconFromMap(iconMap) {
-      if (!iconMap) return "";
-      const widths = Object.keys(iconMap)
-        .map(width => parseInt(width, 10))
-        .filter(width => Number.isFinite(width))
-        .sort((a, b) => a - b);
-      if (!widths.length) return "";
-      const bestWidth = widths.find(w => w >= 32) || widths[widths.length - 1];
-      return iconMap[bestWidth] || "";
-    }
-
-    _searchEnginePlaceholder() {
-      return window.devicePixelRatio > 1
-        ? SEARCH_ENGINE_PLACEHOLDER_2X
-        : SEARCH_ENGINE_PLACEHOLDER;
-    }
-
-    _sanitizeIconURL(url) {
-      if (!url) return "";
-      try {
-        const parsed = typeof Services !== "undefined" ? Services.io.newURI(url) : new URL(url);
-        const scheme = parsed.scheme || parsed.protocol?.replace(":", "");
-        const safeSchemes = ["http", "https", "data", "chrome", "resource"];
-        if (safeSchemes.includes(scheme)) return url;
-      } catch (e) {
-        const cleanUrl = String(url).trim().toLowerCase();
-        if (/^(https?|data|chrome|resource):/i.test(cleanUrl)) return url;
-      }
-      return "";
-    }
-
-    _setHTML(element, markup) {
-      if (!element) return;
-      element.replaceChildren(this._parseFragment(markup));
-    }
-
-    _parseFragment(markup) {
-      const doc = new DOMParser().parseFromString(markup, "text/html");
-      const frag = document.createDocumentFragment();
-      while (doc.body.firstChild) {
-        frag.appendChild(document.adoptNode(doc.body.firstChild));
-      }
-      return frag;
-    }
-
-    _renderIntro() {
-      if (!this._overlay) return;
-
-      const markup = `
-        <div class="hw-overlay-center">
-          <header class="hw-header hw-intro-header">
-            <div class="hw-header-left">
-              <div class="hw-header-traffic-spacer"></div>
-              <div class="hw-header-brand">
-                <img src="${BRAND_LOGO_URL}" class="hw-header-logo" alt="" />
-                <span class="hw-header-title" data-l10n-id="hilal-welcome-brand-text">Hilal Browser</span>
-              </div>
-            </div>
-            <div class="hw-header-right">
-              <button type="button" class="hw-btn-icon" id="hw-intro-skip-btn" title="Skip" aria-label="Skip">
-                <i>close</i>
-              </button>
-            </div>
-          </header>
-
-          <article class="hw-card hw-intro-card hw-stage-enter" role="dialog" aria-modal="true" aria-labelledby="hw-intro-title">
-            <div class="hw-intro-logo-wrap">
-              <img src="${BRAND_LOGO_URL}" class="hw-intro-logo" alt="" />
-            </div>
-            <div class="hw-badge-chip">
-              <i>auto_awesome</i>
-              <span>Hilal Browser</span>
-            </div>
-            <h2 class="hw-intro-heading" id="hw-intro-title" data-l10n-id="hilal-welcome-intro-title">Welcome to Hilal</h2>
-            <p class="hw-intro-subtitle" data-l10n-id="hilal-welcome-intro-sub">A fast, private, and expressive web browser built around workspaces and solid Material 3 design.</p>
-            
-            <div class="hw-intro-pills">
-              <div class="hw-pill-feature"><i>palette</i><span>Expressive Theming</span></div>
-              <div class="hw-pill-feature"><i>view_sidebar</i><span>Isolated Workspaces</span></div>
-              <div class="hw-pill-feature"><i>security</i><span>Zero Tracker Leaks</span></div>
-            </div>
-
-            <div class="hw-intro-cta-wrap">
-              <button type="button" class="hw-btn-primary" id="hw-start-btn">
-                <span data-l10n-id="hilal-welcome-action-start">Get Started</span>
-                <i>arrow_forward</i>
-              </button>
-            </div>
-          </article>
-        </div>
-      `;
-      this._setHTML(this._overlay, markup);
+    _render({ focus = false } = {}) {
+      const main = h("div", { class: "hw-main" }, this._stepContent());
+      this._overlay.replaceChildren(...[this._header(), main, this._footer()].filter(Boolean));
       this._attachTrafficLights();
-      document.getElementById("hw-intro-skip-btn")?.addEventListener("click", () => {
-        this._dismiss();
-      });
-      document.getElementById("hw-start-btn")?.addEventListener("click", () => {
-        this._beginFlow();
-      });
+      if (focus) {
+        this._overlay.querySelector(".hw-primary")?.focus();
+      }
     }
 
-    async _beginFlow() {
-      const button = document.getElementById("hw-start-btn");
-      if (button) button.disabled = true;
-
-      try {
-        await this._enginesReady;
-      } catch (e) {
-        console.error("HilalWelcome: engine preload failed", e);
-      }
-
-      this._stage = 0;
-      this._initFlowShell();
-      this._renderStage();
+    _header() {
+      const progress = h(
+        "div",
+        { class: "hw-progress", "aria-hidden": "true" },
+        Array.from({ length: STEP_COUNT }, (_, i) =>
+          h("span", { class: i <= this._step ? "hw-progress-bar is-done" : "hw-progress-bar" })
+        )
+      );
+      return h(
+        "div",
+        { class: "hw-header" },
+        h("div", { class: "hw-traffic-slot" }),
+        // Keep the middle grid cell filled so "Skip" stays on the right.
+        this._step >= 0 ? progress : h("div"),
+        h(
+          "button",
+          { type: "button", class: "hw-link", "data-l10n-id": "hilal-welcome-skip", onclick: () => this._dismiss() },
+          "Skip setup"
+        )
+      );
     }
 
-    _initFlowShell() {
-      const markup = `
-        <div class="hw-overlay-center">
-          <header class="hw-header">
-            <div class="hw-header-left">
-              <div class="hw-header-traffic-spacer"></div>
-              <div class="hw-header-brand">
-                <img src="${BRAND_LOGO_URL}" class="hw-header-logo" alt="" />
-                <span class="hw-header-title" data-l10n-id="hilal-welcome-brand-text">Hilal Browser</span>
-              </div>
-            </div>
-            <div class="hw-stepper-wrap" id="hw-stepper"></div>
-            <div class="hw-header-right">
-              <button type="button" class="hw-btn-icon" id="hw-skip-btn" title="Skip" aria-label="Skip">
-                <i>close</i>
-              </button>
-            </div>
-          </header>
-
-          <article class="hw-card hw-flow-card" role="dialog" aria-modal="true" aria-labelledby="hw-stage-title">
-            <div id="hw-stage-container" class="hw-stage-scroll hw-stage-enter">
-              <div id="hw-stage-head" class="hw-stage-head"></div>
-              <div id="hw-stage-body" class="hw-stage-body"></div>
-            </div>
-
-            <footer class="hw-footer">
-              <nav id="hw-footer-nav" class="hw-footer-nav"></nav>
-            </footer>
-          </article>
-        </div>
-      `;
-      this._setHTML(this._overlay, markup);
-      this._attachTrafficLights();
-
-      document.getElementById("hw-skip-btn")?.addEventListener("click", () => {
-        this._dismiss();
-      });
+    _footer() {
+      if (this._step < 0) {
+        return null;
+      }
+      const last = this._step === STEP_COUNT - 1;
+      return h(
+        "div",
+        { class: "hw-footer" },
+        h(
+          "div",
+          { class: "hw-footer-inner" },
+          h(
+            "button",
+            {
+              type: "button",
+              class: "hw-secondary",
+              "data-l10n-id": "hilal-welcome-back",
+              onclick: () => this._go(this._step - 1),
+            },
+            "Back"
+          ),
+          h(
+            "span",
+            {
+              class: "hw-step-count",
+              "data-l10n-id": "hilal-welcome-step",
+              "data-l10n-args": JSON.stringify({ current: this._step + 1, total: STEP_COUNT }),
+            },
+            `Step ${this._step + 1} of ${STEP_COUNT}`
+          ),
+          h(
+            "button",
+            {
+              type: "button",
+              class: "hw-primary",
+              "data-l10n-id": last ? "hilal-welcome-finish" : "hilal-welcome-next",
+              onclick: () => (last ? this._finish() : this._go(this._step + 1)),
+            },
+            last ? "Start browsing" : "Continue"
+          )
+        )
+      );
     }
 
-    _renderStage() {
-      if (!this._overlay) return;
-
-      if (!document.getElementById("hw-stage-body")) {
-        this._initFlowShell();
-      }
-
-      // Stepper
-      const stepperEl = document.getElementById("hw-stepper");
-      if (stepperEl) {
-        this._setHTML(stepperEl, this._stepperHTML());
-      }
-
-      // Stage Header
-      const headEl = document.getElementById("hw-stage-head");
-      if (headEl) {
-        this._setHTML(headEl, this._stageCopyHTML());
-      }
-
-      // Stage Body
-      const bodyEl = document.getElementById("hw-stage-body");
-      if (bodyEl) {
-        this._setHTML(bodyEl, this._stageHTML());
-      }
-
-      // Footer Navigation
-      const footerNavEl = document.getElementById("hw-footer-nav");
-      if (footerNavEl) {
-        this._setHTML(footerNavEl, this._actionsHTML());
-      }
-
-      // Entrance animation
-      const containerEl = document.getElementById("hw-stage-container");
-      if (containerEl) {
-        containerEl.classList.remove("hw-stage-enter");
-        void containerEl.offsetWidth;
-        containerEl.classList.add("hw-stage-enter");
-      }
-
-      this._attachStageListeners();
-    }
-
-    _stepperHTML() {
-      const current = this._stage;
-      const total = STAGES.length;
-      return `
-        <div class="hw-stepper">
-          ${STAGES.map((s, idx) => {
-            const isDone = idx < current;
-            const isCurrent = idx === current;
-            let stateClass = isCurrent ? "hw-step-active" : isDone ? "hw-step-done" : "hw-step-pending";
-            return `
-              <div class="hw-step-item ${stateClass}" title="${s.title}">
-                <div class="hw-step-bar"></div>
-              </div>
-            `;
-          }).join("")}
-          <div class="hw-step-badge">
-            <span data-l10n-id="hilal-welcome-step-count" data-l10n-args='{"current": ${current + 1}, "total": ${total}}'>${current + 1} / ${total}</span>
-          </div>
-        </div>
-      `;
-    }
-
-    _stageCopyHTML() {
-      const stageCopies = [
-        {
-          kicker: "Appearance",
-          title: "Make Hilal uniquely yours",
-          subtitle: "Choose your preferred theme appearance and accent color palette.",
-          l10nKicker: "hilal-welcome-stage-0-kicker",
-          l10nTitle: "hilal-welcome-stage-0-title",
-          l10nSub: "hilal-welcome-stage-0-subtitle",
-        },
-        {
-          kicker: "Workflow & Tabs",
-          title: "Organize your workflow",
-          subtitle: "Select your tab orientation and set up clean workspace contexts.",
-          l10nKicker: "hilal-welcome-stage-1-kicker",
-          l10nTitle: "hilal-welcome-stage-1-title",
-          l10nSub: "hilal-welcome-stage-1-subtitle",
-        },
-        {
-          kicker: "Privacy & Search",
-          title: "Protected and powered by your choice",
-          subtitle: "Pick a protection profile and configure your primary search engine.",
-          l10nKicker: "hilal-welcome-stage-2-kicker",
-          l10nTitle: "hilal-welcome-stage-2-title",
-          l10nSub: "hilal-welcome-stage-2-subtitle",
-        },
-        {
-          kicker: "Getting Started",
-          title: "You're all set",
-          subtitle: "Import existing data, set your default browser, or jump straight in.",
-          l10nKicker: "hilal-welcome-stage-3-kicker",
-          l10nTitle: "hilal-welcome-stage-3-title",
-          l10nSub: "hilal-welcome-stage-3-subtitle",
-        },
-      ];
-
-      const copy = stageCopies[this._stage] || stageCopies[0];
-      return `
-        <div class="hw-badge-chip" data-l10n-id="${copy.l10nKicker}">${copy.kicker}</div>
-        <h3 class="hw-stage-heading" id="hw-stage-title" data-l10n-id="${copy.l10nTitle}">${copy.title}</h3>
-        <p class="hw-stage-subheading" data-l10n-id="${copy.l10nSub}">${copy.subtitle}</p>
-      `;
-    }
-
-    _stageHTML() {
-      switch (this._stage) {
+    _stepContent() {
+      switch (this._step) {
         case 0:
-          return this._stageAppearanceHTML();
+          return this._lookStep();
         case 1:
-          return this._stageWorkflowHTML();
+          return this._privacyStep();
         case 2:
-          return this._stagePrivacyAndSearchHTML();
-        case 3:
-          return this._stageReadyHTML();
+          return this._readyStep();
+        default:
+          return this._introStep();
       }
-      return "";
     }
 
-    _actionsHTML() {
-      const isFirst = this._stage === 0;
-      const isLast = this._stage === STAGES.length - 1;
-
-      return `
-        <button type="button" class="hw-btn-secondary" id="hw-prev-btn"${isFirst ? ' disabled="disabled"' : ""}>
-          <i>arrow_back</i>
-          <span data-l10n-id="hilal-welcome-action-back">Back</span>
-        </button>
-        <div class="hw-footer-spacer"></div>
-        <button type="button" class="hw-btn-primary" id="${isLast ? "hw-finish-btn" : "hw-next-btn"}">
-          <span data-l10n-id="${isLast ? "hilal-welcome-action-start-browsing" : "hilal-welcome-action-continue"}">${isLast ? "Start Browsing" : "Continue"}</span>
-          <i>${isLast ? "rocket_launch" : "arrow_forward"}</i>
-        </button>
-      `;
+    _title(id, text, subId, subText) {
+      return [
+        h("h1", { id: "hw-title", class: "hw-title", "data-l10n-id": id }, text),
+        subId ? h("p", { class: "hw-subtitle", "data-l10n-id": subId }, subText) : null,
+      ];
     }
 
-    /* ----------------------------------------------------------
-       Stage 0: Appearance (Theme & Accent Color)
-       ---------------------------------------------------------- */
-
-    _stageAppearanceHTML() {
-      const themeMode = this._selectedThemeMode;
-      const accentMode = this._selectedAccentMode;
-      const currentGlobalAccent = (this._selectedGlobalAccent || "#0b57d0").toLowerCase();
-
-      return `
-        <div class="hw-section-block">
-          <div class="hw-section-title-wrap">
-            <span class="hw-section-title">Theme Mode</span>
-            <span class="hw-section-desc">Choose between light, dark, or system-synchronized appearance.</span>
-          </div>
-
-          <div class="hw-grid hw-grid-3">
-            <div class="hw-tile" data-theme-choice="1">
-              <div class="hw-tile-top">
-                <div class="hw-tile-icon-circle"><i>light_mode</i></div>
-                <div class="hw-tile-spacer"></div>
-                <label class="hw-radio">
-                  <input type="radio" name="hw-theme-mode" value="1"${themeMode === 1 ? ' checked="checked"' : ""}/>
-                  <span></span>
-                </label>
-              </div>
-              <div class="hw-tile-title">Light</div>
-              <p class="hw-tile-desc">Crisp, solid light tonal surfaces.</p>
-            </div>
-
-            <div class="hw-tile" data-theme-choice="0">
-              <div class="hw-tile-top">
-                <div class="hw-tile-icon-circle"><i>dark_mode</i></div>
-                <div class="hw-tile-spacer"></div>
-                <label class="hw-radio">
-                  <input type="radio" name="hw-theme-mode" value="0"${themeMode === 0 ? ' checked="checked"' : ""}/>
-                  <span></span>
-                </label>
-              </div>
-              <div class="hw-tile-title">Dark</div>
-              <p class="hw-tile-desc">Deep midnight tones for comfortable viewing.</p>
-            </div>
-
-            <div class="hw-tile" data-theme-choice="2">
-              <div class="hw-tile-top">
-                <div class="hw-tile-icon-circle"><i>brightness_auto</i></div>
-                <div class="hw-tile-spacer"></div>
-                <label class="hw-radio">
-                  <input type="radio" name="hw-theme-mode" value="2"${themeMode === 2 ? ' checked="checked"' : ""}/>
-                  <span></span>
-                </label>
-              </div>
-              <div class="hw-tile-title">System</div>
-              <p class="hw-tile-desc">Seamlessly adapts to your operating system.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="hw-section-block hw-section-gap">
-          <div class="hw-section-title-wrap">
-            <span class="hw-section-title">Accent Color</span>
-            <span class="hw-section-desc">Select how the browser colors highlights, buttons, and active workspace badges.</span>
-          </div>
-
-          <div class="hw-segmented-bar">
-            <button type="button" class="hw-segment-btn${accentMode === "workspace" ? " active" : ""}" data-accent-mode="workspace">
-              <i>stacks</i>
-              <span>Workspace Sync</span>
-            </button>
-            <button type="button" class="hw-segment-btn${accentMode === "global" ? " active" : ""}" data-accent-mode="global">
-              <i>palette</i>
-              <span>Global Accent</span>
-            </button>
-          </div>
-
-          <div class="hw-accent-swatches-box" id="hw-swatches-panel"${accentMode === "workspace" ? ' style="display: none;"' : ""}>
-            <div class="hw-swatches-label">Choose primary color swatch:</div>
-            <div class="hw-swatches-row">
-              ${ACCENT_COLOR_SWATCHES.map(swatch => {
-                const isSelected = currentGlobalAccent === swatch.hex.toLowerCase();
-                return `
-                  <button type="button" class="hw-swatch-circle" data-swatch-hex="${swatch.hex}" style="background-color: ${swatch.hex} !important; --swatch-color: ${swatch.hex};"${isSelected ? ' selected="true"' : ""} title="${swatch.label}">
-                    ${isSelected ? `<i>check</i>` : ""}
-                  </button>
-                `;
-              }).join("")}
-              <label class="hw-custom-color-wrap" title="Custom color">
-                <i>colorize</i>
-                <input type="color" id="hw-custom-color-input" value="${currentGlobalAccent}" />
-              </label>
-            </div>
-          </div>
-        </div>
-      `;
+    _introStep() {
+      return h(
+        "div",
+        { class: "hw-column hw-intro" },
+        h("img", { class: "hw-logo", src: BRAND_LOGO_URL, alt: "" }),
+        this._title(
+          "hilal-welcome-intro-title",
+          "Welcome to Hilal",
+          "hilal-welcome-intro-sub",
+          "A few choices and you are ready to browse."
+        ),
+        h(
+          "button",
+          { type: "button", class: "hw-primary", "data-l10n-id": "hilal-welcome-start", onclick: () => this._go(0) },
+          "Get started"
+        )
+      );
     }
 
-    /* ----------------------------------------------------------
-       Stage 1: Workflow (Tab Orientation & Starter Workspaces)
-       ---------------------------------------------------------- */
-
-    _stageWorkflowHTML() {
-      const vertical = this._verticalTabsSelected;
-
-      return `
-        <div class="hw-section-block">
-          <div class="hw-section-title-wrap">
-            <span class="hw-section-title">Tab Orientation</span>
-            <span class="hw-section-desc">Choose whether tabs reside in the modern sidebar or classic horizontal top bar.</span>
-          </div>
-
-          <div class="hw-grid hw-grid-2">
-            <div class="hw-tile" data-tab-layout="vertical">
-              <div class="hw-tile-top">
-                <div class="hw-tile-icon-circle"><i>view_sidebar</i></div>
-                <div class="hw-tile-spacer"></div>
-                <span class="hw-badge-chip-small primary">Recommended</span>
-                <label class="hw-radio" style="margin-left: 8px;">
-                  <input type="radio" name="hw-tab-choice" value="vertical"${vertical ? ' checked="checked"' : ""}/>
-                  <span></span>
-                </label>
-              </div>
-              <div class="hw-tile-title">Vertical Tabs</div>
-              <p class="hw-tile-desc">Sidebar tabs for cleaner multitasking on widescreen monitors.</p>
-            </div>
-
-            <div class="hw-tile" data-tab-layout="horizontal">
-              <div class="hw-tile-top">
-                <div class="hw-tile-icon-circle"><i>tab</i></div>
-                <div class="hw-tile-spacer"></div>
-                <span class="hw-badge-chip-small">Classic</span>
-                <label class="hw-radio" style="margin-left: 8px;">
-                  <input type="radio" name="hw-tab-choice" value="horizontal"${!vertical ? ' checked="checked"' : ""}/>
-                  <span></span>
-                </label>
-              </div>
-              <div class="hw-tile-title">Horizontal Tabs</div>
-              <p class="hw-tile-desc">Familiar top tab strip across the browser window.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="hw-section-block hw-section-gap">
-          <div class="hw-section-title-wrap">
-            <span class="hw-section-title">Starter Workspaces</span>
-            <span class="hw-section-desc">Workspaces keep cookies, accounts, and tabs isolated so your work and personal life never mix.</span>
-          </div>
-
-          <div class="hw-grid hw-grid-3">
-            ${WORKSPACE_PRESETS.map(preset => {
-              const active = this._workspacesSelected[preset.key];
-              return `
-                <div class="hw-tile hw-tile-compact" data-starter-ws="${preset.key}">
-                  <div class="hw-tile-row">
-                    <div class="hw-tile-icon-circle" style="color: ${preset.hex};"><i>${preset.icon}</i></div>
-                    <div class="hw-tile-label-wrap">
-                      <div class="hw-tile-title hw-tile-title-compact">${preset.label}</div>
-                      <span class="hw-tile-sub">Isolated space</span>
-                    </div>
-                    <div class="hw-tile-spacer"></div>
-                    <label class="hw-checkbox">
-                      <input type="checkbox"${active ? ' checked="checked"' : ""}/>
-                      <span></span>
-                    </label>
-                  </div>
-                </div>
-              `;
-            }).join("")}
-          </div>
-        </div>
-      `;
+    _lookStep() {
+      return h(
+        "div",
+        { class: "hw-column" },
+        this._title(
+          "hilal-welcome-look-title",
+          "Choose your look",
+          "hilal-welcome-look-sub",
+          "You can change these later in Settings."
+        ),
+        this._group(
+          "hilal-welcome-theme-label",
+          "Theme",
+          h(
+            "div",
+            { class: "hw-tiles hw-tiles-3", role: "radiogroup" },
+            THEMES.map(theme =>
+              this._tile({
+                selected: this._theme === theme.value,
+                preview: h("span", { class: `hw-preview hw-preview-${theme.key}` }),
+                labelId: `hilal-welcome-theme-${theme.key}`,
+                label: theme.label,
+                onSelect: () => {
+                  this._theme = theme.value;
+                  this._applyTheme();
+                  this._render();
+                },
+              })
+            )
+          )
+        ),
+        this._group(
+          "hilal-welcome-tabs-label",
+          "Tabs",
+          h(
+            "div",
+            { class: "hw-tiles hw-tiles-2", role: "radiogroup" },
+            TAB_LAYOUTS.map(layout =>
+              this._tile({
+                selected: this._tabLayout === layout.value,
+                preview: h("span", { class: `hw-preview hw-preview-${layout.value}` }, h("span"), h("span")),
+                labelId: `hilal-welcome-tabs-${layout.value}`,
+                label: layout.label,
+                descId: `hilal-welcome-tabs-${layout.value}-desc`,
+                desc: layout.desc,
+                onSelect: () => {
+                  this._tabLayout = layout.value;
+                  this._render();
+                },
+              })
+            )
+          )
+        )
+      );
     }
 
-    /* ----------------------------------------------------------
-       Stage 2: Privacy & Search
-       ---------------------------------------------------------- */
-
-    _stagePrivacyAndSearchHTML() {
-      const currentLevel = this._selectedPrivacyLevel;
-      const icons = { standard: "verified_user", strict: "security", extreme: "lock" };
-
-      return `
-        <div class="hw-section-block">
-          <div class="hw-section-title-wrap">
-            <span class="hw-section-title">Privacy Protection Profile</span>
-            <span class="hw-section-desc">Hilal enforces zero tracking by default; choose how strictly tracking surfaces are closed.</span>
-          </div>
-
-          <div class="hw-grid hw-grid-3">
-            ${PRIVACY_LEVELS.map(level => {
-              const isSelected = currentLevel === level.key;
-              return `
-                <div class="hw-tile" data-privacy-choice="${level.key}">
-                  <div class="hw-tile-top">
-                    <div class="hw-tile-icon-circle"><i>${icons[level.key]}</i></div>
-                    <div class="hw-tile-spacer"></div>
-                    <span class="hw-badge-chip-small${level.key === "standard" ? " primary" : ""}">${level.badge}</span>
-                    <label class="hw-radio" style="margin-left: 8px;">
-                      <input type="radio" name="hw-privacy-choice" value="${level.key}"${isSelected ? ' checked="checked"' : ""}/>
-                      <span></span>
-                    </label>
-                  </div>
-                  <div class="hw-tile-title">${level.label}</div>
-                  <p class="hw-tile-desc">${level.description}</p>
-                </div>
-              `;
-            }).join("")}
-          </div>
-        </div>
-
-        <div class="hw-section-block hw-section-gap">
-          <div class="hw-section-title-wrap">
-            <span class="hw-section-title">Default Search Engine</span>
-            <span class="hw-section-desc">The search provider used when you type into the unified address bar.</span>
-          </div>
-
-          <div class="hw-grid hw-grid-3">
-            ${this._engines.map((engine, idx) => {
-              const isActive = this._selectedEngine?.name === engine.name;
-              const isDuckDuckGo = engine.name.toLowerCase().includes("duckduckgo");
-              return `
-                <div class="hw-tile hw-tile-compact" data-engine-choice="${idx}">
-                  <div class="hw-tile-row">
-                    <div class="hw-engine-icon-wrap">${this._engineIconHTML(engine)}</div>
-                    <div class="hw-tile-label-wrap">
-                      <div class="hw-tile-title hw-tile-title-compact">${this._escapeHTML(engine.name)}</div>
-                      <span class="hw-tile-sub">${isDuckDuckGo ? "Privacy-first" : "Direct search"}</span>
-                    </div>
-                    <div class="hw-tile-spacer"></div>
-                    <label class="hw-radio">
-                      <input type="radio" name="hw-engine-choice" value="${idx}"${isActive ? ' checked="checked"' : ""}/>
-                      <span></span>
-                    </label>
-                  </div>
-                </div>
-              `;
-            }).join("")}
-          </div>
-        </div>
-      `;
+    _privacyStep() {
+      const engines = this._engines.length
+        ? h(
+            "div",
+            { class: "hw-list hw-list-grid", role: "radiogroup" },
+            this._engines.map(engine =>
+              this._row({
+                selected: this._engine === engine,
+                icon: engine.iconURL ? h("img", { class: "hw-row-icon", src: engine.iconURL, alt: "" }) : null,
+                label: engine.name,
+                onSelect: () => {
+                  this._engine = engine;
+                  this._render();
+                },
+              })
+            )
+          )
+        : null;
+      return h(
+        "div",
+        { class: "hw-column" },
+        this._title(
+          "hilal-welcome-privacy-title",
+          "Privacy and search",
+          "hilal-welcome-privacy-sub",
+          "Stricter levels block more tracking but can break some sites."
+        ),
+        this._group(
+          "hilal-welcome-privacy-label",
+          "Protection level",
+          h(
+            "div",
+            { class: "hw-list", role: "radiogroup" },
+            PRIVACY_LEVELS.map(level =>
+              this._row({
+                selected: this._privacy === level.value,
+                labelId: `hilal-welcome-privacy-${level.value}`,
+                label: level.label,
+                descId: `hilal-welcome-privacy-${level.value}-desc`,
+                desc: level.desc,
+                onSelect: () => {
+                  this._privacy = level.value;
+                  this._render();
+                },
+              })
+            )
+          )
+        ),
+        engines ? this._group("hilal-welcome-search-label", "Search engine", engines) : null
+      );
     }
 
-    /* ----------------------------------------------------------
-       Stage 3: Getting Started (Import, Default, Pinned Tabs)
-       ---------------------------------------------------------- */
-
-    _stageReadyHTML() {
-      const themeLabel = this._selectedThemeMode === 1 ? "Light" : this._selectedThemeMode === 0 ? "Dark" : "System";
-      const tabsLabel = this._verticalTabsSelected ? "Vertical" : "Horizontal";
-      const privacyLabel = PRIVACY_LEVELS.find(l => l.key === this._selectedPrivacyLevel)?.label || "Balanced";
-      const engineName = this._selectedEngine?.name || "DuckDuckGo";
-
-      return `
-        <div class="hw-summary-banner">
-          <div class="hw-summary-icon"><i>rocket_launch</i></div>
-          <div class="hw-summary-text">
-            <span class="hw-summary-title">Configuration Summary</span>
-            <div class="hw-summary-chips">
-              <span class="hw-pill-feature"><i>palette</i>${themeLabel} Mode</span>
-              <span class="hw-pill-feature"><i>view_sidebar</i>${tabsLabel} Tabs</span>
-              <span class="hw-pill-feature"><i>security</i>${privacyLabel} Privacy</span>
-              <span class="hw-pill-feature"><i>search</i>${this._escapeHTML(engineName)}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="hw-section-block hw-section-gap">
-          <div class="hw-grid hw-grid-2">
-            <div class="hw-row-card">
-              <div class="hw-row-icon"><i>sync</i></div>
-              <div class="hw-row-content">
-                <div class="hw-row-title">Import Browser Data</div>
-                <p class="hw-row-desc">Bring bookmarks & logins.</p>
-              </div>
-              <button type="button" class="hw-btn-secondary" id="hw-import-btn">
-                <span>Import</span>
-                <i>arrow_forward</i>
-              </button>
-            </div>
-
-            <div class="hw-row-card">
-              <div class="hw-row-icon"><i>home</i></div>
-              <div class="hw-row-content">
-                <div class="hw-row-title">Set as Default Browser</div>
-                <p class="hw-row-desc">Open links in Hilal.</p>
-              </div>
-              <label class="hw-switch">
-                <input type="checkbox" id="hw-default-browser-toggle"${this._defaultBrowserSelected ? ' checked="checked"' : ""}/>
-                <span></span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="hw-section-block hw-section-gap">
-          <div class="hw-section-title-wrap">
-            <span class="hw-section-title">Quick-Access Pinned Tabs</span>
-            <span class="hw-section-desc">Pin your daily essentials so they are always ready when you launch the browser.</span>
-          </div>
-
-          <div class="hw-grid hw-grid-3">
-            ${PINNED_SITE_PRESETS.map(site => {
-              const isChecked = this._pinnedSitesSelected[site.key];
-              return `
-                <div class="hw-tile hw-tile-compact" data-pinned-site="${site.key}">
-                  <div class="hw-tile-row">
-                    ${site.iconURL
-                      ? `<img src="${this._escapeHTML(site.iconURL)}" class="hw-pinned-icon" alt="" />`
-                      : `<div class="hw-pinned-avatar" style="background-color: ${site.color};">${site.initial}</div>`
-                    }
-                    <div class="hw-tile-label-wrap">
-                      <div class="hw-tile-title hw-tile-title-compact">${this._escapeHTML(site.label)}</div>
-                    </div>
-                    <div class="hw-tile-spacer"></div>
-                    <label class="hw-checkbox">
-                      <input type="checkbox"${isChecked ? ' checked="checked"' : ""}/>
-                      <span></span>
-                    </label>
-                  </div>
-                </div>
-              `;
-            }).join("")}
-          </div>
-        </div>
-      `;
+    _readyStep() {
+      return h(
+        "div",
+        { class: "hw-column" },
+        this._title(
+          "hilal-welcome-ready-title",
+          "Almost done",
+          "hilal-welcome-ready-sub",
+          "Set these up now or later from Settings."
+        ),
+        h(
+          "div",
+          { class: "hw-list" },
+          this._switchRow({
+            checked: this._createWorkspaces,
+            labelId: "hilal-welcome-workspaces",
+            label: "Create starter workspaces",
+            descId: "hilal-welcome-workspaces-desc",
+            desc: "Personal, Work and Social, each with its own cookies and logins.",
+            onToggle: value => (this._createWorkspaces = value),
+          }),
+          this._switchRow({
+            checked: this._makeDefault,
+            labelId: "hilal-welcome-default",
+            label: "Make Hilal your default browser",
+            descId: "hilal-welcome-default-desc",
+            desc: "Links from other apps will open here.",
+            onToggle: value => (this._makeDefault = value),
+          }),
+          h(
+            "div",
+            { class: "hw-row hw-row-static" },
+            this._rowText("hilal-welcome-import", "Import from another browser", "hilal-welcome-import-desc", "Bookmarks, history and passwords."),
+            h(
+              "button",
+              { type: "button", class: "hw-secondary", "data-l10n-id": "hilal-welcome-import-button", onclick: () => this._import() },
+              "Import"
+            )
+          )
+        )
+      );
     }
 
-    /* ----------------------------------------------------------
-       Interactive Listeners
-       ---------------------------------------------------------- */
+    // Controls
 
-    _attachStageListeners() {
-      const onClick = (id, fn) => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener("click", fn);
-      };
+    _group(labelId, label, content) {
+      return h(
+        "div",
+        { class: "hw-group" },
+        h("h2", { class: "hw-group-label", "data-l10n-id": labelId }, label),
+        content
+      );
+    }
 
-      onClick("hw-next-btn", () => this._next());
-      onClick("hw-prev-btn", () => this._prev());
-      onClick("hw-finish-btn", () => this._finish());
+    _rowText(labelId, label, descId, desc) {
+      return h(
+        "span",
+        { class: "hw-row-text" },
+        h("span", { class: "hw-row-label", "data-l10n-id": labelId }, label),
+        desc ? h("span", { class: "hw-row-desc", "data-l10n-id": descId }, desc) : null
+      );
+    }
 
-      // Stage 0: Theme Mode
-      const themeTiles = this._overlay.querySelectorAll("[data-theme-choice]");
-      themeTiles.forEach(tile => {
-        tile.addEventListener("click", () => {
-          const modeVal = parseInt(tile.dataset.themeChoice, 10);
-          this._selectedThemeMode = modeVal;
-          const radio = tile.querySelector('input[type="radio"]');
-          if (radio) radio.checked = true;
-          this._applyLiveTheme();
-        });
+    _tile({ selected, preview, labelId, label, descId, desc, onSelect }) {
+      return h(
+        "button",
+        {
+          type: "button",
+          role: "radio",
+          "aria-checked": selected ? "true" : "false",
+          class: selected ? "hw-tile is-selected" : "hw-tile",
+          onclick: onSelect,
+        },
+        preview,
+        this._rowText(labelId, label, descId, desc)
+      );
+    }
+
+    _row({ selected, icon, labelId, label, descId, desc, onSelect }) {
+      return h(
+        "button",
+        {
+          type: "button",
+          role: "radio",
+          "aria-checked": selected ? "true" : "false",
+          class: selected ? "hw-row is-selected" : "hw-row",
+          onclick: onSelect,
+        },
+        h("span", { class: "hw-radio", "aria-hidden": "true" }),
+        icon,
+        labelId ? this._rowText(labelId, label, descId, desc) : h("span", { class: "hw-row-text" }, h("span", { class: "hw-row-label" }, label))
+      );
+    }
+
+    _switchRow({ checked, labelId, label, descId, desc, onToggle }) {
+      const row = h(
+        "button",
+        {
+          type: "button",
+          role: "switch",
+          "aria-checked": checked ? "true" : "false",
+          class: "hw-row",
+        },
+        this._rowText(labelId, label, descId, desc),
+        h("span", { class: "hw-switch", "aria-hidden": "true" })
+      );
+      row.addEventListener("click", () => {
+        const value = row.getAttribute("aria-checked") !== "true";
+        row.setAttribute("aria-checked", value ? "true" : "false");
+        onToggle(value);
       });
+      return row;
+    }
 
-      // Stage 0: Accent Mode Segmented Button
-      const segmentBtns = this._overlay.querySelectorAll("[data-accent-mode]");
-      segmentBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-          const mode = btn.dataset.accentMode;
-          this._selectedAccentMode = mode;
-          segmentBtns.forEach(b => b.classList.toggle("active", b.dataset.accentMode === mode));
-          const swatchesBox = document.getElementById("hw-swatches-panel");
-          if (swatchesBox) {
-            swatchesBox.style.display = (mode === "workspace") ? "none" : "block";
-          }
-          this._applyLiveAccentColor();
-        });
-      });
+    // State
 
-      // Stage 0: Swatch Selection
-      const swatchBtns = this._overlay.querySelectorAll("[data-swatch-hex]");
-      swatchBtns.forEach(swatch => {
-        swatch.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const hex = swatch.dataset.swatchHex;
-          this._selectedGlobalAccent = hex;
-          swatchBtns.forEach(s => {
-            const isTarget = s.dataset.swatchHex === hex;
-            s.setAttribute("selected", isTarget ? "true" : "false");
-            s.replaceChildren();
-            if (isTarget) {
-              const checkIcon = document.createElementNS(HTML_NS, "i");
-              checkIcon.textContent = "check";
-              s.appendChild(checkIcon);
-            }
-          });
-          const customColorInput = document.getElementById("hw-custom-color-input");
-          if (customColorInput) customColorInput.value = hex;
-          this._applyLiveAccentColor();
-        });
-      });
-
-      // Stage 0: Custom Color Input
-      const customColorInput = document.getElementById("hw-custom-color-input");
-      if (customColorInput) {
-        customColorInput.addEventListener("input", (e) => {
-          const hex = e.target.value;
-          this._selectedGlobalAccent = hex;
-          swatchBtns.forEach(s => {
-            s.setAttribute("selected", "false");
-            s.replaceChildren();
-          });
-          this._applyLiveAccentColor();
-        });
+    async _go(step) {
+      if (step < 0) {
+        step = -1;
       }
+      if (step === 1) {
+        await this._enginesReady;
+      }
+      this._step = Math.min(step, STEP_COUNT - 1);
+      this._render({ focus: true });
+    }
 
-      // Stage 1: Tab Orientation
-      const tabTiles = this._overlay.querySelectorAll("[data-tab-layout]");
-      tabTiles.forEach(tile => {
-        tile.addEventListener("click", () => {
-          this._verticalTabsSelected = tile.dataset.tabLayout === "vertical";
-          const radio = tile.querySelector('input[type="radio"]');
-          if (radio) radio.checked = true;
-        });
-      });
+    _isDark() {
+      if (this._theme === 0) {
+        return true;
+      }
+      if (this._theme === 1) {
+        return false;
+      }
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
 
-      // Stage 1: Starter Workspaces
-      const wsTiles = this._overlay.querySelectorAll("[data-starter-ws]");
-      wsTiles.forEach(tile => {
-        const checkbox = tile.querySelector('input[type="checkbox"]');
-        tile.addEventListener("click", (event) => {
-          if (event.target !== checkbox && checkbox) {
-            checkbox.checked = !checkbox.checked;
-          }
-          const key = tile.dataset.starterWs;
-          this._workspacesSelected[key] = checkbox ? checkbox.checked : !this._workspacesSelected[key];
-        });
-      });
+    _applyTheme() {
+      this._overlay?.setAttribute("data-theme", this._isDark() ? "dark" : "light");
+    }
 
-      // Stage 2: Privacy Choices
-      const privacyTiles = this._overlay.querySelectorAll("[data-privacy-choice]");
-      privacyTiles.forEach(tile => {
-        tile.addEventListener("click", () => {
-          this._selectedPrivacyLevel = tile.dataset.privacyChoice;
-          const radio = tile.querySelector('input[type="radio"]');
-          if (radio) radio.checked = true;
-        });
-      });
+    async _loadEngines() {
+      try {
+        const engines = await SearchService.getVisibleEngines();
+        this._engines = await Promise.all(
+          engines
+            // Site search engines are not useful as the default.
+            .filter(engine => !/wikipedia|ebay|amazon/i.test(engine.name))
+            .map(async engine => ({
+              name: engine.name,
+              engine,
+              iconURL: await this._engineIcon(engine),
+            }))
+        );
+        const current = await SearchService.getDefault();
+        this._engine =
+          this._engines.find(e => e.name.toLowerCase().includes("duckduckgo")) ||
+          this._engines.find(e => e.engine === current) ||
+          this._engines[0] ||
+          null;
+      } catch (e) {
+        console.error("HilalWelcome: could not load search engines", e);
+      }
+    }
 
-      // Stage 2: Search Engines
-      const engineTiles = this._overlay.querySelectorAll("[data-engine-choice]");
-      engineTiles.forEach(tile => {
-        tile.addEventListener("click", () => {
-          const idx = parseInt(tile.dataset.engineChoice, 10);
-          this._selectedEngine = this._engines[idx];
-          const radio = tile.querySelector('input[type="radio"]');
-          if (radio) radio.checked = true;
-        });
-      });
-
-      // Stage 3: Import Button
-      onClick("hw-import-btn", async () => {
-        const btn = document.getElementById("hw-import-btn");
-        try {
-          if (typeof MigrationUtils !== "undefined" && MigrationUtils.showMigrationWizard) {
-            MigrationUtils.showMigrationWizard(window, { isStartupMigration: true });
-            if (btn) {
-              btn.setAttribute("data-l10n-id", "hilal-welcome-imported-button");
-              btn.textContent = "Imported";
-              btn.disabled = true;
-            }
-          }
-        } catch (e) {
-          console.error("HilalWelcome: migration wizard failed", e);
+    async _engineIcon(engine) {
+      const name = engine.name.toLowerCase();
+      if (name.includes("duckduckgo")) {
+        return `${TIPPYTOP}duckduckgo-com@2x.svg`;
+      }
+      if (name.includes("google")) {
+        return `${TIPPYTOP}google-com@2x.png`;
+      }
+      if (name.includes("bing")) {
+        return `${TIPPYTOP}bing-com@2x.svg`;
+      }
+      try {
+        const url = (await engine.getIconURL(32)) || (await engine.getIconURL());
+        if (url && /^(https|data|chrome|resource|moz-extension):/.test(url)) {
+          return url;
         }
-      });
-
-      // Stage 3: Default Browser Switch
-      const defaultToggle = document.getElementById("hw-default-browser-toggle");
-      if (defaultToggle) {
-        defaultToggle.addEventListener("change", (e) => {
-          this._defaultBrowserSelected = e.target.checked;
-        });
-      }
-
-      // Stage 3: Pinned Sites
-      const pinnedTiles = this._overlay.querySelectorAll("[data-pinned-site]");
-      pinnedTiles.forEach(tile => {
-        const checkbox = tile.querySelector('input[type="checkbox"]');
-        tile.addEventListener("click", (event) => {
-          if (event.target !== checkbox && checkbox) {
-            checkbox.checked = !checkbox.checked;
-          }
-          const key = tile.dataset.pinnedSite;
-          this._pinnedSitesSelected[key] = checkbox ? checkbox.checked : !this._pinnedSitesSelected[key];
-        });
-      });
+      } catch (e) {}
+      return "chrome://global/skin/icons/search-glass.svg";
     }
 
-    _next() {
-      if (this._stage < STAGES.length - 1) {
-        this._stage++;
-        this._renderStage();
-      }
-    }
-
-    _prev() {
-      if (this._stage > 0) {
-        this._stage--;
-        this._renderStage();
+    _import() {
+      try {
+        MigrationUtils.showMigrationWizard(window, { isStartupMigration: true });
+      } catch (e) {
+        console.error("HilalWelcome: could not open the import wizard", e);
       }
     }
 
     async _finish() {
-      // 1. Save Theme and Accent Prefs
-      if (typeof Services !== "undefined" && Services.prefs) {
+      const prefs = Services.prefs;
+      try {
+        prefs.setIntPref(PREF_THEME, this._theme);
+        // The shell reads its layout pref; native sidebar.* prefs stay as the
+        // branding sets them so Firefox's own sidebar never comes back.
+        if (window.gHilalShell?.setTabMode) {
+          window.gHilalShell.setTabMode(this._tabLayout);
+        } else {
+          prefs.setStringPref(PREF_TAB_LAYOUT, this._tabLayout);
+        }
+        prefs.setStringPref(PREF_PRIVACY_LEVEL, this._privacy);
+      } catch (e) {
+        console.error("HilalWelcome: could not save preferences", e);
+      }
+
+      if (this._engine?.engine) {
         try {
-          Services.prefs.setIntPref(PREF_THEME_OVERRIDE, this._selectedThemeMode);
-          Services.prefs.setStringPref(PREF_ACCENT_MODE, this._selectedAccentMode);
-          Services.prefs.setStringPref(PREF_GLOBAL_ACCENT, this._selectedGlobalAccent);
+          const reason = SearchService.CHANGE_REASON.USER;
+          await SearchService.setDefault(this._engine.engine, reason);
+          await SearchService.setDefaultPrivate(this._engine.engine, reason);
         } catch (e) {
-          console.error("HilalWelcome: failed to save theme prefs", e);
+          console.error("HilalWelcome: could not set the search engine", e);
         }
       }
 
-      // 2. Save Layout Prefs
-      if (typeof Services !== "undefined" && Services.prefs) {
+      if (this._createWorkspaces && this._workspaces?.ensureWorkspace) {
         try {
-          // The Material shell draws its own tabs and sidebar, so the native
-          // sidebar.* prefs must stay as the branding sets them.
-          const tabMode = this._verticalTabsSelected ? "vertical" : "horizontal";
-          if (window.gHilalShell?.setTabMode) {
-            window.gHilalShell.setTabMode(tabMode);
-          } else {
-            Services.prefs.setStringPref(PREF_TAB_LAYOUT_MODE, tabMode);
+          prefs.setBoolPref(PREF_WORKSPACES_ENABLED, true);
+          let first = null;
+          for (const preset of STARTER_WORKSPACES) {
+            const label =
+              (await document.l10n.formatValue(`hilal-welcome-workspace-label-${preset.key}`)) ||
+              preset.label;
+            const workspace = this._workspaces.ensureWorkspace(label, "", preset.color);
+            first ??= workspace;
           }
-          Services.prefs.setBoolPref(PREF_WORKSPACES_ENABLED, true);
-          Services.prefs.setBoolPref(PREF_PINNED_PUBLIC, this._pinnedPublicSelected);
-          Services.prefs.setStringPref(PREF_PRIVACY_LEVEL, this._selectedPrivacyLevel);
-        } catch (e) {
-          console.error("HilalWelcome: failed to save layout prefs", e);
-        }
-      }
-
-      // 3. Create Selected Starter Workspaces
-      if (this._workspaces) {
-        for (const item of WORKSPACE_PRESETS) {
-          if (this._workspacesSelected[item.key]) {
-            let label = item.label;
-            try {
-              if (document.l10n?.formatValue) {
-                label =
-                  (await document.l10n.formatValue(`hilal-welcome-workspace-label-${item.key}`)) ||
-                  item.label;
-              }
-            } catch (e) {}
-            if (typeof this._workspaces.ensureWorkspace === "function") {
-              this._workspaces.ensureWorkspace(label, "", item.workspaceColor);
-            } else if (typeof this._workspaces.create === "function") {
-              this._workspaces.create(label, "", item.workspaceColor);
-            }
-          }
-        }
-      }
-
-      // 4. Create Pinned Tabs
-      await this._createPinnedTabs();
-
-      // 5. Set Default Engine
-      if (this._selectedEngine?.originalEngine && SearchService) {
-        try {
-          if (SearchService.setDefault) {
-            await SearchService.setDefault(
-              this._selectedEngine.originalEngine,
-              SearchService.CHANGE_REASON?.UNKNOWN ?? 1
-            );
-          }
-          if (SearchService.setDefaultPrivate) {
-            await SearchService.setDefaultPrivate(
-              this._selectedEngine.originalEngine,
-              SearchService.CHANGE_REASON?.UNKNOWN ?? 1
-            );
+          if (first?.id) {
+            this._workspaces.switchTo(first.id);
           }
         } catch (e) {
-          console.error("HilalWelcome: failed to set default search engine", e);
+          console.error("HilalWelcome: could not create workspaces", e);
         }
       }
 
-      // 6. Set Default Browser
-      if (this._defaultBrowserSelected) {
+      if (this._makeDefault) {
         try {
-          const shellService = window.getShellService?.();
-          if (shellService) {
-            shellService.setDefaultBrowser(false);
-          }
+          window.getShellService?.()?.setDefaultBrowser(false);
         } catch (e) {
-          console.error("HilalWelcome: failed to set default browser", e);
+          console.error("HilalWelcome: could not set the default browser", e);
         }
       }
 
-      this._markSeen();
-      this._teardown();
-    }
-
-    async _createPinnedTabs() {
-      const selectedSites = PINNED_SITE_PRESETS.filter(s => this._pinnedSitesSelected[s.key]);
-      if (
-        !selectedSites.length ||
-        typeof gBrowser === "undefined" ||
-        typeof gBrowser.addTrustedTab !== "function" ||
-        typeof gBrowser.pinTab !== "function"
-      ) {
-        return;
-      }
-
-      const userContextId = this._workspaces?.activeContainerId || 0;
-      for (const site of selectedSites) {
-        try {
-          let tab = gBrowser.addTrustedTab(site.url, {
-            inBackground: true,
-            createLazyBrowser: true,
-            userContextId,
-          });
-          if (tab && !tab.pinned) {
-            gBrowser.pinTab(tab);
-          }
-        } catch (e) {
-          console.error(`HilalWelcome: failed to pin ${site.label}`, e);
-        }
-      }
+      this._dismiss();
     }
 
     _dismiss() {
-      this._markSeen();
-      this._teardown();
-    }
-
-    _markSeen() {
-      if (typeof Services === "undefined" || !Services.prefs) return;
       try {
         Services.prefs.setBoolPref(PREF_SEEN, true);
       } catch (e) {
-        console.error("HilalWelcome: failed to save seen pref", e);
+        console.error("HilalWelcome: could not save the seen pref", e);
       }
-    }
-
-    _attachTrafficLights() {
-      try {
-        const trafficSlot = this._overlay?.querySelector(".hw-header-traffic-spacer");
-        if (this._savedTrafficNode) {
-          // Re-rendering the overlay detaches the borrowed node; move that same
-          // node into the new header instead of grabbing another copy.
-          if (trafficSlot && this._savedTrafficNode.parentNode !== trafficSlot) {
-            trafficSlot.appendChild(this._savedTrafficNode);
-          }
-          return;
-        }
-        const nativeButtons =
-          document.querySelector("#hilal-traffic-lights-spacer .titlebar-buttonbox-container") ||
-          document.querySelector(".titlebar-buttonbox-container");
-        if (nativeButtons && trafficSlot && nativeButtons.parentNode !== trafficSlot) {
-          this._savedTrafficNode = nativeButtons;
-          this._savedTrafficParent = nativeButtons.parentNode;
-          this._savedTrafficNext = nativeButtons.nextSibling;
-          trafficSlot.appendChild(nativeButtons);
-        }
-      } catch (e) {
-        console.warn("HilalWelcome: could not attach traffic lights", e);
-      }
-    }
-
-    _restoreTrafficLights() {
-      try {
-        // Put back the exact node that was borrowed; otherwise it is removed
-        // together with the overlay and macOS loses its window buttons.
-        const nativeButtons = this._savedTrafficNode;
-        const parent = this._savedTrafficParent;
-        if (nativeButtons && parent?.isConnected) {
-          const next = this._savedTrafficNext;
-          parent.insertBefore(nativeButtons, next?.parentNode === parent ? next : null);
-        }
-        this._savedTrafficNode = null;
-        this._savedTrafficParent = null;
-        this._savedTrafficNext = null;
-      } catch (e) {
-        console.warn("HilalWelcome: could not restore traffic lights", e);
-      }
-    }
-
-    _teardown() {
       this._restoreTrafficLights();
       this._overlay?.remove();
       this._overlay = null;
       this._style?.remove();
       this._style = null;
-      this._leaveWelcomeStage();
-
-      if (this._workspaces) {
-        try {
-          this._workspaces._apply?.();
-          this._workspaces._updateUI?.();
-        } catch (e) {
-          console.error("HilalWelcome: failed to refresh workspaces", e);
-        }
-      }
-
-      if (this._previousWindowDims) {
-        try {
-          if (this._previousWindowDims.maximized) {
-            window.maximize?.();
-          } else {
-            window.resizeTo(this._previousWindowDims.width, this._previousWindowDims.height);
-            window.moveTo(this._previousWindowDims.screenX, this._previousWindowDims.screenY);
-          }
-        } catch (e) {
-          try {
-            window.maximize?.();
-          } catch (err) {}
-        }
-        this._previousWindowDims = null;
-      } else {
-        try {
-          window.maximize?.();
-        } catch (e) {}
+      document.documentElement.removeAttribute("hilal-welcome-stage");
+      try {
+        this._workspaces?._apply?.();
+        this._workspaces?._updateUI?.();
+      } catch (e) {
+        console.error("HilalWelcome: could not refresh workspaces", e);
       }
     }
 
-    _normalizePrivacyLevel(value) {
-      return PRIVACY_LEVELS.some(level => level.key === value) ? value : "standard";
-    }
+    // The overlay covers the titlebar, so the macOS window buttons are moved
+    // into its header while it is shown and put back afterwards.
 
-    _engineIconHTML(engine) {
-      const name = engine.name.toLowerCase();
-      let iconURL = engine.iconURL;
-
-      if (name.includes("duckduckgo")) {
-        iconURL = IS_HTTP_PREVIEW
-          ? "/assets/tippytop/duckduckgo-com@2x.svg"
-          : "chrome://activity-stream/content/data/content/tippytop/images/duckduckgo-com@2x.svg";
-      } else if (name.includes("google")) {
-        iconURL = IS_HTTP_PREVIEW
-          ? "/assets/tippytop/google-com@2x.png"
-          : "chrome://activity-stream/content/data/content/tippytop/images/google-com@2x.png";
-      } else if (name.includes("bing")) {
-        iconURL = IS_HTTP_PREVIEW
-          ? "/assets/tippytop/bing-com@2x.svg"
-          : "chrome://activity-stream/content/data/content/tippytop/images/bing-com@2x.svg";
+    _attachTrafficLights() {
+      const slot = this._overlay?.querySelector(".hw-traffic-slot");
+      if (!slot) {
+        return;
       }
-
-      if (iconURL) {
-        return `<img src="${this._escapeHTML(iconURL)}" style="width: 28px; height: 28px; object-fit: contain; display: block;" alt="" />`;
-      }
-      return `<i>search</i>`;
-    }
-
-    _escapeHTML(value) {
-      return String(value).replace(/[&<>"']/g, char => {
-        switch (char) {
-          case "&": return "&amp;";
-          case "<": return "&lt;";
-          case ">": return "&gt;";
-          case '"': return "&quot;";
-          case "'": return "&#39;";
+      if (!this._trafficNode) {
+        const node =
+          document.querySelector("#hilal-traffic-lights-spacer .titlebar-buttonbox-container") ||
+          document.querySelector(".titlebar-buttonbox-container");
+        if (!node) {
+          return;
         }
-        return char;
-      });
+        this._trafficNode = node;
+        this._trafficParent = node.parentNode;
+        this._trafficNext = node.nextSibling;
+      }
+      slot.appendChild(this._trafficNode);
+    }
+
+    _restoreTrafficLights() {
+      const node = this._trafficNode;
+      const parent = this._trafficParent;
+      if (node && parent?.isConnected) {
+        const next = this._trafficNext;
+        parent.insertBefore(node, next?.parentNode === parent ? next : null);
+      }
+      this._trafficNode = this._trafficParent = this._trafficNext = null;
     }
   }
 
