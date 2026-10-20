@@ -1,7 +1,7 @@
 diff --git a/browser/base/content/aboutDialog.js b/browser/base/content/aboutDialog.js
 --- a/browser/base/content/aboutDialog.js
 +++ b/browser/base/content/aboutDialog.js
-@@ -52,7 +52,7 @@ function init() {
+@@ -54,7 +54,7 @@ function init() {
    ]);
    let versionIdKey = "base";
    let versionAttributes = {
@@ -10,7 +10,7 @@ diff --git a/browser/base/content/aboutDialog.js b/browser/base/content/aboutDia
    };
  
    let arch = Services.sysinfo.get("arch");
-@@ -152,4 +152,19 @@ function init() {
+@@ -181,4 +181,19 @@ function init() {
    }
  }
  
@@ -33,7 +33,57 @@ diff --git a/browser/base/content/aboutDialog.js b/browser/base/content/aboutDia
 diff --git a/browser/components/preferences/config/about-firefox.mjs b/browser/components/preferences/config/about-firefox.mjs
 --- a/browser/components/preferences/config/about-firefox.mjs
 +++ b/browser/components/preferences/config/about-firefox.mjs
-@@ -207,20 +207,30 @@ Preferences.addSetting(
+@@ -11,6 +11,12 @@ const { AppConstants } = ChromeUtils.importESModule(
+   "resource://gre/modules/AppConstants.sys.mjs"
+ );
+ 
++const HAS_APP_UPDATE_SERVICE =
++  !!Cc["@mozilla.org/updates/update-service;1"] &&
++  !!Cc["@mozilla.org/updates/update-manager;1"];
++const CAN_USE_APP_UPDATER =
++  AppConstants.MOZ_UPDATER && HAS_APP_UPDATE_SERVICE;
++
+ const AUTO_UPDATE_CHANGED_TOPIC =
+   UpdateUtils.PER_INSTALLATION_PREFS["app.update.auto"].observerTopic;
+ const BACKGROUND_UPDATE_CHANGED_TOPIC =
+@@ -34,7 +40,7 @@ const UpdatesHelpers = {
+     // displaying any update content here, and it would get confusing if we
+     // did, because our updater is not enabled.
+     return (
+-      AppConstants.MOZ_UPDATER && !Services.sysinfo.getProperty("isPackagedApp")
++      CAN_USE_APP_UPDATER && !Services.sysinfo.getProperty("isPackagedApp")
+     );
+   },
+ 
+@@ -70,6 +76,9 @@ const UpdatesHelpers = {
+   },
+ 
+   async checkUpdateInProgress() {
++    if (!CAN_USE_APP_UPDATER) {
++      return;
++    }
+     const aus = Cc["@mozilla.org/updates/update-service;1"].getService(
+       Ci.nsIApplicationUpdateService
+     );
+@@ -153,7 +162,7 @@ Preferences.addSetting({
+   visible: () => UpdatesHelpers.showUpdatesSettings,
+ });
+ 
+-if (AppConstants.MOZ_UPDATER && typeof appUpdater === "undefined") {
++if (CAN_USE_APP_UPDATER && typeof appUpdater === "undefined") {
+   Services.scriptloader.loadSubScript(
+     "chrome://browser/content/aboutDialog-appUpdater.js",
+     this
+@@ -166,7 +175,7 @@ Preferences.addSetting(
+     _panel: "",
+     _options: {},
+     setup(emitChange) {
+-      if (!AppConstants.MOZ_UPDATER) {
++      if (!CAN_USE_APP_UPDATER) {
+         return () => {};
+       }
+       if (gAppUpdater) {
+@@ -198,20 +207,30 @@ Preferences.addSetting(
  Preferences.addSetting({
    id: "updateAppInfo",
    getControlConfig(config) {
@@ -67,3 +117,21 @@ diff --git a/browser/components/preferences/config/about-firefox.mjs b/browser/c
      // Append "(32-bit)" or "(64-bit)" build architecture to the version number:
      let bundle = Services.strings.createBundle(
        "chrome://browser/locale/browser.properties"
+@@ -263,7 +282,7 @@ Preferences.addSetting({
+ 
+ Preferences.addSetting({
+   id: "disableShowUpdateHistory",
+-  pref: AppConstants.MOZ_UPDATER
++  pref: CAN_USE_APP_UPDATER
+     ? "app.update.disable_button.showUpdateHistory"
+     : undefined,
+ });
+@@ -456,7 +475,7 @@ Preferences.addSetting({
+ Preferences.addSetting({
+   id: "showUpdatePrompts",
+   pref:
+-    AppConstants.MOZ_UPDATER && AppConstants.NIGHTLY_BUILD
++    CAN_USE_APP_UPDATER && AppConstants.NIGHTLY_BUILD
+       ? "app.update.suppressPrompts"
+       : undefined,
+ });

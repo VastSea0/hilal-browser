@@ -34,14 +34,20 @@ export class HilalBoostsChild extends JSWindowActorChild {
     if (!domain) return;
 
     const currentDoc = this.document;
-    if (!force && this._lastInitializedDoc === currentDoc && this._lastInitializedUrl === currentDoc.documentURI) {
+    if (
+      !force &&
+      this._lastInitializedDoc === currentDoc &&
+      this._lastInitializedUrl === currentDoc.documentURI
+    ) {
       return;
     }
     this._lastInitializedDoc = currentDoc;
     this._lastInitializedUrl = currentDoc.documentURI;
 
     try {
-      const boost = await this.sendQuery("HilalBoosts:GetBoostForDomain", { domain });
+      const boost = await this.sendQuery("HilalBoosts:GetBoostForDomain", {
+        domain,
+      });
       this.applyBoostToBackend(boost);
       this._notifyThemeColor();
       this._startMetaObserver();
@@ -96,7 +102,10 @@ export class HilalBoostsChild extends JSWindowActorChild {
       if (parsed) return parsed;
     }
 
-    for (const name of ["apple-mobile-web-app-status-bar-style", "msapplication-navbutton-color"]) {
+    for (const name of [
+      "apple-mobile-web-app-status-bar-style",
+      "msapplication-navbutton-color",
+    ]) {
       meta = doc.querySelector(`meta[name="${name}"]`);
       if (meta && meta.content) {
         const parsed = this.parseToHex(meta.content, doc);
@@ -267,8 +276,14 @@ export class HilalBoostsChild extends JSWindowActorChild {
     const doc = this.document;
     const host = doc.createElement("div");
     host.setAttribute("data-hilal-boosts-zap-overlay", "true");
-    host.style.setProperty("--hilal-boosts-accent", this._safeColor(accentColor, "#7c5cff"));
-    host.style.setProperty("--hilal-boosts-secondary", this._safeColor(secondaryColor, "#00d4ff"));
+    host.style.setProperty(
+      "--hilal-boosts-accent",
+      this._safeColor(accentColor, "#7c5cff")
+    );
+    host.style.setProperty(
+      "--hilal-boosts-secondary",
+      this._safeColor(secondaryColor, "#00d4ff")
+    );
     doc.documentElement.appendChild(host);
 
     const shadow = host.attachShadow({ mode: "open" });
@@ -389,16 +404,20 @@ export class HilalBoostsChild extends JSWindowActorChild {
       </div>
     `;
 
-    shadow.querySelector('[data-action="cancel"]').addEventListener("click", event => {
-      event.preventDefault();
-      event.stopPropagation();
-      this.stopZap();
-    });
-    shadow.querySelector('[data-action="done"]').addEventListener("click", event => {
-      event.preventDefault();
-      event.stopPropagation();
-      this.stopZap();
-    });
+    shadow
+      .querySelector('[data-action="cancel"]')
+      .addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.stopZap();
+      });
+    shadow
+      .querySelector('[data-action="done"]')
+      .addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.stopZap();
+      });
 
     this._zapHost = host;
     this._zapShadow = shadow;
@@ -459,7 +478,9 @@ export class HilalBoostsChild extends JSWindowActorChild {
   }
 
   _safeColor(value, fallback) {
-    return typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value) ? value : fallback;
+    return typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value)
+      ? value
+      : fallback;
   }
 
   computeSelector(el) {
@@ -532,11 +553,20 @@ export class HilalBoostsChild extends JSWindowActorChild {
       if (boost && boost.enabled) {
         let accentInt = 0;
         if (boost.colorEnabled && boost.accentColor) {
-          accentInt = this.hexToColorInt(boost.accentColor, boost.colorIntensity, boost.colorBrightness);
+          accentInt = this.hexToColorInt(
+            boost.accentColor,
+            boost.colorIntensity,
+            boost.colorBrightness
+          );
         }
 
         const complementaryRotation = boost.colorEnabled
-          ? (boost.secondaryColor ? this.calculateRotationDelta(boost.accentColor, boost.secondaryColor) : 52)
+          ? boost.secondaryColor
+            ? this.calculateRotationDelta(
+                boost.accentColor,
+                boost.secondaryColor
+              )
+            : 52
           : 0;
 
         const inverted = boost.smartInvert ? 1 : 0;
@@ -544,7 +574,11 @@ export class HilalBoostsChild extends JSWindowActorChild {
         const notifyStr = `${domain}|${accentInt}|${complementaryRotation}|${inverted}`;
         Services.obs.notifyObservers(null, "hilal-boost-updated", notifyStr);
       } else {
-        Services.obs.notifyObservers(null, "hilal-boost-updated", `${domain}|0|0|0`);
+        Services.obs.notifyObservers(
+          null,
+          "hilal-boost-updated",
+          `${domain}|0|0|0`
+        );
       }
     } catch (e) {
       console.error("HilalBoostsChild: failed to apply boost to backend", e);

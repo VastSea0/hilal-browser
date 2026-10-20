@@ -1,11 +1,20 @@
 diff --git a/browser/app/distribution/moz.build b/browser/app/distribution/moz.build
 --- a/browser/app/distribution/moz.build
 +++ b/browser/app/distribution/moz.build
-@@ -6,6 +6,7 @@ DIST_SUBDIR = ""
+@@ -4,7 +4,12 @@
  
- FINAL_TARGET_FILES.distribution += [
-     "distribution.ini",
+ DIST_SUBDIR = ""
+ 
+-if CONFIG["BUILT_BY_MOZILLA"]:
+-    FINAL_TARGET_FILES.distribution += [
+-        "distribution.ini",
+-    ]
++FINAL_TARGET_FILES.distribution += [
++    "distribution.ini",
 +    "policies.json",
- ]
- 
- FINAL_TARGET_FILES.distribution.extensions += [
++]
++
++FINAL_TARGET_FILES.distribution.extensions += [
++    "extensions/langpack-*@firefox.mozilla.org.xpi",
++    "extensions/uBlock0@raymondhill.net.xpi",
++]

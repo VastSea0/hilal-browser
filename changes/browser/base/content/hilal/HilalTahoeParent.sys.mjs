@@ -28,6 +28,17 @@ export class HilalTahoeParent extends JSWindowActorParent {
       return null;
     }
 
+    if (aMessage.name === "HilalTahoe:RequestNewTabTheme") {
+      let chromeWin = this.browsingContext.topChromeWindow;
+      let theme =
+        chromeWin?.MaterialYouTheme?.getThemeData?.() ||
+        chromeWin?.gHilalShell?.getActiveThemeData?.();
+      if (theme) {
+        this.sendAsyncMessage("HilalTahoe:SetNewTabTheme", theme);
+      }
+      return null;
+    }
+
     return null;
   }
 }

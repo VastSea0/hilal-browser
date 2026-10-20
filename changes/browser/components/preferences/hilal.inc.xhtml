@@ -2,450 +2,474 @@
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
-<!-- Hilal Browser panel -->
+<!-- Hilal Browser — Hilal Settings Panel — Pure Beer CSS (M3 Expressive) -->
 
-<html:template id="template-paneHilal">
-<hbox id="hilalCategory"
-      class="subcategory"
-      hidden="true"
-      data-category="paneHilal">
-  <html:h1 data-l10n-id="hilal-settings-header"/>
-</hbox>
-
-<groupbox id="hilalWorkspacesGroup" data-category="paneHilal" hidden="true">
-  <label><html:h2 data-l10n-id="hilal-workspaces-header"/></label>
-  <vbox align="start">
-    <checkbox id="hilalWorkspacesEnabled"
-              data-l10n-id="hilal-workspaces-enabled"/>
-    <checkbox id="hilalWorkspacesPinnedPublic"
-              data-l10n-id="hilal-workspaces-pinned-public"/>
-    <checkbox id="hilalWorkspacesGroupsPublic"
-              data-l10n-id="hilal-workspaces-groups-public"/>
-    <checkbox id="hilalUrlbarShowWorkspaceName"
-              data-l10n-id="hilal-urlbar-show-workspace-name"/>
-    <hbox>
-      <description flex="1" data-l10n-id="hilal-workspaces-reset-description"/>
-      <button id="hilalWorkspacesReset"
-              is="highlightable-button"
-              class="accessory-button"
-              data-l10n-id="hilal-workspaces-reset-button"/>
-    </hbox>
-  </vbox>
-</groupbox>
-<groupbox id="hilalSidebarGroup" data-category="paneHilal" hidden="true">
-  <label><html:h2 data-l10n-id="hilal-sidebar-header"/></label>
-  <vbox align="start" style="margin-bottom: 16px;">
-    <checkbox id="hilalSidebarCompactEnabled"
-              data-l10n-id="hilal-sidebar-compact-enabled"
-              style="margin-bottom: 4px; font-weight: bold;"/>
-    <vbox class="indent" style="margin-bottom: 12px;">
-      <checkbox id="hilalSidebarCompactHideToolbar"
-                data-l10n-id="hilal-sidebar-compact-hide-toolbar"
-                style="margin-bottom: 4px;"/>
-      <description style="font-size: 0.9em; opacity: 0.7; margin: 0; line-height: 1.4; max-width: 650px;" data-l10n-id="hilal-sidebar-compact-hide-toolbar-desc"/>
-    </vbox>
-    <checkbox id="hilalSidebarShowHorizontalTabs"
-              data-l10n-id="hilal-sidebar-show-horizontal-tabs"
-              style="margin-bottom: 8px;"/>
-    <description style="margin-bottom: 8px; font-weight: bold;" data-l10n-id="hilal-sidebar-footer-items-label"/>
-    <checkbox id="hilalSidebarFooterBookmarks"
-              data-l10n-id="hilal-sidebar-footer-bookmarks"/>
-    <checkbox id="hilalSidebarFooterHistory"
-              data-l10n-id="hilal-sidebar-footer-history"/>
-    <checkbox id="hilalSidebarFooterPasswords"
-              data-l10n-id="hilal-sidebar-footer-passwords"/>
-    <checkbox id="hilalSidebarFooterDownloads"
-              data-l10n-id="hilal-sidebar-footer-downloads"/>
-    <checkbox id="hilalSidebarFooterPrivacy"
-              data-l10n-id="hilal-sidebar-footer-privacy"/>
-    <checkbox id="hilalSidebarFooterSettings"
-              data-l10n-id="hilal-sidebar-footer-settings"/>
-  </vbox>
-
-  <vbox align="start" style="border-top: 1px solid var(--in-content-border-color); padding-top: 16px; margin-top: 8px;" flex="1">
-    <description style="margin-bottom: 8px; font-weight: bold;" data-l10n-id="hilal-sidebar-custom-shortcuts-label"/>
-    <description style="margin-bottom: 8px; font-size: 0.9em; opacity: 0.85;" data-l10n-id="hilal-sidebar-custom-shortcuts-desc"/>
-
-    <richlistbox id="hilalSidebarCustomList" style="height: 120px; width: 100%; min-width: 400px; margin-bottom: 10px;">
-    </richlistbox>
-
-    <hbox spacing="10" style="margin-bottom: 12px;">
-      <button id="hilalSidebarCustomAdd"
-              is="highlightable-button"
-              class="accessory-button"
-              data-l10n-id="hilal-sidebar-custom-add"/>
-      <button id="hilalSidebarCustomRemove"
-              is="highlightable-button"
-              class="accessory-button"
-              data-l10n-id="hilal-sidebar-custom-remove"
-              disabled="true"/>
-    </hbox>
-
-    <vbox id="hilalSidebarCustomForm" hidden="true" style="width: 100%; min-width: 400px; padding: 12px; border: 1px solid var(--in-content-border-color); border-radius: 6px; background-color: var(--in-content-box-background); margin-top: 4px;">
-      <grid>
-        <columns>
-          <column style="padding-right: 8px; font-weight: 500; min-width: 80px;"/>
-          <column flex="1"/>
-        </columns>
-        <rows>
-          <row align="center" style="margin-bottom: 8px;">
-            <label data-l10n-id="hilal-sidebar-custom-name-label"/>
-            <html:input id="hilalSidebarCustomName" type="text" data-l10n-id="hilal-sidebar-custom-name-placeholder"/>
-          </row>
-          <row align="center" style="margin-bottom: 8px;">
-            <label data-l10n-id="hilal-sidebar-custom-url-label"/>
-            <html:input id="hilalSidebarCustomUrl" type="text" data-l10n-id="hilal-sidebar-custom-url-placeholder"/>
-          </row>
-          <row align="center" style="margin-bottom: 8px;">
-            <label data-l10n-id="hilal-sidebar-custom-icon-label"/>
-            <html:select id="hilalSidebarCustomIcon" style="padding: 4px; border-radius: 4px; border: 1px solid var(--in-content-border-color); background: var(--in-content-button-background); color: inherit;">
-              <html:option value="link" data-l10n-id="hilal-sidebar-custom-icon-link"/>
-              <html:option value="bookmark" data-l10n-id="hilal-sidebar-custom-icon-bookmark"/>
-              <html:option value="history" data-l10n-id="hilal-sidebar-custom-icon-history"/>
-              <html:option value="key" data-l10n-id="hilal-sidebar-custom-icon-key"/>
-              <html:option value="downloads" data-l10n-id="hilal-sidebar-custom-icon-downloads"/>
-              <html:option value="shield" data-l10n-id="hilal-sidebar-custom-icon-shield"/>
-              <html:option value="settings" data-l10n-id="hilal-sidebar-custom-icon-settings"/>
-            </html:select>
-          </row>
-        </rows>
-      </grid>
-      <hbox spacing="10" style="margin-top: 12px;">
-        <button id="hilalSidebarCustomSave"
-                is="highlightable-button"
-                class="accessory-button"
-                data-l10n-id="hilal-sidebar-custom-save"/>
-        <button id="hilalSidebarCustomCancel"
-                is="highlightable-button"
-                class="accessory-button"
-                data-l10n-id="hilal-sidebar-custom-cancel"/>
-      </hbox>
-    </vbox>
-  </vbox>
-</groupbox>
-
-<groupbox id="hilalPrivacyGroup" data-category="paneHilal" hidden="true">
-  <label><html:h2 data-l10n-id="hilal-privacy-header"/></label>
-  <vbox align="start">
-    <description style="margin-bottom: 8px; max-width: 720px;" data-l10n-id="hilal-privacy-description"/>
-    <radiogroup id="hilalPrivacyLevel" orient="vertical">
-      <radio id="hilalPrivacyStandard"
-             value="standard"
-             data-l10n-id="hilal-privacy-standard"/>
-      <radio id="hilalPrivacyStrict"
-             value="strict"
-             data-l10n-id="hilal-privacy-strict"/>
-      <radio id="hilalPrivacyExtreme"
-             value="extreme"
-             data-l10n-id="hilal-privacy-extreme"/>
-    </radiogroup>
-  </vbox>
-</groupbox>
-
-<groupbox id="hilalUiFixGroup" data-category="paneHilal" hidden="true">
-  <label><html:h2 data-l10n-id="hilal-uifix-header"/></label>
-  <vbox align="start">
-    <checkbox id="hilalTahoeEnabled"
-              data-l10n-id="hilal-tahoe-enabled"/>
-    <description class="indent"
-                 style="margin-bottom: 8px; max-width: 650px; opacity: 0.8;"
-                 data-l10n-id="hilal-tahoe-enabled-desc"/>
-    <checkbox id="hilalUiFixEnabled"
-              data-l10n-id="hilal-uifix-enabled"/>
-    <vbox id="hilalUiFixSubOptions" class="indent">
-      <checkbox id="hilalUiFixConnectToWindow"
-                data-l10n-id="hilal-uifix-connect-to-window"/>
-      <checkbox id="hilalUiFixCompactPadding"
-                data-l10n-id="hilal-uifix-compact-padding"/>
-      <checkbox id="hilalUiFixDynamicSeparator"
-                data-l10n-id="hilal-uifix-dynamic-separator"/>
-      <checkbox id="hilalUiFixBottomRounded"
-                data-l10n-id="hilal-uifix-bottom-rounded"/>
-      <checkbox id="hilalUiFixCloseOnHover"
-                data-l10n-id="hilal-uifix-close-on-hover"/>
-    </vbox>
-  </vbox>
-</groupbox>
-
-<groupbox id="hilalBoostsGroup" data-category="paneHilal" hidden="true">
-  <label><html:h2 data-l10n-id="hilal-boosts-header"/></label>
-  <vbox align="start">
-    <checkbox id="hilalBoostsAutoPalette"
-              data-l10n-id="hilal-boosts-auto-palette"/>
-    <checkbox id="hilalBoostsBrowserUi"
-              data-l10n-id="hilal-boosts-browser-ui"/>
-  </vbox>
-</groupbox>
-
-<groupbox id="hilalBangsGroup" data-category="paneHilal" hidden="true">
-  <label><html:h2 data-l10n-id="hilal-bangs-header"/></label>
-  <vbox align="start" class="indent" flex="1">
-    <richlistbox id="hilalBangsList" style="height: 150px; min-width: 400px; margin-bottom: 10px;">
-    </richlistbox>
-
-    <hbox spacing="10">
-      <button id="hilalBangsAdd"
-              is="highlightable-button"
-              class="accessory-button"
-              data-l10n-id="hilal-bangs-add-button"/>
-      <button id="hilalBangsRemove"
-              is="highlightable-button"
-              class="accessory-button"
-              data-l10n-id="hilal-bangs-remove-button"
-              disabled="true"/>
-    </hbox>
-
-    <vbox id="hilalBangsForm" hidden="true" style="margin-top: 10px; padding: 10px; border: 1px solid var(--in-content-border-color); border-radius: 4px; background-color: var(--in-content-box-background);">
-      <grid>
-        <columns>
-          <column/>
-          <column flex="1"/>
-        </columns>
-        <rows>
-          <row align="center">
-            <label data-l10n-id="hilal-bangs-trigger-label"/>
-            <html:input id="hilalBangsTrigger" type="text" placeholder="e.g., g"/>
-          </row>
-          <row align="center">
-            <label data-l10n-id="hilal-bangs-searchurl-label"/>
-            <html:input id="hilalBangsSearchUrl" type="text" placeholder="https://www.google.com/search?q={query}"/>
-          </row>
-          <row align="center">
-            <label data-l10n-id="hilal-bangs-homeurl-label"/>
-            <html:input id="hilalBangsHomeUrl" type="text" placeholder="https://www.google.com"/>
-          </row>
-        </rows>
-      </grid>
-      <hbox spacing="10" style="margin-top: 10px;">
-        <button id="hilalBangsSave"
-                is="highlightable-button"
-                class="accessory-button"
-                data-l10n-id="hilal-bangs-save-button"/>
-        <button id="hilalBangsCancel"
-                is="highlightable-button"
-                class="accessory-button"
-                data-l10n-id="hilal-bangs-cancel-button"/>
-      </hbox>
-    </vbox>
-  </vbox>
-</groupbox>
-
-<groupbox id="hilalLanguageGroup" data-category="paneHilal" hidden="true">
-  <label><html:h2 data-l10n-id="hilal-language-header"/></label>
-  <vbox align="start" style="margin-bottom: 16px;">
-    <description style="margin-bottom: 8px;" data-l10n-id="hilal-language-description"/>
-    <hbox align="center" style="margin-top: 4px;">
-      <html:select id="hilalLanguageSelect" style="padding: 4px; border-radius: 4px; border: 1px solid var(--in-content-border-color); background: var(--in-content-button-background); color: inherit; min-width: 200px; margin-right: 8px;">
-        <!-- Dynamic populated options -->
-      </html:select>
-      <button id="hilalLanguageApply"
-              is="highlightable-button"
-              class="accessory-button"
-              data-l10n-id="hilal-language-apply-button"/>
-    </hbox>
-  </vbox>
-</groupbox>
-
-<groupbox id="hilalShortcutsGroup" data-category="paneHilal" hidden="true">
-  <html:style>
-    .shortcuts-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      margin-top: 15px;
-    }
-
-    .shortcuts-category-card {
-      background: var(--in-content-box-background);
-      border: 1px solid var(--in-content-border-color);
-      border-radius: 10px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .shortcuts-category-title {
-      font-size: 1.1em;
-      font-weight: bold;
-      color: var(--in-content-text-color);
-      margin: 0 0 6px 0;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--in-content-border-color);
-    }
-
-    .shortcut-row-container {
-      display: flex;
-      flex-direction: column;
-      border-bottom: 1px solid var(--in-content-border-color);
-      padding-bottom: 8px;
-      margin-bottom: 4px;
-    }
-
-    .shortcut-row-container:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-      margin-bottom: 0;
-    }
-
-    .shortcut-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 6px 4px;
-      border-radius: 6px;
-    }
-
-    .shortcut-row:hover {
-      background-color: var(--in-content-button-background-hover);
-    }
-
-    .shortcut-info {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      padding-right: 12px;
-    }
-
-    .shortcut-label {
-      font-weight: 600;
-      color: var(--in-content-text-color);
-    }
-
-    .shortcut-desc {
-      font-size: 0.85em;
-      opacity: 0.75;
-      color: var(--in-content-deemphasized-text);
-      margin-top: 2px;
-    }
-
-    .shortcut-controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .kbd-container {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      min-width: 120px;
-      justify-content: flex-end;
-    }
-
-    .shortcut-keycap {
-      background-color: var(--in-content-button-background);
-      border: 1px solid var(--in-content-border-color);
-      border-bottom: 2px solid var(--in-content-border-color);
-      border-radius: 4px;
-      padding: 3px 6px;
-      font-family: monospace;
-      font-size: 0.85em;
-      font-weight: 600;
-      color: var(--in-content-text-color);
-      min-width: 20px;
-      text-align: center;
-      display: inline-block;
-    }
-
-    .shortcut-action-btn {
-      padding: 4px 8px;
-      border-radius: 4px;
-      border: 1px solid var(--in-content-border-color);
-      background-color: var(--in-content-button-background);
-      color: var(--in-content-text-color);
-      cursor: pointer;
-      font-weight: 500;
-      min-width: 70px;
-      text-align: center;
-    }
-
-    .shortcut-action-btn:hover {
-      background-color: var(--in-content-button-background-hover);
-    }
-
-    .shortcut-action-btn.recording-active {
-      background: linear-gradient(135deg, #0060df, #0090ff);
-      color: #ffffff;
-      border-color: transparent;
-      animation: pulse-glow 1.5s infinite;
-      font-weight: 600;
-    }
-
-    @keyframes pulse-glow {
-      0% {
-        box-shadow: 0 0 0 0 rgba(0, 96, 223, 0.6);
-      }
-      70% {
-        box-shadow: 0 0 0 5px rgba(0, 96, 223, 0);
-      }
-      100% {
-        box-shadow: 0 0 0 0 rgba(0, 96, 223, 0);
-      }
-    }
-
-    .shortcut-clear-btn {
-      background: none;
-      border: none;
-      color: var(--in-content-deemphasized-text);
-      cursor: pointer;
-      font-size: 1.1em;
-      padding: 4px;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .shortcut-clear-btn:hover {
-      background-color: var(--in-content-button-background-hover);
-      color: #ff3b30;
-    }
-
-    .shortcut-conflict-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border: 1px dashed #ff4500;
-      background-color: rgba(255, 69, 0, 0.08);
-      border-radius: 6px;
-      padding: 6px 10px;
-      margin-top: 4px;
-      font-size: 0.85em;
-    }
-
-    .shortcut-conflict-text {
-      color: var(--in-content-text-color);
-    }
-
-    .shortcut-conflict-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .conflict-action-link {
-      background: none;
-      border: none;
-      color: var(--in-content-primary-button-background);
-      cursor: pointer;
-      font-weight: 600;
-      text-decoration: underline;
-      padding: 0;
-    }
-
-    .conflict-action-link:hover {
-      color: var(--in-content-primary-button-background-hover);
-    }
-  </html:style>
-
-  <label><html:h2 data-l10n-id="hilal-shortcuts-header"/></label>
-  <description class="description-deemphasized" data-l10n-id="hilal-shortcuts-description" />
-  
-  <hbox style="margin-top: 10px;">
-    <button id="hilalShortcutsRestoreDefaults" data-l10n-id="hilal-shortcuts-reset" class="accessory-button"/>
-  </hbox>
-
-  <html:div class="shortcuts-container" id="hilalShortcutsContainer">
+<!-- Panel Başlığı -->
+<html:div class="row middle-align medium-margin" data-category="paneHilal" hidden="true">
+  <html:i class="extra primary-text">auto_awesome</html:i>
+  <html:div class="max">
+    <html:h4 class="no-margin" data-l10n-id="hilal-settings-header">Hilal Tarayıcı Özellikleri</html:h4>
+    <html:div class="secondary-text">Çalışma alanları, renk temaları, kenar çubuğu ve gelişmiş Hilal özellikleri</html:div>
   </html:div>
-</groupbox>
-</html:template>
+</html:div>
+
+<!-- Kart 1: Hilal Boosts -->
+<html:article id="hilalBoostsGroup" class="border round padding medium-margin" data-category="paneHilal" hidden="true">
+  <html:div class="row middle-align">
+    <html:i class="primary-text">palette</html:i>
+    <html:div class="max">
+      <html:h6 class="small no-margin" data-l10n-id="hilal-boosts-auto-palette">Hilal Boosts</html:h6>
+      <html:label class="secondary-text" data-l10n-id="hilal-boosts-browser-ui">Web sitelerinin renk paletlerini otomatik algılayıp tarayıcı arayüzüne uyarlar</html:label>
+    </html:div>
+  </html:div>
+
+  <html:div class="space"></html:div>
+
+  <html:div class="row middle-align">
+    <html:div class="max">
+      <html:div data-l10n-id="hilal-boosts-auto-palette">Otomatik Renk Paleti</html:div>
+      <html:label class="secondary-text" data-l10n-id="hilal-boosts-browser-ui">Ziyaret edilen sitenin ana rengini tema vurgusu olarak kullanır</html:label>
+    </html:div>
+    <html:label class="switch">
+      <html:input type="checkbox" id="hilalBoostsAutoPalette" preference="hilal.boosts.auto_palette.enabled" />
+      <html:span></html:span>
+    </html:label>
+  </html:div>
+</html:article>
+
+<!-- Kart 2: Workspaces (Çalışma Alanları) -->
+<html:article id="hilalWorkspacesGroup" class="border round padding medium-margin" data-category="paneHilal" hidden="true">
+  <html:div class="row middle-align">
+    <html:i class="primary-text">workspaces</html:i>
+    <html:div class="max">
+      <html:h6 class="small no-margin" data-l10n-id="hilal-workspaces-header">Çalışma Alanları</html:h6>
+      <html:label class="secondary-text">Sekmelerinizi bağımsız çalışma alanlarına ayırın ve yönetin</html:label>
+    </html:div>
+  </html:div>
+
+  <html:div class="space"></html:div>
+
+  <!-- Workspaces Enabled -->
+  <html:div class="row middle-align">
+    <html:div class="max">
+      <html:div data-l10n-id="hilal-workspaces-enabled">Çalışma Alanlarını Etkinleştir</html:div>
+      <html:label class="secondary-text">Sekmelerinizi kişisel, iş ve sosyal alanlara ayırın</html:label>
+    </html:div>
+    <html:label class="switch">
+      <html:input type="checkbox" id="hilalWorkspacesEnabled" preference="hilal.workspaces.enabled" />
+      <html:span></html:span>
+    </html:label>
+  </html:div>
+
+  <html:hr class="small" />
+
+  <!-- Pinned Public -->
+  <html:div class="row middle-align">
+    <html:div class="max">
+      <html:div data-l10n-id="hilal-workspaces-pinned-public">Ortak Sabitlenmiş Sekmeler</html:div>
+      <html:label class="secondary-text">Sabitlenmiş sekmeler her çalışma alanında görünür kalsın</html:label>
+    </html:div>
+    <html:label class="switch">
+      <html:input type="checkbox" id="hilalWorkspacesPinnedPublic" preference="hilal.workspaces.pinned.public" />
+      <html:span></html:span>
+    </html:label>
+  </html:div>
+
+  <html:hr class="small" />
+
+  <!-- Groups Public -->
+  <html:div class="row middle-align">
+    <html:div class="max">
+      <html:div data-l10n-id="hilal-workspaces-groups-public">Ortak Sekme Grupları</html:div>
+      <html:label class="secondary-text">Sekme gruplarını tüm çalışma alanlarına yayın</html:label>
+    </html:div>
+    <html:label class="switch">
+      <html:input type="checkbox" id="hilalWorkspacesGroupsPublic" preference="hilal.workspaces.groups.public" />
+      <html:span></html:span>
+    </html:label>
+  </html:div>
+
+  <html:hr class="small" />
+
+  <!-- URL bar show workspace name -->
+  <html:div class="row middle-align">
+    <html:div class="max">
+      <html:div data-l10n-id="hilal-urlbar-show-workspace-name">Adres Çubuğunda Alan Adı</html:div>
+      <html:label class="secondary-text">Adres çubuğunda geçerli çalışma alanı adını göster</html:label>
+    </html:div>
+    <html:label class="switch">
+      <html:input type="checkbox" id="hilalUrlbarShowWorkspaceName" preference="hilal.urlbar.showWorkspaceName" />
+      <html:span></html:span>
+    </html:label>
+  </html:div>
+
+  <html:hr class="small" />
+
+  <!-- Reset Workspaces -->
+  <html:div class="row middle-align">
+    <html:div class="max">
+      <html:div data-l10n-id="hilal-workspaces-reset-button">Çalışma Alanlarını Sıfırla</html:div>
+      <html:label class="secondary-text" data-l10n-id="hilal-workspaces-reset-description">Tüm çalışma alanlarını siler ve varsayılan duruma geri döndürür</html:label>
+    </html:div>
+    <html:button class="border round" id="hilalWorkspacesReset" data-l10n-id="hilal-workspaces-reset-button">
+      <html:i>restart_alt</html:i>
+      <html:span>Sıfırla</html:span>
+    </html:button>
+  </html:div>
+</html:article>
+
+<!-- Kart 3: Tema ve Vurgu Rengi -->
+<html:article id="hilalThemeColorsGroup" class="border round padding medium-margin" data-category="paneHilal" hidden="true">
+  <html:div class="row middle-align">
+    <html:i class="primary-text">palette</html:i>
+    <html:div class="max">
+      <html:h6 class="small no-margin" data-l10n-id="hilal-theme-color-header">Tema ve Vurgu Rengi</html:h6>
+      <html:label class="secondary-text">Arayüz renklerini ve çalışma alanı vurgularını özelleştirin</html:label>
+    </html:div>
+  </html:div>
+
+  <html:div class="space"></html:div>
+
+  <!-- Accent Mode Selector -->
+  <html:div class="row middle-align">
+    <html:div class="max">
+      <html:div data-l10n-id="hilal-accent-mode-title">Vurgu Rengi Modu</html:div>
+      <html:label class="secondary-text" data-l10n-id="hilal-accent-mode-desc">Vurgu renginin nasıl belirleneceğini seçin</html:label>
+    </html:div>
+    <html:div>
+      <html:nav class="tabs min border round" id="hilalAccentMode">
+        <html:a id="hilalAccentModeWorkspace" data-value="workspace" class="active" href="javascript:void(0)">
+          <html:i>dashboard</html:i>
+          <html:span data-l10n-id="hilal-accent-mode-workspace">Çalışma Alanı</html:span>
+        </html:a>
+        <html:a id="hilalAccentModeGlobal" data-value="global" href="javascript:void(0)">
+          <html:i>brush</html:i>
+          <html:span data-l10n-id="hilal-accent-mode-global">Genel Vurgu</html:span>
+        </html:a>
+        <html:a id="hilalAccentModeBoosts" data-value="boosts" href="javascript:void(0)">
+          <html:i>auto_awesome</html:i>
+          <html:span data-l10n-id="hilal-accent-mode-boosts">Hilal Boosts</html:span>
+        </html:a>
+      </html:nav>
+    </html:div>
+  </html:div>
+
+  <html:hr class="small" />
+
+  <!-- Sub-section: Workspace Colors -->
+  <html:div id="hilalWorkspaceColorsSection">
+    <html:label class="secondary-text" data-l10n-id="hilal-workspace-colors-subdesc">Her çalışma alanı için özel bir vurgu rengi belirleyin</html:label>
+    <html:div class="space"></html:div>
+    <html:div id="hilalWorkspaceColorList"></html:div>
+  </html:div>
+
+  <!-- Sub-section: Global Master Color -->
+  <html:div id="hilalGlobalColorSection" hidden="true">
+    <html:div class="row middle-align">
+      <html:div class="max">
+        <html:div data-l10n-id="hilal-global-color-title">Genel Vurgu Rengi</html:div>
+        <html:label class="secondary-text" data-l10n-id="hilal-global-color-desc">Tüm arayüzde geçerli olacak sabit renk seçin</html:label>
+      </html:div>
+      <html:div class="row middle-align">
+        <html:div id="hilalGlobalColorSwatches" class="row no-margin"></html:div>
+        <html:input type="color" id="hilalGlobalCustomColor" class="border round" style="width: 44px; height: 44px; padding: 2px; cursor: pointer;" title="Özel Renk" />
+      </html:div>
+    </html:div>
+  </html:div>
+
+  <!-- Sub-section: Dynamic Hilal Boosts Website Color -->
+  <html:div id="hilalBoostsColorSection" hidden="true">
+    <html:div class="row middle-align">
+      <html:div class="max">
+        <html:div data-l10n-id="hilal-boosts-mode-title">Dinamik Web Vurgusu</html:div>
+        <html:label class="secondary-text" data-l10n-id="hilal-boosts-mode-desc">Aktif sekmedeki web sayfasının rengi canlı olarak uygulanır</html:label>
+      </html:div>
+      <html:button class="border round primary-text">
+        <html:i class="primary-text">auto_awesome</html:i>
+        <html:span data-l10n-id="hilal-boosts-live-status">Canlı Web Rengi Aktif</html:span>
+      </html:button>
+    </html:div>
+  </html:div>
+</html:article>
+
+<!-- Kart 4: Kenar Çubuğu -->
+<html:article id="hilalSidebarGroup" class="border round padding medium-margin" data-category="paneHilal" hidden="true">
+  <html:div class="row middle-align">
+    <html:i class="primary-text">dock_to_left</html:i>
+    <html:div class="max">
+      <html:h6 class="small no-margin" data-l10n-id="hilal-sidebar-header">Kenar Çubuğu</html:h6>
+      <html:label class="secondary-text">Kompakt mod, yatay/dikey geçişi ve kısayollar</html:label>
+    </html:div>
+  </html:div>
+
+  <html:div class="space"></html:div>
+
+  <!-- Compact Enabled -->
+  <html:div class="row middle-align">
+    <html:div class="max">
+      <html:div data-l10n-id="hilal-sidebar-compact-enabled">Kompakt Mod</html:div>
+      <html:label class="secondary-text">Fare kenara yaklaşınca beliren daraltılmış kenar çubuğu</html:label>
+    </html:div>
+    <html:label class="switch">
+      <html:input type="checkbox" id="hilalSidebarCompactEnabled" preference="hilal.compact.enabled" />
+      <html:span></html:span>
+    </html:label>
+  </html:div>
+
+  <html:hr class="small" />
+
+  <!-- Compact Hide Toolbar -->
+  <html:div class="row middle-align">
+    <html:div class="max">
+      <html:div data-l10n-id="hilal-sidebar-compact-hide-toolbar">Üst Araç Çubuğunu Gizle</html:div>
+      <html:label class="secondary-text" data-l10n-id="hilal-sidebar-compact-hide-toolbar-desc">Kompakt moddayken üst araç çubuğunu otomatik gizle</html:label>
+    </html:div>
+    <html:label class="switch">
+      <html:input type="checkbox" id="hilalSidebarCompactHideToolbar" preference="hilal.compact.hideToolbar" />
+      <html:span></html:span>
+    </html:label>
+  </html:div>
+
+  <html:hr class="small" />
+
+  <!-- Show Horizontal Tabs -->
+  <html:div class="row middle-align">
+    <html:div class="max">
+      <html:div data-l10n-id="hilal-sidebar-show-horizontal-tabs">Üst Yatay Sekmeleri Göster</html:div>
+      <html:label class="secondary-text">Kenar çubuğunun yanı sıra üst yatay sekmeleri de koru</html:label>
+    </html:div>
+    <html:label class="switch">
+      <html:input type="checkbox" id="hilalSidebarShowHorizontalTabs" preference="sidebar.verticalTabs.showHorizontal" />
+      <html:span></html:span>
+    </html:label>
+  </html:div>
+
+  <html:hr class="small" />
+
+  <!-- Footer Quick Items -->
+  <html:div>
+    <html:div data-l10n-id="hilal-sidebar-footer-items-label">Alt Panel Kısayolları</html:div>
+    <html:label class="secondary-text">Kenar çubuğunun altında gösterilecek hızlı erişim butonları</html:label>
+    <html:div class="space"></html:div>
+    <html:div class="row wrap">
+      <html:label class="checkbox">
+        <html:input type="checkbox" id="hilalSidebarFooterBookmarks" preference="hilal.sidebar.footer.bookmarks" />
+        <html:span data-l10n-id="hilal-sidebar-footer-bookmarks">Yer İmleri</html:span>
+      </html:label>
+      <html:label class="checkbox">
+        <html:input type="checkbox" id="hilalSidebarFooterHistory" preference="hilal.sidebar.footer.history" />
+        <html:span data-l10n-id="hilal-sidebar-footer-history">Geçmiş</html:span>
+      </html:label>
+      <html:label class="checkbox">
+        <html:input type="checkbox" id="hilalSidebarFooterPasswords" preference="hilal.sidebar.footer.passwords" />
+        <html:span data-l10n-id="hilal-sidebar-footer-passwords">Parolalar</html:span>
+      </html:label>
+      <html:label class="checkbox">
+        <html:input type="checkbox" id="hilalSidebarFooterDownloads" preference="hilal.sidebar.footer.downloads" />
+        <html:span data-l10n-id="hilal-sidebar-footer-downloads">İndirmeler</html:span>
+      </html:label>
+      <html:label class="checkbox">
+        <html:input type="checkbox" id="hilalSidebarFooterPrivacy" preference="hilal.sidebar.footer.privacy" />
+        <html:span data-l10n-id="hilal-sidebar-footer-privacy">Gizlilik</html:span>
+      </html:label>
+      <html:label class="checkbox">
+        <html:input type="checkbox" id="hilalSidebarFooterSettings" preference="hilal.sidebar.footer.settings" />
+        <html:span data-l10n-id="hilal-sidebar-footer-settings">Ayarlar</html:span>
+      </html:label>
+    </html:div>
+  </html:div>
+
+  <html:hr class="small" />
+
+  <!-- Custom Shortcuts Manager -->
+  <html:div>
+    <html:div data-l10n-id="hilal-sidebar-custom-shortcuts-label">Özel Kenar Çubuğu Kısayolları</html:div>
+    <html:label class="secondary-text" data-l10n-id="hilal-sidebar-custom-shortcuts-desc">Kenar çubuğuna hızlı erişim için özel bağlantılar ekleyin</html:label>
+    <html:div class="space"></html:div>
+
+    <html:div id="hilalSidebarCustomList" class="border round padding" style="max-height: 180px; overflow-y: auto;"></html:div>
+
+    <html:div class="space"></html:div>
+
+    <html:nav class="row">
+      <html:button class="border round" id="hilalSidebarCustomAdd" data-l10n-id="hilal-sidebar-custom-add">
+        <html:i>add</html:i>
+        <html:span>Ekle</html:span>
+      </html:button>
+      <html:button class="border round" id="hilalSidebarCustomRemove" data-l10n-id="hilal-sidebar-custom-remove" disabled="true">
+        <html:i>delete</html:i>
+        <html:span>Sil</html:span>
+      </html:button>
+    </html:nav>
+
+    <!-- Custom Shortcut Form -->
+    <html:div id="hilalSidebarCustomForm" class="border round padding medium-margin" hidden="true">
+      <html:div class="field label border round">
+        <html:input id="hilalSidebarCustomName" type="text" data-l10n-id="hilal-sidebar-custom-name-placeholder" />
+        <html:label data-l10n-id="hilal-sidebar-custom-name-label">Kısayol Adı</html:label>
+      </html:div>
+      <html:div class="field label border round">
+        <html:input id="hilalSidebarCustomUrl" type="text" data-l10n-id="hilal-sidebar-custom-url-placeholder" />
+        <html:label data-l10n-id="hilal-sidebar-custom-url-label">URL</html:label>
+      </html:div>
+      <html:div class="field label border round">
+        <html:select id="hilalSidebarCustomIcon">
+          <html:option value="link" data-l10n-id="hilal-sidebar-custom-icon-link">Bağlantı</html:option>
+          <html:option value="bookmark" data-l10n-id="hilal-sidebar-custom-icon-bookmark">Yer İmi</html:option>
+          <html:option value="history" data-l10n-id="hilal-sidebar-custom-icon-history">Geçmiş</html:option>
+          <html:option value="key" data-l10n-id="hilal-sidebar-custom-icon-key">Parola</html:option>
+          <html:option value="downloads" data-l10n-id="hilal-sidebar-custom-icon-downloads">İndirmeler</html:option>
+          <html:option value="shield" data-l10n-id="hilal-sidebar-custom-icon-shield">Güvenlik</html:option>
+          <html:option value="settings" data-l10n-id="hilal-sidebar-custom-icon-settings">Ayarlar</html:option>
+        </html:select>
+        <html:label data-l10n-id="hilal-sidebar-custom-icon-label">İkon</html:label>
+      </html:div>
+      <html:nav class="row right-align">
+        <html:button class="primary round" id="hilalSidebarCustomSave" data-l10n-id="hilal-sidebar-custom-save">Kaydet</html:button>
+        <html:button class="transparent round" id="hilalSidebarCustomCancel" data-l10n-id="hilal-sidebar-custom-cancel">İptal</html:button>
+      </html:nav>
+    </html:div>
+  </html:div>
+</html:article>
+
+<!-- Kart 5: Yerel Güvenlik Kademesi -->
+<html:article id="hilalPrivacyGroup" class="border round padding medium-margin" data-category="paneHilal" hidden="true">
+  <html:div class="row middle-align">
+    <html:i class="primary-text">shield</html:i>
+    <html:div class="max">
+      <html:h6 class="small no-margin" data-l10n-id="hilal-privacy-header">Yerel Güvenlik Kademesi</html:h6>
+      <html:label class="secondary-text" data-l10n-id="hilal-privacy-description">Tarayıcının yerel koruma ve gizlilik seviyesini belirleyin</html:label>
+    </html:div>
+  </html:div>
+
+  <html:div class="space"></html:div>
+
+  <html:div class="row middle-align">
+    <html:div class="max">
+      <html:div>Güvenlik Kademesi</html:div>
+      <html:label class="secondary-text">İzleme koruması, çerez kısıtlamaları ve parmak izi engelleme</html:label>
+    </html:div>
+    <html:div>
+      <html:nav class="tabs min border round" id="hilalPrivacyLevel">
+        <html:a id="hilalPrivacyStandard" data-value="standard" class="active" href="javascript:void(0)">
+          <html:i>shield</html:i>
+          <html:span data-l10n-id="hilal-privacy-standard">Dengeli</html:span>
+        </html:a>
+        <html:a id="hilalPrivacyStrict" data-value="strict" href="javascript:void(0)">
+          <html:i>verified_user</html:i>
+          <html:span data-l10n-id="hilal-privacy-strict">Sıkı</html:span>
+        </html:a>
+        <html:a id="hilalPrivacyExtreme" data-value="extreme" href="javascript:void(0)">
+          <html:i>security</html:i>
+          <html:span data-l10n-id="hilal-privacy-extreme">Maksimum</html:span>
+        </html:a>
+      </html:nav>
+    </html:div>
+  </html:div>
+</html:article>
+
+<!-- Kart 6: Bangs -->
+<html:article id="hilalBangsGroup" class="border round padding medium-margin" data-category="paneHilal" hidden="true">
+  <html:div class="row middle-align">
+    <html:i class="primary-text">travel_explore</html:i>
+    <html:div class="max">
+      <html:h6 class="small no-margin" data-l10n-id="hilal-bangs-header">Hızlı Arama Kısayolları (!Bangs)</html:h6>
+      <html:label class="secondary-text">Adres çubuğunda !g, !w gibi kısayollarla doğrudan farklı motorlarda arama yapın</html:label>
+    </html:div>
+  </html:div>
+
+  <html:div class="space"></html:div>
+
+  <html:div id="hilalBangsList" class="border round padding" style="max-height: 200px; overflow-y: auto;"></html:div>
+
+  <html:div class="space"></html:div>
+
+  <html:nav class="row">
+    <html:button class="border round" id="hilalBangsAdd" data-l10n-id="hilal-bangs-add-button">
+      <html:i>add</html:i>
+      <html:span>Ekle</html:span>
+    </html:button>
+    <html:button class="border round" id="hilalBangsRemove" data-l10n-id="hilal-bangs-remove-button" disabled="true">
+      <html:i>delete</html:i>
+      <html:span>Sil</html:span>
+    </html:button>
+  </html:nav>
+
+  <!-- Bang Form -->
+  <html:div id="hilalBangsForm" class="border round padding medium-margin" hidden="true">
+    <html:div class="field label border round">
+      <html:input id="hilalBangsTrigger" type="text" placeholder="örn. g" />
+      <html:label data-l10n-id="hilal-bangs-trigger-label">Tetikleyici (ör. g)</html:label>
+    </html:div>
+    <html:div class="field label border round">
+      <html:input id="hilalBangsSearchUrl" type="text" placeholder="https://www.google.com/search?q={query}" />
+      <html:label data-l10n-id="hilal-bangs-searchurl-label">Arama URL'si</html:label>
+    </html:div>
+    <html:div class="field label border round">
+      <html:input id="hilalBangsHomeUrl" type="text" placeholder="https://www.google.com" />
+      <html:label data-l10n-id="hilal-bangs-homeurl-label">Ana Sayfa URL'si</html:label>
+    </html:div>
+    <html:nav class="row right-align">
+      <html:button class="primary round" id="hilalBangsSave" data-l10n-id="hilal-bangs-save-button">Kaydet</html:button>
+      <html:button class="transparent round" id="hilalBangsCancel" data-l10n-id="hilal-bangs-cancel-button">İptal</html:button>
+    </html:nav>
+  </html:div>
+</html:article>
+
+<!-- Kart 7: Dil Tercihi -->
+<html:article id="hilalLanguageGroup" class="border round padding medium-margin" data-category="paneHilal" hidden="true">
+  <html:div class="row middle-align">
+    <html:i class="primary-text">translate</html:i>
+    <html:div class="max">
+      <html:h6 class="small no-margin" data-l10n-id="hilal-language-header">Dil Seçimi</html:h6>
+      <html:label class="secondary-text" data-l10n-id="hilal-language-description">Tarayıcının kullanıcı arayüzü dilini değiştirin</html:label>
+    </html:div>
+  </html:div>
+
+  <html:div class="space"></html:div>
+
+  <html:div class="row middle-align">
+    <html:div class="field label border round max">
+      <html:select id="hilalLanguageSelect"></html:select>
+      <html:label>Tarayıcı Dili</html:label>
+    </html:div>
+    <html:button class="primary round" id="hilalLanguageApply" data-l10n-id="hilal-language-apply-button">
+      <html:i>check</html:i>
+      <html:span>Uygula ve Yeniden Başlat</html:span>
+    </html:button>
+  </html:div>
+</html:article>
+
+<!-- Kart 8: Klavye Kısayolları -->
+<html:article id="hilalShortcutsGroup" class="border round padding medium-margin" data-category="paneHilal" hidden="true">
+  <html:div class="row middle-align">
+    <html:i class="primary-text">keyboard</html:i>
+    <html:div class="max">
+      <html:h6 class="small no-margin" data-l10n-id="hilal-shortcuts-header">Klavye Kısayolları</html:h6>
+      <html:label class="secondary-text" data-l10n-id="hilal-shortcuts-description">Çalışma alanları, kenar çubuğu ve gezinti için kısayolları yönetin</html:label>
+    </html:div>
+    <html:button class="border round" id="hilalShortcutsRestoreDefaults" data-l10n-id="hilal-shortcuts-reset">
+      <html:i>restart_alt</html:i>
+      <html:span>Varsayılanlara Sıfırla</html:span>
+    </html:button>
+  </html:div>
+
+  <html:div class="space"></html:div>
+
+  <html:div id="hilalShortcutsContainer"></html:div>
+</html:article>
+
+<!-- Kart 9: Hilal Hakkında -->
+<html:article id="hilalAboutGroup" class="border round padding medium-margin" data-category="paneHilal" hidden="true">
+  <html:div class="row middle-align">
+    <html:i class="primary-text">info</html:i>
+    <html:div class="max">
+      <html:h6 class="small no-margin" data-l10n-id="hilal-about-header">Hilal Hakkında</html:h6>
+      <html:label class="secondary-text" data-l10n-id="hilal-about-version-subtitle">Sürüm bilgileri, lisans ve açık kaynak detayları</html:label>
+    </html:div>
+    <html:button class="primary round" id="hilalAboutVersionBtn" data-l10n-id="hilal-about-version-button" onclick="openAboutDialog()">
+      <html:i>open_in_new</html:i>
+      <html:span>Sürüm Bilgisi</html:span>
+    </html:button>
+  </html:div>
+</html:article>

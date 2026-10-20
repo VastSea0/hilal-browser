@@ -1,2881 +1,1675 @@
-diff --git a/browser/app/Makefile.in b/browser/app/Makefile.in
---- a/browser/app/Makefile.in
-+++ b/browser/app/Makefile.in
-@@ -90,6 +90,6 @@ ifdef MOZ_UPDATER
- 	cp -f '$(dist_dest)/Contents/MacOS/updater.app/Contents/MacOS/org.mozilla.updater' '$(dist_dest)/Contents/Library/LaunchServices'
- endif
- 	$(MKDIR) -p '$(dist_dest)/Contents/Frameworks'
--	mv '$(dist_dest)/Contents/Resources/ChannelPrefs.framework' '$(dist_dest)/Contents/Frameworks'
-+	-mv '$(dist_dest)/Contents/Resources/ChannelPrefs.framework' '$(dist_dest)/Contents/Frameworks'
- 	printf APPLMOZB > '$(dist_dest)/Contents/PkgInfo'
- endif
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
-@@ -3618,6 +3618,7 @@ pref("distribution.mozillaonline.ignore", true);
- pref("hilal.privacy.initialized", false);
- pref("hilal.bangs.custom", "[]");
- // Hilal Browser - UI Fix Integration
-+pref("hilal.tahoe.enabled", false);
- pref("hilal.uifix.enabled", true);
- // Theme Default Options
- pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+@@ -59,7 +59,7 @@ pref("extensions.systemAddon.update.enabled", true);
+ // See the SCOPE constants in AddonManager.sys.mjs for values to use here.
+ pref("extensions.autoDisableScopes", 15);
+ // Scopes to scan for changes at startup.
+-pref("extensions.startupScanScopes", 0);
++pref("extensions.startupScanScopes", 8);
+ 
+ pref("extensions.geckoProfiler.acceptedExtensionIds", "geckoprofiler@mozilla.com,quantum-foxfooding@mozilla.com,raptor@mozilla.org");
+ 
 diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
 --- a/browser/base/content/browser.xhtml
 +++ b/browser/base/content/browser.xhtml
-@@ -152,6 +152,15 @@
+@@ -39,6 +39,7 @@
+     href="chrome://browser/content/usercontext/usercontext.css"
+   />
+   <link rel="stylesheet" href="chrome://browser/skin/" />
++  <link rel="stylesheet" href="chrome://browser/content/hilal/HilalShell.css" />
+ 
+   <link rel="stylesheet" href="chrome://browser/skin/controlcenter/panel.css" />
+   <link
+@@ -160,5 +161,10 @@
+ 
    <!-- Put it at the very end to make sure it's not covered by anything. -->
    <html:div id="fullscr-toggler" hidden="hidden"/>
- 
-+  <svg xmlns="http://www.w3.org/2000/svg" style="position: absolute; width: 0; height: 0; pointer-events: none;">
-+    <defs>
-+      <filter id="liquid-glass-refraction" x="0%" y="0%" width="100%" height="100%">
-+        <feTurbulence type="fractalNoise" baseFrequency="0.02 0.04" numOctaves="3" result="noise" />
-+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="10" xChannelSelector="R" yChannelSelector="G" />
-+      </filter>
-+    </defs>
-+  </svg>
 +
-   <script src="chrome://browser/content/hilal/HilalKeyboardShortcuts.js"></script>
-   <script src="chrome://browser/content/hilal/HilalWelcome.js"></script>
-   <script src="chrome://browser/content/hilal/HilalWorkspaces.js"></script>
++  <script src="chrome://browser/content/hilal/HilalKeyboardShortcuts.js"></script>
++  <script src="chrome://browser/content/hilal/HilalWelcome.js"></script>
++  <script src="chrome://browser/content/hilal/HilalWorkspaces.js"></script>
++  <script src="chrome://browser/content/hilal/HilalShell.js"></script>
+ </html:body>
+ </html>
 diff --git a/browser/base/jar.mn b/browser/base/jar.mn
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
-@@ -90,6 +90,8 @@ browser.jar:
-         content/browser/hilal/HilalBoosts.js                (content/hilal/HilalBoosts.js)
-         content/browser/hilal/HilalBoostsActorParent.sys.mjs (content/hilal/HilalBoostsActorParent.sys.mjs)
-         content/browser/hilal/HilalBoostsActorChild.sys.mjs  (content/hilal/HilalBoostsActorChild.sys.mjs)
-+        content/browser/hilal/HilalTahoeParent.sys.mjs      (content/hilal/HilalTahoeParent.sys.mjs)
-+        content/browser/hilal/HilalTahoeChild.sys.mjs       (content/hilal/HilalTahoeChild.sys.mjs)
+@@ -66,6 +66,26 @@ browser.jar:
+         content/browser/browser-unified-extensions.js       (content/browser-unified-extensions.js)
+         content/browser/browser-graphics-utils.js           (content/browser-graphics-utils.js)
+         content/browser/browser-webrtc.js                   (content/browser-webrtc.js)
++        content/browser/hilal/HilalWelcome.js               (content/hilal/HilalWelcome.js)
++        content/browser/hilal/HilalWelcome.css              (content/hilal/HilalWelcome.css)
++        content/browser/hilal/welcome-home-preview.png       (content/hilal/welcome-home-preview.png)
++        content/browser/hilal/screenshots/welcome-standard.png (content/hilal/screenshots/welcome-standard.png)
++        content/browser/hilal/screenshots/welcome-compact.png (content/hilal/screenshots/welcome-compact.png)
++        content/browser/hilal/screenshots/welcome-standard-vertical.png (content/hilal/screenshots/welcome-standard-vertical.png)
++        content/browser/hilal/screenshots/welcome-standard-horizontal.png (content/hilal/screenshots/welcome-standard-horizontal.png)
++        content/browser/hilal/screenshots/welcome-compact-vertical.png (content/hilal/screenshots/welcome-compact-vertical.png)
++        content/browser/hilal/screenshots/welcome-compact-horizontal.png (content/hilal/screenshots/welcome-compact-horizontal.png)
++        content/browser/hilal/screenshots/welcome-workspaces-on.png (content/hilal/screenshots/welcome-workspaces-on.png)
++        content/browser/hilal/screenshots/welcome-workspaces-off.png (content/hilal/screenshots/welcome-workspaces-off.png)
++        content/browser/hilal/screenshots/welcome-toolbar-visible.png (content/hilal/screenshots/welcome-toolbar-visible.png)
++        content/browser/hilal/screenshots/welcome-toolbar-hidden.png (content/hilal/screenshots/welcome-toolbar-hidden.png)
++        content/browser/hilal/HilalKeyboardShortcuts.js     (content/hilal/HilalKeyboardShortcuts.js)
++        content/browser/hilal/HilalWorkspaces.js            (content/hilal/HilalWorkspaces.js)
++        content/browser/hilal/HilalShell.js                 (content/hilal/HilalShell.js)
++        content/browser/hilal/HilalShell.css                (content/hilal/HilalShell.css)
++        content/browser/hilal/newtab/newtab.html            (content/hilal/newtab/newtab.html)
++        content/browser/hilal/newtab/newtab.css             (content/hilal/newtab/newtab.css)
++        content/browser/hilal/newtab/newtab.js              (content/hilal/newtab/newtab.js)
          content/browser/global-scripts.js                   (content/global-scripts.js)
          content/browser/main-popupset.js                    (content/main-popupset.js)
  *       content/browser/pageinfo/pageInfo.xhtml             (content/pageinfo/pageInfo.xhtml)
 diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/components/customizableui/CustomizableUI.sys.mjs
 --- a/browser/components/customizableui/CustomizableUI.sys.mjs
 +++ b/browser/components/customizableui/CustomizableUI.sys.mjs
-@@ -37,6 +37,18 @@ const kPrefCustomizationHorizontalTabsBackup =
-   "browser.uiCustomization.horizontalTabsBackup";
- const kPrefCustomizationNavBarWhenVerticalTabs =
-   "browser.uiCustomization.navBarWhenVerticalTabs";
-+const kHilalHorizontalTabToolbarWidgets = ["new-tab-button"];
-+const kHilalHorizontalTabToolbarExcludedWidgets = [
-+  "firefox-view-button",
-+  "alltabs-button",
-+];
-+const kHilalHorizontalTabstripDefaultPlacements = ["tabbrowser-tabs"];
-+const kHilalDefaultTabstripPlacements = [
-+  "firefox-view-button",
-+  "tabbrowser-tabs",
-+  "new-tab-button",
-+  "alltabs-button",
-+];
- const kPrefCustomizationAutoAdd = "browser.uiCustomization.autoAdd";
- const kPrefCustomizationDebug = "browser.uiCustomization.debug";
- const kPrefDrawInTitlebar = "browser.tabs.inTitlebar";
-@@ -251,6 +263,19 @@ XPCOMUtils.defineLazyPreferenceGetter(
-   }
- );
+@@ -320,6 +320,11 @@ var CustomizableUIInternal = {
+   initialize() {
+     lazy.log.debug("Initializing");
  
-+XPCOMUtils.defineLazyPreferenceGetter(
-+  lazy,
-+  "verticalTabsShowHorizontalPref",
-+  "sidebar.verticalTabs.showHorizontal",
-+  false,
-+  (pref, oldVal, newVal) => {
-+    lazy.log.debug(
-+      `sidebar.verticalTabs.showHorizontal change handler, calling updateTabStripOrientation with value: ${newVal}`
-+    );
-+    CustomizableUIInternal.updateTabStripOrientation();
-+  }
-+);
-+
- XPCOMUtils.defineLazyPreferenceGetter(
-   lazy,
-   "horizontalPlacementsPref",
-@@ -357,6 +382,9 @@ var CustomizableUIInternal = {
-       false
-     );
- 
-+    let useHilalHorizontalTabsToolbar =
-+      Services.prefs.getBoolPref("sidebar.verticalTabs", false) &&
-+      Services.prefs.getBoolPref("sidebar.verticalTabs.showHorizontal", false);
-     let navbarPlacements = [
-       lazy.sidebarRevampEnabled ? "sidebar-button" : null,
-       "back-button",
-@@ -375,6 +403,14 @@ var CustomizableUIInternal = {
-       "fxa-toolbar-menu-button",
-       lazy.resetPBMToolbarButtonEnabled ? "reset-pbm-toolbar-button" : null,
-     ].filter(name => name);
-+    if (useHilalHorizontalTabsToolbar) {
-+      let newTabIndex = navbarPlacements.indexOf("downloads-button");
-+      navbarPlacements.splice(
-+        newTabIndex >= 0 ? newTabIndex + 1 : navbarPlacements.length,
-+        0,
-+        "new-tab-button"
-+      );
-+    }
- 
-     this.registerArea(
-       CustomizableUI.AREA_NAVBAR,
-@@ -407,12 +443,9 @@ var CustomizableUIInternal = {
-       CustomizableUI.AREA_TABSTRIP,
-       {
-         type: CustomizableUI.TYPE_TOOLBAR,
--        defaultPlacements: [
--          "firefox-view-button",
--          "tabbrowser-tabs",
--          "new-tab-button",
--          "alltabs-button",
--        ],
-+        defaultPlacements: useHilalHorizontalTabsToolbar
-+          ? kHilalHorizontalTabstripDefaultPlacements
-+          : kHilalDefaultTabstripPlacements,
-         verticalTabsDefaultPlacements: [],
-         defaultCollapsed: null,
-       },
-@@ -445,6 +478,11 @@ var CustomizableUIInternal = {
-     // we'll enable revamp rather than disable vertical tabs.
-     this.reconcileSidebarPrefs(kPrefSidebarVerticalTabsEnabled);
- 
-+    // Force initialization of lazy preference getters so their observers are registered:
-+    lazy.verticalTabsPref;
-+    lazy.verticalTabsShowHorizontalPref;
-+
-+    this.updateHilalHorizontalTabToolbarDefaults();
-     this.initializeForTabsOrientation(CustomizableUI.verticalTabsEnabled);
- 
-     Services.obs.addObserver(this, "browser-set-toolbar-visibility");
-@@ -4466,10 +4504,15 @@ var CustomizableUIInternal = {
-    */
-   reset() {
-     gResetting = true;
--    // CUI reset also implies resetting verticalTabs back to false.
--    // We do this before the rest of the reset so widgets are reset to their non-vertical
--    // positions.
--    Services.prefs.setBoolPref("sidebar.verticalTabs", false);
-+    if (Services.prefs.getBoolPref("hilal.tahoe.enabled", false)) {
-+      Services.prefs.setStringPref("sidebar.visibility", "hide-sidebar");
-+      Services.prefs.setBoolPref("sidebar.verticalTabs.showHorizontal", true);
-+      Services.prefs.setBoolPref("sidebar.verticalTabs", true);
-+    } else {
-+      Services.prefs.setBoolPref("sidebar.verticalTabs.showHorizontal", false);
-+      Services.prefs.setBoolPref("sidebar.verticalTabs", true);
-+    }
-+    this.updateHilalHorizontalTabToolbarDefaults();
-     this._resetUIState();
- 
-     // Rebuild each registered area (across windows) to reflect the state that
-@@ -5075,6 +5118,12 @@ var CustomizableUIInternal = {
- 
-     if (aTopic === "nsPref:changed") {
-       this.reconcileSidebarPrefs(aData);
-+      if (
-+        aData === kPrefSidebarVerticalTabsEnabled ||
-+        aData === "sidebar.verticalTabs.showHorizontal"
-+      ) {
-+        this.updateHilalHorizontalTabToolbarDefaults();
-+      }
-     }
-   },
- 
-@@ -5094,14 +5143,19 @@ var CustomizableUIInternal = {
-         "initializeForTabsOrientation, savedPlacements",
-         savedPlacements
-       );
--      if (savedPlacements.length) {
-+      let isCurrentlyVertical =
-+        gSavedState?.placements?.[
-+          CustomizableUI.AREA_VERTICAL_TABSTRIP
-+        ]?.includes("tabbrowser-tabs");
-+      if (savedPlacements.length || isCurrentlyVertical) {
-         // We're startup up with horizontal tabs, but there are saved placements for the
--        // horizontal tab strip, so its possible the verticalTabs pref was updated outside
--        // of normal use. Make sure to restore those tabstrip widget placements
-+        // horizontal tab strip, or the database placements show it is currently vertical.
-+        // Make sure to restore those tabstrip widget placements.
-         this.restoreSavedHorizontalTabStripState(savedPlacements, true);
-       } else {
-         // This is the default state and normal initialization will do everything necessary
-       }
-+      this.updateHilalHorizontalTabToolbarState(true);
-       gCurrentVerticalTabs = false;
-       return;
-     }
-@@ -5285,6 +5339,9 @@ var CustomizableUIInternal = {
-       return;
-     }
-     let toVertical = CustomizableUI.verticalTabsEnabled;
-+    if (!toVertical) {
-+      this.updateHilalHorizontalTabToolbarState();
-+    }
-     if (toVertical === gCurrentVerticalTabs) {
-       lazy.log.debug("early return as the value hasn't changed");
-       return;
-@@ -5378,6 +5435,7 @@ var CustomizableUIInternal = {
-       this.saveNavBarWhenVerticalTabsState();
-       // We're switching to vertical in this session; pull saved state from pref and update placements
-       this.restoreSavedHorizontalTabStripState();
-+      this.updateHilalHorizontalTabToolbarState();
-     }
-     // Give the sidebar a chance to adjust before we show/hide the toolbars
-     lazy.log.debug("CustomizableUI notifying tabstrip-orientation-change");
-@@ -5396,6 +5454,96 @@ var CustomizableUIInternal = {
-       win.TabBarVisibility.update(true);
-     }
-   },
-+
-+  updateHilalHorizontalTabToolbarDefaults() {
-+    if (
-+      !gAreas.get(CustomizableUI.AREA_TABSTRIP) ||
-+      !gAreas.get(CustomizableUI.AREA_NAVBAR)
-+    ) {
-+      return;
++    if (!Services.prefs.getBoolPref("hilal.toolbar.initialized", false)) {
++      Services.prefs.clearUserPref("browser.uiCustomization.state");
++      Services.prefs.setBoolPref("hilal.toolbar.initialized", true);
 +    }
 +
-+    let useHilalHorizontalTabsToolbar =
-+      lazy.verticalTabsPref && lazy.verticalTabsShowHorizontalPref;
-+
-+    let tabstripProps = gAreas.get(CustomizableUI.AREA_TABSTRIP);
-+    tabstripProps.set(
-+      "defaultPlacements",
-+      useHilalHorizontalTabsToolbar
-+        ? [...kHilalHorizontalTabstripDefaultPlacements]
-+        : [...kHilalDefaultTabstripPlacements]
-+    );
-+
-+    let navbarProps = gAreas.get(CustomizableUI.AREA_NAVBAR);
-+    let navbarDefaults = navbarProps
-+      .get("defaultPlacements")
-+      .filter(
-+        id =>
-+          !kHilalHorizontalTabToolbarWidgets.includes(id) &&
-+          !kHilalHorizontalTabToolbarExcludedWidgets.includes(id)
-+      );
-+    if (useHilalHorizontalTabsToolbar) {
-+      let insertIndex = navbarDefaults.indexOf("downloads-button");
-+      navbarDefaults.splice(
-+        insertIndex >= 0 ? insertIndex + 1 : navbarDefaults.length,
-+        0,
-+        ...kHilalHorizontalTabToolbarWidgets
-+      );
-+    }
-+    navbarProps.set("defaultPlacements", navbarDefaults);
-+  },
-+
-+  updateHilalHorizontalTabToolbarState(isInitializing = false) {
-+    if (!lazy.verticalTabsPref || !lazy.verticalTabsShowHorizontalPref) {
-+      return;
-+    }
-+
-+    if (
-+      !gPlacements.get(CustomizableUI.AREA_TABSTRIP) ||
-+      !gPlacements.get(CustomizableUI.AREA_NAVBAR)
-+    ) {
-+      return;
-+    }
-+
-+    let insertIndex = gPlacements
-+      .get(CustomizableUI.AREA_NAVBAR)
-+      .indexOf("downloads-button");
-+    insertIndex =
-+      insertIndex >= 0
-+        ? insertIndex + 1
-+        : gPlacements.get(CustomizableUI.AREA_NAVBAR).length;
-+
-+    this.updateHilalHorizontalTabToolbarDefaults();
-+    CustomizableUI.beginBatchUpdate();
-+    try {
-+      for (let widgetId of kHilalHorizontalTabToolbarExcludedWidgets) {
-+        let placement = this.getPlacementOfWidget(widgetId, false, true);
-+        if (placement?.area === CustomizableUI.AREA_NAVBAR) {
-+          this.removeWidgetFromArea(widgetId);
-+        }
-+      }
-+
-+      for (let widgetId of kHilalHorizontalTabToolbarWidgets) {
-+        let navbarPlacements = gPlacements.get(CustomizableUI.AREA_NAVBAR);
-+        let placement = this.getPlacementOfWidget(widgetId, false, true);
-+        let currentIndex = navbarPlacements.indexOf(widgetId);
-+        if (
-+          placement?.area !== CustomizableUI.AREA_NAVBAR ||
-+          currentIndex !== insertIndex
-+        ) {
-+          this.addWidgetToArea(
-+            widgetId,
-+            CustomizableUI.AREA_NAVBAR,
-+            insertIndex,
-+            isInitializing
-+          );
-+        }
-+        insertIndex++;
-+      }
-+    } finally {
-+      CustomizableUI.endBatchUpdate();
-+    }
-+  },
- };
- Object.freeze(CustomizableUIInternal);
+     this._setAutoTouchModeDefault();
  
-@@ -5500,7 +5648,7 @@ export var CustomizableUI = {
-   },
- 
-   get verticalTabsEnabled() {
--    return lazy.verticalTabsPref;
-+    return lazy.verticalTabsPref && !lazy.verticalTabsShowHorizontalPref;
-   },
- 
-   /**
+     lazy.AddonManagerPrivate.databaseReady.then(async () => {
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -1796,8 +1796,10 @@ var gHilalPane = {
-     const hilalWsCheckbox = document.getElementById("hilalWorkspacesEnabled");
-     const hilalWsPinnedPublicCheckbox = document.getElementById("hilalWorkspacesPinnedPublic");
-     const hilalWsGroupsPublicCheckbox = document.getElementById("hilalWorkspacesGroupsPublic");
-+    const hilalUrlbarShowWorkspaceNameCheckbox = document.getElementById("hilalUrlbarShowWorkspaceName");
-     const hilalSidebarCompactCheckbox = document.getElementById("hilalSidebarCompactEnabled");
-     const hilalSidebarCompactHideToolbarCheckbox = document.getElementById("hilalSidebarCompactHideToolbar");
-+    const hilalSidebarShowHorizontalCheckbox = document.getElementById("hilalSidebarShowHorizontalTabs");
-     const hilalPrivacyLevelRadioGroup = /** @type {HTMLElement|null} */ (
-       document.getElementById("hilalPrivacyLevel")
-     );
-@@ -1863,6 +1865,18 @@ var gHilalPane = {
-         );
-       });
-     }
-+    if (hilalUrlbarShowWorkspaceNameCheckbox) {
-+      hilalUrlbarShowWorkspaceNameCheckbox.checked = Services.prefs.getBoolPref(
-+        "hilal.urlbar.showWorkspaceName",
-+        false
-+      );
-+      hilalUrlbarShowWorkspaceNameCheckbox.addEventListener("command", function () {
-+        Services.prefs.setBoolPref(
-+          "hilal.urlbar.showWorkspaceName",
-+          hilalUrlbarShowWorkspaceNameCheckbox.checked
-+        );
+@@ -13,7 +13,7 @@
+ /* import-globals-from preferences.js */
+ /* import-globals-from /toolkit/mozapps/preferences/fontbuilder.js */
+ /* import-globals-from /browser/base/content/aboutDialog-appUpdater.js */
+-/* global MozXULElement */
++/* global ContextualIdentityService, MozXULElement, Services */
+ 
+ /**
+  * @import { Setting } from "chrome://global/content/preferences/Setting.mjs"
+@@ -31,6 +31,8 @@ const { DefaultBrowserHelper } = ChromeUtils.importESModule(
+ 
+ ChromeUtils.defineESModuleGetters(this, {
+   BackgroundUpdate: "resource://gre/modules/BackgroundUpdate.sys.mjs",
++  ContextualIdentityService:
++    "moz-src:///toolkit/components/contextualidentity/ContextualIdentityService.sys.mjs",
+   UpdateListener: "resource://gre/modules/UpdateListener.sys.mjs",
+   LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
+   MigrationUtils: "resource:///modules/MigrationUtils.sys.mjs",
+@@ -122,6 +124,23 @@ Preferences.addAll([
+     id: "privacy.userContext.newTabContainerOnLeftClick.enabled",
+     type: "bool",
+   },
++
++  // Hilal Browser settings
++  { id: "hilal.boosts.auto_palette.enabled", type: "bool" },
++  { id: "hilal.workspaces.enabled", type: "bool" },
++  { id: "hilal.workspaces.pinned.public", type: "bool" },
++  { id: "hilal.workspaces.groups.public", type: "bool" },
++  { id: "hilal.urlbar.showWorkspaceName", type: "bool" },
++  { id: "hilal.compact.hideToolbar", type: "bool" },
++  { id: "hilal.sidebar.footer.bookmarks", type: "bool" },
++  { id: "hilal.sidebar.footer.history", type: "bool" },
++  { id: "hilal.sidebar.footer.passwords", type: "bool" },
++  { id: "hilal.sidebar.footer.downloads", type: "bool" },
++  { id: "hilal.sidebar.footer.privacy", type: "bool" },
++  { id: "hilal.sidebar.footer.settings", type: "bool" },
++  { id: "hilal.theme.accentMode", type: "string" },
++  { id: "hilal.theme.globalAccentColor", type: "string" },
++  { id: "hilal.privacy.level", type: "string" },
+ ]);
+ 
+ if (AppConstants.HAVE_SHELL_SERVICE) {
+@@ -1671,6 +1690,1374 @@ gMainPane.initialized = new Promise(res => {
+   gMainPane.setInitialized = res;
+ });
+ 
++var gTabsBrowsingPane = {
++  init() {
++    function wireCheckbox(checkboxId, prefName, defaultValue) {
++      const el = document.getElementById(checkboxId);
++      if (!el) return;
++      el.checked = Services.prefs.getBoolPref(prefName, defaultValue);
++      el.addEventListener("change", () => {
++        Services.prefs.setBoolPref(prefName, el.checked);
 +      });
 +    }
-     if (hilalSidebarCompactCheckbox) {
-       hilalSidebarCompactCheckbox.checked = Services.prefs.getBoolPref(
-         "hilal.compact.enabled",
-@@ -1887,6 +1901,18 @@ var gHilalPane = {
-         );
-       });
-     }
-+    if (hilalSidebarShowHorizontalCheckbox) {
-+      hilalSidebarShowHorizontalCheckbox.checked = Services.prefs.getBoolPref(
-+        "sidebar.verticalTabs.showHorizontal",
-+        false
-+      );
-+      hilalSidebarShowHorizontalCheckbox.addEventListener("command", function () {
-+        Services.prefs.setBoolPref(
-+          "sidebar.verticalTabs.showHorizontal",
-+          hilalSidebarShowHorizontalCheckbox.checked
-+        );
-+      });
-+    }
- 
-     const hilalSidebarFooterCheckboxes = [
-       ["hilalSidebarFooterBookmarks", "hilal.sidebar.footer.bookmarks", false],
-@@ -2106,6 +2132,7 @@ var gHilalPane = {
-         Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
-         Services.prefs.setBoolPref("hilal.workspaces.pinned.public", true);
-         Services.prefs.setBoolPref("hilal.workspaces.groups.public", false);
-+        Services.prefs.setBoolPref("hilal.urlbar.showWorkspaceName", false);
-         Services.prefs.setBoolPref("hilal.compact.enabled", false);
-         Services.prefs.setBoolPref("hilal.compact.hide_toolbox", true);
-         Services.prefs.setStringPref("hilal.privacy.level", "standard");
-@@ -2118,18 +2145,28 @@ var gHilalPane = {
-         if (hilalWsGroupsPublicCheckbox) {
-           hilalWsGroupsPublicCheckbox.checked = false;
-         }
-+        if (hilalUrlbarShowWorkspaceNameCheckbox) {
-+          hilalUrlbarShowWorkspaceNameCheckbox.checked = false;
-+        }
-         if (hilalSidebarCompactCheckbox) {
-           hilalSidebarCompactCheckbox.checked = false;
-         }
-         if (hilalSidebarCompactHideToolbarCheckbox) {
-           hilalSidebarCompactHideToolbarCheckbox.checked = true;
-         }
-+        const hilalTahoeCheckbox = document.getElementById("hilalTahoeEnabled");
-+        if (hilalTahoeCheckbox) {
-+          hilalTahoeCheckbox.checked = true;
-+        }
-         if (hilalPrivacyLevelRadioGroup) {
-           hilalPrivacyLevelRadioGroup.value = "standard";
-         }
-       }
-     });
- 
-+    const hilalTahoeCheckbox = /** @type {HTMLInputElement|null} */ (
-+      document.getElementById("hilalTahoeEnabled")
-+    );
-     const hilalUiFixCheckbox = /** @type {HTMLInputElement|null} */ (
-       document.getElementById("hilalUiFixEnabled")
-     );
-@@ -2183,6 +2220,36 @@ var gHilalPane = {
-       }
-     };
- 
-+    const updateHilalCompactOptionsState = () => {
-+      const tahoeEnabled = hilalTahoeCheckbox?.checked ?? false;
-+      if (hilalSidebarCompactCheckbox) {
-+        hilalSidebarCompactCheckbox.disabled = tahoeEnabled;
-+      }
-+      if (hilalSidebarCompactHideToolbarCheckbox) {
-+        hilalSidebarCompactHideToolbarCheckbox.disabled = tahoeEnabled;
-+      }
-+    };
 +
-+    if (hilalTahoeCheckbox) {
-+      hilalTahoeCheckbox.checked = Services.prefs.getBoolPref(
-+        "hilal.tahoe.enabled",
-+        false
-+      );
-+      hilalTahoeCheckbox.addEventListener("command", function () {
-+        const isTahoe = hilalTahoeCheckbox.checked;
-+        Services.prefs.setBoolPref(
-+          "hilal.tahoe.enabled",
-+          isTahoe
-+        );
-+        Services.prefs.setBoolPref(
-+          "sidebar.verticalTabs.showHorizontal",
-+          isTahoe
-+        );
-+        updateHilalCompactOptionsState();
-+      });
-+    }
-+    updateHilalCompactOptionsState();
-+
-     if (hilalUiFixCheckbox) {
-       hilalUiFixCheckbox.checked = Services.prefs.getBoolPref(
-         "hilal.uifix.enabled",
-diff --git a/browser/components/sidebar/SidebarManager.sys.mjs b/browser/components/sidebar/SidebarManager.sys.mjs
---- a/browser/components/sidebar/SidebarManager.sys.mjs
-+++ b/browser/components/sidebar/SidebarManager.sys.mjs
-@@ -236,6 +236,15 @@ class SidebarManager extends EventTarget {
-       }
-       Services.prefs.setStringPref(VISIBILITY_SETTING_PREF, "hide-sidebar");
-     } else if (resetVisibility) {
-+      if (
-+        Services.prefs.getBoolPref(
-+          "sidebar.verticalTabs.showHorizontal",
-+          false
-+        )
-+      ) {
-+        Services.prefs.setStringPref(VISIBILITY_SETTING_PREF, "hide-sidebar");
-+        return;
-+      }
-       if (this.#savedVisibility) {
-         Services.prefs.setStringPref(
-           VISIBILITY_SETTING_PREF,
-diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
---- a/browser/components/sidebar/browser-sidebar.js
-+++ b/browser/components/sidebar/browser-sidebar.js
-@@ -574,6 +574,68 @@ var SidebarController = {
-     }
- 
-     HilalCompactMode.init();
-+
-+    try {
-+      ChromeUtils.registerWindowActor("HilalTahoe", {
-+        parent: {
-+          esModuleURI:
-+            "chrome://browser/content/hilal/HilalTahoeParent.sys.mjs",
-+        },
-+        child: {
-+          esModuleURI: "chrome://browser/content/hilal/HilalTahoeChild.sys.mjs",
-+          events: {
-+            DOMDocElementInserted: {},
-+            DOMContentLoaded: {},
-+            pageshow: {},
-+            scroll: { capture: true },
-+          },
-+        },
-+        allFrames: false,
-+        remoteTypes: ["web", "file", "privilegedabout", "parent"],
-+      });
-+    } catch (e) {
-+      // Already registered
-+    }
-+
-+    this._tabSelectListener = () => {
-+      this.updateTahoeOffsets();
-+    };
-+    window.gBrowser.tabContainer.addEventListener(
-+      "TabSelect",
-+      this._tabSelectListener
-+    );
-+
-+    this._tahoeZoomListener = event => {
-+      let browser = event.originalTarget;
-+      if (browser !== window.gBrowser?.selectedBrowser) {
-+        return;
-+      }
-+      this.invalidateTahoeScrollReflection();
-+      this.updateTahoeOffsets();
-+    };
-+    window.addEventListener("FullZoomChange", this._tahoeZoomListener);
-+    window.addEventListener("TextZoomChange", this._tahoeZoomListener);
-+
-+    this._tahoeGeometryListener = () => {
-+      this.scheduleTahoeGeometryUpdate();
-+    };
-+    window.addEventListener("resize", this._tahoeGeometryListener);
-+    if (typeof ResizeObserver == "function") {
-+      this._tahoeGeometryResizeObserver = new ResizeObserver(
-+        this._tahoeGeometryListener
-+      );
-+      for (let id of [
-+        "navigator-toolbox",
-+        "tabbrowser-tabbox",
-+        "sidebar-main",
-+      ]) {
-+        let element = document.getElementById(id);
-+        if (element) {
-+          this._tahoeGeometryResizeObserver.observe(element);
-+        }
-+      }
-+    }
-+    this.scheduleTahoeGeometryUpdate();
-   },
- 
-   uninit() {
-@@ -608,6 +670,36 @@ var SidebarController = {
-     delete this._aiWindowObserverAdded;
-     delete this._windowRestoredObserverAdded;
- 
-+    if (this._tabSelectListener) {
-+      window.gBrowser.tabContainer.removeEventListener(
-+        "TabSelect",
-+        this._tabSelectListener
-+      );
-+      this._tabSelectListener = null;
-+    }
-+    if (this._tahoeZoomListener) {
-+      window.removeEventListener("FullZoomChange", this._tahoeZoomListener);
-+      window.removeEventListener("TextZoomChange", this._tahoeZoomListener);
-+      this._tahoeZoomListener = null;
-+    }
-+    if (this._tahoeGeometryListener) {
-+      window.removeEventListener("resize", this._tahoeGeometryListener);
-+      this._tahoeGeometryListener = null;
-+    }
-+    if (this._tahoeGeometryResizeObserver) {
-+      this._tahoeGeometryResizeObserver.disconnect();
-+      this._tahoeGeometryResizeObserver = null;
-+    }
-+    if (this._tahoeGeometryFrame) {
-+      cancelAnimationFrame(this._tahoeGeometryFrame);
-+      this._tahoeGeometryFrame = 0;
-+    }
-+    if (this._tahoeReflectionFrame) {
-+      cancelAnimationFrame(this._tahoeReflectionFrame);
-+      this._tahoeReflectionFrame = 0;
-+    }
-+    this.clearTahoeScrollReflection();
-+
-     CustomizableUI.removeListener(this);
- 
-     if (this._observer) {
-@@ -2071,6 +2163,7 @@ var SidebarController = {
-       this.updateToolbarButton();
-       this.dismissSidebarBadge(commandID);
- 
-+      this.updateTahoeOffsets(true);
-       this._fireFocusedEvent();
-       return true;
-     });
-@@ -2095,6 +2188,7 @@ var SidebarController = {
-     }
-     return this._show(commandID).then(() => {
-       this._loadSidebarExtension(commandID);
-+      this.updateTahoeOffsets(true);
-       return true;
-     });
-   },
-@@ -2278,6 +2372,7 @@ var SidebarController = {
-       updateToggleControlLabel(triggerNode);
-     }
-     this.updateToolbarButton();
-+    this.updateTahoeOffsets(false);
-   },
- 
-   /**
-@@ -2374,7 +2469,9 @@ var SidebarController = {
-   },
- 
-   toggleTabstrip() {
--    let toVerticalTabs = CustomizableUI.verticalTabsEnabled;
-+    let toVerticalTabs =
-+      CustomizableUI.verticalTabsEnabled &&
-+      !Services.prefs.getBoolPref("sidebar.verticalTabs.showHorizontal", false);
-     let tabStrip = gBrowser.tabContainer;
-     let arrowScrollbox = tabStrip.arrowScrollbox;
-     let currentScrollOrientation = arrowScrollbox.getAttribute("orient");
-@@ -2414,6 +2511,284 @@ var SidebarController = {
-     }
-   },
- 
-+  updateTahoeOffsets() {
-+    this.scheduleTahoeGeometryUpdate();
-+    let browser = window.gBrowser.selectedBrowser;
-+    this.applyTahoePageBackground(browser);
-+    if (browser && browser.browsingContext) {
-+      try {
-+        let actor =
-+          browser.browsingContext.currentWindowGlobal?.getActor("HilalTahoe");
-+        if (actor) {
-+          actor.sendAsyncMessage("HilalTahoe:UpdateOffsets", {});
-+        }
-+      } catch (e) {
-+        // Ignore "doesn't match remote type" errors
-+      }
-+    }
-+  },
-+
-+  updateTahoePageBackground(backgroundColor, browser) {
-+    if (!browser) {
-+      return;
-+    }
-+
-+    this._tahoePageBackgrounds ??= new WeakMap();
-+    this._tahoePageBackgrounds.set(browser, backgroundColor || "");
-+    if (browser === window.gBrowser?.selectedBrowser) {
-+      this.applyTahoePageBackground(browser);
-+    }
-+  },
-+
-+  applyTahoePageBackground(browser = window.gBrowser?.selectedBrowser) {
-+    let docEl = document.documentElement;
-+    let color = browser ? this._tahoePageBackgrounds?.get(browser) || "" : "";
-+    if (color) {
-+      docEl.style.setProperty("--hilal-safari-page-bg", color);
-+    } else {
-+      docEl.style.removeProperty("--hilal-safari-page-bg");
-+    }
-+    window.gHilalBoosts?.refreshTahoeBoostedPageBackground?.();
-+  },
-+
-+  scheduleTahoeGeometryUpdate() {
-+    if (this._tahoeGeometryFrame) {
-+      return;
-+    }
-+    this._tahoeGeometryFrame = requestAnimationFrame(() => {
-+      this._tahoeGeometryFrame = 0;
-+      this.updateTahoeGeometry();
-+    });
-+  },
-+
-+  updateTahoeGeometry() {
-+    let docEl = document.documentElement;
-+    if (!Services.prefs.getBoolPref("hilal.tahoe.enabled", false)) {
-+      docEl.style.removeProperty("--hilal-safari-content-top");
-+      docEl.style.removeProperty("--hilal-safari-content-bottom");
-+      docEl.style.removeProperty("--hilal-safari-content-height");
-+      docEl.style.removeProperty("--hilal-safari-page-bg");
-+      docEl.style.removeProperty("--hilal-safari-page-bg-top");
-+      return;
-+    }
-+    let tabbox = document.getElementById("tabbrowser-tabbox");
-+    if (!tabbox) {
-+      return;
-+    }
-+
-+    let rect = tabbox.getBoundingClientRect();
-+    let top = Math.max(0, Math.round(rect.top));
-+    let bottom = Math.max(0, Math.round(window.innerHeight - rect.bottom));
-+    let height = Math.max(0, Math.round(rect.height));
-+    docEl.style.setProperty("--hilal-safari-content-top", `${top}px`);
-+    docEl.style.setProperty("--hilal-safari-content-bottom", `${bottom}px`);
-+    docEl.style.setProperty("--hilal-safari-content-height", `${height}px`);
-+  },
-+
-+  updateTahoeScrollReflection(scrollState, browsingContext) {
-+    let browser = window.gBrowser?.selectedBrowser;
-+    if (!browser || browser.browsingContext !== browsingContext) {
-+      return;
-+    }
-+    if (!this.isTahoeSafariLayoutActive()) {
-+      this.clearTahoeScrollReflection();
-+      return;
-+    }
-+
-+    let top = this.readTahoeContentTop();
-+    let scrollY = Math.max(0, Number(scrollState?.scrollY) || 0);
-+    let pageBackgroundTop = scrollY > 0 ? 0 : top;
-+    document.documentElement.style.setProperty(
-+      "--hilal-safari-page-bg-top",
-+      `${pageBackgroundTop}px`
-+    );
-+
-+    this._lastTahoeScrollState = scrollState;
-+    this._lastTahoeScrollBrowsingContext = browsingContext;
-+    this._tahoeReflectionDirty = true;
-+    this.scheduleTahoeScrollReflectionUpdate();
-+  },
-+
-+  scheduleTahoeScrollReflectionUpdate() {
-+    if (this._tahoeReflectionFrame || this._tahoeReflectionPending) {
-+      return;
-+    }
-+    this._tahoeReflectionFrame = requestAnimationFrame(() => {
-+      this._tahoeReflectionFrame = 0;
-+      this.updateTahoeScrollReflectionCanvas();
-+    });
-+  },
-+
-+  invalidateTahoeScrollReflection() {
-+    this._tahoeReflectionSerial = (this._tahoeReflectionSerial || 0) + 1;
-+    this._tahoeReflectionDirty = false;
-+    let canvas = document.getElementById("hilal-safari-scroll-reflection");
-+    canvas?.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
-+  },
-+
-+  async updateTahoeScrollReflectionCanvas() {
-+    if (this._tahoeReflectionPending) {
-+      return;
-+    }
-+
-+    this._tahoeReflectionPending = true;
-+    this._tahoeReflectionDirty = false;
-+
-+    try {
-+      let scrollState = this._lastTahoeScrollState;
-+      let browser = window.gBrowser?.selectedBrowser;
-+      if (
-+        !scrollState ||
-+        !browser ||
-+        browser.browsingContext !== this._lastTahoeScrollBrowsingContext ||
-+        !this.isTahoeSafariLayoutActive()
-+      ) {
-+        this.clearTahoeScrollReflection();
-+        return;
-+      }
-+
-+      let top = this.readTahoeContentTop();
-+      let rawScrollY = Math.max(0, Number(scrollState.scrollY) || 0);
-+      let scrollY = rawScrollY > 0 ? Math.max(1, Math.round(rawScrollY)) : 0;
-+      let fullZoom = Number(scrollState.fullZoom) || 1;
-+      let textZoom = Number(scrollState.textZoom) || 1;
-+      if (
-+        Math.abs(browser.fullZoom - fullZoom) > 0.001 ||
-+        Math.abs(browser.textZoom - textZoom) > 0.001
-+      ) {
-+        this.updateTahoeOffsets();
-+        return;
-+      }
-+      let captureHeight = Math.min(top / fullZoom, scrollY);
-+      if (captureHeight <= 0) {
-+        this.clearTahoeScrollReflection();
-+        return;
-+      }
-+
-+      let tabbox = document.getElementById("tabbrowser-tabbox");
-+      let tabboxRect = tabbox.getBoundingClientRect();
-+      let width = Math.max(1, Math.round(tabboxRect.width));
-+      let left = Math.max(0, Math.round(tabboxRect.left));
-+      let pageBackground = getComputedStyle(tabbox).backgroundColor;
-+      // Content rects use page CSS pixels; fullZoom converts them to chrome CSS pixels.
-+      let scale = fullZoom;
-+      let canvas = this.ensureTahoeScrollReflectionCanvas();
-+      let canvasWidth = Math.max(1, Math.round(width));
-+      let canvasHeight = Math.max(1, Math.round(top));
-+      if (canvas.width !== canvasWidth) {
-+        canvas.width = canvasWidth;
-+      }
-+      if (canvas.height !== canvasHeight) {
-+        canvas.height = canvasHeight;
-+      }
-+      canvas.style.insetInlineStart = `${left}px`;
-+      canvas.style.inlineSize = `${width}px`;
-+      canvas.style.blockSize = `${top}px`;
-+
-+      let captureWidth = Math.max(
-+        1,
-+        Math.round(scrollState.innerWidth || browser.clientWidth || width)
-+      );
-+      let captureX = Math.max(0, Math.round(scrollState.scrollX || 0));
-+      let captureY = Math.max(0, scrollY - captureHeight);
-+      let serial = (this._tahoeReflectionSerial || 0) + 1;
-+      this._tahoeReflectionSerial = serial;
-+      let image = await browser.drawSnapshot(
-+        captureX,
-+        captureY,
-+        captureWidth,
-+        captureHeight,
-+        scale,
-+        "transparent",
-+        false
-+      );
-+      if (
-+        !image ||
-+        serial !== this._tahoeReflectionSerial ||
-+        browser !== window.gBrowser?.selectedBrowser ||
-+        Math.abs(browser.fullZoom - fullZoom) > 0.001 ||
-+        Math.abs(browser.textZoom - textZoom) > 0.001
-+      ) {
-+        image?.close?.();
-+        return;
-+      }
-+
-+      let dstY = Math.round(top - captureHeight * scale);
-+      let dstHeight = Math.round(captureHeight * scale);
-+      let ctx = canvas.getContext("2d");
-+      ctx.clearRect(0, 0, canvas.width, canvas.height);
-+      if (pageBackground.startsWith("rgb")) {
-+        ctx.fillStyle = pageBackground;
-+        ctx.fillRect(0, 0, canvas.width, canvas.height);
-+      }
-+      ctx.drawImage(image, 0, dstY, canvas.width, dstHeight);
-+      image.close?.();
-+      document.documentElement.toggleAttribute(
-+        "hilal-safari-reflection-active",
-+        true
-+      );
-+    } catch (e) {
-+      this.clearTahoeScrollReflection();
-+    } finally {
-+      this._tahoeReflectionPending = false;
-+      if (this._tahoeReflectionDirty) {
-+        this.scheduleTahoeScrollReflectionUpdate();
-+      }
-+    }
-+  },
-+
-+  isTahoeSafariLayoutActive() {
-+    if (!Services.prefs.getBoolPref("hilal.tahoe.enabled", false)) {
-+      return false;
-+    }
-+    let docEl = document.documentElement;
-+    return (
-+      !docEl.hasAttribute("macOSNativeFullscreen") &&
-+      !docEl.hasAttribute("customizing") &&
-+      docEl.getAttribute("sizemode") !== "fullscreen" &&
-+      !!document.querySelector(
-+        "#sidebar-main[hilal-sidebar]:not([hidden]):not([sidebar-positionend])"
-+      )
-+    );
-+  },
-+
-+  readTahoeContentTop() {
-+    let value = parseFloat(
-+      getComputedStyle(document.documentElement).getPropertyValue(
-+        "--hilal-safari-content-top"
-+      )
-+    );
-+    if (!Number.isFinite(value) || value <= 0) {
-+      value = parseFloat(
-+        getComputedStyle(document.documentElement).getPropertyValue(
-+          "--hilal-safari-toolbox-height"
-+        )
-+      );
-+    }
-+    return Math.max(1, Math.round(value || 94));
-+  },
-+
-+  ensureTahoeScrollReflectionCanvas() {
-+    let canvas = document.getElementById("hilal-safari-scroll-reflection");
-+    if (canvas) {
-+      return canvas;
-+    }
-+
-+    canvas = document.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
-+    canvas.id = "hilal-safari-scroll-reflection";
-+    canvas.className = "hilal-safari-scroll-reflection";
-+    document.getElementById("hilal-browser-background")?.appendChild(canvas);
-+    return canvas;
-+  },
-+
-+  clearTahoeScrollReflection() {
-+    let docEl = document.documentElement;
-+    docEl.toggleAttribute("hilal-safari-reflection-active", false);
-+    docEl.style.removeProperty("--hilal-safari-page-bg-top");
-+    let canvas = document.getElementById("hilal-safari-scroll-reflection");
-+    canvas?.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
-+  },
-+
-   debouncedMouseEnter() {
-     const contentArea = document.getElementById("tabbrowser-tabbox");
-     this._box.toggleAttribute("sidebar-launcher-hovered", true);
-@@ -2838,6 +3213,7 @@ var HilalCompactMode = {
-       if (
-         data === this.PREF ||
-         data === this.HIDE_TOOLBOX_PREF ||
-+        data === "hilal.tahoe.enabled" ||
-         data === "hilal.workspaces.enabled" ||
-         data === "sidebar.verticalTabs"
-       ) {
-@@ -2846,6 +3222,7 @@ var HilalCompactMode = {
-     };
-     Services.prefs.addObserver(this.PREF, this._prefObserver);
-     Services.prefs.addObserver(this.HIDE_TOOLBOX_PREF, this._prefObserver);
-+    Services.prefs.addObserver("hilal.tahoe.enabled", this._prefObserver);
-     Services.prefs.addObserver("hilal.workspaces.enabled", this._prefObserver);
-     Services.prefs.addObserver("sidebar.verticalTabs", this._prefObserver);
-     window.addEventListener("popupshown", this, true);
-@@ -2874,6 +3251,7 @@ var HilalCompactMode = {
-     if (this._prefObserver) {
-       Services.prefs.removeObserver(this.PREF, this._prefObserver);
-       Services.prefs.removeObserver(this.HIDE_TOOLBOX_PREF, this._prefObserver);
-+      Services.prefs.removeObserver("hilal.tahoe.enabled", this._prefObserver);
-       Services.prefs.removeObserver(
-         "hilal.workspaces.enabled",
-         this._prefObserver
-@@ -2933,9 +3311,11 @@ var HilalCompactMode = {
-       false
-     );
-     const isSidebarActive = workspacesEnabled || verticalTabsEnabled;
--    const isWelcomeStage = document.documentElement.hasAttribute("hilal-welcome-stage");
--    const actualCompact = compact;
--
-+    const isWelcomeStage = document.documentElement.hasAttribute(
-+      "hilal-welcome-stage"
-+    );
-+    const actualCompact =
-+      compact && !Services.prefs.getBoolPref("hilal.tahoe.enabled", false);
-     const compactSidebar = actualCompact && isSidebarActive;
-     const hideToolbox =
-       actualCompact && Services.prefs.getBoolPref(this.HIDE_TOOLBOX_PREF, true);
-diff --git a/browser/components/sidebar/sidebar-main.css b/browser/components/sidebar/sidebar-main.css
---- a/browser/components/sidebar/sidebar-main.css
-+++ b/browser/components/sidebar/sidebar-main.css
-@@ -336,7 +336,10 @@
-   display: flex;
-   justify-content: center;
-   position: relative;
--  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
-+  transition:
-+    background 0.15s ease,
-+    border-color 0.15s ease,
-+    transform 0.1s ease;
- }
- 
- .hilal-pinned-card:hover {
-@@ -547,6 +550,510 @@
-   text-align: start;
- }
- 
-+@media -moz-pref("hilal.tahoe.enabled") and (-moz-platform: macos) {
-+  :host([hilal-sidebar]) {
-+    --hilal-sidebar-muted: color-mix(in srgb, var(--hilal-sidebar-text) 62%, transparent);
-+    --hilal-sidebar-faint: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.05));
-+    --hilal-sidebar-hover: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.06));
-+    --hilal-sidebar-highlight: light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08));
-+    --hilal-sidebar-highlight-text: var(--hilal-sidebar-text);
-+    --hilal-sidebar-blue: light-dark(#0a84ff, #64a7ff);
-+    --hilal-sidebar-border: transparent;
-+    inline-size: var(--hilal-safari-sidebar-width, 260px) !important;
-+    max-inline-size: var(--hilal-safari-sidebar-width, 260px) !important;
-+    min-inline-size: var(--hilal-safari-sidebar-width, 260px) !important;
-+  }
-+
-+  :host([hilal-sidebar]:not([vertical-tabs])) {
-+    inline-size: var(--hilal-safari-sidebar-width, 260px) !important;
-+    max-inline-size: var(--hilal-safari-sidebar-width, 260px) !important;
-+    min-inline-size: var(--hilal-safari-sidebar-width, 260px) !important;
-+  }
-+
-+  .hilal-sidebar-layout {
-+    background: transparent;
-+    padding-block-start: var(--hilal-sidebar-top-padding, 82px);
-+  }
-+
-+  .hilal-sidebar-layout::before {
-+    border-bottom: 0;
-+  }
-+
-+  .hilal-workspace-rail {
-+    display: none;
-+  }
-+
-+  .hilal-workspace-list {
-+    gap: 9px;
-+  }
-+
-+  .hilal-workspace-button,
-+  #hilal-workspace-add {
-+    block-size: 36px;
-+    border-radius: 11px;
-+    flex-basis: 36px;
-+    inline-size: 36px;
-+    transition:
-+      background-color 0.16s ease,
-+      border-color 0.16s ease,
-+      transform 0.12s ease;
-+  }
-+
-+  .hilal-workspace-button:hover,
-+  #hilal-workspace-add:hover {
-+    transform: translateY(-0.5px);
-+  }
-+
-+  .hilal-workspace-active {
-+    background: var(--hilal-sidebar-highlight);
-+    border-color: color-mix(in srgb, var(--hilal-sidebar-blue) 24%, transparent);
-+    box-shadow:
-+      0 1px 0 light-dark(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.08)) inset,
-+      0 6px 16px color-mix(in srgb, var(--hilal-sidebar-blue) 18%, transparent);
-+  }
-+
-+  #hilal-workspace-add {
-+    border-style: solid;
-+    color: var(--hilal-sidebar-muted);
-+  }
-+
-+  .hilal-sidebar-panel {
-+    padding: 0 13px 0 26px;
-+  }
-+
-+  .hilal-panel-header {
-+    position: absolute;
-+    top: 22px;
-+    right: 12px;
-+    z-index: 12;
-+    justify-content: flex-end;
-+    gap: 6px;
-+    min-block-size: 32px;
-+    margin: 0;
-+  }
-+
-+  .hilal-panel-workspace-icon,
-+  .hilal-panel-title {
-+    display: none;
-+  }
-+
-+  .hilal-icon-button {
-+    block-size: 30px;
-+    border-radius: 999px;
-+    inline-size: 30px;
-+  }
-+
-+  #hilal-sidebar-search {
-+    background: var(--hilal-sidebar-faint);
-+    border-color: color-mix(in srgb, var(--hilal-sidebar-text) 10%, transparent);
-+    border-radius: 999px;
-+    min-block-size: 30px;
-+    padding-inline: 10px;
-+  }
-+
-+  #hilal-sidebar-search:focus {
-+    border-color: color-mix(in srgb, var(--hilal-sidebar-blue) 34%, transparent);
-+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--hilal-sidebar-blue) 16%, transparent);
-+  }
-+
-+  .hilal-panel-scroll {
-+    padding-block-end: 18px;
-+    scrollbar-width: none;
-+  }
-+
-+  .hilal-panel-scroll::-webkit-scrollbar {
-+    display: none;
-+  }
-+
-+  .hilal-section {
-+    gap: 8px;
-+    margin-block-end: 20px;
-+  }
-+
-+  .hilal-section-heading {
-+    color: var(--hilal-sidebar-muted);
-+    font-size: 13px;
-+    font-weight: 700;
-+    min-block-size: 26px;
-+    padding-inline: 0 8px;
-+    text-transform: none;
-+  }
-+
-+  .hilal-row,
-+  .hilal-footer-row {
-+    border-radius: 10px;
-+  }
-+
-+  .hilal-row {
-+    min-block-size: 28px;
-+    padding-inline: 8px;
-+  }
-+
-+  .hilal-footer-row {
-+    min-block-size: 30px;
-+    padding-inline: 9px;
-+  }
-+
-+  .hilal-count-badge {
-+    background: light-dark(rgba(255, 255, 255, 0.44), rgba(255, 255, 255, 0.08));
-+    border: 1px solid color-mix(in srgb, var(--hilal-sidebar-text) 8%, transparent);
-+  }
-+
-+  .hilal-footer-group,
-+  .hilal-sidebar-footer,
-+  .hilal-workspace-add-wrap {
-+    border-color: color-mix(in srgb, var(--hilal-sidebar-text) 10%, transparent);
-+  }
-+
-+  #hilal-tabs-section {
-+    min-height: unset !important;
-+  }
-+
-+  .hilal-tabstrip-container {
-+    gap: 2px;
-+  }
-+
-+  /* Safari header layout */
-+  .safari-sidebar-header {
-+    display: flex;
-+    align-items: flex-start;
-+    justify-content: flex-end;
-+    padding: 18px 18px 0 88px;
-+    height: 58px;
-+    min-height: 58px;
-+    box-sizing: border-box;
-+  }
-+
-+  .safari-header-buttons {
-+    display: flex;
-+    align-items: center;
-+    gap: 12px;
-+  }
-+
-+  .safari-icon-button {
-+    background: transparent;
-+    border: none;
-+    color: var(--hilal-sidebar-muted);
-+    cursor: pointer;
-+    display: flex;
-+    align-items: center;
-+    justify-content: center;
-+    width: 34px;
-+    height: 34px;
-+    border-radius: 9px;
-+    padding: 0;
-+    transition:
-+      background-color 0.15s ease,
-+      color 0.15s ease;
-+  }
-+
-+  .safari-icon-button:hover {
-+    background-color: var(--hilal-sidebar-hover);
-+    color: var(--sidebar-text-color);
-+  }
-+
-+  .safari-icon-button svg {
-+    width: 18px;
-+    height: 18px;
-+  }
-+
-+  /* Layout and scroll panel */
-+  .safari-sidebar-layout {
-+    display: flex;
-+    flex-direction: column;
-+    height: 100%;
-+    box-sizing: border-box;
-+    padding-block-start: 8px !important;
-+  }
-+
-+  .safari-panel {
-+    flex: 1 1 auto;
-+    display: flex;
-+    flex-direction: column;
-+    min-height: 0;
-+    padding: 0 16px 0 16px !important;
-+  }
-+
-+  .safari-scroll {
-+    flex: 1 1 auto;
-+    overflow-y: auto;
-+    scrollbar-width: none;
-+    padding-block-end: 24px;
-+  }
-+
-+  .safari-scroll::-webkit-scrollbar {
-+    display: none;
-+  }
-+
-+  /* Section heading buttons (collapsible Tabs section) */
-+  .safari-section-heading-btn {
-+    background: transparent;
-+    border: none;
-+    color: var(--hilal-sidebar-muted);
-+    font: inherit;
-+    font-size: 13px;
-+    font-weight: 700;
-+    display: flex;
-+    align-items: center;
-+    gap: 8px;
-+    padding: 6px 0;
-+    width: 100%;
-+    cursor: pointer;
-+    text-align: start;
-+    user-select: none;
-+  }
-+
-+  .safari-section-heading-btn:hover {
-+    color: var(--sidebar-text-color);
-+  }
-+
-+  .safari-chevron {
-+    transition: transform 0.2s ease;
-+    transform: rotate(0deg);
-+    opacity: 0.7;
-+    margin-inline-start: 2px;
-+  }
-+
-+  .safari-chevron-collapsed {
-+    transform: rotate(-90deg);
-+  }
-+
-+  .safari-heading-icon {
-+    width: 16px;
-+    height: 16px;
-+    opacity: 0.85;
-+  }
-+
-+  .safari-heading-text {
-+    flex: 1 1 auto;
-+  }
-+
-+  /* Section headers like Tab Groups / Saved */
-+  .safari-section {
-+    margin-block-end: 20px;
-+    display: flex;
-+    flex-direction: column;
-+    gap: 4px;
-+  }
-+
-+  .safari-section-heading {
-+    display: flex;
-+    align-items: center;
-+    justify-content: space-between;
-+    height: 28px;
-+    padding-inline: 4px;
-+    color: var(--hilal-sidebar-muted);
-+    font-size: 11px;
-+    font-weight: 700;
-+    text-transform: uppercase;
-+    letter-spacing: 0;
-+    user-select: none;
-+  }
-+
-+  .safari-heading-title {
-+    flex: 1 1 auto;
-+  }
-+
-+  .safari-section-add-btn {
-+    background: transparent;
-+    border: none;
-+    color: inherit;
-+    cursor: pointer;
-+    display: flex;
-+    align-items: center;
-+    justify-content: center;
-+    width: 20px;
-+    height: 20px;
-+    border-radius: 4px;
-+    padding: 0;
-+    opacity: 0;
-+    transition:
-+      opacity 0.15s ease,
-+      background-color 0.15s ease;
-+  }
-+
-+  .safari-section:hover .safari-section-add-btn {
-+    opacity: 1;
-+  }
-+
-+  .safari-section-add-btn:hover {
-+    background-color: var(--hilal-sidebar-hover);
-+    color: var(--sidebar-text-color);
-+  }
-+
-+  /* Safari Rows List & Items */
-+  .safari-row-list {
-+    display: flex;
-+    flex-direction: column;
-+    gap: 2px;
-+  }
-+
-+  .safari-row {
-+    background: transparent;
-+    border: 1px solid transparent;
-+    color: var(--sidebar-text-color);
-+    font: inherit;
-+    font-size: 13px;
-+    font-weight: 500;
-+    display: flex;
-+    align-items: center;
-+    gap: 10px;
-+    width: 100%;
-+    min-height: 30px;
-+    height: 30px;
-+    padding-inline: 7px;
-+    border-radius: 8px;
-+    cursor: pointer;
-+    text-align: start;
-+    transition:
-+      background-color 0.15s ease,
-+      color 0.15s ease,
-+      opacity 0.15s ease,
-+      border-color 0.15s ease,
-+      box-shadow 0.15s ease,
-+      transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-+    user-select: none;
-+    box-sizing: border-box;
-+  }
-+
-+  .safari-row:hover {
-+    background-color: var(--hilal-sidebar-hover);
-+  }
-+
-+  .safari-row-active {
-+    background-color: var(--hilal-sidebar-highlight) !important;
-+    font-weight: 600;
-+  }
-+
-+  .safari-row.hilal-ws-drop-target {
-+    background-color: var(--hilal-sidebar-highlight) !important;
-+    border-color: light-dark(rgba(0, 0, 0, 0.15), rgba(255, 255, 255, 0.25)) !important;
-+    box-shadow: 0 0 0 1.5px var(--hilal-sidebar-blue) !important;
-+  }
-+
-+  .safari-tab-row.dragging-active {
-+    position: relative;
-+    z-index: 10000 !important;
-+    background-color: light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.15)) !important;
-+    backdrop-filter: blur(24px) !important;
-+    -webkit-backdrop-filter: blur(24px) !important;
-+    border-color: light-dark(rgba(0, 0, 0, 0.12), rgba(255, 255, 255, 0.22)) !important;
-+    box-shadow: 0 10px 30px light-dark(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.45)),
-+                0 1px 0 light-dark(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1)) inset !important;
-+    transition: none !important;
-+    pointer-events: none;
-+  }
-+
-+  .safari-tab-row.dropping-active {
-+    position: relative;
-+    z-index: 10000 !important;
-+    background-color: light-dark(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.15)) !important;
-+    backdrop-filter: blur(24px) !important;
-+    -webkit-backdrop-filter: blur(24px) !important;
-+    border-color: light-dark(rgba(0, 0, 0, 0.12), rgba(255, 255, 255, 0.22)) !important;
-+    box-shadow: 0 4px 12px light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.2)),
-+                0 1px 0 light-dark(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1)) inset !important;
-+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
-+                box-shadow 0.4s ease, 
-+                background-color 0.4s ease, 
-+                border-color 0.4s ease, 
-+                backdrop-filter 0.4s ease !important;
-+  }
-+
-+  @media (prefers-reduced-motion: reduce) {
-+    .safari-row,
-+    .safari-tab-row[dragging],
-+    .safari-tab-row[dragover] {
-+      transition: none !important;
-+      transform: none !important;
-+    }
-+  }
-+
-+  .safari-row-emoji {
-+    font-size: 14px;
-+    line-height: 1;
-+    display: inline-block;
-+    width: 16px;
-+    text-align: center;
-+  }
-+
-+  .safari-row-icon {
-+    width: 16px;
-+    height: 16px;
-+    color: var(--hilal-sidebar-muted);
-+  }
-+
-+  .safari-row-active .safari-row-icon {
-+    color: var(--sidebar-text-color);
-+  }
-+
-+  .safari-row-title {
-+    flex: 1 1 auto;
-+    overflow: hidden;
-+    text-overflow: ellipsis;
-+    white-space: nowrap;
-+  }
-+
-+  .safari-tab-row .safari-row-close-btn {
-+    display: none;
-+    background: transparent;
-+    border: none;
-+    padding: 4px;
-+    border-radius: 4px;
-+    color: var(--hilal-sidebar-muted);
-+    cursor: pointer;
-+    align-items: center;
-+    justify-content: center;
-+    width: 20px;
-+    height: 20px;
-+    margin-inline-start: 4px;
-+  }
-+
-+  .safari-tab-row:hover .safari-row-close-btn {
-+    display: flex;
-+  }
-+
-+  .safari-tab-row .safari-row-close-btn:hover {
-+    background-color: var(--hilal-sidebar-hover);
-+    color: var(--sidebar-text-color);
-+  }
-+
-+  .safari-row-audio {
-+    cursor: pointer;
-+    opacity: 0.7;
-+    margin-inline-end: 4px;
-+    display: flex;
-+    align-items: center;
-+  }
-+
-+  .safari-row-audio:hover {
-+    opacity: 1;
-+  }
-+
-+  .safari-row-pin {
-+    color: var(--hilal-sidebar-muted);
-+    margin-inline-end: 4px;
-+    display: flex;
-+    align-items: center;
-+  }
-+
-+  .safari-bookmarks-sublist {
-+    padding-inline-start: 16px;
-+    display: flex;
-+    flex-direction: column;
-+    gap: 2px;
-+    margin-block: 2px;
-+  }
-+
-+  .safari-bookmarks-sublist .hilal-row {
-+    font-size: 12.5px;
-+    height: 28px;
-+    min-height: 28px;
-+    padding-inline: 8px;
-+    border-radius: 6px;
-+  }
-+}
-+
- .wrapper {
-   display: grid;
-   grid-template-rows: auto min-content min-content;
-diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/sidebar/sidebar-main.mjs
---- a/browser/components/sidebar/sidebar-main.mjs
-+++ b/browser/components/sidebar/sidebar-main.mjs
-@@ -55,8 +55,14 @@ export default class SidebarMain extends MozLitElement {
-     hilalFooterPrivacy: { type: Boolean },
-     hilalFooterSettings: { type: Boolean },
-     hilalCustomItems: { type: Array },
-+    isTabsExpanded: { type: Boolean },
-+    showHorizontal: { type: Boolean },
-   };
- 
-+  get isTahoeEnabled() {
-+    return Services.prefs.getBoolPref("hilal.tahoe.enabled", true);
-+  }
-+
-   static queries = {
-     allButtons: { all: "moz-button" },
-     extensionButtons: { all: ".tools-and-extensions > moz-button[extension]" },
-@@ -108,8 +114,13 @@ export default class SidebarMain extends MozLitElement {
-     this._hilalPrefObserver = (_subject, topic, data) => {
-       this.observe(_subject, topic, data);
-     };
-+    this._onTabPointerMove = this.handleTabPointerMove.bind(this);
-+    this._onTabPointerUp = this.handleTabPointerUp.bind(this);
-+    this._onTabPointerCancel = this.handleTabPointerCancel.bind(this);
-     this.shouldShowOverflowButton = false;
-     this.overflowMenuOpen = false;
-+    this.isTabsExpanded = true;
-+    this.showHorizontal = false;
-   }
- 
-   tooltips = {
-@@ -176,6 +187,11 @@ export default class SidebarMain extends MozLitElement {
-     window.addEventListener("SidebarItemRemoved", this);
- 
-     Services.prefs.addObserver("sidebar.verticalTabs", this._hilalPrefObserver);
-+    Services.prefs.addObserver(
-+      "sidebar.verticalTabs.showHorizontal",
-+      this._hilalPrefObserver
-+    );
-+    Services.prefs.addObserver("hilal.tahoe.enabled", this._hilalPrefObserver);
-     Services.prefs.addObserver("hilal.workspaces.", this._hilalPrefObserver);
-     Services.prefs.addObserver(
-       "hilal.sidebar.footer.",
-@@ -210,6 +226,14 @@ export default class SidebarMain extends MozLitElement {
-       "sidebar.verticalTabs",
-       this._hilalPrefObserver
-     );
-+    Services.prefs.removeObserver(
-+      "sidebar.verticalTabs.showHorizontal",
-+      this._hilalPrefObserver
-+    );
-+    Services.prefs.removeObserver(
-+      "hilal.tahoe.enabled",
-+      this._hilalPrefObserver
-+    );
-     Services.prefs.removeObserver("hilal.workspaces.", this._hilalPrefObserver);
-     Services.prefs.removeObserver(
-       "hilal.sidebar.footer.",
-@@ -246,8 +270,14 @@ export default class SidebarMain extends MozLitElement {
-       return true;
-     }
-     const manager = window.gHilalWorkspaces;
--    const workspacesEnabled = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
--    const verticalTabsEnabled = Services.prefs.getBoolPref("sidebar.verticalTabs", false);
-+    const workspacesEnabled = Services.prefs.getBoolPref(
-+      "hilal.workspaces.enabled",
-+      true
-+    );
-+    const verticalTabsEnabled = Services.prefs.getBoolPref(
-+      "sidebar.verticalTabs",
-+      false
-+    );
-     if (!manager || (!workspacesEnabled && !verticalTabsEnabled)) {
-       return false;
-     }
-@@ -343,15 +373,22 @@ export default class SidebarMain extends MozLitElement {
- 
-   observe(_subject, topic, data) {
-     if (topic === "nsPref:changed") {
--      if (data === "sidebar.verticalTabs") {
-+      if (
-+        data === "sidebar.verticalTabs" ||
-+        data === "sidebar.verticalTabs.showHorizontal"
-+      ) {
-         const enabled = Services.prefs.getBoolPref(
-           "sidebar.verticalTabs",
-           false
-         );
-         this._sidebarMain?.toggleAttribute("vertical-tabs", enabled);
-         this.toggleAttribute("vertical-tabs", enabled);
--        const workspacesEnabled = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
--        const shouldBeActive = window.gHilalWorkspaces && (workspacesEnabled || enabled);
-+        const workspacesEnabled = Services.prefs.getBoolPref(
-+          "hilal.workspaces.enabled",
-+          true
-+        );
-+        const shouldBeActive =
-+          window.gHilalWorkspaces && (workspacesEnabled || enabled);
-         if (shouldBeActive !== this.hilalSidebarActive) {
-           if (shouldBeActive) {
-             this.maybeInitHilalSidebar();
-@@ -359,12 +396,22 @@ export default class SidebarMain extends MozLitElement {
-             this.uninitHilalSidebar();
-           }
-         } else {
--          this.requestUpdate();
-+          this.refreshHilalSidebar();
-         }
--      } else if (data === "hilal.workspaces.enabled") {
--        const workspacesEnabled = Services.prefs.getBoolPref("hilal.workspaces.enabled", true);
--        const verticalTabsEnabled = Services.prefs.getBoolPref("sidebar.verticalTabs", false);
--        const shouldBeActive = window.gHilalWorkspaces && (workspacesEnabled || verticalTabsEnabled);
-+      } else if (
-+        data === "hilal.workspaces.enabled" ||
-+        data === "hilal.tahoe.enabled"
-+      ) {
-+        const workspacesEnabled = Services.prefs.getBoolPref(
-+          "hilal.workspaces.enabled",
-+          true
-+        );
-+        const verticalTabsEnabled = Services.prefs.getBoolPref(
-+          "sidebar.verticalTabs",
-+          false
-+        );
-+        const shouldBeActive =
-+          window.gHilalWorkspaces && (workspacesEnabled || verticalTabsEnabled);
-         if (shouldBeActive !== this.hilalSidebarActive) {
-           if (shouldBeActive) {
-             this.maybeInitHilalSidebar();
-@@ -403,6 +450,10 @@ export default class SidebarMain extends MozLitElement {
-     this.hilalWorkspaces = [...(manager._workspaces || [])];
-     this.hilalActiveId = manager._activeId || this.hilalWorkspaces[0]?.id || "";
-     this.hilalTabs = this.getHilalWorkspaceTabs(this.hilalActiveId);
-+    this.showHorizontal = Services.prefs.getBoolPref(
-+      "sidebar.verticalTabs.showHorizontal",
-+      false
-+    );
-     this.hilalShowBookmarks = Services.prefs.getBoolPref(
-       "hilal.workspaces.showBookmarks",
-       false
-@@ -530,38 +581,354 @@ export default class SidebarMain extends MozLitElement {
-     tab.dispatchEvent(new CustomEvent("TabHoverEnd", { bubbles: true }));
-   }
- 
-+  handleTabPointerDown(tab, event) {
-+    if (event.button !== 0) {
-+      return;
-+    }
-+    const target = event.target;
-+    if (target.closest(".safari-row-close-btn") || target.closest(".safari-row-audio")) {
-+      return;
-+    }
-+
-+    this._dragTab = tab;
-+    this._dragElement = event.currentTarget;
-+    this._activePointerId = event.pointerId;
-+    this._startX = event.clientX;
-+    this._startY = event.clientY;
-+    this._isDragging = false;
-+    this._hoveredWorkspaceRow = null;
-+    this._targetWorkspaceId = null;
-+
-+    this._dragElement.setPointerCapture(event.pointerId);
-+    this._dragElement.addEventListener("pointermove", this._onTabPointerMove);
-+    this._dragElement.addEventListener("pointerup", this._onTabPointerUp);
-+    this._dragElement.addEventListener("pointercancel", this._onTabPointerCancel);
-+
-+    event.stopPropagation();
-+  }
-+
-+  handleTabPointerMove(event) {
-+    if (event.pointerId !== this._activePointerId) {
-+      return;
-+    }
-+
-+    const clientX = event.clientX;
-+    const clientY = event.clientY;
-+
-+    if (!this._isDragging) {
-+      const dx = clientX - this._startX;
-+      const dy = clientY - this._startY;
-+      if (Math.sqrt(dx * dx + dy * dy) > 4) {
-+        this._isDragging = true;
-+
-+        const container = this.shadowRoot.querySelector(".safari-row-list");
-+        if (!container) {
-+          this.handleTabPointerCancel(event);
-+          return;
-+        }
-+
-+        this._containerRect = container.getBoundingClientRect();
-+        this._tabElements = Array.from(container.querySelectorAll(".safari-tab-row"));
-+        this._tabPositions = [];
-+        this._tabHeights = [];
-+        this._dragIndex = -1;
-+
-+        for (let i = 0; i < this._tabElements.length; i++) {
-+          const el = this._tabElements[i];
-+          const rect = el.getBoundingClientRect();
-+          this._tabPositions.push({
-+            left: rect.left - this._containerRect.left,
-+            top: rect.top - this._containerRect.top,
-+            height: rect.height,
-+            width: rect.width,
-+          });
-+          this._tabHeights.push(rect.height);
-+          if (el === this._dragElement) {
-+            this._dragIndex = i;
-+          }
-+        }
-+
-+        if (this._dragIndex === -1) {
-+          this.handleTabPointerCancel(event);
-+          return;
-+        }
-+
-+        const dragRect = this._dragElement.getBoundingClientRect();
-+        this._dragOffset = {
-+          x: this._startX - dragRect.left,
-+          y: this._startY - dragRect.top,
-+        };
-+
-+        this._dragElement.classList.add("dragging-active");
-+        this._targetIndex = this._dragIndex;
-+
-+        try {
-+          this._dragTab.dispatchEvent(new CustomEvent("TabHoverEnd", { bubbles: true }));
-+        } catch (e) {}
-+      }
-+      return;
-+    }
-+
-+    event.preventDefault();
-+    event.stopPropagation();
-+
-+    const originalPos = this._tabPositions[this._dragIndex];
-+    const tx = (clientX - this._dragOffset.x - this._containerRect.left) - originalPos.left;
-+    const ty = (clientY - this._dragOffset.y - this._containerRect.top) - originalPos.top;
-+
-+    this._dragElement.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(0.97)`;
-+
-+    const elementUnderPointer = this.shadowRoot.elementFromPoint(clientX, clientY);
-+    const workspaceRow = elementUnderPointer?.closest(".safari-row");
-+    const isWorkspace = workspaceRow && !workspaceRow.classList.contains("safari-tab-row");
-+
-+    if (isWorkspace) {
-+      const wsId = workspaceRow.dataset.workspaceId;
-+      if (this._hoveredWorkspaceRow !== workspaceRow) {
-+        this._hoveredWorkspaceRow?.classList.remove("hilal-ws-drop-target");
-+        this._hoveredWorkspaceRow = workspaceRow;
-+        workspaceRow.classList.add("hilal-ws-drop-target");
-+      }
-+      this._targetWorkspaceId = wsId;
-+      this._targetIndex = -1;
-+
-+      for (let j = 0; j < this._tabElements.length; j++) {
-+        if (j !== this._dragIndex) {
-+          this._tabElements[j].style.transform = "";
-+        }
-+      }
-+      return;
-+    }
-+
-+    if (this._hoveredWorkspaceRow) {
-+      this._hoveredWorkspaceRow.classList.remove("hilal-ws-drop-target");
-+      this._hoveredWorkspaceRow = null;
-+    }
-+    this._targetWorkspaceId = null;
-+
-+    const h = originalPos.height;
-+    const y_top = clientY - this._dragOffset.y - this._containerRect.top;
-+    const y_center = y_top + h / 2;
-+
-+    let computedTarget = 0;
-+    let minDiff = Infinity;
-+
-+    for (let k = 0; k < this._tabPositions.length; k++) {
-+      let slotTop = this._tabPositions[k].top;
-+      if (k > this._dragIndex) {
-+        slotTop -= this._tabHeights[this._dragIndex];
-+      }
-+      const slotCenter = slotTop + this._tabHeights[this._dragIndex] / 2;
-+      const diff = Math.abs(y_center - slotCenter);
-+      if (diff < minDiff) {
-+        minDiff = diff;
-+        computedTarget = k;
-+      }
-+    }
-+
-+    this._targetIndex = computedTarget;
-+
-+    for (let j = 0; j < this._tabElements.length; j++) {
-+      if (j === this._dragIndex) {
-+        continue;
-+      }
-+      const isShifted = (this._targetIndex <= j && j < this._dragIndex) || 
-+                        (this._dragIndex < j && j <= this._targetIndex);
-+      if (isShifted) {
-+        const shiftY = j < this._dragIndex ? this._tabHeights[this._dragIndex] : -this._tabHeights[this._dragIndex];
-+        const shiftX = 8;
-+        this._tabElements[j].style.transform = `translate3d(${shiftX}px, ${shiftY}px, 0)`;
++    const btnHorizontal = document.getElementById("tabLayoutHorizontal");
++    const btnVertical = document.getElementById("tabLayoutVertical");
++    if (btnHorizontal && btnVertical) {
++      const isVertical = Services.prefs.getBoolPref("sidebar.verticalTabs", false);
++      if (isVertical) {
++        btnVertical.classList.add("active");
++        btnHorizontal.classList.remove("active");
 +      } else {
-+        this._tabElements[j].style.transform = "";
++        btnHorizontal.classList.add("active");
++        btnVertical.classList.remove("active");
 +      }
-+    }
-+  }
-+
-+  handleTabPointerUp(event) {
-+    if (event.pointerId !== this._activePointerId) {
-+      return;
-+    }
-+
-+    const element = this._dragElement;
-+    element.releasePointerCapture(event.pointerId);
-+    element.removeEventListener("pointermove", this._onTabPointerMove);
-+    element.removeEventListener("pointerup", this._onTabPointerUp);
-+    element.removeEventListener("pointercancel", this._onTabPointerCancel);
-+
-+    this._activePointerId = null;
-+
-+    if (!this._isDragging) {
-+      this.selectHilalTab(this._dragTab);
-+      this._dragTab = null;
-+      this._dragElement = null;
-+      return;
++      btnHorizontal.addEventListener("click", () => {
++        Services.prefs.setBoolPref("sidebar.verticalTabs", false);
++        btnHorizontal.classList.add("active");
++        btnVertical.classList.remove("active");
++      });
++      btnVertical.addEventListener("click", () => {
++        Services.prefs.setBoolPref("sidebar.verticalTabs", true);
++        btnVertical.classList.add("active");
++        btnHorizontal.classList.remove("active");
++      });
 +    }
 +
-+    const draggedTab = this._dragTab;
-+    const dragIndex = this._dragIndex;
-+    const targetIndex = this._targetIndex;
-+    const targetWorkspaceId = this._targetWorkspaceId;
++    wireCheckbox("prefSidebarRevamp", "sidebar.revamp", true);
++    wireCheckbox("prefLinkOpenNewWindow", "browser.link.open_newwindow", true);
++    wireCheckbox("prefTabsLoadInBackground", "browser.tabs.loadInBackground", false);
++    wireCheckbox("prefOpenAppLinksNext", "browser.link.open_newwindow.override.external", false);
++    wireCheckbox("prefWarnOpenMany", "browser.tabs.warnOnOpen", true);
++    wireCheckbox("prefCtrlTabRecentlyUsed", "browser.ctrlTab.sortByRecentlyUsed", false);
++    wireCheckbox("prefTabPreviewThumbnails", "browser.tabs.hoverPreview.showThumbnails", true);
++    wireCheckbox("prefTabGroupsEnabled", "browser.tabs.groups.enabled", true);
++    wireCheckbox("prefTabGroupDragCreate", "browser.tabs.dragDrop.createGroup.enabled", true);
++    wireCheckbox("prefContainersEnabled", "privacy.userContext.enabled", true);
++    wireCheckbox("prefCaretBrowsing", "accessibility.browsewithcaret", false);
++    wireCheckbox("prefTypeaheadFind", "accessibility.typeaheadfind", false);
++    wireCheckbox("prefLinkPreview", "browser.ml.linkPreview.enabled", false);
++    wireCheckbox("prefPipToggle", "media.videocontrols.picture-in-picture.video-toggle.enabled", true);
++    wireCheckbox("prefDrmEnabled", "media.eme.enabled", true);
++    wireCheckbox("prefPerformanceRecommended", "browser.preferences.defaultPerformanceSettings.enabled", true);
++    wireCheckbox("prefHwAccel", "layers.acceleration.disabled", false);
++    wireCheckbox("prefWarnCloseMultiple", "browser.tabs.warnOnClose", true);
++    wireCheckbox("prefWarnOnQuitShortcut", "browser.warnOnQuitShortcut", true);
++  },
++};
 +
-+    this._hoveredWorkspaceRow?.classList.remove("hilal-ws-drop-target");
-+    this._hoveredWorkspaceRow = null;
-+
-+    element.classList.remove("dragging-active");
-+
-+    if (targetWorkspaceId) {
-+      this.cleanupDragStyles();
-+      this._hilalManager?._moveTabToWorkspace?.(draggedTab, targetWorkspaceId);
-+      this.scheduleHilalRefresh();
-+      return;
-+    }
-+
-+    if (dragIndex === -1 || targetIndex === -1 || targetIndex === dragIndex) {
-+      element.classList.add("dropping-active");
-+      element.style.transform = "translate3d(0, 0, 0) scale(1)";
-+      setTimeout(() => {
-+        this.cleanupDragStyles();
-+        this.scheduleHilalRefresh();
-+      }, 400);
-+      return;
-+    }
-+
-+    element.classList.add("dropping-active");
-+    const finalTy = this._tabPositions[targetIndex].top - this._tabPositions[dragIndex].top;
-+    element.style.transform = `translate3d(0px, ${finalTy}px, 0) scale(1)`;
-+
-+    setTimeout(() => {
-+      const targetTab = this.filteredHilalTabs[targetIndex];
-+      if (draggedTab && targetTab && draggedTab !== targetTab) {
-+        if (draggedTab.pinned && !targetTab.pinned) {
-+          window.gBrowser.unpinTab(draggedTab);
-+        } else if (!draggedTab.pinned && targetTab.pinned) {
-+          window.gBrowser.pinTab(draggedTab);
++var gHilalPane = {
++  init() {
++    function setEventListener(aId, aEventType, aCallback) {
++      const el = document.getElementById(aId);
++      if (el) {
++        el.addEventListener(aEventType, aCallback);
++        if (aEventType === "command") {
++          el.addEventListener("click", aCallback);
 +        }
-+        window.gBrowser.moveTabTo(draggedTab, targetTab._tPos);
-+      }
-+      this.cleanupDragStyles();
-+      this.scheduleHilalRefresh();
-+    }, 400);
-+  }
-+
-+  handleTabPointerCancel(event) {
-+    if (event.pointerId !== this._activePointerId) {
-+      return;
-+    }
-+
-+    const element = this._dragElement;
-+    if (element) {
-+      element.releasePointerCapture(event.pointerId);
-+      element.removeEventListener("pointermove", this._onTabPointerMove);
-+      element.removeEventListener("pointerup", this._onTabPointerUp);
-+      element.removeEventListener("pointercancel", this._onTabPointerCancel);
-+    }
-+
-+    this._activePointerId = null;
-+    this._hoveredWorkspaceRow?.classList.remove("hilal-ws-drop-target");
-+    this._hoveredWorkspaceRow = null;
-+
-+    if (this._isDragging) {
-+      element?.classList.remove("dragging-active");
-+      element?.classList.add("dropping-active");
-+      if (element) {
-+        element.style.transform = "translate3d(0, 0, 0) scale(1)";
-+      }
-+      setTimeout(() => {
-+        this.cleanupDragStyles();
-+        this.scheduleHilalRefresh();
-+      }, 400);
-+    } else {
-+      this._dragTab = null;
-+      this._dragElement = null;
-+    }
-+  }
-+
-+  cleanupDragStyles() {
-+    if (this._dragElement) {
-+      this._dragElement.classList.remove("dragging-active");
-+      this._dragElement.classList.remove("dropping-active");
-+      this._dragElement.style.transform = "";
-+    }
-+    if (this._tabElements) {
-+      for (const el of this._tabElements) {
-+        el.style.transform = "";
 +      }
 +    }
-+    this._dragTab = null;
-+    this._dragElement = null;
-+    this._tabElements = [];
-+    this._tabPositions = [];
-+    this._tabHeights = [];
-+    this._isDragging = false;
-+    this._dragIndex = -1;
-+    this._targetIndex = -1;
-+    this._targetWorkspaceId = null;
-+  }
 +
-   handleTabDragStart(tab, event) {
-+    this.clearHilalTabDragState();
-     this._draggedTab = tab;
-+    this._draggedTabRow = event.currentTarget;
-+    event.currentTarget.toggleAttribute("dragging", true);
-     event.dataTransfer.effectAllowed = "move";
-     event.dataTransfer.setData("text/plain", tab.label);
-+    event.dataTransfer.setData("application/x-hilal-tab", String(tab._tPos));
-+    event.dataTransfer.setDragImage(
-+      event.currentTarget,
-+      18,
-+      Math.round(event.currentTarget.getBoundingClientRect().height / 2)
++    function wireCheckbox(checkbox, prefName, defaultValue) {
++      if (!checkbox) return;
++      const initialVal = Services.prefs.getBoolPref(prefName, defaultValue);
++      checkbox.checked = initialVal;
++      checkbox.addEventListener("change", () => {
++        Services.prefs.setBoolPref(prefName, checkbox.checked);
++      });
++    }
++
++    // Interactive row click delegation: clicking on any row toggles its switch
++    const mainPane = document.getElementById("mainPrefPane");
++    if (mainPane && !mainPane._hilalRowClickDelegated) {
++      mainPane._hilalRowClickDelegated = true;
++      mainPane.addEventListener("click", e => {
++        const row = e.target.closest(".row");
++        if (!row) return;
++        if (e.target.closest("button, a, input, select, nav, kbd, label.switch")) {
++          return;
++        }
++        const switchEl = row.querySelector("label.switch input[type='checkbox']");
++        if (switchEl) {
++          switchEl.click();
++        }
++      });
++    }
++
++    const hilalWsCheckbox = document.getElementById("hilalWorkspacesEnabled");
++    const hilalWsPinnedPublicCheckbox = document.getElementById("hilalWorkspacesPinnedPublic");
++    const hilalWsGroupsPublicCheckbox = document.getElementById("hilalWorkspacesGroupsPublic");
++    const hilalPrivacyLevelRadioGroup = /** @type {HTMLElement|null} */ (
++      document.getElementById("hilalPrivacyLevel")
 +    );
-     try {
-       tab.dispatchEvent(new CustomEvent("TabHoverEnd", { bubbles: true }));
-     } catch (e) {}
-   }
- 
-+  handleTabDragEnd(event) {
-+    this.clearHilalTabDragState();
-+  }
-+
-+  clearHilalTabDragState() {
-+    this._draggedTabRow?.removeAttribute("dragging");
-+    this._dragOverTabRow?.removeAttribute("dragover");
-+    this._draggedTab = null;
-+    this._draggedTabRow = null;
-+    this._dragOverTabRow = null;
-+  }
-+
-+  setHilalTabDropTarget(row) {
-+    if (this._dragOverTabRow === row) {
-+      return;
-+    }
-+    this._dragOverTabRow?.removeAttribute("dragover");
-+    this._dragOverTabRow = row;
-+    row?.toggleAttribute("dragover", true);
-+  }
-+
-   handleTabDragOver(tab, event) {
-     if (!this._draggedTab) {
-       return;
-     }
-     event.preventDefault();
-     event.dataTransfer.dropEffect = "move";
-+    this.setHilalTabDropTarget(event.currentTarget);
-   }
- 
-   handleTabDrop(targetTab, event) {
-     event.preventDefault();
-     event.stopPropagation();
--    if (!this._draggedTab || this._draggedTab === targetTab) {
-+    const draggedTab = this._draggedTab;
-+    this.clearHilalTabDragState();
-+    if (!draggedTab || draggedTab === targetTab) {
-       return;
-     }
- 
--    if (this._draggedTab.pinned && !targetTab.pinned) {
--      window.gBrowser.unpinTab(this._draggedTab);
--    } else if (!this._draggedTab.pinned && targetTab.pinned) {
--      window.gBrowser.pinTab(this._draggedTab);
-+    if (draggedTab.pinned && !targetTab.pinned) {
-+      window.gBrowser.unpinTab(draggedTab);
-+    } else if (!draggedTab.pinned && targetTab.pinned) {
-+      window.gBrowser.pinTab(draggedTab);
-     }
- 
--    window.gBrowser.moveTabTo(this._draggedTab, targetTab._tPos);
--    this._draggedTab = null;
-+    window.gBrowser.moveTabTo(draggedTab, targetTab._tPos);
-     this.scheduleHilalRefresh();
-   }
- 
-@@ -575,15 +942,16 @@ export default class SidebarMain extends MozLitElement {
- 
-   handlePinnedContainerDrop(event) {
-     event.preventDefault();
--    if (!this._draggedTab) {
-+    const draggedTab = this._draggedTab;
-+    this.clearHilalTabDragState();
-+    if (!draggedTab) {
-       return;
-     }
- 
--    if (!this._draggedTab.pinned) {
--      window.gBrowser.pinTab(this._draggedTab);
-+    if (!draggedTab.pinned) {
-+      window.gBrowser.pinTab(draggedTab);
-     }
- 
--    this._draggedTab = null;
-     this.scheduleHilalRefresh();
-   }
- 
-@@ -597,21 +965,22 @@ export default class SidebarMain extends MozLitElement {
- 
-   handleUnpinnedContainerDrop(event) {
-     event.preventDefault();
--    if (!this._draggedTab) {
-+    const draggedTab = this._draggedTab;
-+    this.clearHilalTabDragState();
-+    if (!draggedTab) {
-       return;
-     }
- 
--    if (this._draggedTab.pinned) {
--      window.gBrowser.unpinTab(this._draggedTab);
-+    if (draggedTab.pinned) {
-+      window.gBrowser.unpinTab(draggedTab);
-     }
- 
-     const workspaceTabs = this.filteredHilalUnpinnedTabs;
-     if (workspaceTabs.length > 0) {
-       const lastTab = workspaceTabs[workspaceTabs.length - 1];
--      window.gBrowser.moveTabTo(this._draggedTab, lastTab._tPos);
-+      window.gBrowser.moveTabTo(draggedTab, lastTab._tPos);
-     }
- 
--    this._draggedTab = null;
-     this.scheduleHilalRefresh();
-   }
- 
-@@ -705,7 +1074,11 @@ export default class SidebarMain extends MozLitElement {
- 
-   handleWorkspaceDragOver(workspace, event) {
-     const types = event.dataTransfer.types;
--    if (this._draggedTab || types.includes("application/x-moz-tabbrowser-tab") || types.includes("application/x-hilal-workspace")) {
-+    if (
-+      this._draggedTab ||
-+      types.includes("application/x-moz-tabbrowser-tab") ||
-+      types.includes("application/x-hilal-workspace")
-+    ) {
-       event.preventDefault();
-       event.dataTransfer.dropEffect = "move";
-       event.currentTarget.classList.add("hilal-ws-drop-target");
-@@ -720,22 +1093,28 @@ export default class SidebarMain extends MozLitElement {
-     event.currentTarget.classList.remove("hilal-ws-drop-target");
- 
-     if (this._draggedTab) {
-+      const draggedTab = this._draggedTab;
-       event.preventDefault();
--      this._hilalManager?._moveTabToWorkspace?.(this._draggedTab, workspace.id);
--      this._draggedTab = null;
-+      this.clearHilalTabDragState();
-+      this._hilalManager?._moveTabToWorkspace?.(draggedTab, workspace.id);
-       this.scheduleHilalRefresh();
-       return;
-     }
- 
-     const types = event.dataTransfer.types;
-     if (types.includes("application/x-moz-tabbrowser-tab")) {
--      const draggedTab = event.dataTransfer.mozGetDataAt("application/x-moz-tabbrowser-tab", 0);
-+      const draggedTab = event.dataTransfer.mozGetDataAt(
-+        "application/x-moz-tabbrowser-tab",
-+        0
-+      );
-       if (draggedTab && window.gBrowser.isTab(draggedTab)) {
-         event.preventDefault();
-         this._hilalManager?._moveTabToWorkspace?.(draggedTab, workspace.id);
-       }
-     } else if (types.includes("application/x-hilal-workspace")) {
--      const draggedWsId = event.dataTransfer.getData("application/x-hilal-workspace");
-+      const draggedWsId = event.dataTransfer.getData(
-+        "application/x-hilal-workspace"
-+      );
-       if (draggedWsId && draggedWsId !== workspace.id) {
-         event.preventDefault();
-         this._hilalManager?.reorderWorkspaces?.(draggedWsId, workspace.id);
-@@ -789,8 +1168,44 @@ export default class SidebarMain extends MozLitElement {
-     }
-   }
- 
-+  toggleCompactMode() {
-+    const prefName = "hilal.compact.enabled";
-+    const current = Services.prefs.getBoolPref(prefName, false);
-+    Services.prefs.setBoolPref(prefName, !current);
-+  }
-+
-+  toggleSafariSidebar() {
-+    const controller = window.SidebarController;
-+    if (
-+      !controller ||
-+      !controller._state ||
-+      controller.inSingleTabWindow ||
-+      controller.uninitializing
-+    ) {
-+      return;
-+    }
-+
-+    const shouldShow = !controller.launcherVisible;
-+    if (
-+      Services.prefs.getStringPref("sidebar.visibility", "always-show") !==
-+      "hide-sidebar"
-+    ) {
-+      Services.prefs.setStringPref("sidebar.visibility", "hide-sidebar");
-+      controller._state.revampVisibility = "hide-sidebar";
-+    }
-+    if (controller._animationEnabled && !window.gReduceMotion) {
-+      controller._animateSidebarMain();
-+    }
-+    controller._state.updateVisibility(shouldShow, shouldShow);
-+    if (!shouldShow) {
-+      controller.hide({ dismissPanel: false });
-+    }
-+    controller.updateToolbarButton();
-+  }
-+
-   openHilalFooterItem(item) {
--    const isCompact = document.documentElement.hasAttribute("hilal-compact-mode");
-+    const isCompact =
-+      document.documentElement.hasAttribute("hilal-compact-mode");
-     if (typeof item === "object" && item !== null) {
-       const url = this.normalizeHilalShortcutUrl(item.url);
-       if (url === "viewBookmarksSidebar" || url === "about:bookmarks") {
-@@ -813,13 +1228,18 @@ export default class SidebarMain extends MozLitElement {
-         if (isCompact) {
-           window.openTrustedLinkIn("about:logins", "tab", {
-             userContextId: 0,
--            triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
-+            triggeringPrincipal:
-+              Services.scriptSecurityManager.getSystemPrincipal(),
-           });
-         } else {
-           window.SidebarController.show("viewCPMSidebar");
-         }
-       } else if (url === "about:downloads") {
--        if (!isCompact && window.DownloadsPanel && window.DownloadsButton?.getAnchor()) {
-+        if (
-+          !isCompact &&
-+          window.DownloadsPanel &&
-+          window.DownloadsButton?.getAnchor()
-+        ) {
-           window.DownloadsPanel.showPanel(true);
-         } else {
-           window.BrowserCommands.downloadsUI();
-@@ -866,14 +1286,19 @@ export default class SidebarMain extends MozLitElement {
-         if (isCompact) {
-           window.openTrustedLinkIn("about:logins", "tab", {
-             userContextId: 0,
--            triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
-+            triggeringPrincipal:
-+              Services.scriptSecurityManager.getSystemPrincipal(),
-           });
-         } else {
-           window.SidebarController.show("viewCPMSidebar");
-         }
-         break;
-       case "downloads":
--        if (!isCompact && window.DownloadsPanel && window.DownloadsButton?.getAnchor()) {
-+        if (
-+          !isCompact &&
-+          window.DownloadsPanel &&
-+          window.DownloadsButton?.getAnchor()
-+        ) {
-           window.DownloadsPanel.showPanel(true);
-         } else {
-           window.BrowserCommands.downloadsUI();
-@@ -1657,6 +2082,7 @@ export default class SidebarMain extends MozLitElement {
-           "hilal-workspace-button": true,
-           "hilal-workspace-active": active,
-         })}
-+        data-workspace-id=${workspace.id}
-         type="button"
-         title=${tooltip}
-         aria-label=${ariaLabel}
-@@ -1677,6 +2103,155 @@ export default class SidebarMain extends MozLitElement {
-     `;
-   }
- 
-+  hilalCustomTabTemplate(tab) {
-+    const active = tab.selected;
-+    const title = this.getHilalTabTitle(tab);
-+    const icon = this.getHilalTabIcon(tab);
-+
-+    return html`
-+      <div
-+        class=${classMap({
-+          "safari-row": true,
-+          "safari-row-active": active,
-+          "safari-tab-row": true,
-+          "safari-pinned-tab": tab.pinned,
-+        })}
-+        role="button"
-+        tabindex="0"
-+        draggable="false"
-+        title=${title}
-+        @click=${event => {
-+          if (this._isDragging) {
-+            event.preventDefault();
-+            event.stopPropagation();
++    const normalizePrivacyLevel = value =>
++      ["standard", "strict", "extreme"].includes(value) ? value : "standard";
++    const resetHilalWorkspaceContainers = () => {
++      let workspaces = [];
++      try {
++        workspaces = JSON.parse(
++          Services.prefs.getStringPref("hilal.workspaces.data", "[]")
++        );
++      } catch (e) {
++        console.warn("Failed to parse Hilal workspace data during reset", e);
++      }
++      if (!Array.isArray(workspaces)) {
++        return;
++      }
++      for (const workspace of workspaces) {
++        const containerId = Number.parseInt(workspace?.containerId, 10);
++        if (containerId) {
++          try {
++            if (lazy.ContextualIdentityService) {
++              lazy.ContextualIdentityService.remove(containerId);
++            }
++          } catch (e) {
++            console.warn("Failed to remove Hilal workspace container", e);
 +          }
-+        }}
-+        @keydown=${event => {
-+          if (event.key === " " || event.key === "Enter") {
-+            event.preventDefault();
-+            this.selectHilalTab(tab);
++        }
++      }
++    };
++
++    try {
++      wireCheckbox(hilalWsCheckbox, "hilal.workspaces.enabled", true);
++      wireCheckbox(hilalWsPinnedPublicCheckbox, "hilal.workspaces.pinned.public", true);
++      wireCheckbox(hilalWsGroupsPublicCheckbox, "hilal.workspaces.groups.public", false);
++    } catch (e) {
++      console.error("Hilal workspaces checkbox init error:", e);
++    }
++
++    try {
++      const hilalPrefMappings = [
++        ["hilalUrlbarShowWorkspaceName", "hilal.urlbar.showWorkspaceName", false],
++        ["hilalSidebarCompactEnabled", "hilal.compact.enabled", false],
++        ["hilalSidebarCompactHideToolbar", "hilal.compact.hideToolbar", false],
++        ["hilalSidebarShowHorizontalTabs", "sidebar.verticalTabs.showHorizontal", false],
++        ["hilalBoostsAutoPalette", "hilal.boosts.auto_palette.enabled", false],
++      ];
++      for (const [elementId, prefName, defaultValue] of hilalPrefMappings) {
++        const checkbox = document.getElementById(elementId);
++        wireCheckbox(checkbox, prefName, defaultValue);
++      }
++    } catch (e) {
++      console.error("Hilal pref mappings init error:", e);
++    }
++
++    try {
++      const hilalSidebarFooterCheckboxes = [
++        ["hilalSidebarFooterBookmarks", "hilal.sidebar.footer.bookmarks", false],
++        ["hilalSidebarFooterHistory", "hilal.sidebar.footer.history", true],
++        ["hilalSidebarFooterPasswords", "hilal.sidebar.footer.passwords", false],
++        ["hilalSidebarFooterDownloads", "hilal.sidebar.footer.downloads", true],
++        ["hilalSidebarFooterPrivacy", "hilal.sidebar.footer.privacy", true],
++        ["hilalSidebarFooterSettings", "hilal.sidebar.footer.settings", true],
++      ];
++      for (const [elementId, prefName, defaultValue] of hilalSidebarFooterCheckboxes) {
++        const checkbox = document.getElementById(elementId);
++        wireCheckbox(checkbox, prefName, defaultValue);
++      }
++    } catch (e) {
++      console.error("Hilal sidebar footer checkboxes init error:", e);
++    }
++
++    const getHilalSidebarCustomItems = () => {
++      try {
++        const parsed = JSON.parse(
++          Services.prefs.getStringPref("hilal.sidebar.customItems", "[]")
++        );
++        return Array.isArray(parsed) ? parsed : [];
++      } catch (e) {
++        console.warn("Failed to parse hilal.sidebar.customItems", e);
++        return [];
++      }
++    };
++    const setHilalSidebarCustomItems = items => {
++      Services.prefs.setStringPref(
++        "hilal.sidebar.customItems",
++        JSON.stringify(items)
++      );
++    };
++
++    const customList = document.getElementById("hilalSidebarCustomList");
++    const customAddBtn = document.getElementById("hilalSidebarCustomAdd");
++    const customRemoveBtn = document.getElementById("hilalSidebarCustomRemove");
++    const customForm = document.getElementById("hilalSidebarCustomForm");
++    const customNameInput = document.getElementById("hilalSidebarCustomName");
++    const customUrlInput = document.getElementById("hilalSidebarCustomUrl");
++    const customIconSelect = document.getElementById("hilalSidebarCustomIcon");
++    const customSaveBtn = document.getElementById("hilalSidebarCustomSave");
++    const customCancelBtn = document.getElementById("hilalSidebarCustomCancel");
++    let editingCustomItemId = null;
++
++    const refreshHilalSidebarCustomList = () => {
++      if (!customList) {
++        return;
++      }
++      customList.textContent = "";
++      for (const item of getHilalSidebarCustomItems()) {
++        if (!item?.id) {
++          continue;
++        }
++        const row = document.createElement("div");
++        row.className = "row middle-align border round padding small-margin";
++        row.setAttribute("itemId", item.id);
++        row.style.cursor = "pointer";
++
++        const icon = document.createElement("i");
++        icon.className = "primary-text";
++        icon.textContent = item.icon || "link";
++        row.appendChild(icon);
++
++        const nameLabel = document.createElement("div");
++        nameLabel.className = "bold";
++        nameLabel.style.width = "160px";
++        nameLabel.textContent = item.name || item.url || item.id;
++        row.appendChild(nameLabel);
++
++        const urlLabel = document.createElement("div");
++        urlLabel.className = "max secondary-text truncate";
++        urlLabel.textContent = item.url || "";
++        row.appendChild(urlLabel);
++
++        row.addEventListener("click", () => {
++          for (const r of customList.children) r.classList.remove("primary-container");
++          row.classList.add("primary-container");
++          customList.selectedItem = row;
++          if (customRemoveBtn) customRemoveBtn.disabled = false;
++        });
++
++        customList.appendChild(row);
++      }
++      if (customRemoveBtn) {
++        customRemoveBtn.disabled = true;
++      }
++    };
++
++    const resetHilalSidebarCustomForm = () => {
++      editingCustomItemId = null;
++      if (customForm) {
++        customForm.hidden = true;
++      }
++      if (customNameInput) {
++        customNameInput.value = "";
++      }
++      if (customUrlInput) {
++        customUrlInput.value = "";
++      }
++      if (customIconSelect) {
++        customIconSelect.value = "link";
++      }
++    };
++
++    const showHilalSidebarCustomForm = item => {
++      if (customForm) {
++        customForm.hidden = false;
++      }
++      editingCustomItemId = item?.id || null;
++      if (customNameInput) {
++        customNameInput.value = item?.name || "";
++        customNameInput.focus();
++      }
++      if (customUrlInput) {
++        customUrlInput.value = item?.url || "";
++      }
++      if (customIconSelect) {
++        customIconSelect.value = item?.icon || "link";
++      }
++    };
++
++    if (customAddBtn) {
++      customAddBtn.addEventListener("click", () => {
++        showHilalSidebarCustomForm(null);
++      });
++    }
++
++    if (customCancelBtn) {
++      customCancelBtn.addEventListener("click", resetHilalSidebarCustomForm);
++    }
++
++    if (customSaveBtn) {
++      customSaveBtn.addEventListener("click", () => {
++        const name = customNameInput ? customNameInput.value.trim() : "";
++        const url = customUrlInput ? customUrlInput.value.trim() : "";
++        const icon = customIconSelect ? customIconSelect.value : "link";
++        if (!name || !url) {
++          Services.prompt.alert(
++            window,
++            "Invalid Input",
++            "Name and URL are required."
++          );
++          return;
++        }
++
++        const items = getHilalSidebarCustomItems();
++        const itemId =
++          editingCustomItemId ||
++          `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
++        const nextItem = { id: itemId, name, url, icon };
++        const existingIndex = items.findIndex(item => item.id === itemId);
++        if (existingIndex >= 0) {
++          items[existingIndex] = nextItem;
++        } else {
++          items.push(nextItem);
++        }
++        setHilalSidebarCustomItems(items);
++        refreshHilalSidebarCustomList();
++        resetHilalSidebarCustomForm();
++      });
++    }
++
++    if (customRemoveBtn) {
++      customRemoveBtn.addEventListener("click", () => {
++        const selected = customList ? customList.selectedItem : null;
++        if (!selected) {
++          return;
++        }
++        const itemId = selected.getAttribute("itemId");
++        if (
++          !itemId ||
++          !Services.prompt.confirm(
++            window,
++            "Remove Shortcut",
++            "Remove this custom sidebar shortcut?"
++          )
++        ) {
++          return;
++        }
++        setHilalSidebarCustomItems(
++          getHilalSidebarCustomItems().filter(item => item.id !== itemId)
++        );
++        refreshHilalSidebarCustomList();
++        resetHilalSidebarCustomForm();
++      });
++    }
++
++    refreshHilalSidebarCustomList();
++
++    if (hilalPrivacyLevelRadioGroup) {
++      const updatePrivacyLevelUI = (level) => {
++        const normalized = normalizePrivacyLevel(level);
++        hilalPrivacyLevelRadioGroup.value = normalized;
++        const links = hilalPrivacyLevelRadioGroup.querySelectorAll("a, button, m3e-button-segment, radio");
++        for (const s of links) {
++          const val = s.getAttribute("data-value") || s.getAttribute("value") || s.value;
++          const isSel = (val === normalized);
++          if (isSel) {
++            s.classList.add("active");
++          } else {
++            s.classList.remove("active");
 +          }
-+        }}
-+        @mouseenter=${event => this.handleTabMouseEnter(tab, event)}
-+        @mouseleave=${event => this.handleTabMouseLeave(tab, event)}
-+        @pointerdown=${event => this.handleTabPointerDown(tab, event)}
-+        @contextmenu=${event => {
-+          event.preventDefault();
-+          event.stopPropagation();
-+          const contextMenu = document.getElementById("tabContextMenu");
-+          if (contextMenu) {
-+            event.currentTarget.tab = tab;
-+            contextMenu.openPopup(
-+              event.currentTarget,
-+              "after_start",
-+              0,
-+              0,
-+              true,
-+              false,
-+              event
++        }
++      };
++
++      const initialLevel = Services.prefs.getStringPref("hilal.privacy.level", "standard");
++      updatePrivacyLevelUI(initialLevel);
++
++      const onPrivacyChange = (val) => {
++        const level = normalizePrivacyLevel(val || hilalPrivacyLevelRadioGroup.value);
++        updatePrivacyLevelUI(level);
++        Services.prefs.setStringPref("hilal.privacy.level", level);
++      };
++
++      hilalPrivacyLevelRadioGroup.addEventListener("click", e => {
++        const seg = e.target.closest("a, button, m3e-button-segment, radio");
++        if (seg) {
++          const val = seg.getAttribute("data-value") || seg.getAttribute("value") || seg.value;
++          if (val) onPrivacyChange(val);
++        }
++      });
++    }
++    setEventListener("hilalWorkspacesReset", "command", function () {
++      if (
++        Services.prompt.confirm(
++          window,
++          "Reset Workspaces",
++          "This will delete all workspace data and cannot be undone. Continue?"
++        )
++      ) {
++        resetHilalWorkspaceContainers();
++        Services.prefs.setStringPref("hilal.workspaces.data", "[]");
++        Services.prefs.setStringPref("hilal.workspaces.active", "default");
++        Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
++        Services.prefs.setBoolPref("hilal.workspaces.pinned.public", true);
++        Services.prefs.setBoolPref("hilal.workspaces.groups.public", false);
++        Services.prefs.setStringPref("hilal.privacy.level", "standard");
++        if (hilalWsCheckbox) {
++          hilalWsCheckbox.checked = true;
++        }
++        if (hilalWsPinnedPublicCheckbox) {
++          hilalWsPinnedPublicCheckbox.checked = true;
++        }
++        if (hilalWsGroupsPublicCheckbox) {
++          hilalWsGroupsPublicCheckbox.checked = false;
++        }
++        if (hilalPrivacyLevelRadioGroup) {
++          hilalPrivacyLevelRadioGroup.value = "standard";
++        }
++      }
++    });
++
++    // -- Hilal Accent Color & Theme Customization ----------------------------
++    const accentModeRadioGroup = document.getElementById("hilalAccentMode");
++    const workspaceColorsSection = document.getElementById("hilalWorkspaceColorsSection");
++    const globalColorSection = document.getElementById("hilalGlobalColorSection");
++    const boostsColorSection = document.getElementById("hilalBoostsColorSection");
++    const workspaceColorList = document.getElementById("hilalWorkspaceColorList");
++    const globalColorSwatches = document.getElementById("hilalGlobalColorSwatches");
++    const globalCustomColor = document.getElementById("hilalGlobalCustomColor");
++
++    const WORKSPACE_COLOR_CHOICES = [
++      { id: "purple", hex: "#af51f5", label: "Purple" },
++      { id: "blue", hex: "#37adff", label: "Blue" },
++      { id: "turquoise", hex: "#00c79a", label: "Turquoise" },
++      { id: "green", hex: "#51cd00", label: "Green" },
++      { id: "yellow", hex: "#ffcb00", label: "Yellow" },
++      { id: "orange", hex: "#ff9f00", label: "Orange" },
++      { id: "red", hex: "#ff613d", label: "Red" },
++      { id: "pink", hex: "#ff4bda", label: "Pink" },
++    ];
++
++    const getWorkspacesData = () => {
++      try {
++        const raw = Services.prefs.getStringPref("hilal.workspaces.data", "[]");
++        const parsed = JSON.parse(raw);
++        return Array.isArray(parsed) && parsed.length > 0
++          ? parsed
++          : [{ id: "default", name: "Default", emoji: "\u{1F5C2}", color: "purple" }];
++      } catch (e) {
++        return [{ id: "default", name: "Default", emoji: "\u{1F5C2}", color: "purple" }];
++      }
++    };
++
++    const setWorkspacesData = data => {
++      Services.prefs.setStringPref("hilal.workspaces.data", JSON.stringify(data));
++    };
++
++    const refreshWorkspaceColorsUI = () => {
++      if (!workspaceColorList) return;
++      workspaceColorList.textContent = "";
++      const workspaces = getWorkspacesData();
++      const activeId = Services.prefs.getStringPref("hilal.workspaces.active", workspaces[0]?.id || "default");
++
++      for (const ws of workspaces) {
++        const row = document.createElement("div");
++        row.className = "row middle-align border round padding small-margin";
++
++        // Meta (emoji badge, name label, active badge)
++        const meta = document.createElement("div");
++        meta.className = "row middle-align max";
++
++        const emojiBadge = document.createElement("div");
++        emojiBadge.className = "chip circle";
++        emojiBadge.textContent = ws.emoji || "\u{1F5C2}";
++        meta.appendChild(emojiBadge);
++
++        const nameLabel = document.createElement("span");
++        nameLabel.className = "bold max";
++        nameLabel.textContent = ws.name || ws.id;
++        meta.appendChild(nameLabel);
++
++        if (ws.id === activeId) {
++          const activeBadge = document.createElement("span");
++          activeBadge.className = "chip primary small";
++          activeBadge.textContent = "Aktif";
++          activeBadge.setAttribute("data-l10n-id", "hilal-workspace-active-badge");
++          meta.appendChild(activeBadge);
++        }
++
++        row.appendChild(meta);
++
++        // Swatches
++        const swatches = document.createElement("div");
++        swatches.className = "row no-margin middle-align";
++
++        for (const choice of WORKSPACE_COLOR_CHOICES) {
++          const swatch = document.createElement("button");
++          swatch.className = "circle small";
++          const isSelected = (ws.color === choice.id || ws.color === choice.hex);
++          swatch.style.cssText = `background-color: ${choice.hex}; width: 28px; height: 28px; min-width: 28px; padding: 0; margin: 2px; border: ${isSelected ? '2px solid var(--primary, #0b57d0)' : '2px solid transparent'}; cursor: pointer;`;
++          swatch.title = choice.label;
++          swatch.setAttribute("aria-label", choice.label);
++
++          swatch.addEventListener("click", () => {
++            ws.color = choice.id;
++            setWorkspacesData(workspaces);
++            refreshWorkspaceColorsUI();
++            applyPreferencesTheme();
++          });
++
++          swatches.appendChild(swatch);
++        }
++
++        row.appendChild(swatches);
++        workspaceColorList.appendChild(row);
++      }
++    };
++
++    const refreshGlobalColorUI = () => {
++      if (!globalColorSwatches) return;
++      globalColorSwatches.textContent = "";
++      const currentColor = Services.prefs.getStringPref("hilal.theme.globalAccentColor", "#af51f5");
++
++      for (const choice of WORKSPACE_COLOR_CHOICES) {
++        const swatch = document.createElement("button");
++        swatch.className = "circle small";
++        const isSelected = (currentColor.toLowerCase() === choice.hex.toLowerCase() || currentColor === choice.id);
++        swatch.style.cssText = `background-color: ${choice.hex}; width: 32px; height: 32px; min-width: 32px; padding: 0; margin: 3px; border: ${isSelected ? '3px solid var(--primary, #0b57d0)' : '2px solid transparent'}; cursor: pointer;`;
++        swatch.title = choice.label;
++        swatch.setAttribute("aria-label", choice.label);
++
++        swatch.addEventListener("click", () => {
++          Services.prefs.setStringPref("hilal.theme.globalAccentColor", choice.hex);
++          refreshGlobalColorUI();
++          applyPreferencesTheme();
++          if (globalCustomColor) {
++            globalCustomColor.value = choice.hex;
++          }
++        });
++
++        globalColorSwatches.appendChild(swatch);
++      }
++
++      if (globalCustomColor) {
++        if (/^#[0-9A-Fa-f]{6}$/.test(currentColor)) {
++          globalCustomColor.value = currentColor;
++        }
++      }
++    };
++
++    if (globalCustomColor) {
++      globalCustomColor.addEventListener("input", () => {
++        const hex = globalCustomColor.value;
++        Services.prefs.setStringPref("hilal.theme.globalAccentColor", hex);
++        refreshGlobalColorUI();
++        applyPreferencesTheme();
++      });
++    }
++
++    const updateAccentModeUI = (mode) => {
++      if (workspaceColorsSection) {
++        workspaceColorsSection.hidden = (mode !== "workspace");
++      }
++      if (globalColorSection) {
++        globalColorSection.hidden = (mode !== "global");
++      }
++      if (boostsColorSection) {
++        boostsColorSection.hidden = (mode !== "boosts");
++      }
++      if (accentModeRadioGroup) {
++        accentModeRadioGroup.value = mode;
++        const links = accentModeRadioGroup.querySelectorAll("a, button, m3e-button-segment, radio");
++        for (const s of links) {
++          const val = s.getAttribute("data-value") || s.getAttribute("value") || s.value;
++          const isSel = (val === mode);
++          if (isSel) {
++            s.classList.add("active");
++          } else {
++            s.classList.remove("active");
++          }
++        }
++      }
++    };
++
++    const applyPreferencesTheme = () => {
++      // 1. Resolve Accent Color
++      const mode = Services.prefs.getStringPref("hilal.theme.accentMode", "workspace");
++      let hex = "#0b57d0";
++      const colorChoices = {
++        purple: "#af51f5",
++        blue: "#37adff",
++        turquoise: "#00c79a",
++        green: "#51cd00",
++        yellow: "#ffcb00",
++        orange: "#ff9f00",
++        red: "#ff613d",
++        pink: "#ff4bda",
++      };
++
++      if (mode === "global") {
++        const globalHex = Services.prefs.getStringPref("hilal.theme.globalAccentColor", "#af51f5");
++        hex = colorChoices[globalHex] || globalHex || "#af51f5";
++      } else if (mode === "boosts") {
++        hex = "#7c5cff";
++      } else {
++        try {
++          const workspaces = JSON.parse(Services.prefs.getStringPref("hilal.workspaces.data", "[]"));
++          const activeId = Services.prefs.getStringPref("hilal.workspaces.active", workspaces[0]?.id || "default");
++          const activeWs = workspaces.find(w => w.id === activeId) || workspaces[0];
++          hex = colorChoices[activeWs?.color] || activeWs?.color || "#af51f5";
++        } catch (e) {
++          hex = "#af51f5";
++        }
++      }
++
++      // 2. Resolve Dark / Light Mode
++      const contentOverride = Services.prefs.getIntPref("layout.css.prefers-color-scheme.content-override", 2);
++      let isDark = false;
++      if (contentOverride === 0) {
++        isDark = true;
++      } else if (contentOverride === 1) {
++        isDark = false;
++      } else {
++        isDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
++      }
++
++      document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
++
++      // Apply dynamic tokens
++      document.documentElement.style.setProperty("--md-sys-color-primary", hex);
++      document.documentElement.style.setProperty("--color-accent-primary", hex);
++      if (isDark) {
++        document.documentElement.style.setProperty(
++          "--md-sys-color-primary-container",
++          `color-mix(in srgb, ${hex} 32%, #1b1e25)`
++        );
++        document.documentElement.style.setProperty(
++          "--md-sys-color-on-primary-container",
++          `color-mix(in srgb, ${hex} 35%, #ffffff)`
++        );
++      } else {
++        document.documentElement.style.setProperty(
++          "--md-sys-color-primary-container",
++          `color-mix(in srgb, ${hex} 20%, #f2f3fa)`
++        );
++        document.documentElement.style.setProperty(
++          "--md-sys-color-on-primary-container",
++          `color-mix(in srgb, ${hex} 75%, #181c22)`
++        );
++      }
++    };
++
++    if (accentModeRadioGroup) {
++      const currentMode = Services.prefs.getStringPref("hilal.theme.accentMode", "workspace");
++      updateAccentModeUI(currentMode);
++
++      const onModeChange = (modeVal) => {
++        const selected = modeVal || accentModeRadioGroup.value;
++        if (!selected) return;
++        Services.prefs.setStringPref("hilal.theme.accentMode", selected);
++        if (selected === "boosts") {
++          Services.prefs.setBoolPref("hilal.boosts.auto_palette.enabled", true);
++          Services.prefs.setBoolPref("hilal.boosts.browser_ui.enabled", true);
++          Services.prefs.setBoolPref("hilal.boosts.enabled", true);
++        }
++        updateAccentModeUI(selected);
++        applyPreferencesTheme();
++      };
++
++      accentModeRadioGroup.addEventListener("click", e => {
++        const seg = e.target.closest("a, button, m3e-button-segment, radio");
++        if (seg) {
++          const val = seg.getAttribute("data-value") || seg.getAttribute("value") || seg.value;
++          if (val) onModeChange(val);
++        }
++      });
++    }
++
++    refreshWorkspaceColorsUI();
++    refreshGlobalColorUI();
++    applyPreferencesTheme();
++
++    const themePrefObserver = () => {
++      refreshWorkspaceColorsUI();
++      refreshGlobalColorUI();
++      applyPreferencesTheme();
++    };
++    try {
++      Services.prefs.addObserver("hilal.workspaces.data", themePrefObserver);
++      Services.prefs.addObserver("hilal.workspaces.active", themePrefObserver);
++      Services.prefs.addObserver("hilal.theme.accentMode", themePrefObserver);
++      Services.prefs.addObserver("hilal.theme.globalAccentColor", themePrefObserver);
++      Services.prefs.addObserver("layout.css.prefers-color-scheme.content-override", themePrefObserver);
++      if (window.matchMedia) {
++        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyPreferencesTheme);
++      }
++      window.addEventListener("unload", () => {
++        try {
++          Services.prefs.removeObserver("hilal.workspaces.data", themePrefObserver);
++          Services.prefs.removeObserver("hilal.workspaces.active", themePrefObserver);
++          Services.prefs.removeObserver("hilal.theme.accentMode", themePrefObserver);
++          Services.prefs.removeObserver("hilal.theme.globalAccentColor", themePrefObserver);
++          Services.prefs.removeObserver("layout.css.prefers-color-scheme.content-override", themePrefObserver);
++        } catch (e) {}
++      });
++    } catch (e) {}
++
++    // -- Hilal Bangs Customization -------------------------------------------
++    const { HilalBangs } = ChromeUtils.importESModule(
++      "resource:///modules/HilalBangs.sys.mjs"
++    );
++
++    const bangsList = document.getElementById("hilalBangsList");
++    const bangsAddBtn = document.getElementById("hilalBangsAdd");
++    const bangsRemoveBtn = document.getElementById("hilalBangsRemove");
++    const bangsForm = document.getElementById("hilalBangsForm");
++    const bangsTriggerInput = document.getElementById("hilalBangsTrigger");
++    const bangsSearchUrlInput = document.getElementById("hilalBangsSearchUrl");
++    const bangsHomeUrlInput = document.getElementById("hilalBangsHomeUrl");
++    const bangsSaveBtn = document.getElementById("hilalBangsSave");
++    const bangsCancelBtn = document.getElementById("hilalBangsCancel");
++
++    const refreshBangsList = () => {
++      if (!bangsList) {
++        return;
++      }
++      bangsList.textContent = "";
++
++      const defaults = HilalBangs.getDefaultBangs();
++      const customs = HilalBangs.getCustomBangs() || [];
++
++      const addRow = (trigger, search, home, isCustom) => {
++        const item = document.createElement("div");
++        item.className = "row middle-align border round padding small-margin";
++        item.setAttribute("trigger", trigger);
++        item.setAttribute("isCustom", isCustom ? "true" : "false");
++        item.style.cursor = "pointer";
++
++        const triggerChip = document.createElement("div");
++        triggerChip.className = "chip bold";
++        triggerChip.textContent = "!" + trigger;
++        item.appendChild(triggerChip);
++
++        const typeChip = document.createElement("div");
++        typeChip.className = isCustom ? "chip secondary small" : "chip small";
++        typeChip.textContent = isCustom ? "özel" : "varsayılan";
++        item.appendChild(typeChip);
++
++        const urlLabel = document.createElement("div");
++        urlLabel.className = "max secondary-text truncate";
++        urlLabel.textContent = search;
++        item.appendChild(urlLabel);
++
++        item.addEventListener("click", () => {
++          for (const r of bangsList.children) r.classList.remove("primary-container");
++          item.classList.add("primary-container");
++          bangsList.selectedItem = item;
++          if (bangsRemoveBtn) {
++            bangsRemoveBtn.disabled = !isCustom;
++          }
++        });
++
++        bangsList.appendChild(item);
++      };
++
++      // Add custom bangs first
++      for (const entry of customs) {
++        if (entry && entry.trigger) {
++          addRow(entry.trigger, entry.search, entry.home || "", true);
++        }
++      }
++
++      // Add default bangs
++      for (const [trigger, data] of Object.entries(defaults)) {
++        addRow(trigger, data.search, data.home, false);
++      }
++    };
++
++    if (bangsAddBtn) {
++      bangsAddBtn.addEventListener("click", () => {
++        if (bangsForm) {
++          bangsForm.hidden = false;
++        }
++        if (bangsTriggerInput) {
++          bangsTriggerInput.value = "";
++          bangsTriggerInput.focus();
++        }
++        if (bangsSearchUrlInput) {
++          bangsSearchUrlInput.value = "";
++        }
++        if (bangsHomeUrlInput) {
++          bangsHomeUrlInput.value = "";
++        }
++      });
++    }
++
++    if (bangsCancelBtn) {
++      bangsCancelBtn.addEventListener("click", () => {
++        if (bangsForm) {
++          bangsForm.hidden = true;
++        }
++      });
++    }
++
++    if (bangsSaveBtn) {
++      bangsSaveBtn.addEventListener("click", () => {
++        const trigger = bangsTriggerInput ? bangsTriggerInput.value.trim().toLowerCase().replace(/^!/, "") : "";
++        const search = bangsSearchUrlInput ? bangsSearchUrlInput.value.trim() : "";
++        const home = bangsHomeUrlInput ? bangsHomeUrlInput.value.trim() : "";
++
++        if (!trigger || !search) {
++          Services.prompt.alert(window, "Invalid Input", "Trigger and Search URL are required.");
++          return;
++        }
++
++        // Check if trigger is already in use by default bangs
++        const defaults = HilalBangs.getDefaultBangs();
++        if (trigger in defaults) {
++          Services.prompt.alert(window, "Duplicate Trigger", "The trigger '!" + trigger + "' is reserved as a default bang.");
++          return;
++        }
++
++        const customs = HilalBangs.getCustomBangs() || [];
++        const existingIndex = customs.findIndex(c => c.trigger === trigger);
++
++        if (existingIndex >= 0) {
++          customs[existingIndex] = { trigger, search, home };
++        } else {
++          customs.push({ trigger, search, home });
++        }
++
++        HilalBangs.setCustomBangs(customs);
++        refreshBangsList();
++
++        if (bangsForm) {
++          bangsForm.hidden = true;
++        }
++      });
++    }
++
++    if (bangsRemoveBtn) {
++      bangsRemoveBtn.addEventListener("click", () => {
++        const selected = bangsList ? bangsList.selectedItem : null;
++        if (!selected) {
++          return;
++        }
++
++        const trigger = selected.getAttribute("trigger");
++        const isCustom = selected.getAttribute("isCustom") === "true";
++
++        if (isCustom && trigger) {
++          if (Services.prompt.confirm(window, "Remove Bang", "Are you sure you want to remove the custom bang '!" + trigger + "'?")) {
++            const customs = HilalBangs.getCustomBangs() || [];
++            const filtered = customs.filter(c => c.trigger !== trigger);
++            HilalBangs.setCustomBangs(filtered);
++            refreshBangsList();
++          }
++        }
++      });
++    }
++
++    refreshBangsList();
++
++    // -- Hilal Language Customization -----------------------------------------
++    const languageSelect = document.getElementById("hilalLanguageSelect");
++    const languageApplyBtn = document.getElementById("hilalLanguageApply");
++
++    try {
++      if (languageSelect && languageApplyBtn) {
++        const initLanguageUI = async () => {
++          let available = [];
++          try {
++            const matcher = window.LangPackMatcher || ChromeUtils.importESModule(
++              "moz-src:///intl/locale/LangPackMatcher.sys.mjs"
++            ).LangPackMatcher;
++            if (matcher && matcher.getAvailableLocales) {
++              available = await matcher.getAvailableLocales();
++            }
++          } catch (e) {
++            // fallback
++          }
++
++          if (!available || !available.length) {
++            available = ["en-US", "tr"];
++          }
++
++          if (!available.includes("en-US")) {
++            available.push("en-US");
++          }
++          if (!available.includes("tr")) {
++            available.push("tr");
++          }
++
++          let localeNames = [];
++          try {
++            localeNames = Services.intl.getLocaleDisplayNames(undefined, available, {
++              preferNative: true,
++            });
++          } catch (e) {
++            localeNames = available.map(code =>
++              code.startsWith("tr") ? "Türkçe" : (code.startsWith("en") ? "English (US)" : code)
 +            );
 +          }
-+        }}
-+      >
-+        <!-- Favicon -->
-+        <img class="safari-row-icon" src=${icon} width="16" height="16" />
 +
-+        <span class="safari-row-title">${title}</span>
++          languageSelect.textContent = "";
 +
-+        <!-- Audio Indicator -->
-+        ${when(
-+          tab.soundPlaying || tab.muted,
-+          () => html`
-+            <span
-+              class="safari-row-audio"
-+              @click=${e => {
-+                e.stopPropagation();
-+                tab.toggleMuteAudio();
-+                this.scheduleHilalRefresh();
-+              }}
-+            >
-+              ${tab.muted
-+                ? html`
-+                    <svg
-+                      width="12"
-+                      height="12"
-+                      viewBox="0 0 16 16"
-+                      fill="none"
-+                      stroke="currentColor"
-+                      stroke-width="1.5"
-+                      stroke-linecap="round"
-+                      stroke-linejoin="round"
-+                    >
-+                      <path d="M11 5L5 9H2V13H5L11 17V5Z" />
-+                      <line x1="23" y1="9" x2="17" y2="15" />
-+                      <line x1="17" y1="9" x2="23" y2="15" />
-+                    </svg>
-+                  `
-+                : html`
-+                    <svg
-+                      width="12"
-+                      height="12"
-+                      viewBox="0 0 16 16"
-+                      fill="none"
-+                      stroke="currentColor"
-+                      stroke-width="1.5"
-+                      stroke-linecap="round"
-+                      stroke-linejoin="round"
-+                    >
-+                      <path d="M11 5L5 9H2V13H5L11 17V5Z" />
-+                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-+                    </svg>
-+                  `}
-+            </span>
-+          `
-+        )}
++          const currentLocale = Services.locale.appLocaleAsBCP47;
++          const systemLabel = currentLocale.startsWith("tr")
++            ? "Sistem Dili (Varsayılan)"
++            : "System Language (Default)";
 +
-+        <!-- Pin indicator/badge if pinned -->
-+        ${when(
-+          tab.pinned,
-+          () => html`
-+            <span class="safari-row-pin">
-+              <svg
-+                width="10"
-+                height="10"
-+                viewBox="0 0 16 16"
-+                fill="currentColor"
-+              >
-+                <path
-+                  d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.18.18-.362.393-.528.6a2.5 2.5 0 0 1-1.89 1.137l-.822.082a1.5 1.5 0 0 0-1.322 1.17l-.17.679a2.5 2.5 0 0 1-.94 1.348c-.282.193-.564.33-.746.402a.5.5 0 0 1-.63-.226l-2.483-4.966a.5.5 0 0 1 .082-.572L7.1 5.304a1.5 1.5 0 0 0 .424-1.128l-.066-.66a2.5 2.5 0 0 1 .59-1.808c.24-.265.485-.47.66-.618a.5.5 0 0 1 .35-.126zM2 13.5a.5.5 0 0 1 .82-.38l2.155 1.83a.5.5 0 1 1-.65.76l-2.155-1.83A.5.5 0 0 1 2 13.5z"
-+                />
-+              </svg>
-+            </span>
-+          `
-+        )}
++          const systemOption = document.createElement("option");
++          systemOption.value = "";
++          systemOption.textContent = systemLabel;
++          languageSelect.appendChild(systemOption);
 +
-+        <!-- Close Tab Button -->
-+        <button
-+          class="safari-row-close-btn"
-+          type="button"
-+          title="Close Tab"
-+          @click=${e => {
-+            this.closeHilalTab(tab, e);
-+          }}
-+        >
-+          <svg
-+            width="8"
-+            height="8"
-+            viewBox="0 0 16 16"
-+            fill="none"
-+            stroke="currentColor"
-+            stroke-width="2"
-+            stroke-linecap="round"
-+            stroke-linejoin="round"
-+          >
-+            <line x1="3" y1="3" x2="13" y2="13" />
-+            <line x1="13" y1="3" x2="3" y2="13" />
-+          </svg>
-+        </button>
-+      </div>
-+    `;
-+  }
- 
-   hilalBookmarkTemplate(bookmark) {
-     const badge = this.getHilalBookmarkBadge(bookmark);
-@@ -1860,14 +2435,23 @@ export default class SidebarMain extends MozLitElement {
-                   `
-                 )}
-                 <span class="hilal-panel-title">
--                  ${(Services.prefs.getBoolPref("hilal.workspaces.enabled", true) && activeWorkspace) ? activeWorkspace.name : workspaceFallback}
-+                  ${Services.prefs.getBoolPref(
-+                    "hilal.workspaces.enabled",
-+                    true
-+                  ) && activeWorkspace
-+                    ? activeWorkspace.name
-+                    : workspaceFallback}
-                 </span>
-                 <span class="hilal-row-spacer"></span>
-                 <button
-                   class="hilal-icon-button"
-                   type="button"
--                  title=${this.fluentStrings.formatValueSync("hilal-sidebar-new-tab-label")}
--                  aria-label=${this.fluentStrings.formatValueSync("hilal-sidebar-new-tab-label")}
-+                  title=${this.fluentStrings.formatValueSync(
-+                    "hilal-sidebar-new-tab-label"
-+                  )}
-+                  aria-label=${this.fluentStrings.formatValueSync(
-+                    "hilal-sidebar-new-tab-label"
-+                  )}
-                   @click=${() => this.openHilalNewTab()}
-                 >
-                   ${this.hilalIcon("plus")}
-@@ -1888,7 +2472,8 @@ export default class SidebarMain extends MozLitElement {
-                       class="hilal-icon-button"
-                       type="button"
-                       data-l10n-id="hilal-sidebar-workspace-menu"
--                      @click=${event => this.showHilalActiveWorkspaceMenu(event)}
-+                      @click=${event =>
-+                        this.showHilalActiveWorkspaceMenu(event)}
-                     >
-                       ${this.hilalIcon("menu")}
-                     </button>
-@@ -1922,7 +2507,20 @@ export default class SidebarMain extends MozLitElement {
-                     >
-                   </div>
-                   <div class="hilal-tabstrip-container">
--                    <slot name="tabstrip"></slot>
-+                    ${this.showHorizontal
-+                      ? html`
-+                          <div class="safari-row-list">
-+                            ${repeat(
-+                              this.filteredHilalTabs,
-+                              tab =>
-+                                tab.linkedBrowser?.outerWindowID ||
-+                                tab.id ||
-+                                Math.random(),
-+                              tab => this.hilalCustomTabTemplate(tab)
-+                            )}
-+                          </div>
-+                        `
-+                      : html`<slot name="tabstrip"></slot>`}
-                   </div>
-                 </section>
-                 ${when(
-@@ -2018,8 +2616,309 @@ export default class SidebarMain extends MozLitElement {
-     `;
-   }
- 
-+  tahoeSidebarTemplate() {
-+    const activeWorkspace = this.activeHilalWorkspace;
-+    const workspaceFallback = this.fluentStrings.formatValueSync(
-+      "hilal-sidebar-workspace-fallback"
-+    );
-+    const railLabel = this.fluentStrings.formatValueSync(
-+      "hilal-sidebar-workspaces-nav-label"
-+    );
-+    const panelLabel = this.fluentStrings.formatValueSync(
-+      "hilal-sidebar-panel-label"
-+    );
++          for (let i = 0; i < available.length; i++) {
++            const code = available[i];
++            const name = localeNames[i] || code;
++            const option = document.createElement("option");
++            option.value = code;
++            option.textContent = name;
++            languageSelect.appendChild(option);
++          }
 +
-+    return html`
-+      <link
-+        rel="stylesheet"
-+        href="chrome://browser/content/sidebar/sidebar.css"
-+      />
-+      <link
-+        rel="stylesheet"
-+        href="chrome://browser/content/sidebar/sidebar-main.css"
-+      />
-+      <div class="wrapper" hidden></div>
-+      <div class="hilal-sidebar-layout safari-sidebar-layout">
-+        <!-- Top Header with buttons matching Safari -->
-+        <header class="safari-sidebar-header">
-+          <div class="safari-header-buttons">
-+            <button
-+              class="safari-icon-button safari-toggle-button"
-+              type="button"
-+              title="Toggle Sidebar"
-+              @click=${() => this.toggleSafariSidebar()}
-+            >
-+              <svg
-+                width="16"
-+                height="16"
-+                viewBox="0 0 16 16"
-+                fill="none"
-+                stroke="currentColor"
-+                stroke-width="1.3"
-+                stroke-linecap="round"
-+                stroke-linejoin="round"
-+              >
-+                <rect x="2" y="2" width="12" height="12" rx="2" />
-+                <line x1="6" y1="2" x2="6" y2="14" />
-+              </svg>
-+            </button>
-+          </div>
-+        </header>
++          const requestedLocales = Services.locale.requestedLocales || [];
++          const currentPrimary = requestedLocales[0] || "";
++          if (currentPrimary && !available.includes(currentPrimary)) {
++            const option = document.createElement("option");
++            option.value = currentPrimary;
++            option.textContent = currentPrimary;
++            languageSelect.appendChild(option);
++          }
++          languageSelect.value = currentPrimary;
++        };
 +
-+        ${when(
-+          this.hilalSearchOpen,
-+          () => html`
-+            <input
-+              id="hilal-sidebar-search"
-+              type="search"
-+              data-l10n-id="hilal-sidebar-search-input"
-+              .value=${this.hilalSearchQuery}
-+              @input=${event => {
-+                this.hilalSearchQuery = event.target.value;
-+              }}
-+            />
-+          `
-+        )}
++        initLanguageUI();
 +
-+        <section
-+          class="hilal-sidebar-panel safari-panel"
-+          aria-label=${panelLabel}
-+        >
-+          <div class="hilal-panel-scroll safari-scroll">
-+            <!-- Open Tabs / N Tabs Section -->
-+            <section
-+              class="hilal-section safari-section"
-+              id="hilal-tabs-section"
-+            >
-+              <button
-+                class="safari-section-heading-btn"
-+                type="button"
-+                @click=${() => {
-+                  this.isTabsExpanded = !this.isTabsExpanded;
-+                }}
-+              >
-+                <!-- Arrow / chevron indicator -->
-+                <svg
-+                  class=${classMap({
-+                    "safari-chevron": true,
-+                    "safari-chevron-collapsed": !this.isTabsExpanded,
-+                  })}
-+                  width="10"
-+                  height="10"
-+                  viewBox="0 0 10 10"
-+                  fill="none"
-+                  stroke="currentColor"
-+                  stroke-width="1.3"
-+                  stroke-linecap="round"
-+                  stroke-linejoin="round"
-+                >
-+                  <path d="M2 3l3 3 3-3" />
-+                </svg>
++        languageApplyBtn.addEventListener("command", () => {
++          const selected = languageSelect.value;
++          const requestedLocales = Services.locale.requestedLocales || [];
++          const currentPrimary = requestedLocales[0] || "";
 +
-+                <!-- Window/Tabs Icon -->
-+                <svg
-+                  class="safari-heading-icon"
-+                  width="16"
-+                  height="16"
-+                  viewBox="0 0 16 16"
-+                  fill="none"
-+                  stroke="currentColor"
-+                  stroke-width="1.3"
-+                  stroke-linecap="round"
-+                  stroke-linejoin="round"
-+                >
-+                  <rect x="2" y="3" width="12" height="10" rx="1.5" />
-+                  <line x1="2" y1="6" x2="14" y2="6" />
-+                </svg>
++          if (selected === currentPrimary) {
++            return;
++          }
++          const nextLocales = selected
++            ? Array.from(new Set([selected, ...requestedLocales]).values())
++            : [];
 +
-+                <span class="safari-heading-text"
-+                  >${this.hilalTabs.length} Tabs</span
-+                >
-+              </button>
++          const currentLocale = Services.locale.appLocaleAsBCP47;
++          const title = currentLocale.startsWith("tr") ? "Yeniden Başlatma Gerekli" : "Restart Required";
++          const message = currentLocale.startsWith("tr")
++            ? "Dil değişikliğini uygulamak için tarayıcının yeniden başlatılması gerekiyor. Şimdi yeniden başlatılsın mı?"
++            : "The browser needs to be restarted to apply language changes. Restart now?";
 +
-+              <div
-+                class="hilal-tabstrip-container"
-+                ?hidden=${!this.isTabsExpanded}
-+              >
-+                ${this.showHorizontal
-+                  ? html`
-+                      <div class="safari-row-list">
-+                        ${repeat(
-+                          this.filteredHilalTabs,
-+                          tab =>
-+                            tab.linkedBrowser?.outerWindowID ||
-+                            tab.id ||
-+                            Math.random(),
-+                          tab => this.hilalCustomTabTemplate(tab)
-+                        )}
-+                      </div>
-+                    `
-+                  : html`<slot name="tabstrip"></slot>`}
-+              </div>
-+            </section>
-+
-+            <!-- Tab Groups (Workspaces) Section -->
-+            <section class="hilal-section safari-section">
-+              <div class="safari-section-heading">
-+                <span class="safari-heading-title">Tab Groups</span>
-+                <button
-+                  class="safari-section-add-btn"
-+                  type="button"
-+                  title="New Tab Group"
-+                  @click=${() => this.showHilalCreateWorkspace()}
-+                >
-+                  <svg
-+                    width="12"
-+                    height="12"
-+                    viewBox="0 0 16 16"
-+                    fill="none"
-+                    stroke="currentColor"
-+                    stroke-width="1.5"
-+                    stroke-linecap="round"
-+                    stroke-linejoin="round"
-+                  >
-+                    <line x1="8" y1="3" x2="8" y2="13" />
-+                    <line x1="3" y1="8" x2="13" y2="8" />
-+                  </svg>
-+                </button>
-+              </div>
-+
-+              <div class="safari-row-list">
-+                ${repeat(
-+                  this.hilalWorkspaces,
-+                  workspace => workspace.id,
-+                  workspace => {
-+                    const active = workspace.id === this.hilalActiveId;
-+                    return html`
-+                      <button
-+                        class=${classMap({
-+                          "safari-row": true,
-+                          "safari-row-active": active,
-+                        })}
-+                        data-workspace-id=${workspace.id}
-+                        type="button"
-+                        draggable="true"
-+                        @click=${() => this.switchHilalWorkspace(workspace)}
-+                        @contextmenu=${event =>
-+                          this.showHilalWorkspaceMenu(workspace, event)}
-+                        @dragstart=${event =>
-+                          this.handleWorkspaceDragStart(workspace, event)}
-+                        @dragend=${event => this.handleWorkspaceDragEnd(event)}
-+                        @dragover=${event =>
-+                          this.handleWorkspaceDragOver(workspace, event)}
-+                        @dragleave=${event =>
-+                          this.handleWorkspaceDragLeave(event)}
-+                        @drop=${event =>
-+                          this.handleWorkspaceDrop(workspace, event)}
-+                      >
-+                        <!-- Workspace Icon or Emoji -->
-+                        ${workspace.emoji
-+                          ? html`<span
-+                              class="safari-row-emoji"
-+                              aria-hidden="true"
-+                              >${workspace.emoji}</span
-+                            >`
-+                          : html`
-+                              <svg
-+                                class="safari-row-icon"
-+                                width="16"
-+                                height="16"
-+                                viewBox="0 0 16 16"
-+                                fill="none"
-+                                stroke="currentColor"
-+                                stroke-width="1.3"
-+                                stroke-linecap="round"
-+                                stroke-linejoin="round"
-+                              >
-+                                <rect
-+                                  x="2"
-+                                  y="4"
-+                                  width="8"
-+                                  height="8"
-+                                  rx="1.5"
-+                                />
-+                                <rect
-+                                  x="5"
-+                                  y="2"
-+                                  width="8"
-+                                  height="8"
-+                                  rx="1.5"
-+                                />
-+                              </svg>
-+                            `}
-+                        <span class="safari-row-title">${workspace.name}</span>
-+                      </button>
-+                    `;
-+                  }
-+                )}
-+              </div>
-+            </section>
-+
-+            <!-- Saved Section -->
-+            <section class="hilal-section safari-section">
-+              <div class="safari-section-heading">
-+                <span class="safari-heading-title">Saved</span>
-+              </div>
-+
-+              <div class="safari-row-list">
-+                <!-- Bookmarks Row -->
-+                <button
-+                  class=${classMap({
-+                    "safari-row": true,
-+                    "safari-row-active": this.hilalShowBookmarks,
-+                  })}
-+                  type="button"
-+                  @click=${() => {
-+                    this.hilalShowBookmarks = !this.hilalShowBookmarks;
-+                    Services.prefs.setBoolPref(
-+                      "hilal.workspaces.showBookmarks",
-+                      this.hilalShowBookmarks
-+                    );
-+                  }}
-+                >
-+                  <svg
-+                    class="safari-row-icon"
-+                    width="16"
-+                    height="16"
-+                    viewBox="0 0 16 16"
-+                    fill="none"
-+                    stroke="currentColor"
-+                    stroke-width="1.3"
-+                    stroke-linecap="round"
-+                    stroke-linejoin="round"
-+                  >
-+                    <path d="M2 3h4a2 2 0 0 1 2 2v9a2 2 0 0 0-2-2H2z" />
-+                    <path d="M14 3h-4a2 2 0 0 0-2 2v9a2 2 0 0 1 2-2h4z" />
-+                  </svg>
-+                  <span class="safari-row-title">Bookmarks</span>
-+                </button>
-+
-+                <!-- Bookmarks Sub-list if expanded -->
-+                ${when(
-+                  this.hilalShowBookmarks,
-+                  () => html`
-+                    <div class="safari-bookmarks-sublist">
-+                      ${repeat(
-+                        this.filteredHilalBookmarks,
-+                        bookmark => bookmark.guid,
-+                        bookmark => this.hilalBookmarkTemplate(bookmark)
-+                      )}
-+                    </div>
-+                  `
-+                )}
-+              </div>
-+            </section>
-+          </div>
-+        </section>
-+      </div>
-+    `;
-+  }
-+
-   render() {
-     if (this.hilalSidebarActive) {
-+      if (this.isTahoeEnabled) {
-+        return this.tahoeSidebarTemplate();
++          if (Services.prompt.confirm(window, title, message)) {
++            Multilingual.applyAndRestart(nextLocales);
++          }
++        });
 +      }
-       return this.hilalSidebarTemplate();
-     }
-     /* Add 1 to tools and extensions count for "Customize sidebar" option */
-diff --git a/browser/components/tabbrowser/content/drag-and-drop.js b/browser/components/tabbrowser/content/drag-and-drop.js
---- a/browser/components/tabbrowser/content/drag-and-drop.js
-+++ b/browser/components/tabbrowser/content/drag-and-drop.js
-@@ -1179,69 +1179,81 @@
-         canvas.mozOpaque = true;
-       }
- 
--      canvas.width = 160 * scale;
--      canvas.height = 90 * scale;
--      let toDrag = canvas;
--      let dragImageOffset = -16;
--      let splitViewTab;
--      if (isSplitViewWrapper(tab)) {
--        splitViewTab = tab.tabs.find(t => t.selected);
--      }
--      let browser = splitViewTab
--        ? splitViewTab.linkedBrowser
--        : isTab(tab) && tab.linkedBrowser;
--      if (isTabGroupLabel(tab)) {
--        toDrag = tab;
--      } else if (gMultiProcessBrowser) {
--        var context = canvas.getContext("2d");
--        context.fillStyle = "white";
--        context.fillRect(0, 0, canvas.width, canvas.height);
--
--        let captureListener;
--        let platform = AppConstants.platform;
--        // On Windows and Mac we can update the drag image during a drag
--        // using updateDragImage. On Linux, we can use a panel.
--        if (platform == "win" || platform == "macosx") {
--          captureListener = function () {
--            dt.updateDragImage(canvas, dragImageOffset, dragImageOffset);
--          };
--        } else {
--          // Create a panel to use it in setDragImage
--          // which will tell xul to render a panel that follows
--          // the pointer while a dnd session is on.
--          if (!this._tabbrowserTabs._dndPanel) {
--            this._tabbrowserTabs._dndCanvas = canvas;
--            this._tabbrowserTabs._dndPanel = document.createXULElement("panel");
--            this._tabbrowserTabs._dndPanel.className = "dragfeedback-tab";
--            this._tabbrowserTabs._dndPanel.setAttribute("type", "drag");
--            let wrapper = document.createElementNS(
--              "http://www.w3.org/1999/xhtml",
--              "div"
--            );
--            wrapper.style.width = "160px";
--            wrapper.style.height = "90px";
--            wrapper.appendChild(canvas);
--            this._tabbrowserTabs._dndPanel.appendChild(wrapper);
--            document.documentElement.appendChild(
--              this._tabbrowserTabs._dndPanel
--            );
-+      let useTabDragImage = false;
-+      try {
-+        useTabDragImage = Services.prefs.getBoolPref("hilal.tahoe.enabled", true);
-+      } catch (e) {}
++    } catch (e) {
++      console.error("Hilal language settings init error:", e);
++    }
 +
-+      if (useTabDragImage && !isTabGroupLabel(tab)) {
-+        let rect = tab.getBoundingClientRect();
-+        let xOffset = event.clientX - rect.left;
-+        let yOffset = event.clientY - rect.top;
-+        dt.setDragImage(tab, xOffset, yOffset);
-+      } else {
-+        canvas.width = 160 * scale;
-+        canvas.height = 90 * scale;
-+        let toDrag = canvas;
-+        let dragImageOffset = -16;
-+        let splitViewTab;
-+        if (isSplitViewWrapper(tab)) {
-+          splitViewTab = tab.tabs.find(t => t.selected);
++    try {
++      gHilalShortcutsSettings.init();
++    } catch (e) {
++      console.error("Hilal shortcuts settings init error:", e);
++    }
++  },
++};
++
++var gHilalShortcutsSettings = {
++  init() {
++    this._container = document.getElementById("hilalShortcutsContainer");
++    this._defaultsBtn = document.getElementById("hilalShortcutsRestoreDefaults");
++
++    if (!this._container) return;
++
++    this.refresh();
++
++    if (this._defaultsBtn) {
++      const onRestore = () => {
++        if (Services.prompt.confirm(window, "Restore Defaults", "Are you sure you want to restore all keyboard shortcuts to their default settings?")) {
++          Services.prefs.clearUserPref("hilal.keyboard.shortcuts.data");
++          this.refresh();
 +        }
-+        let browser = splitViewTab
-+          ? splitViewTab.linkedBrowser
-+          : isTab(tab) && tab.linkedBrowser;
-+        if (isTabGroupLabel(tab)) {
-+          toDrag = tab;
-+        } else if (gMultiProcessBrowser) {
-+          var context = canvas.getContext("2d");
-+          context.fillStyle = "white";
-+          context.fillRect(0, 0, canvas.width, canvas.height);
++      };
++      this._defaultsBtn.addEventListener("command", onRestore);
++      this._defaultsBtn.addEventListener("click", onRestore);
++    }
++  },
 +
-+          let captureListener;
-+          let platform = AppConstants.platform;
-+          // On Windows and Mac we can update the drag image during a drag
-+          // using updateDragImage. On Linux, we can use a panel.
-+          if (platform == "win" || platform == "macosx") {
-+            captureListener = function () {
-+              dt.updateDragImage(canvas, dragImageOffset, dragImageOffset);
-+            };
-+          } else {
-+            // Create a panel to use it in setDragImage
-+            // which will tell xul to render a panel that follows
-+            // the pointer while a dnd session is on.
-+            if (!this._tabbrowserTabs._dndPanel) {
-+              this._tabbrowserTabs._dndCanvas = canvas;
-+              this._tabbrowserTabs._dndPanel = document.createXULElement("panel");
-+              this._tabbrowserTabs._dndPanel.className = "dragfeedback-tab";
-+              this._tabbrowserTabs._dndPanel.setAttribute("type", "drag");
-+              let wrapper = document.createElementNS(
-+                "http://www.w3.org/1999/xhtml",
-+                "div"
-+              );
-+              wrapper.style.width = "160px";
-+              wrapper.style.height = "90px";
-+              wrapper.appendChild(canvas);
-+              this._tabbrowserTabs._dndPanel.appendChild(wrapper);
-+              document.documentElement.appendChild(
-+                this._tabbrowserTabs._dndPanel
-+              );
-+            }
-+            toDrag = this._tabbrowserTabs._dndPanel;
-           }
--          toDrag = this._tabbrowserTabs._dndPanel;
-+          // PageThumb is async with e10s but that's fine
-+          // since we can update the image during the dnd.
-+          PageThumbs.captureToCanvas(browser, canvas)
-+            .then(captureListener)
-+            .catch(e => console.error(e));
-+        } else {
-+          // For the non e10s case we can just use PageThumbs
-+          // sync, so let's use the canvas for setDragImage.
-+          PageThumbs.captureToCanvas(browser, canvas).catch(e =>
-+            console.error(e)
-+          );
-+          dragImageOffset = dragImageOffset * scale;
-         }
--        // PageThumb is async with e10s but that's fine
--        // since we can update the image during the dnd.
--        PageThumbs.captureToCanvas(browser, canvas)
--          .then(captureListener)
--          .catch(e => console.error(e));
--      } else {
--        // For the non e10s case we can just use PageThumbs
--        // sync, so let's use the canvas for setDragImage.
--        PageThumbs.captureToCanvas(browser, canvas).catch(e =>
--          console.error(e)
--        );
--        dragImageOffset = dragImageOffset * scale;
-+        dt.setDragImage(toDrag, dragImageOffset, dragImageOffset);
-       }
--      dt.setDragImage(toDrag, dragImageOffset, dragImageOffset);
- 
-       // _dragData.offsetX/Y give the coordinates that the mouse should be
-       // positioned relative to the corner of the new window created upon
-diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/components/tabbrowser/content/tabbrowser.js
---- a/browser/components/tabbrowser/content/tabbrowser.js
-+++ b/browser/components/tabbrowser/content/tabbrowser.js
-@@ -10150,7 +10150,8 @@ var TabBarVisibility = {
- 
-     let hasVerticalTabs =
-       !isSingleTabWindow &&
--      Services.prefs.getBoolPref("sidebar.verticalTabs", false);
-+      Services.prefs.getBoolPref("sidebar.verticalTabs", false) &&
-+      !Services.prefs.getBoolPref("sidebar.verticalTabs.showHorizontal", false);
- 
-     // When `gBrowser` has not been initialized, we're opening a new window and
-     // assume only a single tab is loading.
++  getShortcut(id) {
++    let userShortcuts = {};
++    try {
++      userShortcuts = JSON.parse(Services.prefs.getStringPref("hilal.keyboard.shortcuts.data", "{}"));
++    } catch (e) {}
++
++    if (userShortcuts[id] !== undefined) {
++      return userShortcuts[id];
++    }
++    return this.getDefaultShortcut(id);
++  },
++
++  getDefaultShortcut(id) {
++    const isMac = AppConstants.platform === "macosx";
++    const defaults = {
++      "key_toggleSidebar": isMac ? { key: "Z", modifiers: "control" } : { key: "Z", modifiers: "control,alt" },
++      "key_hilalNewWorkspace": { key: "W", modifiers: "accel,alt" },
++      "key_hilalNextWorkspace": { key: "]", modifiers: "accel,alt" },
++      "key_hilalPrevWorkspace": { key: "[", modifiers: "accel,alt" },
++      "key_hilalToggleWorkspaces": { key: "E", modifiers: "accel,alt" },
++      "key_hilalToggleCompactMode": { key: "M", modifiers: "accel,alt" },
++      "key_toggleCompactHideToolbar": { key: "T", modifiers: "accel,alt" },
++      "key_focusUrlbar": { key: "L", modifiers: "accel" },
++      "key_newNavigator": { key: "N", modifiers: "accel" },
++      "key_newNavigatorTab": { key: "T", modifiers: "accel" },
++      "key_closeWindow": { key: "W", modifiers: "accel,shift" },
++      "key_close": { key: "W", modifiers: "accel" },
++      "key_undoCloseTab": { key: "T", modifiers: "accel,shift" },
++      "key_gotoHistory": isMac ? { key: "H", modifiers: "accel,shift" } : { key: "H", modifiers: "accel" },
++      "key_viewBookmarksSidebar": { key: "B", modifiers: "accel" }
++    };
++    return defaults[id] || { key: "", modifiers: "" };
++  },
++
++  refresh() {
++    this._container.textContent = "";
++
++    const categories = [
++      {
++        id: "workspaces",
++        title: "Workspaces",
++        items: [
++          { id: "key_hilalNewWorkspace", name: "New Workspace", desc: "Create a new workspace to organize your tabs" },
++          { id: "key_hilalToggleWorkspaces", name: "Toggle Workspaces Panel", desc: "Show or hide the workspace list sidebar" },
++          { id: "key_hilalNextWorkspace", name: "Next Workspace", desc: "Switch to the next active workspace" },
++          { id: "key_hilalPrevWorkspace", name: "Previous Workspace", desc: "Switch to the previous active workspace" }
++        ]
++      },
++      {
++        id: "sidebar",
++        title: "Sidebar & Compact Mode",
++        items: [
++          { id: "key_toggleSidebar", name: "Toggle Primary Sidebar", desc: "Show or hide the primary vertical sidebar" },
++          { id: "key_hilalToggleCompactMode", name: "Toggle Compact Mode", desc: "Enable or disable compact mode spacing" },
++          { id: "key_toggleCompactHideToolbar", name: "Toggle Top Toolbar", desc: "Show or hide the top toolbar in compact mode" },
++          { id: "key_viewBookmarksSidebar", name: "Bookmarks Sidebar", desc: "Toggle bookmarks sidebar panel" },
++          { id: "key_gotoHistory", name: "History Sidebar", desc: "Toggle history sidebar panel" }
++        ]
++      },
++      {
++        id: "tabs",
++        title: "Tabs & Windows",
++        items: [
++          { id: "key_newNavigatorTab", name: "New Tab", desc: "Open a new tab in the active window" },
++          { id: "key_close", name: "Close Active Tab", desc: "Close the currently selected tab" },
++          { id: "key_undoCloseTab", name: "Reopen Closed Tab", desc: "Restore the last tab you closed" },
++          { id: "key_newNavigator", name: "New Window", desc: "Open a new browser window" },
++          { id: "key_closeWindow", name: "Close Window", desc: "Close the current browser window" }
++        ]
++      },
++      {
++        id: "navigation",
++        title: "Navigation",
++        items: [
++          { id: "key_focusUrlbar", name: "Focus Address Bar", desc: "Highlight address bar for search or web address entry" }
++        ]
++      }
++    ];
++
++    for (let cat of categories) {
++      let card = this._createCategoryCard(cat);
++      this._container.appendChild(card);
++    }
++  },
++
++  _createCategoryCard(cat) {
++    let card = document.createElement("article");
++    card.setAttribute("class", "border round padding small-margin");
++
++    let title = document.createElement("h6");
++    title.setAttribute("class", "small primary-text no-margin");
++    title.textContent = cat.title;
++    card.appendChild(title);
++
++    let divider = document.createElement("div");
++    divider.className = "space";
++    card.appendChild(divider);
++
++    for (let item of cat.items) {
++      let rowContainer = document.createElement("div");
++      rowContainer.setAttribute("class", "row middle-align");
++      rowContainer.setAttribute("id", `container_${item.id}`);
++
++      let info = document.createElement("div");
++      info.setAttribute("class", "max");
++
++      let label = document.createElement("div");
++      label.setAttribute("class", "bold");
++      label.textContent = item.name;
++
++      let desc = document.createElement("label");
++      desc.setAttribute("class", "secondary-text");
++      desc.textContent = item.desc;
++
++      info.appendChild(label);
++      info.appendChild(desc);
++      rowContainer.appendChild(info);
++
++      let controls = document.createElement("div");
++      controls.setAttribute("class", "row middle-align");
++
++      let kbdContainer = document.createElement("div");
++      kbdContainer.setAttribute("class", "row middle-align small-margin");
++      
++      let shortcut = this.getShortcut(item.id);
++      this._renderKeycaps(kbdContainer, shortcut.key, shortcut.modifiers);
++      controls.appendChild(kbdContainer);
++
++      let btnEdit = document.createElement("button");
++      btnEdit.setAttribute("class", "border round small");
++      btnEdit.textContent = "Düzenle";
++      btnEdit.addEventListener("click", () => {
++        this._startCapture(item.id, btnEdit, kbdContainer, rowContainer);
++      });
++      controls.appendChild(btnEdit);
++
++      let btnClear = document.createElement("button");
++      btnClear.setAttribute("class", "circle transparent small");
++      btnClear.innerHTML = "<i>close</i>";
++      btnClear.setAttribute("title", "Kısayolu Temizle");
++      btnClear.addEventListener("click", () => {
++        this._save(item.id, "", "");
++      });
++      controls.appendChild(btnClear);
++
++      rowContainer.appendChild(controls);
++      card.appendChild(rowContainer);
++    }
++
++    return card;
++  },
++
++  _renderKeycaps(container, key, modifiers) {
++    container.textContent = "";
++    if (!key && !modifiers) {
++      let span = document.createElement("span");
++      span.style.opacity = "0.5";
++      span.textContent = "Devre Dışı";
++      container.appendChild(span);
++      return;
++    }
++
++    let parts = [];
++    if (modifiers) {
++      if (modifiers.includes("accel") || modifiers.includes("control")) {
++        parts.push(AppConstants.platform === "macosx" ? "Cmd" : "Ctrl");
++      }
++      if (modifiers.includes("alt")) {
++        parts.push(AppConstants.platform === "macosx" ? "Option" : "Alt");
++      }
++      if (modifiers.includes("shift")) {
++        parts.push("Shift");
++      }
++    }
++    if (key) {
++      parts.push(key);
++    }
++
++    for (let part of parts) {
++      let kbd = document.createElement("kbd");
++      kbd.setAttribute("class", "border round");
++      kbd.style.cssText = "padding: 2px 6px; margin: 0 2px; font-size: 0.85em; font-weight: bold;";
++      kbd.textContent = part;
++      container.appendChild(kbd);
++    }
++  },
++
++  _startCapture(id, btn, kbdContainer, rowContainer) {
++    btn.setAttribute("class", "button round error small");
++    btn.textContent = "Kaydediliyor...";
++    btn.focus();
++
++    // Clear conflict banners if any
++    let activeBanner = rowContainer.querySelector(".shortcut-conflict-banner");
++    if (activeBanner) activeBanner.remove();
++
++    const updateLivePreview = (e) => {
++      let mods = [];
++      if (e.metaKey) mods.push("accel");
++      if (e.ctrlKey) mods.push("control");
++      if (e.altKey) mods.push("alt");
++      if (e.shiftKey) mods.push("shift");
++
++      let k = e.key;
++      if (["Meta", "Control", "Alt", "Shift"].includes(k)) {
++        k = "";
++      } else if (k.length === 1) {
++        k = k.toUpperCase();
++      }
++
++      this._renderKeycaps(kbdContainer, k, mods.join(","));
++    };
++
++    const handler = (e) => {
++      e.preventDefault();
++      e.stopPropagation();
++
++      if (e.key === "Escape") {
++        cleanup();
++        this.refresh();
++        return;
++      }
++
++      if (["Meta", "Control", "Alt", "Shift"].includes(e.key)) {
++        updateLivePreview(e);
++        return;
++      }
++
++      let mods = [];
++      if (e.metaKey) mods.push("accel");
++      if (e.ctrlKey) mods.push("control");
++      if (e.altKey) mods.push("alt");
++      if (e.shiftKey) mods.push("shift");
++
++      let k = e.key;
++      if (k === " ") k = "Space";
++      else if (k.length === 1) k = k.toUpperCase();
++
++      cleanup();
++      this._handleCapturedShortcut(id, k, mods.join(","), rowContainer);
++    };
++
++    const keyupHandler = (e) => {
++      updateLivePreview(e);
++    };
++
++    const blurHandler = () => {
++      cleanup();
++      this.refresh();
++    };
++
++    const cleanup = () => {
++      btn.removeEventListener("keydown", handler, true);
++      btn.removeEventListener("keyup", keyupHandler, true);
++      btn.removeEventListener("blur", blurHandler, true);
++      btn.setAttribute("class", "border round small");
++      btn.textContent = "Düzenle";
++    };
++
++    btn.addEventListener("keydown", handler, true);
++    btn.addEventListener("keyup", keyupHandler, true);
++    btn.addEventListener("blur", blurHandler, true);
++  },
++
++  _handleCapturedShortcut(id, key, modifiers, rowContainer) {
++    let conflict = this._detectConflict(id, key, modifiers);
++    if (conflict) {
++      this._showConflictBanner(id, key, modifiers, conflict, rowContainer);
++    } else {
++      this._save(id, key, modifiers);
++    }
++  },
++
++  _detectConflict(id, key, modifiers) {
++    if (!key && !modifiers) return null;
++
++    const categories = [
++      {
++        id: "workspaces",
++        title: "Workspaces",
++        items: [
++          { id: "key_hilalNewWorkspace", name: "New Workspace" },
++          { id: "key_hilalToggleWorkspaces", name: "Toggle Workspaces Panel" },
++          { id: "key_hilalNextWorkspace", name: "Next Workspace" },
++          { id: "key_hilalPrevWorkspace", name: "Previous Workspace" }
++        ]
++      },
++      {
++        id: "sidebar",
++        title: "Sidebar & Compact Mode",
++        items: [
++          { id: "key_toggleSidebar", name: "Toggle Primary Sidebar" },
++          { id: "key_hilalToggleCompactMode", name: "Toggle Compact Mode" },
++          { id: "key_toggleCompactHideToolbar", name: "Toggle Top Toolbar" },
++          { id: "key_viewBookmarksSidebar", name: "Bookmarks Sidebar" },
++          { id: "key_gotoHistory", name: "History Sidebar" }
++        ]
++      },
++      {
++        id: "tabs",
++        title: "Tabs & Windows",
++        items: [
++          { id: "key_newNavigatorTab", name: "New Tab" },
++          { id: "key_close", name: "Close Active Tab" },
++          { id: "key_undoCloseTab", name: "Reopen Closed Tab" },
++          { id: "key_newNavigator", name: "New Window" },
++          { id: "key_closeWindow", name: "Close Window" }
++        ]
++      },
++      {
++        id: "navigation",
++        title: "Navigation",
++        items: [
++          { id: "key_focusUrlbar", name: "Focus Address Bar" }
++        ]
++      }
++    ];
++
++    const normMods = (m) => (m || "").split(",").map(s => s.trim()).filter(Boolean).sort().join(",");
++    const targetMods = normMods(modifiers);
++
++    for (let cat of categories) {
++      for (let item of cat.items) {
++        if (item.id === id) continue;
++        let s = this.getShortcut(item.id);
++        if (s.key && s.key.toUpperCase() === key.toUpperCase() && normMods(s.modifiers) === targetMods) {
++          return item;
++        }
++      }
++    }
++    return null;
++  },
++
++  _showConflictBanner(id, key, modifiers, conflict, rowContainer) {
++    let activeBanner = rowContainer.querySelector(".shortcut-conflict-banner");
++    if (activeBanner) activeBanner.remove();
++
++    let banner = document.createElement("div");
++    banner.setAttribute("class", "row middle-align border round padding small-margin error-container shortcut-conflict-banner");
++
++    let text = document.createElement("span");
++    text.setAttribute("class", "max");
++    text.textContent = `"${conflict.name}" kısayolu ile çakışıyor!`;
++    banner.appendChild(text);
++
++    let btnOverwrite = document.createElement("button");
++    btnOverwrite.setAttribute("class", "border round small error");
++    btnOverwrite.textContent = "Üzerine Yaz";
++    btnOverwrite.addEventListener("click", () => {
++      this._overwrite(id, key, modifiers, conflict.id);
++    });
++    banner.appendChild(btnOverwrite);
++
++    let btnCancel = document.createElement("button");
++    btnCancel.setAttribute("class", "transparent round small");
++    btnCancel.textContent = "İptal";
++    btnCancel.addEventListener("click", () => {
++      this.refresh();
++    });
++    banner.appendChild(btnCancel);
++
++    rowContainer.appendChild(banner);
++  },
++
++  _overwrite(id, key, modifiers, conflictId) {
++    let userShortcuts = {};
++    try {
++      userShortcuts = JSON.parse(Services.prefs.getStringPref("hilal.keyboard.shortcuts.data", "{}"));
++    } catch (e) {}
++
++    userShortcuts[conflictId] = { key: "", modifiers: "" };
++    userShortcuts[id] = { key, modifiers };
++
++    Services.prefs.setStringPref("hilal.keyboard.shortcuts.data", JSON.stringify(userShortcuts));
++    this.refresh();
++  },
++
++  _save(id, key, modifiers) {
++    let userShortcuts = {};
++    try {
++      userShortcuts = JSON.parse(Services.prefs.getStringPref("hilal.keyboard.shortcuts.data", "{}"));
++    } catch (e) {}
++
++    userShortcuts[id] = { key, modifiers };
++    Services.prefs.setStringPref("hilal.keyboard.shortcuts.data", JSON.stringify(userShortcuts));
++    this.refresh();
++  }
++};
++
+ var {
+   InternalHandlerInfoWrapper,
+   getFileDisplayName,
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2773,6 +2773,8 @@ hilal-workspaces-pinned-public =
-     .label = Make pinned tabs visible in all workspaces
- hilal-workspaces-groups-public =
-     .label = Make tab groups visible in all workspaces
-+hilal-urlbar-show-workspace-name =
-+    .label = Show workspace name in URL bar
- hilal-workspaces-reset-description = Reset all workspace data (cannot be undone).
- hilal-workspaces-reset-button =
-     .label = Reset Workspaces
-@@ -2787,6 +2789,8 @@ hilal-sidebar-compact-enabled =
- hilal-sidebar-compact-hide-toolbar =
-     .label = Auto-hide top toolbar in compact mode
- hilal-sidebar-compact-hide-toolbar-desc = When enabled, the top toolbar containing the address bar and tabs is automatically hidden in compact mode. Hovering near the top edge reveals it with a gorgeous premium glassmorphic slide-down animation. When disabled, the top toolbar remains permanently visible.
-+hilal-sidebar-show-horizontal-tabs =
-+    .label = Keep top horizontal tabs visible when using vertical tabs
- hilal-sidebar-footer-items-label = Standard Footer Items:
- hilal-sidebar-footer-bookmarks =
-     .label = Bookmarks
-@@ -2840,6 +2844,9 @@ hilal-privacy-extreme =
- ## UI Enhancements
- 
- hilal-uifix-header = UI Enhancements
-+hilal-tahoe-enabled =
-+    .label = Enable Tahoe Safari shell (Experimental / Deneysel)
-+hilal-tahoe-enabled-desc = Experimental macOS Tahoe & Safari Liquid Glass shell with combined top horizontal tab strip and vertical sidebar. (Deneysel özellik: Çift sekme düzeni ve Safari cam arayüzü sağlar.)
- hilal-uifix-enabled =
-     .label = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
- hilal-uifix-connect-to-window =
-@@ -2891,4 +2898,3 @@ hilal-shortcuts-header = Keyboard Shortcuts
- hilal-shortcuts-description = Customize keyboard shortcuts for Hilal actions and native browser functions.
- hilal-shortcuts-reset =
-     .label = Restore Defaults
--
+@@ -2832,3 +2832,172 @@ referrals-section-header2 =
+ # use the browser. "Share" here means recommending or referring the browser
+ referrals-link2 =
+   .label = Share { -brand-product-name }
++## Hilal Browser Settings
++
++hilal-settings-header = Hilal Browser
++
++## Workspaces
++
++hilal-workspaces-header = Workspaces
++hilal-workspaces-enabled = Enable workspaces
++    .label = Enable workspaces
++hilal-workspaces-pinned-public = Make pinned tabs visible in all workspaces
++    .label = Make pinned tabs visible in all workspaces
++hilal-workspaces-groups-public = Make tab groups visible in all workspaces
++    .label = Make tab groups visible in all workspaces
++hilal-urlbar-show-workspace-name = Show workspace name in address bar
++    .label = Show workspace name in address bar
++hilal-workspaces-reset-description = Reset all workspace data (cannot be undone).
++hilal-workspaces-reset-button = Reset Workspaces
++    .label = Reset Workspaces
++hilal-workspaces-reset-confirm-title = Reset Workspaces
++hilal-workspaces-reset-confirm-message = This will delete all workspace data and cannot be undone. Continue?
++
++## Theme & Accent Color
++
++hilal-theme-color-header = Accent Color & Theme
++hilal-accent-mode-title = Accent Color Mode
++hilal-accent-mode-desc = Choose how theme accent colors are determined across workspaces and the browser
++hilal-accent-mode-workspace = Workspaces
++    .label = Workspaces
++hilal-accent-mode-global = Global Accent
++    .label = Global Accent
++hilal-accent-mode-boosts = Dynamic Boosts
++    .label = Dynamic Boosts
++hilal-workspace-colors-subdesc = Set a distinct accent color for each workspace. When you switch workspaces, the browser theme updates dynamically.
++hilal-workspace-active-badge = Active
++    .label = Active
++hilal-global-color-title = Master Accent Color
++hilal-global-color-desc = Override all workspaces and chrome elements with a single unified accent color
++hilal-boosts-mode-title = Hilal Boosts Active Color
++hilal-boosts-mode-desc = Automatically extracts the dominant accent color from the visited website and applies it dynamically throughout the entire browser
++hilal-boosts-live-status = Live Web Tinting Active
++    .label = Live Web Tinting Active
++
++## Sidebar Options
++
++hilal-sidebar-header = Sidebar Options
++hilal-sidebar-compact-enabled = Enable Compact Mode (hover near screen edges to reveal sidebar and toolbar)
++    .label = Enable Compact Mode (hover near screen edges to reveal sidebar and toolbar)
++hilal-sidebar-compact-hide-toolbar = Auto-hide top toolbar in compact mode
++    .label = Auto-hide top toolbar in compact mode
++hilal-sidebar-compact-hide-toolbar-desc = When enabled, the top navigation and tab bar automatically hides and slides down with a smooth blur when the cursor nears the top edge.
++hilal-sidebar-show-horizontal-tabs = Show horizontal tabs
++    .label = Show horizontal tabs
++hilal-sidebar-footer-items-label = Standard Footer Items:
++hilal-sidebar-footer-bookmarks =
++    .label = Bookmarks
++hilal-sidebar-footer-history =
++    .label = History
++hilal-sidebar-footer-passwords =
++    .label = Passwords
++hilal-sidebar-footer-downloads =
++    .label = Downloads
++hilal-sidebar-footer-privacy =
++    .label = Privacy
++hilal-sidebar-footer-settings =
++    .label = Settings
++
++## UI Enhancements & Tahoe
++
++hilal-tahoe-header = Appearance & Tahoe Aesthetics
++hilal-tahoe-enabled = macOS Tahoe Glass Effect
++    .label = macOS Tahoe Glass Effect
++hilal-tahoe-enabled-desc = Window translucency, dynamic background blur, and lighting reflections.
++hilal-uifix-header = UI Enhancements
++hilal-uifix-enabled = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
++    .label = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
++hilal-uifix-connect-to-window = Connected Tabs (Connect tab borders to the window)
++    .label = Connected Tabs (Connect tab borders to the window)
++hilal-uifix-compact-padding = Compact Tab Padding (Slimmer tabs)
++    .label = Compact Tab Padding (Slimmer tabs)
++hilal-uifix-dynamic-separator = Dynamic Tab Separators
++    .label = Dynamic Tab Separators
++hilal-uifix-bottom-rounded = Rounded Bottom Tab Corners
++    .label = Rounded Bottom Tab Corners
++hilal-uifix-close-on-hover = Show Tab Close Button Only on Hover
++    .label = Show Tab Close Button Only on Hover
++
++## Site Customizer & Dynamic Coloring
++
++hilal-boosts-header = Site Customizer & Dynamic Coloring
++hilal-boosts-auto-palette = Automatically extract and apply website color palette to browser UI
++    .label = Automatically extract and apply website color palette to browser UI
++hilal-boosts-browser-ui = Apply site customizer colors to browser UI by default
++    .label = Apply site customizer colors to browser UI by default
++hilal-sidebar-custom-shortcuts-label = Custom Sidebar Shortcuts:
++hilal-sidebar-custom-shortcuts-desc = Add custom pages, bookmarks, or external links to the sidebar footer. Hilal shows favicons from Firefox's favicon cache for web links; it does not contact a site just to fetch its icon.
++hilal-sidebar-custom-add =
++    .label = Add Shortcut
++hilal-sidebar-custom-remove =
++    .label = Remove Selected
++hilal-sidebar-custom-name-label = Name:
++hilal-sidebar-custom-name-placeholder =
++    .placeholder = e.g. My Workspace or Hacker News
++hilal-sidebar-custom-url-label = URL:
++hilal-sidebar-custom-url-placeholder =
++    .placeholder = e.g. https://news.ycombinator.com or about:logins
++hilal-sidebar-custom-icon-label = Icon:
++hilal-sidebar-custom-icon-link = Globe/Link (Default)
++hilal-sidebar-custom-icon-bookmark = Bookmark
++hilal-sidebar-custom-icon-history = History
++hilal-sidebar-custom-icon-key = Key (Password)
++hilal-sidebar-custom-icon-downloads = Download
++hilal-sidebar-custom-icon-shield = Shield (Privacy)
++hilal-sidebar-custom-icon-settings = Settings
++hilal-sidebar-custom-save =
++    .label = Save
++hilal-sidebar-custom-cancel =
++    .label = Cancel
++
++## Privacy Level
++
++hilal-privacy-header = Privacy Level
++hilal-privacy-description = Hilal privacy levels are explicit hardening profiles. They do not hide your public IP address, do not replace Tor Browser, and may break sites that depend on fingerprinting surfaces, WebGL, WebRTC, persistent cookies, saved passwords, or JavaScript.
++hilal-privacy-standard =
++    .label = Balanced (LibreWolf-like): strict tracking protection, RFP, HTTPS-only, URL cleanup, WebGL off, reduced WebRTC exposure, cookies/cache cleared on close.
++hilal-privacy-strict =
++    .label = Strict: Balanced plus First Party Isolation and WebRTC disabled. Safer for privacy, more likely to break video calls and sign-in flows.
++hilal-privacy-extreme =
++    .label = Maximum local hardening (not Tor): Strict plus JavaScript off, camera/microphone/location blocked, and browsing history cleared on close.
++
++## Bangs
++
++hilal-bangs-header = Bangs
++hilal-bangs-add-button =
++    .label = Add Bang
++hilal-bangs-remove-button =
++    .label = Remove Selected
++hilal-bangs-save-button =
++    .label = Save
++hilal-bangs-cancel-button =
++    .label = Cancel
++hilal-bangs-trigger-label = Trigger:
++hilal-bangs-searchurl-label = Search URL:
++hilal-bangs-homeurl-label = Home URL (optional):
++hilal-bangs-default-label = (default)
++hilal-bangs-custom-label = (custom)
++
++## Language Selection
++
++hilal-language-header = Language Selection
++hilal-language-description = Select the interface language for the browser. The browser must be restarted for changes to take effect.
++hilal-language-apply-button =
++    .label = Apply and Restart
++
++## Keyboard Shortcuts
++
++hilal-shortcuts-header = Keyboard Shortcuts
++hilal-shortcuts-description = Customize keyboard shortcuts for Hilal actions and native browser functions.
++hilal-shortcuts-reset =
++    .label = Restore Defaults
++
++## Hilal About
++
++hilal-about-header = Hilal Browser Information
++hilal-about-version-title = Hilal Browser 0.3.0-alpha.6
++hilal-about-version-subtitle = Based on Firefox Gecko 153.0a1
++hilal-about-version-button =
++    .label = Version Details
++
++

@@ -1,7 +1,7 @@
 diff --git a/browser/app/distribution/moz.build b/browser/app/distribution/moz.build
 --- a/browser/app/distribution/moz.build
 +++ b/browser/app/distribution/moz.build
-@@ -4,7 +4,11 @@
+@@ -4,7 +4,12 @@
  
  DIST_SUBDIR = ""
  
@@ -11,6 +11,7 @@ diff --git a/browser/app/distribution/moz.build b/browser/app/distribution/moz.b
 -    ]
 +FINAL_TARGET_FILES.distribution += [
 +    "distribution.ini",
++    "policies.json",
 +]
 +
 +FINAL_TARGET_FILES.distribution.extensions += [
