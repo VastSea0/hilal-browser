@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/* global gBrowser, Services, ChromeUtils, TabContextMenu */
+/* global gBrowser, Services, ChromeUtils, Ci, TabContextMenu, PrivateBrowsingUtils */
 
 (function () {
   const MaterialYouTheme = {
@@ -1099,17 +1099,14 @@
 
         // 1. Direct Search Query Item (if not a resolved bang)
         if (!bangResolved || !bangResolved.url) {
-          let engineName = "Google";
+          let engineName = "";
           try {
-            const ss = getSearchService();
-            if (ss?.defaultEngine) {
-              engineName = ss.defaultEngine.name;
-            }
+            engineName = getSearchService()?.defaultEngine?.name || "";
           } catch (e) {}
           items.push({
             type: "search",
             label: trimmed,
-            sub: `Search with ${engineName}`,
+            sub: engineName ? `Search with ${engineName}` : "Search",
             query: trimmed,
           });
         }
@@ -1149,19 +1146,6 @@
           );
           webSuggestions.forEach(s => items.push(s));
         } catch (e) {}
-      } else {
-        // When input is blank, suggest top open tabs
-        const tabs = Array.from(window.gBrowser?.tabs || [])
-          .filter(t => !t.hidden && !t.closing && t.isConnected)
-          .slice(0, 4);
-        tabs.forEach(tab => {
-          items.push({
-            type: "tab",
-            label: tab.label || "Tab",
-            sub: tab.linkedBrowser?.currentURI?.spec || "",
-            tab,
-          });
-        });
       }
 
       this._suggestions = items;
@@ -1349,7 +1333,14 @@
       const term = query.toLowerCase();
       const results = [];
       for (const tab of window.gBrowser.tabs) {
-        if (tab.hidden || tab.closing || !tab.isConnected) continue;
+        if (
+          tab.hidden ||
+          tab.closing ||
+          !tab.isConnected ||
+          tab === window.gBrowser.selectedTab
+        ) {
+          continue;
+        }
         const title = tab.label || tab.getAttribute("label") || "";
         const uri = tab.linkedBrowser?.currentURI?.spec || "";
         if (
@@ -1404,23 +1395,28 @@
     },
 
     async fetchLiveSearchSuggestions(query, signal) {
+      // Every keystroke would go to the search provider, so honour the same
+      // prefs and private-window rule as Firefox's address bar. Hilal's
+      // privacy levels turn these prefs off.
+      if (
+        !Services.prefs.getBoolPref("browser.search.suggest.enabled", false) ||
+        !Services.prefs.getBoolPref("browser.urlbar.suggest.searches", false) ||
+        (PrivateBrowsingUtils.isWindowPrivate(window) &&
+          !Services.prefs.getBoolPref("browser.search.suggest.enabled.private", false))
+      ) {
+        return [];
+      }
       try {
-        let suggestUrl = "";
+        let url = "";
         try {
-          const ss = getSearchService();
-          const engine = ss?.defaultEngine;
-          if (engine) {
-            const submission = engine.getSubmission(
-              query,
-              "application/x-suggestions+json"
-            );
-            suggestUrl = submission?.uri?.spec || "";
-          }
+          const engine = getSearchService()?.defaultEngine;
+          url =
+            engine?.getSubmission(query, "application/x-suggestions+json")?.uri
+              ?.spec || "";
         } catch (e) {}
-
-        const url =
-          suggestUrl ||
-          `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`;
+        if (!url) {
+          return [];
+        }
         const res = await fetch(url, { signal });
         if (!res.ok) return [];
         const data = await res.json();
@@ -2017,45 +2013,29 @@
         }
       }
 
-      // 2. If not a protocol or about: URI, resolve domain or search
-      if (
-        !url.includes("://") &&
-        !url.startsWith("about:") &&
-        !url.startsWith("chrome:")
-      ) {
-        if (url.includes(".") && !url.includes(" ")) {
-          url = "https://" + url;
-        } else {
-          let searchUrl = "";
-          try {
-            const ss = getSearchService();
-            const engine = ss?.defaultEngine;
-            if (engine) {
-              const submission = engine.getSubmission(url, null);
-              searchUrl = submission?.uri?.spec || "";
-            }
-          } catch (e) {
-            console.warn("Hilal: Search submission error in navigate", e);
-          }
-          url =
-            searchUrl ||
-            `https://www.google.com/search?q=${encodeURIComponent(url)}`;
+      // 2. Let Firefox decide between an address and a search, the same way
+      // its own address bar does (localhost:3000, IPs, schemes, keywords,
+      // the private-window search engine).
+      let uri;
+      try {
+        let flags =
+          Ci.nsIURIFixup.FIXUP_FLAG_ALLOW_KEYWORD_LOOKUP |
+          Ci.nsIURIFixup.FIXUP_FLAG_FIX_SCHEME_TYPOS;
+        if (PrivateBrowsingUtils.isWindowPrivate(window)) {
+          flags |= Ci.nsIURIFixup.FIXUP_FLAG_PRIVATE_CONTEXT;
         }
+        uri = Services.uriFixup.getFixupURIInfo(url, flags).preferredURI;
+      } catch (e) {
+        console.error("Hilal: could not interpret address", e);
+        return;
+      }
+      // Firefox's address bar refuses typed javascript: URLs as well.
+      if (!uri || uri.schemeIs("javascript")) {
+        return;
       }
 
-      try {
-        const principal = Services.scriptSecurityManager.getSystemPrincipal();
-        const uri = Services.io.newURI(url);
-        if (typeof window.gBrowser.loadURI === "function") {
-          window.gBrowser.loadURI(uri, { triggeringPrincipal: principal });
-        } else if (window.gBrowser.selectedBrowser?.loadURI) {
-          window.gBrowser.selectedBrowser.loadURI(uri, {
-            triggeringPrincipal: principal,
-          });
-        }
-      } catch (e) {
-        console.error("Hilal navigation failed:", e);
-      }
+      // openTrustedLinkIn is the address bar's own loading path.
+      window.openTrustedLinkIn(uri.spec, "current");
     },
 
     focusUrlInput(select = true) {
