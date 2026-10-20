@@ -77,12 +77,6 @@
           if (mode === "global") {
             const globalColor = Services.prefs.getStringPref("hilal.theme.globalAccentColor", "#af51f5");
             if (globalColor) return globalColor;
-          } else if (mode === "boosts") {
-            const domain = window.gHilalBoosts?.activeDomain;
-            const extracted = domain ? window.gHilalBoosts?._extractedThemeColors?.[domain] : null;
-            if (extracted) {
-              return extracted;
-            }
           }
         }
       } catch (e) {}
@@ -645,7 +639,7 @@
       });
       urlContainer.appendChild(copyBtn);
 
-      // Theme / Boosts Action Button
+      // Theme action button
       const themeBtn = document.createElement("button");
       themeBtn.id = "hilal-url-theme-btn";
       themeBtn.className = "circle transparent small hilal-btn hilal-url-action-btn";
@@ -659,7 +653,7 @@
       });
       urlContainer.appendChild(themeBtn);
 
-      // Page Actions wrapper slot for native Firefox page actions (#star-button-box, reader-mode, boosts)
+      // Page Actions wrapper slot for native Firefox page actions (#star-button-box, reader-mode)
       const pageActionsSlot = document.createElement("div");
       pageActionsSlot.id = "hilal-page-actions-slot";
       pageActionsSlot.className = "row tiny-space";
@@ -1882,18 +1876,6 @@
       });
       menu.appendChild(swatchesRow);
 
-      if (window.gHilalBoosts?.togglePanel) {
-        const boostsBtn = document.createElement("button");
-        boostsBtn.className = "hilal-m3-menu-item";
-        boostsBtn.textContent = "Customize Site Boosts";
-        boostsBtn.addEventListener("click", e => {
-          e.stopPropagation();
-          menu.remove();
-          window.gHilalBoosts.togglePanel(e);
-        });
-        menu.appendChild(boostsBtn);
-      }
-
       const rect = anchor.getBoundingClientRect();
       menu.style.position = "fixed";
       menu.style.top = `${rect.bottom + 6}px`;
@@ -1963,13 +1945,6 @@
                 event.stopPropagation();
                 FullZoom.resetFromURLBar();
               }
-            } else if (
-              btn.id === "hilal-boosts-button" ||
-              btn.closest("#hilal-boosts-button")
-            ) {
-              event.preventDefault();
-              event.stopPropagation();
-              window.gHilalBoosts?.togglePanel(event);
             }
           });
         }
