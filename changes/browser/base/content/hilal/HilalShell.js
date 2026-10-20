@@ -704,6 +704,13 @@
       });
       rightGroup.appendChild(sidebarToggle);
 
+      // Native downloads and main menu buttons are moved in here; the main
+      // menu is the only way to reach many commands on Windows and Linux.
+      const nativeSlot = document.createElement("div");
+      nativeSlot.id = "hilal-native-slot";
+      nativeSlot.className = "row tiny-space";
+      rightGroup.appendChild(nativeSlot);
+
       topbar.appendChild(rightGroup);
       headerShell.appendChild(topbar);
 
@@ -1941,6 +1948,17 @@
 
       // 2. Sync extensions into #hilal-extensions-slot
       this.syncExtensions();
+
+      // 3. Downloads and main menu buttons
+      const nativeSlot = document.getElementById("hilal-native-slot");
+      if (nativeSlot) {
+        for (const id of ["downloads-button", "PanelUI-menu-button"]) {
+          const node = document.getElementById(id);
+          if (node && node.parentNode !== nativeSlot) {
+            nativeSlot.appendChild(node);
+          }
+        }
+      }
     },
 
     syncExtensions() {
