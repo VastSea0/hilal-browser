@@ -1,8 +1,8 @@
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
-index 46da45849..110e0c756 100644
+index d642742f3..b659c0fe1 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
-@@ -3712,3 +3712,11 @@ pref("intl.locale.requested", "");
+@@ -3724,3 +3724,11 @@ pref("intl.locale.requested", "");
  
  // Allow custom compiled unsigned language packs
  pref("extensions.langpacks.signatures.required", false);
@@ -15,10 +15,10 @@ index 46da45849..110e0c756 100644
 +pref("hilal.sidebar.customItems", "[]");
 +pref("hilal.compact.enabled", false);
 diff --git a/browser/base/content/browser-sets.js b/browser/base/content/browser-sets.js
-index 8b153dfac..51c1598d7 100644
+index b3615d038..96ae33e28 100644
 --- a/browser/base/content/browser-sets.js
 +++ b/browser/base/content/browser-sets.js
-@@ -316,15 +316,12 @@ document.addEventListener(
+@@ -343,15 +343,12 @@ document.addEventListener(
            }
            break;
          }
@@ -66,7 +66,7 @@ index 954698aca..bbad1cd10 100644
          SidebarController.updateToolbarButton(aNode);
          aNode.setAttribute("overflows", "false");
 diff --git a/browser/components/sidebar/SidebarManager.sys.mjs b/browser/components/sidebar/SidebarManager.sys.mjs
-index a9857f468..114a2b1c5 100644
+index 3d1b64ba6..de3ee9154 100644
 --- a/browser/components/sidebar/SidebarManager.sys.mjs
 +++ b/browser/components/sidebar/SidebarManager.sys.mjs
 @@ -224,6 +224,9 @@ class SidebarManager extends EventTarget {
@@ -120,10 +120,10 @@ index 15c466af3..ef8a10951 100644
        this.#props.launcherExpanded = false;
        return;
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
-index d3178e9eb..fc65001ad 100644
+index 947f026af..bad0a5dac 100644
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
-@@ -481,7 +481,10 @@ var SidebarController = {
+@@ -498,7 +498,10 @@ var SidebarController = {
        this._handleLauncherResize(entry)
      );
  
@@ -135,7 +135,7 @@ index d3178e9eb..fc65001ad 100644
        if (!customElements.get("sidebar-main")) {
          ChromeUtils.importESModule(
            "chrome://browser/content/sidebar/sidebar-main.mjs",
-@@ -569,6 +572,8 @@ var SidebarController = {
+@@ -586,6 +589,8 @@ var SidebarController = {
        Services.obs.addObserver(this, "sessionstore-single-window-restored");
        this._windowRestoredObserverAdded = true;
      }
@@ -144,7 +144,7 @@ index d3178e9eb..fc65001ad 100644
    },
  
    uninit() {
-@@ -1453,7 +1458,10 @@ var SidebarController = {
+@@ -1476,7 +1481,10 @@ var SidebarController = {
      if (!toolbarButton || this.inSingleTabWindow) {
        return;
      }
@@ -156,7 +156,7 @@ index d3178e9eb..fc65001ad 100644
        toolbarButton.dataset.l10nId = "show-sidebars";
        toolbarButton.checked = this.isOpen;
      } else {
-@@ -2113,7 +2121,19 @@ var SidebarController = {
+@@ -2136,7 +2144,19 @@ var SidebarController = {
        }
  
        this.selectMenuItem(commandID);
@@ -176,7 +176,7 @@ index d3178e9eb..fc65001ad 100644
  
        this._box.setAttribute("checked", "true");
        this._state.command = commandID;
-@@ -2782,3 +2802,171 @@ XPCOMUtils.defineLazyPreferenceGetter(
+@@ -2805,3 +2825,171 @@ XPCOMUtils.defineLazyPreferenceGetter(
      }
    }
  );
@@ -915,7 +915,7 @@ index a8369dde3..462e0ce39 100644
 +  min-height: 0;
 +}
 diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/sidebar/sidebar-main.mjs
-index 8acc798e5..7cb3728bf 100644
+index 46b602611..6ae4a2440 100644
 --- a/browser/components/sidebar/sidebar-main.mjs
 +++ b/browser/components/sidebar/sidebar-main.mjs
 @@ -18,8 +18,9 @@ import "chrome://browser/content/sidebar/sidebar-pins-promo.mjs";
@@ -2235,10 +2235,10 @@ index 8acc798e5..7cb3728bf 100644
      let enabledToolsAndExtensionsCount =
        this.enabledToolsAndExtensionsCount() + 1;
 diff --git a/browser/locales/en-US/browser/sidebar.ftl b/browser/locales/en-US/browser/sidebar.ftl
-index 6bd76b860..809df0e9b 100644
+index aced1cced..68513394f 100644
 --- a/browser/locales/en-US/browser/sidebar.ftl
 +++ b/browser/locales/en-US/browser/sidebar.ftl
-@@ -251,3 +251,38 @@ sidebar-widget-hide-sidebar2 =
+@@ -288,3 +288,38 @@ sidebar-widget-hide-sidebar2 =
  # users who do not have any pinned tabs. Indicates that they can drop tabs in
  # this area to pin them.
  sidebar-pins-promo-text = Drag important tabs here to keep them within reach

@@ -1,8 +1,8 @@
 diff --git a/browser/base/content/browser-places.js b/browser/base/content/browser-places.js
-index 5af3790e6..461bf781d 100644
+index 6531738de..7e60e3f5c 100644
 --- a/browser/base/content/browser-places.js
 +++ b/browser/base/content/browser-places.js
-@@ -1119,8 +1119,21 @@ var PlacesToolbarHelper = {
+@@ -1120,8 +1120,21 @@ var PlacesToolbarHelper = {
        return;
      }
  
@@ -26,10 +26,10 @@ index 5af3790e6..461bf781d 100644
        viewElt
      );
 diff --git a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs b/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
-index 16041c107..a995318d2 100644
+index 624cb2adc..a7b7db275 100644
 --- a/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
 +++ b/browser/components/urlbar/UrlbarMuxerStandard.sys.mjs
-@@ -729,6 +729,69 @@ class MuxerUnifiedComplete extends UrlbarMuxer {
+@@ -804,6 +804,69 @@ class MuxerUnifiedComplete extends UrlbarMuxer {
    // error or increase the complexity threshold.
    // eslint-disable-next-line complexity
    _canAddResult(result, state) {

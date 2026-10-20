@@ -1,8 +1,8 @@
 diff --git a/browser/base/content/browser-sets.inc.xhtml b/browser/base/content/browser-sets.inc.xhtml
-index 65ee61721..bed031f30 100644
+index 7543a6726..300079524 100644
 --- a/browser/base/content/browser-sets.inc.xhtml
 +++ b/browser/base/content/browser-sets.inc.xhtml
-@@ -419,4 +419,13 @@
+@@ -431,4 +431,13 @@
           modifiers="accel,alt"
           internal="true"/>
  #endif
@@ -17,10 +17,10 @@ index 65ee61721..bed031f30 100644
    </keyset>
 +
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index dc25fe20f..d0c8f939b 100644
+index 6591f67f5..92aa54d51 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -2534,9 +2534,400 @@ var gHilalPane = {
+@@ -2564,9 +2564,400 @@ var gHilalPane = {
          }
        });
      }
@@ -422,10 +422,10 @@ index dc25fe20f..d0c8f939b 100644
    InternalHandlerInfoWrapper,
    getFileDisplayName,
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
-index 38df9269d..3cb7ef86f 100644
+index cc9ec3dd0..ba30ba8ca 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2884,3 +2884,11 @@ hilal-language-header = Language Selection
+@@ -2810,3 +2810,11 @@ hilal-language-header = Language Selection
  hilal-language-description = Select the interface language for the browser. The browser must be restarted for changes to take effect.
  hilal-language-apply-button =
      .label = Apply and Restart

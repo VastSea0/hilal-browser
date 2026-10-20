@@ -1,8 +1,8 @@
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index 90713abf4..dc25fe20f 100644
+index b0a2897bf..6591f67f5 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -1887,6 +1887,201 @@ var gHilalPane = {
+@@ -1917,6 +1917,201 @@ var gHilalPane = {
          );
        });
      }

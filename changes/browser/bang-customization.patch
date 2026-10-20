@@ -1,21 +1,21 @@
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
-index 2a121ca17..46da45849 100644
+index 44d55d18f..d642742f3 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
-@@ -3615,6 +3615,8 @@ pref("browser.contentsharing.newBadge.enabled", true);
- 
- // When enabled, Firefox ignores the distribution.ini file if global.id is MozillaOnline.
- pref("distribution.mozillaonline.ignore", true);
+@@ -3627,6 +3627,8 @@ pref("distribution.mozillaonline.ignore", true);
+ #ifdef XP_MACOSX
+   pref("browser.macAppMenu.setAsDefaultShown", false);
+ #endif
 +pref("hilal.privacy.initialized", false);
 +pref("hilal.bangs.custom", "[]");
  // Hilal Browser - UI Fix Integration
  pref("hilal.uifix.enabled", true);
  // Theme Default Options
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index ca5ecee85..41981aad7 100644
+index 2ad23d68f..242e46a44 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -2044,6 +2044,169 @@ var gHilalPane = {
+@@ -2074,6 +2074,169 @@ var gHilalPane = {
      }
  
      updateHilalUiFixSubOptionsState();
@@ -186,16 +186,16 @@ index ca5ecee85..41981aad7 100644
  };
  
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
-index 8a2d44fc5..336169a1b 100644
+index 55e2e1136..aaf26a62d 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2871,3 +2871,4 @@ hilal-bangs-trigger-label = Trigger:
+@@ -2797,3 +2797,4 @@ hilal-bangs-trigger-label = Trigger:
  hilal-bangs-searchurl-label = Search URL:
  hilal-bangs-homeurl-label = Home URL (optional):
  hilal-bangs-default-label = (default)
 +hilal-bangs-custom-label = (custom)
 diff --git a/browser/modules/moz.build b/browser/modules/moz.build
-index 4ba209230..0e88b3770 100644
+index 5660bf5ff..0793e9369 100644
 --- a/browser/modules/moz.build
 +++ b/browser/modules/moz.build
 @@ -125,6 +125,7 @@ EXTRA_JS_MODULES += [

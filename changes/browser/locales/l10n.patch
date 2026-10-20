@@ -1,8 +1,8 @@
 diff --git a/browser/locales/en-US/browser/browser.ftl b/browser/locales/en-US/browser/browser.ftl
-index 01e61dd4d..223f12fd5 100644
+index 759a6d263..abee78442 100644
 --- a/browser/locales/en-US/browser/browser.ftl
 +++ b/browser/locales/en-US/browser/browser.ftl
-@@ -1618,3 +1618,148 @@ reduced-protection-infobar-reload-button = Reload
+@@ -1676,3 +1676,148 @@ reduced-protection-infobar-reload-button = Reload
    .accesskey = R
  reduced-protection-infobar-never-show-button = Don’t show again
    .accesskey = D
@@ -152,10 +152,10 @@ index 01e61dd4d..223f12fd5 100644
 +hilal-welcome-privacy-extreme-desc = Adds JavaScript, camera, microphone, location, and history blocking on top of Strict.
 +hilal-welcome-privacy-extreme-detail = Does not hide your IP address; many modern sites may not work as expected.
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
-index 7b9b95dd6..8a2d44fc5 100644
+index a890aeb55..55e2e1136 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2760,3 +2760,114 @@ security-privacy-issue-warning-ech =
+@@ -2686,3 +2686,114 @@ security-privacy-issue-warning-ech =
  security-privacy-issue-warning-proxy-autodetection =
    .label = Proxy auto-configuration is enabled
    .description = Proxy auto-configuration could let untrusted networks to monitor your activity.

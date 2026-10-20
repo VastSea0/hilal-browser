@@ -19,7 +19,7 @@ index b174449a0..31e76e3d5 100644
 +    "extensions/uBlock0@raymondhill.net.xpi",
 +]
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
-index a05a8e8fd..efeb53931 100644
+index 838ce4cd8..174252872 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
 @@ -59,7 +59,7 @@ pref("extensions.systemAddon.update.enabled", true);

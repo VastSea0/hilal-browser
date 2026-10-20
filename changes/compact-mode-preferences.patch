@@ -1,8 +1,8 @@
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
-index 110e0c756..58b8bb99f 100644
+index b659c0fe1..7a959f59f 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
-@@ -3719,4 +3719,5 @@ pref("hilal.sidebar.footer.downloads", true);
+@@ -3731,4 +3731,5 @@ pref("hilal.sidebar.footer.downloads", true);
  pref("hilal.sidebar.footer.privacy", true);
  pref("hilal.sidebar.footer.settings", true);
  pref("hilal.sidebar.customItems", "[]");
@@ -10,10 +10,10 @@ index 110e0c756..58b8bb99f 100644
 +pref("hilal.compact.enabled", true);
 +pref("hilal.compact.hide_toolbox", true);
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index fcfaaf83f..90713abf4 100644
+index 1e306e60d..b0a2897bf 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -1796,6 +1796,8 @@ var gHilalPane = {
+@@ -1826,6 +1826,8 @@ var gHilalPane = {
      const hilalWsCheckbox = document.getElementById("hilalWorkspacesEnabled");
      const hilalWsPinnedPublicCheckbox = document.getElementById("hilalWorkspacesPinnedPublic");
      const hilalWsGroupsPublicCheckbox = document.getElementById("hilalWorkspacesGroupsPublic");
@@ -22,7 +22,7 @@ index fcfaaf83f..90713abf4 100644
      const hilalPrivacyLevelRadioGroup = /** @type {HTMLElement|null} */ (
        document.getElementById("hilalPrivacyLevel")
      );
-@@ -1861,6 +1863,30 @@ var gHilalPane = {
+@@ -1891,6 +1893,30 @@ var gHilalPane = {
          );
        });
      }
@@ -53,7 +53,7 @@ index fcfaaf83f..90713abf4 100644
      if (hilalPrivacyLevelRadioGroup) {
        hilalPrivacyLevelRadioGroup.value = normalizePrivacyLevel(
          Services.prefs.getStringPref("hilal.privacy.level", "standard")
-@@ -1885,6 +1911,8 @@ var gHilalPane = {
+@@ -1915,6 +1941,8 @@ var gHilalPane = {
          Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
          Services.prefs.setBoolPref("hilal.workspaces.pinned.public", true);
          Services.prefs.setBoolPref("hilal.workspaces.groups.public", false);
@@ -62,7 +62,7 @@ index fcfaaf83f..90713abf4 100644
          Services.prefs.setStringPref("hilal.privacy.level", "standard");
          if (hilalWsCheckbox) {
            hilalWsCheckbox.checked = true;
-@@ -1895,6 +1923,12 @@ var gHilalPane = {
+@@ -1925,6 +1953,12 @@ var gHilalPane = {
          if (hilalWsGroupsPublicCheckbox) {
            hilalWsGroupsPublicCheckbox.checked = false;
          }
@@ -76,10 +76,10 @@ index fcfaaf83f..90713abf4 100644
            hilalPrivacyLevelRadioGroup.value = "standard";
          }
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
-index fc65001ad..1c542f529 100644
+index bad0a5dac..c5b7fd204 100644
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
-@@ -2121,14 +2121,20 @@ var SidebarController = {
+@@ -2144,14 +2144,20 @@ var SidebarController = {
        }
  
        this.selectMenuItem(commandID);
@@ -103,7 +103,7 @@ index fc65001ad..1c542f529 100644
          ].includes(commandID);
          this._box.hidden = this._splitter.hidden = !isStandardPanel;
        } else {
-@@ -2805,6 +2811,7 @@ XPCOMUtils.defineLazyPreferenceGetter(
+@@ -2828,6 +2834,7 @@ XPCOMUtils.defineLazyPreferenceGetter(
  
  var HilalCompactMode = {
    PREF: "hilal.compact.enabled",
@@ -111,7 +111,7 @@ index fc65001ad..1c542f529 100644
    ATTR: "hilal-compact-mode",
  
    _prefObserver: null,
-@@ -2816,11 +2823,49 @@ var HilalCompactMode = {
+@@ -2839,11 +2846,49 @@ var HilalCompactMode = {
    _showDelayMs: 180,
    _leaveDelayMs: 400,
  
@@ -162,7 +162,7 @@ index fc65001ad..1c542f529 100644
      window.addEventListener("unload", () => this.uninit(), { once: true });
      this._apply(Services.prefs.getBoolPref(this.PREF, false));
    },
-@@ -2828,11 +2873,48 @@ var HilalCompactMode = {
+@@ -2851,11 +2896,48 @@ var HilalCompactMode = {
    uninit() {
      if (this._prefObserver) {
        Services.prefs.removeObserver(this.PREF, this._prefObserver);
@@ -211,7 +211,7 @@ index fc65001ad..1c542f529 100644
    get enabled() {
      return Services.prefs.getBoolPref(this.PREF, false);
    },
-@@ -2842,14 +2924,53 @@ var HilalCompactMode = {
+@@ -2865,14 +2947,53 @@ var HilalCompactMode = {
    },
  
    _apply(compact) {
@@ -268,7 +268,7 @@ index fc65001ad..1c542f529 100644
    },
  
    _syncToolbarButton(compact) {
-@@ -2881,48 +3002,76 @@ var HilalCompactMode = {
+@@ -2904,48 +3025,76 @@ var HilalCompactMode = {
        clearTimeout(this._mouseLeaveTimer);
        this._mouseLeaveTimer = null;
      }
@@ -361,7 +361,7 @@ index fc65001ad..1c542f529 100644
  
        if (!isInsideSidebar && !isNearEdge) {
          this._scheduleHide();
-@@ -2932,6 +3081,99 @@ var HilalCompactMode = {
+@@ -2955,6 +3104,99 @@ var HilalCompactMode = {
      } else if (!isNearEdge && this._mouseShowTimer) {
        clearTimeout(this._mouseShowTimer);
        this._mouseShowTimer = null;
@@ -461,7 +461,7 @@ index fc65001ad..1c542f529 100644
      }
    },
  
-@@ -2960,6 +3202,12 @@ var HilalCompactMode = {
+@@ -2983,6 +3225,12 @@ var HilalCompactMode = {
      this._mouseLeaveTimer = setTimeout(() => {
        this._mouseLeaveTimer = null;
        this._hideSidebar();
@@ -474,7 +474,7 @@ index fc65001ad..1c542f529 100644
      }, this._leaveDelayMs);
    },
  
-@@ -2969,4 +3217,45 @@ var HilalCompactMode = {
+@@ -2992,4 +3240,45 @@ var HilalCompactMode = {
        this._mouseLeaveTimer = null;
      }
    },
@@ -521,10 +521,10 @@ index fc65001ad..1c542f529 100644
 +  },
  };
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
-index 4ece62b58..38df9269d 100644
+index 1eb599ead..cc9ec3dd0 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2782,6 +2782,11 @@ hilal-workspaces-reset-confirm-message = This will delete all workspace data and
+@@ -2708,6 +2708,11 @@ hilal-workspaces-reset-confirm-message = This will delete all workspace data and
  ## Sidebar Options
  
  hilal-sidebar-header = Sidebar Options

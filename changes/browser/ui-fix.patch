@@ -1,11 +1,11 @@
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
-index efeb53931..a9781e55c 100644
+index 174252872..f1983c01f 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
-@@ -3615,3 +3615,92 @@ pref("browser.contentsharing.newBadge.enabled", true);
- 
- // When enabled, Firefox ignores the distribution.ini file if global.id is MozillaOnline.
- pref("distribution.mozillaonline.ignore", true);
+@@ -3627,3 +3627,92 @@ pref("distribution.mozillaonline.ignore", true);
+ #ifdef XP_MACOSX
+   pref("browser.macAppMenu.setAsDefaultShown", false);
+ #endif
 +// Hilal Browser - UI Fix Integration
 +pref("hilal.uifix.enabled", true);
 +// Theme Default Options
@@ -96,10 +96,10 @@ index efeb53931..a9781e55c 100644
 +pref("browser.urlbar.clipboard.featureGate", true);
 +pref("browser.urlbar.suggest.calculator", true);
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index f0e9daea9..6b40f3405 100644
+index 2479dca43..79558b4bc 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -1881,6 +1881,150 @@ var gHilalPane = {
+@@ -1911,6 +1911,150 @@ var gHilalPane = {
          }
        }
      });

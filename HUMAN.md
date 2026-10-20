@@ -19,7 +19,7 @@ All patches applied to Firefox and all architectural decisions are written or re
 - The `.patch` files under `changes/`, which are unified diffs against Firefox source
 - The branding assets in `changes/browser/branding/hilal/`
 - The patch-plus-overlay model, the gitignored `engine/` checkout, and the upstream-first workflow
-- The `FIREFOX_COMMIT` and `upstream.lock` pin for Firefox `153.0a1` at `e28b34ab33dbf49364999070168cbb7e11e8e5bd`
+- The `FIREFOX_COMMIT` and `upstream.lock` pin for Firefox `153.5.1esr` at `6cd88e7d45fe7a5b0b87b984fb32a8779151860e`
 
 ## Contact
 

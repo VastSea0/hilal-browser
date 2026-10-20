@@ -1,8 +1,8 @@
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
-index a9781e55c..2a121ca17 100644
+index f1983c01f..44d55d18f 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
-@@ -3704,3 +3704,9 @@ pref("userContent.page.proton", true);
+@@ -3716,3 +3716,9 @@ pref("userContent.page.proton", true);
  pref("browser.tabs.hoverPreview.enabled", true);
  pref("browser.urlbar.clipboard.featureGate", true);
  pref("browser.urlbar.suggest.calculator", true);

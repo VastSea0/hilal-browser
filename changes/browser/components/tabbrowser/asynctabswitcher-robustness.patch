@@ -41,10 +41,10 @@ index 577e27598..98eb956aa 100644
      }
      this._processing = true;
 diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/components/tabbrowser/content/tabbrowser.js
-index 1ec699d34..0580bbe1e 100644
+index 23e6d4749..9684c95ba 100644
 --- a/browser/components/tabbrowser/content/tabbrowser.js
 +++ b/browser/components/tabbrowser/content/tabbrowser.js
-@@ -8334,11 +8334,11 @@
+@@ -8350,11 +8350,11 @@
      }
  
      on_activate() {

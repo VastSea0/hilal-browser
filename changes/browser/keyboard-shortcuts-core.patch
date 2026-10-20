@@ -1,5 +1,5 @@
 diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
-index 75130ed5f..7bcc54d65 100644
+index 59493883f..d2cd97493 100644
 --- a/browser/base/content/browser.xhtml
 +++ b/browser/base/content/browser.xhtml
 @@ -152,6 +152,7 @@
@@ -11,10 +11,10 @@ index 75130ed5f..7bcc54d65 100644
    <script src="chrome://browser/content/hilal/HilalWorkspaces.js"></script>
  </html:body>
 diff --git a/browser/base/jar.mn b/browser/base/jar.mn
-index d9e447707..890a1580f 100644
+index bf1cb4701..31d71e63d 100644
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
-@@ -85,6 +85,7 @@ browser.jar:
+@@ -78,6 +78,7 @@ browser.jar:
          content/browser/hilal/screenshots/welcome-workspaces-off.png (content/hilal/screenshots/welcome-workspaces-off.png)
          content/browser/hilal/screenshots/welcome-toolbar-visible.png (content/hilal/screenshots/welcome-toolbar-visible.png)
          content/browser/hilal/screenshots/welcome-toolbar-hidden.png (content/hilal/screenshots/welcome-toolbar-hidden.png)

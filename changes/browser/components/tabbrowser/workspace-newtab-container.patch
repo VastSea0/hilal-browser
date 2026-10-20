@@ -7,10 +7,10 @@ loss and page reloads.
 
 ---
 diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/components/tabbrowser/content/tabbrowser.js
-index 37508e85d..1ec699d34 100644
+index c42b1a1a8..23e6d4749 100644
 --- a/browser/components/tabbrowser/content/tabbrowser.js
 +++ b/browser/components/tabbrowser/content/tabbrowser.js
-@@ -4161,8 +4161,12 @@
+@@ -4159,8 +4159,12 @@
  
        // Related tab inherits current tab's user context unless a different
        // usercontextid is specified

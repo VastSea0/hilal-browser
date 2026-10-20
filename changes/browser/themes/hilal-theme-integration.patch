@@ -1,5 +1,5 @@
 diff --git a/browser/themes/shared/browser-shared.css b/browser/themes/shared/browser-shared.css
-index fbc709b2b..e775bee67 100644
+index 12d5982b1..a2d831fdd 100644
 --- a/browser/themes/shared/browser-shared.css
 +++ b/browser/themes/shared/browser-shared.css
 @@ -4,6 +4,7 @@
@@ -10,7 +10,7 @@ index fbc709b2b..e775bee67 100644
  @import url("chrome://browser/skin/addons/extension-controlled.css");
  @import url("chrome://browser/skin/addons/unified-extensions.css");
  @import url("chrome://browser/skin/downloads/indicator.css");
-@@ -33,6 +34,7 @@
+@@ -34,6 +35,7 @@
  @import url("chrome://browser/skin/customizableui/customizeMode.css");
  @import url("chrome://browser/skin/UITour.css");
  @import url("chrome://browser/skin/formautofill-notification.css");
@@ -18,7 +18,7 @@ index fbc709b2b..e775bee67 100644
  
  :root,
  body {
-@@ -58,7 +60,7 @@ body {
+@@ -59,7 +61,7 @@ body {
  
    user-select: none;
    color-scheme: light dark;
@@ -28,10 +28,10 @@ index fbc709b2b..e775bee67 100644
     * values for different scenarios that don't lend themselves to design tokens. */
    /* stylelint-disable-next-line stylelint-plugin-mozilla/use-design-tokens */
 diff --git a/browser/themes/shared/jar.inc.mn b/browser/themes/shared/jar.inc.mn
-index 449305353..d1053fc8a 100644
+index 7892988bd..5d5c6c664 100644
 --- a/browser/themes/shared/jar.inc.mn
 +++ b/browser/themes/shared/jar.inc.mn
-@@ -355,3 +355,208 @@
+@@ -357,3 +357,208 @@
    skin/classic/browser/illustrations/market-opt-in.svg         (../shared/illustrations/market-opt-in.svg)
    skin/classic/browser/illustrations/tab-groups.svg            (../shared/illustrations/tab-groups.svg)
    skin/classic/browser/illustrations/yelpRealtime-opt-in.svg   (../shared/illustrations/yelpRealtime-opt-in.svg)
@@ -241,7 +241,7 @@ index 449305353..d1053fc8a 100644
 +  skin/classic/browser/icons/welcome-back.svg                              (../shared/icons/welcome-back.svg)
 +  skin/classic/browser/icons/whatsnew.svg                                  (../shared/icons/whatsnew.svg)
 diff --git a/browser/themes/shared/sidebar.css b/browser/themes/shared/sidebar.css
-index 910b7f6c9..c969c7224 100644
+index ecb910d1d..068c55ee8 100644
 --- a/browser/themes/shared/sidebar.css
 +++ b/browser/themes/shared/sidebar.css
 @@ -544,3 +544,661 @@ sidebar-main,
@@ -907,7 +907,7 @@ index 910b7f6c9..c969c7224 100644
 +  transition: transform 0.08s ease-out !important;
 +}
 diff --git a/browser/themes/shared/tabbrowser/tabs.css b/browser/themes/shared/tabbrowser/tabs.css
-index 2a9085993..bfbd033ca 100644
+index 24ad9ab05..51978c1c2 100644
 --- a/browser/themes/shared/tabbrowser/tabs.css
 +++ b/browser/themes/shared/tabbrowser/tabs.css
 @@ -3102,3 +3102,8 @@ toolbar:not(#TabsToolbar) #firefox-view-button {
@@ -920,11 +920,11 @@ index 2a9085993..bfbd033ca 100644
 +}
 +
 diff --git a/browser/themes/shared/urlbar-searchbar.css b/browser/themes/shared/urlbar-searchbar.css
-index f2dadcbab..48e3124f7 100644
+index a54ac5e6b..c06bf30fb 100644
 --- a/browser/themes/shared/urlbar-searchbar.css
 +++ b/browser/themes/shared/urlbar-searchbar.css
-@@ -1445,3 +1445,19 @@ toolbar[inactive="true"] .urlbar,
-     top: -999px;
+@@ -1459,3 +1459,18 @@ toolbar[inactive="true"] .urlbar,
+     }
    }
  }
 +
@@ -942,4 +942,3 @@ index f2dadcbab..48e3124f7 100644
 +    }
 +  }
 +}
-+

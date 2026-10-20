@@ -1,16 +1,16 @@
 diff --git a/browser/components/urlbar/UrlbarUtils.sys.mjs b/browser/components/urlbar/UrlbarUtils.sys.mjs
-index e6d2e0d97..3561673f2 100644
+index e4ef36076..4abaea243 100644
 --- a/browser/components/urlbar/UrlbarUtils.sys.mjs
 +++ b/browser/components/urlbar/UrlbarUtils.sys.mjs
-@@ -45,6 +45,7 @@ const lazy = XPCOMUtils.declareLazy({
+@@ -46,6 +46,7 @@ const lazy = XPCOMUtils.declareLazy({
      "moz-src:///browser/components/urlbar/UrlbarProviderOpenTabs.sys.mjs",
    UrlbarProviderSearchTips:
      "moz-src:///browser/components/urlbar/UrlbarProviderSearchTips.sys.mjs",
 +  HilalBangs: "resource:///modules/HilalBangs.sys.mjs",
    UrlbarSearchUtils:
      "moz-src:///browser/components/urlbar/UrlbarSearchUtils.sys.mjs",
-   UrlbarTokenizer:
-@@ -727,6 +728,18 @@ export var UrlbarUtils = {
+   UrlUtils: "resource://gre/modules/UrlUtils.sys.mjs",
+@@ -740,6 +741,18 @@ export var UrlbarUtils = {
     *    post data (object).
     */
    getSearchQueryUrl(engine, query) {

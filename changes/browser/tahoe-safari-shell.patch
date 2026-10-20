@@ -11,10 +11,10 @@ index 561e040d2..7366ab02a 100644
  	printf APPLMOZB > '$(dist_dest)/Contents/PkgInfo'
  endif
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
-index 2adae5bbb..e86efd22c 100644
+index c34f440df..cebe51729 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
-@@ -3618,6 +3618,7 @@ pref("distribution.mozillaonline.ignore", true);
+@@ -3630,6 +3630,7 @@ pref("distribution.mozillaonline.ignore", true);
  pref("hilal.privacy.initialized", false);
  pref("hilal.bangs.custom", "[]");
  // Hilal Browser - UI Fix Integration
@@ -23,7 +23,7 @@ index 2adae5bbb..e86efd22c 100644
  // Theme Default Options
  pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
-index cf09ca25f..f335d674f 100644
+index 523d18e7e..bb780ef1d 100644
 --- a/browser/base/content/browser.xhtml
 +++ b/browser/base/content/browser.xhtml
 @@ -152,6 +152,15 @@
@@ -43,10 +43,10 @@ index cf09ca25f..f335d674f 100644
    <script src="chrome://browser/content/hilal/HilalWelcome.js"></script>
    <script src="chrome://browser/content/hilal/HilalWorkspaces.js"></script>
 diff --git a/browser/base/jar.mn b/browser/base/jar.mn
-index 947201682..ac9a0ba48 100644
+index e97993031..775e3e1d4 100644
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
-@@ -90,6 +90,8 @@ browser.jar:
+@@ -83,6 +83,8 @@ browser.jar:
          content/browser/hilal/HilalBoosts.js                (content/hilal/HilalBoosts.js)
          content/browser/hilal/HilalBoostsActorParent.sys.mjs (content/hilal/HilalBoostsActorParent.sys.mjs)
          content/browser/hilal/HilalBoostsActorChild.sys.mjs  (content/hilal/HilalBoostsActorChild.sys.mjs)
@@ -56,7 +56,7 @@ index 947201682..ac9a0ba48 100644
          content/browser/main-popupset.js                    (content/main-popupset.js)
  *       content/browser/pageinfo/pageInfo.xhtml             (content/pageinfo/pageInfo.xhtml)
 diff --git a/browser/components/customizableui/CustomizableUI.sys.mjs b/browser/components/customizableui/CustomizableUI.sys.mjs
-index 2c0b6e179..57c1b7e8f 100644
+index e2c4c5b17..51e5e7833 100644
 --- a/browser/components/customizableui/CustomizableUI.sys.mjs
 +++ b/browser/components/customizableui/CustomizableUI.sys.mjs
 @@ -37,6 +37,18 @@ const kPrefCustomizationHorizontalTabsBackup =
@@ -151,7 +151,7 @@ index 2c0b6e179..57c1b7e8f 100644
      this.initializeForTabsOrientation(CustomizableUI.verticalTabsEnabled);
  
      Services.obs.addObserver(this, "browser-set-toolbar-visibility");
-@@ -4466,10 +4504,15 @@ var CustomizableUIInternal = {
+@@ -4467,10 +4505,15 @@ var CustomizableUIInternal = {
     */
    reset() {
      gResetting = true;
@@ -171,7 +171,7 @@ index 2c0b6e179..57c1b7e8f 100644
      this._resetUIState();
  
      // Rebuild each registered area (across windows) to reflect the state that
-@@ -5075,6 +5118,12 @@ var CustomizableUIInternal = {
+@@ -5076,6 +5119,12 @@ var CustomizableUIInternal = {
  
      if (aTopic === "nsPref:changed") {
        this.reconcileSidebarPrefs(aData);
@@ -184,7 +184,7 @@ index 2c0b6e179..57c1b7e8f 100644
      }
    },
  
-@@ -5094,14 +5143,19 @@ var CustomizableUIInternal = {
+@@ -5095,14 +5144,19 @@ var CustomizableUIInternal = {
          "initializeForTabsOrientation, savedPlacements",
          savedPlacements
        );
@@ -207,7 +207,7 @@ index 2c0b6e179..57c1b7e8f 100644
        gCurrentVerticalTabs = false;
        return;
      }
-@@ -5285,6 +5339,9 @@ var CustomizableUIInternal = {
+@@ -5286,6 +5340,9 @@ var CustomizableUIInternal = {
        return;
      }
      let toVertical = CustomizableUI.verticalTabsEnabled;
@@ -217,7 +217,7 @@ index 2c0b6e179..57c1b7e8f 100644
      if (toVertical === gCurrentVerticalTabs) {
        lazy.log.debug("early return as the value hasn't changed");
        return;
-@@ -5378,6 +5435,7 @@ var CustomizableUIInternal = {
+@@ -5379,6 +5436,7 @@ var CustomizableUIInternal = {
        this.saveNavBarWhenVerticalTabsState();
        // We're switching to vertical in this session; pull saved state from pref and update placements
        this.restoreSavedHorizontalTabStripState();
@@ -225,7 +225,7 @@ index 2c0b6e179..57c1b7e8f 100644
      }
      // Give the sidebar a chance to adjust before we show/hide the toolbars
      lazy.log.debug("CustomizableUI notifying tabstrip-orientation-change");
-@@ -5396,6 +5454,96 @@ var CustomizableUIInternal = {
+@@ -5397,6 +5455,96 @@ var CustomizableUIInternal = {
        win.TabBarVisibility.update(true);
      }
    },
@@ -322,7 +322,7 @@ index 2c0b6e179..57c1b7e8f 100644
  };
  Object.freeze(CustomizableUIInternal);
  
-@@ -5500,7 +5648,7 @@ export var CustomizableUI = {
+@@ -5501,7 +5649,7 @@ export var CustomizableUI = {
    },
  
    get verticalTabsEnabled() {
@@ -332,10 +332,10 @@ index 2c0b6e179..57c1b7e8f 100644
  
    /**
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index 74f1c63a5..911605311 100644
+index acdcdd953..b022d9480 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -1796,8 +1796,10 @@ var gHilalPane = {
+@@ -1826,8 +1826,10 @@ var gHilalPane = {
      const hilalWsCheckbox = document.getElementById("hilalWorkspacesEnabled");
      const hilalWsPinnedPublicCheckbox = document.getElementById("hilalWorkspacesPinnedPublic");
      const hilalWsGroupsPublicCheckbox = document.getElementById("hilalWorkspacesGroupsPublic");
@@ -346,7 +346,7 @@ index 74f1c63a5..911605311 100644
      const hilalPrivacyLevelRadioGroup = /** @type {HTMLElement|null} */ (
        document.getElementById("hilalPrivacyLevel")
      );
-@@ -1863,6 +1865,18 @@ var gHilalPane = {
+@@ -1893,6 +1895,18 @@ var gHilalPane = {
          );
        });
      }
@@ -365,7 +365,7 @@ index 74f1c63a5..911605311 100644
      if (hilalSidebarCompactCheckbox) {
        hilalSidebarCompactCheckbox.checked = Services.prefs.getBoolPref(
          "hilal.compact.enabled",
-@@ -1887,6 +1901,18 @@ var gHilalPane = {
+@@ -1917,6 +1931,18 @@ var gHilalPane = {
          );
        });
      }
@@ -384,7 +384,7 @@ index 74f1c63a5..911605311 100644
  
      const hilalSidebarFooterCheckboxes = [
        ["hilalSidebarFooterBookmarks", "hilal.sidebar.footer.bookmarks", false],
-@@ -2106,6 +2132,7 @@ var gHilalPane = {
+@@ -2136,6 +2162,7 @@ var gHilalPane = {
          Services.prefs.setBoolPref("hilal.workspaces.enabled", true);
          Services.prefs.setBoolPref("hilal.workspaces.pinned.public", true);
          Services.prefs.setBoolPref("hilal.workspaces.groups.public", false);
@@ -392,7 +392,7 @@ index 74f1c63a5..911605311 100644
          Services.prefs.setBoolPref("hilal.compact.enabled", false);
          Services.prefs.setBoolPref("hilal.compact.hide_toolbox", true);
          Services.prefs.setStringPref("hilal.privacy.level", "standard");
-@@ -2118,18 +2145,28 @@ var gHilalPane = {
+@@ -2148,18 +2175,28 @@ var gHilalPane = {
          if (hilalWsGroupsPublicCheckbox) {
            hilalWsGroupsPublicCheckbox.checked = false;
          }
@@ -421,7 +421,7 @@ index 74f1c63a5..911605311 100644
      const hilalUiFixCheckbox = /** @type {HTMLInputElement|null} */ (
        document.getElementById("hilalUiFixEnabled")
      );
-@@ -2183,6 +2220,36 @@ var gHilalPane = {
+@@ -2213,6 +2250,36 @@ var gHilalPane = {
        }
      };
  
@@ -459,7 +459,7 @@ index 74f1c63a5..911605311 100644
        hilalUiFixCheckbox.checked = Services.prefs.getBoolPref(
          "hilal.uifix.enabled",
 diff --git a/browser/components/sidebar/SidebarManager.sys.mjs b/browser/components/sidebar/SidebarManager.sys.mjs
-index 114a2b1c5..24b4d762d 100644
+index de3ee9154..9d5eba7fc 100644
 --- a/browser/components/sidebar/SidebarManager.sys.mjs
 +++ b/browser/components/sidebar/SidebarManager.sys.mjs
 @@ -236,6 +236,15 @@ class SidebarManager extends EventTarget {
@@ -479,10 +479,10 @@ index 114a2b1c5..24b4d762d 100644
          Services.prefs.setStringPref(
            VISIBILITY_SETTING_PREF,
 diff --git a/browser/components/sidebar/browser-sidebar.js b/browser/components/sidebar/browser-sidebar.js
-index 1c542f529..a7524ae5e 100644
+index c5b7fd204..b67d7b194 100644
 --- a/browser/components/sidebar/browser-sidebar.js
 +++ b/browser/components/sidebar/browser-sidebar.js
-@@ -574,6 +574,68 @@ var SidebarController = {
+@@ -591,6 +591,68 @@ var SidebarController = {
      }
  
      HilalCompactMode.init();
@@ -551,7 +551,7 @@ index 1c542f529..a7524ae5e 100644
    },
  
    uninit() {
-@@ -608,6 +670,36 @@ var SidebarController = {
+@@ -625,6 +687,36 @@ var SidebarController = {
      delete this._aiWindowObserverAdded;
      delete this._windowRestoredObserverAdded;
  
@@ -588,7 +588,7 @@ index 1c542f529..a7524ae5e 100644
      CustomizableUI.removeListener(this);
  
      if (this._observer) {
-@@ -2071,6 +2163,7 @@ var SidebarController = {
+@@ -2094,6 +2186,7 @@ var SidebarController = {
        this.updateToolbarButton();
        this.dismissSidebarBadge(commandID);
  
@@ -596,7 +596,7 @@ index 1c542f529..a7524ae5e 100644
        this._fireFocusedEvent();
        return true;
      });
-@@ -2095,6 +2188,7 @@ var SidebarController = {
+@@ -2118,6 +2211,7 @@ var SidebarController = {
      }
      return this._show(commandID).then(() => {
        this._loadSidebarExtension(commandID);
@@ -604,7 +604,7 @@ index 1c542f529..a7524ae5e 100644
        return true;
      });
    },
-@@ -2278,6 +2372,7 @@ var SidebarController = {
+@@ -2301,6 +2395,7 @@ var SidebarController = {
        updateToggleControlLabel(triggerNode);
      }
      this.updateToolbarButton();
@@ -612,7 +612,7 @@ index 1c542f529..a7524ae5e 100644
    },
  
    /**
-@@ -2374,7 +2469,9 @@ var SidebarController = {
+@@ -2397,7 +2492,9 @@ var SidebarController = {
    },
  
    toggleTabstrip() {
@@ -623,7 +623,7 @@ index 1c542f529..a7524ae5e 100644
      let tabStrip = gBrowser.tabContainer;
      let arrowScrollbox = tabStrip.arrowScrollbox;
      let currentScrollOrientation = arrowScrollbox.getAttribute("orient");
-@@ -2414,6 +2511,284 @@ var SidebarController = {
+@@ -2437,6 +2534,284 @@ var SidebarController = {
      }
    },
  
@@ -908,7 +908,7 @@ index 1c542f529..a7524ae5e 100644
    debouncedMouseEnter() {
      const contentArea = document.getElementById("tabbrowser-tabbox");
      this._box.toggleAttribute("sidebar-launcher-hovered", true);
-@@ -2838,6 +3213,7 @@ var HilalCompactMode = {
+@@ -2861,6 +3236,7 @@ var HilalCompactMode = {
        if (
          data === this.PREF ||
          data === this.HIDE_TOOLBOX_PREF ||
@@ -916,7 +916,7 @@ index 1c542f529..a7524ae5e 100644
          data === "hilal.workspaces.enabled" ||
          data === "sidebar.verticalTabs"
        ) {
-@@ -2846,6 +3222,7 @@ var HilalCompactMode = {
+@@ -2869,6 +3245,7 @@ var HilalCompactMode = {
      };
      Services.prefs.addObserver(this.PREF, this._prefObserver);
      Services.prefs.addObserver(this.HIDE_TOOLBOX_PREF, this._prefObserver);
@@ -924,7 +924,7 @@ index 1c542f529..a7524ae5e 100644
      Services.prefs.addObserver("hilal.workspaces.enabled", this._prefObserver);
      Services.prefs.addObserver("sidebar.verticalTabs", this._prefObserver);
      window.addEventListener("popupshown", this, true);
-@@ -2874,6 +3251,7 @@ var HilalCompactMode = {
+@@ -2897,6 +3274,7 @@ var HilalCompactMode = {
      if (this._prefObserver) {
        Services.prefs.removeObserver(this.PREF, this._prefObserver);
        Services.prefs.removeObserver(this.HIDE_TOOLBOX_PREF, this._prefObserver);
@@ -932,7 +932,7 @@ index 1c542f529..a7524ae5e 100644
        Services.prefs.removeObserver(
          "hilal.workspaces.enabled",
          this._prefObserver
-@@ -2933,9 +3311,11 @@ var HilalCompactMode = {
+@@ -2956,9 +3334,11 @@ var HilalCompactMode = {
        false
      );
      const isSidebarActive = workspacesEnabled || verticalTabsEnabled;
@@ -1475,7 +1475,7 @@ index 462e0ce39..d77754637 100644
    display: grid;
    grid-template-rows: auto min-content min-content;
 diff --git a/browser/components/sidebar/sidebar-main.mjs b/browser/components/sidebar/sidebar-main.mjs
-index 7cb3728bf..053e42812 100644
+index 6ae4a2440..2f5f7fabb 100644
 --- a/browser/components/sidebar/sidebar-main.mjs
 +++ b/browser/components/sidebar/sidebar-main.mjs
 @@ -55,8 +55,14 @@ export default class SidebarMain extends MozLitElement {
@@ -2696,10 +2696,10 @@ index 7cb3728bf..053e42812 100644
      }
      /* Add 1 to tools and extensions count for "Customize sidebar" option */
 diff --git a/browser/components/tabbrowser/content/drag-and-drop.js b/browser/components/tabbrowser/content/drag-and-drop.js
-index 20f87cf81..69c0fe901 100644
+index 7101cb673..2dc20dea5 100644
 --- a/browser/components/tabbrowser/content/drag-and-drop.js
 +++ b/browser/components/tabbrowser/content/drag-and-drop.js
-@@ -1179,6 +1179,17 @@
+@@ -1193,6 +1193,17 @@
          canvas.mozOpaque = true;
        }
  
@@ -2717,7 +2717,7 @@ index 20f87cf81..69c0fe901 100644
        canvas.width = 160 * scale;
        canvas.height = 90 * scale;
        let toDrag = canvas;
-@@ -1242,6 +1253,7 @@
+@@ -1256,6 +1267,7 @@
          dragImageOffset = dragImageOffset * scale;
        }
        dt.setDragImage(toDrag, dragImageOffset, dragImageOffset);
@@ -2726,10 +2726,10 @@ index 20f87cf81..69c0fe901 100644
        // _dragData.offsetX/Y give the coordinates that the mouse should be
        // positioned relative to the corner of the new window created upon
 diff --git a/browser/components/tabbrowser/content/tabbrowser.js b/browser/components/tabbrowser/content/tabbrowser.js
-index 0580bbe1e..a93a466ca 100644
+index 9684c95ba..32730537b 100644
 --- a/browser/components/tabbrowser/content/tabbrowser.js
 +++ b/browser/components/tabbrowser/content/tabbrowser.js
-@@ -10150,7 +10150,8 @@ var TabBarVisibility = {
+@@ -10123,7 +10123,8 @@ var TabBarVisibility = {
  
      let hasVerticalTabs =
        !isSingleTabWindow &&
@@ -2740,10 +2740,10 @@ index 0580bbe1e..a93a466ca 100644
      // When `gBrowser` has not been initialized, we're opening a new window and
      // assume only a single tab is loading.
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
-index 3cb7ef86f..c398fda96 100644
+index ba30ba8ca..eafcb41a4 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2773,6 +2773,8 @@ hilal-workspaces-pinned-public =
+@@ -2699,6 +2699,8 @@ hilal-workspaces-pinned-public =
      .label = Make pinned tabs visible in all workspaces
  hilal-workspaces-groups-public =
      .label = Make tab groups visible in all workspaces
@@ -2752,7 +2752,7 @@ index 3cb7ef86f..c398fda96 100644
  hilal-workspaces-reset-description = Reset all workspace data (cannot be undone).
  hilal-workspaces-reset-button =
      .label = Reset Workspaces
-@@ -2787,6 +2789,8 @@ hilal-sidebar-compact-enabled =
+@@ -2713,6 +2715,8 @@ hilal-sidebar-compact-enabled =
  hilal-sidebar-compact-hide-toolbar =
      .label = Auto-hide top toolbar in compact mode
  hilal-sidebar-compact-hide-toolbar-desc = When enabled, the top toolbar containing the address bar and tabs is automatically hidden in compact mode. Hovering near the top edge reveals it with a gorgeous premium glassmorphic slide-down animation. When disabled, the top toolbar remains permanently visible.
@@ -2761,7 +2761,7 @@ index 3cb7ef86f..c398fda96 100644
  hilal-sidebar-footer-items-label = Standard Footer Items:
  hilal-sidebar-footer-bookmarks =
      .label = Bookmarks
-@@ -2840,6 +2844,9 @@ hilal-privacy-extreme =
+@@ -2766,6 +2770,9 @@ hilal-privacy-extreme =
  ## UI Enhancements
  
  hilal-uifix-header = UI Enhancements
@@ -2771,7 +2771,7 @@ index 3cb7ef86f..c398fda96 100644
  hilal-uifix-enabled =
      .label = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
  hilal-uifix-connect-to-window =
-@@ -2891,4 +2898,3 @@ hilal-shortcuts-header = Keyboard Shortcuts
+@@ -2817,4 +2824,3 @@ hilal-shortcuts-header = Keyboard Shortcuts
  hilal-shortcuts-description = Customize keyboard shortcuts for Hilal actions and native browser functions.
  hilal-shortcuts-reset =
      .label = Restore Defaults

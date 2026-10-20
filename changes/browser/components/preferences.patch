@@ -1,5 +1,5 @@
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index 2561c3c48..f0e9daea9 100644
+index b66ff919d..2479dca43 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
 @@ -13,7 +13,7 @@
@@ -20,7 +20,7 @@ index 2561c3c48..f0e9daea9 100644
    UpdateListener: "resource://gre/modules/UpdateListener.sys.mjs",
    LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
    MigrationUtils: "resource:///modules/MigrationUtils.sys.mjs",
-@@ -1785,6 +1787,103 @@ gMainPane.initialized = new Promise(res => {
+@@ -1815,6 +1817,103 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
@@ -125,10 +125,10 @@ index 2561c3c48..f0e9daea9 100644
    InternalHandlerInfoWrapper,
    getFileDisplayName,
 diff --git a/browser/components/preferences/preferences.js b/browser/components/preferences/preferences.js
-index 17e226831..bc04ee0cf 100644
+index c76a0647e..63f1a887e 100644
 --- a/browser/components/preferences/preferences.js
 +++ b/browser/components/preferences/preferences.js
-@@ -504,6 +504,7 @@ function init_all() {
+@@ -524,6 +524,7 @@ function init_all() {
      document.getElementById("category-general").hidden = false;
      document.getElementById("nav-separator").hidden = true;
    }
@@ -137,10 +137,10 @@ index 17e226831..bc04ee0cf 100644
    register_module("paneSearch", gSearchPane);
    register_module("panePrivacy", gPrivacyPane);
 diff --git a/browser/components/preferences/preferences.xhtml b/browser/components/preferences/preferences.xhtml
-index a11826602..bad930841 100644
+index 1b8c38159..d271b6efd 100644
 --- a/browser/components/preferences/preferences.xhtml
 +++ b/browser/components/preferences/preferences.xhtml
-@@ -136,6 +136,11 @@
+@@ -124,6 +124,11 @@
          iconsrc="chrome://browser/skin/preferences/category-sync.svg"
          data-l10n-id="pane-sync-title3">
        </html:moz-page-nav-button>
@@ -152,7 +152,7 @@ index a11826602..bad930841 100644
        <html:moz-page-nav-button id="category-home"
          view="paneHome"
          iconsrc="chrome://browser/skin/home.svg"
-@@ -256,6 +261,7 @@
+@@ -243,6 +248,7 @@
          <vbox id="mainPrefPane">
  #include searchResults.inc.xhtml
  #include main.inc.xhtml

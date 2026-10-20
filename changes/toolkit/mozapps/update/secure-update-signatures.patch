@@ -4,10 +4,10 @@ Configure the Firefox updater build system to compile release_primary.der
 and release_secondary.der into the updater binary when MOZ_UPDATE_CHANNEL
 starts with "hilal-".
 diff --git a/toolkit/mozapps/update/updater/moz.build b/toolkit/mozapps/update/updater/moz.build
-index c5e2e20e6..201ecba7c 100644
+index 7e362df57..a9a9efbdf 100644
 --- a/toolkit/mozapps/update/updater/moz.build
 +++ b/toolkit/mozapps/update/updater/moz.build
-@@ -51,7 +51,7 @@ xpcshell_cert.script = "gen_cert_header.py:create_header"
+@@ -64,7 +64,7 @@ xpcshell_cert.script = "gen_cert_header.py:create_header"
  dep1_cert.script = "gen_cert_header.py:create_header"
  dep2_cert.script = "gen_cert_header.py:create_header"
  

@@ -36,10 +36,10 @@ index 3ffd464b9..2a57b9f13 100644
        <description id="trademark" data-l10n-id="trademarkInfo"></description>
      </vbox>
 diff --git a/browser/base/content/utilityOverlay.js b/browser/base/content/utilityOverlay.js
-index e692f340a..245bada1b 100644
+index bdfabc3f7..c80767afb 100644
 --- a/browser/base/content/utilityOverlay.js
 +++ b/browser/base/content/utilityOverlay.js
-@@ -534,6 +534,9 @@ function makeURLAbsolute(aBase, aUrl) {
+@@ -536,6 +536,9 @@ function makeURLAbsolute(aBase, aUrl) {
  
  function getHelpLinkURL(aHelpTopic) {
    var url = Services.urlFormatter.formatURLPref("app.support.baseURL");

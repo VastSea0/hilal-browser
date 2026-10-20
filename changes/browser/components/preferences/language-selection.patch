@@ -1,8 +1,8 @@
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index 41981aad7..fcfaaf83f 100644
+index 242e46a44..1e306e60d 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -2207,6 +2207,104 @@ var gHilalPane = {
+@@ -2237,6 +2237,104 @@ var gHilalPane = {
      }
  
      refreshBangsList();
@@ -108,10 +108,10 @@ index 41981aad7..fcfaaf83f 100644
  };
  
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
-index 336169a1b..4ece62b58 100644
+index aaf26a62d..1eb599ead 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2872,3 +2872,10 @@ hilal-bangs-searchurl-label = Search URL:
+@@ -2798,3 +2798,10 @@ hilal-bangs-searchurl-label = Search URL:
  hilal-bangs-homeurl-label = Home URL (optional):
  hilal-bangs-default-label = (default)
  hilal-bangs-custom-label = (custom)

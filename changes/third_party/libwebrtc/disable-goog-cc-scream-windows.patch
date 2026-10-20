@@ -26,10 +26,10 @@ index 97ace33d8..218c9a4f7 100644
                                                     std::move(goog_cc_config));
  }
 diff --git a/third_party/libwebrtc/moz.build b/third_party/libwebrtc/moz.build
-index 70bd75ee2..affb52812 100644
+index dd7816f70..143b74d8a 100644
 --- a/third_party/libwebrtc/moz.build
 +++ b/third_party/libwebrtc/moz.build
-@@ -295,7 +295,6 @@ DIRS += [
+@@ -294,7 +294,6 @@ DIRS += [
      "/third_party/libwebrtc/modules/congestion_controller/goog_cc/probe_controller_gn",
      "/third_party/libwebrtc/modules/congestion_controller/goog_cc/pushback_controller_gn",
      "/third_party/libwebrtc/modules/congestion_controller/goog_cc/send_side_bwe_gn",

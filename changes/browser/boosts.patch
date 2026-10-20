@@ -1,8 +1,8 @@
 diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
-index 58b8bb99f..2adae5bbb 100644
+index 7a959f59f..c34f440df 100644
 --- a/browser/app/profile/firefox.js
 +++ b/browser/app/profile/firefox.js
-@@ -3721,3 +3721,6 @@ pref("hilal.sidebar.footer.settings", true);
+@@ -3733,3 +3733,6 @@ pref("hilal.sidebar.footer.settings", true);
  pref("hilal.sidebar.customItems", "[]");
  pref("hilal.compact.enabled", true);
  pref("hilal.compact.hide_toolbox", true);
@@ -10,7 +10,7 @@ index 58b8bb99f..2adae5bbb 100644
 +pref("hilal.boosts.enabled", true);
 +pref("hilal.boosts.data", "{}");
 diff --git a/browser/base/content/browser.xhtml b/browser/base/content/browser.xhtml
-index 7bcc54d65..cf09ca25f 100644
+index d2cd97493..523d18e7e 100644
 --- a/browser/base/content/browser.xhtml
 +++ b/browser/base/content/browser.xhtml
 @@ -155,5 +155,6 @@
@@ -21,10 +21,10 @@ index 7bcc54d65..cf09ca25f 100644
  </html:body>
  </html>
 diff --git a/browser/base/content/main-popupset.inc.xhtml b/browser/base/content/main-popupset.inc.xhtml
-index 55cfc4d36..c33baf247 100644
+index 2338bac00..8ebe44dfc 100644
 --- a/browser/base/content/main-popupset.inc.xhtml
 +++ b/browser/base/content/main-popupset.inc.xhtml
-@@ -932,4 +932,742 @@
+@@ -937,4 +937,742 @@
      <menuitem id="select-translations-panel-about-translations-menuitem"
                data-l10n-id="translations-panel-settings-about2"/>
    </menupopup>
@@ -768,7 +768,7 @@ index 55cfc4d36..c33baf247 100644
 +  
  </popupset>
 diff --git a/browser/base/content/navigator-toolbox.inc.xhtml b/browser/base/content/navigator-toolbox.inc.xhtml
-index e7e94e13a..059c6c3fc 100644
+index 7b2ac0dc1..2a76ea057 100644
 --- a/browser/base/content/navigator-toolbox.inc.xhtml
 +++ b/browser/base/content/navigator-toolbox.inc.xhtml
 @@ -440,6 +440,13 @@
@@ -786,10 +786,10 @@ index e7e94e13a..059c6c3fc 100644
            <html:div class="search-one-offs"
                includecurrentengine="true"
 diff --git a/browser/base/jar.mn b/browser/base/jar.mn
-index 890a1580f..947201682 100644
+index 31d71e63d..e97993031 100644
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
-@@ -87,6 +87,9 @@ browser.jar:
+@@ -80,6 +80,9 @@ browser.jar:
          content/browser/hilal/screenshots/welcome-toolbar-hidden.png (content/hilal/screenshots/welcome-toolbar-hidden.png)
          content/browser/hilal/HilalKeyboardShortcuts.js     (content/hilal/HilalKeyboardShortcuts.js)
          content/browser/hilal/HilalWorkspaces.js            (content/hilal/HilalWorkspaces.js)
@@ -812,10 +812,10 @@ index 33b90b64e..658d71e93 100644
      "content/test/keyboard/browser.toml",
      "content/test/keyboard/browserSidebarRevamp.toml",
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index d0c8f939b..74f1c63a5 100644
+index 92aa54d51..acdcdd953 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
-@@ -2274,6 +2274,36 @@ var gHilalPane = {
+@@ -2304,6 +2304,36 @@ var gHilalPane = {
  
      updateHilalUiFixSubOptionsState();
  
@@ -853,10 +853,10 @@ index d0c8f939b..74f1c63a5 100644
      const { HilalBangs } = ChromeUtils.importESModule(
        "resource:///modules/HilalBangs.sys.mjs"
 diff --git a/gfx/layers/AnimationInfo.cpp b/gfx/layers/AnimationInfo.cpp
-index b4941588b..0571b4fbd 100644
+index 3c8729876..7b10b5d78 100644
 --- a/gfx/layers/AnimationInfo.cpp
 +++ b/gfx/layers/AnimationInfo.cpp
-@@ -13,6 +13,7 @@
+@@ -15,6 +15,7 @@
  #include "mozilla/EffectSet.h"
  #include "mozilla/MotionPathUtils.h"
  #include "mozilla/PresShell.h"
@@ -864,7 +864,7 @@ index b4941588b..0571b4fbd 100644
  #include "mozilla/ScrollContainerFrame.h"
  #include "nsIContent.h"
  #include "nsLayoutUtils.h"
-@@ -331,6 +332,7 @@ static void SetAnimatable(NonCustomCSSPropertyId aProperty,
+@@ -356,6 +357,7 @@ static void SetAnimatable(NonCustomCSSPropertyId aProperty,
                            nsIFrame* aFrame, TransformReferenceBox& aRefBox,
                            layers::Animatable& aAnimatable) {
    MOZ_ASSERT(aFrame);
@@ -873,7 +873,7 @@ index b4941588b..0571b4fbd 100644
    if (aAnimationValue.IsNull()) {
      aAnimatable = null_t();
 diff --git a/gfx/layers/wr/WebRenderCommandBuilder.cpp b/gfx/layers/wr/WebRenderCommandBuilder.cpp
-index 034355908..e6b13075b 100644
+index 64b3553fc..bd5243dfa 100644
 --- a/gfx/layers/wr/WebRenderCommandBuilder.cpp
 +++ b/gfx/layers/wr/WebRenderCommandBuilder.cpp
 @@ -3,6 +3,7 @@
@@ -884,7 +884,7 @@ index 034355908..e6b13075b 100644
  
  #include "mozilla/AutoRestore.h"
  #include "mozilla/DebugOnly.h"
-@@ -1840,6 +1841,7 @@ void WebRenderCommandBuilder::CreateWebRenderCommands(
+@@ -1846,6 +1847,7 @@ void WebRenderCommandBuilder::CreateWebRenderCommands(
      mozilla::wr::IpcResourceUpdateQueue& aResources,
      const StackingContextHelper& aSc,
      nsDisplayListBuilder* aDisplayListBuilder) {
@@ -893,10 +893,10 @@ index 034355908..e6b13075b 100644
    if (aItem->GetType() == DisplayItemType::TYPE_COMPOSITOR_HITTEST_INFO) {
      // The hit test information was processed above.
 diff --git a/image/AutoRestoreSVGState.h b/image/AutoRestoreSVGState.h
-index be639a7b7..731bfde2b 100644
+index de4c6e0f0..fb85e3035 100644
 --- a/image/AutoRestoreSVGState.h
 +++ b/image/AutoRestoreSVGState.h
-@@ -47,6 +47,10 @@ class MOZ_STACK_CLASS AutoRestoreSVGState final {
+@@ -49,6 +49,10 @@ class MOZ_STACK_CLASS AutoRestoreSVGState final {
          }
          return dom::PrefersColorSchemeOverride::None;
        }());
@@ -908,7 +908,7 @@ index be639a7b7..731bfde2b 100644
  
      aSVGDocumentWrapper->mIsDrawing = true;
 diff --git a/layout/base/PresShell.cpp b/layout/base/PresShell.cpp
-index 17c8830ba..df5d0e6ed 100644
+index f5d4d0963..60f46a061 100644
 --- a/layout/base/PresShell.cpp
 +++ b/layout/base/PresShell.cpp
 @@ -137,6 +137,7 @@
@@ -919,7 +919,7 @@ index 17c8830ba..df5d0e6ed 100644
  #include "nsAutoLayoutPhase.h"
  #include "nsCOMArray.h"
  #include "nsCOMPtr.h"
-@@ -5594,7 +5595,8 @@ nscolor PresShell::GetDefaultBackgroundColorToDraw() const {
+@@ -5659,7 +5660,8 @@ nscolor PresShell::GetDefaultBackgroundColorToDraw() const {
    if (!mPresContext) {
      return NS_RGB(255, 255, 255);
    }
@@ -930,7 +930,7 @@ index 17c8830ba..df5d0e6ed 100644
  
  void PresShell::UpdateCanvasBackground() {
 diff --git a/layout/base/nsPresContext.h b/layout/base/nsPresContext.h
-index f8fe48344..3c1a5ceb7 100644
+index 81a9b2938..bde663704 100644
 --- a/layout/base/nsPresContext.h
 +++ b/layout/base/nsPresContext.h
 @@ -594,6 +594,34 @@ class nsPresContext : public nsISupports,
@@ -966,12 +966,12 @@ index f8fe48344..3c1a5ceb7 100644
 +  }
 +
    /**
-    * Return the device's screen size in inches, for font size
-    * inflation.
-@@ -1425,6 +1453,12 @@ class nsPresContext : public nsISupports,
-   FontVisibility mFontVisibility = FontVisibility::Unknown;
+    * Sets the effective link parameters overrides, and invalidate stuff as
+    * needed.
+@@ -1443,6 +1471,12 @@ class nsPresContext : public nsISupports,
    mozilla::dom::PrefersColorSchemeOverride mOverriddenOrEmbedderColorScheme;
    mozilla::StyleForcedColors mForcedColors;
+   mozilla::StyleLinkParameters mLinkParameters;
 +  nscolor mHilalBoostsOverrideAccent = 0;
 +  float mHilalBoostsOverrideComplementaryRotation = 0.0f;
 +  nsCString mHilalBoostsBaseDomain;
@@ -982,7 +982,7 @@ index f8fe48344..3c1a5ceb7 100644
   protected:
    virtual ~nsPresContext();
 diff --git a/layout/generic/nsIFrame.h b/layout/generic/nsIFrame.h
-index 8f2c92865..0af687b75 100644
+index 9b2f05208..fadf65579 100644
 --- a/layout/generic/nsIFrame.h
 +++ b/layout/generic/nsIFrame.h
 @@ -128,6 +128,10 @@ class nsWindowSizes;
@@ -1010,7 +1010,7 @@ index 8f2c92865..0af687b75 100644
  
    /**
 diff --git a/layout/painting/nsCSSRendering.cpp b/layout/painting/nsCSSRendering.cpp
-index a581b039a..b9fac0fc4 100644
+index 3c824193e..54426e2d7 100644
 --- a/layout/painting/nsCSSRendering.cpp
 +++ b/layout/painting/nsCSSRendering.cpp
 @@ -5,6 +5,7 @@
@@ -1021,7 +1021,7 @@ index a581b039a..b9fac0fc4 100644
  
  #include <algorithm>
  #include <ctime>
-@@ -622,6 +623,7 @@ ImgDrawResult nsCSSRendering::PaintBorder(
+@@ -624,6 +625,7 @@ ImgDrawResult nsCSSRendering::PaintBorder(
      nsPresContext* aPresContext, gfxContext& aRenderingContext,
      nsIFrame* aForFrame, const nsRect& aDirtyRect, const nsRect& aBorderArea,
      ComputedStyle* aStyle, PaintBorderFlags aFlags, Sides aSkipSides) {
@@ -1029,7 +1029,7 @@ index a581b039a..b9fac0fc4 100644
    AUTO_PROFILER_LABEL("nsCSSRendering::PaintBorder", GRAPHICS);
  
    Maybe<nsStyleBorder> visitedBorder = GetBorderIfVisited(*aStyle);
-@@ -934,6 +936,7 @@ Maybe<nsCSSBorderRenderer>
+@@ -936,6 +938,7 @@ Maybe<nsCSSBorderRenderer>
  nsCSSRendering::CreateBorderRendererForNonThemedOutline(
      nsPresContext* aPresContext, DrawTarget* aDrawTarget, nsIFrame* aForFrame,
      const nsRect& aDirtyRect, const nsRect& aInnerRect, ComputedStyle* aStyle) {
@@ -1037,7 +1037,7 @@ index a581b039a..b9fac0fc4 100644
    // Get our ComputedStyle's color struct.
    const nsStyleOutline* ourOutline = aStyle->StyleOutline();
    if (!ourOutline->ShouldPaintOutline()) {
-@@ -2375,6 +2378,7 @@ nscolor nsCSSRendering::DetermineBackgroundColor(nsPresContext* aPresContext,
+@@ -2379,6 +2382,7 @@ nscolor nsCSSRendering::DetermineBackgroundColor(nsPresContext* aPresContext,
                                                   nsIFrame* aFrame,
                                                   bool& aDrawBackgroundImage,
                                                   bool& aDrawBackgroundColor) {
@@ -1046,10 +1046,10 @@ index a581b039a..b9fac0fc4 100644
    aDrawBackgroundImage = shouldPaint.mImage;
    aDrawBackgroundColor = shouldPaint.mColor;
 diff --git a/layout/painting/nsDisplayList.cpp b/layout/painting/nsDisplayList.cpp
-index 4253ae097..e7ada8aaa 100644
+index f958ef743..de44ab4b5 100644
 --- a/layout/painting/nsDisplayList.cpp
 +++ b/layout/painting/nsDisplayList.cpp
-@@ -81,6 +81,7 @@
+@@ -83,6 +83,7 @@
  #include "mozilla/layers/WebRenderLayerManager.h"
  #include "mozilla/layers/WebRenderMessages.h"
  #include "mozilla/layers/WebRenderScrollData.h"
@@ -1057,7 +1057,7 @@ index 4253ae097..e7ada8aaa 100644
  #include "nsCSSProps.h"
  #include "nsCSSRendering.h"
  #include "nsCSSRenderingGradients.h"
-@@ -2204,6 +2205,8 @@ void nsDisplayList::Paint(nsDisplayListBuilder* aBuilder, gfxContext* aCtx,
+@@ -2206,6 +2207,8 @@ void nsDisplayList::Paint(nsDisplayListBuilder* aBuilder, gfxContext* aCtx,
        continue;
      }
  
@@ -1088,7 +1088,7 @@ index 6e464b48c..6b22179a7 100644
  
        const int32_t appUnitsPerDevPixel = aPresContext->AppUnitsPerDevPixel();
 diff --git a/layout/style/StyleColor.cpp b/layout/style/StyleColor.cpp
-index b320186e5..ea4f7273e 100644
+index bbee32af3..9b72f8a19 100644
 --- a/layout/style/StyleColor.cpp
 +++ b/layout/style/StyleColor.cpp
 @@ -7,6 +7,7 @@
@@ -1099,7 +1099,7 @@ index b320186e5..ea4f7273e 100644
  #include "nsIFrame.h"
  #include "nsStyleStruct.h"
  
-@@ -51,6 +52,7 @@ nscolor StyleColor::CalcColor(const ComputedStyle& aStyle) const {
+@@ -112,6 +113,7 @@ nscolor StyleColor::CalcColor(const ComputedStyle& aStyle) const {
  
  template <>
  nscolor StyleColor::CalcColor(const nsIFrame* aFrame) const {
@@ -1107,7 +1107,7 @@ index b320186e5..ea4f7273e 100644
    return ResolveColor(aFrame->StyleText()->mColor).ToColor();
  }
  
-@@ -101,11 +103,12 @@ nscolor StyleAbsoluteColor::ToColor() const {
+@@ -162,11 +164,12 @@ nscolor StyleAbsoluteColor::ToColor() const {
      }
    }
  
@@ -1124,7 +1124,7 @@ index b320186e5..ea4f7273e 100644
  
  }  // namespace mozilla
 diff --git a/layout/style/moz.build b/layout/style/moz.build
-index b3886e491..0d9cc8b13 100644
+index 4b89cbf31..afe2b4e69 100644
 --- a/layout/style/moz.build
 +++ b/layout/style/moz.build
 @@ -99,6 +99,7 @@ EXPORTS.mozilla += [
@@ -1135,7 +1135,7 @@ index b3886e491..0d9cc8b13 100644
      "PostTraversalTask.h",
      "PreferenceSheet.h",
      "PreloadedStyleSheet.h",
-@@ -253,6 +254,7 @@ UNIFIED_SOURCES += [
+@@ -252,6 +253,7 @@ UNIFIED_SOURCES += [
      "nsDOMCSSValueList.cpp",
      "nsFontFaceLoader.cpp",
      "nsFontFaceUtils.cpp",
@@ -1702,7 +1702,7 @@ index 000000000..af060cba2
 +
 +#endif  // mozilla_HilalBoostsBackend_h_
 diff --git a/layout/svg/SVGImageContext.cpp b/layout/svg/SVGImageContext.cpp
-index ecbda963b..c976e61d6 100644
+index 384401ae2..add807c70 100644
 --- a/layout/svg/SVGImageContext.cpp
 +++ b/layout/svg/SVGImageContext.cpp
 @@ -11,6 +11,7 @@
@@ -1749,7 +1749,7 @@ index ecbda963b..c976e61d6 100644
      auto scheme = LookAndFeel::ColorSchemeForStyle(
          *aPresContext.Document(), aStyle.StyleUI()->mColorScheme.bits,
 diff --git a/layout/svg/SVGImageContext.h b/layout/svg/SVGImageContext.h
-index 159d9cbbd..28dfffaf0 100644
+index b1f811989..88b654609 100644
 --- a/layout/svg/SVGImageContext.h
 +++ b/layout/svg/SVGImageContext.h
 @@ -6,6 +6,7 @@
@@ -1789,12 +1789,12 @@ index 159d9cbbd..28dfffaf0 100644
    const Maybe<SVGPreserveAspectRatio>& GetPreserveAspectRatio() const {
      return mPreserveAspectRatio;
    }
-@@ -107,7 +123,11 @@ class SVGImageContext {
- 
+@@ -116,7 +132,11 @@ class SVGImageContext {
      return contextPaintIsEqual && mViewportSize == aOther.mViewportSize &&
             mPreserveAspectRatio == aOther.mPreserveAspectRatio &&
--           mColorScheme == aOther.mColorScheme;
-+           mColorScheme == aOther.mColorScheme &&
+            mColorScheme == aOther.mColorScheme &&
+-           mLinkParameters == aOther.mLinkParameters;
++           mLinkParameters == aOther.mLinkParameters &&
 +           mHilalBoostsAccent == aOther.mHilalBoostsAccent &&
 +           mHilalBoostsComplementaryRotation ==
 +               aOther.mHilalBoostsComplementaryRotation &&
@@ -1802,21 +1802,21 @@ index 159d9cbbd..28dfffaf0 100644
    }
  
    bool operator!=(const SVGImageContext&) const = default;
-@@ -119,7 +139,9 @@ class SVGImageContext {
-     }
+@@ -129,7 +149,9 @@ class SVGImageContext {
      return HashGeneric(hash, mViewportSize.map(HashSize).valueOr(0),
                         mPreserveAspectRatio.map(HashPAR).valueOr(0),
--                       mColorScheme.map(HashColorScheme).valueOr(0));
-+                       mColorScheme.map(HashColorScheme).valueOr(0),
+                        mColorScheme.map(HashColorScheme).valueOr(0),
+-                       HashLinkParameters(mLinkParameters));
++                       HashLinkParameters(mLinkParameters),
 +                       mHilalBoostsAccent, mHilalBoostsComplementaryRotation,
 +                       mHilalBoostsInverted);
    }
  
   private:
-@@ -138,6 +160,9 @@ class SVGImageContext {
-   Maybe<CSSIntSize> mViewportSize;
+@@ -167,6 +189,9 @@ class SVGImageContext {
    Maybe<SVGPreserveAspectRatio> mPreserveAspectRatio;
    Maybe<ColorScheme> mColorScheme;
+   StyleLinkParameters mLinkParameters;
 +  nscolor mHilalBoostsAccent = 0;
 +  float mHilalBoostsComplementaryRotation = 0.0f;
 +  bool mHilalBoostsInverted = false;
