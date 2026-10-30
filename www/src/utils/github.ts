@@ -305,3 +305,28 @@ export async function fetchGithubContributors(): Promise<Contributor[]> {
   return [];
 }
 
+
+const hasApk = (release: GithubRelease) =>
+  release.assets.some(asset => asset.name.toLowerCase().endsWith(".apk"));
+
+/** Android releases share the repository with desktop ones; tell them apart by tag or APK. */
+export function isAndroidRelease(release: GithubRelease): boolean {
+  return /^(android|mobile)-/.test(release.tag_name) || hasApk(release);
+}
+
+/**
+ * The release to offer on this device: the newest stable APK release on Android, the newest
+ * desktop release everywhere else.
+ */
+export function pickReleaseFor(releases: GithubRelease[], os: DetectionOS): GithubRelease | null {
+  const published = releases.filter(release => !release.draft);
+  if (os === "android") {
+    return (
+      published.find(release => !release.prerelease && hasApk(release)) ||
+      published.find(hasApk) ||
+      published[0] ||
+      null
+    );
+  }
+  return published.find(release => !isAndroidRelease(release)) || published[0] || null;
+}

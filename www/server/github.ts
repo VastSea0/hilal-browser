@@ -84,14 +84,34 @@ export async function fetchGithubReleases(limit = 10): Promise<ReleaseSummary[]>
   return data.map(normalizeRelease);
 }
 
+/** Android releases share the repository; their tags start with "android-" or "mobile-". */
+export function isAndroidRelease(release: ReleaseSummary): boolean {
+  return /^(android|mobile)-/.test(release.tag_name);
+}
+
+/** Newest desktop release, for the desktop updater. Android releases are skipped. */
 export async function fetchLatestRelease(): Promise<ReleaseSummary | null> {
-  const releases = await fetchGithubReleases(12);
+  const releases = await fetchGithubReleases(30);
   const includePrerelease = process.env.HILAL_UPDATE_INCLUDE_PRERELEASES === "1";
   return (
     releases.find(
-      release => !release.draft && (includePrerelease || !release.prerelease)
+      release =>
+        !release.draft &&
+        !isAndroidRelease(release) &&
+        (includePrerelease || !release.prerelease)
     ) || null
   );
+}
+
+/** Newest stable release that ships an APK. */
+export async function fetchLatestAndroidApk(): Promise<{ release: ReleaseSummary; apk: ReleaseAsset } | null> {
+  const releases = await fetchGithubReleases(30);
+  for (const release of releases) {
+    if (release.draft || release.prerelease) continue;
+    const apk = release.assets.find(asset => asset.name.toLowerCase().endsWith(".apk"));
+    if (apk) return { release, apk };
+  }
+  return null;
 }
 
 export function normalizeRelease(item: any): ReleaseSummary {

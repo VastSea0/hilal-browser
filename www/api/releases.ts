@@ -6,7 +6,7 @@ export default async function handler(
   res: ServerResponse
 ) {
   try {
-    const releases = await fetchGithubReleases(12);
+    const releases = await fetchGithubReleases(30);
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=900");

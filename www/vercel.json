@@ -3,9 +3,25 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/update/:path*", "destination": "/api/update?path=:path*" },
-    { "source": "/releases.json", "destination": "/api/releases" },
-    { "source": "/api/telemetry", "destination": "/api/telemetry" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/android/latest.apk",
+      "destination": "/api/android-latest"
+    },
+    {
+      "source": "/update/:path*",
+      "destination": "/api/update?path=:path*"
+    },
+    {
+      "source": "/releases.json",
+      "destination": "/api/releases"
+    },
+    {
+      "source": "/api/telemetry",
+      "destination": "/api/telemetry"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }

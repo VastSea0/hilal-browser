@@ -15,6 +15,7 @@ import {
   FALLBACK_RELEASE_EN,
   detectOS,
   getRecommendedAsset,
+  pickReleaseFor,
   formatBytes
 } from "./utils/github";
 
@@ -79,7 +80,7 @@ export default function App() {
     return "home";
   });
 
-  const [release, setRelease] = useState<GithubRelease | null>(null);
+  const [releases, setReleases] = useState<GithubRelease[]>([]);
   const [isDownloadOpen, setIsDownloadOpen] = useState<boolean>(false);
   const [detectedOS, setDetectedOS] = useState<string>("other");
   const [activeTab, setActiveTab] = useState<number>(0);
@@ -137,14 +138,9 @@ export default function App() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await fetchGithubReleases();
-        if (data && data.length > 0) {
-          setRelease(data[0]);
-        } else {
-          setRelease(lang === "en" ? FALLBACK_RELEASE_EN : FALLBACK_RELEASE_TR);
-        }
+        setReleases(await fetchGithubReleases());
       } catch {
-        setRelease(lang === "en" ? FALLBACK_RELEASE_EN : FALLBACK_RELEASE_TR);
+        setReleases([]);
       }
     };
     loadData();
@@ -191,7 +187,8 @@ export default function App() {
     }
   };
 
-  const activeRelease = release || (lang === "en" ? FALLBACK_RELEASE_EN : FALLBACK_RELEASE_TR);
+  const activeRelease =
+    pickReleaseFor(releases, detectedOS as any) || (lang === "en" ? FALLBACK_RELEASE_EN : FALLBACK_RELEASE_TR);
   const recommendedAsset = activeRelease?.assets
     ? getRecommendedAsset(activeRelease.assets, detectedOS as any)
     : null;
