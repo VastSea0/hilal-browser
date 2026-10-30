@@ -38,3 +38,10 @@ jobs:
           name: hilal-android-debug
           path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 14
+
+      - name: Upload release APK (debug-signed, for testing R8 output)
+        uses: actions/upload-artifact@v4
+        with:
+          name: hilal-android-release-unsigned
+          path: android/app/build/outputs/apk/release/*.apk
+          retention-days: 14
