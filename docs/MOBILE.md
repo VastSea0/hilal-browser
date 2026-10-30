@@ -13,7 +13,7 @@ Expressive (`androidx.compose.material3` 1.5, `MaterialExpressiveTheme`, `Motion
 android/app/src/main/java/com/vastsea/hilal/
 ├── HilalApplication.kt     # AppContainer: the single GeckoRuntime, database, stores
 ├── MainActivity.kt         # Splash, intents (VIEW/SEND), immersive mode, permissions bridge
-├── engine/GeckoProvider.kt # Runtime settings: tracking protection, cookie isolation, GPC
+├── gecko/GeckoProvider.kt  # Runtime settings: tracking protection, cookie isolation, GPC
 ├── browser/
 │   ├── Tab.kt              # TabState (UI state) + the GeckoSession it comes from
 │   ├── TabStore.kt         # Tabs, selection, Gecko delegates, session persistence, undo close

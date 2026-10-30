@@ -6,7 +6,7 @@ import com.vastsea.hilal.browser.TabStore
 import com.vastsea.hilal.data.HilalDatabase
 import com.vastsea.hilal.data.SettingsRepository
 import com.vastsea.hilal.downloads.DownloadController
-import com.vastsea.hilal.engine.GeckoProvider
+import com.vastsea.hilal.gecko.GeckoProvider
 import com.vastsea.hilal.search.SuggestionProvider
 import com.vastsea.hilal.telemetry.Telemetry
 import kotlinx.coroutines.CoroutineScope
