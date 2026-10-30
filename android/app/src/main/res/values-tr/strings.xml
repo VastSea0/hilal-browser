@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Address bar -->
+    <string name="address_placeholder">Arayın veya adres yazın</string>
+    <string name="address_edit">Adresi düzenle</string>
+    <string name="address_quick_actions">Hızlı işlemler</string>
+    <string name="menu">Menü</string>
+    <string name="tabs_count">%1$d sekme</string>
+    <string name="go">Git</string>
+    <string name="clear_text">Temizle</string>
+    <string name="search_with">%1$s ile ara</string>
+    <string name="bang_hint">!%1$s · %2$s</string>
+    <string name="paste_and_go">Yapıştır ve git</string>
+    <string name="copy_link">Bağlantıyı kopyala</string>
+    <string name="link_copied">Bağlantı kopyalandı</string>
+    <string name="share">Paylaş</string>
+    <string name="fill_in">Alana yaz</string>
+
+    <!-- Start page -->
+    <string name="start_greeting">Nereye gidelim?</string>
+    <string name="start_frequent">Sık ziyaret edilenler</string>
+    <string name="start_bookmarks">Yer imleri</string>
+    <string name="start_private_title">Gizli sekme</string>
+    <string name="start_private_body">Hilal, bu sekmeyi kapattığınızda geçmişini, çerezlerini ve site verilerini unutur. İnternet sağlayıcınız ve ziyaret ettiğiniz siteler etkinliğinizi yine de görebilir.</string>
+
+    <!-- Tabs -->
+    <string name="tabs">Sekmeler</string>
+    <string name="tabs_normal">Sekmeler</string>
+    <string name="tabs_private">Gizli</string>
+    <string name="new_tab">Yeni sekme</string>
+    <string name="new_private_tab">Yeni gizli sekme</string>
+    <string name="close_tab">Sekmeyi kapat</string>
+    <string name="close_all_tabs">Tüm sekmeleri kapat</string>
+    <string name="tab_closed">Sekme kapatıldı</string>
+    <string name="private_tab_closed">Gizli sekme kapatıldı</string>
+    <string name="undo">Geri al</string>
+    <string name="no_private_tabs">Gizli sekme yok</string>
+    <string name="untitled">Adsız</string>
+
+    <!-- Menu -->
+    <string name="back">Geri</string>
+    <string name="forward">İleri</string>
+    <string name="reload">Yenile</string>
+    <string name="stop">Durdur</string>
+    <string name="bookmark">Yer imlerine ekle</string>
+    <string name="bookmarked">Yer imlerinde</string>
+    <string name="find_in_page">Sayfada bul</string>
+    <string name="history">Geçmiş</string>
+    <string name="bookmarks">Yer imleri</string>
+    <string name="downloads">İndirilenler</string>
+    <string name="addons">Eklentiler</string>
+    <string name="settings">Ayarlar</string>
+
+    <!-- Find in page -->
+    <string name="find_placeholder">Sayfada bul</string>
+    <string name="find_count">%1$d/%2$d</string>
+    <string name="find_previous">Önceki eşleşme</string>
+    <string name="find_next">Sonraki eşleşme</string>
+    <string name="close">Kapat</string>
+
+    <!-- Library -->
+    <string name="history_empty">Ziyaret ettiğiniz sayfalar burada görünür</string>
+    <string name="bookmarks_empty">Yer imlerine eklediğiniz sayfalar burada görünür</string>
+    <string name="downloads_empty">İndirdiğiniz dosyalar burada görünür</string>
+    <string name="clear_history">Geçmişi temizle</string>
+    <string name="clear_history_title">Tarama geçmişi temizlensin mi?</string>
+    <string name="clear_history_last_hour">Son bir saat</string>
+    <string name="clear_history_today">Bugün</string>
+    <string name="clear_history_all">Tümü</string>
+    <string name="delete">Sil</string>
+    <string name="today">Bugün</string>
+    <string name="yesterday">Dün</string>
+    <string name="earlier">Daha önce</string>
+    <string name="open_in_new_tab">Yeni sekmede aç</string>
+    <string name="open_in_private_tab">Gizli sekmede aç</string>
+    <string name="download_started">%1$s indiriliyor</string>
+    <string name="download_failed">%1$s indirilemedi</string>
+    <string name="download_failed_status">Başarısız</string>
+    <string name="download_running_status">İndiriliyor…</string>
+    <string name="open">Aç</string>
+    <string name="no_app_to_open">Bunu açabilecek uygulama yok</string>
+
+    <!-- Page requests -->
+    <string name="ok">Tamam</string>
+    <string name="cancel">İptal</string>
+    <string name="allow">İzin ver</string>
+    <string name="block">Engelle</string>
+    <string name="leave">Ayrıl</string>
+    <string name="stay">Kal</string>
+    <string name="resend">Yeniden gönder</string>
+    <string name="username">Kullanıcı adı</string>
+    <string name="password">Parola</string>
+    <string name="sign_in">Giriş yap</string>
+    <string name="sign_in_to">%1$s sitesine giriş yap</string>
+    <string name="leave_page_title">Bu sayfadan ayrılınsın mı?</string>
+    <string name="leave_page_body">Yaptığınız değişiklikler kaydedilmemiş olabilir.</string>
+    <string name="repost_title">Form verileri yeniden gönderilsin mi?</string>
+    <string name="repost_body">Bu sayfanın girdiğiniz bilgileri yeniden göndermesi gerekiyor. Satın alma gibi bir işlem iki kez yapılabilir.</string>
+    <string name="popup_title">Açılır pencere açılsın mı?</string>
+    <string name="popup_body">%1$s yeni bir pencere açmak istiyor.</string>
+    <string name="permission_location">%1$s konumunuzu öğrenmek istiyor</string>
+    <string name="permission_notifications">%1$s bildirim göndermek istiyor</string>
+    <string name="permission_camera">%1$s kameranızı kullanmak istiyor</string>
+    <string name="permission_microphone">%1$s mikrofonunuzu kullanmak istiyor</string>
+    <string name="permission_camera_microphone">%1$s kameranızı ve mikrofonunuzu kullanmak istiyor</string>
+    <string name="permission_drm">%1$s korumalı (DRM) içerik oynatmak istiyor</string>
+    <string name="permission_storage_access">%1$s bu sitede kendi çerezlerini kullanmak istiyor</string>
+    <string name="permission_xr">%1$s sanal gerçeklik cihazlarını kullanmak istiyor</string>
+    <string name="open_link_in_new_tab">Bağlantıyı yeni sekmede aç</string>
+    <string name="open_link_in_private_tab">Bağlantıyı gizli sekmede aç</string>
+    <string name="open_image_in_new_tab">Görseli yeni sekmede aç</string>
+    <string name="save_image">Görseli kaydet</string>
+    <string name="copy_image_link">Görsel bağlantısını kopyala</string>
+    <string name="share_link">Bağlantıyı paylaş</string>
+    <string name="open_in_app_failed">Bu bağlantı için uygulama bulunamadı</string>
+
+    <!-- Add-ons -->
+    <string name="addons_installed">Yüklü</string>
+    <string name="addons_get_more">Daha fazla eklenti bul</string>
+    <string name="addon_options">Seçenekler</string>
+    <string name="addon_remove">Kaldır</string>
+    <string name="addon_enabled">Etkin</string>
+    <string name="addon_installed">%1$s eklendi</string>
+    <string name="addon_install_failed">Eklenti eklenemedi</string>
+    <string name="addon_permission_title">%1$s eklensin mi?</string>
+    <string name="addon_permission_body">Şunları yapabilecek:</string>
+    <string name="addon_permission_sites">%1$s üzerindeki verilerinize erişmek</string>
+    <string name="addon_permission_all_sites">Tüm web sitelerindeki verilerinize erişmek</string>
+    <string name="add">Ekle</string>
+
+    <!-- Settings -->
+    <string name="settings_general">Genel</string>
+    <string name="settings_search_engine">Arama motoru</string>
+    <string name="settings_search_suggestions">Arama önerileri</string>
+    <string name="settings_search_suggestions_summary">Öneri almak için yazdıklarınızı arama motorunuza gönderin</string>
+    <string name="settings_appearance">Görünüm</string>
+    <string name="settings_theme">Tema</string>
+    <string name="theme_system">Sistem</string>
+    <string name="theme_light">Açık</string>
+    <string name="theme_dark">Koyu</string>
+    <string name="settings_dynamic_color">Duvar kâğıdı renkleri</string>
+    <string name="settings_dynamic_color_summary">Uygulamanın renklerini duvar kâğıdınıza uydurun</string>
+    <string name="settings_dark_websites">Koyu web siteleri</string>
+    <string name="settings_dark_websites_summary">Web sitelerinden koyu tasarımlarını kullanmalarını isteyin</string>
+    <string name="settings_haptics">Hareket titreşimi</string>
+    <string name="settings_haptics_summary">Kaydırma sekme değiştirmeye veya sekme görünümünü açmaya yetecek kadar ilerlediğinde hafifçe titret</string>
+    <string name="settings_privacy">Gizlilik</string>
+    <string name="settings_telemetry">Anonim kullanım istatistikleri</string>
+    <string name="settings_telemetry_summary">Günde bir kez, rastgele bir kimlikle birlikte uygulama sürümünü, Android sürümünü, dili, arama motorunu ve yaklaşık sekme sayısını gönderir. Tarama verisi gönderilmez.</string>
+    <string name="settings_clear_data">Tarama verilerini temizle</string>
+    <string name="settings_about">Hakkında</string>
+    <string name="settings_version">Sürüm %1$s</string>
+    <string name="settings_source">Kaynak kodu</string>
+</resources>

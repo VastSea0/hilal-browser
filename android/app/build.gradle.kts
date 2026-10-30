@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -12,8 +13,9 @@ android {
         applicationId = "com.vastsea.hilal"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.1.0"
+        // CI passes these from the release tag; local builds use the defaults.
+        versionCode = providers.gradleProperty("hilal.versionCode").orNull?.toInt() ?: 20000
+        versionName = providers.gradleProperty("hilal.versionName").orNull ?: "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -25,11 +27,12 @@ android {
     signingConfigs {
         create("release") {
             val uploadKeystore = file("hilal-upload-key.jks")
-            if (uploadKeystore.exists()) {
+            val storePass = System.getenv("KEYSTORE_PASSWORD")
+            if (uploadKeystore.exists() && storePass != null) {
                 storeFile = uploadKeystore
-                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "hilalBrowser2026UploadKey!"
+                storePassword = storePass
                 keyAlias = System.getenv("KEY_ALIAS") ?: "hilal-upload"
-                keyPassword = System.getenv("KEY_PASSWORD") ?: "hilalBrowser2026UploadKey!"
+                keyPassword = System.getenv("KEY_PASSWORD") ?: storePass
             } else {
                 val debugConfig = getByName("debug")
                 storeFile = debugConfig.storeFile
@@ -42,7 +45,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -52,12 +56,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-
-    kotlinOptions {
-        jvmTarget = "21"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {
@@ -72,42 +72,44 @@ android {
     }
 }
 
-dependencies {
-    // AndroidX Core & Lifecycle
-    implementation("androidx.core:core-ktx:1.15.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
-    implementation("androidx.activity:activity-compose:1.10.0")
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        optIn.addAll(
+            "androidx.compose.material3.ExperimentalMaterial3Api",
+            "androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
+        )
+    }
+}
 
-    // Material 3 Expressive & Jetpack Compose
-    val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+dependencies {
+    implementation("androidx.core:core-ktx:1.19.1")
+    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.11.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
+    implementation("androidx.core:core-splashscreen:1.2.0")
+
+    val composeBom = platform("androidx.compose:compose-bom:2026.09.00")
     implementation(composeBom)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3-adaptive-navigation-suite")
-    implementation("androidx.compose.material3:material3-window-size-class")
-    implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.animation:animation")
-    implementation("io.coil-kt:coil-compose:2.7.0")
-    
-    // Explicitly enforce Material 3 Expressive (1.4.0-alpha10) over BOM
-    implementation("androidx.compose.material3:material3") {
-        version {
-            strictly("1.4.0-alpha10")
-        }
-    }
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation("androidx.compose.material3:material3:1.5.0-beta02")
 
-    // GeckoView Browser Engine
+    val roomVersion = "2.8.5"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
+
     implementation("org.mozilla.geckoview:geckoview-omni:135.0.20250130195129")
 
-    // Debug / Preview tooling
     debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // Testing
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    androidTestImplementation(composeBom)
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 }
