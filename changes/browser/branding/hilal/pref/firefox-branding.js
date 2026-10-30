@@ -39,6 +39,16 @@ pref("sidebar.revamp", false);
 pref("sidebar.verticalTabs", false);
 pref("sidebar.visibility", "hide-sidebar");
 
+// Lepton icon rules in hilal-icons.css; upstream's recommended set.
+pref("userChrome.icon.library", true);
+pref("userChrome.icon.panel", true);
+pref("userChrome.icon.panel_full", true);
+pref("userChrome.icon.menu", true);
+pref("userChrome.icon.context_menu", true);
+pref("userChrome.icon.global_menu", true);
+pref("userChrome.icon.global_menubar", true);
+pref("userChrome.icon.1-25px_stroke", true);
+
 // Follow the OS language when a matching locale is installed; otherwise use en-US.
 pref("intl.locale.requested", "");
 

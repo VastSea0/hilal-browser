@@ -1,9 +1,8 @@
 # Firefox-UI-Fix (vendored)
 
-Hilal Browser ships a subset of [Firefox-UI-Fix](https://github.com/black7375/Firefox-UI-Fix)
-(Lepton) inside browser chrome. The compiled stylesheet lives at
-`prefs/browser/themes/shared/firefox-ui-fix.css`. Hilal-specific rules are in
-`prefs/browser/themes/shared/hilal-ui-overrides.css`.
+Hilal Browser ships the icon rules of [Firefox-UI-Fix](https://github.com/black7375/Firefox-UI-Fix)
+(Lepton) inside browser chrome: `changes/browser/themes/shared/hilal-icons.css`
+and the SVGs in `changes/browser/themes/shared/icons/`.
 
 ## License
 
@@ -14,7 +13,7 @@ Mozilla Public License 2.0. See `LICENSE` in this directory.
 From the repo root:
 
 ```bash
-scripts/sync-firefox-ui-fix.sh
+scripts/sync-lepton-icons.sh
 ```
 
-Review the diff, update `SOURCE`, run `scripts/apply.sh --force`, and test UI.
+See `docs/LEPTON-ICONS.md`.

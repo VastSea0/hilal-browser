@@ -1,9 +1,8 @@
 repository=https://github.com/black7375/Firefox-UI-Fix
 license=MPL-2.0
-upstream_version=8.0.0
-# Upstream commit when css/leptonChrome.css last matched Hilal's vendored
-# firefox-ui-fix.css (before Hilal chrome:// icon path rewrites). Update this
-# when running scripts/sync-firefox-ui-fix.sh.
-pinned_commit=unknown
-pinned_date=2026-05-24
-hilal_adaptations=chrome_icon_urls,customizing_attribute_syntax
+# Upstream commit that hilal-icons.css and the icons were taken from.
+# Updated by scripts/sync-lepton-icons.sh.
+pinned_commit=d800e21dff7fe48c326f3051acb9c932426f99c1
+pinned_date=2026-10-18
+scope=icons_section_only
+hilal_adaptations=chrome_icon_urls

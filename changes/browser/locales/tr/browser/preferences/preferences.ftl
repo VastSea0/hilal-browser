@@ -62,22 +62,6 @@ hilal-privacy-strict =
 hilal-privacy-extreme =
     .label = Maksimum yerel sıkılaştırma (Tor değil): Sıkı seviyeye ek olarak JavaScript kapalı, kamera/mikrofon/konum engelli ve kapanışta tarama geçmişi temizliği.
 
-## UI Enhancements
-
-hilal-uifix-header = Arayüz Geliştirmeleri
-hilal-uifix-enabled =
-    .label = Arayüz geliştirmelerini etkinleştir (@black7375 tarafından geliştirilen Firefox-UI-Fix'i içerir)
-hilal-uifix-connect-to-window =
-    .label = Birleşik Sekmeler (Sekme kenarlarını pencereye bağla)
-hilal-uifix-compact-padding =
-    .label = Kompakt Sekme Boşluğu (Daha ince, Lepton tarzı sekmeler)
-hilal-uifix-dynamic-separator =
-    .label = Dinamik Sekme Ayırıcıları
-hilal-uifix-bottom-rounded =
-    .label = Yuvarlatılmış Alt Sekme Köşeleri
-hilal-uifix-close-on-hover =
-    .label = Sekme Kapatma Butonunu Yalnızca Üzerine Gelindiğinde Göster
-
 ## Site Customizer & Dynamic Coloring
 
 hilal-boosts-header = Site Özelleştirici ve Dinamik Renklendirme
