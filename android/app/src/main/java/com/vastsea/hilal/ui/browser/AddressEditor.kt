@@ -33,6 +33,7 @@ import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.NorthWest
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material3.Icon
@@ -122,10 +123,11 @@ fun AddressEditor(
             ) {
                 if (text.isNotBlank() && !editingCurrent && !text.trimStart().startsWith("!")) {
                     item(key = "search") {
+                        val address = InputResolver.looksLikeAddress(text.trim())
                         SuggestionRow(
-                            icon = Icons.Outlined.Search,
+                            icon = if (address) Icons.Outlined.Public else Icons.Outlined.Search,
                             title = text.trim(),
-                            subtitle = stringResource(R.string.search_with, engine.name),
+                            subtitle = if (address) null else stringResource(R.string.search_with, engine.name),
                             onClick = { submit(text) },
                         )
                     }
