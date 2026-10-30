@@ -99,21 +99,12 @@ fun AddressBar(
         ) {
             Box {
                 SiteLabel(tab)
-                AnimatedVisibility(
-                    visible = tab?.isLoading == true,
-                    enter = fadeIn(MaterialTheme.motionScheme.fastEffectsSpec()),
-                    exit = fadeOut(MaterialTheme.motionScheme.slowEffectsSpec()),
+                LoadingWave(
+                    tab = tab,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(horizontal = 28.dp, vertical = 5.dp),
-                ) {
-                    LinearWavyProgressIndicator(
-                        progress = { (tab?.progress ?: 0) / 100f },
-                        modifier = Modifier.fillMaxWidth().height(6.dp),
-                        stroke = WavyProgressIndicatorDefaults.linearIndicatorStroke,
-                        trackStroke = WavyProgressIndicatorDefaults.linearTrackStroke,
-                    )
-                }
+                )
             }
         }
         TabCountButton(count = tabCount, isPrivate = tab?.isPrivate == true, onClick = onTabsClick)
@@ -124,6 +115,23 @@ fun AddressBar(
         ) {
             Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(R.string.menu))
         }
+    }
+}
+
+@Composable
+private fun LoadingWave(tab: TabState?, modifier: Modifier) {
+    AnimatedVisibility(
+        visible = tab?.isLoading == true,
+        enter = fadeIn(MaterialTheme.motionScheme.fastEffectsSpec()),
+        exit = fadeOut(MaterialTheme.motionScheme.slowEffectsSpec()),
+        modifier = modifier,
+    ) {
+        LinearWavyProgressIndicator(
+            progress = { (tab?.progress ?: 0) / 100f },
+            modifier = Modifier.fillMaxWidth().height(6.dp),
+            stroke = WavyProgressIndicatorDefaults.linearIndicatorStroke,
+            trackStroke = WavyProgressIndicatorDefaults.linearTrackStroke,
+        )
     }
 }
 
@@ -152,11 +160,11 @@ private fun SiteLabel(tab: TabState?) {
             else MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.width(8.dp))
+        val motion = MaterialTheme.motionScheme
         AnimatedContent(
             targetState = if (isBlank) "" else InputResolver.host(tab?.url.orEmpty()),
             transitionSpec = {
-                fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()) togetherWith
-                    fadeOut(MaterialTheme.motionScheme.fastEffectsSpec())
+                fadeIn(motion.defaultEffectsSpec()) togetherWith fadeOut(motion.fastEffectsSpec())
             },
             label = "host",
         ) { host ->

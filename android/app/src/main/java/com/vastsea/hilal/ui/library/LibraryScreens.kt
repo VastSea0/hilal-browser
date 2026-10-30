@@ -103,7 +103,7 @@ fun <T> LazyListScope.segmentedGroup(
     header: String?,
     items: List<T>,
     key: (T) -> Any,
-    row: @Composable (item: T, shapes: androidx.compose.material3.ListItemShapes) -> Unit,
+    row: @Composable androidx.compose.foundation.lazy.LazyItemScope.(item: T, shapes: androidx.compose.material3.ListItemShapes) -> Unit,
 ) {
     if (header != null) {
         item(key = "h:$header") {

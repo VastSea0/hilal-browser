@@ -50,13 +50,14 @@ fun AddonsScreen(container: AppContainer, onBack: () -> Unit, onOpen: (String) -
     val controller = container.addons
     val addons by controller.addons.collectAsState()
     LaunchedEffect(Unit) { controller.refresh() }
+    val installedLabel = stringResource(R.string.addons_installed)
 
     LibraryScaffold(title = stringResource(R.string.addons), onBack = onBack) { padding ->
         LazyColumn(
             contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding() + 24.dp),
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
-            segmentedGroup(stringResource(R.string.addons_installed), addons, key = { it.id }) { addon, shapes ->
+            segmentedGroup(installedLabel, addons, key = { it.id }) { addon, shapes ->
                 AddonRow(
                     addon = addon,
                     shapes = shapes,

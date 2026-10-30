@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            HilalApp(container = container, onFullscreenChange = ::setImmersive)
+            HilalApp(container = container, onFullscreenChange = ::applyImmersive)
         }
     }
 
@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
         setIntent(Intent())
     }
 
-    private fun setImmersive(enabled: Boolean) {
+    private fun applyImmersive(enabled: Boolean) {
         val controller = WindowCompat.getInsetsController(window, window.decorView)
         if (enabled) {
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE

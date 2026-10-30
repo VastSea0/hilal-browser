@@ -32,12 +32,12 @@ class AppContainer(val app: Application) {
     val database = HilalDatabase.create(app)
     val runtime: GeckoRuntime by lazy { GeckoProvider.create(app) }
     val downloads by lazy { DownloadController(app, database.downloads()) }
-    val tabs by lazy {
+    val tabs: TabStore by lazy {
         TabStore(app, runtime, appScope, database.history(), downloads) { url ->
             appScope.launch { addons.install(url) }
         }
     }
-    val addons by lazy {
+    val addons: AddonController by lazy {
         AddonController(app, runtime, appScope).also { controller ->
             controller.openTab = { url, select -> tabs.adoptSession(url, isPrivate = false, parentId = null, select = select) }
         }
