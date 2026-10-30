@@ -103,3 +103,6 @@ keystore-backup/
 
 
 .vercel/
+
+# Remotion intro video project (kept locally, not part of the browser)
+/media/intro-video/
