@@ -38,7 +38,6 @@ pref("hilal.material3.enabled", true);
 pref("sidebar.revamp", false);
 pref("sidebar.verticalTabs", false);
 pref("sidebar.visibility", "hide-sidebar");
-pref("hilal.tahoe.enabled", false);
 
 // Follow the OS language when a matching locale is installed; otherwise use en-US.
 pref("intl.locale.requested", "");

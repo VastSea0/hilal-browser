@@ -22,28 +22,6 @@ hilal-workspaces-reset-button = Çalışma Alanlarını Sıfırla
 hilal-workspaces-reset-confirm-title = Çalışma Alanlarını Sıfırla
 hilal-workspaces-reset-confirm-message = Bu işlem tüm çalışma alanı verilerini silecek ve geri alınamaz. Devam edilsin mi?
 
-## Sidebar Options
-
-hilal-sidebar-header = Kenar Çubuğu Seçenekleri
-hilal-sidebar-compact-enabled =
-    .label = Kompakt modu etkinleştir (farenizi kenarlara yaklaştırarak kenar ve üst araç çubuklarını süzebilirsiniz)
-hilal-sidebar-compact-hide-toolbar =
-    .label = Kompakt modda üst araç çubuğunu otomatik gizle
-hilal-sidebar-compact-hide-toolbar-desc = Etkinleştirildiğinde, adres çubuğu ve sekmeleri barındıran üst araç çubuğu otomatik olarak gizlenir ve yalnızca imleç üst kenara getirildiğinde şık, yarı saydam bir süzülme animasyonuyla gösterilir. Devre dışı bırakıldığında ise üst araç çubuğu her zaman görünür kalır.
-hilal-sidebar-footer-items-label = Standart Alt Bilgi Öğeleri:
-hilal-sidebar-footer-bookmarks =
-    .label = Yer İmleri
-hilal-sidebar-footer-history =
-    .label = Geçmiş
-hilal-sidebar-footer-passwords =
-    .label = Parolalar
-hilal-sidebar-footer-downloads =
-    .label = İndirmeler
-hilal-sidebar-footer-privacy =
-    .label = Gizlilik
-hilal-sidebar-footer-settings =
-    .label = Ayarlar
-
 hilal-sidebar-custom-shortcuts-label = Özel Kenar Çubuğu Kısayolları:
 hilal-sidebar-custom-shortcuts-desc = Kenar çubuğu alt bilgisine özel sayfalar, yer imleri veya harici bağlantılar ekleyin. Hilal, web bağlantıları için Firefox'un önbelleğindeki simgeleri gösterir; simge almak için siteye bağlanmaz.
 hilal-sidebar-custom-add =

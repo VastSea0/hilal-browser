@@ -157,7 +157,7 @@ diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser
 index a890aeb558f8..e1bb18f91875 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2686,3 +2686,180 @@ security-privacy-issue-warning-ech =
+@@ -2686,3 +2686,152 @@ security-privacy-issue-warning-ech =
  security-privacy-issue-warning-proxy-autodetection =
    .label = Proxy auto-configuration is enabled
    .description = Proxy auto-configuration could let untrusted networks to monitor your activity.
@@ -207,36 +207,8 @@ index a890aeb558f8..e1bb18f91875 100644
 +hilal-boosts-live-status = Live Web Tinting Active
 +    .label = Live Web Tinting Active
 +
-+## Sidebar Options
++## UI Enhancements
 +
-+hilal-sidebar-header = Sidebar Options
-+hilal-sidebar-compact-enabled = Enable Compact Mode (hover near screen edges to reveal sidebar and toolbar)
-+    .label = Enable Compact Mode (hover near screen edges to reveal sidebar and toolbar)
-+hilal-sidebar-compact-hide-toolbar = Auto-hide top toolbar in compact mode
-+    .label = Auto-hide top toolbar in compact mode
-+hilal-sidebar-compact-hide-toolbar-desc = When enabled, the top navigation and tab bar automatically hides and slides down with a smooth blur when the cursor nears the top edge.
-+hilal-sidebar-show-horizontal-tabs = Show horizontal tabs
-+    .label = Show horizontal tabs
-+hilal-sidebar-footer-items-label = Standard Footer Items:
-+hilal-sidebar-footer-bookmarks =
-+    .label = Bookmarks
-+hilal-sidebar-footer-history =
-+    .label = History
-+hilal-sidebar-footer-passwords =
-+    .label = Passwords
-+hilal-sidebar-footer-downloads =
-+    .label = Downloads
-+hilal-sidebar-footer-privacy =
-+    .label = Privacy
-+hilal-sidebar-footer-settings =
-+    .label = Settings
-+
-+## UI Enhancements & Tahoe
-+
-+hilal-tahoe-header = Appearance & Tahoe Aesthetics
-+hilal-tahoe-enabled = macOS Tahoe Glass Effect
-+    .label = macOS Tahoe Glass Effect
-+hilal-tahoe-enabled-desc = Window translucency, dynamic background blur, and lighting reflections.
 +hilal-uifix-header = UI Enhancements
 +hilal-uifix-enabled = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)
 +    .label = Enable UI Enhancements (includes Firefox-UI-Fix by @black7375)

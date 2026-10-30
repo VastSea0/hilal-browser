@@ -294,20 +294,6 @@
           Services.ppmm.sharedData.flush();
         }
 
-        if (window.gBrowser?.tabs) {
-          for (const tab of window.gBrowser.tabs) {
-            try {
-              const actor =
-                tab.linkedBrowser?.browsingContext?.currentWindowGlobal?.getActor(
-                  "HilalTahoe"
-                );
-              if (actor) {
-                actor.sendAsyncMessage("HilalTahoe:SetNewTabTheme", themeData);
-              }
-            } catch (e) {}
-          }
-        }
-
         if (!this._themeChannel) {
           this._themeChannel = new BroadcastChannel("hilal-theme-channel");
           this._themeChannel.onmessage = e => {
