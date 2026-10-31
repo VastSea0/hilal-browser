@@ -1,5 +1,5 @@
 diff --git a/browser/themes/shared/preferences/preferences.css b/browser/themes/shared/preferences/preferences.css
-index 80722b9f86d9..6369ee1a76fe 100644
+index 80722b9f86d9..df0835639067 100644
 --- a/browser/themes/shared/preferences/preferences.css
 +++ b/browser/themes/shared/preferences/preferences.css
 @@ -4,32 +4,249 @@
@@ -270,7 +270,7 @@ index 80722b9f86d9..6369ee1a76fe 100644
  }
  
  @media not print {
-@@ -45,1641 +262,1228 @@
+@@ -45,1641 +262,1223 @@
    margin: 0;
    padding: 0;
    width: 100%;
@@ -369,13 +369,6 @@ index 80722b9f86d9..6369ee1a76fe 100644
 -groupbox[data-category],
 -setting-group[data-category] {
 -  margin: 0 0 var(--space-xlarge);
--}
--
--/* Bug 2002963 - payments and addresses are in a groupbox together, but they probably shouldn't be */
--#formAutofillGroupBox:not([hidden]) {
--  display: flex;
--  flex-direction: column;
--  gap: 32px;
 +  display: flex !important;
 +  flex-direction: column !important;
 +  gap: 20px !important;
@@ -414,8 +407,8 @@ index 80722b9f86d9..6369ee1a76fe 100644
 +.page-nav-heading-wrapper {
 +  margin-block-start: 0px !important;
 +  margin-top: 0px !important;
-+  margin-bottom: 4px !important;
-+  padding-top: 0px !important;
++  margin-bottom: 16px !important;
++  padding: 8px 16px 0 !important;
 +}
 +
 +#page-nav-heading,
@@ -437,8 +430,11 @@ index 80722b9f86d9..6369ee1a76fe 100644
 +  display: none !important;
  }
  
--html|h1 {
--  margin: 0 0 var(--space-large);
+-/* Bug 2002963 - payments and addresses are in a groupbox together, but they probably shouldn't be */
+-#formAutofillGroupBox:not([hidden]) {
+-  display: flex;
+-  flex-direction: column;
+-  gap: 32px;
 +@media (max-width: 950px) {
 +  #categories.categories-list,
 +  #categories,
@@ -450,110 +446,50 @@ index 80722b9f86d9..6369ee1a76fe 100644
 +  }
  }
  
--html|h2 {
--  margin: var(--space-small) 0 var(--space-xxsmall) 0;
+-html|h1 {
+-  margin: 0 0 var(--space-large);
++/* The button lives in moz-page-nav-button's shadow root and is not exposed
++   as a part, so it is styled through the variables the component reads.
++   They are set on the host because the component's :host defaults would
++   win over values inherited from :root. */
 +moz-page-nav-button,
 +html|moz-page-nav-button {
-+  min-height: 52px !important;
-+  height: 52px !important;
-+  margin: 3px 0 !important;
-+  box-sizing: border-box !important;
-+  border-radius: var(--md-sys-shape-corner-full) !important;
-+  max-width: 100% !important;
++  margin: 0 !important;
 +  width: 100% !important;
-+}
-+
-+moz-page-nav-button::part(button),
-+html|moz-page-nav-button::part(button),
-+moz-page-nav-button button {
-+  min-height: 52px !important;
-+  height: 52px !important;
 +  border-radius: 9999px !important;
-+  padding: 0 20px !important;
-+  gap: 14px !important;
-+  display: flex !important;
-+  align-items: center !important;
 +  font-size: 14px !important;
 +  font-weight: 500 !important;
-+  color: var(--md-sys-color-on-surface-variant) !important;
-+  background-color: transparent !important;
-+  border: none !important;
-+  cursor: pointer !important;
-+  transition: background-color 150ms cubic-bezier(0.2, 0, 0, 1),
-+              color 150ms cubic-bezier(0.2, 0, 0, 1) !important;
++  --page-nav-button-border-radius: 9999px;
++  --page-nav-button-padding: 10px 16px;
++  --page-nav-button-text-color: var(--md-sys-color-on-surface-variant);
++  --page-nav-button-text-color-hover: var(--md-sys-color-on-surface);
++  --page-nav-button-text-color-active: var(--md-sys-color-on-surface);
++  --page-nav-button-background-color: transparent;
++  --page-nav-button-background-color-hover: var(--md-sys-color-surface-container);
++  --page-nav-button-background-color-active: var(--md-sys-color-surface-container-high);
++  --page-nav-button-background-color-selected: var(--md-sys-color-secondary-container);
++  --page-nav-button-indicator-color: var(--md-sys-color-on-secondary-container);
++  --page-nav-button-indicator-width: 0px;
 +}
 +
-+moz-page-nav-button::part(button)::before,
-+html|moz-page-nav-button::part(button)::before,
-+moz-page-nav-button button::before {
-+  display: none !important;
- }
- 
--description.indent,
--.indent:not(#browserPrivateEngineSelection) > description {
--  color: var(--text-color-deemphasized);
--
--  /* Ensures margin on checkboxes, radios, and description don't create a big gap between the input and indented description */
--  margin-top: calc(var(--space-xsmall) * -1);
-+moz-page-nav-button:not([selected]):hover::part(button),
-+html|moz-page-nav-button:not([selected]):hover::part(button),
-+moz-page-nav-button button:not([selected]):hover {
-+  background-color: var(--md-sys-color-surface-container) !important;
-+  color: var(--md-sys-color-on-surface) !important;
- }
- 
--button,
--treecol,
--menulist,
--html|select {
--  /* override the root rule */
--  user-select: none;
-+moz-page-nav-button[selected]::part(button),
-+html|moz-page-nav-button[selected]::part(button),
-+moz-page-nav-button button[selected] {
-+  background-color: var(--md-sys-color-primary-container) !important;
-+  color: var(--md-sys-color-on-primary-container) !important;
-+  font-weight: 600 !important;
- }
- 
--/* Buttons get a default min-width in XUL. When they also have flex, they will
-- * be large enough anyway, and we don't want them to become smaller than their inner
-- * text which would then overflow the button. Set min-width back to auto for that:
-- */
--button[flex] {
--  min-width: auto;
-+moz-page-nav-button[selected] .icon,
-+moz-page-nav-button[selected]::part(icon) {
-+  fill: var(--md-sys-color-on-primary-container) !important;
- }
- 
--description,
--label {
--  margin: var(--space-xxsmall) 0;
 +hr.nav-separator,
 +#nav-separator {
 +  border: none !important;
 +  border-top: 1px solid var(--md-sys-color-outline-variant) !important;
 +  margin: 12px 16px !important;
- }
- 
--label {
--  margin: var(--space-xxsmall) 0;
++}
++
 +/* ==========================================================================
 +   3. MATERIAL 3 SEARCH BAR & IN-CONTENT NOTICES
 +   ========================================================================== */
- 
--  &.tail-with-learn-more + a {
--    margin-block: var(--space-xxsmall);
--    margin-inline: var(--space-small) 0;
--  }
++
 +html|nav-notice,
 +nav-notice {
 +  display: none !important;
  }
  
--.description-deemphasized {
--  color: var(--text-color-deemphasized);
+-html|h2 {
+-  margin: var(--space-small) 0 var(--space-xxsmall) 0;
 +/* .main-content has 24px of top padding, which a sticky top: 0 leaves
 +   uncovered, so scrolled content showed above the search field. */
 +#search-container {
@@ -611,6 +547,12 @@ index 80722b9f86d9..6369ee1a76fe 100644
 +  gap: 16px !important;
 +}
 +
++/* moz-card pads its article and content itself. */
++moz-card:not([hidden]) {
++  padding: 0 !important;
++  --card-padding: 24px;
++}
++
 +setting-group:not([hidden]):has(> moz-card) {
 +  border: none !important;
 +  background: transparent !important;
@@ -662,7 +604,14 @@ index 80722b9f86d9..6369ee1a76fe 100644
 +  border: none !important;
 +  background: none !important;
 +  box-shadow: none !important;
-+}
+ }
+-
+-description.indent,
+-.indent:not(#browserPrivateEngineSelection) > description {
+-  color: var(--text-color-deemphasized);
+-
+-  /* Ensures margin on checkboxes, radios, and description don't create a big gap between the input and indented description */
+-  margin-top: calc(var(--space-xsmall) * -1);
 +
 +.privacy-detailedoption,
 +.content-blocking-category,
@@ -676,25 +625,30 @@ index 80722b9f86d9..6369ee1a76fe 100644
 +  margin-block: 8px !important;
  }
  
--.firefoxLabs-description {
--  color: var(--text-color-deemphasized);
--  margin: 0;
+-button,
+-treecol,
+-menulist,
+-html|select {
+-  /* override the root rule */
+-  user-select: none;
 +moz-card setting-control[is="setting-link"] {
 +  cursor: pointer !important;
  }
  
--.tip-caption {
--  font-size: 0.9em;
--  color: var(--text-color-deemphasized);
+-/* Buttons get a default min-width in XUL. When they also have flex, they will
+- * be large enough anyway, and we don't want them to become smaller than their inner
+- * text which would then overflow the button. Set min-width back to auto for that:
+- */
+-button[flex] {
+-  min-width: auto;
 +.subcategory:not([hidden]) {
 +  display: flex !important;
 +  align-items: center !important;
  }
  
--menulist::part(label),
--menuitem > label,
--button > hbox > label {
--  line-height: unset;
+-description,
+-label {
+-  margin: var(--space-xxsmall) 0;
 +.subcategory h1 {
 +  font-size: 26px !important;
 +  font-weight: 700 !important;
@@ -703,8 +657,13 @@ index 80722b9f86d9..6369ee1a76fe 100644
 +  margin-block: 16px 12px !important;
  }
  
--.indent {
--  margin-inline-start: calc(var(--checkbox-size) + var(--checkbox-margin-inline)) !important;
+-label {
+-  margin: var(--space-xxsmall) 0;
+-
+-  &.tail-with-learn-more + a {
+-    margin-block: var(--space-xxsmall);
+-    margin-inline: var(--space-small) 0;
+-  }
 +.section-heading,
 +.settings-group-header,
 +groupbox[data-category] > label h2,
@@ -717,6 +676,33 @@ index 80722b9f86d9..6369ee1a76fe 100644
 +  align-items: center !important;
 +  gap: 12px !important;
 +  margin: 0 0 4px 0 !important;
+ }
+ 
+-.description-deemphasized {
+-  color: var(--text-color-deemphasized);
++.settings-group-header {
++  margin-bottom: 8px !important;
+ }
+ 
+-.firefoxLabs-description {
+-  color: var(--text-color-deemphasized);
+-  margin: 0;
++.settings-group-header h2 {
++  margin: 0 !important;
+ }
+ 
+-.tip-caption {
+-  font-size: 0.9em;
+-  color: var(--text-color-deemphasized);
++.settings-group-header svg {
++  width: 20px !important;
++  height: 20px !important;
++}
++
++/* Same padding as moz-card, so Hilal's cards line up with Firefox's. */
++groupbox.settings-group-card:not([hidden]) {
++  padding: 24px !important;
++  gap: 4px !important;
 +}
 +
 +.settings-group-header svg,
@@ -724,12 +710,19 @@ index 80722b9f86d9..6369ee1a76fe 100644
 +  fill: var(--md-sys-color-primary) !important;
 +  color: var(--md-sys-color-primary) !important;
 +  flex-shrink: 0 !important;
-+}
-+
+ }
+ 
+-menulist::part(label),
+-menuitem > label,
+-button > hbox > label {
+-  line-height: unset;
+-}
 +/* ==========================================================================
 +   5. SETTINGS ROW ARCHITECTURE (1:1 from desing.html)
 +   ========================================================================== */
-+
+ 
+-.indent {
+-  margin-inline-start: calc(var(--checkbox-size) + var(--checkbox-margin-inline)) !important;
 +.settings-row {
 +  display: flex !important;
 +  align-items: center !important;
@@ -2168,29 +2161,25 @@ index 80722b9f86d9..6369ee1a76fe 100644
 -.sync-engine-prefs .checkbox-icon,
 -.sync-engine-prefs.sync-engine-image {
 -  list-style-image: url("chrome://global/skin/icons/settings.svg");
- }
- 
+-}
+-
 -.sync-engine-addresses .checkbox-icon,
 -.sync-engine-addresses.sync-engine-image {
 -  list-style-image: url("chrome://formautofill/content/formfill-anchor.svg");
-+#engineList treechildren::-moz-tree-image(bookmarks) {
-+  fill: var(--md-sys-color-primary) !important;
  }
  
 -.sync-engine-creditcards .checkbox-icon,
 -.sync-engine-creditcards.sync-engine-image {
 -  list-style-image: url("chrome://formautofill/content/icon-credit-card-generic.svg");
-+#engineList treechildren::-moz-tree-image(tabs) {
-+  fill: var(--md-sys-color-tertiary) !important;
++#engineList treechildren::-moz-tree-image(bookmarks) {
++  fill: var(--md-sys-color-primary) !important;
  }
  
 -.fxaMobilePromo {
 -  margin-top: 2px !important;
 -  margin-bottom: var(--space-xxlarge);
-+#engineList treechildren::-moz-tree-image(history),
-+#engineList treechildren::-moz-tree-image(bookmarks, selected),
-+#engineList treechildren::-moz-tree-image(tabs, selected) {
-+  fill: currentColor !important;
++#engineList treechildren::-moz-tree-image(tabs) {
++  fill: var(--md-sys-color-tertiary) !important;
  }
  
 -.androidIcon,
@@ -2199,8 +2188,10 @@ index 80722b9f86d9..6369ee1a76fe 100644
 -  width: var(--icon-size-medium);
 -  height: var(--icon-size-medium);
 -  vertical-align: text-bottom;
-+#engineList > treechildren::-moz-tree-cell(engineKeyword) {
-+  unicode-bidi: plaintext;
++#engineList treechildren::-moz-tree-image(history),
++#engineList treechildren::-moz-tree-image(bookmarks, selected),
++#engineList treechildren::-moz-tree-image(tabs, selected) {
++  fill: currentColor !important;
  }
  
 -.info-box-container {
@@ -2208,6 +2199,12 @@ index 80722b9f86d9..6369ee1a76fe 100644
 -  padding: 9px;
 -  border: 1px solid transparent;
 -  border-radius: var(--border-radius-small);
++#engineList > treechildren::-moz-tree-cell(engineKeyword) {
++  unicode-bidi: plaintext;
+ }
+ 
+-.info-box-container.smaller-font-size {
+-  font-size: 85%;
 +/* Permission and Security Icons */
 +.permission-icon {
 +  width: 20px !important;
@@ -2216,64 +2213,10 @@ index 80722b9f86d9..6369ee1a76fe 100644
 +  margin-inline-end: 8px !important;
  }
  
--.info-box-container.smaller-font-size {
--  font-size: 85%;
-+.permission-icon,
-+.privacy-detailedoption .checkbox-label-box,
-+.extra-information-label > image,
-+.arrowhead,
-+.reload-tabs-button,
-+.content-blocking-warning-image {
-+  -moz-context-properties: fill;
-+  fill: currentColor !important;
-+}
-+
-+.geo-icon { list-style-image: url(chrome://browser/skin/notification-icons/geo.svg); }
-+.xr-icon { list-style-image: url(chrome://browser/skin/notification-icons/xr.svg); }
-+.camera-icon { list-style-image: url(chrome://browser/skin/notification-icons/camera.svg); }
-+.loopback-network-icon { list-style-image: url(chrome://browser/skin/notification-icons/local-host.svg); }
-+.local-network-icon { list-style-image: url(chrome://browser/skin/notification-icons/local-network.svg); }
-+.microphone-icon { list-style-image: url(chrome://browser/skin/notification-icons/microphone.svg); }
-+.speaker-icon { list-style-image: url(chrome://browser/skin/notification-icons/speaker.svg); }
-+.desktop-notification-icon { list-style-image: url(chrome://browser/skin/notification-icons/desktop-notification.svg); }
-+.autoplay-icon { list-style-image: url(chrome://browser/skin/notification-icons/autoplay-media.svg); }
-+.midi-icon { list-style-image: url(chrome://browser/skin/notification-icons/midi.svg); }
-+.serial-icon { list-style-image: url(chrome://browser/skin/notification-icons/serial.svg); }
-+
-+#trackingProtectionShield {
-+  list-style-image: url("chrome://browser/skin/controlcenter/tracking-protection.svg");
-+  -moz-context-properties: fill, fill-opacity;
-+  fill: var(--md-sys-color-primary) !important;
-+  width: 48px !important;
-+  height: 48px !important;
-+  margin-inline-end: 12px !important;
-+}
-+
-+/* Material 3 Banners and Messages */
-+moz-message-bar,
-+.info-box,
-+.alert-box,
-+.message-bar {
-+  border-radius: 16px !important;
-+  border: 1px solid var(--md-sys-color-outline-variant) !important;
-+  background-color: var(--md-sys-color-surface-container) !important;
-+  color: var(--md-sys-color-on-surface) !important;
-+  padding: 12px 16px !important;
-+}
-+
-+/* Default Browser & Sync Banners */
-+#defaultBrowserGroup,
-+#setAsDefaultCard {
-+  border-radius: 20px !important;
-+  background-color: var(--md-sys-color-surface-container) !important;
-+  border: 1px solid var(--md-sys-color-outline-variant) !important;
-+  padding: 16px 20px !important;
- }
- 
 -.info-icon-container {
 -  display: flex;
 -}
- 
+-
 -.info-icon {
 -  content: url("chrome://global/skin/icons/info.svg");
 -  width: 16px;
@@ -2609,7 +2552,13 @@ index 80722b9f86d9..6369ee1a76fe 100644
 -  padding: 2px;
 -  width: 80px;
 -  flex: 0 0 auto;
--  -moz-context-properties: fill;
++.permission-icon,
++.privacy-detailedoption .checkbox-label-box,
++.extra-information-label > image,
++.arrowhead,
++.reload-tabs-button,
++.content-blocking-warning-image {
+   -moz-context-properties: fill;
 -  fill: currentColor;
 -}
 -
@@ -2971,4 +2920,52 @@ index 80722b9f86d9..6369ee1a76fe 100644
 -  @media (max-width: 45em) {
 -    grid-template-columns: 1fr;
 -  }
--}
++  fill: currentColor !important;
++}
++
++.geo-icon { list-style-image: url(chrome://browser/skin/notification-icons/geo.svg); }
++.xr-icon { list-style-image: url(chrome://browser/skin/notification-icons/xr.svg); }
++.camera-icon { list-style-image: url(chrome://browser/skin/notification-icons/camera.svg); }
++.loopback-network-icon { list-style-image: url(chrome://browser/skin/notification-icons/local-host.svg); }
++.local-network-icon { list-style-image: url(chrome://browser/skin/notification-icons/local-network.svg); }
++.microphone-icon { list-style-image: url(chrome://browser/skin/notification-icons/microphone.svg); }
++.speaker-icon { list-style-image: url(chrome://browser/skin/notification-icons/speaker.svg); }
++.desktop-notification-icon { list-style-image: url(chrome://browser/skin/notification-icons/desktop-notification.svg); }
++.autoplay-icon { list-style-image: url(chrome://browser/skin/notification-icons/autoplay-media.svg); }
++.midi-icon { list-style-image: url(chrome://browser/skin/notification-icons/midi.svg); }
++.serial-icon { list-style-image: url(chrome://browser/skin/notification-icons/serial.svg); }
++
++#trackingProtectionShield {
++  list-style-image: url("chrome://browser/skin/controlcenter/tracking-protection.svg");
++  -moz-context-properties: fill, fill-opacity;
++  fill: var(--md-sys-color-primary) !important;
++  width: 48px !important;
++  height: 48px !important;
++  margin-inline-end: 12px !important;
++}
++
++/* Material 3 Banners and Messages */
++moz-message-bar,
++.info-box,
++.alert-box,
++.message-bar {
++  border-radius: 16px !important;
++  border: 1px solid var(--md-sys-color-outline-variant) !important;
++  background-color: var(--md-sys-color-surface-container) !important;
++  color: var(--md-sys-color-on-surface) !important;
++  padding: 12px 16px !important;
++}
++
++/* Default Browser & Sync Banners */
++#defaultBrowserGroup,
++#setAsDefaultCard {
++  border-radius: 20px !important;
++  background-color: var(--md-sys-color-surface-container) !important;
++  border: 1px solid var(--md-sys-color-outline-variant) !important;
++  padding: 16px 20px !important;
++}
++
++/* Theme pickers: equal tiles instead of ones sized to their label. */
++moz-visual-picker-item.setting-chooser-item {
++  width: 104px;
+ }
