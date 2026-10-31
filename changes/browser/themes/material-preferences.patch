@@ -1,5 +1,5 @@
 diff --git a/browser/themes/shared/preferences/preferences.css b/browser/themes/shared/preferences/preferences.css
-index 80722b9f86d9..ef568f3a8bc5 100644
+index 80722b9f86d9..5b9c39dddbc3 100644
 --- a/browser/themes/shared/preferences/preferences.css
 +++ b/browser/themes/shared/preferences/preferences.css
 @@ -4,32 +4,249 @@
@@ -270,7 +270,7 @@ index 80722b9f86d9..ef568f3a8bc5 100644
  }
  
  @media not print {
-@@ -45,1641 +262,1206 @@
+@@ -45,1641 +262,1209 @@
    margin: 0;
    padding: 0;
    width: 100%;
@@ -595,12 +595,15 @@ index 80722b9f86d9..ef568f3a8bc5 100644
 -  margin-inline-start: 0;
 -  font-weight: normal;
 -  white-space: nowrap;
++/* .main-content has 24px of top padding, which a sticky top: 0 leaves
++   uncovered, so scrolled content showed above the search field. */
 +#search-container {
 +  position: sticky !important;
-+  top: 0 !important;
++  top: -24px !important;
 +  z-index: 100 !important;
 +  background-color: var(--md-sys-color-surface-container-low) !important;
-+  padding: 8px 0 12px 0 !important;
++  padding: 32px 0 12px 0 !important;
++  margin-top: -24px !important;
 +  margin-bottom: 8px !important;
 +  display: flex !important;
 +  flex-direction: column !important;
