@@ -71,7 +71,7 @@ export default function App() {
       if (p === "/docs" || h === "#docs" || h.startsWith("#docs/") || p === "/mobile" || h === "#mobile") {
         return "docs";
       }
-      if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
+      if (p === "/changelog" || p === "/releases" || h === "#changelog" || h.startsWith("#v0.")) {
         return "changelog";
       }
       if (p === "/privacy" || h === "#privacy") {
@@ -82,7 +82,10 @@ export default function App() {
   });
 
   const [releases, setReleases] = useState<GithubRelease[]>([]);
-  const [isDownloadOpen, setIsDownloadOpen] = useState<boolean>(false);
+  // Desktop builds link to /download from their update notifications.
+  const [isDownloadOpen, setIsDownloadOpen] = useState<boolean>(
+    () => typeof window !== "undefined" && window.location.pathname === "/download"
+  );
   const [detectedOS, setDetectedOS] = useState<string>("other");
   const [activeTab, setActiveTab] = useState<number>(0);
   const [androidTab, setAndroidTab] = useState<number>(0);
@@ -96,7 +99,7 @@ export default function App() {
       const h = window.location.hash;
       if (p === "/docs" || h === "#docs" || h.startsWith("#docs/") || p === "/mobile" || h === "#mobile") {
         setCurrentView("docs");
-      } else if (p === "/changelog" || h === "#changelog" || h.startsWith("#v0.")) {
+      } else if (p === "/changelog" || p === "/releases" || h === "#changelog" || h.startsWith("#v0.")) {
         setCurrentView("changelog");
       } else if (p === "/privacy" || h === "#privacy") {
         setCurrentView("privacy");
