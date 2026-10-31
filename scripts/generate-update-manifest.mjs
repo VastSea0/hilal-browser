@@ -81,7 +81,7 @@ if (!options.appVersion) {
 options.appVersion = stripTagPrefix(options.appVersion);
 if (!isFirefoxAppVersion(options.appVersion)) {
   console.error(
-    `Invalid --app-version '${options.appVersion}'. Expected a modern Firefox version such as 153.0a1, 152.0, or 140.0.1esr.`
+    `Invalid --app-version '${options.appVersion}'. Expected a modern Firefox version such as 153.5.1, 152.0, or 153.0a1.`
   );
   process.exit(1);
 }
@@ -208,7 +208,7 @@ Platforms:
   macos-x86_64, macos-arm64, linux-x86_64, linux-arm64, windows-x86_64, windows-arm64
 
 The generated JSON must be uploaded to the same GitHub release as the MAR files.
-  --app-version must be the Firefox/Gecko version shipped in the build, for example 153.0a1.
+  --app-version must be the Firefox/Gecko version shipped in the build, for example 153.5.1.
 The website update endpoint serves an update only when platform, channel, URL,
 sha512 hash, and size are all present.`);
   process.exit(code);

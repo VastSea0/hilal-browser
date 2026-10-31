@@ -1,2 +1,0 @@
-. "$topsrcdir/../mozconfigs/android-base"
-ac_add_options --target=arm-linux-androideabi
