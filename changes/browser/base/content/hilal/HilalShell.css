@@ -1690,3 +1690,128 @@ browser[type="content"],
     transition: none !important;
   }
 }
+
+/* Motion, following the Android app: spring-like curves, shapes that tighten
+   while pressed, and elements that grow out of where they come from. */
+.hilal-tab-pill {
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    border-radius 260ms var(--md-sys-motion-spring-spatial),
+    transform 260ms var(--md-sys-motion-spring-spatial) !important;
+}
+
+.hilal-tab-pill:active:not(.dragging) {
+  transform: scale(0.97);
+  border-radius: 10px !important;
+}
+
+.hilal-tab-pill.hilal-tab-leaving {
+  animation: hilal-tab-leave-vertical 200ms cubic-bezier(0.3, 0, 0.8, 0.15) both;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+@keyframes hilal-tab-leave-vertical {
+  from {
+    opacity: 1;
+    max-height: 40px;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-12px) scale(0.96);
+    max-height: 0;
+    min-height: 0;
+    margin-block: 0;
+    padding-block: 0;
+  }
+}
+
+.hilal-htab.hilal-tab-entering {
+  animation: hilal-htab-enter 280ms var(--md-sys-motion-spring-spatial) both;
+}
+
+.hilal-htab.hilal-tab-leaving {
+  animation: hilal-htab-leave 200ms cubic-bezier(0.3, 0, 0.8, 0.15) both;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+@keyframes hilal-htab-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+    max-width: 0;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    max-width: 240px;
+  }
+}
+
+@keyframes hilal-htab-leave {
+  from {
+    opacity: 1;
+    max-width: 240px;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.85);
+    max-width: 0;
+    min-width: 0;
+    padding-inline: 0;
+    margin-inline: 0;
+  }
+}
+
+#hilal-search-dropdown,
+#hilal-mode-context-menu,
+#hilal-workspaces-dropdown-menu,
+#hilal-theme-menu {
+  transform-origin: top center;
+  animation: hilal-menu-open 260ms var(--md-sys-motion-spring-spatial);
+}
+
+#hilal-workspaces-dropdown-menu,
+#hilal-mode-context-menu {
+  transform-origin: top left;
+}
+
+@keyframes hilal-menu-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+}
+
+#hilal-native-slot > toolbarbutton,
+#hilal-extensions-slot toolbarbutton,
+#hilal-topbar button,
+#hilal-sidebar button {
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-radius 240ms var(--md-sys-motion-spring-spatial),
+    transform 240ms var(--md-sys-motion-spring-spatial) !important;
+}
+
+#hilal-native-slot > toolbarbutton:active:not([disabled]),
+#hilal-extensions-slot toolbarbutton:active:not([disabled]),
+#hilal-topbar button:active:not([disabled]),
+#hilal-sidebar button:not(.hilal-tab-pill *):active:not([disabled]) {
+  border-radius: 10px !important;
+  transform: scale(0.92) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hilal-tab-pill,
+  .hilal-htab,
+  #hilal-search-dropdown,
+  #hilal-mode-context-menu,
+  #hilal-workspaces-dropdown-menu,
+  #hilal-theme-menu {
+    animation: none !important;
+    transition: none !important;
+  }
+}

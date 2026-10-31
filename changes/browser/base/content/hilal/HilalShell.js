@@ -2562,6 +2562,52 @@
       this.updateNavButtons();
     },
 
+    // Plays the enter animation once. Elements created in a hidden tab list
+    // never get animationend, so a timer clears the class as well.
+    markEntering(el) {
+      el.classList.add("hilal-tab-entering");
+      const done = event => {
+        if (event && event.target != el) {
+          return;
+        }
+        el.classList.remove("hilal-tab-entering");
+        el.removeEventListener("animationend", done);
+      };
+      el.addEventListener("animationend", done);
+      setTimeout(done, 500);
+    },
+
+    liveTabElements(container) {
+      return container.querySelectorAll(":scope > :not(.hilal-tab-leaving)");
+    },
+
+    // Animates tab elements out when their tab closes. Workspace switches
+    // remove many at once, and those are dropped right away so the list does
+    // not shrink in front of the new workspace's tabs.
+    retireTabElements(container, existing, visibleTabs) {
+      const leaving = [...existing].filter(([tab]) => !visibleTabs.includes(tab));
+      const animate =
+        leaving.length == 1 &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      for (const [tab, el] of leaving) {
+        existing.delete(tab);
+        if (!animate) {
+          el.remove();
+          continue;
+        }
+        el._tab = null;
+        el.classList.remove("hilal-tab-entering");
+        el.classList.add("hilal-tab-leaving");
+        el.addEventListener("animationend", event => {
+          if (event.target == el) {
+            el.remove();
+          }
+        });
+        // Removes it even if the animation never runs, e.g. while hidden.
+        setTimeout(() => el.remove(), 400);
+      }
+    },
+
     renderVerticalTabs(visibleTabs) {
       const container = document.getElementById("hilal-tab-list");
       if (!container) return;
@@ -2573,12 +2619,7 @@
         }
       }
 
-      for (const [tab, pill] of existingPills.entries()) {
-        if (!visibleTabs.includes(tab)) {
-          pill.remove();
-          existingPills.delete(tab);
-        }
-      }
+      this.retireTabElements(container, existingPills, visibleTabs);
 
       visibleTabs.forEach((tab, index) => {
         let pill = existingPills.get(tab);
@@ -2595,14 +2636,7 @@
         if (!pill) {
           pill = this.createTabPill(tab);
           existingPills.set(tab, pill);
-          pill.classList.add("hilal-tab-entering");
-          pill.addEventListener(
-            "animationend",
-            () => {
-              pill.classList.remove("hilal-tab-entering");
-            },
-            { once: true }
-          );
+          this.markEntering(pill);
         }
 
         pill.classList.toggle("active", isSelected);
@@ -2628,7 +2662,7 @@
 
         this.updateTabPillContent(pill, tab);
 
-        const currentChild = container.children[index];
+        const currentChild = this.liveTabElements(container)[index];
         if (currentChild !== pill) {
           container.insertBefore(pill, currentChild || null);
         }
@@ -2646,12 +2680,7 @@
         }
       }
 
-      for (const [tab, htab] of existingTabs.entries()) {
-        if (!visibleTabs.includes(tab)) {
-          htab.remove();
-          existingTabs.delete(tab);
-        }
-      }
+      this.retireTabElements(container, existingTabs, visibleTabs);
 
       visibleTabs.forEach((tab, index) => {
         let htab = existingTabs.get(tab);
@@ -2668,6 +2697,7 @@
         if (!htab) {
           htab = this.createHorizontalTab(tab);
           existingTabs.set(tab, htab);
+          this.markEntering(htab);
         }
 
         htab.classList.toggle("active", isSelected);
@@ -2693,7 +2723,7 @@
 
         this.updateHorizontalTabContent(htab, tab);
 
-        const currentChild = container.children[index];
+        const currentChild = this.liveTabElements(container)[index];
         if (currentChild !== htab) {
           container.insertBefore(htab, currentChild || null);
         }
