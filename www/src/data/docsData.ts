@@ -450,146 +450,70 @@ Kullanıcılar Ayarlar menüsünden kendi özel bang tanımlarını ekleyebilir 
         title: "Hilal Android ve Mobil Mimari",
         shortTitle: "Mobil",
         iconName: "Smartphone",
-        description: "Mozilla GeckoView 135 motoru, Jetpack Compose Material 3 Expressive mimarisi, Hilal Bangs ve yerel derleme.",
+        description: "GeckoView üzerine kurulu, Material 3 Expressive arayüzlü Android uygulaması.",
         subsections: [
           {
             id: "mobile-overview",
             title: "Android Mimarisi ve Modül Düzeni",
-            description: "Modern çoklu modül hiyerarşisi ve kaynak dizini.",
-            content: `Hilal Browser Android sürümü, Chromium veya sistem WebView'ı yerine gerçek **Mozilla GeckoView (Gecko 135)** motoru üzerinde çalışan, modern Android mimari standartlarına tam uyumlu bir mobil web tarayıcısıdır.
+            description: "Paket yapısı, SDK seviyeleri ve motor.",
+            content: `Hilal Android, Mozilla GeckoView üzerine kurulu ve arayüzü Jetpack Compose ile Material 3 Expressive kullanılarak yazılmış ayrı bir uygulamadır. Masaüstü yamalarını kullanmaz; kodu \\\`android/\\\` dizinindedir.
 
-Arayüz katmanı tamamen **Jetpack Compose** ve **Material 3 Expressive** tasarım sistemi kullanılarak sıfırdan geliştirilmiştir.
-
-### Modül Hiyerarşisi
-Depodaki Android kaynakları \`android/\` dizini altında toplanmıştır:
+- Paket: \\\`com.vastsea.hilal\\\`
+- Min SDK 26, hedef SDK 36, derleme SDK 37
+- Motor: \\\`org.mozilla.geckoview:geckoview-omni\\\` 135
 
 \`\`\`text
-android/
-├── app/                      # Ana uygulama modülü, aktiviteler ve ekran gezintisi
-│   └── src/main/java/com/vastsea/hilal/
-│       ├── MainActivity.kt   # GeckoSession yaşam döngüsü ve kök Scaffold
-│       ├── model/            # Sekme, geçmiş, yer imi ve çalışma alanı veri modelleri
-│       ├── ui/
-│       │   ├── components/   # Omnibox, TabsTray, OptionsBottomSheet, NewTabPage
-│       │   ├── screens/      # SettingsScreen, HistoryScreen, BookmarksScreen, BangsScreen
-│       │   └── theme/        # Material 3 Expressive renk şemaları, tipografi ve şekiller
-│       └── util/             # BangsEngine, arama motoru yönlendiricisi ve yardımcılar
-├── core/                     # Çekirdek yardımcılar, veritabanı ve tercihler
-└── gradle/                   # Gradle wrapper ve derleme eklentileri
+android/app/src/main/java/com/vastsea/hilal/
+├── HilalApplication.kt     # Single GeckoRuntime, database, stores
+├── MainActivity.kt         # Intents, immersive mode, permissions bridge
+├── gecko/GeckoProvider.kt  # Tracking protection, cookie isolation
+├── browser/                # Tabs, Gecko delegates, session persistence
+├── data/                   # Room: history, bookmarks, downloads; settings
+├── search/                 # Search engines, bangs, suggestions
+├── downloads/              # Saves downloads to MediaStore
+├── addons/                 # Bundled uBlock Origin, add-on install prompts
+├── telemetry/              # Opt-out daily usage ping
+└── ui/                     # Compose screens: browser, library, settings
 \`\`\`
 
-### Platform Parametreleri
-- **Hedef SDK:** Android 15 (API 35/36)
-- **Minimum SDK:** Android 8.0 Oreo (API 26)
-- **Kotlin Sürümü:** 2.1.0
-- **Arayüz:** 100% Jetpack Compose (Material 3 Expressive)
-- **Motor:** \`org.mozilla.geckoview:geckoview:135.0.20250216.090000\``
+Ayrıntılı geliştirici rehberi depodaki \\\`docs/MOBILE.md\\\` dosyasındadır.`
           },
           {
-            id: "mobile-geckoview",
-            title: "GeckoView 135 ve Oturum Yönetimi",
-            description: "Mozilla GeckoView runtime, GeckoSession yaşam döngüsü ve içerik engelleme.",
-            content: `GeckoView, Firefox'un tam Gecko motorunu Android uygulamalarına gömen bağımsız bir kütüphanedir. Hilal, sistem WebView'larının getirdiği gizlilik zafiyetlerini ve Chromium tekelini aşmak için doğrudan GeckoView 135 kullanır.
+            id: "mobile-gestures",
+            title: "Adres Çubuğu Hareketleri",
+            description: "Alttaki adres çubuğu ve hareket modeli.",
+            content: `Adres çubuğu ekranın altında, sayfanın üzerinde durur. Okurken gizlenir, yukarı kaydırınca geri gelir. Tüm hareketler \\\`ui/browser/BarGestures.kt\\\` içindedir:
 
-### GeckoRuntime Başlatma
-Uygulama yaşam döngüsünde tek bir \`GeckoRuntime\` örneği oluşturulur ve tüm sekmeler tarafından paylaşılır:
+| Hareket | Sonuç |
+| --- | --- |
+| Dokunma | Adres düzenleyici; öneriler yukarı doğru dizilir |
+| Sola / sağa kaydırma | Sonraki / önceki sekme |
+| Yukarı kaydırma | Sekme genel görünümü |
+| Basılı tutma | Yapıştır ve git, kopyala, paylaş, düzenle |
 
-\`\`\`kotlin
-val runtimeSettings = GeckoRuntimeSettings.Builder()
-    .contentBlocking(
-        ContentBlocking.Settings.Builder()
-            .antiTracking(ContentBlocking.AntiTracking.STRICT)
-            .cookieBehavior(ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS)
-            .enhancedTrackingProtectionLevel(ContentBlocking.EtpLevel.STRICT)
-            .build()
-    )
-    .aboutConfigEnabled(false)
-    .build()
-
-val geckoRuntime = GeckoRuntime.create(context, runtimeSettings)
-\`\`\`
-
-### Oturum Yaşam Döngüsü ve Sekme İzolasyonu
-Her sekme bağımsız bir \`GeckoSession\` nesnesine karşılık gelir. Masaüstündeki Container tabanlı Workspaces mimarisi, mobilde izole oturum parametreleri ve çerez bağlamları ile korunur. Özel gezinti (Private Browsing) modunda açılan sekmeler bellekte tutulur ve sekme kapatıldığında tüm oturum verisi anında bellekten silinir.`
-          },
-          {
-            id: "mobile-ui",
-            title: "Jetpack Compose ve Material 3 Expressive",
-            description: "M3E gruplu ayar satırları, dinamik renkler ve etkileşimli bileşenler.",
-            content: `Hilal Android arayüzü, Google'ın Material 3 Expressive (M3E) kılavuzlarına harfiyen uyar. Masaüstündeki Beer CSS / M3 arayüzü ile tutarlı bir görsel dil sunar.
-
-### Temel Arayüz Bileşenleri
-
-| Bileşen | Dosya | İşlev |
-| --- | --- | --- |
-| \`Omnibox\` | \`ui/components/Omnibox.kt\` | Dinamik adres çubuğu, yükleme göstergesi, kalkan durumu ve bang algılayıcı. |
-| \`TabsTray\` | \`ui/components/TabsTray.kt\` | Kaydırarak sekme kapatma (swipe-to-dismiss), çalışma alanı sekmeleri ve yeni sekme açma. |
-| \`OptionsBottomSheet\` | \`ui/components/OptionsBottomSheet.kt\` | Masaüstü modu, sayfada bul, gizlilik kalkanı ve paylaşım eylemleri. |
-| \`SettingsScreen\` | \`ui/screens/SettingsScreen.kt\` | M3 Expressive gruplanmış kutu satırları, varsayılan tarayıcı ayarı ve bang yönetimi. |
-
-### Dinamik Renk ve Tema Desteği
-Android 12+ cihazlarda sistem duvar kağıdından türetilen Dinamik Renk (Monet) paleti desteklenir. Açık ve koyu tema geçişleri tam Compose yeniden çizim optimizasyonu ile gecikmesiz çalışır.`
-          },
-          {
-            id: "mobile-bangs",
-            title: "Hilal Bangs Mobil Arama Motoru",
-            description: "Doğrudan arama kestirmeleri ve URL ayrıştırma mantığı.",
-            content: `Masaüstü sürümdeki Hilal Bangs sistemi mobil adres çubuğuna doğrudan entegre edilmiştir. Kullanıcı arama sorgusunun başına veya sonuna bir bang eklediğinde, harici bir arama motoru ara sayfası olmadan doğrudan hedef servise yönlendirilir.
-
-### Popüler Dahili Kestirmeler
-- \`!w <terim>\` veya \`!wiki <terim>\` -> Doğrudan Vikipedi araması
-- \`!gh <terim>\` -> Doğrudan GitHub arama sonuçları
-- \`!yt <terim>\` -> YouTube arama sonuçları
-- \`!ddg <terim>\` -> DuckDuckGo araması
-- \`!reddit <terim>\` -> Reddit araması
-
-### Ayrıştırma ve Yönlendirme
-\`BangsEngine.kt\` adres çubuğuna girilen metni anlık olarak inceler, kayıtlı bang anahtarlarını ayıklar ve harici servislerin arama uç noktalarına yönlendirir.`
+Titreşim yalnızca bir kaydırma işlem yapacak kadar ilerlediğinde çalışır ve ayarlardan kapatılabilir.`
           },
           {
             id: "mobile-build",
-            title: "Kaynak Koddan Derleme ve Paketleme",
-            description: "Gradle derleme komutları, debug/release APK ve AAB üretimi.",
-            content: `Hilal Android projesini yerel geliştirme makinenizde derlemek için Android SDK (API 35/36) ve JDK 17+ gereklidir.
+            title: "Kaynak Koddan Derleme ve Yayın",
+            description: "Gradle komutları ve android-v etiketleri.",
+            content: `JDK 17 ve Android SDK gerekir:
 
-### Hızlı Derleme Adımları
-
-1. Depo kök dizininden Android klasörüne geçin:
 \`\`\`bash
 cd android
-\`\`\`
-
-2. Debug derlemesi yapın ve bağlı cihaza yükleyin:
-\`\`\`bash
+./gradlew assembleDebug
 ./gradlew installDebug
 \`\`\`
 
-3. Google Play Store için imzalı Android App Bundle (.aab) üretin:
-\`\`\`bash
-./gradlew bundleRelease
-\`\`\`
-
-4. Doğrudan bağımsız sürüm APK (.apk) üretin:
-\`\`\`bash
-./gradlew assembleRelease
-\`\`\`
-
-> **İmzalama Notu:** Release sürümleri için \`keystore.properties\` dosyası veya CI ortam değişkenleri (\`KEYSTORE_BASE64\`, \`KEYSTORE_PASSWORD\`, \`KEY_ALIAS\`, \`KEY_PASSWORD\`) tanımlanmalıdır. Gizli anahtar dosyaları asla git deposuna commit edilmez.`
+\\\`android-vX.Y.Z\\\` etiketi gönderildiğinde \\\`android-release.yml\\\` iş akışı imzalı APK ve AAB üretir, APK'yı GitHub sürümüne ekler. İmza anahtarı depo sırlarından gelir ve depoda tutulmaz.`
           },
           {
             id: "mobile-privacy",
-            title: "Mobil Gizlilik ve Şeffaflık Modeli",
-            description: "Tamamen açık kaynak, sıfır reklam ve sponsor odaklı yapı.",
-            content: `Hilal Browser Android sürümü, ticari tarayıcıların aksine kullanıcıyı bir veri kaynağı olarak görmez.
-
-### Veri Toplama Sınırları
-- **Sıfır Kişisel Veri:** Konum, arama geçmişi, form verileri veya cihaz ID'leri asla toplanmaz.
-- **Sıfır Reklam Kimliği:** Google Reklam Kimliği (GAID) veya benzeri profilleme araçları uygulamaya dahil edilmemiştir.
-- **Yalnızca Anonim İstatistikler:** Hizmet kalitesini ve GeckoView motorunun kararlılığını ölçmek amacıyla yalnızca tamamen anonim sayısal sayaçlar (aktif kurulum sayısı, cihaz modeli ve Android işletim sistemi sürümü) toplanır.
-- **Şeffaf ve Denetlenebilir:** Kaynak kod bütünüyle GitHub üzerinde herkese açıktır. Uygulamanın hangi ağ isteklerini yaptığı kaynak koddan satır satır denetlenebilir.
-
-### Gelir Modeli
-Hilal Browser'ın hiçbir sürümünde reklam ağı, veri satışı veya sponsorlu arama yerleşimi bulunmaz. Proje bütünüyle açık kaynak topluluğunun bağışları ve kurumsal sponsorluklar ile finanse edilir.`
+            title: "Mobil Gizlilik ve Telemetri",
+            description: "Cihazda kalan veriler ve anonim günlük sayım.",
+            content: `- Geçmiş, yer imleri, sekmeler ve indirmeler cihazda kalır. Gizli sekmeler geçmişe ve kayıtlı oturuma yazılmaz.
+- Arama önerileri yazdığınızı seçili arama motoruna gönderir; kapatılabilir ve gizli sekmelerde hiç istenmez.
+- Hilal'in kendisinin gönderdiği tek veri, kapatılabilir bir anonim sayımdır: ilk açılışta bir \\\`first_run\\\`, sonra günde en fazla bir \\\`daily_ping\\\`. İçinde rastgele bir kurulum kimliği, uygulama sürümü, Android API seviyesi, işlemci mimarisi, dil, arama motoru, tema, uBlock Origin durumu ve sekme sayısı aralığı bulunur. Ayarlar > Gizlilik'ten kapatılabilir.`
           }
         ]
       },
@@ -603,15 +527,13 @@ Hilal Browser'ın hiçbir sürümünde reklam ağı, veri satışı veya sponsor
           {
             id: "rolling-forward",
             title: "Firefox Sürümünü Güncelleme Adımları",
-            description: "upstream.lock kilit dosyasını yenileme prosedürü.",
-            content: `Mozilla yeni bir güvenlik veya kararlı sürüm yayınladığında Hilal tabanı şu sırayla güncellenir:
+            description: "Firefox ESR tabanını bir sonraki ara sürüme taşıma.",
+            content: `Masaüstü Hilal, Firefox ESR üzerine kuruludur. Taban, bir sonraki ESR ara sürümüne taşınır; Nightly veya Release dallarına geçilmez.
 
-1. \`upstream.lock\` dosyasını açın ve yeni Firefox commit karmasını güncelleyin:
+1. \\\`upstream.lock\\\` dosyasında \\\`firefox_version\\\` ve \\\`commit\\\` değerlerini yeni ESR sürüm etiketine göre güncelleyin:
 \`\`\`toml
-[upstream]
-repo = "https://github.com/mozilla-firefox/firefox.git"
-commit = "yeni-commit-karmasi"
-branch = "release"
+firefox_version = "153.6.0esr"
+commit          = "<yeni-commit>"
 \`\`\`
 
 2. Motoru yeni commit'e çekin ve yamaları uygulayın:
@@ -620,13 +542,11 @@ branch = "release"
 ./bin/hil apply --force
 \`\`\`
 
-3. Eğer tüm yamalar hatasız uygulanırsa doğrudan derleme ve test aşamasına geçin:
+3. Uygulanmayan yamaları \\\`docs/UPSTREAM-SYNC.md\\\` dosyasındaki adımlarla düzeltin, ardından tam derleme yapıp test edin:
 \`\`\`bash
-scripts/build-macos.sh faster
+scripts/build-macos.sh
 (cd engine && ./mach run)
-\`\`\`
-
-4. \`about:\` penceresindeki sürüm dizgilerini ve Hilal arayüz bileşenlerini doğrulayın.`
+\`\`\``
           }
         ]
       },
@@ -1140,146 +1060,70 @@ Users can configure custom bangs and modify default mappings via Hilal Preferenc
         title: "Hilal Android & Mobile Architecture",
         shortTitle: "Mobile",
         iconName: "Smartphone",
-        description: "Mozilla GeckoView 135 runtime, Jetpack Compose Material 3 Expressive UI, Hilal Bangs, and local builds.",
+        description: "The Android app built on GeckoView with a Material 3 Expressive interface.",
         subsections: [
           {
             id: "mobile-overview",
             title: "Android Architecture & Module Layout",
-            description: "Modern multi-module hierarchy and source tree organization.",
-            content: `Hilal Browser for Android is built directly on top of the genuine **Mozilla GeckoView (Gecko 135)** engine rather than Chromium or system WebViews, providing an independent rendering engine with native privacy safeguards.
+            description: "Package layout, SDK levels, and engine.",
+            content: `Hilal for Android is a separate app built on Mozilla GeckoView, with a Jetpack Compose interface on Material 3 Expressive. It does not use the desktop patches; its code lives in \\\`android/\\\`.
 
-The entire user interface is crafted using **Jetpack Compose** following Google's **Material 3 Expressive** design system.
-
-### Module Hierarchy
-All Android source files reside within the \`android/\` directory:
+- Package: \\\`com.vastsea.hilal\\\`
+- Min SDK 26, target SDK 36, compile SDK 37
+- Engine: \\\`org.mozilla.geckoview:geckoview-omni\\\` 135
 
 \`\`\`text
-android/
-├── app/                      # Main application module, activities, and navigation
-│   └── src/main/java/com/vastsea/hilal/
-│       ├── MainActivity.kt   # GeckoSession lifecycle and root Scaffold
-│       ├── model/            # Tab, history, bookmark, and workspace data models
-│       ├── ui/
-│       │   ├── components/   # Omnibox, TabsTray, OptionsBottomSheet, NewTabPage
-│       │   ├── screens/      # SettingsScreen, HistoryScreen, BookmarksScreen, BangsScreen
-│       │   └── theme/        # Material 3 Expressive color schemes, typography, and shapes
-│       └── util/             # BangsEngine, search router, and utility classes
-├── core/                     # Core utilities, preferences, and persistence
-└── gradle/                   # Gradle wrapper and build plugins
+android/app/src/main/java/com/vastsea/hilal/
+├── HilalApplication.kt     # Single GeckoRuntime, database, stores
+├── MainActivity.kt         # Intents, immersive mode, permissions bridge
+├── gecko/GeckoProvider.kt  # Tracking protection, cookie isolation
+├── browser/                # Tabs, Gecko delegates, session persistence
+├── data/                   # Room: history, bookmarks, downloads; settings
+├── search/                 # Search engines, bangs, suggestions
+├── downloads/              # Saves downloads to MediaStore
+├── addons/                 # Bundled uBlock Origin, add-on install prompts
+├── telemetry/              # Opt-out daily usage ping
+└── ui/                     # Compose screens: browser, library, settings
 \`\`\`
 
-### Platform Specifications
-- **Target SDK:** Android 15 (API 35/36)
-- **Minimum SDK:** Android 8.0 Oreo (API 26)
-- **Kotlin Version:** 2.1.0
-- **UI Architecture:** 100% Jetpack Compose (Material 3 Expressive)
-- **Engine Dependency:** \`org.mozilla.geckoview:geckoview:135.0.20250216.090000\``
+The full developer guide is \\\`docs/MOBILE.md\\\` in the repository.`
           },
           {
-            id: "mobile-geckoview",
-            title: "GeckoView 135 & Session Management",
-            description: "Mozilla GeckoView runtime, session lifecycle, and content protection.",
-            content: `GeckoView embeds the full Firefox rendering engine into Android applications as a modular component. Hilal utilizes GeckoView 135 to deliver desktop-class web compatibility and prevent Chromium monoculture.
+            id: "mobile-gestures",
+            title: "Address Bar Gestures",
+            description: "The bottom address bar and its gesture model.",
+            content: `The address bar sits at the bottom and floats over the page. It hides while you read and returns when you scroll up. All gestures live in \\\`ui/browser/BarGestures.kt\\\`:
 
-### GeckoRuntime Initialization
-A single singleton \`GeckoRuntime\` instance is created during application launch and shared across all active sessions:
+| Gesture | Result |
+| --- | --- |
+| Tap | Address editor; suggestions stack upward |
+| Swipe left / right | Next / previous tab |
+| Swipe up | Tab overview |
+| Long press | Paste and go, copy, share, edit |
 
-\`\`\`kotlin
-val runtimeSettings = GeckoRuntimeSettings.Builder()
-    .contentBlocking(
-        ContentBlocking.Settings.Builder()
-            .antiTracking(ContentBlocking.AntiTracking.STRICT)
-            .cookieBehavior(ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS)
-            .enhancedTrackingProtectionLevel(ContentBlocking.EtpLevel.STRICT)
-            .build()
-    )
-    .aboutConfigEnabled(false)
-    .build()
-
-val geckoRuntime = GeckoRuntime.create(context, runtimeSettings)
-\`\`\`
-
-### Session Lifecycle and Workspace Isolation
-Each browser tab maps to an independent \`GeckoSession\`. The container-based workspace separation from desktop is preserved via isolated cookie and context storage. Private browsing tabs exist strictly in-memory and are purged immediately upon closure.`
-          },
-          {
-            id: "mobile-ui",
-            title: "Jetpack Compose & Material 3 Expressive",
-            description: "M3 Expressive design tokens, grouped settings rows, and adaptive components.",
-            content: `The Hilal Android UI conforms strictly to Google's Material 3 Expressive (M3E) guidelines, providing visual harmony with the desktop Beer CSS design language.
-
-### Core UI Components
-
-| Component | Path | Responsibility |
-| --- | --- | --- |
-| \`Omnibox\` | \`ui/components/Omnibox.kt\` | Address bar, morphing progress indicator, shield status, and bang detection. |
-| \`TabsTray\` | \`ui/components/TabsTray.kt\` | Swipe-to-dismiss tab grid, workspace pagination, and quick tab creation. |
-| \`OptionsBottomSheet\` | \`ui/components/OptionsBottomSheet.kt\` | Desktop site toggle, find in page, tracking protection controls, and sharing. |
-| \`SettingsScreen\` | \`ui/screens/SettingsScreen.kt\` | M3 Expressive grouped container rows, default browser configuration, and bangs. |
-
-### Dynamic Color & Theming
-On Android 12+, Hilal automatically adapts to the user's wallpaper via Dynamic Color (Monet). Both Light and Dark color schemes are fully tuned with high-contrast surfaces and accessible text tokens.`
-          },
-          {
-            id: "mobile-bangs",
-            title: "Hilal Bangs Mobile Search Engine",
-            description: "Direct search shortcuts and URL parsing logic.",
-            content: `The desktop Hilal Bangs search system is integrated natively into the mobile address bar. Prefixing or suffixing a search query with a bang redirects directly to the destination without hitting intermediary tracking search engines.
-
-### Common Built-in Shortcuts
-- \`!w <query>\` or \`!wiki <query>\` -> Direct Wikipedia lookup
-- \`!gh <query>\` -> Direct GitHub search
-- \`!yt <query>\` -> Direct YouTube video search
-- \`!ddg <query>\` -> DuckDuckGo search
-- \`!reddit <query>\` -> Reddit search
-
-### Parsing and Dispatch
-\`BangsEngine.kt\` monitors the query in real-time, extracts registered bang tokens, and constructs direct destination URLs.`
+Vibration only fires when a swipe is far enough to act, and it can be turned off in settings.`
           },
           {
             id: "mobile-build",
-            title: "Building from Source & Packaging",
-            description: "Gradle build commands, debug, release APK, and App Bundle generation.",
-            content: `Building Hilal Android locally requires the Android SDK (API 35/36) and JDK 17+.
+            title: "Building from Source & Releases",
+            description: "Gradle commands and android-v tags.",
+            content: `You need JDK 17 and the Android SDK:
 
-### Build Commands
-
-1. Change directory to the Android project root:
 \`\`\`bash
 cd android
-\`\`\`
-
-2. Build and install the debug variant on a connected device:
-\`\`\`bash
+./gradlew assembleDebug
 ./gradlew installDebug
 \`\`\`
 
-3. Generate a signed Android App Bundle (.aab) for Google Play:
-\`\`\`bash
-./gradlew bundleRelease
-\`\`\`
-
-4. Generate a standalone release APK (.apk):
-\`\`\`bash
-./gradlew assembleRelease
-\`\`\`
-
-> **Signing Notice:** Production builds require signing properties configured via \`keystore.properties\` or CI environment variables (\`KEYSTORE_BASE64\`, \`KEYSTORE_PASSWORD\`, \`KEY_ALIAS\`, \`KEY_PASSWORD\`). Keystores are never tracked in version control.`
+Pushing an \\\`android-vX.Y.Z\\\` tag runs the \\\`android-release.yml\\\` workflow, which builds a signed APK and AAB and attaches the APK to a GitHub release. The signing key comes from repository secrets and is never committed.`
           },
           {
             id: "mobile-privacy",
-            title: "Privacy Model & Telemetry Transparency",
-            description: "Fully open source, zero ad networks, and sponsor-funded model.",
-            content: `Hilal Browser on Android treats user privacy as an absolute architectural requirement rather than a feature toggle.
-
-### Data Boundaries
-- **Zero Personal Data:** Location, browsing history, form data, and persistent hardware IDs are never collected.
-- **Zero Advertising ID:** Google Advertising ID (GAID) and commercial ad SDKs are completely absent from the codebase.
-- **Strictly Anonymous Diagnostics:** Only aggregate counts (active installations, device model, and OS version) are processed to measure GeckoView engine stability and rendering compatibility.
-- **Auditable Source Code:** The entire application is open source on GitHub. Every network call can be inspected directly in the repository.
-
-### Monetization Model
-Hilal Browser contains zero advertising networks, zero affiliate tracking, and zero commercial search placement deals. Development is funded exclusively through community donations and project sponsorships.`
+            title: "Privacy & Telemetry",
+            description: "What stays on the device and the anonymous daily ping.",
+            content: `- History, bookmarks, tabs, and downloads stay on the device. Private tabs are never written to history or the saved session.
+- Search suggestions send what you type to the selected search engine. They can be turned off and are never requested from private tabs.
+- The only data Hilal itself sends is an opt-out anonymous ping: a \\\`first_run\\\` event, then at most one \\\`daily_ping\\\` per day. It contains a random installation ID, the app version, Android API level, CPU architecture, language, search engine, theme, whether uBlock Origin is on, and a tab count range. Turn it off in Settings > Privacy.`
           }
         ]
       },
@@ -1293,30 +1137,26 @@ Hilal Browser contains zero advertising networks, zero affiliate tracking, and z
           {
             id: "rolling-forward",
             title: "Rolling Firefox Forward",
-            description: "Procedure for updating the pinned upstream base.",
-            content: `When Mozilla releases new security updates or stable versions:
+            description: "Moving the Firefox ESR base to the next point release.",
+            content: `Desktop Hilal is based on Firefox ESR. The base moves to the next ESR point release, never to Nightly or Release.
 
-1. Update the commit hash in \`upstream.lock\`:
+1. Update \\\`firefox_version\\\` and \\\`commit\\\` in \\\`upstream.lock\\\` to the new ESR release tag:
 \`\`\`toml
-[upstream]
-repo = "https://github.com/mozilla-firefox/firefox.git"
-commit = "new-target-commit-hash"
-branch = "release"
+firefox_version = "153.6.0esr"
+commit          = "<new-commit>"
 \`\`\`
 
-2. Checkout the new commit and apply patches:
+2. Fetch the new commit and apply the patches:
 \`\`\`bash
 ./bin/hil setup
 ./bin/hil apply --force
 \`\`\`
 
-3. If all patches apply cleanly, compile and verify:
+3. Fix any patch that fails to apply as described in \\\`docs/UPSTREAM-SYNC.md\\\`, then do a full build and test:
 \`\`\`bash
-scripts/build-macos.sh faster
+scripts/build-macos.sh
 (cd engine && ./mach run)
-\`\`\`
-
-4. Verify branding strings in \`about:\`, workspace isolation, and custom UI components.`
+\`\`\``
           }
         ]
       },

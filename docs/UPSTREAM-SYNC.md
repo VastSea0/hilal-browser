@@ -1,12 +1,14 @@
 # Syncing with upstream Firefox
 
-Roll the Firefox base forward regularly.
+Desktop Hilal is based on Firefox ESR. Move the base to the next ESR point
+release (for example from `153.5.1esr` to `153.6.0esr`) as soon as it is out,
+because ESR point releases carry the security fixes. Do not move to Nightly or
+Release.
 
 ## Upstream Sync Workflow
 
-To sync with a new upstream Firefox release or commit:
-
-1. Edit `upstream.lock` in the repository root and update the `commit` hash and metadata.
+1. Edit `upstream.lock` in the repository root: set `firefox_version` and the
+   `commit` of the new ESR release tag in `mozilla-firefox/firefox`.
 2. Run `./bin/hil setup` to fetch the new pinned commit and reset `engine/`.
 3. Run `./bin/hil apply --force` to apply patches and overlays to the new base.
 
@@ -44,9 +46,10 @@ commit it at the correct point in the history, and run `./bin/hil refresh`.
 
 ## Verifying after a Sync
 
-Run, at minimum:
+Do a full build, not `faster`, because the engine itself changed:
 ```bash
 scripts/build-macos.sh
 (cd engine && ./mach run)
 ```
-Then exercise any Hilal-specific surface: branding visible, vendor string in `about:` matches, etc.
+Then check the Hilal-specific parts: branding and version in `about:`, the
+shell, workspaces, bangs, and the privacy profiles.
