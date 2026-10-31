@@ -14,7 +14,7 @@ index 12d5982b1244..fd5b3a02ddb2 100644
  @import url("chrome://browser/skin/customizableui/customizeMode.css");
  @import url("chrome://browser/skin/UITour.css");
  @import url("chrome://browser/skin/formautofill-notification.css");
-+@import url("chrome://browser/skin/beer.min.css");
++@import url("chrome://browser/skin/hilal-beer.css");
 +@import url("chrome://browser/skin/hilal-m3-tokens.css");
 +@import url("chrome://browser/skin/hilal-material3.css");
  
@@ -42,7 +42,7 @@ index 7892988bd599..e018c738e99b 100644
 +  skin/classic/browser/hilal-m3-tokens.css                    (../shared/hilal-m3-tokens.css)
 +  skin/classic/browser/hilal-material3.css                    (../shared/hilal-material3.css)
 +# Beer CSS M3E bundle (real Material 3 Expressive library)
-+  skin/classic/browser/beer.min.css                           (../shared/beer.min.css)
++  skin/classic/browser/hilal-beer.css                         (../shared/hilal-beer.css)
 +  skin/classic/browser/beer.min.js                            (../shared/beer.min.js)
 +  skin/classic/browser/material-symbols-outlined.woff2        (../shared/material-symbols-outlined.woff2)
 +  skin/classic/browser/icons/add-device.svg                                 (../shared/icons/add-device.svg)
