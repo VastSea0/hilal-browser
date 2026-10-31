@@ -2,6 +2,27 @@
 
 ---
 
+## [Unreleased]
+
+### Changed
+- The desktop browser is now based on Firefox ESR 153.5.1 instead of Nightly snapshots, so it receives a year of security and stability fixes through small ESR updates.
+- New Material 3 Expressive shell with its own top bar, address bar, and vertical or horizontal tabs. The address bar follows Firefox's loading and privacy rules, site information and permission prompts open from it, and the downloads button and main menu are in the toolbar.
+- The welcome screen is now a short setup flow.
+- Shell labels and tooltips are localized.
+- Lepton (Firefox-UI-Fix) is reduced to its icon rules.
+
+### Fixed
+- The shell hides during fullscreen video.
+- Private windows are marked in the shell and keep an empty address bar.
+- The tab context menu opens at the pointer.
+- Tab and reload shortcuts use Firefox's own commands.
+
+### Removed
+- The Tahoe theme, compact mode, and transparent macOS chrome.
+- Boosts. They will return as a rewritten feature.
+
+---
+
 ## [0.3.0-alpha.6] - 2026-06-21
 
 ### Added
