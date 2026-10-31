@@ -2918,14 +2918,119 @@
     },
   };
 
+  // Compact mode hides the sidebar, the top bar or both until the pointer
+  // reaches the window edge they sit on, and slides them back in over the
+  // page instead of resizing it.
+  const HilalCompactMode = {
+    SIDEBAR_PREF: "hilal.compact.enabled",
+    TOPBAR_PREF: "hilal.compact.hide_toolbox",
+    HIDE_DELAY_MS: 350,
+    _timers: {},
+
+    init() {
+      this._edges = {};
+      for (const side of ["sidebar", "topbar"]) {
+        const edge = document.createElement("div");
+        edge.id = `hilal-compact-edge-${side}`;
+        edge.className = "hilal-compact-edge";
+        edge.addEventListener("mouseenter", () => this.reveal(side));
+        edge.addEventListener("mouseleave", () => this.scheduleHide(side));
+        document.body.appendChild(edge);
+        this._edges[side] = edge;
+      }
+      for (const [side, id] of [
+        ["sidebar", "hilal-sidebar"],
+        ["topbar", "hilal-header-shell"],
+      ]) {
+        const panel = document.getElementById(id);
+        if (!panel) {
+          continue;
+        }
+        panel.addEventListener("mouseenter", () => this.reveal(side));
+        panel.addEventListener("mouseleave", () => this.scheduleHide(side));
+        panel.addEventListener("focusout", () => this.scheduleHide(side));
+      }
+      this._observer = () => this.apply();
+      Services.prefs.addObserver(this.SIDEBAR_PREF, this._observer);
+      Services.prefs.addObserver(this.TOPBAR_PREF, this._observer);
+      window.addEventListener(
+        "unload",
+        () => {
+          Services.prefs.removeObserver(this.SIDEBAR_PREF, this._observer);
+          Services.prefs.removeObserver(this.TOPBAR_PREF, this._observer);
+        },
+        { once: true }
+      );
+      this.apply();
+    },
+
+    apply() {
+      const root = document.documentElement;
+      root.toggleAttribute(
+        "hilal-compact-sidebar",
+        Services.prefs.getBoolPref(this.SIDEBAR_PREF, false)
+      );
+      root.toggleAttribute(
+        "hilal-compact-topbar",
+        Services.prefs.getBoolPref(this.TOPBAR_PREF, false)
+      );
+    },
+
+    toggle() {
+      Services.prefs.setBoolPref(
+        this.SIDEBAR_PREF,
+        !Services.prefs.getBoolPref(this.SIDEBAR_PREF, false)
+      );
+    },
+
+    toggleTopbar() {
+      Services.prefs.setBoolPref(
+        this.TOPBAR_PREF,
+        !Services.prefs.getBoolPref(this.TOPBAR_PREF, false)
+      );
+    },
+
+    reveal(side) {
+      clearTimeout(this._timers[side]);
+      document.documentElement.setAttribute(`hilal-compact-show-${side}`, "true");
+    },
+
+    scheduleHide(side) {
+      clearTimeout(this._timers[side]);
+      this._timers[side] = setTimeout(() => {
+        const panel = document.getElementById(
+          side == "sidebar" ? "hilal-sidebar" : "hilal-header-shell"
+        );
+        // Stay open while the pointer is over the panel, it holds focus, or
+        // one of its menus is open.
+        if (
+          panel?.matches(":hover, :focus-within") ||
+          document.querySelector(
+            "#hilal-workspaces-dropdown-menu[style*='flex'], #hilal-mode-context-menu[style*='flex'], #hilal-search-dropdown[style*='flex']"
+          )
+        ) {
+          this.scheduleHide(side);
+          return;
+        }
+        document.documentElement.removeAttribute(`hilal-compact-show-${side}`);
+      }, this.HIDE_DELAY_MS);
+    },
+  };
+
+  window.HilalCompactMode = HilalCompactMode;
+
   function startShell() {
+    const start = () => {
+      HilalShell.init();
+      HilalCompactMode.init();
+    };
     if (
       typeof window.gBrowser !== "undefined" &&
       window.gBrowser.tabContainer
     ) {
-      HilalShell.init();
+      start();
     } else {
-      window.addEventListener("load", () => HilalShell.init(), { once: true });
+      window.addEventListener("load", start, { once: true });
     }
   }
 

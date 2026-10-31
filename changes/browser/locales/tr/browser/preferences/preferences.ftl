@@ -14,6 +14,17 @@ hilal-workspaces-groups-public = Sekme gruplarını tüm çalışma alanlarında
 hilal-workspaces-enabled-desc = Kişisel, iş ve sosyal sekmeleri ayrı alanlarda tutun
 hilal-workspaces-pinned-public-desc = Sabitlenmiş sekmeleri her çalışma alanında göster
 hilal-workspaces-groups-public-desc = Sekme gruplarını her çalışma alanında göster
+hilal-compact-header = Kompakt mod
+hilal-compact-sidebar = Kenar çubuğunu gizle
+hilal-compact-sidebar-desc = Göstermek için imleci pencerenin sol kenarına götürün. { PLATFORM() ->
+        [macos] ⌘⌥M
+       *[other] Ctrl+Alt+M
+    } ile açıp kapatabilirsiniz.
+hilal-compact-topbar = Üst çubuğu gizle
+hilal-compact-topbar-desc = Göstermek için imleci pencerenin üst kenarına götürün. { PLATFORM() ->
+        [macos] ⌘⌥T
+       *[other] Ctrl+Alt+T
+    } ile açıp kapatabilirsiniz.
 hilal-urlbar-show-workspace-name =
     .label = Çalışma alanı ismini adres çubuğunda göster
 hilal-workspaces-reset-description = Tüm çalışma alanı verilerini sıfırla (geri alınamaz).

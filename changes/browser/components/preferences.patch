@@ -11,7 +11,7 @@ index de83282c2c8a..5e67f723b792 100644
     content/browser/preferences/home.js
     content/browser/preferences/search.js
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index b66ff919d93b..3646efc7896c 100644
+index b66ff919d93b..6ad7b8425287 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
 @@ -13,7 +13,7 @@
@@ -32,7 +32,7 @@ index b66ff919d93b..3646efc7896c 100644
    UpdateListener: "resource://gre/modules/UpdateListener.sys.mjs",
    LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
    MigrationUtils: "resource:///modules/MigrationUtils.sys.mjs",
-@@ -116,6 +118,23 @@ Preferences.addAll([
+@@ -116,6 +118,24 @@ Preferences.addAll([
      id: "privacy.userContext.newTabContainerOnLeftClick.enabled",
      type: "bool",
    },
@@ -43,7 +43,8 @@ index b66ff919d93b..3646efc7896c 100644
 +  { id: "hilal.workspaces.pinned.public", type: "bool" },
 +  { id: "hilal.workspaces.groups.public", type: "bool" },
 +  { id: "hilal.urlbar.showWorkspaceName", type: "bool" },
-+  { id: "hilal.compact.hideToolbar", type: "bool" },
++  { id: "hilal.compact.enabled", type: "bool" },
++  { id: "hilal.compact.hide_toolbox", type: "bool" },
 +  { id: "hilal.sidebar.footer.bookmarks", type: "bool" },
 +  { id: "hilal.sidebar.footer.history", type: "bool" },
 +  { id: "hilal.sidebar.footer.passwords", type: "bool" },
@@ -56,7 +57,7 @@ index b66ff919d93b..3646efc7896c 100644
  ]);
  
  if (AppConstants.HAVE_SHELL_SERVICE) {
-@@ -632,10 +651,6 @@ function createDefaultBrowserConfig({
+@@ -632,10 +652,6 @@ function createDefaultBrowserConfig({
          },
        },
      ],
@@ -67,7 +68,7 @@ index b66ff919d93b..3646efc7896c 100644
    };
  
    const items = includeIsDefaultPane
-@@ -1815,6 +1830,1377 @@ gMainPane.initialized = new Promise(res => {
+@@ -1815,6 +1831,1377 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
@@ -188,7 +189,7 @@ index b66ff919d93b..3646efc7896c 100644
 +      const hilalPrefMappings = [
 +        ["hilalUrlbarShowWorkspaceName", "hilal.urlbar.showWorkspaceName", false],
 +        ["hilalSidebarCompactEnabled", "hilal.compact.enabled", false],
-+        ["hilalSidebarCompactHideToolbar", "hilal.compact.hideToolbar", false],
++        ["hilalSidebarCompactHideToolbar", "hilal.compact.hide_toolbox", false],
 +        ["hilalSidebarShowHorizontalTabs", "sidebar.verticalTabs.showHorizontal", false],
 +        ["hilalBoostsAutoPalette", "hilal.boosts.auto_palette.enabled", false],
 +      ];

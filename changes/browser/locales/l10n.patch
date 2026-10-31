@@ -161,10 +161,10 @@ index 759a6d2638c3..86c33e291d09 100644
 +hilal-about-helpus = Want to help? <label data-l10n-name="hilal-about-contribute-link">Contribute on GitHub</label> or <label data-l10n-name="hilal-about-issue-link">report a problem</label>.
 +hilal-about-source-link = Source code
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
-index a890aeb558f8..036e250e7a7c 100644
+index a890aeb558f8..d2d9d9a51752 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2686,3 +2686,136 @@ security-privacy-issue-warning-ech =
+@@ -2686,3 +2686,147 @@ security-privacy-issue-warning-ech =
  security-privacy-issue-warning-proxy-autodetection =
    .label = Proxy auto-configuration is enabled
    .description = Proxy auto-configuration could let untrusted networks to monitor your activity.
@@ -185,6 +185,17 @@ index a890aeb558f8..036e250e7a7c 100644
 +hilal-workspaces-enabled-desc = Keep personal, work, and social tabs in separate spaces
 +hilal-workspaces-pinned-public-desc = Show pinned tabs in every workspace
 +hilal-workspaces-groups-public-desc = Show tab groups in every workspace
++hilal-compact-header = Compact mode
++hilal-compact-sidebar = Hide the sidebar
++hilal-compact-sidebar-desc = Move the pointer to the left edge of the window to show it. Toggle with { PLATFORM() ->
++        [macos] ⌘⌥M
++       *[other] Ctrl+Alt+M
++    }.
++hilal-compact-topbar = Hide the top bar
++hilal-compact-topbar-desc = Move the pointer to the top edge of the window to show it. Toggle with { PLATFORM() ->
++        [macos] ⌘⌥T
++       *[other] Ctrl+Alt+T
++    }.
 +hilal-urlbar-show-workspace-name = Show workspace name in address bar
 +    .label = Show workspace name in address bar
 +hilal-workspaces-reset-description = Reset all workspace data (cannot be undone).

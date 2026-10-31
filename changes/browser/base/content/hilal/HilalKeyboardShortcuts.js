@@ -96,15 +96,12 @@ class HilalKeyboardShortcutsManager {
               HilalCompactMode.toggle();
             }
             break;
-          case "key_toggleCompactHideToolbar": {
-            event.stopPropagation();
-            const pref = "hilal.compact.hide-toolbar";
-            Services.prefs.setBoolPref(
-              pref,
-              !Services.prefs.getBoolPref(pref, false)
-            );
+          case "key_toggleCompactHideToolbar":
+            if (typeof HilalCompactMode !== "undefined") {
+              event.stopPropagation();
+              HilalCompactMode.toggleTopbar();
+            }
             break;
-          }
         }
       });
     }
