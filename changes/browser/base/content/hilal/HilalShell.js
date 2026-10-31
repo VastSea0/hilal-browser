@@ -2915,25 +2915,6 @@
           { attributes: true, attributeFilter: ["class"] }
         );
       }
-
-      // Only shortcuts that would otherwise focus Firefox's hidden urlbar are
-      // taken over; everything else (close tab/window, reload, reopen closed
-      // tab) stays with Firefox's own commands.
-      window.addEventListener("keydown", e => {
-        const isMac = AppConstants.platform === "macosx";
-        const isAccel = isMac ? e.metaKey : e.ctrlKey;
-        const key = e.key.toLowerCase();
-        const plainAccel = isAccel && !e.shiftKey && !e.altKey;
-        const altD = !isMac && e.altKey && !e.ctrlKey && !e.shiftKey && key === "d";
-
-        if ((plainAccel && key === "l") || altD) {
-          e.preventDefault();
-          this.focusUrlInput();
-        } else if (plainAccel && key === "t") {
-          e.preventDefault();
-          this.openNewTab();
-        }
-      });
     },
   };
 

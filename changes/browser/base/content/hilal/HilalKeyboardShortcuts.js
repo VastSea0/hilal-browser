@@ -192,6 +192,11 @@ class HilalKeyboardShortcutsManager {
         const cached = this.defaultShortcuts[elem.id];
         if (cached) {
           elem.removeAttribute("disabled");
+          const l10nId = elem.getAttribute("hilal-l10n-id");
+          if (l10nId) {
+            elem.setAttribute("data-l10n-id", l10nId);
+            elem.removeAttribute("hilal-l10n-id");
+          }
           if (cached.modifiers) {
             elem.setAttribute("modifiers", cached.modifiers);
           } else {
@@ -228,6 +233,13 @@ class HilalKeyboardShortcutsManager {
 
       const applyToElem = elem => {
         if (!elem) return;
+        // Fluent sets key and modifiers from data-l10n-id whenever the keyset
+        // is translated again, which would undo the override.
+        const l10nId = elem.getAttribute("data-l10n-id");
+        if (l10nId) {
+          elem.setAttribute("hilal-l10n-id", l10nId);
+          elem.removeAttribute("data-l10n-id");
+        }
         if (!override.key && !override.modifiers) {
           elem.setAttribute("disabled", "true");
           elem.removeAttribute("key");
