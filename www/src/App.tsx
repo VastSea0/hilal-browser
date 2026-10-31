@@ -233,7 +233,7 @@ export default function App() {
           title: "Çalışma şeklinize uyum sağlayan arayüz.",
           description:
             "Dikey sekmeli kenar çubuğu ya da yatay sekme şeridi arasında istediğiniz an geçin, vurgu rengini ve temayı kendinize göre ayarlayın.",
-          image: isDark ? "/welcome-compact-vertical.png" : "/welcome-standard-vertical.png",
+          image: "/desktop/newtab.jpg",
           alt: "Hilal Özelleştirilebilir Arayüz",
         },
         {
@@ -241,7 +241,7 @@ export default function App() {
           title: "İş ve kişisel hesapları birbirinden ayırın.",
           description:
             "Her çalışma alanı bağımsız çerez ve oturum konteynerleri kullanır. Farklı hesaplar için onlarca ayrı pencere açmaya gerek kalmaz.",
-          image: "/welcome-workspaces-on.png",
+          image: "/desktop/page.jpg",
           alt: "Hilal Çalışma Alanları",
         },
         {
@@ -249,7 +249,7 @@ export default function App() {
           title: "Dahili uBlock Origin, telemetrisiz masaüstü.",
           description:
             "uBlock Origin varsayılan olarak kurulu gelir. Masaüstü sürümünde Firefox telemetrisi ve arka plan veri gönderimi tamamen devre dışıdır.",
-          image: "/welcome-toolbar-hidden.png",
+          image: "/desktop/page.jpg",
           alt: "Hilal Gizlilik ve Güvenlik",
         },
         {
@@ -257,7 +257,7 @@ export default function App() {
           title: "Firefox eklenti ekosistemiyle tam uyumlu.",
           description:
             "Firefox Add-ons mağazasındaki tüm eklentilerinizi doğrudan yükleyip kullanabilirsiniz. uBlock Origin kutudan çıktığı gibi hazır.",
-          image: "/welcome-home-preview.png",
+          image: "/desktop/newtab.jpg",
           alt: "Hilal Eklenti Uyumu",
         },
       ],
@@ -358,7 +358,7 @@ export default function App() {
           title: "An interface that adapts to how you work.",
           description:
             "Switch between vertical sidebar tabs and a horizontal tab strip at any time, and pick your own accent color and theme.",
-          image: isDark ? "/welcome-compact-vertical.png" : "/welcome-standard-vertical.png",
+          image: "/desktop/newtab.jpg",
           alt: "Hilal Customizable Interface",
         },
         {
@@ -366,7 +366,7 @@ export default function App() {
           title: "Keep work and personal accounts separated.",
           description:
             "Each workspace runs in an isolated container with its own cookies and logins. Manage multiple accounts without juggling dozens of windows.",
-          image: "/welcome-workspaces-on.png",
+          image: "/desktop/page.jpg",
           alt: "Hilal Workspaces",
         },
         {
@@ -374,7 +374,7 @@ export default function App() {
           title: "Built-in uBlock Origin, no desktop telemetry.",
           description:
             "uBlock Origin comes pre-installed. On desktop, Firefox telemetry and background data reporting are completely disabled.",
-          image: "/welcome-toolbar-hidden.png",
+          image: "/desktop/page.jpg",
           alt: "Hilal Privacy Protection",
         },
         {
@@ -382,7 +382,7 @@ export default function App() {
           title: "Compatible with the Firefox add-on ecosystem.",
           description:
             "Install any extension from Firefox Add-ons (AMO) directly. uBlock Origin comes pre-installed out of the box.",
-          image: "/welcome-home-preview.png",
+          image: "/desktop/newtab.jpg",
           alt: "Hilal Add-on Compatibility",
         },
       ],
@@ -695,7 +695,7 @@ export default function App() {
               className="mt-12 sm:mt-16 max-w-5xl mx-auto drop-shadow-2xl"
             >
               <img
-                src={isDark ? "/welcome-home-preview-black.png" : "/welcome-home-preview.png"}
+                src="/desktop/newtab.jpg"
                 alt="Hilal Browser Interface"
                 className="w-full h-auto block select-none pointer-events-none rounded-2xl"
               />
@@ -765,6 +765,45 @@ export default function App() {
                 </div>
               </motion.div>
             </AnimatePresence>
+          </section>
+
+          {/* Android */}
+          <section className="py-20 max-w-6xl mx-auto px-4 sm:px-6" id="android">
+            <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--secondary-container)] text-[var(--on-secondary-container)] text-xs font-semibold">
+                <i className="material-symbols-outlined text-[14px]">smartphone</i>
+                <span>Android 2.0</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[var(--on-surface)]">
+                {lang === "tr" ? "Başparmağınızla yönetin." : "Built for your thumb."}
+              </h2>
+              <p className="text-sm sm:text-base text-[var(--on-surface-variant)] leading-relaxed">
+                {lang === "tr"
+                  ? "Adres çubuğu ekranın altında. Sekmeler arasında geçmek için kaydırın, tüm sekmeler için yukarı çekin, arama kestirmeleri için ! yazın. uBlock Origin dahil."
+                  : "The address bar sits at the bottom. Swipe to switch tabs, pull up for all tabs, and type ! for search shortcuts. uBlock Origin is included."}
+              </p>
+            </div>
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 sm:justify-center">
+              {[
+                ["start", lang === "tr" ? "Başlangıç" : "Start page"],
+                ["page", lang === "tr" ? "Sayfa" : "Browsing"],
+                ["search", lang === "tr" ? "Arama kestirmeleri" : "Search shortcuts"],
+                ["tabs", lang === "tr" ? "Sekmeler" : "Tabs"],
+                ["menu", lang === "tr" ? "Menü" : "Menu"],
+              ].map(([name, label]) => (
+                <figure key={name} className="snap-center shrink-0 w-[180px] sm:w-[190px] space-y-2">
+                  <img
+                    src={`/android/${name}.jpg`}
+                    alt={label}
+                    loading="lazy"
+                    className="w-full h-auto block rounded-[28px] border border-[var(--outline-variant)]/40 shadow-lg select-none"
+                  />
+                  <figcaption className="text-center text-xs font-medium text-[var(--on-surface-variant)]">
+                    {label}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
           </section>
 
           {/* 4. M3 Expressive Architecture & Terminal Section */}
