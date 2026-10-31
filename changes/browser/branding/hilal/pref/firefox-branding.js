@@ -211,3 +211,7 @@ pref("hilal.boosts.browser_ui.enabled", false);
 // Theme and accent color preferences ("workspace" | "global" | "boosts")
 pref("hilal.theme.accentMode", "workspace");
 pref("hilal.theme.globalAccentColor", "#af51f5");
+
+// Mozilla's "Same settings, new look!" banner describes Firefox's settings
+// redesign, not Hilal's.
+pref("browser.settings-redesign.promo.dismissed", true);

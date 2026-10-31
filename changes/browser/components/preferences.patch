@@ -11,7 +11,7 @@ index de83282c2c8a..5e67f723b792 100644
     content/browser/preferences/home.js
     content/browser/preferences/search.js
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index b66ff919d93b..3ba70cfd3fb7 100644
+index b66ff919d93b..3646efc7896c 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
 @@ -13,7 +13,7 @@
@@ -56,7 +56,18 @@ index b66ff919d93b..3ba70cfd3fb7 100644
  ]);
  
  if (AppConstants.HAVE_SHELL_SERVICE) {
-@@ -1815,6 +1834,1377 @@ gMainPane.initialized = new Promise(res => {
+@@ -632,10 +651,6 @@ function createDefaultBrowserConfig({
+         },
+       },
+     ],
+-    controlAttrs: {
+-      imagesrc: "chrome://global/skin/illustrations/kit-concerned.svg",
+-      imagedisplay: "cover",
+-    },
+   };
+ 
+   const items = includeIsDefaultPane
+@@ -1815,6 +1830,1377 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  

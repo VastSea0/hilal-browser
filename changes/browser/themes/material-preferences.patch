@@ -1,5 +1,5 @@
 diff --git a/browser/themes/shared/preferences/preferences.css b/browser/themes/shared/preferences/preferences.css
-index 80722b9f86d9..f57df0952594 100644
+index 80722b9f86d9..6369ee1a76fe 100644
 --- a/browser/themes/shared/preferences/preferences.css
 +++ b/browser/themes/shared/preferences/preferences.css
 @@ -4,32 +4,249 @@
@@ -270,7 +270,7 @@ index 80722b9f86d9..f57df0952594 100644
  }
  
  @media not print {
-@@ -45,1641 +262,1208 @@
+@@ -45,1641 +262,1228 @@
    margin: 0;
    padding: 0;
    width: 100%;
@@ -376,43 +376,6 @@ index 80722b9f86d9..f57df0952594 100644
 -  display: flex;
 -  flex-direction: column;
 -  gap: 32px;
--}
--
--html|h1 {
--  margin: 0 0 var(--space-large);
--}
--
--html|h2 {
--  margin: var(--space-small) 0 var(--space-xxsmall) 0;
--}
--
--description.indent,
--.indent:not(#browserPrivateEngineSelection) > description {
--  color: var(--text-color-deemphasized);
--
--  /* Ensures margin on checkboxes, radios, and description don't create a big gap between the input and indented description */
--  margin-top: calc(var(--space-xsmall) * -1);
--}
--
--button,
--treecol,
--menulist,
--html|select {
--  /* override the root rule */
--  user-select: none;
--}
--
--/* Buttons get a default min-width in XUL. When they also have flex, they will
-- * be large enough anyway, and we don't want them to become smaller than their inner
-- * text which would then overflow the button. Set min-width back to auto for that:
-- */
--button[flex] {
--  min-width: auto;
--}
--
--description,
--label {
--  margin: var(--space-xxsmall) 0;
 +  display: flex !important;
 +  flex-direction: column !important;
 +  gap: 20px !important;
@@ -474,12 +437,8 @@ index 80722b9f86d9..f57df0952594 100644
 +  display: none !important;
  }
  
--label {
--  margin: var(--space-xxsmall) 0;
--
--  &.tail-with-learn-more + a {
--    margin-block: var(--space-xxsmall);
--    margin-inline: var(--space-small) 0;
+-html|h1 {
+-  margin: 0 0 var(--space-large);
 +@media (max-width: 950px) {
 +  #categories.categories-list,
 +  #categories,
@@ -488,11 +447,11 @@ index 80722b9f86d9..f57df0952594 100644
 +    min-width: unset !important;
 +    max-width: unset !important;
 +    flex: none !important;
-   }
++  }
  }
  
--.description-deemphasized {
--  color: var(--text-color-deemphasized);
+-html|h2 {
+-  margin: var(--space-small) 0 var(--space-xxsmall) 0;
 +moz-page-nav-button,
 +html|moz-page-nav-button {
 +  min-height: 52px !important;
@@ -530,9 +489,12 @@ index 80722b9f86d9..f57df0952594 100644
 +  display: none !important;
  }
  
--.firefoxLabs-description {
+-description.indent,
+-.indent:not(#browserPrivateEngineSelection) > description {
 -  color: var(--text-color-deemphasized);
--  margin: 0;
+-
+-  /* Ensures margin on checkboxes, radios, and description don't create a big gap between the input and indented description */
+-  margin-top: calc(var(--space-xsmall) * -1);
 +moz-page-nav-button:not([selected]):hover::part(button),
 +html|moz-page-nav-button:not([selected]):hover::part(button),
 +moz-page-nav-button button:not([selected]):hover {
@@ -540,9 +502,12 @@ index 80722b9f86d9..f57df0952594 100644
 +  color: var(--md-sys-color-on-surface) !important;
  }
  
--.tip-caption {
--  font-size: 0.9em;
--  color: var(--text-color-deemphasized);
+-button,
+-treecol,
+-menulist,
+-html|select {
+-  /* override the root rule */
+-  user-select: none;
 +moz-page-nav-button[selected]::part(button),
 +html|moz-page-nav-button[selected]::part(button),
 +moz-page-nav-button button[selected] {
@@ -551,17 +516,20 @@ index 80722b9f86d9..f57df0952594 100644
 +  font-weight: 600 !important;
  }
  
--menulist::part(label),
--menuitem > label,
--button > hbox > label {
--  line-height: unset;
+-/* Buttons get a default min-width in XUL. When they also have flex, they will
+- * be large enough anyway, and we don't want them to become smaller than their inner
+- * text which would then overflow the button. Set min-width back to auto for that:
+- */
+-button[flex] {
+-  min-width: auto;
 +moz-page-nav-button[selected] .icon,
 +moz-page-nav-button[selected]::part(icon) {
 +  fill: var(--md-sys-color-on-primary-container) !important;
  }
  
--.indent {
--  margin-inline-start: calc(var(--checkbox-size) + var(--checkbox-margin-inline)) !important;
+-description,
+-label {
+-  margin: var(--space-xxsmall) 0;
 +hr.nav-separator,
 +#nav-separator {
 +  border: none !important;
@@ -569,32 +537,23 @@ index 80722b9f86d9..f57df0952594 100644
 +  margin: 12px 16px !important;
  }
  
--checkbox,
--radio {
--  margin: var(--space-small) 0;
--
--  &.tail-with-learn-more + a {
--    margin-block: var(--space-small);
--    margin-inline: var(--space-small) 0;
--  }
--}
+-label {
+-  margin: var(--space-xxsmall) 0;
 +/* ==========================================================================
 +   3. MATERIAL 3 SEARCH BAR & IN-CONTENT NOTICES
 +   ========================================================================== */
  
--/* Add a bit of space to the end of descriptions to
-- * leave margin with e.g. additional buttons on the side. */
--.description-with-side-element {
--  margin-inline-end: 10px !important;
+-  &.tail-with-learn-more + a {
+-    margin-block: var(--space-xxsmall);
+-    margin-inline: var(--space-small) 0;
+-  }
 +html|nav-notice,
 +nav-notice {
 +  display: none !important;
  }
  
--.learnMore {
--  margin-inline-start: 0;
--  font-weight: normal;
--  white-space: nowrap;
+-.description-deemphasized {
+-  color: var(--text-color-deemphasized);
 +/* .main-content has 24px of top padding, which a sticky top: 0 leaves
 +   uncovered, so scrolled content showed above the search field. */
 +#search-container {
@@ -660,13 +619,51 @@ index 80722b9f86d9..f57df0952594 100644
 +}
 +
 +setting-group:not([hidden]) {
-+  margin-block: 16px !important;
++  margin-block: 0 !important;
 +}
 +
-+/* Material 3 Nested Containers & Setting Controls */
++/* Settings inside a card are plain rows split by dividers, like the
++   Hilal panes. Boxing every row, and again every nested row, stacked three
++   or four borders inside each card. */
 +moz-card setting-control,
-+moz-card .setting-control-row,
-+setting-group setting-control,
++setting-group setting-control {
++  display: block !important;
++  padding: 12px 0 !important;
++  margin: 0 !important;
++  border: none !important;
++  border-bottom: 1px solid var(--md-sys-color-outline-variant) !important;
++  border-radius: 0 !important;
++  background: none !important;
++}
++
++moz-card setting-control:not(:has(~ setting-control:not([hidden]))),
++setting-group setting-control:not(:has(~ setting-control:not([hidden]))),
++setting-control setting-control {
++  border-bottom: none !important;
++}
++
++setting-control setting-control {
++  padding-block: 6px !important;
++}
++
++moz-card [slot="nested"] {
++  margin-top: 4px !important;
++  padding-inline-start: 28px !important;
++  border: none !important;
++  background: none !important;
++}
++
++/* Firefox's own cards and box groups nested in a Hilal card. */
++moz-card moz-card,
++setting-control moz-card,
++groupbox moz-card {
++  padding: 0 !important;
++  margin: 0 !important;
++  border: none !important;
++  background: none !important;
++  box-shadow: none !important;
++}
++
 +.privacy-detailedoption,
 +.content-blocking-category,
 +#contentBlockingCategories,
@@ -677,35 +674,27 @@ index 80722b9f86d9..f57df0952594 100644
 +  border: 1px solid var(--md-sys-color-outline-variant) !important;
 +  padding: 14px 18px !important;
 +  margin-block: 8px !important;
-+  display: flex !important;
-+  flex-direction: column !important;
-+  gap: 8px !important;
-+  box-sizing: border-box !important;
-+  transition: background-color 150ms ease, border-color 150ms ease !important;
-+}
-+
-+moz-card setting-control:hover,
-+setting-group setting-control:hover {
-+  background-color: var(--md-sys-color-surface-container-high) !important;
-+}
-+
-+moz-card [slot="nested"] {
-+  border-radius: 14px !important;
-+  background-color: var(--md-sys-color-surface-container-low) !important;
-+  border: 1px solid var(--md-sys-color-outline-variant) !important;
-+  padding: 12px 16px !important;
-+  margin-top: 8px !important;
-+}
-+
+ }
+ 
+-.firefoxLabs-description {
+-  color: var(--text-color-deemphasized);
+-  margin: 0;
 +moz-card setting-control[is="setting-link"] {
 +  cursor: pointer !important;
-+}
-+
+ }
+ 
+-.tip-caption {
+-  font-size: 0.9em;
+-  color: var(--text-color-deemphasized);
 +.subcategory:not([hidden]) {
 +  display: flex !important;
 +  align-items: center !important;
-+}
-+
+ }
+ 
+-menulist::part(label),
+-menuitem > label,
+-button > hbox > label {
+-  line-height: unset;
 +.subcategory h1 {
 +  font-size: 26px !important;
 +  font-weight: 700 !important;
@@ -714,9 +703,8 @@ index 80722b9f86d9..f57df0952594 100644
 +  margin-block: 16px 12px !important;
  }
  
--.accessory-button {
--  min-width: 150px;
--  margin: 4px 0;
+-.indent {
+-  margin-inline-start: calc(var(--checkbox-size) + var(--checkbox-margin-inline)) !important;
 +.section-heading,
 +.settings-group-header,
 +groupbox[data-category] > label h2,
@@ -892,6 +880,33 @@ index 80722b9f86d9..f57df0952594 100644
 +  background-size: 13px 13px !important;
  }
  
+-checkbox,
+ radio {
+-  margin: var(--space-small) 0;
+-
+-  &.tail-with-learn-more + a {
+-    margin-block: var(--space-small);
+-    margin-inline: var(--space-small) 0;
+-  }
+-}
+-
+-/* Add a bit of space to the end of descriptions to
+- * leave margin with e.g. additional buttons on the side. */
+-.description-with-side-element {
+-  margin-inline-end: 10px !important;
+-}
+-
+-.learnMore {
+-  margin-inline-start: 0;
+-  font-weight: normal;
+-  white-space: nowrap;
+-}
+-
+-.accessory-button {
+-  min-width: 150px;
+-  margin: 4px 0;
+-}
+-
 -@media not -moz-pref("browser.settings-redesign.enabled") {
 -  .spotlight {
 -    background-color: color-mix(in srgb, var(--color-accent-primary) 15%, transparent);
@@ -905,7 +920,6 @@ index 80722b9f86d9..f57df0952594 100644
 -  [data-subcategory] {
 -    margin-inline: -4px;
 -    padding-inline: 4px;
-+radio {
 +  display: inline-flex !important;
 +  align-items: center !important;
 +  gap: 12px !important;
@@ -1174,7 +1188,7 @@ index 80722b9f86d9..f57df0952594 100644
  }
  
 -/* All panes */
- 
+-
 -.info-icon,
 -.androidIcon,
 -.iOSIcon {
@@ -1191,7 +1205,7 @@ index 80722b9f86d9..f57df0952594 100644
 -   * image is loaded. */
 -  min-height: calc(64px + 2 * var(--border-width));
 -}
--
+ 
 -@media not -moz-pref("browser.migrate.preferences-entrypoint.enabled") {
 -  #dataMigrationGroup {
 -    display: none;
@@ -1353,14 +1367,14 @@ index 80722b9f86d9..f57df0952594 100644
 -  moz-box-item label[slot="actions"],
 -  .actionsMenu {
 -    width: clamp(140px, 50cqi, 270px);
--  }
--
--  moz-box-item[hidden] {
--    display: none;
 +@keyframes spotlightFade {
 +  0% {
 +    background-color: color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent);
    }
+-
+-  moz-box-item[hidden] {
+-    display: none;
+-  }
 -}
 -/** SRD applications section END **/
 -
@@ -2049,17 +2063,17 @@ index 80722b9f86d9..f57df0952594 100644
 -
 -#syncChangeOptions {
 -  margin-inline-start: 0;
--}
--
--.sync-group {
--  margin-block: var(--space-large);
--  border: 1px solid var(--border-color);
 +/* Search Engines List (#engineList) */
 +#defaultEngineNormal,
 +#defaultPrivateEngine {
 +  max-width: var(--search-engine-name-max-width);
  }
  
+-.sync-group {
+-  margin-block: var(--space-large);
+-  border: 1px solid var(--border-color);
+-}
+-
 -.sync-configured {
 -  display: block;
 -}
@@ -2113,16 +2127,14 @@ index 80722b9f86d9..f57df0952594 100644
 -
 -.sync-engines-list .checkbox-label-box {
 -  align-items: center;
- }
- 
+-}
+-
 -.sync-engines-list {
 -  column-count: 3;
 -  column-fill: balance;
 -  margin-block-end: 10px;
-+#engineList treechildren::-moz-tree-image(bookmarks) {
-+  fill: var(--md-sys-color-primary) !important;
- }
- 
+-}
+-
 -.sync-engines-list > div:not([hidden]) {
 -  display: flex;
 -  break-inside: avoid;
@@ -2151,29 +2163,51 @@ index 80722b9f86d9..f57df0952594 100644
 -.sync-engine-addons .checkbox-icon,
 -.sync-engine-addons.sync-engine-image {
 -  list-style-image: url("chrome://mozapps/skin/extensions/extension.svg");
+-}
+-
+-.sync-engine-prefs .checkbox-icon,
+-.sync-engine-prefs.sync-engine-image {
+-  list-style-image: url("chrome://global/skin/icons/settings.svg");
+ }
+ 
+-.sync-engine-addresses .checkbox-icon,
+-.sync-engine-addresses.sync-engine-image {
+-  list-style-image: url("chrome://formautofill/content/formfill-anchor.svg");
++#engineList treechildren::-moz-tree-image(bookmarks) {
++  fill: var(--md-sys-color-primary) !important;
+ }
+ 
+-.sync-engine-creditcards .checkbox-icon,
+-.sync-engine-creditcards.sync-engine-image {
+-  list-style-image: url("chrome://formautofill/content/icon-credit-card-generic.svg");
 +#engineList treechildren::-moz-tree-image(tabs) {
 +  fill: var(--md-sys-color-tertiary) !important;
  }
  
--.sync-engine-prefs .checkbox-icon,
--.sync-engine-prefs.sync-engine-image {
--  list-style-image: url("chrome://global/skin/icons/settings.svg");
+-.fxaMobilePromo {
+-  margin-top: 2px !important;
+-  margin-bottom: var(--space-xxlarge);
 +#engineList treechildren::-moz-tree-image(history),
 +#engineList treechildren::-moz-tree-image(bookmarks, selected),
 +#engineList treechildren::-moz-tree-image(tabs, selected) {
 +  fill: currentColor !important;
  }
  
--.sync-engine-addresses .checkbox-icon,
--.sync-engine-addresses.sync-engine-image {
--  list-style-image: url("chrome://formautofill/content/formfill-anchor.svg");
+-.androidIcon,
+-.iOSIcon {
+-  margin-inline: 2px 4px;
+-  width: var(--icon-size-medium);
+-  height: var(--icon-size-medium);
+-  vertical-align: text-bottom;
 +#engineList > treechildren::-moz-tree-cell(engineKeyword) {
 +  unicode-bidi: plaintext;
  }
  
--.sync-engine-creditcards .checkbox-icon,
--.sync-engine-creditcards.sync-engine-image {
--  list-style-image: url("chrome://formautofill/content/icon-credit-card-generic.svg");
+-.info-box-container {
+-  background-color: var(--background-color-box-info);
+-  padding: 9px;
+-  border: 1px solid transparent;
+-  border-radius: var(--border-radius-small);
 +/* Permission and Security Icons */
 +.permission-icon {
 +  width: 20px !important;
@@ -2182,9 +2216,8 @@ index 80722b9f86d9..f57df0952594 100644
 +  margin-inline-end: 8px !important;
  }
  
--.fxaMobilePromo {
--  margin-top: 2px !important;
--  margin-bottom: var(--space-xxlarge);
+-.info-box-container.smaller-font-size {
+-  font-size: 85%;
 +.permission-icon,
 +.privacy-detailedoption .checkbox-label-box,
 +.extra-information-label > image,
@@ -2237,29 +2270,10 @@ index 80722b9f86d9..f57df0952594 100644
 +  padding: 16px 20px !important;
  }
  
--.androidIcon,
--.iOSIcon {
--  margin-inline: 2px 4px;
--  width: var(--icon-size-medium);
--  height: var(--icon-size-medium);
--  vertical-align: text-bottom;
--}
- 
--.info-box-container {
--  background-color: var(--background-color-box-info);
--  padding: 9px;
--  border: 1px solid transparent;
--  border-radius: var(--border-radius-small);
--}
--
--.info-box-container.smaller-font-size {
--  font-size: 85%;
--}
--
 -.info-icon-container {
 -  display: flex;
 -}
--
+ 
 -.info-icon {
 -  content: url("chrome://global/skin/icons/info.svg");
 -  width: 16px;
