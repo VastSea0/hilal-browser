@@ -131,6 +131,18 @@ path   = "browser/components/newtab/redirector.patch"
 reason = "Redirect about:newtab and about:home to the Hilal new tab page"
 
 [[patches]]
+path   = "browser/actors/HilalNewTabChild.sys.mjs"
+reason = "New tab page actor: theme and navigation requests from the page"
+
+[[patches]]
+path   = "browser/actors/HilalNewTabParent.sys.mjs"
+reason = "New tab page actor: answers with the window's theme and shell"
+
+[[patches]]
+path   = "browser/actors/hilal-newtab-actor.patch"
+reason = "Register the Hilal new tab actor"
+
+[[patches]]
 path   = "browser/themes/material-preferences.patch"
 reason = "Material 3 Expressive restyle of the settings page"
 

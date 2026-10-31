@@ -16,155 +16,123 @@
     />
     <link rel="localization" href="browser/browser.ftl" />
   </head>
-  <body class="hilal-newtab">
-    <main class="hilal-home-container">
-      <!-- Brand: Logo & Wordmark -->
-      <div class="hilal-brand">
-        <img
-          src="chrome://branding/content/about-logo.png"
-          class="hilal-logo"
-          alt=""
-        />
-        <div class="hilal-wordmark">
-          <span class="hilal-wordmark-bold">Hilal</span>
-          <span class="hilal-wordmark-light">Browser</span>
+  <body>
+    <main class="home">
+      <section class="clock-card" aria-hidden="true">
+        <div class="clock" id="clock">
+          <span id="clock-hours"></span><span class="clock-sep">:</span
+          ><span id="clock-minutes"></span
+          ><span class="clock-period" id="clock-period"></span>
         </div>
-      </div>
+        <div class="clock-date" id="clock-date"></div>
+      </section>
 
-      <!-- Search Bar -->
-      <form class="hilal-search-form" id="search-form" autocomplete="off">
-        <div class="hilal-search-engine-icon">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="11" cy="11" r="7.5" />
-            <line x1="21" y1="21" x2="16.5" y2="16.5" />
-          </svg>
-        </div>
+      <form class="search" id="search-form" autocomplete="off">
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <line x1="20.5" y1="20.5" x2="16" y2="16" />
+        </svg>
         <input
           type="text"
           id="search-input"
-          class="hilal-search-input"
+          class="search-input"
           data-l10n-id="hilal-newtab-search-input"
           autocomplete="off"
           spellcheck="false"
         />
         <button
           type="button"
-          class="hilal-search-clear"
+          class="icon-button search-clear"
           id="search-clear"
           data-l10n-id="hilal-newtab-search-clear"
+          hidden
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="17" y1="7" x2="7" y2="17" />
+            <line x1="7" y1="7" x2="17" y2="17" />
           </svg>
         </button>
         <button
           type="submit"
-          class="hilal-search-submit"
-          id="search-submit"
+          class="search-submit"
           data-l10n-id="hilal-newtab-search-submit"
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
             <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
+            <polyline points="13 6 19 12 13 18" />
           </svg>
         </button>
       </form>
 
-      <!-- Clean Shortcuts Row -->
-      <div class="hilal-shortcuts-row" id="shortcuts-grid">
-        <!-- Dynamically rendered shortcuts -->
-      </div>
+      <section class="shortcuts" id="shortcuts"></section>
+
+      <nav class="chips">
+        <button
+          class="chip"
+          data-url="about:bookmarks"
+          data-l10n-id="hilal-newtab-bookmarks"
+        ></button>
+        <button
+          class="chip"
+          data-url="about:history"
+          data-l10n-id="hilal-newtab-history"
+        ></button>
+        <button
+          class="chip"
+          data-url="about:downloads"
+          data-l10n-id="hilal-newtab-downloads"
+        ></button>
+        <button
+          class="chip"
+          data-url="about:preferences"
+          data-l10n-id="hilal-newtab-settings-chip"
+        ></button>
+      </nav>
     </main>
 
-    <!-- Add/Edit Shortcut Dialog -->
-    <dialog class="hilal-dialog" id="shortcut-dialog">
-      <div class="hilal-dialog-card">
-        <h2
-          class="hilal-dialog-title"
-          id="dialog-title"
-          data-l10n-id="hilal-newtab-dialog-title"
-        ></h2>
-        <form id="shortcut-dialog-form">
-          <div class="hilal-field-group">
-            <label class="hilal-field">
-              <span
-                class="hilal-label"
-                data-l10n-id="hilal-newtab-field-name"
-              ></span>
-              <input
-                type="text"
-                id="shortcut-name-input"
-                class="hilal-input"
-                data-l10n-id="hilal-newtab-field-name-input"
-                required
-              />
-            </label>
-            <label class="hilal-field">
-              <span
-                class="hilal-label"
-                data-l10n-id="hilal-newtab-field-url"
-              ></span>
-              <input
-                type="url"
-                id="shortcut-url-input"
-                class="hilal-input"
-                data-l10n-id="hilal-newtab-field-url-input"
-                required
-              />
-            </label>
-          </div>
-          <div class="hilal-dialog-actions">
-            <button
-              type="button"
-              class="hilal-btn hilal-btn-delete"
-              id="dialog-delete-btn"
-              data-l10n-id="hilal-newtab-dialog-delete"
-              style="display: none"
-            ></button>
-            <div class="hilal-dialog-spacer"></div>
-            <button
-              type="button"
-              class="hilal-btn hilal-btn-text"
-              id="dialog-cancel-btn"
-              data-l10n-id="hilal-newtab-dialog-cancel"
-            ></button>
-            <button
-              type="submit"
-              class="hilal-btn hilal-btn-primary"
-              id="dialog-save-btn"
-              data-l10n-id="hilal-newtab-dialog-save"
-            ></button>
-          </div>
-        </form>
-      </div>
+    <dialog class="dialog" id="shortcut-dialog">
+      <form id="shortcut-form" method="dialog">
+        <h2 class="dialog-title" id="dialog-title"></h2>
+        <label class="field">
+          <span data-l10n-id="hilal-newtab-field-name"></span>
+          <input
+            type="text"
+            id="shortcut-name"
+            data-l10n-id="hilal-newtab-field-name-input"
+            required
+          />
+        </label>
+        <label class="field">
+          <span data-l10n-id="hilal-newtab-field-url"></span>
+          <input
+            type="text"
+            id="shortcut-url"
+            data-l10n-id="hilal-newtab-field-url-input"
+            required
+          />
+        </label>
+        <div class="dialog-actions">
+          <button
+            type="button"
+            class="text-button danger"
+            id="dialog-delete"
+            data-l10n-id="hilal-newtab-dialog-delete"
+            hidden
+          ></button>
+          <span class="spacer"></span>
+          <button
+            type="button"
+            class="text-button"
+            id="dialog-cancel"
+            data-l10n-id="hilal-newtab-dialog-cancel"
+          ></button>
+          <button
+            type="submit"
+            class="filled-button"
+            data-l10n-id="hilal-newtab-dialog-save"
+          ></button>
+        </div>
+      </form>
     </dialog>
 
     <script src="chrome://browser/content/hilal/newtab/newtab.js"></script>

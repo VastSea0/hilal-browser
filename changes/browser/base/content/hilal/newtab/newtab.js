@@ -1,402 +1,286 @@
-// Hilal Browser New Tab Controller
-// Zero hardcoded strings - 100% Fluent localized
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+"use strict";
+
+// HilalNewTabChild answers the HilalNewTab:* events this page dispatches. They
+// must bubble to reach the actor, which listens above the window.
 (function () {
-  "use strict";
+  // Theme
 
-  // 1. Theme Synchronization (Inherit Accent & Solid Background)
-  const themeChannel = new BroadcastChannel("hilal-theme-channel");
-  const newTabChannel = new BroadcastChannel("hilal-newtab-channel");
-
-  const COLOR_MAP = {
-    blue: "#37adff",
-    turquoise: "#00c79a",
-    green: "#51cd00",
-    yellow: "#ffcb00",
-    orange: "#ff9f00",
-    red: "#ff613d",
-    pink: "#ff4bda",
-    purple: "#af51f5",
+  const THEME_VARS = {
+    accent: "--accent",
+    primary: "--primary",
+    bg: "--bg",
+    surface: "--surface",
+    surfaceHover: "--surface-high",
+    border: "--outline",
+    text: "--on-surface",
+    textMuted: "--on-surface-variant",
   };
 
-  function applyTheme(themeData) {
-    if (!themeData) return;
-    let hex = themeData.accent || themeData.color;
-    if (hex) {
-      hex = hex.trim();
-      if (COLOR_MAP[hex.toLowerCase()]) {
-        hex = COLOR_MAP[hex.toLowerCase()];
+  function applyTheme(theme) {
+    if (!theme) {
+      return;
+    }
+    const root = document.documentElement;
+    for (const [key, cssVar] of Object.entries(THEME_VARS)) {
+      if (theme[key]) {
+        root.style.setProperty(cssVar, theme[key]);
       }
     }
-
-    const root = document.documentElement;
-    if (hex) {
-      root.style.setProperty("--hilal-accent", hex);
-      root.style.setProperty("--md-sys-color-primary", hex);
+    if (typeof theme.isDark == "boolean") {
+      root.style.colorScheme = theme.isDark ? "dark" : "light";
     }
-    if (themeData.bg) {
-      root.style.setProperty("--hilal-bg", themeData.bg);
-      root.style.setProperty("--md-sys-color-surface", themeData.bg);
-    } else if (hex) {
-      root.style.setProperty(
-        "--hilal-bg",
-        `color-mix(in srgb, ${hex} 14%, #131217)`
-      );
-      root.style.setProperty(
-        "--md-sys-color-surface",
-        `color-mix(in srgb, ${hex} 14%, #131217)`
-      );
-    }
-    if (themeData.surface) {
-      root.style.setProperty("--hilal-surface", themeData.surface);
-      root.style.setProperty(
-        "--md-sys-color-surface-container-high",
-        themeData.surface
-      );
-    } else if (hex) {
-      root.style.setProperty(
-        "--hilal-surface",
-        `color-mix(in srgb, ${hex} 22%, #1b1922)`
-      );
-      root.style.setProperty(
-        "--md-sys-color-surface-container-high",
-        `color-mix(in srgb, ${hex} 22%, #1b1922)`
-      );
-    }
-    if (themeData.surfaceHover) {
-      root.style.setProperty("--hilal-surface-hover", themeData.surfaceHover);
-      root.style.setProperty(
-        "--md-sys-color-surface-container-highest",
-        themeData.surfaceHover
-      );
-    } else if (hex) {
-      root.style.setProperty(
-        "--hilal-surface-hover",
-        `color-mix(in srgb, ${hex} 32%, #262330)`
-      );
-      root.style.setProperty(
-        "--md-sys-color-surface-container-highest",
-        `color-mix(in srgb, ${hex} 32%, #262330)`
-      );
-    }
-    if (themeData.border) {
-      root.style.setProperty("--hilal-border", themeData.border);
-      root.style.setProperty(
-        "--md-sys-color-outline-variant",
-        themeData.border
-      );
-    } else if (hex) {
-      root.style.setProperty(
-        "--hilal-border",
-        `color-mix(in srgb, ${hex} 25%, rgba(255, 255, 255, 0.08))`
-      );
-      root.style.setProperty(
-        "--md-sys-color-outline-variant",
-        `color-mix(in srgb, ${hex} 25%, rgba(255, 255, 255, 0.08))`
-      );
-    }
-    if (themeData.text) root.style.setProperty("--hilal-text", themeData.text);
-    if (themeData.textMuted)
-      root.style.setProperty("--hilal-text-muted", themeData.textMuted);
-
-    if (hex) {
-      try {
-        localStorage.setItem("hilal_active_accent", hex);
-      } catch (e) {}
-    }
+    try {
+      localStorage.setItem("hilal_newtab_theme", JSON.stringify(theme));
+    } catch (e) {}
   }
 
-  // Instant render from cache (0ms flicker)
+  // Apply the last theme right away so the page does not flash.
   try {
-    const cached = localStorage.getItem("hilal_active_accent");
-    if (cached) {
-      applyTheme({ color: cached });
-    }
+    applyTheme(JSON.parse(localStorage.getItem("hilal_newtab_theme")));
   } catch (e) {}
 
-  window.addEventListener("hilal-theme-applied", event => {
-    if (event.detail) {
-      applyTheme(event.detail);
-    }
+  window.addEventListener("HilalNewTab:Theme", event =>
+    applyTheme(event.detail)
+  );
+  window.dispatchEvent(
+    new CustomEvent("HilalNewTab:GetTheme", { bubbles: true })
+  );
+
+  // Navigation goes through the shell so that bangs, address fixup and the
+  // user's default search engine work the same as in the address bar.
+  function navigate(input) {
+    window.dispatchEvent(
+      new CustomEvent("HilalNewTab:Navigate", { bubbles: true, detail: input })
+    );
+  }
+
+  // Clock
+
+  const hoursEl = document.getElementById("clock-hours");
+  const minutesEl = document.getElementById("clock-minutes");
+  const dateEl = document.getElementById("clock-date");
+  const periodEl = document.getElementById("clock-period");
+  const timeFormat = new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  const dateFormat = new Intl.DateTimeFormat(undefined, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
   });
 
-  themeChannel.onmessage = event => {
-    if (event.data) {
-      applyTheme(event.data.theme || event.data);
-    }
-  };
-
-  // Request current theme from browser shell
-  function requestTheme() {
-    themeChannel.postMessage({ action: "request-theme" });
+  function updateClock() {
+    const now = new Date();
+    const parts = timeFormat.formatToParts(now);
+    const hour = parts.find(p => p.type == "hour")?.value ?? "";
+    const minute = parts.find(p => p.type == "minute")?.value ?? "";
+    const period = parts.find(p => p.type == "dayPeriod")?.value;
+    hoursEl.textContent = hour;
+    minutesEl.textContent = minute;
+    periodEl.textContent = period ?? "";
+    dateEl.textContent = dateFormat.format(now);
+    setTimeout(updateClock, 60000 - (now.getSeconds() * 1000 + now.getMilliseconds()));
   }
-  requestTheme();
-  setTimeout(requestTheme, 20);
-  setTimeout(requestTheme, 80);
-  setTimeout(requestTheme, 250);
+  updateClock();
 
-  // 2. Search Box Controller
+  // Search
+
   const searchForm = document.getElementById("search-form");
   const searchInput = document.getElementById("search-input");
   const searchClear = document.getElementById("search-clear");
 
-  if (searchInput && searchClear) {
-    searchInput.addEventListener("input", () => {
-      searchClear.style.display =
-        searchInput.value.trim().length > 0 ? "flex" : "none";
-    });
-
-    searchClear.addEventListener("click", () => {
-      searchInput.value = "";
-      searchClear.style.display = "none";
-      searchInput.focus();
-    });
-  }
-
-  function openLocation(url) {
-    if (!url) return;
-    if (url.startsWith("about:") || url.startsWith("chrome:")) {
-      newTabChannel.postMessage({ action: "navigate", url: url });
-    } else {
-      window.location.href = url;
+  searchInput.addEventListener("input", () => {
+    searchClear.hidden = !searchInput.value;
+  });
+  searchClear.addEventListener("click", () => {
+    searchInput.value = "";
+    searchClear.hidden = true;
+    searchInput.focus();
+  });
+  searchForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const value = searchInput.value.trim();
+    if (value) {
+      navigate(value);
     }
+  });
+
+  for (const chip of document.querySelectorAll(".chip")) {
+    chip.addEventListener("click", () => navigate(chip.dataset.url));
   }
 
-  if (searchForm && searchInput) {
-    searchForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const raw = searchInput.value.trim();
-      if (!raw) return;
+  // Shortcuts
 
-      let targetUrl = raw;
-      if (
-        !targetUrl.includes("://") &&
-        !targetUrl.startsWith("about:") &&
-        !targetUrl.startsWith("chrome:")
-      ) {
-        if (targetUrl.includes(".") && !targetUrl.includes(" ")) {
-          targetUrl = "https://" + targetUrl;
-        } else {
-          targetUrl =
-            "https://duckduckgo.com/?q=" + encodeURIComponent(targetUrl);
-        }
-      }
-      openLocation(targetUrl);
-    });
-  }
-
-  // 3. Shortcuts Management
   const DEFAULT_SHORTCUTS = [
-    {
-      title: "Wikipedia",
-      url: "https://www.wikipedia.org",
-      icon: "https://www.wikipedia.org/static/favicon/wikipedia.ico",
-    },
-    {
-      title: "YouTube",
-      url: "https://www.youtube.com",
-      icon: "https://www.youtube.com/favicon.ico",
-    },
-    {
-      title: "Reddit",
-      url: "https://www.reddit.com",
-      icon: "https://www.redditstatic.com/shreddit/assets/favicon/192x192.png",
-    },
-    {
-      title: "Add-ons for Firefox",
-      url: "https://addons.mozilla.org",
-      icon: "chrome://branding/content/icon32.png",
-    },
+    { title: "Wikipedia", url: "https://www.wikipedia.org/" },
+    { title: "YouTube", url: "https://www.youtube.com/" },
+    { title: "Reddit", url: "https://www.reddit.com/" },
+    { title: "GitHub", url: "https://github.com/" },
+    { title: "Add-ons", url: "https://addons.mozilla.org/" },
   ];
+  const MAX_SHORTCUTS = 12;
 
-  function getShortcuts() {
+  function loadShortcuts() {
     try {
-      const data = localStorage.getItem("hilal_shortcuts");
-      if (data) return JSON.parse(data);
+      const stored = JSON.parse(localStorage.getItem("hilal_shortcuts"));
+      if (Array.isArray(stored)) {
+        return stored.map(({ title, url }) => ({ title, url }));
+      }
     } catch (e) {}
-    return DEFAULT_SHORTCUTS;
+    return DEFAULT_SHORTCUTS.slice();
   }
 
-  function saveShortcuts(shortcuts) {
+  function saveShortcuts() {
     try {
       localStorage.setItem("hilal_shortcuts", JSON.stringify(shortcuts));
     } catch (e) {}
+    requestSiteIcons();
   }
 
-  // Dialog Elements
-  const dialog = document.getElementById("shortcut-dialog");
-  const dialogTitle = document.getElementById("dialog-title");
-  const dialogForm = document.getElementById("shortcut-dialog-form");
-  const nameInput = document.getElementById("shortcut-name-input");
-  const urlInput = document.getElementById("shortcut-url-input");
-  const cancelBtn = document.getElementById("dialog-cancel-btn");
-  const deleteBtn = document.getElementById("dialog-delete-btn");
-  let currentEditIndex = -1;
+  let shortcuts = loadShortcuts();
 
-  function openShortcutModal(editIndex = -1) {
-    if (!dialog) return;
-    currentEditIndex = editIndex;
-
-    if (editIndex >= 0) {
-      const shortcuts = getShortcuts();
-      const sc = shortcuts[editIndex];
-      if (nameInput) nameInput.value = sc?.title || "";
-      if (urlInput) urlInput.value = sc?.url || "";
-      if (dialogTitle && document.l10n) {
-        document.l10n.setAttributes(
-          dialogTitle,
-          "hilal-newtab-dialog-edit-title"
-        );
-      }
-      if (deleteBtn) deleteBtn.style.display = "inline-flex";
-    } else {
-      if (nameInput) nameInput.value = "";
-      if (urlInput) urlInput.value = "";
-      if (dialogTitle && document.l10n) {
-        document.l10n.setAttributes(dialogTitle, "hilal-newtab-dialog-title");
-      }
-      if (deleteBtn) deleteBtn.style.display = "none";
-    }
-
-    dialog.showModal();
-    if (nameInput) nameInput.focus();
+  function normalizeUrl(value) {
+    const url = value.trim();
+    return /^[a-z][a-z0-9+.-]*:/i.test(url) ? url : `https://${url}`;
   }
 
-  if (cancelBtn && dialog) {
-    cancelBtn.addEventListener("click", () => dialog.close());
+  // The actor answers with Firefox's bundled large icons for popular sites;
+  // other sites fall back to page-icon:, which reads Firefox's favicon cache,
+  // so the page never contacts a shortcut's site just to draw its icon.
+  let siteIcons = {};
+  window.addEventListener("HilalNewTab:SiteIcons", event => {
+    siteIcons = event.detail ?? {};
+    renderShortcuts();
+  });
+
+  function requestSiteIcons() {
+    window.dispatchEvent(
+      new CustomEvent("HilalNewTab:GetSiteIcons", {
+        bubbles: true,
+        detail: shortcuts.map(shortcut => shortcut.url),
+      })
+    );
   }
 
-  if (deleteBtn && dialog) {
-    deleteBtn.addEventListener("click", () => {
-      if (currentEditIndex >= 0) {
-        const shortcuts = getShortcuts();
-        shortcuts.splice(currentEditIndex, 1);
-        saveShortcuts(shortcuts);
-        renderShortcuts();
+  function createIcon(shortcut) {
+    const box = document.createElement("span");
+    box.className = "tile-icon";
+    const letter = document.createElement("span");
+    letter.className = "tile-letter";
+    letter.textContent = (shortcut.title || "?").charAt(0).toUpperCase();
+    const img = document.createElement("img");
+    img.alt = "";
+    // Sites without a cached icon get the 16px default globe, which the
+    // letter looks better than.
+    img.addEventListener("load", () => {
+      if (img.naturalWidth > 16) {
+        box.classList.add("has-image");
       }
-      dialog.close();
     });
-  }
-
-  if (dialogForm && dialog) {
-    dialogForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const name = (nameInput?.value || "").trim();
-      let url = (urlInput?.value || "").trim();
-      if (!name || !url) return;
-
-      if (
-        !url.includes("://") &&
-        !url.startsWith("about:") &&
-        !url.startsWith("chrome:")
-      ) {
-        url = "https://" + url;
-      }
-
-      let favicon = "";
-      try {
-        const u = new URL(url);
-        favicon =
-          "https://www.google.com/s2/favicons?domain=" + u.hostname + "&sz=64";
-      } catch (err) {}
-
-      const shortcuts = getShortcuts();
-      if (currentEditIndex >= 0 && currentEditIndex < shortcuts.length) {
-        shortcuts[currentEditIndex] = { title: name, url: url, icon: favicon };
-      } else {
-        shortcuts.push({ title: name, url: url, icon: favicon });
-      }
-
-      saveShortcuts(shortcuts);
-      dialog.close();
-      renderShortcuts();
-    });
+    const siteIcon = siteIcons[shortcut.url];
+    // Bundled site icons are full tiles, not small glyphs.
+    box.classList.toggle("rich", !!siteIcon);
+    img.src = siteIcon ?? `page-icon:${shortcut.url}#size=64`;
+    box.append(letter, img);
+    return box;
   }
 
   function renderShortcuts() {
-    const grid = document.getElementById("shortcuts-grid");
-    if (!grid) return;
-    grid.innerHTML = "";
+    const container = document.getElementById("shortcuts");
+    container.replaceChildren();
 
-    const shortcuts = getShortcuts();
-
-    shortcuts.forEach((sc, idx) => {
-      const item = document.createElement("div");
-      item.className = "hilal-shortcut-item";
-      item.title = sc.title + (sc.url ? " (" + sc.url + ")" : "");
-
-      const iconBox = document.createElement("div");
-      iconBox.className = "hilal-shortcut-icon-box";
-
-      if (sc.icon) {
-        const img = document.createElement("img");
-        img.className = "hilal-shortcut-icon";
-        img.src = sc.icon;
-        img.alt = sc.title || "";
-        img.onerror = () => {
-          img.remove();
-          const initial = document.createElement("span");
-          initial.className = "hilal-shortcut-initial";
-          initial.textContent = (sc.title || "?").charAt(0).toUpperCase();
-          iconBox.appendChild(initial);
-        };
-        iconBox.appendChild(img);
-      } else {
-        const initial = document.createElement("span");
-        initial.className = "hilal-shortcut-initial";
-        initial.textContent = (sc.title || "?").charAt(0).toUpperCase();
-        iconBox.appendChild(initial);
-      }
+    shortcuts.forEach((shortcut, index) => {
+      const tile = document.createElement("a");
+      tile.className = "tile";
+      tile.href = shortcut.url;
+      tile.title = shortcut.url;
 
       const label = document.createElement("span");
-      label.className = "hilal-shortcut-label";
-      label.textContent = sc.title;
+      label.className = "tile-label";
+      label.textContent = shortcut.title;
 
-      const actBtn = document.createElement("button");
-      actBtn.className = "hilal-shortcut-action-btn";
-      if (document.l10n) {
-        document.l10n.setAttributes(actBtn, "hilal-newtab-edit-shortcut");
-      }
-      actBtn.innerHTML =
-        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-      actBtn.addEventListener("click", e => {
-        e.stopPropagation();
-        e.preventDefault();
-        openShortcutModal(idx);
+      const edit = document.createElement("button");
+      edit.className = "icon-button tile-edit";
+      document.l10n.setAttributes(edit, "hilal-newtab-edit-shortcut");
+      edit.innerHTML =
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="6" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="18" r="1.4"/></svg>';
+      edit.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        openDialog(index);
       });
 
-      item.appendChild(iconBox);
-      item.appendChild(label);
-      item.appendChild(actBtn);
-
-      item.addEventListener("click", () => {
-        if (sc.url) openLocation(sc.url);
-      });
-
-      grid.appendChild(item);
+      tile.append(createIcon(shortcut), label, edit);
+      container.append(tile);
     });
 
-    // Add Shortcut button
-    const addCard = document.createElement("div");
-    addCard.className = "hilal-shortcut-item hilal-add-shortcut";
-
-    const addIconBox = document.createElement("div");
-    addIconBox.className = "hilal-shortcut-icon-box";
-    addIconBox.innerHTML =
-      '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
-
-    const addLabel = document.createElement("span");
-    addLabel.className = "hilal-shortcut-label";
-    if (document.l10n) {
-      document.l10n.setAttributes(addLabel, "hilal-newtab-add-shortcut");
+    if (shortcuts.length < MAX_SHORTCUTS) {
+      const add = document.createElement("button");
+      add.className = "tile tile-add";
+      const icon = document.createElement("span");
+      icon.className = "tile-icon";
+      icon.innerHTML =
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+      const label = document.createElement("span");
+      label.className = "tile-label";
+      document.l10n.setAttributes(label, "hilal-newtab-add-shortcut");
+      add.append(icon, label);
+      add.addEventListener("click", () => openDialog(-1));
+      container.append(add);
     }
-
-    addCard.appendChild(addIconBox);
-    addCard.appendChild(addLabel);
-    addCard.addEventListener("click", () => openShortcutModal(-1));
-
-    grid.appendChild(addCard);
   }
 
+  // Shortcut dialog
+
+  const dialog = document.getElementById("shortcut-dialog");
+  const form = document.getElementById("shortcut-form");
+  const nameInput = document.getElementById("shortcut-name");
+  const urlInput = document.getElementById("shortcut-url");
+  const deleteButton = document.getElementById("dialog-delete");
+  let editIndex = -1;
+
+  function openDialog(index) {
+    editIndex = index;
+    const shortcut = shortcuts[index];
+    document.l10n.setAttributes(
+      document.getElementById("dialog-title"),
+      shortcut ? "hilal-newtab-dialog-edit-title" : "hilal-newtab-dialog-title"
+    );
+    nameInput.value = shortcut?.title ?? "";
+    urlInput.value = shortcut?.url ?? "";
+    deleteButton.hidden = !shortcut;
+    dialog.showModal();
+    nameInput.focus();
+  }
+
+  form.addEventListener("submit", () => {
+    const shortcut = {
+      title: nameInput.value.trim(),
+      url: normalizeUrl(urlInput.value),
+    };
+    if (editIndex >= 0) {
+      shortcuts[editIndex] = shortcut;
+    } else {
+      shortcuts.push(shortcut);
+    }
+    saveShortcuts();
+    renderShortcuts();
+  });
+  deleteButton.addEventListener("click", () => {
+    shortcuts.splice(editIndex, 1);
+    saveShortcuts();
+    renderShortcuts();
+    dialog.close();
+  });
+  document
+    .getElementById("dialog-cancel")
+    .addEventListener("click", () => dialog.close());
+
   renderShortcuts();
+  requestSiteIcons();
 })();

@@ -232,15 +232,6 @@
         }
         this._lastHex = hex;
         this._lastWsName = wsName;
-
-        if (!this._themeChannel) {
-          this._themeChannel = new BroadcastChannel("hilal-theme-channel");
-          this._themeChannel.onmessage = e => {
-            if (e.data && e.data.action === "request-theme") {
-              this.broadcastTheme();
-            }
-          };
-        }
         this.broadcastTheme();
       } catch (e) {}
     },
@@ -285,29 +276,12 @@
       }
     },
 
+    // HilalNewTabChild watches this key and asks its window for the new
+    // theme when it changes.
     broadcastTheme() {
       try {
-        const themeData = this.getThemeData();
-
-        if (typeof Services !== "undefined" && Services.ppmm?.sharedData) {
-          Services.ppmm.sharedData.set("hilal:activeTheme", themeData);
-          Services.ppmm.sharedData.flush();
-        }
-
-        if (!this._themeChannel) {
-          this._themeChannel = new BroadcastChannel("hilal-theme-channel");
-          this._themeChannel.onmessage = e => {
-            if (e.data && e.data.action === "request-theme") {
-              this.broadcastTheme();
-            }
-          };
-        }
-        this._themeChannel.postMessage({
-          action: "theme-update",
-          color: themeData.accent,
-          theme: themeData,
-          workspaceName: this._lastWsName || "",
-        });
+        Services.ppmm.sharedData.set("hilal:activeTheme", this.getThemeData());
+        Services.ppmm.sharedData.flush();
       } catch (e) {}
     },
   };
@@ -2960,19 +2934,6 @@
           this.openNewTab();
         }
       });
-
-      try {
-        const newTabChannel = new BroadcastChannel("hilal-newtab-channel");
-        newTabChannel.onmessage = event => {
-          if (
-            event.data &&
-            event.data.action === "navigate" &&
-            event.data.url
-          ) {
-            this.navigate(event.data.url);
-          }
-        };
-      } catch (err) {}
     },
   };
 

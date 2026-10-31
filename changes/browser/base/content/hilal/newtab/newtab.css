@@ -1,425 +1,407 @@
-/* Hilal Browser New Tab Stylesheet */
-/* Solid theme background - Zero gradients */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/* The shell overrides these with the window's accent color. */
 :root {
-  --hilal-accent: #af51f5;
-  --hilal-bg: color-mix(in srgb, var(--hilal-accent) 14%, #131217);
-  --hilal-surface: color-mix(in srgb, var(--hilal-accent) 22%, #1b1922);
-  --hilal-surface-hover: color-mix(in srgb, var(--hilal-accent) 32%, #262330);
-  --hilal-border: color-mix(in srgb, var(--hilal-accent) 25%, rgba(255, 255, 255, 0.08));
-  --hilal-text: #f3f4f6;
-  --hilal-text-muted: #9ca3af;
-  --hilal-error: #ef4444;
+  --accent: #af51f5;
+  --primary: oklch(0.82 0.14 305);
+  --bg: color-mix(in srgb, var(--accent) 14%, #131217);
+  --surface: color-mix(in srgb, var(--accent) 22%, #1b1922);
+  --surface-high: color-mix(in srgb, var(--accent) 32%, #262330);
+  --outline: color-mix(in srgb, var(--accent) 25%, rgb(255 255 255 / 0.08));
+  --on-surface: #f3f4f6;
+  --on-surface-variant: #a8a3b3;
+
+  --primary-container: color-mix(in srgb, var(--primary) 22%, var(--bg));
+  --on-primary-container: color-mix(in srgb, var(--primary) 70%, var(--on-surface));
+  --spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  color-scheme: dark;
 }
 
 @media (prefers-color-scheme: light) {
   :root {
-    --hilal-accent: #af51f5;
-    --hilal-bg: color-mix(in srgb, var(--hilal-accent) 8%, #f7f6fa);
-    --hilal-surface: #ffffff;
-    --hilal-surface-hover: color-mix(in srgb, var(--hilal-accent) 12%, #ebeaf2);
-    --hilal-border: color-mix(in srgb, var(--hilal-accent) 15%, rgba(0, 0, 0, 0.08));
-    --hilal-text: #111827;
-    --hilal-text-muted: #6b7280;
-    --hilal-error: #dc2626;
+    --primary: oklch(0.42 0.14 305);
+    --bg: color-mix(in srgb, var(--accent) 8%, #f7f6fa);
+    --surface: #ffffff;
+    --surface-high: color-mix(in srgb, var(--accent) 12%, #ebeaf2);
+    --outline: color-mix(in srgb, var(--accent) 15%, rgb(0 0 0 / 0.08));
+    --on-surface: #1b1a20;
+    --on-surface-variant: #5f5b68;
+
+    color-scheme: light;
   }
 }
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-font-smoothing: antialiased;
 }
 
-body.hilal-newtab {
-  background-color: var(--hilal-bg);
-  color: var(--hilal-text);
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+body {
+  margin: 0;
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  padding: 24px;
-  user-select: none;
-  overflow-x: hidden;
+  display: grid;
+  place-items: center;
+  padding: 32px 24px;
+  background: var(--bg);
+  color: var(--on-surface);
+  font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Central Home Container */
-.hilal-home-container {
-  width: 100%;
-  max-width: 640px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: auto 0;
-  padding-bottom: 40px;
-}
-
-/* Brand: Logo & Wordmark */
-.hilal-brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 34px;
-}
-
-.hilal-logo {
-  width: 58px;
-  height: 58px;
-  object-fit: contain;
-}
-
-.hilal-wordmark {
-  display: flex;
-  align-items: baseline;
-  gap: 7px;
-  font-size: 28px;
-  letter-spacing: -0.4px;
-}
-
-.hilal-wordmark-bold {
-  font-weight: 700;
-  color: var(--hilal-text);
-}
-
-.hilal-wordmark-light {
-  font-weight: 400;
-  color: var(--hilal-text-muted);
-}
-
-/* Search Bar */
-.hilal-search-form {
-  width: 100%;
-  max-width: 560px;
-  height: 50px;
-  background-color: var(--hilal-surface);
-  border: 1px solid var(--hilal-border);
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  padding: 0 6px 0 16px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-  transition: all 160ms ease;
-  margin-bottom: 36px;
-}
-
-.hilal-search-form:focus-within {
-  border-color: var(--hilal-accent);
-  box-shadow:
-    0 6px 20px rgba(0, 0, 0, 0.18),
-    0 0 0 2px var(--hilal-accent);
-  transform: translateY(-1px);
-}
-
-.hilal-search-engine-icon {
-  display: flex;
-  align-items: center;
-  color: var(--hilal-text-muted);
-  margin-right: 12px;
-}
-
-.hilal-search-input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 15px;
-  color: var(--hilal-text);
-  font-family: inherit;
-}
-
-.hilal-search-input::placeholder {
-  color: var(--hilal-text-muted);
-  font-size: 14.5px;
-}
-
-.hilal-search-clear {
-  display: none;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  color: var(--hilal-text-muted);
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  margin-right: 4px;
-  transition: all 120ms ease;
-}
-
-.hilal-search-clear:hover {
-  background-color: var(--hilal-surface-hover);
-  color: var(--hilal-text);
-}
-
-.hilal-search-submit {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: none;
-  background-color: transparent;
-  color: var(--hilal-text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 150ms ease;
-}
-
-.hilal-search-form:focus-within .hilal-search-submit {
-  color: var(--hilal-accent);
-}
-
-.hilal-search-submit:hover {
-  background-color: var(--hilal-surface-hover);
-  color: var(--hilal-text);
-}
-
-/* Clean Shortcuts Row */
-.hilal-shortcuts-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  max-width: 600px;
-}
-
-.hilal-shortcut-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-decoration: none;
-  color: var(--hilal-text);
-  width: 80px;
-  cursor: pointer;
-  position: relative;
-  transition: transform 160ms ease;
-}
-
-.hilal-shortcut-item:hover {
-  transform: translateY(-2px);
-}
-
-.hilal-shortcut-icon-box {
-  width: 50px;
-  height: 50px;
-  border-radius: 16px;
-  background-color: var(--hilal-surface);
-  border: 1px solid var(--hilal-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  transition: all 160ms ease;
-}
-
-.hilal-shortcut-item:hover .hilal-shortcut-icon-box {
-  background-color: var(--hilal-surface-hover);
-  border-color: var(--hilal-accent);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
-}
-
-.hilal-shortcut-icon {
-  width: 26px;
-  height: 26px;
-  object-fit: contain;
-  border-radius: 4px;
-}
-
-.hilal-shortcut-initial {
-  font-size: 19px;
-  font-weight: 700;
-  color: var(--hilal-accent);
-}
-
-.hilal-shortcut-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--hilal-text-muted);
-  max-width: 80px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: center;
-  transition: color 150ms ease;
-}
-
-.hilal-shortcut-item:hover .hilal-shortcut-label {
-  color: var(--hilal-text);
-}
-
-/* Action button on hover */
-.hilal-shortcut-action-btn {
-  position: absolute;
-  top: 0px;
-  right: 10px;
+svg {
   width: 20px;
   height: 20px;
-  border-radius: 50%;
-  background-color: var(--hilal-surface-hover);
-  color: var(--hilal-text);
-  border: 1px solid var(--hilal-border);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  transition: all 120ms ease;
-  z-index: 5;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.hilal-shortcut-item:hover .hilal-shortcut-action-btn {
-  display: flex;
-}
-
-.hilal-shortcut-action-btn:hover {
-  background-color: var(--hilal-error);
-  color: #ffffff;
-  transform: scale(1.1);
-}
-
-/* Add Shortcut item */
-.hilal-add-shortcut .hilal-shortcut-icon-box {
-  background-color: transparent;
-  border: 2px dashed var(--hilal-border);
-  color: var(--hilal-text-muted);
-}
-
-.hilal-add-shortcut:hover .hilal-shortcut-icon-box {
-  border-color: var(--hilal-accent);
-  color: var(--hilal-accent);
-  background-color: var(--hilal-surface);
-}
-
-/* Dialog */
-.hilal-dialog {
+button {
+  font: inherit;
+  color: inherit;
   border: none;
-  background: transparent;
-  padding: 0;
-  margin: auto;
-  outline: none;
+  background: none;
+  cursor: pointer;
 }
 
-.hilal-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-.hilal-dialog-card {
-  width: 360px;
-  background-color: var(--hilal-surface);
-  border-radius: 20px;
-  border: 1px solid var(--hilal-border);
-  padding: 22px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+.home {
+  width: min(100%, 680px);
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  align-items: center;
+  gap: 28px;
+  padding-bottom: 6vh;
 }
 
-.hilal-dialog-title {
-  font-size: 18px;
+/* Clock */
+
+.clock-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 56px 26px;
+  border-radius: 48px;
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.clock {
+  font-size: clamp(72px, 11vw, 120px);
   font-weight: 600;
-  color: var(--hilal-text);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
 }
 
-.hilal-field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.clock-sep {
+  margin-inline: 0.04em;
+  color: color-mix(in srgb, currentColor 55%, transparent);
 }
 
-.hilal-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.hilal-label {
-  font-size: 12px;
+.clock-period {
+  margin-inline-start: 0.25em;
+  font-size: 0.3em;
   font-weight: 500;
-  color: var(--hilal-accent);
+  letter-spacing: 0;
 }
 
-.hilal-input {
-  height: 40px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid var(--hilal-border);
-  background-color: var(--hilal-bg);
-  color: var(--hilal-text);
-  font-size: 13.5px;
-  outline: none;
-  transition: border-color 150ms ease;
-  font-family: inherit;
+.clock-date {
+  margin-top: 10px;
+  font-size: 17px;
+  font-weight: 500;
+  color: color-mix(in srgb, currentColor 80%, transparent);
 }
 
-.hilal-input:focus {
-  border-color: var(--hilal-accent);
-}
+/* Search */
 
-.hilal-dialog-actions {
+.search {
+  width: 100%;
+  height: 60px;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
+  padding-inline: 22px 8px;
+  border-radius: 30px;
+  background: var(--surface-high);
+  outline: 2px solid transparent;
+  transition: outline-color 150ms;
 }
 
-.hilal-dialog-spacer {
+.search:focus-within {
+  outline-color: var(--primary);
+}
+
+.search-icon {
+  flex: none;
+  color: var(--on-surface-variant);
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 17px;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: var(--on-surface-variant);
+}
+
+.icon-button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  color: var(--on-surface-variant);
+}
+
+.icon-button:hover {
+  background: color-mix(in srgb, var(--on-surface) 8%, transparent);
+}
+
+.icon-button[hidden] {
+  display: none;
+}
+
+.search-submit {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background: var(--primary);
+  color: var(--bg);
+  transition: border-radius 250ms var(--spring);
+}
+
+.search-submit:hover {
+  border-radius: 14px;
+}
+
+/* Shortcuts */
+
+.shortcuts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 96px);
+  justify-content: center;
+  gap: 12px 8px;
+  width: 100%;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px;
+  border-radius: 20px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.tile-icon {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background: var(--surface);
+  transition:
+    border-radius 300ms var(--spring),
+    background-color 150ms;
+}
+
+.tile:hover .tile-icon,
+.tile:focus-visible .tile-icon {
+  border-radius: 32px;
+  background: var(--surface-high);
+}
+
+.tile-icon img {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  visibility: hidden;
+}
+
+.tile-icon.has-image img {
+  visibility: visible;
+}
+
+.tile-icon.rich {
+  overflow: hidden;
+}
+
+.tile-icon.rich img {
+  width: 100%;
+  height: 100%;
+}
+
+.tile-icon.has-image .tile-letter {
+  visibility: hidden;
+}
+
+.tile-letter {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.tile-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--on-surface-variant);
+}
+
+.tile-edit {
+  position: absolute;
+  top: 0;
+  right: 2px;
+  width: 28px;
+  height: 28px;
+  background: var(--surface-high);
+  visibility: hidden;
+}
+
+.tile-edit svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.tile:hover .tile-edit,
+.tile-edit:focus-visible {
+  visibility: visible;
+}
+
+.tile-add .tile-icon {
+  background: none;
+  border: 2px dashed var(--outline);
+  color: var(--on-surface-variant);
+}
+
+/* Chips */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.chip {
+  height: 36px;
+  padding-inline: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--outline);
+  color: var(--on-surface-variant);
+  font-size: 14px;
+  font-weight: 500;
+  transition: border-radius 250ms var(--spring), background-color 150ms;
+}
+
+.chip:hover {
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--on-surface);
+}
+
+/* Dialog */
+
+.dialog {
+  width: min(92vw, 400px);
+  padding: 24px;
+  border: none;
+  border-radius: 28px;
+  background: var(--surface-high);
+  color: var(--on-surface);
+}
+
+.dialog::backdrop {
+  background: rgb(0 0 0 / 0.4);
+}
+
+.dialog-title {
+  margin: 0 0 20px;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--on-surface-variant);
+}
+
+.field input {
+  height: 48px;
+  padding-inline: 14px;
+  border: 1px solid var(--outline);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--on-surface);
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+}
+
+.field input:focus {
+  border-color: var(--primary);
+}
+
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.spacer {
   flex: 1;
 }
 
-.hilal-btn {
-  height: 36px;
-  padding: 0 16px;
-  border-radius: 9999px;
-  border: none;
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 150ms ease;
-  font-family: inherit;
+.text-button,
+.filled-button {
+  height: 40px;
+  padding-inline: 18px;
+  border-radius: 20px;
+  font-weight: 500;
 }
 
-.hilal-btn-text {
-  background: transparent;
-  color: var(--hilal-text-muted);
+.text-button {
+  color: var(--primary);
 }
 
-.hilal-btn-text:hover {
-  background-color: var(--hilal-surface-hover);
-  color: var(--hilal-text);
+.text-button:hover {
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
 }
 
-.hilal-btn-primary {
-  background-color: var(--hilal-accent);
-  color: #ffffff;
+.text-button.danger {
+  color: #f2726b;
 }
 
-.hilal-btn-primary:hover {
-  filter: brightness(1.1);
+.text-button[hidden] {
+  display: none;
 }
 
-.hilal-btn-delete {
-  background-color: transparent;
-  color: var(--hilal-error);
-}
-
-.hilal-btn-delete:hover {
-  background-color: rgba(239, 68, 68, 0.15);
+.filled-button {
+  background: var(--primary);
+  color: var(--bg);
 }
