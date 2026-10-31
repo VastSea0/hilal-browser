@@ -11,7 +11,7 @@ index de83282c2c8a..5e67f723b792 100644
     content/browser/preferences/home.js
     content/browser/preferences/search.js
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index b66ff919d93b..6ad7b8425287 100644
+index b66ff919d93b..e2566bfa9b76 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
 @@ -13,7 +13,7 @@
@@ -68,7 +68,7 @@ index b66ff919d93b..6ad7b8425287 100644
    };
  
    const items = includeIsDefaultPane
-@@ -1815,6 +1831,1377 @@ gMainPane.initialized = new Promise(res => {
+@@ -1815,6 +1831,1391 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
@@ -947,6 +947,11 @@ index b66ff919d93b..6ad7b8425287 100644
 +
 +    try {
 +      if (languageSelect && languageApplyBtn) {
++        const getChosenLocale = () =>
++          Services.prefs.prefHasUserValue("intl.locale.requested")
++            ? Services.locale.requestedLocales[0] || ""
++            : "";
++
 +        const initLanguageUI = async () => {
 +          let available = [];
 +          try {
@@ -1003,12 +1008,21 @@ index b66ff919d93b..6ad7b8425287 100644
 +            languageSelect.appendChild(option);
 +          }
 +
-+          const requestedLocales = Services.locale.requestedLocales || [];
-+          const currentPrimary = requestedLocales[0] || "";
++          // Without an explicit choice, requestedLocales mirrors the OS
++          // (for example en-TR), which is what "System Language" means.
++          const currentPrimary = getChosenLocale();
 +          if (currentPrimary && !available.includes(currentPrimary)) {
 +            const option = document.createElement("option");
 +            option.value = currentPrimary;
-+            option.textContent = currentPrimary;
++            try {
++              option.textContent = Services.intl.getLocaleDisplayNames(
++                undefined,
++                [currentPrimary],
++                { preferNative: true }
++              )[0];
++            } catch (e) {
++              option.textContent = currentPrimary;
++            }
 +            languageSelect.appendChild(option);
 +          }
 +          languageSelect.value = currentPrimary;
@@ -1019,7 +1033,7 @@ index b66ff919d93b..6ad7b8425287 100644
 +        languageApplyBtn.addEventListener("click", () => {
 +          const selected = languageSelect.value;
 +          const requestedLocales = Services.locale.requestedLocales || [];
-+          const currentPrimary = requestedLocales[0] || "";
++          const currentPrimary = getChosenLocale();
 +
 +          if (selected === currentPrimary) {
 +            return;
