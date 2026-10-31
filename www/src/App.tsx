@@ -232,7 +232,7 @@ export default function App() {
           chip: "Özelleştirme",
           title: "Çalışma şeklinize uyum sağlayan arayüz.",
           description:
-            "Dikey sekmeler, gizlenebilir kompakt araç çubuğu ve sol veya sağ kenar çubuğu yerleşimiyle tarayıcınızı istediğiniz gibi düzenleyin.",
+            "Dikey sekmeli kenar çubuğu ya da yatay sekme şeridi arasında istediğiniz an geçin, vurgu rengini ve temayı kendinize göre ayarlayın.",
           image: isDark ? "/welcome-compact-vertical.png" : "/welcome-standard-vertical.png",
           alt: "Hilal Özelleştirilebilir Arayüz",
         },
@@ -357,7 +357,7 @@ export default function App() {
           chip: "Customization",
           title: "An interface that adapts to how you work.",
           description:
-            "Configure vertical tabs, an auto-hiding toolbar, and left or right sidebar placement to match your workflow.",
+            "Switch between vertical sidebar tabs and a horizontal tab strip at any time, and pick your own accent color and theme.",
           image: isDark ? "/welcome-compact-vertical.png" : "/welcome-standard-vertical.png",
           alt: "Hilal Customizable Interface",
         },

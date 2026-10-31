@@ -408,16 +408,16 @@ Flatpak bildirimi, Wayland/X11 soket izinleri, pulseaudio ve tam sandbox izolasy
         title: "Çekirdek Alt Sistemler",
         shortTitle: "Alt Sistemler",
         iconName: "Boxes",
-        description: "Arayüz kabuğu, çalışma alanları, site özelleştirme ve gizlilik motoru.",
+        description: "Arayüz kabuğu, çalışma alanları, arama kestirmeleri ve gizlilik.",
         subsections: [
           {
             id: "hilal-shell",
             title: "HilalShell (Arayüz ve Kabuk Mimarisi)",
-            description: "Dikey sekmeler, Tahoe yarı saydamlık ve kompakt araç çubuğu.",
-            content: `Hilal'in kullanıcı arayüzü \`changes/browser/base/content/hilal/\` dizinindeki modüllerle Firefox UI bileşenlerine enjekte edilir:
+            description: "Material 3 Expressive üst çubuk, adres çubuğu ve kenar çubuğu.",
+            content: `Hilal'in kullanıcı arayüzü \`changes/browser/base/content/hilal/\` dizinindeki modüllerle Firefox arayüzüne eklenir:
 
-- **\`HilalShell.js\` & \`HilalShell.css\`:** Tarayıcı ana penceresinin (\`navigator-toolbox\`) yerleşimini dinamik olarak yönetir. Kenar çubuğunun sol veya sağ hizalanmasını, kompakt modda otomatik gizlenmeyi ve Tahoe teması için DOM ağacına gerekli özniteliklerin eklenmesini sağlar.
-- **\`HilalTahoeParent.sys.mjs\` / \`HilalTahoeChild.sys.mjs\`:** Aktif sekmedeki web sayfasının baskın renk paletini JS actor aracılığıyla yakalar ve tarayıcı kenarlıklarına, başlık çubuğuna akıcı bir şekilde uygular.`
+- **\`HilalShell.js\` & \`HilalShell.css\`:** Material 3 Expressive kabuğunu kurar: üst çubuk, adres çubuğu, dikey sekmeli kenar çubuğu veya yatay sekme şeridi. Vurgu rengini, açık/koyu temayı, gizli pencere işaretini ve tam ekran video sırasında kabuğun gizlenmesini yönetir.
+- **\`HilalKeyboardShortcuts.js\`:** Hilal eylemleri ve Firefox komutları için düzenlenebilir klavye kısayolları.`
           },
           {
             id: "hilal-workspaces",
@@ -429,16 +429,6 @@ Flatpak bildirimi, Wayland/X11 soket izinleri, pulseaudio ve tam sandbox izolasy
 - Çerezler, yerel depolama (LocalStorage, IndexedDB) ve oturum verileri çalışma alanları arasında kesin olarak ayrıştırılır.
 - Pinned sekmeler istenirse tüm çalışma alanlarında ortak paylaşılabilir.
 - Sekmeler arası sürükle-bırak desteği doğrudan \`tabbrowser.js\` yama katmanı üzerinden çalışır.`
-          },
-          {
-            id: "hilal-boosts",
-            title: "HilalBoosts (Site Özelleştirici ve Element Zapper)",
-            description: "Kullanıcı CSS enjeksiyonu, tipografi denetimi ve DOM zapper.",
-            content: `Kullanıcıların ziyaret ettikleri siteleri anlık olarak modifiye etmelerini sağlayan alt sistem:
-
-- **\`HilalBoosts.js\`:** Kullanıcının siteye özel yazı tipi, font ölçeği, ters çevirme (smart invert) ve özel CSS kurallarını depolar.
-- **\`HilalBoostsActorParent.sys.mjs\` / \`Child.sys.mjs\`:** Güvenlik sandbox'ını ihlal etmeden içeriğe özel stil enjeksiyonu yapar.
-- **Element Zapper:** Kullanıcının seçtiği can sıkıcı DOM elemanlarını (yapışkan banner'lar, reklam artıkları) kalıcı olarak DOM'dan kaldırır.`
           },
           {
             id: "hilal-bangs",
@@ -916,7 +906,7 @@ scripts/build-macos.sh faster
 
 These map directly to \`./mach build faster\` and \`./mach build binaries\`.
 
-> **Tip:** Most UI features in Hilal (workspaces, sidebar, boosts, bang handling) are implemented in JavaScript and CSS, making iteration cycles via \`faster\` extremely responsive.`
+> **Tip:** Most UI features in Hilal (workspaces, sidebar, bang handling) are implemented in JavaScript and CSS, making iteration cycles via \`faster\` extremely responsive.`
           },
           {
             id: "refreshing-patches",
@@ -1108,16 +1098,16 @@ The executable is compiled to \`engine\\obj-x86_64-pc-windows-msvc\\dist\\bin\\h
         title: "Core Subsystems",
         shortTitle: "Subsystems",
         iconName: "Boxes",
-        description: "UI shell, isolated containers, site customizer, and search bangs.",
+        description: "UI shell, isolated containers, and search bangs.",
         subsections: [
           {
             id: "hilal-shell",
             title: "HilalShell (UI & Chrome Architecture)",
-            description: "Vertical tabs, collapsible sidebar, and Tahoe tinting.",
-            content: `Hilal's user interface is injected into Firefox chrome via \`changes/browser/base/content/hilal/\`:
+            description: "Material 3 Expressive top bar, address bar, and sidebar.",
+            content: `Hilal's user interface is added to the Firefox chrome from \`changes/browser/base/content/hilal/\`:
 
-- **\`HilalShell.js\` & \`HilalShell.css\`:** Dynamically manages the main \`#navigator-toolbox\` layout. Controls left/right sidebar positioning, auto-hiding toolbar behavior in compact mode, and DOM attributes required for Tahoe styling.
-- **\`HilalTahoeParent.sys.mjs\` / \`HilalTahoeChild.sys.mjs\`:** Uses JS actors to extract dominant color palettes from the active web page and smoothly applies matching tinting to window borders and header chrome.`
+- **\`HilalShell.js\` & \`HilalShell.css\`:** Build the Material 3 Expressive shell: the top bar, the address bar, and either the vertical sidebar tabs or the horizontal tab strip. They also handle the accent color, light and dark themes, the private window marker, and hiding the shell during fullscreen video.
+- **\`HilalKeyboardShortcuts.js\`:** Editable keyboard shortcuts for Hilal actions and Firefox commands.`
           },
           {
             id: "hilal-workspaces",
@@ -1129,16 +1119,6 @@ The executable is compiled to \`engine\\obj-x86_64-pc-windows-msvc\\dist\\bin\\h
 - Cookies, localStorage, IndexedDB, and active session tokens are strictly partitioned between workspaces.
 - Pinned tabs can optionally be shared across all workspaces.
 - Tab drag-and-drop between workspaces is integrated directly via patches to \`tabbrowser.js\`.`
-          },
-          {
-            id: "hilal-boosts",
-            title: "HilalBoosts (Site Customizer & Element Zapper)",
-            description: "Per-site CSS injection, typography scaling, and DOM zapper.",
-            content: `Allows users to modify any website persistently:
-
-- **\`HilalBoosts.js\`:** Stores per-domain font selections, text scale, smart invert preferences, and custom CSS overrides.
-- **\`HilalBoostsActorParent.sys.mjs\` / \`Child.sys.mjs\`:** Injects stylesheets safely into content documents without bypassing security sandbox boundaries.
-- **Element Zapper:** Allows users to click and remove intrusive DOM elements (sticky banners, popups) permanently.`
           },
           {
             id: "hilal-bangs",
