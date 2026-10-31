@@ -9,7 +9,6 @@
 #   scripts/build-macos.sh binaries        # C++/Rust only
 #   scripts/build-macos.sh run             # build and run
 #   scripts/build-macos.sh package         # build and package
-#   scripts/build-macos.sh --no-symlinks   # copy instead of symlink prefs
 #   scripts/build-macos.sh -- <args>       # pass arguments to mach build
 
 set -euo pipefail
@@ -17,23 +16,11 @@ set -euo pipefail
 # shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"
 
-export MOZBUILD_STATE_PATH="${MOZBUILD_STATE_PATH:-$HOME/.mozbuild}"
-
 require_firefox_src
 
 if [ "$(uname -s)" != "Darwin" ]; then
   warn "This script is tuned for macOS. On Linux, please use build-linux.sh."
 fi
-
-NO_SYMLINKS=0
-remaining=()
-for arg in "$@"; do
-  case "$arg" in
-    --no-symlinks) NO_SYMLINKS=1 ;;
-    *) remaining+=("$arg") ;;
-  esac
-done
-set -- "${remaining[@]+"${remaining[@]}"}"
 
 "$HILAL_REPO_ROOT/bin/hil" apply
 
