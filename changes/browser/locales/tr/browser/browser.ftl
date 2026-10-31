@@ -74,6 +74,7 @@ hilal-toolbar-split-view =
 hilal-toolbar-new-workspace =
     .title = Yeni çalışma alanı
 
+hilal-shell-new-workspace = Yeni çalışma alanı
 hilal-shell-workspaces = Çalışma alanları
 hilal-shell-accent-color = Vurgu rengi
 hilal-shell-results = Sonuçlar

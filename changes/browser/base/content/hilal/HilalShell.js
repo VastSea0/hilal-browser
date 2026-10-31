@@ -1738,7 +1738,7 @@
       addBtn.className = "row wave round tiny-space transparent";
       addBtn.innerHTML = `
         <i>add</i>
-        <span class="max">New Workspace</span>
+        <span class="max" data-l10n-id="hilal-shell-new-workspace"></span>
       `;
       addBtn.addEventListener("click", () => {
         menu.style.display = "none";

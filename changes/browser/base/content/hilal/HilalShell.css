@@ -954,6 +954,56 @@
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
   padding: 6px;
   gap: 2px;
+  /* The menus are shown with an inline display: flex, which would lay the
+     items out in a row. */
+  flex-direction: column !important;
+  min-width: 220px;
+}
+
+#hilal-mode-context-menu,
+#hilal-workspaces-dropdown-menu,
+#hilal-theme-menu {
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  border-radius: 16px !important;
+}
+
+#hilal-mode-context-menu > button,
+#hilal-workspaces-dropdown-menu > button,
+#hilal-theme-menu > button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-height: 40px !important;
+  height: auto !important;
+  padding: 8px 12px !important;
+  border-radius: 12px !important;
+  text-align: start !important;
+  white-space: nowrap !important;
+}
+
+#hilal-mode-context-menu > button:hover,
+#hilal-workspaces-dropdown-menu > button:hover,
+#hilal-theme-menu > button:hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+}
+
+#hilal-workspaces-dropdown-menu > label {
+  padding: 8px 12px 4px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.06em !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
+}
+
+#hilal-workspaces-dropdown-menu > hr {
+  align-self: stretch !important;
+  width: auto !important;
+  height: 1px !important;
+  margin: 4px 8px !important;
+  border: none !important;
+  background-color: var(--md-sys-color-outline-variant) !important;
 }
 
 #hilal-mode-context-menu button i,
