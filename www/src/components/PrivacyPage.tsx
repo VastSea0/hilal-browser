@@ -39,7 +39,7 @@ export default function PrivacyPage({ lang, onBack }: PrivacyPageProps) {
             {isTr ? "Gizlilik Politikası" : "Privacy Policy"}
           </h1>
           <p className="text-xs font-mono text-[var(--md-sys-color-primary)] font-medium">
-            {isTr ? "Son Güncelleme: 9 Eylül 2026" : "Last Updated: September 9, 2026"}
+            {isTr ? "Son Güncelleme: 31 Ekim 2026" : "Last Updated: October 31, 2026"}
           </p>
         </div>
 
@@ -54,8 +54,8 @@ export default function PrivacyPage({ lang, onBack }: PrivacyPageProps) {
             </h3>
             <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed">
               {isTr
-                ? "Ad, e-posta, telefon, IP veya reklam kimliği asla toplanmaz veya saklanmaz."
-                : "No names, emails, phones, IPs, or advertising IDs are ever harvested."}
+                ? "Ad, e-posta, telefon, cihaz modeli veya reklam kimliği toplanmaz."
+                : "No names, emails, phone numbers, device models, or advertising IDs are collected."}
             </p>
           </div>
 
@@ -103,27 +103,23 @@ export default function PrivacyPage({ lang, onBack }: PrivacyPageProps) {
 
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[var(--md-sys-color-on-surface)]">
-              {isTr ? "2. Toplanan Veriler: Yalnızca Anonim Kullanım İstatistikleri" : "2. Data Collected: Strictly Anonymous Usage Statistics"}
+              {isTr ? "2. Toplanan Veriler: Anonim Kullanım İstatistikleri" : "2. Data Collected: Anonymous Usage Statistics"}
             </h2>
             <p>
               {isTr
-                ? "Hilal Browser, hizmet kalitesini artırmak, GeckoView motoru kararlılığını sağlamak ve işletim sistemlerine özgü render/çökme sorunlarını gidermek amacıyla yalnızca ve yalnızca tamamen anonim kullanım istatistikleri toplar:"
-                : "To maintain engine stability, resolve platform-specific rendering bugs, and continuously improve the browser, Hilal collects strictly anonymous aggregate usage statistics:"}
+                ? "Masaüstü Hilal Browser hiçbir kullanım istatistiği göndermez. Android uygulaması, kaç kişinin hangi sürümü kullandığını görmek için günde en fazla bir kez şu bilgileri gönderir:"
+                : "The Hilal desktop browser sends no usage statistics. To see how many people use which version, the Android app sends the following at most once a day:"}
             </p>
             <ul className="list-disc list-inside space-y-1.5 ml-2">
-              <li>
-                <strong>{isTr ? "Aktif Kullanıcı ve Cihaz Sayısı: " : "Active User & Device Count: "}</strong>
-                {isTr ? "Toplam kullanım hacmini ve ekosistem büyüklüğünü anlamak için." : "To measure service scale and overall adoption."}
-              </li>
-              <li>
-                <strong>{isTr ? "Cihaz Modeli ve İşletim Sistemi Sürümü: " : "Device Model & OS Version: "}</strong>
-                {isTr ? "Örneğin Android 14, Pixel 7 gibi teknik veriler; GeckoView motorunun belirli cihaz ve sürümlerdeki uyumluluk sorunlarını tespit etmek için." : "Such as Android 14, Pixel 7 to diagnose engine-level rendering issues across specific Android releases."}
-              </li>
+              <li>{isTr ? "Uygulama ilk açıldığında rastgele üretilen bir kurulum kimliği" : "A random installation ID created when the app first starts"}</li>
+              <li>{isTr ? "Uygulama sürümü ve derleme numarası" : "The app version and build number"}</li>
+              <li>{isTr ? "Android API seviyesi, işlemci mimarisi ve sistem dili" : "The Android API level, CPU architecture, and system language"}</li>
+              <li>{isTr ? "Seçili arama motoru, tema, uBlock Origin'in açık olup olmadığı ve yaklaşık sekme sayısı" : "The selected search engine, theme, whether uBlock Origin is on, and a rough tab count"}</li>
             </ul>
             <p className="text-xs text-[var(--md-sys-color-primary)] font-medium">
               {isTr
-                ? "Bu veriler hiçbir kişisel kimlik bilgisi içermez, IP adresiniz kaydedilmez ve Google Reklam Kimliği (GAID) ile asla ilişkilendirilmez."
-                : "These statistics contain no personal identifiers, do not log IP addresses, and are never linked to Advertising IDs (GAID)."}
+                ? "Bu veriler hiçbir kişiyle ilişkilendirilmez ve proje sunucusu aracılığıyla Google Cloud Firestore'da saklanır. IP adresiniz istatistik veritabanına yazılmaz. Ayarlar > \"Anonim kullanım istatistikleri\" kapatılarak tamamen durdurulabilir."
+                : "This data is not linked to any person and is stored in Google Cloud Firestore through the project's server. Your IP address is not written to the statistics database. Turn it off completely in Settings > \"Anonymous usage statistics\"."}
             </p>
           </section>
 
@@ -167,16 +163,6 @@ export default function PrivacyPage({ lang, onBack }: PrivacyPageProps) {
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--md-sys-color-primary)] hover:underline"
               >
                 <span>GitHub Repository</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-              <span className="opacity-40">•</span>
-              <a
-                href="https://egehankahraman.vercel.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--md-sys-color-primary)] hover:underline"
-              >
-                <span>egehankahraman.vercel.app</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>

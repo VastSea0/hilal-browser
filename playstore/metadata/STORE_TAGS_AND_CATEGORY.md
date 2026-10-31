@@ -19,9 +19,9 @@ Google Play Console üzerinde arama algoritmasında öne çıkmak için seçilme
 
 ## 3. Mağaza Girişi İletişim Bilgileri
 - **Geliştirici Adı:** VastSea (Egehan Kahraman)
-- **E-posta Adresi:** `egehankahraman@gmail.com` *(veya geliştirici iletişim e-postanız)*
-- **Web Sitesi URL:** `https://egehankahraman.vercel.app`
-- **Gizlilik Politikası URL:** `https://egehankahraman.vercel.app/privacy.html` *(veya barındırılan adres)*
+- **E-posta Adresi:** `egehankahraman@gmail.com`
+- **Web Sitesi URL:** `https://hilal-browser.vercel.app`
+- **Gizlilik Politikası URL:** `https://hilal-browser.vercel.app/privacy.html`
 
 ---
 

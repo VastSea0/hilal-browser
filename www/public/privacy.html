@@ -125,7 +125,7 @@
     <header>
       <img src="https://raw.githubusercontent.com/VastSea0/hilal-browser/main/android/app/src/main/res/drawable/ic_hilal_logo.png" alt="Hilal Logo" class="logo" onerror="this.style.display='none'">
       <h1>Hilal Browser</h1>
-      <div class="updated">Gizlilik Politikası / Privacy Policy • 9 Eylül 2026</div>
+      <div class="updated">Gizlilik Politikası / Privacy Policy • 31 Ekim 2026</div>
       <div class="lang-switch">
         <a href="#tr" class="lang-btn active">Türkçe</a>
         <a href="#en" class="lang-btn">English</a>
@@ -140,18 +140,20 @@
         <h2>1. Giriş ve Açık Kaynak Şeffaflığı</h2>
         <p>Hilal Browser, VastSea (Egehan Kahraman) tarafından geliştirilen, açık kaynak kodlu ve gizlilik odaklı bir mobil web tarayıcısıdır. Kaynak kodlarımızın tamamı <a href="https://github.com/VastSea0/hilal-browser" target="_blank">GitHub</a> üzerinde herkese açıktır. Uygulamamızın hangi verileri nasıl işlediği, hangi ağ isteklerini gönderdiği herkes tarafından doğrudan incelenebilir.</p>
 
-        <h2>2. Toplanan Veriler: Yalnızca Anonim Kullanım İstatistikleri</h2>
-        <p>Hilal Browser, tarayıcı hizmetlerini ve GeckoView motoru kararlılığını daha iyi hale getirebilmek adına <strong>yalnızca ve yalnızca tamamen anonim kullanım istatistikleri</strong> toplar:</p>
+        <h2>2. Toplanan Veriler: Anonim Kullanım İstatistikleri</h2>
+        <p>Masaüstü Hilal Browser hiçbir kullanım istatistiği göndermez. Android uygulaması, kaç kişinin hangi sürümü kullandığını görmek için günde en fazla bir kez şu bilgileri gönderir:</p>
         <ul>
-          <li><strong>Aktif Kullanıcı ve Cihaz Sayısı:</strong> Toplam kullanım hacmini ve ekosistem büyüklüğünü anlamak için.</li>
-          <li><strong>Cihaz Modeli ve İşletim Sistemi Sürümü:</strong> Örneğin <code>Android 14, Pixel 7</code> gibi teknik veriler; GeckoView motorunun belirli donanım veya Android sürümlerinde yaşadığı render ve uyumluluk sorunlarını tespit edip gidermek için.</li>
+          <li>Uygulama ilk açıldığında rastgele üretilen bir kurulum kimliği</li>
+          <li>Uygulama sürümü ve derleme numarası</li>
+          <li>Android API seviyesi, işlemci mimarisi (ör. <code>arm64-v8a</code>) ve sistem dili</li>
+          <li>Seçili arama motoru, tema, uBlock Origin'in açık olup olmadığı ve yaklaşık sekme sayısı (1, 2-5, 6-10, 11+)</li>
         </ul>
-        <p>Bu veriler:</p>
+        <p>Bu istatistikler:</p>
         <ul>
-          <li>Kişisel kimlik bilgisi (ad, e-posta, telefon) <strong>İÇERMEZ</strong>.</li>
-          <li>IP adresiniz kaydedilmez veya saklanmaz.</li>
-          <li>Google Reklam Kimliği (GAID) veya cihaz donanım kimliğiyle <strong>ASLA ilişkilendirilmez</strong>.</li>
-          <li>Tamamen anonimdir ve tekil bir kullanıcıyı tanımlamak için kullanılamaz.</li>
+          <li>Ad, e-posta, telefon, cihaz modeli, reklam kimliği (GAID) veya donanım kimliği <strong>içermez</strong>.</li>
+          <li>Hiçbir kişiyle ilişkilendirilmez. IP adresiniz istatistik veritabanına yazılmaz; barındırma sağlayıcısı istekleri kısa süreli erişim kayıtlarında tutabilir.</li>
+          <li>Vercel üzerinde çalışan proje sunucusu aracılığıyla Google Cloud Firestore'da saklanır ve başka kimseyle paylaşılmaz.</li>
+          <li>Ayarlar &gt; <em>"Anonim kullanım istatistikleri"</em> seçeneği kapatılarak tamamen durdurulabilir.</li>
         </ul>
 
         <h2>3. Asla Toplanmayan ve İletilmeyen Veriler</h2>
@@ -159,7 +161,7 @@
           <li><strong>Tarama Geçmişi ve URL'ler:</strong> Ziyaret ettiğiniz hiçbir web sayfası sunucularımıza iletilmez.</li>
           <li><strong>Arama Sorguları:</strong> Adres çubuğuna yazdığınız aramalar ve Hilal Bangs kısayolları doğrudan arama motoruna iletilir; tarafımızca kaydedilmez.</li>
           <li><strong>Form ve Şifre Bilgileri:</strong> Yalnızca cihazınızda yerel tutulur.</li>
-          <li><strong>Üçüncü Taraf Analitik SDK'ları:</strong> Uygulama içinde Firebase, Google Analytics, Facebook SDK vb. hiçbir ticari takip aracı yoktur.</li>
+          <li><strong>Üçüncü Taraf Analitik SDK'ları:</strong> Uygulamada Firebase, Google Analytics, Facebook SDK veya benzeri takip kütüphaneleri yoktur.</li>
         </ul>
 
         <h2>4. Cihazınızda Yerel Olarak Saklanan Veriler</h2>
@@ -173,16 +175,16 @@
           <li><strong>Gelir Modeli:</strong> Projemizin tek gelir kaynağı <strong>gönüllü sponsorluklar ve bağışlardır</strong> (GitHub Sponsors ve açık kaynak destekçileri).</li>
         </ul>
 
-        <h2>6. İstenen Asgari İzinler</h2>
+        <h2>6. İzinler</h2>
         <ul>
-          <li><code>android.permission.INTERNET</code>: Web sitelerini açmak için gereklidir.</li>
-          <li><code>android.permission.ACCESS_NETWORK_STATE</code>: İnternet bağlantısının varlığını doğrulamak için kullanılır.</li>
+          <li><code>INTERNET</code> ve <code>ACCESS_NETWORK_STATE</code>: Web sitelerini açmak ve bağlantı durumunu görmek için.</li>
+          <li><code>CAMERA</code>, <code>RECORD_AUDIO</code>, <code>MODIFY_AUDIO_SETTINGS</code>, <code>ACCESS_COARSE_LOCATION</code> ve <code>ACCESS_FINE_LOCATION</code>: Yalnızca bir web sitesi kamera, mikrofon veya konum istediğinde ve siz izin verdiğinizde kullanılır. Bu veriler o siteye gider, projeye gönderilmez.</li>
         </ul>
-        <p>Rehber, Konum, Kamera, Mikrofon veya Dosya Depolama izinleri talep edilmez.</p>
+        <p>Rehber ve dosya depolama izinleri istenmez.</p>
 
         <h2>7. İletişim</h2>
         <p>Geliştirici: Egehan Kahraman / VastSea<br>
-        Web Sitesi: <a href="https://egehankahraman.vercel.app" target="_blank">egehankahraman.vercel.app</a><br>
+        Web Sitesi: <a href="https://hilal-browser.vercel.app" target="_blank">hilal-browser.vercel.app</a><br>
         Kaynak Kodu: <a href="https://github.com/VastSea0/hilal-browser" target="_blank">github.com/VastSea0/hilal-browser</a></p>
       </section>
 
@@ -193,18 +195,20 @@
         <h2>1. Overview & Open Source Transparency</h2>
         <p>Hilal Browser is an open-source, privacy-first mobile web browser developed by VastSea (Egehan Kahraman). Our entire source code is publicly accessible on <a href="https://github.com/VastSea0/hilal-browser" target="_blank">GitHub</a>. Anyone can independently audit what data is processed and how our network calls behave.</p>
 
-        <h2>2. Data Collected: Strictly Anonymous Usage Statistics</h2>
-        <p>To ensure GeckoView engine stability, diagnose hardware-specific rendering bugs, and continuously improve the browser, Hilal collects <strong>strictly anonymous aggregate usage statistics</strong>:</p>
+        <h2>2. Data Collected: Anonymous Usage Statistics</h2>
+        <p>The Hilal desktop browser sends no usage statistics. To see how many people use which version, the Android app sends the following at most once a day:</p>
         <ul>
-          <li><strong>Active User & Device Count:</strong> To measure service scale and overall adoption.</li>
-          <li><strong>Device Model & Operating System Version:</strong> Such as <code>Android 14, Pixel 7</code> to reproduce and fix engine-level rendering issues across specific Android releases.</li>
+          <li>A random installation ID created when the app first starts</li>
+          <li>The app version and build number</li>
+          <li>The Android API level, CPU architecture (for example <code>arm64-v8a</code>), and system language</li>
+          <li>The selected search engine, theme, whether uBlock Origin is on, and a rough tab count (1, 2-5, 6-10, 11+)</li>
         </ul>
         <p>These statistics:</p>
         <ul>
-          <li>Contain <strong>NO</strong> personal identifiers (names, emails, phones).</li>
-          <li>Do <strong>NOT</strong> log or store IP addresses.</li>
-          <li>Are <strong>NEVER</strong> associated with Advertising IDs (GAID) or hardware identifiers.</li>
-          <li>Are completely anonymous and cannot be used to identify any individual.</li>
+          <li>Contain <strong>no</strong> name, email, phone number, device model, advertising ID (GAID), or hardware identifier.</li>
+          <li>Are not linked to any person. Your IP address is not written to the statistics database; the hosting provider may keep requests in short-lived access logs.</li>
+          <li>Are stored in Google Cloud Firestore through the project's server on Vercel and are not shared with anyone else.</li>
+          <li>Can be turned off completely in Settings &gt; <em>"Anonymous usage statistics"</em>.</li>
         </ul>
 
         <h2>3. Data We NEVER Collect</h2>
@@ -212,7 +216,7 @@
           <li><strong>No Browsing History or URLs:</strong> The web pages you browse never leave your device.</li>
           <li><strong>No Search Queries:</strong> Searches and Hilal Bangs go straight to the destination website; we do not intercept or log them.</li>
           <li><strong>No Form Inputs or Passwords:</strong> Stored strictly in on-device encrypted storage.</li>
-          <li><strong>No Commercial Analytics SDKs:</strong> No Google Analytics, Firebase, or Facebook SDKs.</li>
+          <li><strong>No Analytics SDKs:</strong> The app contains no Firebase, Google Analytics, Facebook SDK, or similar tracking library.</li>
         </ul>
 
         <h2>4. Local On-Device Storage</h2>
@@ -227,13 +231,14 @@
 
         <h2>6. Permissions</h2>
         <ul>
-          <li><code>android.permission.INTERNET</code>: Required to load websites.</li>
-          <li><code>android.permission.ACCESS_NETWORK_STATE</code>: Required to check network connectivity.</li>
+          <li><code>INTERNET</code> and <code>ACCESS_NETWORK_STATE</code>: To load websites and check connectivity.</li>
+          <li><code>CAMERA</code>, <code>RECORD_AUDIO</code>, <code>MODIFY_AUDIO_SETTINGS</code>, <code>ACCESS_COARSE_LOCATION</code>, and <code>ACCESS_FINE_LOCATION</code>: Used only when a website asks for the camera, microphone, or location and you allow it. That data goes to the website, not to the project.</li>
         </ul>
+        <p>Contacts and file storage permissions are not requested.</p>
 
         <h2>7. Contact</h2>
         <p>Developer: Egehan Kahraman / VastSea<br>
-        Website: <a href="https://egehankahraman.vercel.app" target="_blank">egehankahraman.vercel.app</a><br>
+        Website: <a href="https://hilal-browser.vercel.app" target="_blank">hilal-browser.vercel.app</a><br>
         Source Code: <a href="https://github.com/VastSea0/hilal-browser" target="_blank">github.com/VastSea0/hilal-browser</a></p>
       </section>
     </main>
