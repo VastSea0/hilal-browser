@@ -1,5 +1,5 @@
 diff --git a/browser/themes/shared/preferences/preferences.css b/browser/themes/shared/preferences/preferences.css
-index 80722b9f86d9..5b9c39dddbc3 100644
+index 80722b9f86d9..f57df0952594 100644
 --- a/browser/themes/shared/preferences/preferences.css
 +++ b/browser/themes/shared/preferences/preferences.css
 @@ -4,32 +4,249 @@
@@ -270,7 +270,7 @@ index 80722b9f86d9..5b9c39dddbc3 100644
  }
  
  @media not print {
-@@ -45,1641 +262,1209 @@
+@@ -45,1641 +262,1208 @@
    margin: 0;
    padding: 0;
    width: 100%;
@@ -820,7 +820,6 @@ index 80722b9f86d9..5b9c39dddbc3 100644
 +html|m3e-button-segment {
 +  flex: 1 1 auto !important;
 +  min-width: 130px !important;
-+  padding: 0 16px !important;
 +  cursor: pointer !important;
 +  font-family: var(--font-sans) !important;
 +  font-size: 13.5px !important;
