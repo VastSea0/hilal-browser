@@ -3,7 +3,6 @@ artifacts/
 dist/
 mozconfigs/
 scratch/
-layout-images/
 bin/
 changes/
 flatpak/
@@ -12,8 +11,6 @@ third_party/
 hil/
 .git/
 node_modules/
-/screenshot-*.png
-/compact-mode.gif
 !www/
 !www/**
 www/node_modules/
