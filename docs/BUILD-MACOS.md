@@ -47,6 +47,18 @@ scripts/build-macos.sh
 These map directly to `./mach build faster` / `./mach build binaries`
 and are documented at <https://firefox-source-docs.mozilla.org/build/buildsystem/buildfaster.html>.
 
+To shorten the first full build when you only want to try changes locally,
+set `HILAL_DEV_BUILD=1`:
+
+```bash
+HILAL_DEV_BUILD=1 scripts/build-macos.sh
+```
+
+This builds C++ and Rust at a lower optimization level, skips debug symbols,
+and leaves out the updater. The browser runs slower and the build must not be
+shipped. Switching the variable on or off reconfigures the build, so the next
+build is a full one again.
+
 ## Where does the built app live?
 
 After a successful build, the macOS app bundle is at:

@@ -18,7 +18,6 @@ set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 
 export MOZBUILD_STATE_PATH="${MOZBUILD_STATE_PATH:-$HOME/.mozbuild}"
-export PATH="/Users/egehan/.local/share/uv/python/cpython-3.11-macos-aarch64-none/bin:/Users/egehan/.cargo/bin:$PATH"
 
 require_firefox_src
 
