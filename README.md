@@ -46,9 +46,22 @@ The project is in alpha and was previously developed as Huma Browser.
 
 Privacy profiles are hardening presets, not anonymity modes; they do not hide your public IP address.
 
+## Android
+
+Hilal for Android is a separate app built on GeckoView with a Material 3
+Expressive interface, gesture-driven address bar, and uBlock Origin. Its code
+lives in [`android/`](android/); see [docs/MOBILE.md](docs/MOBILE.md).
+
+Unlike the desktop browser, the Android app sends an anonymous daily usage
+ping, which can be turned off in its settings. The
+[privacy policy](https://hilal-browser.vercel.app/privacy.html) lists exactly
+what it contains.
+
 ## Download
 
-Downloads are available from the [releases page](https://github.com/VastSea0/hilal-browser/releases).
+Desktop and Android downloads are available from the
+[releases page](https://github.com/VastSea0/hilal-browser/releases) and the
+[website](https://hilal-browser.vercel.app).
 
 ## Build from source
 
@@ -89,6 +102,12 @@ engine/         local Firefox checkout
 Source changes are made in `engine/`. Run `./bin/hil refresh` afterward to regenerate the files under `changes/`, then review and commit those files in this repository.
 
 The complete patch workflow, including conflict resolution, is documented in [docs/WORKFLOW.md](docs/WORKFLOW.md). Other build, release, localization, and upstream sync notes live in [`docs/`](docs/).
+
+## Contributing
+
+Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), and
+report security issues as described in [SECURITY.md](SECURITY.md). Questions
+and discussion happen on [Discord](https://discord.gg/JZJ4tmPHFw).
 
 ## Star History
 
