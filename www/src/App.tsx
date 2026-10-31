@@ -23,6 +23,7 @@ import DownloadModal from "./components/DownloadModal";
 import ChangelogPage from "./components/ChangelogPage";
 import DocsPage from "./components/DocsPage";
 import PrivacyPage from "./components/PrivacyPage";
+import { DesktopFrame, PhoneFrame, screen } from "./components/DeviceFrames";
 import { CONTRIBUTORS_DATA } from "./data/changelogData";
 
 // M3 Expressive Spring Motion Physics
@@ -84,6 +85,7 @@ export default function App() {
   const [isDownloadOpen, setIsDownloadOpen] = useState<boolean>(false);
   const [detectedOS, setDetectedOS] = useState<string>("other");
   const [activeTab, setActiveTab] = useState<number>(0);
+  const [androidTab, setAndroidTab] = useState<number>(0);
   const [copiedClone, setCopiedClone] = useState<boolean>(false);
 
   useEffect(() => {
@@ -202,6 +204,25 @@ export default function App() {
 
   const isDark = theme === "dark";
 
+  const androidFeatures =
+    lang === "tr"
+      ? [
+          { shot: "start", icon: "home", title: "Sade bir başlangıç", description: "Sık ziyaret ettiğiniz siteler ve yer imleriniz, başparmağınızın ulaştığı yerde." },
+          { shot: "page", icon: "swipe", title: "Hareketlerle kullanılan adres çubuğu", description: "Sekme değiştirmek için çubuğu sola veya sağa kaydırın, tüm sekmeler için yukarı çekin, hızlı işlemler için basılı tutun." },
+          { shot: "search", icon: "bolt", title: "Arama kestirmeleri", description: "!w, !yt ya da !gh yazın; arama doğrudan o sitede açılır. Öneriler klavyenin hemen üstünde." },
+          { shot: "tabs", icon: "tab", title: "Sekme genel görünümü", description: "Açık sekmeler, sayfaların küçük resimleriyle. Gizli sekmeler ayrı tutulur." },
+          { shot: "private", icon: "visibility_off", title: "Gizli sekmeler", description: "Kapattığınızda geçmişi, çerezleri ve site verilerini unutur. Gizli sekmelerden arama önerisi istenmez." },
+          { shot: "settings", icon: "tune", title: "Size ait ayarlar", description: "Arama motoru, tema, duvar kağıdı renkleri, koyu web siteleri ve kapatılabilir anonim istatistik." },
+        ]
+      : [
+          { shot: "start", icon: "home", title: "A calm start page", description: "Your most visited sites and bookmarks, right where your thumb is." },
+          { shot: "page", icon: "swipe", title: "An address bar you swipe", description: "Swipe the bar left or right to switch tabs, pull it up for all tabs, and hold it for quick actions." },
+          { shot: "search", icon: "bolt", title: "Search shortcuts", description: "Type !w, !yt or !gh and the search opens on that site. Suggestions sit just above the keyboard." },
+          { shot: "tabs", icon: "tab", title: "Tab overview", description: "Your open tabs with page previews. Private tabs are kept apart." },
+          { shot: "private", icon: "visibility_off", title: "Private tabs", description: "Hilal forgets their history, cookies and site data when you close them, and never requests search suggestions from them." },
+          { shot: "settings", icon: "tune", title: "Settings that are yours", description: "Search engine, theme, wallpaper colors, dark websites, and anonymous statistics you can turn off." },
+        ];
+
   const t = {
     tr: {
       nav: {
@@ -232,33 +253,41 @@ export default function App() {
           chip: "Özelleştirme",
           title: "Çalışma şeklinize uyum sağlayan arayüz.",
           description:
-            "Dikey sekmeli kenar çubuğu ya da yatay sekme şeridi arasında istediğiniz an geçin, vurgu rengini ve temayı kendinize göre ayarlayın.",
-          image: "/desktop/newtab.jpg",
-          alt: "Hilal Özelleştirilebilir Arayüz",
+            "Dikey sekmeli kenar çubuğu ile yatay sekme şeridi arasında istediğiniz an geçin. Her çalışma alanının kendi vurgu rengi var; tarayıcı ve yeni sekme sayfası o renge bürünür.",
+          shot: "layout",
+          alt: "Yatay sekme düzeni ve turuncu vurgu rengiyle Hilal",
         },
         {
           chip: "Çalışma Alanları",
           title: "İş ve kişisel hesapları birbirinden ayırın.",
           description:
-            "Her çalışma alanı bağımsız çerez ve oturum konteynerleri kullanır. Farklı hesaplar için onlarca ayrı pencere açmaya gerek kalmaz.",
-          image: "/desktop/page.jpg",
-          alt: "Hilal Çalışma Alanları",
+            "Her çalışma alanı kendi çerez ve oturum kapsayıcısında çalışır. Aynı siteye farklı hesaplarla, ayrı pencereler açmadan girebilirsiniz.",
+          shot: "workspaces",
+          alt: "Hilal'de iş çalışma alanında açık GitHub sekmesi",
         },
         {
           chip: "Gizlilik",
           title: "Dahili uBlock Origin, telemetrisiz masaüstü.",
           description:
-            "uBlock Origin varsayılan olarak kurulu gelir. Masaüstü sürümünde Firefox telemetrisi ve arka plan veri gönderimi tamamen devre dışıdır.",
-          image: "/desktop/page.jpg",
-          alt: "Hilal Gizlilik ve Güvenlik",
+            "uBlock Origin kurulu gelir. Dengeli, Sıkı ve Maksimum gizlilik profilleri arasında seçim yapabilirsiniz. Masaüstü sürümü hiçbir kullanım verisi göndermez.",
+          shot: "privacy",
+          alt: "Hilal ayarlarında gizlilik seviyeleri ve çalışma alanı renkleri",
+        },
+        {
+          chip: "Kestirmeler",
+          title: "Aramayı doğrudan hedefine gönderin.",
+          description:
+            "Adres çubuğuna !w, !yt veya !gh gibi bir kestirme yazın; arama doğrudan Wikipedia, YouTube ya da GitHub'da açılır. Kendi kestirmelerinizi ayarlardan ekleyebilirsiniz.",
+          shot: "bangs",
+          alt: "Adres çubuğunda !w kestirmesi önerisi",
         },
         {
           chip: "Eklentiler",
           title: "Firefox eklenti ekosistemiyle tam uyumlu.",
           description:
-            "Firefox Add-ons mağazasındaki tüm eklentilerinizi doğrudan yükleyip kullanabilirsiniz. uBlock Origin kutudan çıktığı gibi hazır.",
-          image: "/desktop/newtab.jpg",
-          alt: "Hilal Eklenti Uyumu",
+            "addons.mozilla.org'daki eklentileri doğrudan kurup kullanabilirsiniz. Hilal, Firefox ESR'ın Gecko motoru üzerinde çalışır.",
+          shot: "addons",
+          alt: "Hilal eklenti yöneticisinde uBlock Origin",
         },
       ],
       openSourceSection: {
@@ -357,33 +386,41 @@ export default function App() {
           chip: "Customization",
           title: "An interface that adapts to how you work.",
           description:
-            "Switch between vertical sidebar tabs and a horizontal tab strip at any time, and pick your own accent color and theme.",
-          image: "/desktop/newtab.jpg",
-          alt: "Hilal Customizable Interface",
+            "Switch between vertical sidebar tabs and a horizontal tab strip at any time. Each workspace has its own accent color, and the browser and new tab page follow it.",
+          shot: "layout",
+          alt: "Hilal with horizontal tabs and an orange accent color",
         },
         {
           chip: "Workspaces",
           title: "Keep work and personal accounts separated.",
           description:
-            "Each workspace runs in an isolated container with its own cookies and logins. Manage multiple accounts without juggling dozens of windows.",
-          image: "/desktop/page.jpg",
-          alt: "Hilal Workspaces",
+            "Each workspace runs in its own cookie and login container, so you can sign in to the same site with different accounts without extra windows.",
+          shot: "workspaces",
+          alt: "A GitHub tab in Hilal's Work workspace",
         },
         {
           chip: "Privacy",
           title: "Built-in uBlock Origin, no desktop telemetry.",
           description:
-            "uBlock Origin comes pre-installed. On desktop, Firefox telemetry and background data reporting are completely disabled.",
-          image: "/desktop/page.jpg",
-          alt: "Hilal Privacy Protection",
+            "uBlock Origin comes installed. Choose between the Balanced, Strict and Maximum privacy profiles. The desktop browser sends no usage data at all.",
+          shot: "privacy",
+          alt: "Privacy levels and workspace colors in Hilal's settings",
+        },
+        {
+          chip: "Shortcuts",
+          title: "Send a search straight to the right site.",
+          description:
+            "Type a shortcut such as !w, !yt or !gh in the address bar and the search opens directly on Wikipedia, YouTube or GitHub. Add your own in settings.",
+          shot: "bangs",
+          alt: "The !w shortcut suggested in the address bar",
         },
         {
           chip: "Add-ons",
           title: "Compatible with the Firefox add-on ecosystem.",
           description:
-            "Install any extension from Firefox Add-ons (AMO) directly. uBlock Origin comes pre-installed out of the box.",
-          image: "/desktop/newtab.jpg",
-          alt: "Hilal Add-on Compatibility",
+            "Install extensions straight from addons.mozilla.org. Hilal runs on the Gecko engine of Firefox ESR.",
+          shot: "addons",
+          alt: "uBlock Origin in Hilal's add-ons manager",
         },
       ],
       openSourceSection: {
@@ -692,13 +729,25 @@ export default function App() {
               initial={{ opacity: 0, y: 32 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...springTransition, delay: 0.2 }}
-              className="mt-12 sm:mt-16 max-w-5xl mx-auto drop-shadow-2xl"
+              className="relative mt-12 sm:mt-16 max-w-5xl mx-auto sm:pr-16 md:pr-20"
             >
-              <img
-                src="/desktop/newtab.jpg"
-                alt="Hilal Browser Interface"
-                className="w-full h-auto block select-none pointer-events-none rounded-2xl"
+              <DesktopFrame
+                src={screen("desktop", theme, "newtab")}
+                alt={lang === "tr" ? "Hilal'in yeni sekme sayfası" : "Hilal's new tab page"}
+                eager
               />
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...springTransition, delay: 0.45 }}
+                className="absolute -bottom-10 right-0 w-[24%] min-w-[110px] max-w-[210px]"
+              >
+                <PhoneFrame
+                  src={screen("android", theme, "start")}
+                  alt={lang === "tr" ? "Hilal Android başlangıç ekranı" : "Hilal for Android start page"}
+                  eager
+                />
+              </motion.div>
             </motion.div>
           </section>
 
@@ -756,11 +805,11 @@ export default function App() {
                 </div>
 
                 {/* Story Visual Side */}
-                <div className="lg:col-span-7 drop-shadow-xl">
-                  <img
-                    src={activeT.stories[activeTab].image}
+                <div className="lg:col-span-7">
+                  <DesktopFrame
+                    src={screen("desktop", theme, activeT.stories[activeTab].shot)}
                     alt={activeT.stories[activeTab].alt}
-                    className="w-full h-auto block select-none pointer-events-none rounded-2xl"
+                    eager
                   />
                 </div>
               </motion.div>
@@ -768,8 +817,8 @@ export default function App() {
           </section>
 
           {/* Android */}
-          <section className="py-20 max-w-6xl mx-auto px-4 sm:px-6" id="android">
-            <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
+          <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6" id="android">
+            <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[var(--secondary-container)] text-[var(--on-secondary-container)] text-xs font-semibold">
                 <i className="material-symbols-outlined text-[14px]">smartphone</i>
                 <span>Android 2.0</span>
@@ -779,30 +828,61 @@ export default function App() {
               </h2>
               <p className="text-sm sm:text-base text-[var(--on-surface-variant)] leading-relaxed">
                 {lang === "tr"
-                  ? "Adres çubuğu ekranın altında. Sekmeler arasında geçmek için kaydırın, tüm sekmeler için yukarı çekin, arama kestirmeleri için ! yazın. uBlock Origin dahil."
-                  : "The address bar sits at the bottom. Swipe to switch tabs, pull up for all tabs, and type ! for search shortcuts. uBlock Origin is included."}
+                  ? "Hilal'in Android uygulaması GeckoView üzerinde, Material 3 Expressive ile sıfırdan yazıldı."
+                  : "Hilal for Android is a new app built on GeckoView with Material 3 Expressive."}
               </p>
             </div>
-            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 sm:justify-center">
-              {[
-                ["start", lang === "tr" ? "Başlangıç" : "Start page"],
-                ["page", lang === "tr" ? "Sayfa" : "Browsing"],
-                ["search", lang === "tr" ? "Arama kestirmeleri" : "Search shortcuts"],
-                ["tabs", lang === "tr" ? "Sekmeler" : "Tabs"],
-                ["menu", lang === "tr" ? "Menü" : "Menu"],
-              ].map(([name, label]) => (
-                <figure key={name} className="snap-center shrink-0 w-[180px] sm:w-[190px] space-y-2">
-                  <img
-                    src={`/android/${name}.jpg`}
-                    alt={label}
-                    loading="lazy"
-                    className="w-full h-auto block rounded-[28px] border border-[var(--outline-variant)]/40 shadow-lg select-none"
-                  />
-                  <figcaption className="text-center text-xs font-medium text-[var(--on-surface-variant)]">
-                    {label}
-                  </figcaption>
-                </figure>
-              ))}
+
+            <div className="p-6 sm:p-10 rounded-[36px] bg-m3-container-low border border-[var(--outline-variant)]/20 grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center shadow-lg">
+              <div className="md:col-span-7 flex flex-col gap-2">
+                {androidFeatures.map((feature, idx) => (
+                  <div
+                    key={feature.shot}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={androidTab === idx}
+                    onClick={() => setAndroidTab(idx)}
+                    onKeyDown={e => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setAndroidTab(idx);
+                      }
+                    }}
+                    className={`text-left px-5 py-4 rounded-[24px] transition-colors cursor-pointer select-none ${
+                      androidTab === idx
+                        ? "bg-[var(--primary-container)] text-[var(--on-primary-container)]"
+                        : "bg-transparent text-[var(--on-surface)] hover:bg-m3-container"
+                    }`}
+                  >
+                    <span className="flex items-center gap-3 text-base font-bold">
+                      <i className="material-symbols-outlined text-[22px]">{feature.icon}</i>
+                      {feature.title}
+                    </span>
+                    {androidTab === idx && (
+                      <span className="block mt-1.5 pl-[34px] text-sm leading-relaxed">
+                        {feature.description}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="md:col-span-5 flex justify-center">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={androidFeatures[androidTab].shot}
+                    initial={{ opacity: 0, y: 16, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -16, scale: 0.98 }}
+                    transition={springTransition}
+                    className="w-[230px] sm:w-[260px]"
+                  >
+                    <PhoneFrame
+                      src={screen("android", theme, androidFeatures[androidTab].shot)}
+                      alt={androidFeatures[androidTab].title}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
           </section>
 
