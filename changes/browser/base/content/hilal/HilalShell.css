@@ -341,6 +341,32 @@
   -moz-context-properties: fill, fill-opacity, stroke, stroke-opacity !important;
 }
 
+/* Firefox pads the icon box and paints its own hover background and focus
+   ring on it, which clipped the icons in the 32px buttons and drew a square
+   inside the round hover state. The button itself carries both instead. */
+#hilal-native-slot > toolbarbutton .toolbarbutton-icon,
+#hilal-native-slot > toolbarbutton .toolbarbutton-badge-stack,
+#hilal-extensions-slot .toolbarbutton-icon,
+#hilal-extensions-slot .toolbarbutton-badge-stack {
+  padding: 0 !important;
+  background: none !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* appearance: auto lets macOS draw its square toolbar button bezel on hover. */
+#hilal-native-slot > toolbarbutton,
+#hilal-extensions-slot toolbarbutton {
+  appearance: none !important;
+}
+
+#hilal-native-slot > toolbarbutton:focus-visible,
+#hilal-extensions-slot toolbarbutton:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary) !important;
+  outline-offset: 1px !important;
+}
+
 #hilal-extensions-slot .toolbarbutton-badge-stack {
   display: flex !important;
   align-items: center !important;
