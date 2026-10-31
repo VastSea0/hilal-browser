@@ -33,6 +33,12 @@ class HilalKeyboardShortcutsManager {
   }
 
   async init() {
+    // DOMContentLoaded can reach this listener twice, and a second command
+    // listener runs every Hilal shortcut twice, which undoes toggles.
+    if (this._initialized) {
+      return;
+    }
+    this._initialized = true;
     await this.loadOverrides();
 
     const mainKeyset = document.getElementById("mainKeyset");
