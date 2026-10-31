@@ -1,8 +1,16 @@
 diff --git a/browser/base/content/aboutDialog.xhtml b/browser/base/content/aboutDialog.xhtml
-index 3ffd464b960a..2a57b9f13877 100644
+index 3ffd464b960a..3f2db0e60f34 100644
 --- a/browser/base/content/aboutDialog.xhtml
 +++ b/browser/base/content/aboutDialog.xhtml
-@@ -120,17 +120,17 @@
+@@ -35,6 +35,7 @@
+ 
+     <html:link rel="localization" href="branding/brand.ftl"/>
+     <html:link rel="localization" href="browser/aboutDialog.ftl"/>
++    <html:link rel="localization" href="browser/browser.ftl"/>
+   </linkset>
+ 
+   <html:div id="aboutDialogContainer">
+@@ -120,17 +121,17 @@
            <vbox id="experimental" hidden="true">
              <description class="text-blurb" id="warningDesc" data-l10n-id="warningDesc-version"></description>
              <description class="text-blurb" id="communityExperimentalDesc" data-l10n-id="community-exp">
@@ -11,27 +19,30 @@ index 3ffd464b960a..2a57b9f13877 100644
                <label is="text-link" useoriginprincipal="true" href="about:credits" data-l10n-name="community-exp-creditsLink"/>
              </description>
            </vbox>
-           <description class="text-blurb" id="communityDesc" data-l10n-id="community-2">
+-          <description class="text-blurb" id="communityDesc" data-l10n-id="community-2">
 -            <label is="text-link" href="https://www.mozilla.org/?utm_source=firefox-browser&#38;utm_medium=firefox-desktop&#38;utm_campaign=about-dialog" data-l10n-name="community-mozillaLink"/>
-+            <label is="text-link" href="https://hilal-browser.vercel.app" data-l10n-name="community-mozillaLink"/>
-             <label is="text-link" useoriginprincipal="true" href="about:credits" data-l10n-name="community-creditsLink"/>
+-            <label is="text-link" useoriginprincipal="true" href="about:credits" data-l10n-name="community-creditsLink"/>
++          <description class="text-blurb" id="communityDesc" data-l10n-id="hilal-about-community">
++            <label is="text-link" href="https://www.mozilla.org/firefox/" data-l10n-name="hilal-about-firefox-link"/>
++            <label is="text-link" href="https://github.com/VastSea0/hilal-browser/graphs/contributors" data-l10n-name="hilal-about-contributors-link"/>
            </description>
-           <description class="text-blurb" id="contributeDesc" data-l10n-id="helpus">
+-          <description class="text-blurb" id="contributeDesc" data-l10n-id="helpus">
 -            <label is="text-link" href="https://foundation.mozilla.org/?form=firefox-about" data-l10n-name="helpus-donateLink"/>
 -            <label is="text-link" href="https://www.mozilla.org/contribute/?utm_source=firefox-browser&#38;utm_medium=firefox-desktop&#38;utm_campaign=about-dialog" data-l10n-name="helpus-getInvolvedLink"/>
-+            <label is="text-link" href="https://hilal-browser.vercel.app" data-l10n-name="helpus-donateLink"/>
-+            <label is="text-link" href="https://github.com/vastsea0/hilal-browser" data-l10n-name="helpus-getInvolvedLink"/>
++          <description class="text-blurb" id="contributeDesc" data-l10n-id="hilal-about-helpus">
++            <label is="text-link" href="https://github.com/VastSea0/hilal-browser/blob/main/CONTRIBUTING.md" data-l10n-name="hilal-about-contribute-link"/>
++            <label is="text-link" href="https://github.com/VastSea0/hilal-browser/issues/new/choose" data-l10n-name="hilal-about-issue-link"/>
            </description>
          </vbox>
        </vbox>
-@@ -138,8 +138,8 @@
+@@ -138,8 +139,8 @@
      <vbox id="bottomBox">
        <hbox pack="center">
          <label is="text-link" class="bottom-link" useoriginprincipal="true" href="about:license" data-l10n-id="bottomLinks-license"/>
 -        <label is="text-link" class="bottom-link" href="https://www.mozilla.org/about/legal/terms/firefox/" data-l10n-id="bottom-links-terms"/>
 -        <label is="text-link" class="bottom-link" href="https://www.mozilla.org/privacy/firefox/?utm_source=firefox-browser&#38;utm_medium=firefox-desktop&#38;utm_campaign=about-dialog" data-l10n-id="bottom-links-privacy"/>
-+        <label is="text-link" class="bottom-link" href="https://github.com/vastsea0/hilal-browser" data-l10n-id="bottom-links-terms"/>
-+        <label is="text-link" class="bottom-link" href="https://github.com/vastsea0/hilal-browser" data-l10n-id="bottom-links-privacy"/>
++        <label is="text-link" class="bottom-link" href="https://github.com/VastSea0/hilal-browser" data-l10n-id="hilal-about-source-link"/>
++        <label is="text-link" class="bottom-link" href="https://hilal-browser.vercel.app/privacy.html" data-l10n-id="bottom-links-privacy"/>
        </hbox>
        <description id="trademark" data-l10n-id="trademarkInfo"></description>
      </vbox>

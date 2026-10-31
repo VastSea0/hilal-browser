@@ -1,8 +1,8 @@
 diff --git a/browser/app/distribution/moz.build b/browser/app/distribution/moz.build
-index b174449a0989..ad59f6d7ef6b 100644
+index b174449a0989..2e6119c58052 100644
 --- a/browser/app/distribution/moz.build
 +++ b/browser/app/distribution/moz.build
-@@ -4,7 +4,12 @@
+@@ -4,7 +4,13 @@
  
  DIST_SUBDIR = ""
  
@@ -10,8 +10,9 @@ index b174449a0989..ad59f6d7ef6b 100644
 -    FINAL_TARGET_FILES.distribution += [
 -        "distribution.ini",
 -    ]
++# Mozilla's distribution.ini marks official Mozilla builds, so only the
++# Hilal policies are shipped.
 +FINAL_TARGET_FILES.distribution += [
-+    "distribution.ini",
 +    "policies.json",
 +]
 +

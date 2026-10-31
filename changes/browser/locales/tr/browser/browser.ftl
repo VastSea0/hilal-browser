@@ -87,3 +87,9 @@ hilal-shell-visit-website = Siteye git
 hilal-shell-layout-vertical = Kenar çubuğunda dikey sekmeler
 hilal-shell-layout-dual = Kenar çubuğu ve sekme şeridi
 hilal-shell-layout-horizontal = Yatay sekmeler
+
+## Hilal About dialog
+
+hilal-about-community = { -brand-short-name }, gönüllülerin <label data-l10n-name="hilal-about-firefox-link">Firefox</label> üzerine geliştirdiği özgür ve açık kaynaklı bir tarayıcıdır. <label data-l10n-name="hilal-about-contributors-link">Geliştirenleri görün</label>.
+hilal-about-helpus = Yardım etmek ister misiniz? <label data-l10n-name="hilal-about-contribute-link">GitHub'da katkıda bulunun</label> ya da <label data-l10n-name="hilal-about-issue-link">bir sorun bildirin</label>.
+hilal-about-source-link = Kaynak kodu

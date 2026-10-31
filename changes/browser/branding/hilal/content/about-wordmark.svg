@@ -9,7 +9,5 @@
     </linearGradient>
   </defs>
   <text x="0" y="60" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif"
-        font-size="56" font-weight="600" letter-spacing="0" fill="#FFFFFF">Hilal</text>
-  <text x="160" y="60" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif"
-        font-size="56" font-weight="300" letter-spacing="0" fill="url(#wm)">Browser</text>
+        font-size="56" letter-spacing="0"><tspan font-weight="600" fill="#FFFFFF">Hilal</tspan><tspan dx="14" font-weight="300" fill="url(#wm)">Browser</tspan></text>
 </svg>

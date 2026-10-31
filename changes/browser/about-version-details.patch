@@ -1,5 +1,5 @@
 diff --git a/browser/base/content/aboutDialog.js b/browser/base/content/aboutDialog.js
-index f6e1391baf12..d7e16c2301e2 100644
+index f6e1391baf12..7cddd446681a 100644
 --- a/browser/base/content/aboutDialog.js
 +++ b/browser/base/content/aboutDialog.js
 @@ -52,7 +52,7 @@ function init() {
@@ -11,7 +11,7 @@ index f6e1391baf12..d7e16c2301e2 100644
    };
  
    let arch = Services.sysinfo.get("arch");
-@@ -152,4 +152,19 @@ function init() {
+@@ -152,4 +152,14 @@ function init() {
    }
  }
  
@@ -22,12 +22,7 @@ index f6e1391baf12..d7e16c2301e2 100644
 +    return displayVersion;
 +  }
 +
-+  let buildID = Services.appinfo.appBuildID;
-+  let baseVersion = `Firefox ${appVersion}`;
-+  if (buildID) {
-+    baseVersion += `, build ${buildID}`;
-+  }
-+  return `${displayVersion} (${baseVersion})`;
++  return `${displayVersion} (Firefox ${appVersion} ESR)`;
 +}
 +
  init();
