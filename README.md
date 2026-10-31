@@ -12,7 +12,13 @@
 </p>
 
 <p align="center">
-  <img src="changes/browser/base/content/hilal/black-white.png" alt="Hilal Browser interface" width="800" />
+  <img src="www/public/screens/desktop-dark-newtab.webp" alt="Hilal's new tab page on desktop" width="800" />
+</p>
+
+<p align="center">
+  <img src="www/public/screens/android-dark-start.webp" alt="Hilal for Android start page" width="200" />
+  <img src="www/public/screens/android-dark-page.webp" alt="Browsing with Hilal for Android" width="200" />
+  <img src="www/public/screens/android-dark-tabs.webp" alt="Hilal for Android tab overview" width="200" />
 </p>
 
 Hilal is an experimental desktop browser built on Firefox ESR. It combines isolated workspaces, a Material 3 Expressive interface, and configurable privacy profiles while retaining Gecko and Firefox extension compatibility.
