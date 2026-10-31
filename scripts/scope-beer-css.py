@@ -17,6 +17,7 @@ OUTPUT = SHARED / "hilal-beer.css"
 
 GLOBAL_AT_RULES = ("@font-face", "@keyframes", "@-webkit-keyframes", "@import", "@charset")
 TOKEN_SELECTORS = {":root", "body.light", "body.dark"}
+INHERITED_PROPERTIES = {"color", "font-family", "font-size", "line-height", "letter-spacing"}
 
 
 def split_rules(css):
@@ -92,7 +93,16 @@ def main():
         elif prelude.startswith("@-moz-document"):
             scoped_rules.append(block)
         elif selectors <= {"html", "body"}:
-            scoped_rules.append(f":scope{{{block}}}")
+            # Keep only the text styles the page would have inherited from
+            # body. Layout rules such as overflow-x would clip the shell's
+            # dropdowns, which overflow their .beer root.
+            inherited = [
+                decl
+                for decl in declarations(block)
+                if decl.split(":", 1)[0].strip() in INHERITED_PROPERTIES
+            ]
+            if inherited:
+                scoped_rules.append(f":scope{{{';'.join(inherited)}}}")
         else:
             scoped_rules.append(rule)
 
