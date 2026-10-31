@@ -5,7 +5,8 @@
 # element through `*`. Loaded as is into browser.xhtml it also restyles
 # Firefox's own menus and panels. This wraps its rules in @scope (.beer) so they
 # only reach the shell elements that carry the "beer" class. Custom property
-# definitions, @font-face and @keyframes stay global.
+# definitions, @font-face and @keyframes stay global, and rem units are
+# resolved to pixels.
 
 import re
 import sys
@@ -77,10 +78,24 @@ def only_custom_properties(block):
     return all(decl.startswith("--") for decl in declarations(block))
 
 
+def rem_to_px(css):
+    """Resolve rem against Beer's 16px root.
+
+    Browser chrome keeps an 11px root font size, so rem-based sizes would
+    shrink the shell by 11/16 once Beer no longer sets the root itself.
+    """
+
+    def px(match):
+        value = float(match.group(1)) * 16
+        return f"{value:g}px"
+
+    return re.sub(r"(?<![\w.])(-?\d*\.?\d+)rem\b", px, css)
+
+
 def main():
     global_rules = []
     scoped_rules = []
-    for prelude, block in split_rules(SOURCE.read_text()):
+    for prelude, block in split_rules(rem_to_px(SOURCE.read_text())):
         if block is None:
             global_rules.append(prelude + ";")
             continue
