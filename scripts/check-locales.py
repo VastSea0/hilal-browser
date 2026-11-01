@@ -22,7 +22,9 @@ def discover_locales():
     root = locale_root()
     if not root.exists():
         return []
-    return sorted(path.name for path in root.iterdir() if path.is_dir())
+    return sorted(
+        path.name for path in root.iterdir() if path.is_dir() and path.name != "en-US"
+    )
 
 
 def custom_files(locale):

@@ -66,7 +66,11 @@ def discover_locales(repo_root):
     locale_root = repo_root / "changes/browser/locales"
     if not locale_root.exists():
         return []
-    return sorted(path.name for path in locale_root.iterdir() if path.is_dir())
+    return sorted(
+        path.name
+        for path in locale_root.iterdir()
+        if path.is_dir() and path.name != "en-US"
+    )
 
 
 def validate_locale(locale):

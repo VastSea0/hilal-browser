@@ -25,7 +25,7 @@ USAGE
 discover_locales() {
   local locale_dir="$HILAL_REPO_ROOT/changes/browser/locales"
   if [ -d "$locale_dir" ]; then
-    find "$locale_dir" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort
+    find "$locale_dir" -mindepth 1 -maxdepth 1 -type d ! -name en-US -exec basename {} \; | sort
   fi
 }
 
