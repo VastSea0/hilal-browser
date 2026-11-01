@@ -777,6 +777,26 @@ export default function App() {
             </motion.div>
           </section>
 
+          {/* Launch film */}
+          <section className="pb-8 max-w-5xl mx-auto px-4 sm:px-6 text-center" id="film">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
+              {lang === "tr" ? "Hilal'i bir dakikada tanıyın" : "Meet Hilal in one minute"}
+            </h2>
+            <p className="text-[var(--on-surface-variant)] mb-8">
+              {lang === "tr"
+                ? "Masaüstü ve Android için tanıtım filmi."
+                : "The launch film, for desktop and Android."}
+            </p>
+            <video
+              className="w-full rounded-[28px] shadow-2xl border border-[var(--outline-variant)]/30 bg-black"
+              src="/media/introducing-hilal-browser.mp4"
+              poster="/media/introducing-hilal-browser.jpg"
+              controls
+              playsInline
+              preload="none"
+            />
+          </section>
+
           {/* 3. M3 Expressive Interactive Stories Showcase */}
           <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6" id="features">
             <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
