@@ -1,0 +1,156 @@
+#filter substitution
+<?xml version="1.0"?>
+# -*- Mode: HTML -*-
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+<!DOCTYPE window>
+
+<html
+  xmlns:html="http://www.w3.org/1999/xhtml"
+  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns="http://www.w3.org/1999/xhtml"
+  id="hilalBoostWindow"
+  windowtype="Hilal:BoostEditor"
+  alwaysontop="true"
+  customtitlebar="true"
+  sizemode="normal"
+  scrolling="false"
+  macanimationtype="document"
+  windowsmica="true"
+  data-l10n-sync="true">
+<head>
+  <link rel="stylesheet" href="chrome://browser/skin/" />
+  <link rel="stylesheet" href="chrome://global/skin/global.css" />
+
+  <link rel="stylesheet" href="chrome://browser/content/hilal/boosts/hilal-boosts.css" />
+  <link rel="stylesheet" href="chrome://browser/content/hilal/boosts/hilal-boosts-icons.css" />
+  <link rel="stylesheet" href="chrome://browser/content/hilal/boosts/hilal-advanced-color-options.css" />
+
+  <link rel="localization" href="browser/hilal-boosts.ftl"/>
+</head>
+<html:body xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <vbox flex="1" id="hilal-boost-editor-root">
+    <hbox id="hilal-boost-head-wrapper">
+      <button id="hilal-boost-close" class="subviewbutton mod-button title-button"></button>
+      <hbox id="hilal-boost-name" flex="1">
+        <hbox id="hilal-boost-name-container">
+          <html:p id="hilal-boost-name-text"></html:p>
+        </hbox>
+      </hbox>
+      <button data-l10n-id="hilal-boost-shuffle" id="hilal-boost-shuffle" class="subviewbutton mod-button title-button"></button>
+    </hbox>
+    <vbox flex="1" id="hilal-boost-filter-wrapper">
+      <hbox class="hilal-boost-color-picker-gradient hilal-boost-panel-disabled">
+        <button data-l10n-id="hilal-boost-magic-theme" id="hilal-boost-magic-theme" class="subviewbutton mod-button"></button>
+        <html:div id="hilal-boost-color-picker-dot-primary" class="hilal-boost-color-picker-dot no-squircles"></html:div>
+        <html:div id="hilal-boost-color-picker-dot-secondary" class="hilal-boost-color-picker-dot no-squircles"></html:div>
+        <html:div class="hilal-boost-color-picker-circle no-squircles"></html:div>
+      </hbox>
+
+      <hbox flex="1" id="hilal-boost-toolbar-wrapper-colors">
+        <button data-l10n-id="hilal-boost-invert" id="hilal-boost-invert" class="subviewbutton mod-button small"></button>
+        <button data-l10n-id="hilal-boost-controls" id="hilal-boost-controls" class="subviewbutton mod-button small"></button>
+        <button data-l10n-id="hilal-boost-disable" id="hilal-boost-disable" class="subviewbutton mod-button small"></button>
+      </hbox>
+
+      <html:div id="hilal-boost-font-wrapper">
+        <vbox id="hilal-boost-font-grid">
+# Font buttons will be injected here
+        </vbox>
+        <html:div class="visible-separator"></html:div>
+        <hbox flex="1" id="hilal-boost-font-toolbar">
+          <html:select name="font" id="hilal-boost-font-select" class="mod-button">
+# Additional font options will be injected here
+          </html:select>
+        </hbox>
+      </html:div>
+
+      <hbox flex="1" id="hilal-boost-toolbar-wrapper">
+        <button id="hilal-boost-size" class="subviewbutton mod-button big-button med">
+          <html:p data-l10n-id="hilal-boost-size" id="hilal-boost-size-text"></html:p>
+          <html:p id="hilal-boost-size-value"></html:p>
+        </button>
+        <button id="hilal-boost-case" class="subviewbutton mod-button big-button toggleable-button med">
+          <html:p data-l10n-id="hilal-boost-case" id="hilal-boost-case-text"></html:p>
+        </button>
+      </hbox>
+
+      <button id="hilal-boost-zap" class="subviewbutton mod-button big-button toggleable-button">
+        <html:p data-l10n-id="hilal-boost-zap" id="hilal-boost-zap-text"></html:p>
+        <html:p id="hilal-boost-zap-value"></html:p>
+      </button>
+
+      <button id="hilal-boost-focus" class="subviewbutton mod-button big-button toggleable-button">
+        <html:p data-l10n-id="hilal-boost-focus" id="hilal-boost-focus-text"></html:p>
+        <html:p id="hilal-boost-focus-value"></html:p>
+      </button>
+
+      <button id="hilal-boost-code" class="subviewbutton mod-button big-button toggleable-button">
+        <html:p data-l10n-id="hilal-boost-code" id="hilal-boost-code-text"></html:p>
+      </button>
+    </vbox>
+    <hbox id="hilal-boost-footer-wrapper">
+      <button id="hilal-boost-share" mode="blue" class="subviewbutton mod-button big-button">
+        <html:p data-l10n-id="hilal-boost-share" id="hilal-boost-share-text"></html:p>
+      </button>
+    </hbox>
+  </vbox>
+  <vbox flex="1" id="hilal-boost-code-editor-root">
+    <hbox id="hilal-boost-code-top-bar">
+      <button id="hilal-boost-back" class="subviewbutton mod-button big-button">
+        <html:p data-l10n-id="hilal-boost-back" id="hilal-boost-back-text"></html:p>
+      </button>
+    </hbox>
+
+    <vbox flex="1" id="hilal-boost-code-editor">
+    </vbox>
+
+    <hbox id="hilal-boost-code-bottom-bar">
+      <button data-l10n-id="hilal-boost-css-picker" id="hilal-boost-css-picker" class="subviewbutton mod-button big-button toggleable-button"></button>
+      <button data-l10n-id="hilal-boost-css-inspector" id="hilal-boost-css-inspector" class="subviewbutton mod-button big-button"></button>
+    </hbox>
+  </vbox>
+
+  <popupset id="mainPopupSet">
+    <panel type="arrow" popupalign="topmiddle" id="hilal-boost-advanced-color-options-panel">
+      <vbox>
+        <p data-l10n-id="hilal-boost-color-contrast"></p>
+        <html:input id="hilal-boost-color-contrast" type="range" min="0.05" max="0.9" value="0.75" step="0.01"/>
+      </vbox>
+      <vbox>
+        <p data-l10n-id="hilal-boost-color-brightness"></p>
+        <html:input id="hilal-boost-color-brightness" type="range" min="0" max="1" value="0.5" step="0.01"/>
+      </vbox>
+      <vbox>
+        <p data-l10n-id="hilal-boost-color-original-saturation"></p>
+        <html:input id="hilal-boost-color-saturation" type="range" min="0" max="1" value="0.5" step="0.01"/>
+      </vbox>
+    </panel>
+
+    <menupopup id="hilalBoostContextMenu">
+      <menuitem data-l10n-id="hilal-boost-edit-rename" id="hilal-boost-edit-rename" command="cmd_hilalBoostEditName" />
+      <menuitem data-l10n-id="hilal-boost-edit-shuffle" id="hilal-boost-edit-shuffle" command="cmd_hilalBoostShuffle" />
+      <menuitem data-l10n-id="hilal-boost-edit-reset" id="hilal-boost-edit-reset" command="cmd_hilalBoostReset" />
+      <menuseparator/>
+      <menuitem data-l10n-id="hilal-boost-load" id="hilal-boost-load" command="cmd_hilalBoostLoad" />
+      <menuitem data-l10n-id="hilal-boost-save" id="hilal-boost-save" command="cmd_hilalBoostSave" />
+      <menuseparator/>
+      <menuitem data-l10n-id="hilal-boost-edit-delete" id="hilal-boost-edit-delete" command="cmd_hilalBoostDelete" />
+    </menupopup>
+  </popupset>
+
+  <commandset id="hilalBoostCommandSet">
+    <command id="cmd_hilalBoostEditName" />
+    <command id="cmd_hilalBoostShuffle" />
+    <command id="cmd_hilalBoostReset" />
+    <command id="cmd_hilalBoostLoad" />
+    <command id="cmd_hilalBoostSave" />
+    <command id="cmd_hilalBoostDelete" />
+  </commandset>
+
+  <script src="chrome://browser/content/hilal/boosts/hilal-boost-editor.js"></script>
+</html:body>
+</html>

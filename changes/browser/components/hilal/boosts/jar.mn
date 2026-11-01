@@ -1,0 +1,21 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+browser.jar:
+        content/browser/hilal/boosts/hilal-boosts.css                (content/hilal-boosts.css)
+        content/browser/hilal/boosts/hilal-boosts-icons.css          (content/hilal-boosts-icons.css)
+        content/browser/hilal/boosts/hilal-boosts-share.css          (content/hilal-boosts-share.css)
+        content/browser/hilal/boosts/hilal-zap.css                   (content/hilal-zap.css)
+        content/browser/hilal/boosts/hilal-zap-bar.css               (content/hilal-zap-bar.css)
+        content/browser/hilal/boosts/hilal-selector.css              (content/hilal-selector.css)
+        content/browser/hilal/boosts/hilal-advanced-color-options.css (content/hilal-advanced-color-options.css)
+        content/browser/hilal/boosts/HilalZapBar.mjs                 (HilalZapBar.mjs)
+*       content/browser/hilal/boosts/hilal-boost-editor.xhtml        (content/hilal-boost-editor.inc.xhtml)
+        content/browser/hilal/boosts/hilal-boost-editor.js           (content/hilal-boost-editor.js)
+*       content/browser/hilal/boosts/hilal-boost-share.xhtml         (content/hilal-boost-share.inc.xhtml)
+        content/browser/hilal/boosts/hilal-boost-share.js            (content/hilal-boost-share.js)
+*       content/browser/hilal/boosts/hilal-boost-receive.xhtml       (content/hilal-boost-receive.inc.xhtml)
+        content/browser/hilal/boosts/hilal-boost-receive.js          (content/hilal-boost-receive.js)
+        content/browser/hilal/boosts/boost-indicator.svg             (content/boost-indicator.svg)
+        content/browser/hilal/boosts/boost-share-heart.png           (content/boost-share-heart.png)

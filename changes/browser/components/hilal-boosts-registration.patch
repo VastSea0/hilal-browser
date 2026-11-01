@@ -1,0 +1,38 @@
+diff --git a/browser/components/DesktopActorRegistry.sys.mjs b/browser/components/DesktopActorRegistry.sys.mjs
+index aaf1e1be8466..b57c66cd2902 100644
+--- a/browser/components/DesktopActorRegistry.sys.mjs
++++ b/browser/components/DesktopActorRegistry.sys.mjs
+@@ -554,6 +554,21 @@ let JSWINDOWACTORS = {
+     },
+   },
+ 
++  // Adapted from Zen Browser's Boosts.
++  HilalBoosts: {
++    parent: {
++      esModuleURI: "resource:///actors/HilalBoostsParent.sys.mjs",
++    },
++    child: {
++      esModuleURI: "resource:///actors/HilalBoostsChild.sys.mjs",
++      events: {
++        DOMDocElementInserted: {},
++      },
++    },
++    remoteTypes: ["web", "file"],
++    enablePreference: "hilal.boosts.enabled",
++  },
++
+   HilalNewTab: {
+     parent: {
+       esModuleURI: "resource:///actors/HilalNewTabParent.sys.mjs",
+diff --git a/browser/components/moz.build b/browser/components/moz.build
+index d1d769ab0911..fe92ad7ace8b 100644
+--- a/browser/components/moz.build
++++ b/browser/components/moz.build
+@@ -43,6 +43,7 @@ DIRS += [
+     "extensions",
+     "firefoxview",
+     "genai",
++    "hilal/boosts",
+     "ipprotection",
+     "messagepreview",
+     "migration",

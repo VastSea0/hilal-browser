@@ -149,3 +149,19 @@ reason = "Material 3 Expressive restyle of the settings page"
 [[patches]]
 path   = "browser/components/preferences/m3e-web.all.min.mjs"
 reason = "Material 3 Expressive web components used by the settings page (MIT)"
+
+[[patches]]
+path   = "hilal-boosts-engine.patch"
+reason = "Boosts color backend: recolor page styles at paint time (adapted from Zen Browser, MPL-2.0)"
+
+[[patches]]
+path   = "browser/components/hilal/boosts"
+reason = "Boosts editor, manager, actors and color backend sources (adapted from Zen Browser, MPL-2.0)"
+
+[[patches]]
+path   = "browser/components/hilal-boosts-registration.patch"
+reason = "Build the Boosts component and register its window actor"
+
+[[patches]]
+path   = "browser/locales/en-US/browser/hilal-boosts.ftl"
+reason = "English strings for Boosts"

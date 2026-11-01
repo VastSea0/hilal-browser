@@ -1,0 +1,76 @@
+#filter substitution
+<?xml version="1.0"?>
+# -*- Mode: HTML -*-
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+<!DOCTYPE window>
+
+<window
+  xmlns:html="http://www.w3.org/1999/xhtml"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  id="hilalBoostReceiveDialog">
+  <dialog
+    class="hbs-dialog"
+    buttons="accept,cancel"
+    data-l10n-id="hilal-boost-receive-dialog"
+    data-l10n-attrs="buttonlabelaccept,buttonlabelcancel">
+    <linkset>
+      <html:link rel="stylesheet" href="chrome://global/skin/global.css" />
+      <html:link rel="stylesheet" href="chrome://browser/content/hilal/boosts/hilal-boosts-share.css" />
+      <html:link rel="stylesheet" href="chrome://browser/content/hilal/boosts/hilal-boosts-icons.css" />
+      <html:link rel="localization" href="browser/hilal-boosts.ftl" />
+    </linkset>
+    <script src="chrome://browser/content/hilal/boosts/hilal-boost-receive.js"></script>
+
+    <html:div class="hbs-card">
+      <html:div class="hbs-header">
+        <html:div class="hbs-header-domain">
+          <html:p data-l10n-id="hilal-boost-receive-made-for"></html:p>
+          <html:b class="hbs-domain"></html:b>
+        </html:div>
+      </html:div>
+
+      <html:div class="hbs-top">
+        <html:div class="hbs-info">
+          <html:img class="hbs-favicon" draggable="false" />
+          <html:div class="hbs-info-text">
+            <svg xmlns="http://www.w3.org/2000/svg" class="hbs-signature"></svg>
+            <html:p class="hbs-name"></html:p>
+            <html:div class="hbs-author">
+              <html:i data-l10n-id="hilal-boost-receive-by"></html:i>
+              <html:b class="hbs-author-name"></html:b>
+            </html:div>
+          </html:div>
+          <button class="hbs-info-button" noinitialfocus="true" data-l10n-id="hilal-boost-receive-info" />
+        </html:div>
+
+        <html:div class="hbs-content">
+          <html:div class="hbs-pane">
+            <html:div class="hbs-screenshot">
+              <html:img class="hbs-screenshot-image" draggable="false" />
+              <html:img class="hbs-screenshot-favicon" draggable="false" />
+            </html:div>
+          </html:div>
+        </html:div>
+      </html:div>
+
+      <html:div class="hbs-footer">
+        <html:div class="hbs-footer-text">
+          <html:h1 data-l10n-id="hilal-boost-receive-title"></html:h1>
+          <html:p data-l10n-id="hilal-boost-receive-description">
+            <html:span class="hbs-library" data-l10n-name="library"></html:span>
+          </html:p>
+        </html:div>
+      </html:div>
+    </html:div>
+
+    <popupset>
+      <panel type="arrow" class="hbs-info-panel" id="hilal-boost-receive-info-panel">
+        <html:p data-l10n-id="hilal-boost-receive-info-text" data-l10n-args='{"domain": ""}'></html:p>
+      </panel>
+    </popupset>
+  </dialog>
+</window>

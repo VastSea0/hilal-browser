@@ -1,0 +1,39 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+# Per-site Boosts, adapted from Zen Browser (src/zen/boosts in
+# https://github.com/zen-browser/desktop), also under the MPL 2.0.
+
+with Files("**"):
+    BUG_COMPONENT = ("Firefox", "General")
+
+JAR_MANIFESTS += ["jar.mn"]
+
+EXTRA_JS_MODULES.hilal.boosts += [
+    "HilalBoostReceiveDialog.mjs",
+    "HilalBoostsEditor.mjs",
+    "HilalBoostShareDialog.mjs",
+    "HilalBoostsManager.sys.mjs",
+    "HilalBoostStyles.sys.mjs",
+    "HilalSelectorComponent.sys.mjs",
+    "HilalShareClient.sys.mjs",
+    "HilalZapDissolve.sys.mjs",
+    "HilalZapOverlayChild.sys.mjs",
+]
+
+FINAL_TARGET_FILES.actors += [
+    "actors/HilalBoostsChild.sys.mjs",
+    "actors/HilalBoostsParent.sys.mjs",
+]
+
+EXPORTS.mozilla += [
+    "HilalBoostsBackend.h",
+]
+
+SOURCES += [
+    "HilalBoostsBackend.cpp",
+    "HilalBoostsBCOverrides.cpp",
+]
+
+FINAL_LIBRARY = "xul"

@@ -215,3 +215,8 @@ pref("hilal.theme.globalAccentColor", "#af51f5");
 // Mozilla's "Same settings, new look!" banner describes Firefox's settings
 // redesign, not Hilal's.
 pref("browser.settings-redesign.promo.dismissed", true);
+
+// Boosts: per-site colors, fonts, zaps and CSS.
+pref("hilal.boosts.enabled", true);
+pref("hilal.boosts.dissolve-on-zap", true);
+pref("hilal.boosts.custom-fonts", false);
