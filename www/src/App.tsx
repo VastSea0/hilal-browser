@@ -23,6 +23,7 @@ import DownloadModal from "./components/DownloadModal";
 import ChangelogPage from "./components/ChangelogPage";
 import DocsPage from "./components/DocsPage";
 import PrivacyPage from "./components/PrivacyPage";
+import BoostSharePage from "./components/BoostSharePage";
 import { DesktopFrame, PhoneFrame, screen } from "./components/DeviceFrames";
 import { CONTRIBUTORS_DATA } from "./data/changelogData";
 
@@ -81,6 +82,10 @@ export default function App() {
     return "home";
   });
 
+  const sharedBoostId =
+    typeof window !== "undefined"
+      ? /^\/boost\/([0-9A-Za-z-]{19})\/?$/.exec(window.location.pathname)?.[1] ?? null
+      : null;
   const [releases, setReleases] = useState<GithubRelease[]>([]);
   // Desktop builds link to /download from their update notifications.
   const [isDownloadOpen, setIsDownloadOpen] = useState<boolean>(
@@ -633,6 +638,8 @@ export default function App() {
           onBack={() => navigateTo("home")}
           onOpenDownload={() => setIsDownloadOpen(true)}
         />
+      ) : sharedBoostId ? (
+        <BoostSharePage lang={lang} id={sharedBoostId} onBack={() => navigateTo("home")} />
       ) : currentView === "privacy" ? (
         <PrivacyPage
           lang={lang}

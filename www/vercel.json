@@ -20,6 +20,10 @@
       "destination": "/api/telemetry"
     },
     {
+      "source": "/api/boosts/:id",
+      "destination": "/api/boosts?id=:id"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
