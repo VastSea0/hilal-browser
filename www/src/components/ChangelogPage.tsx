@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
-import { RELEASES_DATA, CONTRIBUTORS_DATA } from "../data/changelogData";
+import { RELEASES_DATA } from "../data/changelogData";
+import { CONTRIBUTORS_DATA } from "../data/contributorsData";
 
 interface ChangelogPageProps {
   lang: "tr" | "en";

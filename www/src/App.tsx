@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "motion/react";
 function GithubIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -20,12 +20,15 @@ import {
 } from "./utils/github";
 
 import DownloadModal from "./components/DownloadModal";
-import ChangelogPage from "./components/ChangelogPage";
-import DocsPage from "./components/DocsPage";
-import PrivacyPage from "./components/PrivacyPage";
-import BoostSharePage from "./components/BoostSharePage";
 import { DesktopFrame, PhoneFrame, screen } from "./components/DeviceFrames";
-import { CONTRIBUTORS_DATA } from "./data/changelogData";
+import { CONTRIBUTORS_DATA } from "./data/contributorsData";
+
+// Pages other than home load on demand, so the commit history and the docs
+// are not part of the first download.
+const ChangelogPage = lazy(() => import("./components/ChangelogPage"));
+const DocsPage = lazy(() => import("./components/DocsPage"));
+const PrivacyPage = lazy(() => import("./components/PrivacyPage"));
+const BoostSharePage = lazy(() => import("./components/BoostSharePage"));
 
 // M3 Expressive Spring Motion Physics
 const springTransition = {
@@ -53,6 +56,11 @@ const m3Stagger = {
     }
   }
 };
+
+// Keeps the page height while a lazily loaded page downloads.
+function PageFallback() {
+  return <main className="min-h-screen bg-m3-surface" aria-busy="true" />;
+}
 
 export default function App() {
   const [theme, setTheme] = useState<"light" | "dark">(() => {
@@ -627,24 +635,32 @@ export default function App() {
 
       {/* Main View Router */}
       {currentView === "docs" ? (
-        <DocsPage
-          lang={lang}
-          onBack={() => navigateTo("home")}
-          onOpenDownload={() => setIsDownloadOpen(true)}
-        />
+        <Suspense fallback={<PageFallback />}>
+          <DocsPage
+            lang={lang}
+            onBack={() => navigateTo("home")}
+            onOpenDownload={() => setIsDownloadOpen(true)}
+          />
+        </Suspense>
       ) : currentView === "changelog" ? (
-        <ChangelogPage
-          lang={lang}
-          onBack={() => navigateTo("home")}
-          onOpenDownload={() => setIsDownloadOpen(true)}
-        />
+        <Suspense fallback={<PageFallback />}>
+          <ChangelogPage
+            lang={lang}
+            onBack={() => navigateTo("home")}
+            onOpenDownload={() => setIsDownloadOpen(true)}
+          />
+        </Suspense>
       ) : sharedBoostId ? (
-        <BoostSharePage lang={lang} id={sharedBoostId} onBack={() => navigateTo("home")} />
+        <Suspense fallback={<PageFallback />}>
+          <BoostSharePage lang={lang} id={sharedBoostId} onBack={() => navigateTo("home")} />
+        </Suspense>
       ) : currentView === "privacy" ? (
-        <PrivacyPage
-          lang={lang}
-          onBack={() => navigateTo("home")}
-        />
+        <Suspense fallback={<PageFallback />}>
+          <PrivacyPage
+            lang={lang}
+            onBack={() => navigateTo("home")}
+          />
+        </Suspense>
       ) : (
         <>
           {/* 2. M3 Expressive Hero Section */}
