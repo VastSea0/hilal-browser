@@ -1,0 +1,106 @@
+diff --git a/toolkit/content/license.html b/toolkit/content/license.html
+index ef7188422060..480c05317e7f 100644
+--- a/toolkit/content/license.html
++++ b/toolkit/content/license.html
+@@ -56,6 +56,9 @@
+       <li><a href="about:license#lgpl-3.0">GNU Lesser General Public License 3.0</a>
+       <br><br>
+       </li>
++      <li><a href="about:license#hilal">Hilal Browser Components</a>
++      <br><br>
++      </li>
+       <li><a href="about:license#acorn">acorn License</a></li>
+ #ifdef MOZ_INSTALL_TRACKING
+       <li><a href="about:license#adjust">Adjust SDK License</a></li>
+@@ -1393,6 +1396,91 @@ product.
+           </td>
+         </tr>
+ 
++        <tr>
++          <td>
++            <h1><a id="hilal"></a>Hilal Browser Components</h1>
++          </td>
++          <td>
++            <p>Hilal Browser is built on Firefox and adds the open source
++            components below. Each keeps its own license. The source of
++            Hilal's changes is at
++            <a href="https://github.com/VastSea0/hilal-browser">github.com/VastSea0/hilal-browser</a>.</p>
++
++            <ul>
++              <li><b>Boosts</b>, adapted from
++              <a href="https://github.com/zen-browser/desktop">Zen Browser</a>
++              (<code>browser/components/hilal/boosts</code> and the Boosts
++              color backend), under the
++              <a href="about:license#mpl">Mozilla Public License 2.0</a>.</li>
++              <li><b>Menu and panel icons</b> from
++              <a href="https://github.com/black7375/Firefox-UI-Fix">Firefox-UI-Fix (Lepton)</a>
++              by black7375 (<code>browser/themes/shared/hilal-icons.css</code>
++              and <code>browser/themes/shared/icons</code>), under the
++              <a href="about:license#mpl">Mozilla Public License 2.0</a>.</li>
++              <li><b>Beer CSS</b>, the Material Design CSS framework of the
++              browser shell (<code>browser/themes/shared/beer.min.css</code>,
++              <code>beer.min.js</code> and <code>hilal-beer.css</code>), under
++              the MIT License below.</li>
++              <li><b>M3E</b>, the Material 3 Expressive web components of the
++              settings page
++              (<code>browser/components/preferences/m3e-web.all.min.mjs</code>),
++              under the MIT License below.</li>
++              <li><b>Material Symbols</b>, the icon font of the shell and
++              Boosts (<code>browser/themes/shared/material-symbols-outlined.woff2</code>),
++              copyright Google LLC, under the
++              <a href="about:license#apache">Apache License 2.0</a>.</li>
++              <li><b>uBlock Origin</b> by Raymond Hill, bundled unmodified as a
++              distribution extension, under the GNU General Public License 3.0.
++              Its license text ships inside the extension, and its source is at
++              <a href="https://github.com/gorhill/uBlock">github.com/gorhill/uBlock</a>.</li>
++            </ul>
++
++            <h2>Beer CSS</h2>
++            <pre>Copyright (c) 2021 Beer css!</pre>
++            <pre>
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
++            </pre>
++
++            <h2>M3E</h2>
++            <pre>Copyright (c) 2025-2026 matraic</pre>
++            <pre>
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
++            </pre>
++          </td>
++        </tr>
++
+         <tr>
+           <td>
+             <h1><a id="acorn"></a>acorn License</h1>

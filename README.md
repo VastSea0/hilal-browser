@@ -125,6 +125,18 @@ and discussion happen on [Discord](https://discord.gg/JZJ4tmPHFw).
   </picture>
 </a>
 
+## Open source
+
+Hilal is built on [Firefox ESR](https://www.mozilla.org/firefox/enterprise/) and uses other open source projects:
+Boosts adapted from [Zen Browser](https://github.com/zen-browser/desktop), menu icons from
+[Firefox-UI-Fix](https://github.com/black7375/Firefox-UI-Fix), [Beer CSS](https://github.com/beercss/beercss)
+and [M3E](https://github.com/matraic/m3e) for the Material interface, the
+[Material Symbols](https://github.com/google/material-design-icons) font, and a bundled
+[uBlock Origin](https://github.com/gorhill/uBlock). The Android app uses
+[GeckoView](https://mozilla.github.io/geckoview/) and Jetpack Compose. See
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for what each one does, how it is included, and its
+license. Inside the browser, `about:license` lists them under "Hilal Browser Components".
+
 ## License
 
 Hilal's patches, scripts, and other source files are available under the [Mozilla Public License 2.0](LICENSE). Branding assets are copyright Hilal Browser contributors.

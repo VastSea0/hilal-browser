@@ -165,3 +165,7 @@ reason = "Build the Boosts component and register its window actor"
 [[patches]]
 path   = "browser/locales/en-US/browser/hilal-boosts.ftl"
 reason = "English strings for Boosts"
+
+[[patches]]
+path   = "toolkit/content/hilal-license.patch"
+reason = "List the open source components Hilal adds in about:license"
