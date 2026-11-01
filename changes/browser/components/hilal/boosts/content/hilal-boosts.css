@@ -5,35 +5,39 @@
  */
 
 #hilalBoostWindow {
-  --hilal-boosts-primary-background: light-dark(#fcfcfe, #171717);
-  --hilal-boosts-secondary-background: light-dark(#f6f6f8, #1c1c1e);
-  --hilal-boosts-mica-background: light-dark(#f6f6f8c0, #1c1c1ec0);
+  /* The Material tokens (--surface, --primary, ...) are copied from the
+     browser window by gHilalBoostsManager.applyShellTheme(); the fallbacks
+     only apply before that runs. */
+  --hilal-boosts-primary-background: var(--surface-container-lowest, var(--surface, light-dark(#fcfcfe, #171717)));
+  --hilal-boosts-secondary-background: var(--surface-container-low, light-dark(#f6f6f8, #1c1c1e));
+  --hilal-boosts-mica-background: color-mix(in srgb, var(--hilal-boosts-secondary-background) 75%, transparent);
 
-  --hilal-boosts-primary-color: light-dark(#3a3a3b, #f3f3f3);
-  --hilal-boosts-secondary-color: light-dark(#727272, #b1b1b1);
+  --hilal-boosts-primary-color: var(--on-surface, light-dark(#3a3a3b, #f3f3f3));
+  --hilal-boosts-secondary-color: var(--on-surface-variant, light-dark(#727272, #b1b1b1));
 
-  --hilal-boosts-button-background: light-dark(#ebebed, #262626);
+  --hilal-boosts-button-background: var(--surface-container-high, light-dark(#ebebed, #262626));
 
-  --mod-button-c1: light-dark(#ebebed, #262626);
-  --mod-button-c2: light-dark(#ebebed, #262626);
+  --mod-button-c1: var(--hilal-boosts-button-background);
+  --mod-button-c2: var(--hilal-boosts-button-background);
 
-  --hilal-boosts-active-button-background: light-dark(#3a3a3a, #cccccc);
-  --hilal-boosts-active-button-hover-background: light-dark(#5b5b5c, #c9c9c9);
-  --hilal-boosts-active-button-color: light-dark(#fcfcfe, #1c1c1e);
-  --hilal-boosts-back-button-hover-background: light-dark(#e3e3e6, #3a3a3a);
+  --hilal-boosts-active-button-background: var(--primary, light-dark(#3a3a3a, #cccccc));
+  --hilal-boosts-active-button-hover-background: color-mix(in srgb, var(--hilal-boosts-active-button-background) 88%, var(--hilal-boosts-active-button-color));
+  --hilal-boosts-active-button-color: var(--on-primary, light-dark(#fcfcfe, #1c1c1e));
+  --hilal-boosts-back-button-hover-background: var(--surface-container-highest, light-dark(#e3e3e6, #3a3a3a));
 
-  --hilal-boosts-magic-theme-background: light-dark(white, #3a3a3a);
-  --hilal-boosts-magic-theme-active-background: light-dark(#3a3a3a, white);
+  --hilal-boosts-magic-theme-background: var(--surface-container-lowest, light-dark(white, #3a3a3a));
+  --hilal-boosts-magic-theme-active-background: var(--primary, light-dark(#3a3a3a, white));
 
-  --hilal-boosts-font-wrapper-background: light-dark(white, #262626);
+  --hilal-boosts-font-wrapper-background: var(--surface-container-lowest, light-dark(white, #262626));
 
-  --hilal-boosts-primary-border-color: light-dark(#ededef, #3a3a3a);
+  --hilal-boosts-primary-border-color: var(--outline-variant, light-dark(#ededef, #3a3a3a));
 
-  --hilal-boosts-footer-background: light-dark(#f5f5f7, #1c1c1e);
+  --hilal-boosts-footer-background: var(--surface-container-low, light-dark(#f5f5f7, #1c1c1e));
 
-  --hilal-boosts-color-picker-background: light-dark(#fbfbfdea, #1c1c1eea);
-  --hilal-boosts-color-picker-pattern-color: light-dark(#e3e9e4, #3a3a3a);
+  --hilal-boosts-color-picker-background: color-mix(in srgb, var(--hilal-boosts-primary-background) 92%, transparent);
+  --hilal-boosts-color-picker-pattern-color: var(--outline-variant, light-dark(#e3e9e4, #3a3a3a));
 
+  font-family: var(--font, system-ui);
   appearance: none;
   border: none;
 }
@@ -656,9 +660,9 @@ body {
   --mod-button-c2: light-dark(#ff121b, #95272e);
 }
 .mod-button[mode="blue"] {
-  color: #e3e9e4;
-  --mod-button-c1: light-dark(#6650fc, #5d56ca);
-  --mod-button-c2: light-dark(#4125ff, #453aa9);
+  color: var(--on-primary, #fff);
+  --mod-button-c1: var(--primary, light-dark(#6650fc, #5d56ca));
+  --mod-button-c2: color-mix(in srgb, var(--primary, #4125ff) 85%, black);
 }
 .mod-button[mode] {
   background: linear-gradient(180deg, var(--mod-button-c1) 0%, var(--mod-button-c2) 100%) border-box;
@@ -683,12 +687,13 @@ body {
 }
 
 .toggleable-button[enabled="true"] {
-  filter: invert();
-  opacity: 0.9;
+  --mod-button-c1: var(--hilal-boosts-active-button-background);
+  --mod-button-c2: var(--hilal-boosts-active-button-background);
+  background: var(--hilal-boosts-active-button-background) !important;
+  color: var(--hilal-boosts-active-button-color) !important;
 
   &:active {
-    filter: invert();
-    opacity: 0.8;
+    opacity: 0.85;
   }
 }
 

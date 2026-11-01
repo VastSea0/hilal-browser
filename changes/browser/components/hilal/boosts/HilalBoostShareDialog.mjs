@@ -8,6 +8,8 @@ ChromeUtils.defineESModuleGetters(lazy, {
   PlacesUtils: "resource://gre/modules/PlacesUtils.sys.mjs",
   PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.sys.mjs",
   HilalShareClient: "resource:///modules/hilal/boosts/HilalShareClient.sys.mjs",
+  gHilalBoostsManager:
+    "resource:///modules/hilal/boosts/HilalBoostsManager.sys.mjs",
 });
 
 const ICON_SIZE = 128;
@@ -56,6 +58,7 @@ export class nsHilalBoostShareDialog {
       { once: true }
     );
 
+    lazy.gHilalBoostsManager.applyShellTheme(this.openerWindow, this.doc);
     this.init();
   }
 

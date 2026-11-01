@@ -44,6 +44,7 @@ export class nsHilalBoostReceiveDialog {
       { once: true }
     );
 
+    lazy.gHilalBoostsManager.applyShellTheme(this.openerWindow, this.doc);
     this.init();
   }
 

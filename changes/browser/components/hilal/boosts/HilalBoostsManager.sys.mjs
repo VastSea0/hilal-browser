@@ -5,6 +5,26 @@
 import { JSONFile } from "resource://gre/modules/JSONFile.sys.mjs";
 import { nsHilalBoostStyles } from "resource:///modules/hilal/boosts/HilalBoostStyles.sys.mjs";
 
+const SHELL_THEME_TOKENS = [
+  "--primary",
+  "--on-primary",
+  "--primary-container",
+  "--on-primary-container",
+  "--secondary-container",
+  "--on-secondary-container",
+  "--surface",
+  "--surface-container-lowest",
+  "--surface-container-low",
+  "--surface-container",
+  "--surface-container-high",
+  "--surface-container-highest",
+  "--on-surface",
+  "--on-surface-variant",
+  "--outline",
+  "--outline-variant",
+  "--font",
+];
+
 class nsHilalBoostsManager {
   registeredDomains = new Map(); // <domain, { boosts: <id, boostEntry>, activeBoostID: null }>
   #stylesManager = new nsHilalBoostStyles();
@@ -600,6 +620,32 @@ class nsHilalBoostsManager {
    * @param {nsIURI} uri - The URI to check for boost eligibility.
    * @returns {boolean} True if the URI scheme is http or https, false otherwise.
    */
+  /**
+   * Copies the shell's Material color tokens and font from a browser window
+   * onto a Boosts window, so the editor and dialogs follow Hilal's theme.
+   *
+   * @param {Window} sourceWindow - The browser window to take the theme from.
+   * @param {Document} doc - The Boosts document to theme.
+   */
+  applyShellTheme(sourceWindow, doc) {
+    if (!sourceWindow?.document || !doc?.documentElement) {
+      return;
+    }
+    const style = sourceWindow.getComputedStyle(
+      sourceWindow.document.documentElement
+    );
+    for (const name of SHELL_THEME_TOKENS) {
+      const value = style.getPropertyValue(name).trim();
+      if (value) {
+        doc.documentElement.style.setProperty(name, value);
+      }
+    }
+    const isDark = sourceWindow.MaterialYouTheme?.isDarkMode?.();
+    if (isDark !== undefined) {
+      doc.documentElement.style.colorScheme = isDark ? "dark" : "light";
+    }
+  }
+
   canBoostSite(uri) {
     if (!uri || !uri.schemeIs) {
       return false;

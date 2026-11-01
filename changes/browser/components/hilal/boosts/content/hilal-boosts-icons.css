@@ -32,8 +32,11 @@
     .hbs-pane-right
   ) {
   list-style-image: none !important;
+  align-items: center !important;
 
   &::before {
+    height: auto !important;
+    align-self: center;
     font-family: "Hilal Symbols";
     font-size: 18px;
     font-weight: 400;
@@ -70,3 +73,13 @@
 #hilal-boost-case[case-mode="capitalize"]::before { content: "title"; }
 #hilal-boost-case[case-mode="uppercase"]::before { content: "uppercase"; }
 #hilal-boost-case[case-mode="lowercase"]::before { content: "lowercase"; }
+
+/* Icon-only buttons: center the glyph and drop XUL's empty label box, which
+   otherwise pushes the icon off center. */
+#hilalBoostWindow .mod-button.small {
+  justify-content: center;
+
+  & > .button-box {
+    display: none;
+  }
+}

@@ -230,6 +230,7 @@ export class nsHilalBoostEditor {
   updateColorScheme() {
     const colorScheme = this.isDarkMode ? "dark" : "light";
     this.doc.documentElement.style.colorScheme = colorScheme;
+    gHilalBoostsManager.applyShellTheme(this.openerWindow, this.doc);
 
     if (this.codeEditorReady) {
       const container = this.doc.getElementById("hilal-boost-code-editor");
