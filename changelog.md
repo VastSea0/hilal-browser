@@ -4,12 +4,18 @@
 
 ## [Unreleased]
 
+### Added
+- Boosts are back, rebuilt from Zen Browser's Boosts (MPL 2.0). Per site, you can recolor a page without touching its images, invert it, change its contrast, brightness and saturation, set its font, text size and case, hide elements with Zap, keep only what matters with Focus, and add your own CSS. Open them with the bolt button in the address bar.
+- Boosts can be shared as a link, and opening a shared link in Hilal offers to add the Boost. Boosts can also be exported and imported as files.
+- Night-only Boosts apply only while Hilal is in dark mode.
+
 ### Changed
 - The desktop browser is now based on Firefox ESR 153.5.1 instead of Nightly snapshots, so it receives a year of security and stability fixes through small ESR updates.
 - New Material 3 Expressive shell with its own top bar, address bar, and vertical or horizontal tabs. The address bar follows Firefox's loading and privacy rules, site information and permission prompts open from it, and the downloads button and main menu are in the toolbar.
 - The welcome screen is now a short setup flow.
 - Shell labels and tooltips are localized.
 - Lepton (Firefox-UI-Fix) is reduced to its icon rules.
+- Compact mode is rebuilt for the Material shell.
 
 ### Fixed
 - The shell hides during fullscreen video.
@@ -18,8 +24,7 @@
 - Tab and reload shortcuts use Firefox's own commands.
 
 ### Removed
-- The Tahoe theme, compact mode, and transparent macOS chrome.
-- Boosts. They will return as a rewritten feature.
+- The Tahoe theme and transparent macOS chrome.
 
 ---
 
