@@ -9,7 +9,6 @@ browser.jar:
         content/browser/hilal/boosts/hilal-zap.css                   (content/hilal-zap.css)
         content/browser/hilal/boosts/hilal-zap-bar.css               (content/hilal-zap-bar.css)
         content/browser/hilal/boosts/hilal-selector.css              (content/hilal-selector.css)
-        content/browser/hilal/boosts/hilal-advanced-color-options.css (content/hilal-advanced-color-options.css)
         content/browser/hilal/boosts/HilalZapBar.mjs                 (HilalZapBar.mjs)
 *       content/browser/hilal/boosts/hilal-boost-editor.xhtml        (content/hilal-boost-editor.inc.xhtml)
         content/browser/hilal/boosts/hilal-boost-editor.js           (content/hilal-boost-editor.js)

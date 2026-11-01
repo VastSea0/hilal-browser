@@ -26,110 +26,158 @@
   <link rel="stylesheet" href="chrome://global/skin/global.css" />
 
   <link rel="stylesheet" href="chrome://browser/content/hilal/boosts/hilal-boosts.css" />
-  <link rel="stylesheet" href="chrome://browser/content/hilal/boosts/hilal-boosts-icons.css" />
-  <link rel="stylesheet" href="chrome://browser/content/hilal/boosts/hilal-advanced-color-options.css" />
 
   <link rel="localization" href="browser/hilal-boosts.ftl"/>
 </head>
 <html:body xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <vbox flex="1" id="hilal-boost-editor-root">
-    <hbox id="hilal-boost-head-wrapper">
-      <button id="hilal-boost-close" class="subviewbutton mod-button title-button"></button>
-      <hbox id="hilal-boost-name" flex="1">
-        <hbox id="hilal-boost-name-container">
-          <html:p id="hilal-boost-name-text"></html:p>
-        </hbox>
-      </hbox>
-      <button data-l10n-id="hilal-boost-shuffle" id="hilal-boost-shuffle" class="subviewbutton mod-button title-button"></button>
-    </hbox>
-    <vbox flex="1" id="hilal-boost-filter-wrapper">
-      <hbox class="hilal-boost-color-picker-gradient hilal-boost-panel-disabled">
-        <button data-l10n-id="hilal-boost-magic-theme" id="hilal-boost-magic-theme" class="subviewbutton mod-button"></button>
-        <html:div id="hilal-boost-color-picker-dot-primary" class="hilal-boost-color-picker-dot no-squircles"></html:div>
-        <html:div id="hilal-boost-color-picker-dot-secondary" class="hilal-boost-color-picker-dot no-squircles"></html:div>
-        <html:div class="hilal-boost-color-picker-circle no-squircles"></html:div>
-      </hbox>
+  <html:div id="hilal-boost-editor-root" class="hb-view">
+    <html:header class="hb-top-bar">
+      <html:button id="hilal-boost-close" class="hb-icon-button" data-l10n-id="hilal-boost-close-button">
+        <html:span class="hb-icon">close</html:span>
+      </html:button>
+      <html:button id="hilal-boost-name-container" class="hb-title-button">
+        <html:span id="hilal-boost-name-text"></html:span>
+        <html:span class="hb-icon">expand_more</html:span>
+      </html:button>
+      <html:button id="hilal-boost-shuffle" class="hb-icon-button" data-l10n-id="hilal-boost-shuffle-button">
+        <html:span class="hb-icon">casino</html:span>
+      </html:button>
+    </html:header>
 
-      <hbox flex="1" id="hilal-boost-toolbar-wrapper-colors">
-        <button data-l10n-id="hilal-boost-invert" id="hilal-boost-invert" class="subviewbutton mod-button small"></button>
-        <button data-l10n-id="hilal-boost-controls" id="hilal-boost-controls" class="subviewbutton mod-button small"></button>
-        <button data-l10n-id="hilal-boost-disable" id="hilal-boost-disable" class="subviewbutton mod-button small"></button>
-      </hbox>
+    <html:main id="hilal-boost-filter-wrapper" class="hb-content">
+      <html:section class="hb-card">
+        <html:div class="hb-card-header">
+          <html:span class="hb-icon hb-card-icon">palette</html:span>
+          <html:span class="hb-card-title" data-l10n-id="hilal-boost-colors-title"></html:span>
+          <html:input type="checkbox" role="switch" id="hilal-boost-disable" class="hb-switch" data-l10n-id="hilal-boost-colors-switch"/>
+        </html:div>
 
-      <html:div id="hilal-boost-font-wrapper">
-        <vbox id="hilal-boost-font-grid">
-# Font buttons will be injected here
-        </vbox>
-        <html:div class="visible-separator"></html:div>
-        <hbox flex="1" id="hilal-boost-font-toolbar">
-          <html:select name="font" id="hilal-boost-font-select" class="mod-button">
-# Additional font options will be injected here
-          </html:select>
-        </hbox>
-      </html:div>
+        <html:div class="hilal-boost-color-picker-gradient">
+          <html:div id="hilal-boost-color-picker-dot-primary" class="hilal-boost-color-picker-dot"></html:div>
+          <html:div id="hilal-boost-color-picker-dot-secondary" class="hilal-boost-color-picker-dot"></html:div>
+          <html:div class="hilal-boost-color-picker-circle"></html:div>
+        </html:div>
 
-      <hbox flex="1" id="hilal-boost-toolbar-wrapper">
-        <button id="hilal-boost-size" class="subviewbutton mod-button big-button med">
-          <html:p data-l10n-id="hilal-boost-size" id="hilal-boost-size-text"></html:p>
-          <html:p id="hilal-boost-size-value"></html:p>
-        </button>
-        <button id="hilal-boost-case" class="subviewbutton mod-button big-button toggleable-button med">
-          <html:p data-l10n-id="hilal-boost-case" id="hilal-boost-case-text"></html:p>
-        </button>
-      </hbox>
+        <html:div id="hilal-boost-toolbar-wrapper-colors" class="hb-button-group">
+          <html:button id="hilal-boost-invert" class="hb-toggle" aria-pressed="false">
+            <html:span class="hb-icon">invert_colors</html:span>
+            <html:span data-l10n-id="hilal-boost-invert-label"></html:span>
+          </html:button>
+          <html:button id="hilal-boost-magic-theme" class="hb-toggle" aria-pressed="false">
+            <html:span class="hb-icon">auto_awesome</html:span>
+            <html:span data-l10n-id="hilal-boost-theme-label"></html:span>
+          </html:button>
+          <html:button id="hilal-boost-controls" class="hb-toggle" aria-pressed="false" aria-controls="hilal-boost-advanced-color-options-panel">
+            <html:span class="hb-icon">tune</html:span>
+            <html:span data-l10n-id="hilal-boost-adjust-label"></html:span>
+          </html:button>
+        </html:div>
 
-      <button id="hilal-boost-zap" class="subviewbutton mod-button big-button toggleable-button">
-        <html:p data-l10n-id="hilal-boost-zap" id="hilal-boost-zap-text"></html:p>
-        <html:p id="hilal-boost-zap-value"></html:p>
-      </button>
+        <html:div id="hilal-boost-advanced-color-options-panel" class="hb-sliders" hidden="hidden">
+          <html:label class="hb-slider-row">
+            <html:span data-l10n-id="hilal-boost-color-contrast"></html:span>
+            <html:input id="hilal-boost-color-contrast" class="hb-slider" type="range" min="0.05" max="0.9" value="0.75" step="0.01"/>
+          </html:label>
+          <html:label class="hb-slider-row">
+            <html:span data-l10n-id="hilal-boost-color-brightness"></html:span>
+            <html:input id="hilal-boost-color-brightness" class="hb-slider" type="range" min="0" max="1" value="0.5" step="0.01"/>
+          </html:label>
+          <html:label class="hb-slider-row">
+            <html:span data-l10n-id="hilal-boost-color-original-saturation"></html:span>
+            <html:input id="hilal-boost-color-saturation" class="hb-slider" type="range" min="0" max="1" value="0.5" step="0.01"/>
+          </html:label>
+        </html:div>
+      </html:section>
 
-      <button id="hilal-boost-focus" class="subviewbutton mod-button big-button toggleable-button">
-        <html:p data-l10n-id="hilal-boost-focus" id="hilal-boost-focus-text"></html:p>
-        <html:p id="hilal-boost-focus-value"></html:p>
-      </button>
+      <html:section class="hb-card">
+        <html:div class="hb-card-header">
+          <html:span class="hb-icon hb-card-icon">text_fields</html:span>
+          <html:span class="hb-card-title" data-l10n-id="hilal-boost-text-title"></html:span>
+        </html:div>
 
-      <button id="hilal-boost-code" class="subviewbutton mod-button big-button toggleable-button">
-        <html:p data-l10n-id="hilal-boost-code" id="hilal-boost-code-text"></html:p>
-      </button>
-    </vbox>
-    <hbox id="hilal-boost-footer-wrapper">
-      <button id="hilal-boost-share" mode="blue" class="subviewbutton mod-button big-button">
-        <html:p data-l10n-id="hilal-boost-share" id="hilal-boost-share-text"></html:p>
-      </button>
-    </hbox>
-  </vbox>
-  <vbox flex="1" id="hilal-boost-code-editor-root">
-    <hbox id="hilal-boost-code-top-bar">
-      <button id="hilal-boost-back" class="subviewbutton mod-button big-button">
-        <html:p data-l10n-id="hilal-boost-back" id="hilal-boost-back-text"></html:p>
-      </button>
-    </hbox>
+        <html:div id="hilal-boost-font-wrapper">
+          <html:div id="hilal-boost-font-grid" class="hb-chips"></html:div>
+          <html:div id="hilal-boost-font-toolbar">
+            <html:select name="font" id="hilal-boost-font-select" class="hb-select"></html:select>
+          </html:div>
+        </html:div>
 
-    <vbox flex="1" id="hilal-boost-code-editor">
-    </vbox>
+        <html:div class="hb-row">
+          <html:div class="hb-field">
+            <html:span class="hb-field-label" data-l10n-id="hilal-boost-size"></html:span>
+            <html:div id="hilal-boost-size" class="hb-stepper">
+              <html:button id="hilal-boost-size-down" class="hb-stepper-button" data-l10n-id="hilal-boost-size-down">
+                <html:span class="hb-icon">remove</html:span>
+              </html:button>
+              <html:span id="hilal-boost-size-value"></html:span>
+              <html:button id="hilal-boost-size-up" class="hb-stepper-button" data-l10n-id="hilal-boost-size-up">
+                <html:span class="hb-icon">add</html:span>
+              </html:button>
+            </html:div>
+          </html:div>
+          <html:div class="hb-field">
+            <html:span class="hb-field-label" data-l10n-id="hilal-boost-case"></html:span>
+            <html:div id="hilal-boost-case" class="hb-segmented" role="radiogroup">
+              <html:button role="radio" data-case="none" data-l10n-id="hilal-boost-case-none">
+                <html:span class="hb-icon">format_clear</html:span>
+              </html:button>
+              <html:button role="radio" data-case="capitalize" data-l10n-id="hilal-boost-case-capitalize">Aa</html:button>
+              <html:button role="radio" data-case="uppercase" data-l10n-id="hilal-boost-case-uppercase">AA</html:button>
+              <html:button role="radio" data-case="lowercase" data-l10n-id="hilal-boost-case-lowercase">aa</html:button>
+            </html:div>
+          </html:div>
+        </html:div>
+      </html:section>
 
-    <hbox id="hilal-boost-code-bottom-bar">
-      <button data-l10n-id="hilal-boost-css-picker" id="hilal-boost-css-picker" class="subviewbutton mod-button big-button toggleable-button"></button>
-      <button data-l10n-id="hilal-boost-css-inspector" id="hilal-boost-css-inspector" class="subviewbutton mod-button big-button"></button>
-    </hbox>
-  </vbox>
+      <html:section class="hb-tiles">
+        <html:button id="hilal-boost-zap" class="hb-tile" data-l10n-id="hilal-boost-zap-tile">
+          <html:span class="hb-icon">bolt</html:span>
+          <html:span data-l10n-id="hilal-boost-zap"></html:span>
+          <html:span id="hilal-boost-zap-value" class="hb-badge"></html:span>
+        </html:button>
+        <html:button id="hilal-boost-focus" class="hb-tile" data-l10n-id="hilal-boost-focus-tile">
+          <html:span class="hb-icon">center_focus_strong</html:span>
+          <html:span data-l10n-id="hilal-boost-focus"></html:span>
+          <html:span id="hilal-boost-focus-value" class="hb-badge"></html:span>
+        </html:button>
+        <html:button id="hilal-boost-code" class="hb-tile" data-l10n-id="hilal-boost-code-tile">
+          <html:span class="hb-icon">code</html:span>
+          <html:span data-l10n-id="hilal-boost-code-label"></html:span>
+        </html:button>
+      </html:section>
+    </html:main>
+
+    <html:footer id="hilal-boost-footer-wrapper" class="hb-footer">
+      <html:button id="hilal-boost-share" class="hb-share-button">
+        <html:span class="hb-icon">ios_share</html:span>
+        <html:span data-l10n-id="hilal-boost-share"></html:span>
+      </html:button>
+    </html:footer>
+  </html:div>
+
+  <html:div id="hilal-boost-code-editor-root" class="hb-view">
+    <html:header id="hilal-boost-code-top-bar" class="hb-top-bar">
+      <html:button id="hilal-boost-back" class="hb-icon-button" data-l10n-id="hilal-boost-back-button">
+        <html:span class="hb-icon">arrow_back</html:span>
+      </html:button>
+      <html:span class="hb-top-title" data-l10n-id="hilal-boost-code-label"></html:span>
+    </html:header>
+
+    <html:div id="hilal-boost-code-editor"></html:div>
+
+    <html:footer id="hilal-boost-code-bottom-bar" class="hb-code-toolbar">
+      <html:button id="hilal-boost-css-picker" class="hb-tonal-button">
+        <html:span class="hb-icon">colorize</html:span>
+        <html:span data-l10n-id="hilal-boost-css-picker-label"></html:span>
+      </html:button>
+      <html:button id="hilal-boost-css-inspector" class="hb-tonal-button">
+        <html:span class="hb-icon">construction</html:span>
+        <html:span data-l10n-id="hilal-boost-css-inspector-label"></html:span>
+      </html:button>
+    </html:footer>
+  </html:div>
 
   <popupset id="mainPopupSet">
-    <panel type="arrow" popupalign="topmiddle" id="hilal-boost-advanced-color-options-panel">
-      <vbox>
-        <p data-l10n-id="hilal-boost-color-contrast"></p>
-        <html:input id="hilal-boost-color-contrast" type="range" min="0.05" max="0.9" value="0.75" step="0.01"/>
-      </vbox>
-      <vbox>
-        <p data-l10n-id="hilal-boost-color-brightness"></p>
-        <html:input id="hilal-boost-color-brightness" type="range" min="0" max="1" value="0.5" step="0.01"/>
-      </vbox>
-      <vbox>
-        <p data-l10n-id="hilal-boost-color-original-saturation"></p>
-        <html:input id="hilal-boost-color-saturation" type="range" min="0" max="1" value="0.5" step="0.01"/>
-      </vbox>
-    </panel>
-
     <menupopup id="hilalBoostContextMenu">
       <menuitem data-l10n-id="hilal-boost-edit-rename" id="hilal-boost-edit-rename" command="cmd_hilalBoostEditName" />
       <menuitem data-l10n-id="hilal-boost-edit-shuffle" id="hilal-boost-edit-shuffle" command="cmd_hilalBoostShuffle" />

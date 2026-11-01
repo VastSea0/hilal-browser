@@ -34,8 +34,8 @@ export class nsHilalBoostEditor {
     this.editorWindow = editorWindow;
     this.openerWindow = openerWindow;
 
-    this._codeEditorWidth = 450;
-    this._boostEditorWidth = 185;
+    this._codeEditorWidth = 520;
+    this._boostEditorWidth = 340;
     this._pickerCallback = null;
 
     this.isMouseDown = false;
@@ -102,10 +102,18 @@ export class nsHilalBoostEditor {
 
     this.doc
       .getElementById("hilal-boost-case")
-      .addEventListener("click", this.onBoostCasePressed.bind(this));
+      .addEventListener("click", event => {
+        const segment = event.target.closest("[data-case]");
+        if (segment) {
+          this.onBoostCaseSelected(segment.dataset.case);
+        }
+      });
     this.doc
-      .getElementById("hilal-boost-size")
-      .addEventListener("click", this.onBoostSizePressed.bind(this));
+      .getElementById("hilal-boost-size-down")
+      .addEventListener("click", () => this.onBoostSizeStep(-1));
+    this.doc
+      .getElementById("hilal-boost-size-up")
+      .addEventListener("click", () => this.onBoostSizeStep(1));
     this.doc
       .getElementById("hilal-boost-zap")
       .addEventListener("click", this.onZapButtonPressed.bind(this));
@@ -122,13 +130,16 @@ export class nsHilalBoostEditor {
       .addEventListener("click", this.onCodeBackButtonPressed.bind(this));
     this.doc
       .getElementById("hilal-boost-disable")
-      .addEventListener("click", this.onToggleDisable.bind(this));
+      .addEventListener("change", () => this.onToggleDisable());
     this.doc
       .getElementById("hilal-boost-invert")
       .addEventListener("click", this.onToggleInvert.bind(this));
     this.doc
+      .getElementById("hilal-boost-magic-theme")
+      .addEventListener("click", this.onToggleAutoTheme.bind(this));
+    this.doc
       .getElementById("hilal-boost-controls")
-      .addEventListener("click", event => this.openAdvancedColorOptions(event));
+      .addEventListener("click", this.toggleAdvancedColorOptions.bind(this));
     this.doc
       .getElementById("hilal-boost-name-container")
       .addEventListener("click", this.onNameTextClick.bind(this));
@@ -437,10 +448,10 @@ export class nsHilalBoostEditor {
 
       const fontButton = this.doc.createElement("button");
       fontButton.setAttribute("font-data", `${font}`);
-      fontButton.classList.add("subviewbutton", "no-squircles");
+      fontButton.setAttribute("aria-pressed", "false");
+      fontButton.classList.add("hb-chip");
       fontButton.style.fontFamily = font in genericLabels ? font : `'${font}'`;
-      fontButton.innerHTML = "Aa";
-      fontButton.title = genericLabels[font] ?? font;
+      fontButton.textContent = genericLabels[font] ?? font;
       fontButton.addEventListener("click", this.onFontButtonClick.bind(this));
 
       fontButtonGroup.appendChild(fontButton);
@@ -448,9 +459,6 @@ export class nsHilalBoostEditor {
 
     if (!Services.prefs.getBoolPref("hilal.boosts.custom-fonts", false)) {
       this.doc.getElementById("hilal-boost-font-toolbar").hidden = true;
-      this.doc.querySelector(
-        "#hilal-boost-font-wrapper .visible-separator"
-      ).hidden = true;
       return;
     }
 
@@ -515,7 +523,7 @@ export class nsHilalBoostEditor {
 
       this.doc.getElementById("hilal-boost-editor-root").style.display = "none";
       this.doc.getElementById("hilal-boost-code-editor-root").style.display =
-        "initial";
+        "flex";
     });
   }
 
@@ -717,7 +725,7 @@ ${cssSelector} {
 
       if (this.dragTarget == "hilal-boost-color-picker-dot-secondary") {
         this.setSecondaryDotPos(event.clientX, event.clientY);
-      } else if (event.target.id != "hilal-boost-magic-theme") {
+      } else {
         this.setDotPos(event.clientX, event.clientY, false);
       }
     }
@@ -753,43 +761,34 @@ ${cssSelector} {
   }
 
   /**
-   * Handles the text case toggle button press, cycling through case override options
-   * (none, lower, upper) and updating the UI accordingly.
+   * Sets the text case override from the case segmented button.
+   *
+   * @param {string} textCase - "none", "capitalize", "uppercase" or "lowercase".
    */
-  onBoostCasePressed() {
-    if (this.currentBoostData.textCaseOverride == "uppercase") {
-      this.currentBoostData.textCaseOverride = "lowercase";
-    } else if (this.currentBoostData.textCaseOverride == "lowercase") {
-      this.currentBoostData.textCaseOverride = "capitalize";
-    } else if (this.currentBoostData.textCaseOverride == "capitalize") {
-      this.currentBoostData.textCaseOverride = "none";
-    } else {
-      this.currentBoostData.textCaseOverride = "uppercase";
-    }
-
+  onBoostCaseSelected(textCase) {
+    this.currentBoostData.textCaseOverride = textCase;
     this.currentBoostData.changeWasMade = true;
     this.updateCaseButtonVisuals();
     this.updateCurrentBoost();
   }
 
+  static SIZE_STEPS = [0.9, 1, 1.1, 1.25, 1.5];
+
   /**
-   * Handles the size toggle button press, cycling through size override options
+   * Moves the text size override one step up or down.
+   *
+   * @param {number} direction - 1 for larger text, -1 for smaller.
    */
-  onBoostSizePressed() {
-    if (this.currentBoostData.sizeOverride == 1) {
-      this.currentBoostData.sizeOverride = 1.1;
-    } else if (this.currentBoostData.sizeOverride == 1.1) {
-      this.currentBoostData.sizeOverride = 1.25;
-    } else if (this.currentBoostData.sizeOverride == 1.25) {
-      this.currentBoostData.sizeOverride = 1.5;
-    } else if (this.currentBoostData.sizeOverride == 1.5) {
-      this.currentBoostData.sizeOverride = 0.9;
-    } else if (this.currentBoostData.sizeOverride == 0.9) {
-      this.currentBoostData.sizeOverride = 1;
-      this.hilalBoostsParent.updateBoostSizeOverride(
-        this.currentBoostData.sizeOverride,
-        /* disable: */ true
-      );
+  onBoostSizeStep(direction) {
+    const steps = nsHilalBoostEditor.SIZE_STEPS;
+    let index = steps.indexOf(this.currentBoostData.sizeOverride);
+    if (index == -1) {
+      index = steps.indexOf(1);
+    }
+    index = Math.min(Math.max(index + direction, 0), steps.length - 1);
+    this.currentBoostData.sizeOverride = steps[index];
+    if (steps[index] == 1) {
+      this.hilalBoostsParent.updateBoostSizeOverride(1, /* disable: */ true);
     }
 
     this.currentBoostData.changeWasMade = true;
@@ -816,15 +815,27 @@ ${cssSelector} {
   }
 
   /**
-   * Opens the advanced color options popup panel.
-   *
-   * @param {Event} event - The click event that triggered this action.
+   * Shows or hides the contrast, brightness and saturation sliders.
    */
-  openAdvancedColorOptions(event) {
+  toggleAdvancedColorOptions() {
     const panel = this.doc.getElementById(
       "hilal-boost-advanced-color-options-panel"
     );
-    panel.openPopup(event.target, "bottomcenter topcenter", 0, 2);
+    panel.hidden = !panel.hidden;
+    this.doc
+      .getElementById("hilal-boost-controls")
+      .setAttribute("aria-pressed", !panel.hidden);
+  }
+
+  /**
+   * Toggles following the workspace color instead of the picked color.
+   */
+  onToggleAutoTheme() {
+    this.currentBoostData.autoTheme = !this.currentBoostData.autoTheme;
+    this.currentBoostData.enableColorBoost = true;
+    this.currentBoostData.changeWasMade = true;
+    this.updateButtonToggleVisuals();
+    this.updateCurrentBoost();
   }
 
   /**
@@ -840,10 +851,7 @@ ${cssSelector} {
 
     this.currentBoostData.enableColorBoost = true;
 
-    if (event.target.id == "hilal-boost-magic-theme") {
-      this.currentBoostData.autoTheme = !this.currentBoostData.autoTheme;
-      this.updateCurrentBoost();
-    } else if (this.dragTarget != "hilal-boost-color-picker-dot-secondary") {
+    if (this.dragTarget != "hilal-boost-color-picker-dot-secondary") {
       this.setDotPos(event.clientX, event.clientY, !this.wasDragging);
     }
 
@@ -1242,72 +1250,29 @@ ${cssSelector} {
    * text case override value (none, upper, or lower).
    */
   updateCaseButtonVisuals() {
-    const caseButton = this.doc.getElementById("hilal-boost-case");
-    const caseText = this.doc.getElementById("hilal-boost-case-text");
-    caseButton.setAttribute(
-      "case-mode",
-      this.currentBoostData.textCaseOverride
-    );
-
-    switch (this.currentBoostData.textCaseOverride) {
-      case "uppercase":
-        caseButton.setAttribute("mode", "orange");
-        caseText.style.display = "none";
-        break;
-      case "lowercase":
-        caseButton.setAttribute("mode", "orange-red");
-        caseText.style.display = "none";
-        break;
-      case "capitalize":
-        caseButton.setAttribute("mode", "red");
-        caseText.style.display = "none";
-        break;
-      default:
-        caseButton.setAttribute("mode", "none");
-        caseText.style.display = "initial";
-        break;
+    const textCase = this.currentBoostData.textCaseOverride || "none";
+    for (const segment of this.doc.querySelectorAll(
+      "#hilal-boost-case [data-case]"
+    )) {
+      segment.setAttribute("aria-checked", segment.dataset.case == textCase);
     }
   }
 
   /**
-   * Updates the visual state of the text case toggle button based on the current
-   * text case override value (none, upper, or lower).
+   * Shows the text size override in the size stepper.
    */
   updateSizeButtonVisuals() {
-    const sizeButton = this.doc.getElementById("hilal-boost-size");
-    const sizeText = this.doc.getElementById("hilal-boost-size-text");
-    const sizeValue = this.doc.getElementById("hilal-boost-size-value");
-
-    switch (this.currentBoostData.sizeOverride) {
-      case 1:
-        sizeButton.setAttribute("mode", "none");
-        sizeText.style.display = "initial";
-        sizeValue.style.display = "none";
-        break;
-      case 1.1:
-        sizeButton.setAttribute("mode", "orange");
-        sizeText.style.display = "none";
-        sizeValue.style.display = "initial";
-        break;
-      case 1.25:
-        sizeButton.setAttribute("mode", "orange-red");
-        sizeText.style.display = "none";
-        sizeValue.style.display = "initial";
-        break;
-      case 1.5:
-        sizeButton.setAttribute("mode", "red");
-        sizeText.style.display = "none";
-        sizeValue.style.display = "initial";
-        break;
-      case 0.9:
-        sizeButton.setAttribute("mode", "blue");
-        sizeText.style.display = "none";
-        sizeValue.style.display = "initial";
-        break;
-    }
-    sizeValue.setHTML(
-      `${Math.round(this.currentBoostData.sizeOverride * 100)}%`
-    );
+    const size = this.currentBoostData.sizeOverride || 1;
+    const steps = nsHilalBoostEditor.SIZE_STEPS;
+    this.doc.getElementById("hilal-boost-size-value").textContent =
+      `${Math.round(size * 100)}%`;
+    this.doc
+      .getElementById("hilal-boost-size")
+      .toggleAttribute("modified", size != 1);
+    this.doc.getElementById("hilal-boost-size-down").disabled =
+      size <= steps[0];
+    this.doc.getElementById("hilal-boost-size-up").disabled =
+      size >= steps.at(-1);
   }
 
   /**
@@ -1320,23 +1285,13 @@ ${cssSelector} {
     const autoThemeButton = this.doc.getElementById("hilal-boost-magic-theme");
     const gradient = this.doc.querySelector(".hilal-boost-color-picker-gradient");
 
-    if (this.currentBoostData.autoTheme) {
-      autoThemeButton.classList.add("hilal-boost-button-active");
-    } else {
-      autoThemeButton.classList.remove("hilal-boost-button-active");
-    }
-
-    if (this.currentBoostData.smartInvert) {
-      invertButton.classList.add("hilal-boost-button-active");
-    } else {
-      invertButton.classList.remove("hilal-boost-button-active");
-    }
-
-    if (!this.currentBoostData.enableColorBoost) {
-      disableButton.classList.add("hilal-boost-button-active-transparent");
-    } else {
-      disableButton.classList.remove("hilal-boost-button-active-transparent");
-    }
+    autoThemeButton.setAttribute(
+      "aria-pressed",
+      !!this.currentBoostData.autoTheme
+    );
+    invertButton.setAttribute("aria-pressed", !!this.currentBoostData.smartInvert);
+    // The switch turns color changes on, so it is the inverse of "disable".
+    disableButton.checked = !!this.currentBoostData.enableColorBoost;
 
     // Give the gradient a grayscale effect
     // when the color boosting is disabled
@@ -1419,9 +1374,18 @@ ${cssSelector} {
         fontButton.getAttribute("font-data") == this.currentBoostData.fontFamily
       ) {
         fontButton.classList.add("hilal-boost-font-button-active");
+        fontButton.setAttribute("aria-pressed", "true");
+        // Bring the chosen chip into the scrolling chip row.
+        fontButtonGroup.scrollTo({
+          left:
+            fontButton.offsetLeft -
+            (fontButtonGroup.clientWidth - fontButton.offsetWidth) / 2,
+          behavior: "smooth",
+        });
         foundActive = true;
       } else {
         fontButton.classList.remove("hilal-boost-font-button-active");
+        fontButton.setAttribute("aria-pressed", "false");
       }
     }
 
@@ -1784,6 +1748,7 @@ ${cssSelector} {
     this.onUpdateZapValue();
     this.onUpdateZapButtonVisual();
     this.onUpdateCodeButtonVisual();
+    this.doc.getElementById("hilal-boost-filter-wrapper").scrollTop = 0;
   }
 
   /**

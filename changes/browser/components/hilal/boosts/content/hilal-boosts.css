@@ -4,841 +4,881 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+/* The Boost editor, drawn as a Material 3 Expressive side sheet. The color
+   tokens (--primary, --surface-container, ...) and --font are copied from the
+   browser window by gHilalBoostsManager.applyShellTheme(); the fallbacks only
+   show before that runs. */
+
+@font-face {
+  font-family: "Hilal Symbols";
+  src: url("chrome://browser/skin/material-symbols-outlined.woff2") format("woff2");
+  font-weight: 100 700;
+}
+
 #hilalBoostWindow {
-  /* The Material tokens (--surface, --primary, ...) are copied from the
-     browser window by gHilalBoostsManager.applyShellTheme(); the fallbacks
-     only apply before that runs. */
-  --hilal-boosts-primary-background: var(--surface-container-lowest, var(--surface, light-dark(#fcfcfe, #171717)));
-  --hilal-boosts-secondary-background: var(--surface-container-low, light-dark(#f6f6f8, #1c1c1e));
-  --hilal-boosts-mica-background: color-mix(in srgb, var(--hilal-boosts-secondary-background) 75%, transparent);
+  --hb-primary: var(--primary, #6750a4);
+  --hb-on-primary: var(--on-primary, #fff);
+  --hb-primary-container: var(--primary-container, #eaddff);
+  --hb-on-primary-container: var(--on-primary-container, #21005d);
+  --hb-secondary-container: var(--secondary-container, #e8def8);
+  --hb-on-secondary-container: var(--on-secondary-container, #1d192b);
+  --hb-surface: var(--surface, light-dark(#fef7ff, #141218));
+  --hb-surface-low: var(--surface-container-low, light-dark(#f7f2fa, #1d1b20));
+  --hb-surface-container: var(--surface-container, light-dark(#f3edf7, #211f26));
+  --hb-surface-high: var(--surface-container-high, light-dark(#ece6f0, #2b2930));
+  --hb-surface-highest: var(--surface-container-highest, light-dark(#e6e0e9, #36343b));
+  --hb-on-surface: var(--on-surface, light-dark(#1d1b20, #e6e0e9));
+  --hb-on-surface-variant: var(--on-surface-variant, light-dark(#49454f, #cac4d0));
+  --hb-outline: var(--outline, #79747e);
+  --hb-outline-variant: var(--outline-variant, light-dark(#cac4d0, #49454f));
 
-  --hilal-boosts-primary-color: var(--on-surface, light-dark(#3a3a3b, #f3f3f3));
-  --hilal-boosts-secondary-color: var(--on-surface-variant, light-dark(#727272, #b1b1b1));
+  /* M3 Expressive motion: a fast spatial spring for shapes, a plain ease for
+     colors. */
+  --hb-spring: cubic-bezier(0.42, 1.67, 0.21, 0.9);
+  --hb-spring-duration: 350ms;
+  --hb-effect: cubic-bezier(0.31, 0.94, 0.34, 1);
 
-  --hilal-boosts-button-background: var(--surface-container-high, light-dark(#ebebed, #262626));
-
-  --mod-button-c1: var(--hilal-boosts-button-background);
-  --mod-button-c2: var(--hilal-boosts-button-background);
-
-  --hilal-boosts-active-button-background: var(--primary, light-dark(#3a3a3a, #cccccc));
-  --hilal-boosts-active-button-hover-background: color-mix(in srgb, var(--hilal-boosts-active-button-background) 88%, var(--hilal-boosts-active-button-color));
-  --hilal-boosts-active-button-color: var(--on-primary, light-dark(#fcfcfe, #1c1c1e));
-  --hilal-boosts-back-button-hover-background: var(--surface-container-highest, light-dark(#e3e3e6, #3a3a3a));
-
-  --hilal-boosts-raised-background: light-dark(var(--surface-container-lowest, white), var(--surface-container, #262626));
-  --hilal-boosts-magic-theme-background: var(--hilal-boosts-raised-background);
-  --hilal-boosts-magic-theme-active-background: var(--primary, light-dark(#3a3a3a, white));
-
-  --hilal-boosts-font-wrapper-background: var(--hilal-boosts-raised-background);
-
-  --hilal-boosts-primary-border-color: var(--outline-variant, light-dark(#ededef, #3a3a3a));
-
-  --hilal-boosts-footer-background: var(--surface-container-low, light-dark(#f5f5f7, #1c1c1e));
-
-  --hilal-boosts-color-picker-background: color-mix(in srgb, var(--hilal-boosts-primary-background) 92%, transparent);
-  --hilal-boosts-color-picker-pattern-color: var(--outline-variant, light-dark(#e3e9e4, #3a3a3a));
-
-  font-family: var(--font, system-ui);
   appearance: none;
   border: none;
+  min-height: 760px;
+  max-height: 760px;
 }
 
 #hilalBoostWindow[editor="boost"] {
-  min-width: 184px;
-  max-width: 184px;
+  min-width: 340px;
+  max-width: 340px;
 }
 
 #hilalBoostWindow[editor="code"] {
-  min-width: 452px;
-  max-width: 452px;
+  min-width: 520px;
+  max-width: 520px;
+}
+
+body {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  overflow: clip;
+  background: var(--hb-surface);
+  color: var(--hb-on-surface);
+  font-family: var(--font, system-ui);
+  font-size: 14px;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.hb-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  user-select: none;
+}
+
+#hilal-boost-code-editor-root {
+  display: none;
+}
+
+.hb-icon {
+  font-family: "Hilal Symbols";
+  font-size: 20px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1;
+  font-feature-settings: "liga";
+  letter-spacing: normal;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+button {
+  appearance: none;
+  margin: 0;
+  border: none;
+  font: inherit;
+  color: inherit;
+  background: none;
+  cursor: default;
+
+  &:focus-visible {
+    outline: 2px solid var(--hb-primary);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+/* Top app bar */
+
+.hb-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  height: 56px;
+  padding: 0 8px;
+}
+
+.hb-top-title {
+  flex: 1;
+  padding-inline: 8px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.hb-icon-button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  color: var(--hb-on-surface-variant);
+  transition:
+    border-radius var(--hb-spring-duration) var(--hb-spring),
+    background-color 150ms var(--hb-effect);
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--hb-on-surface) 8%, transparent);
+  }
+
+  &:hover:active {
+    border-radius: 12px;
+    background-color: color-mix(in srgb, var(--hb-on-surface) 12%, transparent);
+  }
+}
+
+.hb-title-button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  height: 40px;
+  padding: 0 8px 0 14px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background-color 150ms var(--hb-effect);
+
+  & #hilal-boost-name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  & .hb-icon {
+    color: var(--hb-on-surface-variant);
+  }
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--hb-on-surface) 8%, transparent);
+  }
+}
+
+/* Content */
+
+.hb-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 4px 12px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.hb-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 16px;
+  border-radius: 28px;
+  background: var(--hb-surface-low);
+}
+
+.hb-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+}
+
+.hb-card-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  font-size: 18px;
+  background: var(--hb-primary-container);
+  color: var(--hb-on-primary-container);
+}
+
+.hb-card-title {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Switch */
+
+.hb-switch {
+  appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 52px;
+  height: 32px;
+  margin: 0;
+  border: 2px solid var(--hb-outline);
+  border-radius: 16px;
+  background: var(--hb-surface-highest);
+  transition:
+    background-color 200ms var(--hb-effect),
+    border-color 200ms var(--hb-effect);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 6px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--hb-outline);
+    translate: 0 -50%;
+    transition:
+      left var(--hb-spring-duration) var(--hb-spring),
+      width var(--hb-spring-duration) var(--hb-spring),
+      height var(--hb-spring-duration) var(--hb-spring),
+      background-color 200ms var(--hb-effect);
+  }
+
+  &:checked {
+    border-color: var(--hb-primary);
+    background: var(--hb-primary);
+
+    &::before {
+      left: 22px;
+      width: 24px;
+      height: 24px;
+      background: var(--hb-on-primary);
+    }
+  }
+
+  &:active::before {
+    width: 28px;
+    height: 28px;
+    left: 2px;
+  }
+
+  &:checked:active::before {
+    left: 18px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--hb-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* Color wheel. The dots' math (HilalBoostsEditor.setDotPos) works in polar
+   coordinates around the center, so the picker is a wheel: hue around the
+   rim, saturation from the center out. */
+
+.hilal-boost-color-picker-gradient {
+  position: relative;
+  align-self: center;
+  width: 192px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transition: filter 300ms var(--hb-effect), opacity 300ms var(--hb-effect);
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 19px;
+    border-radius: 50%;
+    background:
+      radial-gradient(closest-side, var(--hb-surface-low) 0%, transparent 100%),
+      conic-gradient(
+        from 10deg,
+        hsl(0 85% 58%),
+        hsl(36 90% 55%),
+        hsl(72 85% 50%),
+        hsl(108 70% 48%),
+        hsl(144 70% 45%),
+        hsl(180 75% 45%),
+        hsl(216 85% 58%),
+        hsl(252 80% 62%),
+        hsl(288 75% 58%),
+        hsl(324 80% 58%),
+        hsl(360 85% 58%)
+      );
+    box-shadow: 0 0 0 6px var(--hb-surface-high);
+    pointer-events: none;
+  }
+
+  &.hilal-boost-panel-disabled {
+    filter: grayscale(1);
+    opacity: 0.5;
+  }
+
+  & [animated="true"] {
+    transition:
+      left 450ms var(--hb-spring),
+      top 450ms var(--hb-spring) !important;
+  }
+
+  & .hilal-boost-color-picker-circle {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    border-radius: 50%;
+    outline: 1.5px dashed color-mix(in srgb, var(--hb-on-surface) 45%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms var(--hb-effect);
+  }
+
+  & .hilal-boost-color-picker-arc-svg {
+    opacity: 0;
+    transition: opacity 300ms var(--hb-effect);
+  }
+
+  &:hover {
+    & .hilal-boost-color-picker-circle,
+    & .hilal-boost-color-picker-arc-svg {
+      opacity: 0.8;
+    }
+  }
+
+  & .hilal-boost-color-picker-dot {
+    position: absolute;
+    z-index: 4;
+    /* Off screen until the editor places it. */
+    left: -100px;
+    top: -100px;
+    width: 22px;
+    height: 22px;
+    border: 3px solid var(--hb-surface);
+    border-radius: 50%;
+    background: var(--hilal-boost-dot-color);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+    translate: -50% -50%;
+    transition: scale var(--hb-spring-duration) var(--hb-spring);
+
+    &:first-of-type {
+      z-index: 5;
+      width: 34px;
+      height: 34px;
+      border-width: 4px;
+      box-shadow: 0 2px 6px rgb(0 0 0 / 0.3);
+    }
+
+    &:hover {
+      scale: 1.1;
+    }
+
+    &:active {
+      scale: 1.2;
+    }
+  }
+}
+
+/* Connected button group (M3 Expressive): inner corners are tight, outer
+   corners round, and a pressed or selected button rounds fully. */
+
+.hb-button-group {
+  display: flex;
+  gap: 2px;
+}
+
+.hb-toggle {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: var(--hb-surface-highest);
+  color: var(--hb-on-surface-variant);
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    border-radius var(--hb-spring-duration) var(--hb-spring),
+    background-color 200ms var(--hb-effect),
+    color 200ms var(--hb-effect);
+
+  & .hb-icon {
+    font-size: 18px;
+  }
+
+  &:first-child {
+    border-start-start-radius: 22px;
+    border-end-start-radius: 22px;
+  }
+
+  &:last-child {
+    border-start-end-radius: 22px;
+    border-end-end-radius: 22px;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--hb-on-surface) 8%, var(--hb-surface-highest));
+  }
+
+  &[aria-pressed="true"] {
+    border-radius: 22px;
+    background: var(--hb-primary);
+    color: var(--hb-on-primary);
+
+    & .hb-icon {
+      font-variation-settings: "FILL" 1;
+    }
+  }
+
+  &:hover:active {
+    border-radius: 14px;
+  }
+}
+
+/* Sliders (M3 Expressive: a thick rounded track and a tall, thin handle) */
+
+.hb-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 4px 0;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.hb-slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--hb-on-surface-variant);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.hb-slider {
+  appearance: none;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  background: transparent;
+
+  &::-moz-range-track {
+    height: 16px;
+    border-radius: 8px;
+    background: var(--hb-secondary-container);
+  }
+
+  &::-moz-range-progress {
+    height: 16px;
+    border-radius: 8px 2px 2px 8px;
+    background: var(--hb-primary);
+  }
+
+  &::-moz-range-thumb {
+    width: 4px;
+    height: 32px;
+    border: none;
+    border-radius: 2px;
+    background: var(--hb-primary);
+    box-shadow: 0 0 0 4px var(--hb-surface-low);
+    transition: width 200ms var(--hb-spring);
+  }
+
+  &:active::-moz-range-thumb {
+    width: 2px;
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    &::-moz-range-thumb {
+      outline: 2px solid var(--hb-primary);
+      outline-offset: 3px;
+    }
+  }
+}
+
+/* Fonts: a scrolling row of chips, each label set in its own font */
+
+.hb-chips {
+  display: flex;
+  gap: 8px;
+  margin: 0 -16px;
+  padding: 0 16px 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent);
+}
+
+.hb-chip {
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--hb-outline-variant);
+  border-radius: 10px;
+  color: var(--hb-on-surface-variant);
+  font-size: 15px;
+  white-space: nowrap;
+  transition:
+    border-radius var(--hb-spring-duration) var(--hb-spring),
+    background-color 200ms var(--hb-effect),
+    border-color 200ms var(--hb-effect);
+
+  &:hover {
+    background: color-mix(in srgb, var(--hb-on-surface) 8%, transparent);
+  }
+
+  &.hilal-boost-font-button-active {
+    border-color: transparent;
+    border-radius: 18px;
+    background: var(--hb-secondary-container);
+    color: var(--hb-on-secondary-container);
+  }
+}
+
+#hilal-boost-font-toolbar[hidden] {
+  display: none;
+}
+
+.hb-select {
+  width: 100%;
+  height: 40px;
+  margin-top: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--hb-outline-variant);
+  border-radius: 12px;
+  background: var(--hb-surface-low);
+  color: var(--hb-on-surface);
+  font: inherit;
+
+  &[has-selection] {
+    border-color: transparent;
+    background: var(--hb-secondary-container);
+    color: var(--hb-on-secondary-container);
+  }
+}
+
+/* Size and case sit side by side, each under a small caption */
+
+.hb-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hb-field-label {
+  padding-inline-start: 4px;
+  color: var(--hb-on-surface-variant);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.hb-stepper {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 40px;
+
+  & #hilal-boost-size-value {
+    display: grid;
+    place-items: center;
+    min-width: 48px;
+    height: 40px;
+    border-radius: 6px;
+    background: var(--hb-surface-highest);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    transition: background-color 200ms var(--hb-effect), color 200ms var(--hb-effect);
+  }
+
+  &[modified] #hilal-boost-size-value {
+    background: var(--hb-secondary-container);
+    color: var(--hb-on-secondary-container);
+  }
+}
+
+.hb-stepper-button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 40px;
+  border-radius: 6px;
+  background: var(--hb-surface-highest);
+  transition:
+    border-radius var(--hb-spring-duration) var(--hb-spring),
+    background-color 150ms var(--hb-effect);
+
+  &:first-child {
+    border-radius: 20px 6px 6px 20px;
+  }
+
+  &:last-child {
+    border-radius: 6px 20px 20px 6px;
+  }
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--hb-on-surface) 8%, var(--hb-surface-highest));
+  }
+
+  &:hover:active:not(:disabled) {
+    border-radius: 20px;
+  }
+}
+
+.hb-segmented {
+  box-sizing: border-box;
+  display: flex;
+  height: 40px;
+  padding: 2px;
+  border-radius: 20px;
+  background: var(--hb-surface-highest);
+
+  & button {
+    display: grid;
+    place-items: center;
+    min-width: 34px;
+    height: 36px;
+    padding: 0 6px;
+    border-radius: 18px;
+    color: var(--hb-on-surface-variant);
+    font-size: 13px;
+    font-weight: 600;
+    transition:
+      background-color 250ms var(--hb-effect),
+      color 250ms var(--hb-effect),
+      scale var(--hb-spring-duration) var(--hb-spring);
+
+    & .hb-icon {
+      font-size: 18px;
+    }
+
+    &:hover {
+      color: var(--hb-on-surface);
+    }
+
+    &:active {
+      scale: 0.92;
+    }
+
+    &[aria-checked="true"] {
+      background: var(--hb-primary);
+      color: var(--hb-on-primary);
+    }
+  }
+}
+
+/* Page tools: three connected tiles. Like the button group, the outer
+   corners are round and a pressed tile rounds fully. */
+
+.hb-tiles {
+  display: flex;
+  gap: 2px;
+}
+
+.hb-tile {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 76px;
+  border-radius: 8px;
+  background: var(--hb-surface-low);
+  font-size: 13px;
+  font-weight: 600;
+  transition:
+    border-radius var(--hb-spring-duration) var(--hb-spring),
+    background-color 200ms var(--hb-effect),
+    color 200ms var(--hb-effect);
+
+  & .hb-icon {
+    font-size: 24px;
+    color: var(--hb-on-surface-variant);
+  }
+
+  &:first-child {
+    border-start-start-radius: 28px;
+    border-end-start-radius: 28px;
+  }
+
+  &:last-child {
+    border-start-end-radius: 28px;
+    border-end-end-radius: 28px;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--hb-on-surface) 6%, var(--hb-surface-low));
+  }
+
+  &:hover:active {
+    border-radius: 28px;
+  }
+
+  &[enabled="true"] {
+    background: var(--hb-secondary-container);
+    color: var(--hb-on-secondary-container);
+
+    & .hb-icon {
+      color: inherit;
+      font-variation-settings: "FILL" 1;
+    }
+  }
+
+  & .hb-badge {
+    position: absolute;
+    top: 8px;
+    inset-inline-end: 10px;
+  }
+}
+
+.hb-badge {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 12px;
+  background: var(--hb-primary);
+  color: var(--hb-on-primary);
+  font-size: 12px;
+  font-weight: 700;
+
+  &:empty {
+    display: none;
+  }
+}
+
+/* Footer */
+
+.hb-footer {
+  flex-shrink: 0;
+  padding: 12px 16px 16px;
+  border-top: 1px solid color-mix(in srgb, var(--hb-outline-variant) 50%, transparent);
+}
+
+.hb-share-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 56px;
+  border-radius: 28px;
+  background: var(--hb-primary);
+  color: var(--hb-on-primary);
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+  transition:
+    border-radius var(--hb-spring-duration) var(--hb-spring),
+    box-shadow 200ms var(--hb-effect),
+    filter 150ms var(--hb-effect);
+
+  & .hb-icon {
+    font-size: 22px;
+  }
+
+  &:hover {
+    box-shadow: 0 3px 8px rgb(0 0 0 / 0.25);
+    filter: brightness(1.06);
+  }
+
+  &:hover:active {
+    border-radius: 16px;
+  }
+}
+
+/* Custom CSS view */
+
+#hilal-boost-code-editor {
+  flex: 1;
+  min-height: 0;
+  margin: 0 12px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--hb-surface-low);
 }
 
 .source-editor-frame {
-  max-width: 1000px;
-  max-height: 1000px;
   width: 100%;
   height: 100%;
   border: none;
 }
 
-#hilal-boost-code-top-bar {
-  top: 0;
-  z-index: 10;
-
-  width: 100%;
-  height: 40px;
-  background-color: var(--hilal-boosts-secondary-background);
-  @media (-moz-windows-mica) {
-    background-color: var(--hilal-boosts-mica-background);
-  }
-
-  border: solid 0 var(--hilal-boosts-primary-border-color);
-  border-bottom-width: 1px;
+.hb-code-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 12px;
 }
 
-#hilal-boost-name-container {
-  background-image: url("chrome://global/skin/icons/arrow-down.svg");
-  background-repeat: no-repeat;
-  background-position: calc(100% - 2px) calc(50% + 2px);
-  background-size: 12px 12px;
-  padding: 4px 18px 4px 2px;
-  margin-left: 4px;
-  border-radius: 8px;
-
-  -moz-context-properties: fill;
-  fill: var(--hilal-boosts-primary-color);
-
-  opacity: 0.75;
-  background-color: transparent;
-
+.hb-tonal-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px 0 12px;
+  border-radius: 20px;
+  background: var(--hb-secondary-container);
+  color: var(--hb-on-secondary-container);
+  font-weight: 500;
   transition:
-    0.25s opacity cubic-bezier(0.075, 0.82, 0.165, 1),
-    0.25s background-color cubic-bezier(0.075, 0.82, 0.165, 1);
+    border-radius var(--hb-spring-duration) var(--hb-spring),
+    background-color 200ms var(--hb-effect),
+    color 200ms var(--hb-effect);
 
-  -moz-window-dragging: no-drag;
-}
-
-#hilal-boost-name-container:hover {
-  opacity: 0.8;
-  background-color: #aaaaaa22;
-}
-
-#hilal-boost-code-bottom-bar {
-  bottom: 0;
-  z-index: 10;
-
-  width: 100%;
-  height: 60px;
-  background-color: var(--hilal-boosts-secondary-background);
-  @media (-moz-windows-mica) {
-    background-color: var(--hilal-boosts-mica-background);
+  & .hb-icon {
+    font-size: 18px;
   }
 
-  border: solid 0 var(--hilal-boosts-primary-border-color);
-  border-top-width: 1px;
-
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-}
-
-#hilal-boost-code-editor-root {
-  height: 100vh;
-}
-
-#hilal-boost-code-editor {
-  width: 100%;
-  height: calc(100% - 100px);
-
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-body {
-  overflow: clip;
-  display: flex;
-  margin: 0;
-  width: 100%;
-}
-
-#hilal-boost-editor-root,
-#hilal-boost-code-editor-root {
-  user-select: none;
-
-  width: 100%;
-  height: auto;
-  padding: 0;
-  margin: 0;
-
-  & button {
-    border-radius: 8px;
-
-    padding: 0 !important;
-    min-width: fit-content !important;
-
-    border: solid 6px transparent;
-
-    transition: background 0.1s cubic-bezier(0.075, 0.82, 0.165, 1);
-    appearance: none;
-
-    &:active {
-      transform: none !important;
-    }
-
-    &:hover {
-      opacity: 0.8;
-    }
+  &:hover {
+    filter: brightness(0.97);
   }
 
-  & .button-text {
-    display: none;
-  }
-
-  &[disabled] {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
-.subviewbutton {
-  color: var(--hilal-boosts-primary-color);
-}
-
-#hilal-boost-editor-view {
-  gap: 10px;
-}
-
-#hilal-boost-code-top-bar {
-  -moz-window-dragging: drag; /* Allow dragging the window with the custom titlebar for the code view */
-}
-
-#hilal-boost-head-wrapper {
-  -moz-window-dragging: drag; /* Allow dragging the window with the custom titlebar */
-
-  height: 40px;
-  min-height: 40px;
-  max-height: 40px;
-  align-items: center;
-  background-color: var(--hilal-boosts-secondary-background);
-  border: solid 1px transparent;
-  border-bottom-color: var(--hilal-boosts-primary-border-color);
-
-  @media (-moz-windows-mica) {
-    background-color: var(--hilal-boosts-mica-background);
-    border: none;
-  }
-
-  display: flex;
-
-  flex-direction: row-reverse;
-  @media (-moz-platform: macos) {
-    flex-direction: row;
-  }
-
-  & button {
-    height: 24px !important;
-    width: 24px !important;
-    aspect-ratio: 1/1 !important;
-    background-color: transparent;
-    opacity: 0.45;
-
-    transition: 0.25s opacity cubic-bezier(0.075, 0.82, 0.165, 1);
-
-    &:hover {
-      opacity: 0.6;
-    }
-  }
-
-  & #hilal-boost-name {
-    transition: color 0.2s ease-in-out;
-    background-color: transparent;
-    border: none;
-    outline: none;
-    appearance: none;
-
-    display: flex;
-    align-items: center;
-  }
-}
-
-#hilal-boost-name-text {
-  width: 100%;
-  justify-content: center;
-  font-size: 100%;
-  font-weight: 600;
-
-  max-width: 100px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-#hilal-boost-name-text {
-  text-align: center;
-  margin: auto !important;
-  height: min-content;
-}
-
-#hilal-boost-font-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0;
-  width: 100%;
-
-  padding: 2px;
-
-  & button {
-    color: var(--hilal-boosts-primary-color) !important;
-    padding: auto;
-    margin: auto;
-    background-color: transparent;
-  }
-}
-
-#hilal-boost-filter-wrapper {
-  padding: 16px;
-  gap: 14px;
-  padding-top: 6px;
-
-  background-color: var(--hilal-boosts-primary-background);
-
-  -moz-window-dragging: drag;
-  & > * {
-    -moz-window-dragging: no-drag;
-  }
-}
-
-#hilal-boost-footer-wrapper {
-  -moz-window-dragging: drag;
-
-  height: 70px;
-  min-height: 70px;
-  max-height: 70px;
-  align-items: center;
-  padding: 16px;
-  box-sizing: border-box;
-
-  background-color: var(--hilal-boosts-footer-background);
-  border-top: solid 1px var(--hilal-boosts-primary-border-color);
-
-  @media (-moz-windows-mica) {
-    background-color: var(--hilal-boosts-mica-background);
-    border-top: none;
-  }
-
-  & > * {
-    -moz-window-dragging: no-drag;
-  }
-}
-
-.big-button {
-  width: 100% !important;
-  margin: auto;
-  text-indent: 6px;
-  vertical-align: middle;
-  font-size: 10pt;
-
-  list-style-position: right;
-
-  & p {
-    width: 75%;
-    margin: auto;
-    font-weight: 500;
-  }
-}
-
-#hilal-boost-back {
-  width: auto !important;
-  margin: 5px;
-  left: 5px;
-  padding-inline: 6px 10px !important;
-  gap: 4px;
-
-  display: flex;
-
-  & hbox {
-    scale: 0.75;
-    margin-right: -7px;
-    margin-top: 2px;
-  }
-}
-
-#hilal-boost-code-bottom-bar button {
-  content: "";
-  width: auto !important;
-  aspect-ratio: 1/1 !important;
-
-  margin: 5px;
-  left: 5px;
-}
-
-#hilal-boost-zap,
-#hilal-boost-focus {
-  & #hilal-boost-zap-value,
-  & #hilal-boost-focus-value {
-    text-align: right;
-    right: 8px;
-    margin: auto;
-    position: relative;
-  }
-
-  & hbox {
-    margin-right: 8px;
-  }
-}
-
-#hilal-boost-zap[hideicon="true"],
-#hilal-boost-focus[hideicon="true"] {
-  list-style: none;
-  list-style-type: none;
-
-  & hbox {
-    margin-right: 0;
-  }
-}
-
-.hilal-boost-panel-disabled {
-  filter: grayscale(1);
-}
-
-.title-button {
-  scale: 0.9;
-}
-
-.mod-button {
-  height: 38px !important;
-
-  border-radius: 6px;
-  @media (-moz-platform: macos) {
+  &:hover:active {
     border-radius: 12px;
   }
 
-  background-color: var(--hilal-boosts-button-background);
-
-  transition:
-    0.4s background-color cubic-bezier(0.075, 0.82, 0.165, 1),
-    0.4s opacity cubic-bezier(0.075, 0.82, 0.165, 1),
-    0.4s filter cubic-bezier(0.075, 0.82, 0.165, 1) !important;
-
-  &:hover {
-    opacity: 0.85;
-  }
-
-  &:active {
-    transform: none !important;
-
-    opacity: 0.9;
-    filter: brightness(0.9);
+  &[enabled="true"] {
+    background: var(--hb-primary);
+    color: var(--hb-on-primary);
   }
 }
 
-#hilal-boost-case:not([case-mode="none"]) {
-  background-color: var(--hilal-boosts-button-background);
-  font-weight: 600 !important;
-}
-
-#hilal-boost-case[case-mode="uppercase"] {
-  text-transform: uppercase;
-}
-
-#hilal-boost-case[case-mode="lowercase"] {
-  text-transform: lowercase;
-}
-
-#hilal-boost-code-top-bar .mod-button {
-  height: auto !important;
-}
-
-#hilal-boost-code-bottom-bar button {
-  margin: 0;
-}
-
-#hilal-boost-name {
-  height: 26px;
-  font-size: 8pt;
-  text-indent: 2px;
-  vertical-align: middle;
-  color: var(--hilal-boosts-primary-color);
-
-  justify-content: center;
-}
-
-#hilal-boost-close {
-  margin-left: 0;
-  margin-right: 6px;
-  @media (-moz-platform: macos) {
-    margin-left: 6px;
-    margin-right: 0;
+@media (prefers-reduced-motion: reduce) {
+  #hilalBoostWindow {
+    --hb-spring: ease;
+    --hb-spring-duration: 0ms;
   }
 }
 
-#hilal-boost-shuffle {
-  margin-right: 0;
-  margin-left: 4px;
-  @media (-moz-platform: macos) {
-    margin-right: 10px;
-    margin-left: 0;
-  }
-}
-
-.hilal-boost-button-active {
-  background-color: var(--hilal-boosts-active-button-background);
-  color: var(--hilal-boosts-active-button-color);
-
-  &#hilal-boost-magic-theme {
-    background-color: var(--hilal-boosts-magic-theme-active-background);
-  }
-}
-
-.hilal-boost-button-active:hover {
-  background-color: var(--hilal-boosts-active-button-hover-background);
-}
-
-.hilal-boost-button-active-transparent {
-  opacity: 0.35;
-}
-
-.hilal-boost-button-active-transparent:hover {
-  opacity: 0.5 !important;
-}
-
-#hilal-boost-magic-theme {
-  width: 18px;
-  height: 24px !important;
-  margin-top: 12px;
-
-  z-index: 4;
-  box-shadow: 0 2px 4px #00000010;
-
-  position: relative;
-  margin-left: auto;
-  margin-right: auto;
-
-  & image {
-    width: 12px;
-  }
-
-  &:not(.hilal-boost-button-active) {
-    background: var(--hilal-boosts-magic-theme-background);
-    color: var(--hilal-boosts-primary-color);
-  }
-}
-
-.footer {
-  background-color: var(--hilal-boosts-secondary-background);
-  padding: 20px;
-}
-
-#hilal-boost-toolbar-wrapper,
-#hilal-boost-toolbar-wrapper-colors {
-  width: 100%;
-  margin: auto;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-
-  & .small {
-    margin: 0;
-    flex: 1 1 30%;
-  }
-
-  & .med {
-    margin: 0;
-    flex: 1 1 50%;
-
-    & p {
-      text-align: center;
-      width: 100%;
-      text-indent: initial;
-      margin: auto;
-    }
-  }
-}
-
-#hilal-boost-font-select {
-  width: 120px;
-  height: 20px !important;
-
-  transition: 0.2s opacity ease-in-out;
-
-  color: var(--hilal-boosts-secondary-color);
-  background: none;
-
-  font-size: 9pt;
-
-  padding: 0;
-  text-indent: 2px;
-
-  margin-left: 8px;
-  margin-right: 3px;
-  margin-top: 8px;
-  opacity: 0.75;
-
-  &:hover {
-    opacity: 1;
-  }
-
-  &[has-selection="true"] {
-    opacity: 1;
-    background-color: var(--hilal-boosts-button-background);
-  }
-}
-
-/* The editor hides both when custom fonts are off; the flex display below
- * must not win over the hidden attribute. */
-#hilal-boost-font-toolbar[hidden],
-#hilal-boost-font-wrapper .visible-separator[hidden] {
-  display: none !important;
-}
-
-#hilal-boost-font-toolbar {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-
-  & button {
-    border-radius: 6px;
-    min-width: fit-content;
-    height: 20px !important;
-
-    margin-left: 8px;
-    margin-right: 8px;
-    margin-top: 8px;
-    background-color: transparent;
-  }
-}
-
-#hilal-boost-font-wrapper {
-  box-shadow: 0 0 6px rgba(0, 0, 0, .1);
-  background-color: var(--hilal-boosts-font-wrapper-background);
-
-  border-radius: 10px;
-
-  padding-top: 4px;
-  padding-bottom: 4px;
-
-  display: flex;
-  flex-direction: column;
-
-  & .visible-separator {
-    content: "";
-    height: 1px;
-    width: auto;
-
-    margin-right: 6px;
-    margin-left: 6px;
-    margin-top: 2px;
-
-    opacity: 0.15;
-
-    border-top: solid 1px #9a9a9a;
-  }
-
-  & button {
-    filter: none;
-    color: rgba(0, 0, 0, 0.6);
-    border-radius: 50px;
-    font-size: 12px;
-    padding: 2px;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    height: 26px;
-    width: 26px;
-    aspect-ratio: 1;
-
-    &:hover {
-      background-color: #9a9a9a30;
-    }
-  }
-}
-
-@property --mod-button-c1 {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: transparent;
-}
-
-@property --mod-button-c2 {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: transparent;
-}
-
-.mod-button[mode="orange"] {
-  color: #e3e9e4;
-  --mod-button-c1: light-dark(#ffbb5d, #c37a3f);
-  --mod-button-c2: light-dark(#ffa01d, #9f5a2a);
-}
-.mod-button[mode="orange-red"] {
-  color: #e3e9e4;
-  --mod-button-c1: light-dark(#ff8758, #bd6048);
-  --mod-button-c2: light-dark(#ff5b1b, #9b422b);
-}
-.mod-button[mode="red"] {
-  color: #e3e9e4;
-  --mod-button-c1: light-dark(#ff595f, #b94a50);
-  --mod-button-c2: light-dark(#ff121b, #95272e);
-}
-.mod-button[mode="blue"] {
-  color: var(--on-primary, #fff);
-  --mod-button-c1: var(--primary, light-dark(#6650fc, #5d56ca));
-  --mod-button-c2: color-mix(in srgb, var(--primary, #4125ff) 85%, black);
-}
-.mod-button[mode] {
-  background: linear-gradient(180deg, var(--mod-button-c1) 0%, var(--mod-button-c2) 100%) border-box;
-  transition:
-    0.4s background-color cubic-bezier(0.075, 0.82, 0.165, 1),
-    0.4s opacity cubic-bezier(0.075, 0.82, 0.165, 1),
-    0.4s filter cubic-bezier(0.075, 0.82, 0.165, 1),
-    0.75s --mod-button-c1 cubic-bezier(0.075, 0.82, 0.165, 1),
-    0.55s --mod-button-c2 cubic-bezier(0.075, 0.82, 0.165, 1) !important;
-}
-
-#hilal-boost-back {
-  background-color: transparent;
-
-  &:hover {
-    background-color: var(--hilal-boosts-back-button-hover-background);
-  }
-}
-
-#hilal-boost-code-editor-root button {
-  opacity: 0.6;
-}
-
-.toggleable-button[enabled="true"] {
-  --mod-button-c1: var(--hilal-boosts-active-button-background);
-  --mod-button-c2: var(--hilal-boosts-active-button-background);
-  background: var(--hilal-boosts-active-button-background) !important;
-  color: var(--hilal-boosts-active-button-color) !important;
-
-  &:active {
-    opacity: 0.85;
-  }
-}
-
-.hilal-boost-color-picker-gradient::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 8px;
-  margin: 8px;
-
-  z-index: 2;
-
-  background: var(--hilal-boosts-color-picker-background);
-
-  background-position: -23px -23px;
-  backdrop-filter: saturate(2) blur(15px);
-
-  background-size: 6px 6px;
-  background-image: radial-gradient(var(--hilal-boosts-color-picker-pattern-color), 1px, transparent 0);
-
-  @media (-moz-platform: macos) {
-    background-size: 4px 4px;
-    background-image: radial-gradient(var(--hilal-boosts-color-picker-pattern-color) 0.5px, transparent 0);
-  }
-}
-
-.hilal-boost-color-picker-gradient::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-
-  z-index: 1;
-
-  background: conic-gradient(
-      rgba(255, 0, 0, 1) 0%,
-      rgba(255, 162, 0, 1) 10%,
-      rgba(255, 242, 0, 1) 20%,
-      rgba(89, 255, 0, 1) 30%,
-      rgba(0, 255, 128, 1) 40%,
-      rgba(0, 255, 247, 1) 50%,
-      rgba(0, 89, 255, 1) 60%,
-      rgba(8, 0, 255, 1) 70%,
-      rgba(204, 0, 255, 1) 80%,
-      rgba(255, 0, 144, 1) 90%,
-      rgba(255, 0, 8, 1) 100%
-    )
-    border-box;
-
-  pointer-events: none;
-}
-
-.hilal-boost-color-picker-gradient {
-  position: relative;
-  overflow: hidden;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px #00000021;
-  width: 100%;
-  aspect-ratio: 1 /1;
-  margin: 10px 0 4px 0;
-
-  min-height: calc(var(--panel-width) - var(--panel-padding) * 2 - 2px);
-
-  & [animated="true"] {
-    transition: all 0.4s cubic-bezier(0.14, 1.43, 0.56, 1.01) !important;
-  }
-
-  & .hilal-boost-color-picker-circle {
-    position: absolute;
-    z-index: 3;
-    transform-origin: center center;
-    transform: translate(-50%, -50%);
-
-    opacity: 0;
-    transition: opacity 0.4s ease;
-
-    left: 50%;
-    top: 50%;
-
-    outline: solid 1px #9a9a9a88;
-    border-radius: 100%;
-  }
-
-  & .hilal-boost-color-picker-arc-svg {
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-
-  & .hilal-boost-color-picker-dot {
-    box-shadow: 0 2px 4px #00000022;
-    position: absolute;
-    z-index: 5;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--hilal-boost-dot-color);
-
-    /* Move away until initialized */
-    left: -100px;
-    top: -100px;
-
-    @media (-prefers-color-scheme: dark) {
-      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
-    }
-    cursor: pointer;
-    border: 3px solid #ffffff;
-    transform: translate(-50%, -50%);
-    transform-origin: top left;
-    pointer-events: all;
-
-    &:first-of-type {
-      width: 32px;
-      height: 32px;
-      border-width: 3px;
-      transition: transform 0.2s;
-      z-index: 4;
-      &:hover {
-        transform: scale(1.05) translate(-50%, -50%);
-      }
-    }
-
-    &[dragging="true"] {
-      transform: scale(1.2) translate(-50%, -50%);
-    }
-  }
-}
-
-#hilal-boost-editor-root:hover {
-  & .hilal-boost-color-picker-circle, .hilal-boost-color-picker-arc-svg {
-    opacity: 0.4;
-  }
-}
-
-.hilal-boost-font-button-active {
-  background-color: #5454572f !important;
-}
-
-.hilal-boost-font-button-active:hover {
-  background-color: #5b5b5c28 !important;
-}
-
-/** Import animation */
-
+/* Import animation: a light sweep over the window when a Boost is imported */
 
 @property --background-top {
   syntax: "<percentage>";
@@ -848,11 +888,11 @@ body {
 
 #import-animation {
   position: fixed;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.5) 40%, rgba(255, 255, 255, 0.6) 60%, transparent 100%);
   left: 0;
   z-index: 999;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, rgb(255 255 255 / 0.5) 40%, rgb(255 255 255 / 0.6) 60%, transparent 100%);
   opacity: 0;
   transform: translateY(-50%);
   pointer-events: none;
@@ -860,40 +900,32 @@ body {
 
 #import-animation-shadow {
   position: fixed;
-  mix-blend-mode: multiply;
-  background: #00000040;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
+  inset: 0;
   z-index: 998;
+  background: rgb(0 0 0 / 0.25);
+  mix-blend-mode: multiply;
   opacity: 0;
   pointer-events: none;
 }
 
 #import-animation-border {
   position: absolute;
-  border-radius: 12px;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 1000;
-}
-
-#import-animation-border::before {
-  content: "";
-  position: absolute;
   inset: 0;
-  border-radius: inherit;
-  padding: 4px; /* thickness of border */
   z-index: 1000;
+  border-radius: 12px;
+  pointer-events: none;
 
-  background: radial-gradient(ellipse 100% 50% at center var(--background-top), rgba(255, 255, 255, 0.9) 80%, transparent);
-
-  /* Punch out the inside once (not animated) */
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1000;
+    padding: 4px;
+    border-radius: inherit;
+    background: radial-gradient(ellipse 100% 50% at center var(--background-top), rgb(255 255 255 / 0.9) 80%, transparent);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+  }
 }

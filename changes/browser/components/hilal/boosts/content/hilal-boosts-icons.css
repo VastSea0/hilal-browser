@@ -2,8 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/* Boosts editor icons, drawn with the Material Symbols font the shell already
-   ships, so they match the rest of Hilal. */
+/* Icons for the Boost share and receive dialogs, drawn with the Material
+   Symbols font the shell already ships. The editor puts its icons in its own
+   markup. */
 
 @font-face {
   font-family: "Hilal Symbols";
@@ -12,21 +13,6 @@
 }
 
 :is(
-    #hilal-boost-close,
-    #hilal-boost-shuffle,
-    #hilal-boost-magic-theme,
-    #hilal-boost-invert,
-    #hilal-boost-controls,
-    #hilal-boost-disable,
-    #hilal-boost-size,
-    #hilal-boost-case,
-    #hilal-boost-zap,
-    #hilal-boost-focus,
-    #hilal-boost-code,
-    #hilal-boost-share,
-    #hilal-boost-back,
-    #hilal-boost-css-picker,
-    #hilal-boost-css-inspector,
     .hbs-info-button,
     .hbs-pane-left,
     .hbs-pane-right
@@ -47,39 +33,9 @@
   }
 }
 
-#hilal-boost-close::before { content: "close"; }
-#hilal-boost-shuffle::before { content: "casino"; }
-#hilal-boost-magic-theme::before { content: "auto_awesome"; }
-#hilal-boost-invert::before { content: "invert_colors"; }
-#hilal-boost-controls::before { content: "tune"; }
-#hilal-boost-disable::before { content: "format_color_reset"; }
-#hilal-boost-size::before { content: "format_size"; }
-#hilal-boost-case::before { content: "match_case"; }
-#hilal-boost-zap::before { content: "bolt"; }
-#hilal-boost-focus::before { content: "center_focus_strong"; }
-#hilal-boost-code::before { content: "code"; }
-#hilal-boost-share::before { content: "ios_share"; }
-#hilal-boost-back::before { content: "arrow_back"; }
-#hilal-boost-css-picker::before { content: "colorize"; }
-#hilal-boost-css-inspector::before { content: "construction"; }
 .hbs-info-button::before { content: "info"; }
 .hbs-pane-left[icon="back"]::before { content: "arrow_back"; }
 .hbs-pane-left[icon="check"]::before { content: "check"; }
 .hbs-pane-left[icon="signature"]::before { content: "signature"; }
 .hbs-pane-right[icon="menu"]::before { content: "more_vert"; }
 .hbs-pane-right[icon="remove"]::before { content: "close"; }
-
-#hilal-boost-case[case-mode="none"]::before { content: "match_case"; }
-#hilal-boost-case[case-mode="capitalize"]::before { content: "title"; }
-#hilal-boost-case[case-mode="uppercase"]::before { content: "uppercase"; }
-#hilal-boost-case[case-mode="lowercase"]::before { content: "lowercase"; }
-
-/* Icon-only buttons: center the glyph and drop XUL's empty label box, which
-   otherwise pushes the icon off center. */
-#hilalBoostWindow .mod-button.small {
-  justify-content: center;
-
-  & > .button-box {
-    display: none;
-  }
-}

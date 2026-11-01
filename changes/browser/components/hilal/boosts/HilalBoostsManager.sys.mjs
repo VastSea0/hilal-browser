@@ -712,8 +712,8 @@ class nsHilalBoostsManager {
     const screenY = parentWindow.screenY;
     const width = parentWindow.outerWidth;
     const height = parentWindow.outerHeight;
-    const editorWidth = 185;
-    const editorHeight = 685;
+    const editorWidth = 340;
+    const editorHeight = 760;
     const pad = 20;
 
     let left = screenX + width - editorWidth / 2;

@@ -28,6 +28,10 @@ paint paths recolor page colors without touching images.
 
 ## Differences from Zen
 
+- The editor is Hilal's own Material 3 Expressive design, not Zen's layout: a
+  color wheel instead of Zen's square picker, a connected button group for
+  invert, theme and adjust, inline sliders, font chips, a size stepper, a case
+  segmented button and connected tiles for Zap, Focus and Custom CSS.
 - The editor, Zap bar and dialogs take their colors and font from the shell's
   Material tokens (`gHilalBoostsManager.applyShellTheme()`), so they follow the
   workspace color and dark mode.
