@@ -5,38 +5,58 @@
  */
 
 .hbs-dialog {
-  --text-color: light-dark(#060941, #e6e6f0);
-  --text-deco-color: light-dark(#b4b4c2, #5a5a66);
+  /* Material tokens come from the browser window through
+     gHilalBoostsManager.applyShellTheme(); the fallbacks cover the moment
+     before that runs. */
+  --text-color: var(--on-surface, light-dark(#060941, #e6e6f0));
+  --text-deco-color: var(--outline-variant, light-dark(#b4b4c2, #5a5a66));
 
-  --share-header-background: light-dark(#ededf0, #2a2a30);
-  --share-header-border: light-dark(#e0e0e5, #38383f);
-  --share-header-text: light-dark(#6b6b76, #a0a0ab);
+  --share-header-background: var(--surface-container, light-dark(#ededf0, #2a2a30));
+  --share-header-border: var(--outline-variant, light-dark(#e0e0e5, #38383f));
+  --share-header-text: var(--on-surface-variant, light-dark(#6b6b76, #a0a0ab));
 
   --share-width: 470px;
 
-  --signature-container-outline: light-dark(#e5e5e5, #3a3a42);
+  --signature-container-outline: var(--outline-variant, light-dark(#e5e5e5, #3a3a42));
   --signature-container-shadow-color: light-dark(#73747d10, #00000040);
 
-  --footer-background: light-dark(#f7fbfe, #1f1f24);
-  --footer-outline: light-dark(#bbbccb40, #ffffff1a);
+  --footer-background: var(--surface-container-low, light-dark(#f7fbfe, #1f1f24));
+  --footer-outline: var(--outline-variant, light-dark(#bbbccb40, #ffffff1a));
 
-  --info-button-background-hover: light-dark(#d5d6ed, #3a3a44);
-  --info-button-background-active: light-dark(#d5d6ed, #44444f);
-  --share-content-pane-buttons-hover: light-dark(#f1f1ff, #3a3a44);
+  --info-button-background-hover: var(--surface-container-highest, light-dark(#d5d6ed, #3a3a44));
+  --info-button-background-active: var(--surface-container-highest, light-dark(#d5d6ed, #44444f));
+  --share-content-pane-buttons-hover: var(--secondary-container, light-dark(#f1f1ff, #3a3a44));
 
   --favicon-background: light-dark(rgba(0, 0, 0, 0.01), rgba(255, 255, 255, 0.04));
-  --favicon-outline: light-dark(#d4d6e6, #45454f);
-  --favicon-border: light-dark(#fff, #2c2c33);
+  --favicon-outline: var(--outline-variant, light-dark(#d4d6e6, #45454f));
+  --favicon-border: var(--surface-container-lowest, light-dark(#fff, #2c2c33));
 
-  --pane-background: light-dark(#f9f9f8, #2a2a30);
-  --pane-outline: light-dark(#fcfeff, #3a3a42);
+  --pane-background: var(--surface-container-low, light-dark(#f9f9f8, #2a2a30));
+  --pane-outline: var(--surface-container-lowest, light-dark(#fcfeff, #3a3a42));
   --pane-shadow: light-dark(#73747d44, #00000066);
-  --surface-background: light-dark(#fff, #1c1c21);
-  --surface-muted-background: light-dark(#f1f1ff, #2f2f36);
-  --surface-text: light-dark(#6c6a85, #a9a9b8);
-  --ink: light-dark(#030340, #e6e6f0);
-  --separator: light-dark(#8d8e9d68, #ffffff2e);
+  --surface-background: var(--surface-container-lowest, light-dark(#fff, #1c1c21));
+  --surface-muted-background: var(--secondary-container, light-dark(#f1f1ff, #2f2f36));
+  --surface-text: var(--on-surface-variant, light-dark(#6c6a85, #a9a9b8));
+  --ink: var(--on-surface, light-dark(#030340, #e6e6f0));
+  --separator: var(--outline-variant, light-dark(#8d8e9d68, #ffffff2e));
 
+  /* Dialog buttons follow the shell's filled and tonal buttons. */
+  --color-accent-primary: var(--primary);
+  --color-accent-primary-hover: color-mix(in srgb, var(--primary) 90%, var(--on-primary));
+  --color-accent-primary-active: color-mix(in srgb, var(--primary) 80%, var(--on-primary));
+  --button-background-color-primary: var(--color-accent-primary);
+  --button-background-color-primary-hover: var(--color-accent-primary-hover);
+  --button-background-color-primary-active: var(--color-accent-primary-active);
+  --button-background-color: var(--secondary-container);
+  --button-background-color-hover: color-mix(in srgb, var(--secondary-container) 90%, var(--on-secondary-container));
+  --button-background-color-active: color-mix(in srgb, var(--secondary-container) 80%, var(--on-secondary-container));
+  --button-text-color: var(--on-secondary-container);
+  --button-text-color-primary: var(--on-primary);
+  --button-text-color-primary-hover: var(--on-primary);
+  --button-text-color-primary-active: var(--on-primary);
+  --button-border-radius: 20px;
+
+  font-family: var(--font, system-ui);
   position: relative;
   padding: 0 28px 28px;
   background-color: var(--footer-background);
