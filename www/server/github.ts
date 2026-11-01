@@ -68,7 +68,89 @@ function githubHeaders(): HeadersInit {
   return headers;
 }
 
+/**
+ * Lists releases, newest first. GitHub's REST release list leaves out releases
+ * that github-actions[bot] created (most desktop builds), so with a token the
+ * list comes from GraphQL, which returns all of them. REST stays as the
+ * fallback.
+ */
 export async function fetchGithubReleases(limit = 10): Promise<ReleaseSummary[]> {
+  if (process.env.GITHUB_TOKEN) {
+    try {
+      return await fetchGithubReleasesGraphQL(limit);
+    } catch (error) {
+      console.error("GraphQL release list failed, using REST", error);
+    }
+  }
+  return fetchGithubReleasesRest(limit);
+}
+
+const RELEASES_QUERY = `
+  query ($owner: String!, $name: String!, $limit: Int!) {
+    repository(owner: $owner, name: $name) {
+      releases(first: $limit, orderBy: { field: CREATED_AT, direction: DESC }) {
+        nodes {
+          databaseId
+          tagName
+          name
+          publishedAt
+          createdAt
+          description
+          url
+          isDraft
+          isPrerelease
+          releaseAssets(first: 50) {
+            nodes { name size downloadUrl contentType }
+          }
+        }
+      }
+    }
+  }
+`;
+
+async function fetchGithubReleasesGraphQL(limit: number): Promise<ReleaseSummary[]> {
+  const [owner, name] = getRepository().split("/");
+  const response = await fetch(`${GITHUB_API}/graphql`, {
+    method: "POST",
+    headers: { ...githubHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: RELEASES_QUERY,
+      variables: { owner, name, limit: Math.min(limit, 100) },
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`GitHub GraphQL request failed: ${response.status}`);
+  }
+  const data = await response.json();
+  const nodes = data?.data?.repository?.releases?.nodes;
+  if (!Array.isArray(nodes)) {
+    throw new Error(
+      `GitHub GraphQL returned no releases: ${JSON.stringify(data?.errors ?? data)}`
+    );
+  }
+  return nodes.map((node: any) =>
+    normalizeRelease({
+      id: node.databaseId,
+      tag_name: node.tagName,
+      name: node.name,
+      published_at: node.publishedAt || node.createdAt,
+      body: node.description,
+      html_url: node.url,
+      draft: node.isDraft,
+      prerelease: node.isPrerelease,
+      // GraphQL has no numeric asset ids; derive unique ones for UI keys.
+      assets: (node.releaseAssets?.nodes || []).map((asset: any, index: number) => ({
+        id: Number(node.databaseId || 0) * 1000 + index + 1,
+        name: asset.name,
+        size: asset.size,
+        browser_download_url: asset.downloadUrl,
+        content_type: asset.contentType,
+      })),
+    })
+  );
+}
+
+async function fetchGithubReleasesRest(limit: number): Promise<ReleaseSummary[]> {
   const repo = getRepository();
   const response = await fetch(
     `${GITHUB_API}/repos/${repo}/releases?per_page=${limit}`,

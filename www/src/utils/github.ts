@@ -1,74 +1,32 @@
 import { GithubRelease, GithubAsset } from "../types";
 
+// Shown when the release list cannot be loaded: no download files, only a
+// link to the releases page, so nothing points at a file that does not exist.
 export const FALLBACK_RELEASE_TR: GithubRelease = {
-  id: 1,
-  tag_name: "v1.0.0-alpha.5",
-  name: "v1.0.0-alpha.5: Kararlı Başlangıç",
-  published_at: "2026-05-20T14:30:00Z",
+  id: 0,
+  tag_name: "",
+  name: "Hilal Browser",
+  published_at: "",
   html_url: "https://github.com/VastSea0/hilal-browser/releases",
-  body: `### Öne çıkanlar\n- Firefox (Gecko-128) tabanına geçildi.\n- uBlock Origin varsayılan kurulum paketine eklendi.\n- Dikey Sekmeler sol kenar çubuğunda çalışır.\n- Başlangıç sayfası önizlemesi eklendi.`,
-  assets: [
-    {
-      id: 101,
-      name: "hilal-browser-1.0.0-setup.exe",
-      size: 82312450,
-      browser_download_url: "https://github.com/VastSea0/hilal-browser/releases/download/v1.0.0-alpha.5/hilal-browser-1.0.0-setup.exe"
-    },
-    {
-      id: 102,
-      name: "hilal-browser-1.0.0.dmg",
-      size: 89432100,
-      browser_download_url: "https://github.com/VastSea0/hilal-browser/releases/download/v1.0.0-alpha.5/hilal-browser-1.0.0.dmg"
-    },
-    {
-      id: 103,
-      name: "hilal-browser-1.0.0-x86_64.AppImage",
-      size: 96210450,
-      browser_download_url: "https://github.com/VastSea0/hilal-browser/releases/download/v1.0.0-alpha.5/hilal-browser-1.0.0-x86_64.AppImage"
-    },
-    {
-      id: 104,
-      name: "hilal-browser-1.0.0_amd64.deb",
-      size: 68150240,
-      browser_download_url: "https://github.com/VastSea0/hilal-browser/releases/download/v1.0.0-alpha.5/hilal-browser-1.0.0_amd64.deb"
-    },
-    {
-      id: 105,
-      name: "hilal-browser-1.0.0.zip",
-      size: 102140500,
-      browser_download_url: "https://github.com/VastSea0/hilal-browser/releases/download/v1.0.0-alpha.5/hilal-browser-1.0.0.zip"
-    },
-    {
-      id: 106,
-      name: "Hilal-1.0.0-x86_64.tar.gz",
-      size: 99120500,
-      browser_download_url: "https://github.com/VastSea0/hilal-browser/releases/download/v1.0.0-alpha.5/Hilal-1.0.0-x86_64.tar.gz"
-    }
-  ]
+  body: "",
+  assets: [],
 };
 
-export const FALLBACK_RELEASE_EN: GithubRelease = {
-  id: 1,
-  tag_name: "v1.0.0-alpha.5",
-  name: "v1.0.0-alpha.5: Stable Outset",
-  published_at: "2026-05-20T14:30:00Z",
-  html_url: "https://github.com/VastSea0/hilal-browser/releases",
-  body: `### Highlights\n- Moved to the Firefox (Gecko-128) base.\n- Added uBlock Origin to the default package.\n- Vertical Tabs run in the left sidebar.\n- Added a start page preview.`,
-  assets: FALLBACK_RELEASE_TR.assets
-};
+export const FALLBACK_RELEASE_EN: GithubRelease = FALLBACK_RELEASE_TR;
 
 /**
- * Fetch with exponential backoff
- * Retries up to 5 times on fetch/transient errors, silently (does not log retries).
+ * Loads the release list from the site's own API, which is cached and lists
+ * every release. GitHub's public API is only a fallback: it leaves out
+ * releases made by the build workflow and allows few requests per visitor.
  */
 export async function fetchGithubReleases(): Promise<GithubRelease[]> {
-  const localFeed = await fetchReleaseFeed("/releases.json");
-  if (localFeed.length > 0) {
-    return localFeed;
+  const feed = await fetchReleaseFeed("/api/releases");
+  if (feed.length > 0) {
+    return feed;
   }
 
   const url = "https://api.github.com/repos/VastSea0/hilal-browser/releases";
-  const maxRetries = 5;
+  const maxRetries = 2;
   let delay = 300;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -242,31 +200,44 @@ export function detectOS(): DetectionOS {
   return "other";
 }
 
+// Release files that are not the browser: the hil patch manager, update
+// archives and manifests, and build artifacts.
+function isBrowserDownload(asset: GithubAsset): boolean {
+  const name = asset.name.toLowerCase();
+  return !(
+    name === "hil" ||
+    name === "hil.exe" ||
+    name.endsWith(".mar") ||
+    name.endsWith(".json") ||
+    name.endsWith(".sha256") ||
+    name.includes("xpt_artifacts")
+  );
+}
+
 /**
  * Filter and recommend the best install asset for the detected Operating System
  */
 export function getRecommendedAsset(assets: GithubAsset[], os: DetectionOS): GithubAsset | null {
-  if (!assets || assets.length === 0) return null;
-  
+  const downloads = (assets || []).filter(isBrowserDownload);
+  if (downloads.length === 0) return null;
+  const find = (test: (name: string) => boolean) =>
+    downloads.find(a => test(a.name.toLowerCase())) || null;
+
   if (os === "android") {
-    const apk = assets.find(a => a.name.toLowerCase().endsWith(".apk"));
-    if (apk) return apk;
+    return find(name => name.endsWith(".apk"));
   } else if (os === "windows") {
-    const exe = assets.find(a => a.name.toLowerCase().endsWith(".exe"));
-    if (exe) return exe;
+    return (
+      find(name => name.endsWith(".exe")) ||
+      find(name => name.endsWith(".zip") && name.includes("win"))
+    );
   } else if (os === "macos") {
-    const dmg = assets.find(a => a.name.toLowerCase().endsWith(".dmg"));
-    if (dmg) return dmg;
+    return find(name => name.endsWith(".dmg"));
   } else if (os === "linux") {
-    const deb = assets.find(a => a.name.toLowerCase().endsWith(".deb"));
-    if (deb) return deb;
-    const appimage = assets.find(a => a.name.toLowerCase().endsWith(".appimage"));
-    if (appimage) return appimage;
-    const tarball = assets.find(a => {
-      const name = a.name.toLowerCase();
-      return name.endsWith(".tar.gz") || name.endsWith(".tar.xz");
-    });
-    if (tarball) return tarball;
+    return (
+      find(name => name.endsWith(".deb")) ||
+      find(name => name.endsWith(".appimage")) ||
+      find(name => name.endsWith(".tar.gz") || name.endsWith(".tar.xz"))
+    );
   }
   return null;
 }
@@ -328,5 +299,13 @@ export function pickReleaseFor(releases: GithubRelease[], os: DetectionOS): Gith
       null
     );
   }
-  return published.find(release => !isAndroidRelease(release)) || published[0] || null;
+  const desktop = published.filter(release => !isAndroidRelease(release));
+  // The newest desktop release with a file for this system; builds do not
+  // always cover every platform.
+  return (
+    desktop.find(release => getRecommendedAsset(release.assets, os) !== null) ||
+    desktop[0] ||
+    published[0] ||
+    null
+  );
 }
