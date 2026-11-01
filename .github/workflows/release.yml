@@ -651,6 +651,21 @@ jobs:
           if-no-files-found: warn
           retention-days: 5
 
+      # mach names the packages after Firefox and also leaves an xpt_artifacts.zip
+      # that is not meant for users. Publish only the installer and the portable
+      # zip, named like the Linux assets.
+      - name: Name Windows release assets
+        if: always()
+        shell: pwsh
+        run: |
+          $version = "${{ needs.prepare.outputs.tag }}".TrimStart("v")
+          New-Item -ItemType Directory -Force -Path "dist" | Out-Null
+          $installer = Get-ChildItem -Path "engine/obj-*/dist/install/sea/*.installer.exe", "engine/obj-*/dist/*.installer.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          $zip = Get-ChildItem -Path "engine/obj-*/dist/*.win64.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($installer) { Copy-Item $installer.FullName "dist/Hilal-$version-win64-setup.exe" }
+          if ($zip) { Copy-Item $zip.FullName "dist/Hilal-$version-win64.zip" }
+          Get-ChildItem dist
+
       - name: Upload Windows Assets to release
         if: always()
         uses: softprops/action-gh-release@v3
@@ -660,9 +675,8 @@ jobs:
           tag_name: ${{ needs.prepare.outputs.tag }}
           fail_on_unmatched_files: false
           files: |
-            engine/obj-*/dist/*.exe
-            engine/obj-*/dist/install/**/*.exe
-            engine/obj-*/dist/*.zip
+            dist/Hilal-*-win64-setup.exe
+            dist/Hilal-*-win64.zip
 
   # --------------------------------------------------------------------------
   # Publish: mark the draft release as live once at least one platform finished
