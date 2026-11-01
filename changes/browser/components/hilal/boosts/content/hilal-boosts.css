@@ -25,10 +25,11 @@
   --hilal-boosts-active-button-color: var(--on-primary, light-dark(#fcfcfe, #1c1c1e));
   --hilal-boosts-back-button-hover-background: var(--surface-container-highest, light-dark(#e3e3e6, #3a3a3a));
 
-  --hilal-boosts-magic-theme-background: var(--surface-container-lowest, light-dark(white, #3a3a3a));
+  --hilal-boosts-raised-background: light-dark(var(--surface-container-lowest, white), var(--surface-container, #262626));
+  --hilal-boosts-magic-theme-background: var(--hilal-boosts-raised-background);
   --hilal-boosts-magic-theme-active-background: var(--primary, light-dark(#3a3a3a, white));
 
-  --hilal-boosts-font-wrapper-background: var(--surface-container-lowest, light-dark(white, #262626));
+  --hilal-boosts-font-wrapper-background: var(--hilal-boosts-raised-background);
 
   --hilal-boosts-primary-border-color: var(--outline-variant, light-dark(#ededef, #3a3a3a));
 
