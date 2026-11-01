@@ -1,6 +1,9 @@
 . "$topsrcdir/../mozconfigs/base"
 
 if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+  # Configure only bootstraps toolchains on Nightly by default. ESR builds on
+  # CI need Mozilla's pinned clang, libclang and cbindgen, not the runner's.
+  ac_add_options --enable-bootstrap
   # A release Rust staticlib build uses LTO even when cross-language LTO is
   # disabled. Run one build job at a time so rustc and clang do not exhaust
   # the hosted runner's memory together.

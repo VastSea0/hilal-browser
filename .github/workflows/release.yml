@@ -161,10 +161,6 @@ jobs:
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@v0.0.10
 
-      # ESR 153 needs cbindgen 0.29.4 or newer and nothing else installs it.
-      - name: Install cbindgen
-        run: cargo install cbindgen --version "^0.29.4" --locked
-
       - name: Apply patches
         run: ./bin/hil apply --force
 
@@ -419,10 +415,6 @@ jobs:
             echo "Could not install sccache -- building without compiler cache"
           fi
 
-      # ESR 153 needs cbindgen 0.29.4 or newer and nothing else installs it.
-      - name: Install cbindgen
-        run: cargo install cbindgen --version "^0.29.4" --locked
-
       - name: Apply patches
         run: ./bin/hil apply --force
 
@@ -614,11 +606,6 @@ jobs:
           } catch {
             Write-Host "sccache server failed to start: $_"
           }
-
-      # ESR 153 needs cbindgen 0.29.4 or newer and nothing else installs it.
-      - name: Install cbindgen
-        shell: pwsh
-        run: cargo install cbindgen --version "^0.29.4" --locked
 
       - name: Apply patches
         shell: pwsh

@@ -3,6 +3,9 @@
 ac_add_options --enable-linker=lld
 
 if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+  # Configure only bootstraps toolchains on Nightly by default. ESR builds on
+  # CI need Mozilla's pinned clang, libclang and cbindgen, not the runner's.
+  ac_add_options --enable-bootstrap
   # Keep peak memory below the hosted runner limit and avoid generating
   # debug data that is not published by the release workflow.
   mk_add_options MOZ_MAKE_FLAGS="-j2"
