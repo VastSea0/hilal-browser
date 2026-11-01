@@ -328,12 +328,13 @@ body {
 }
 
 #hilal-boost-back {
-  width: 60px !important;
+  width: auto !important;
   margin: 5px;
   left: 5px;
+  padding-inline: 6px 10px !important;
+  gap: 4px;
 
   display: flex;
-  flex-direction: row-reverse;
 
   & hbox {
     scale: 0.75;

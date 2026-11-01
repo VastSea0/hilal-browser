@@ -72,7 +72,23 @@ export class HilalBoostsParent extends JSWindowActorParent {
     if (!browser || browsingContext.parent) {
       return;
     }
-    const bar = browser.ownerDocument.createElement("hilal-zap-bar");
+    const doc = browser.ownerDocument;
+    // The element is defined by a module the browser window does not load
+    // at startup; the bar upgrades once the module has run.
+    if (
+      !doc.defaultView.customElements.get("hilal-zap-bar") &&
+      !doc.getElementById("hilal-zap-bar-module")
+    ) {
+      const script = doc.createElementNS(
+        "http://www.w3.org/1999/xhtml",
+        "script"
+      );
+      script.id = "hilal-zap-bar-module";
+      script.type = "module";
+      script.src = "chrome://browser/content/hilal/boosts/HilalZapBar.mjs";
+      doc.head.appendChild(script);
+    }
+    const bar = doc.createElement("hilal-zap-bar");
     bar.browser = browser;
     bar.actor = this;
     browser.parentNode.insertAdjacentElement("afterend", bar);

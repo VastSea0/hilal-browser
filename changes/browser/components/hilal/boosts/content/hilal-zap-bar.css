@@ -4,58 +4,81 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+/* Floats over the bottom of the page as a Material toolbar, using the shell's
+   color tokens, which inherit into the shadow tree from the browser window. */
 :host {
-  grid-area: findbar;
-  position: relative;
-  z-index: 1;
+  position: absolute;
+  inset-inline: 16px;
+  bottom: 16px;
+  z-index: 2;
+  margin-inline: auto;
+  max-width: min(720px, calc(100% - 32px));
 
   display: flex;
   align-items: center;
   gap: 8px;
 
   min-width: 0;
-  padding: 10px;
+  padding: 8px;
 
-  color: #d6d6d6;
-  background-color: #1d1b1b;
-  border-top: 1px solid #2f2b2b;
+  font-family: var(--font, system-ui);
+  font-size: 13px;
+  color: var(--on-surface, #1d1b20);
+  background-color: var(--surface-container-high, #ece6f0);
+  border: 1px solid var(--outline-variant, #cac4d0);
+  border-radius: 28px;
+  box-shadow:
+    0 4px 8px 3px rgb(0 0 0 / 0.15),
+    0 1px 3px rgb(0 0 0 / 0.3);
+
+  animation: hilal-zap-bar-in 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes hilal-zap-bar-in {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    animation: none;
+  }
 }
 
 button {
   appearance: none;
   flex: 0 0 auto;
 
-  height: 30px;
-  min-width: 30px;
+  height: 32px;
+  min-width: 32px;
   margin: 0;
-  padding: 0 10px;
+  padding: 0 12px;
 
   border: none;
-  border-radius: 8px;
+  border-radius: 16px;
 
-  /* stylelint-disable-next-line property-no-unknown */
-
-  background: linear-gradient(0deg, #afafaf 0%, #e5e5e5 100%);
-  color: #1d1b1b;
+  background: var(--secondary-container, #e8def8);
+  color: var(--on-secondary-container, #1d192b);
   font: inherit;
-  font-weight: bold;
+  font-weight: 500;
 
   transition:
-    0.1s filter ease-in-out,
+    0.15s filter ease-in-out,
     scale 0.35s cubic-bezier(0.11, 1.6, 0.63, 1);
 
   &:hover {
-    filter: brightness(0.9);
+    filter: brightness(0.95);
   }
 
   &:active {
-    filter: brightness(0.8);
     scale: 0.95;
   }
 
   &:focus-visible {
-    outline: 2px solid #e5e5e5;
-    outline-offset: 1px;
+    outline: 2px solid var(--primary, #6750a4);
+    outline-offset: 2px;
   }
 }
 
@@ -69,16 +92,17 @@ button {
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
+  scrollbar-width: none;
 }
 
 .hilal-zap-bar-unzap {
-  width: 30px;
+  width: 32px;
   padding: 0;
 }
 
 .hilal-zap-bar-helper {
-  padding-inline-start: 6px;
-  opacity: 0.8;
+  padding-inline-start: 8px;
+  color: var(--on-surface-variant, #49454f);
   user-select: none;
 }
 
@@ -89,5 +113,7 @@ button {
 }
 
 .hilal-zap-bar-done {
-  padding: 0 12px;
+  padding: 0 16px;
+  background: var(--primary, #6750a4);
+  color: var(--on-primary, #fff);
 }
