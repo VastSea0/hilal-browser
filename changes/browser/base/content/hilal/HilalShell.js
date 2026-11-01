@@ -279,6 +279,8 @@
     // HilalNewTabChild watches this key and asks its window for the new
     // theme when it changes.
     broadcastTheme() {
+      // Lets Boosts that follow the workspace color restyle their pages.
+      Services.obs.notifyObservers(window, "hilal-accent-changed");
       try {
         Services.ppmm.sharedData.set("hilal:activeTheme", this.getThemeData());
         Services.ppmm.sharedData.flush();
@@ -612,6 +614,18 @@
         this.openThemePicker(themeBtn, e);
       });
       urlContainer.appendChild(themeBtn);
+
+      const boostBtn = document.createElement("button");
+      boostBtn.id = "hilal-url-boost-btn";
+      boostBtn.className = "circle transparent small hilal-btn hilal-url-action-btn";
+      boostBtn.setAttribute("data-l10n-id", "hilal-boosts-button");
+      boostBtn.innerHTML = "<i>bolt</i>";
+      boostBtn.addEventListener("click", e => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.openBoostsMenu(boostBtn);
+      });
+      urlContainer.appendChild(boostBtn);
 
       // Page Actions wrapper slot for native Firefox page actions (#star-button-box, reader-mode)
       const pageActionsSlot = document.createElement("div");
@@ -1778,6 +1792,174 @@
       menu.style.display = "flex";
     },
 
+    get boostsManager() {
+      return ChromeUtils.importESModule(
+        "resource:///modules/hilal/boosts/HilalBoostsManager.sys.mjs"
+      ).gHilalBoostsManager;
+    },
+
+    // Shows the Boost button only where Boosts can run and marks it while
+    // one of the site's Boosts is on.
+    updateBoostButton() {
+      const button = document.getElementById("hilal-url-boost-btn");
+      if (!button) {
+        return;
+      }
+      const uri = window.gBrowser.currentURI;
+      let canBoost = false;
+      let active = false;
+      try {
+        const manager = this.boostsManager;
+        canBoost =
+          Services.prefs.getBoolPref("hilal.boosts.enabled", true) &&
+          manager.canBoostSite(uri);
+        active = canBoost && !!manager.getActiveBoostId(uri.host);
+      } catch (e) {}
+      button.hidden = !canBoost;
+      button.classList.toggle("hilal-boost-active", active);
+    },
+
+    openBoostsMenu(anchor) {
+      const existing = document.getElementById("hilal-boosts-menu");
+      if (existing) {
+        existing.remove();
+        return;
+      }
+      const manager = this.boostsManager;
+      const uri = window.gBrowser.currentURI;
+      if (!manager.canBoostSite(uri)) {
+        return;
+      }
+      const domain = uri.host;
+      const boosts = (manager.loadBoostsFromStore(domain) || []).filter(
+        boost => boost.boostEntry.boostData.changeWasMade
+      );
+      const openEditor = boost => {
+        manager.openBoostWindow(window, boost, uri);
+      };
+      if (!boosts.length) {
+        openEditor(manager.createNewBoost(domain));
+        return;
+      }
+
+      const menu = document.createElement("div");
+      menu.id = "hilal-boosts-menu";
+      menu.className =
+        "beer menu vertical round medium-elevate active surface-container-high";
+
+      const title = document.createElement("label");
+      title.className = "bold uppercase small-text opacity padding";
+      title.setAttribute("data-l10n-id", "hilal-site-data-boosts");
+      menu.appendChild(title);
+
+      const activeId = manager.getActiveBoostId(domain);
+      for (const boost of boosts) {
+        const row = document.createElement("div");
+        row.className = "hilal-boosts-menu-row";
+        const toggle = document.createElement("button");
+        toggle.className = "row wave round tiny-space transparent";
+        toggle.toggleAttribute("aria-pressed", boost.id == activeId);
+        const icon = document.createElement("i");
+        icon.textContent = boost.id == activeId ? "toggle_on" : "toggle_off";
+        const name = document.createElement("span");
+        name.className = "max";
+        name.textContent = boost.boostEntry.boostData.boostName || domain;
+        toggle.append(icon, name);
+        toggle.addEventListener("click", () => {
+          manager.toggleBoostActiveForDomain(domain, boost.id);
+          menu.remove();
+          this.updateBoostButton();
+        });
+        const edit = document.createElement("button");
+        edit.className = "circle transparent small";
+        edit.setAttribute("data-l10n-id", "hilal-boosts-edit");
+        edit.innerHTML = "<i>edit</i>";
+        edit.addEventListener("click", () => {
+          menu.remove();
+          openEditor(manager.loadBoostFromStore(domain, boost.id));
+        });
+        row.append(toggle, edit);
+        menu.appendChild(row);
+      }
+
+      const create = document.createElement("button");
+      create.className = "row wave round tiny-space transparent";
+      create.innerHTML = '<i>add</i><span class="max" data-l10n-id="hilal-boosts-new"></span>';
+      create.addEventListener("click", () => {
+        menu.remove();
+        openEditor(manager.createNewBoost(domain));
+      });
+      menu.appendChild(create);
+
+      const rect = anchor.getBoundingClientRect();
+      menu.style.position = "fixed";
+      menu.style.top = `${rect.bottom + 6}px`;
+      menu.style.right = `${window.innerWidth - rect.right}px`;
+      menu.style.display = "flex";
+      document.body.appendChild(menu);
+
+      const onDocClick = e => {
+        if (!menu.contains(e.target) && !anchor.contains(e.target)) {
+          menu.remove();
+          document.removeEventListener("mousedown", onDocClick);
+        }
+      };
+      setTimeout(() => document.addEventListener("mousedown", onDocClick), 0);
+    },
+
+    // Opening a shared Boost link offers the Boost instead of showing the
+    // share page, then takes the user to the site it was made for.
+    async maybeReceiveSharedBoost(webProgress, location) {
+      if (!webProgress || !location) {
+        return;
+      }
+      const { HilalShareClient } = ChromeUtils.importESModule(
+        "resource:///modules/hilal/boosts/HilalShareClient.sys.mjs"
+      );
+      const share = HilalShareClient.parseShareUrl(location.spec);
+      if (!share) {
+        return;
+      }
+      const browser = webProgress.browsingContext?.top?.embedderElement;
+      let preview;
+      try {
+        preview = await HilalShareClient.fetchSharePreview(share);
+      } catch (e) {
+        console.error("Hilal Boosts: could not load a shared Boost", e);
+        this.showToast("hilal-boost-receive-error-toast");
+        return;
+      }
+      const manager = this.boostsManager;
+      if (!manager.isValidSharedDomain(preview.doc.shared.domain)) {
+        this.showToast("hilal-boost-receive-error-toast");
+        return;
+      }
+      const tab = browser && window.gBrowser.getTabForBrowser(browser);
+      if (tab && window.gBrowser.tabs.length > 1) {
+        window.gBrowser.removeTab(tab, { skipSessionStore: true });
+      }
+      manager.receiveBoost(window, preview.doc.shared, preview.name);
+    },
+
+    // Short message above the bottom of the window, used by Boosts.
+    showToast(l10nId, l10nArgs) {
+      let toast = document.getElementById("hilal-toast");
+      if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "hilal-toast";
+        toast.className = "beer";
+        toast.setAttribute("role", "status");
+        document.body.appendChild(toast);
+      }
+      document.l10n.setAttributes(toast, l10nId, l10nArgs);
+      toast.classList.remove("visible");
+      // Restarts the transition when a toast is already showing.
+      void toast.offsetWidth;
+      toast.classList.add("visible");
+      clearTimeout(this._toastTimer);
+      this._toastTimer = setTimeout(() => toast.classList.remove("visible"), 2600);
+    },
+
     openThemePicker(anchor, event) {
       const existing = document.getElementById("hilal-theme-menu");
       if (existing) {
@@ -2932,9 +3114,24 @@
           if (!aWebProgress || aWebProgress.isTopLevel) {
             this.syncUrl();
             this.renderTabs();
+            this.updateBoostButton();
+            this.maybeReceiveSharedBoost(aWebProgress, aLocation);
           }
         },
       });
+
+      window.gBrowser.tabContainer.addEventListener("TabSelect", () =>
+        this.updateBoostButton()
+      );
+      MozXULElement.insertFTLIfNeeded("browser/hilal-boosts.ftl");
+      const boostsObserver = () => this.updateBoostButton();
+      Services.obs.addObserver(boostsObserver, "hilal-boosts-update");
+      window.addEventListener(
+        "unload",
+        () => Services.obs.removeObserver(boostsObserver, "hilal-boosts-update"),
+        { once: true }
+      );
+      this.updateBoostButton();
 
       // gIdentityHandler updates after progress listeners such as the one
       // above, so follow the native identity box it restyles instead.

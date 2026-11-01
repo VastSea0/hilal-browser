@@ -1815,3 +1815,86 @@ browser[type="content"],
     transition: none !important;
   }
 }
+
+/* Boosts */
+#hilal-url-boost-btn[hidden] {
+  display: none !important;
+}
+
+#hilal-url-boost-btn.hilal-boost-active {
+  background-color: var(--md-sys-color-primary-container) !important;
+  color: var(--md-sys-color-on-primary-container) !important;
+}
+
+#hilal-boosts-menu {
+  z-index: 100002;
+  flex-direction: column !important;
+  min-width: 240px;
+  padding: 6px;
+  gap: 2px;
+  border-radius: 16px !important;
+  border: 1px solid var(--md-sys-color-outline-variant) !important;
+  background-color: var(--md-sys-color-surface-container-high) !important;
+  color: var(--md-sys-color-on-surface) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+  transform-origin: top right;
+  animation: hilal-menu-open 260ms var(--md-sys-motion-spring-spatial);
+}
+
+#hilal-boosts-menu > label {
+  padding: 8px 12px 4px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.06em !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
+}
+
+#hilal-boosts-menu button.row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-height: 40px !important;
+  padding: 8px 12px !important;
+  border-radius: 12px !important;
+  text-align: start !important;
+  white-space: nowrap !important;
+}
+
+#hilal-boosts-menu button.row:hover {
+  background-color: var(--md-sys-color-surface-container-highest) !important;
+}
+
+#hilal-boosts-menu button[aria-pressed] i {
+  color: var(--md-sys-color-primary);
+}
+
+.hilal-boosts-menu-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#hilal-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 100003;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  background-color: var(--md-sys-color-inverse-surface, #2f3036);
+  color: var(--md-sys-color-inverse-on-surface, #f1f0f7);
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 16px) scale(0.96);
+  transition:
+    opacity 180ms ease,
+    transform 320ms var(--md-sys-motion-spring-spatial);
+}
+
+#hilal-toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
