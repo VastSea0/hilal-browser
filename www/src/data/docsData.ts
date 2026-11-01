@@ -263,7 +263,7 @@ git commit -am "feat(shell): update sidebar collapse behavior"
 [browser]
 name = "Hilal Browser"
 codename = "hilal"
-version = "0.3.0-alpha.6"
+version = "0.4.0-alpha.1"
 
 [branding]
 active_profile = "hilal-default"
@@ -873,7 +873,7 @@ git commit -am "feat(shell): update sidebar collapse behavior"
 [browser]
 name = "Hilal Browser"
 codename = "hilal"
-version = "0.3.0-alpha.6"
+version = "0.4.0-alpha.1"
 
 [branding]
 active_profile = "hilal-default"

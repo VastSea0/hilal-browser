@@ -15,7 +15,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 563,
+    "contributions": 567,
     "role": "Lead Developer"
   },
   {

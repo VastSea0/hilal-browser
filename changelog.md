@@ -2,7 +2,7 @@
 
 ---
 
-## [Unreleased]
+## [0.4.0-alpha.1] - 2026-11-01
 
 ### Added
 - Boosts are back, rebuilt from Zen Browser's Boosts (MPL 2.0). Per site, you can recolor a page without touching its images, invert it, change its contrast, brightness and saturation, set its font, text size and case, hide elements with Zap, keep only what matters with Focus, and add your own CSS. Open them with the bolt button in the address bar.
