@@ -149,6 +149,7 @@ export class nsHilalBoostEditor {
       cmd_hilalBoostEditName: () => this.editBoostName(),
       cmd_hilalBoostShuffle: () => this.shuffleBoost(),
       cmd_hilalBoostReset: () => this.resetBoost(),
+      cmd_hilalBoostNightOnly: () => this.onToggleNightOnly(),
       cmd_hilalBoostLoad: () => this.onLoadBoostClick(),
       cmd_hilalBoostSave: () => this.onSaveBoostClick(),
       cmd_hilalBoostDelete: () => this.deleteBoost(),
@@ -1203,6 +1204,23 @@ ${cssSelector} {
   }
 
   /**
+   * Toggles whether the boost only applies while the browser is dark.
+   */
+  onToggleNightOnly() {
+    this.currentBoostData.nightOnly = !this.currentBoostData.nightOnly;
+    this.currentBoostData.changeWasMade = true;
+    this.updateCurrentBoost();
+    if (
+      !gHilalBoostsManager.isBoostInEffect(
+        this.currentBoostData,
+        this.openerWindow
+      )
+    ) {
+      this.openerWindow.gHilalShell?.showToast("hilal-boost-night-only-toast");
+    }
+  }
+
+  /**
    * Toggles the smart invert feature, which automatically inverts colors
    * based on the window's color scheme.
    *
@@ -1460,6 +1478,9 @@ ${cssSelector} {
     const resetBoost = this.doc.getElementById("hilal-boost-edit-reset");
 
     const popup = this.doc.getElementById("hilalBoostContextMenu");
+    this.doc
+      .getElementById("hilal-boost-night-only")
+      .setAttribute("checked", !!this.currentBoostData.nightOnly);
     popup.addEventListener(
       "popupshown",
       () => {

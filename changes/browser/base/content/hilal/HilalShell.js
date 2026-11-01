@@ -1865,6 +1865,13 @@
         name.className = "max";
         name.textContent = boost.boostEntry.boostData.boostName || domain;
         toggle.append(icon, name);
+        if (boost.boostEntry.boostData.nightOnly) {
+          const night = document.createElement("i");
+          night.className = "hilal-boosts-night-badge";
+          night.setAttribute("data-l10n-id", "hilal-boosts-night-only-badge");
+          night.textContent = "dark_mode";
+          toggle.append(night);
+        }
         toggle.addEventListener("click", () => {
           manager.toggleBoostActiveForDomain(domain, boost.id);
           menu.remove();

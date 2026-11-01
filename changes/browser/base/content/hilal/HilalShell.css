@@ -1875,6 +1875,11 @@ browser[type="content"],
   gap: 4px;
 }
 
+#hilal-boosts-menu .hilal-boosts-night-badge {
+  font-size: 18px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
 #hilal-toast {
   position: fixed;
   left: 50%;

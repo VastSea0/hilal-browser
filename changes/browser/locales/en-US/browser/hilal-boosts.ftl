@@ -117,3 +117,9 @@ hilal-boosts-edit =
     .aria-label = Edit Boost
 hilal-boosts-new = New Boost
 hilal-boost-share-error-toast = Couldn't share this Boost. Try again later.
+
+hilal-boost-night-only =
+    .label = Only in Dark Mode
+hilal-boost-night-only-toast = This Boost will apply when Hilal is in dark mode
+hilal-boosts-night-only-badge =
+    .title = Only in dark mode

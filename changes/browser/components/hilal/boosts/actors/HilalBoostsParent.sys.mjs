@@ -227,6 +227,14 @@ export class HilalBoostsParent extends JSWindowActorParent {
         }
 
         const boost = lazy.gHilalBoostsManager.loadActiveBoostFromStore(domain);
+        if (
+          !lazy.gHilalBoostsManager.isBoostInEffect(
+            boost.boostEntry.boostData,
+            this.browsingContext.topChromeWindow
+          )
+        ) {
+          break;
+        }
         let workspaceGradient = [];
         if (boost.boostEntry.boostData.autoTheme) {
           // The child expects Zen's gradient format: RGB 0-255 channels.

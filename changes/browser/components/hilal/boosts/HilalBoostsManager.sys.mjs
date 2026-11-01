@@ -156,6 +156,9 @@ class nsHilalBoostsManager {
         // Follows the accent color of the window's workspace
         autoTheme: false,
 
+        // Hilal: the boost only applies while the browser is in dark mode
+        nightOnly: false,
+
         textCaseOverride: "none",
         sizeOverride: 1,
 
@@ -644,6 +647,21 @@ class nsHilalBoostsManager {
     if (isDark !== undefined) {
       doc.documentElement.style.colorScheme = isDark ? "dark" : "light";
     }
+  }
+
+  /**
+   * Whether a boost should be applied in a browser window right now. Night
+   * only boosts sit out while the window is in light mode.
+   *
+   * @param {object} boostData - The boost's data.
+   * @param {Window} win - The browser window showing the page.
+   * @returns {boolean}
+   */
+  isBoostInEffect(boostData, win) {
+    if (!boostData?.nightOnly) {
+      return true;
+    }
+    return !!win?.MaterialYouTheme?.isDarkMode?.();
   }
 
   canBoostSite(uri) {

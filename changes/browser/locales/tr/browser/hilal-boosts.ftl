@@ -116,3 +116,9 @@ hilal-boosts-edit =
     .aria-label = Boost'u düzenle
 hilal-boosts-new = Yeni Boost
 hilal-boost-share-error-toast = Bu Boost paylaşılamadı. Daha sonra tekrar deneyin.
+
+hilal-boost-night-only =
+    .label = Yalnızca Karanlık Modda
+hilal-boost-night-only-toast = Bu Boost, Hilal karanlık moddayken uygulanacak
+hilal-boosts-night-only-badge =
+    .title = Yalnızca karanlık modda
