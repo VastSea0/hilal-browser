@@ -226,6 +226,11 @@ jobs:
           SCCACHE_GHA_ENABLED: "true"
         run: |
           export CODESIGN_IDENTITY="$HAS_CODESIGN"
+          # The runner's Homebrew rustup proxies ignore argv[0], so configure's
+          # `rustup which` unwrap runs rustc instead. Hand it the real binaries.
+          export RUSTC="$(rustup which rustc)"
+          export CARGO="$(rustup which cargo)"
+          echo "Using $RUSTC and $CARGO"
           scripts/build-macos.sh package --no-symlinks
 
       - name: Sign and notarize
