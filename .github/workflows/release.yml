@@ -151,6 +151,14 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || needs.prepare.outputs.tag }}
 
+      # The runner's default Python 3.15 cannot set up mach's taskgraph site,
+      # so toolchain bootstrap silently fails and configure falls back to
+      # Xcode's clang without a usable linker.
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
       - name: Cache cargo
         uses: actions/cache@v5
         with:
