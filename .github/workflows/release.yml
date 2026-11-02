@@ -15,6 +15,7 @@ on:
         type: choice
         options:
           - all
+          - macos-only
           - linux-only
           - windows-only
         default: "all"
@@ -36,6 +37,7 @@ jobs:
       build_number: ${{ github.run_number }}
       build_linux: ${{ steps.platforms.outputs.linux }}
       build_windows: ${{ steps.platforms.outputs.windows }}
+      build_macos: ${{ steps.platforms.outputs.macos }}
       has_secrets: ${{ steps.check_secrets.outputs.has_secrets }}
 
     steps:
@@ -63,6 +65,11 @@ jobs:
             echo "windows=true" >> "$GITHUB_OUTPUT"
           else
             echo "windows=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [ "$PLAT" = "all" ] || [ "$PLAT" = "macos-only" ]; then
+            echo "macos=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "macos=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Checkout release tag
@@ -92,7 +99,21 @@ jobs:
             echo "has_secrets=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # Re-running a platform for a published release must not turn it back
+      # into a draft.
+      - name: Check for an existing release
+        id: existing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "${{ steps.vars.outputs.tag }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create GitHub release (DRAFT)
+        if: ${{ steps.existing.outputs.exists != 'true' }}
         uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -104,14 +125,15 @@ jobs:
           prerelease: ${{ steps.release_meta.outputs.prerelease == 'true' }}
 
   # --------------------------------------------------------------------------
-  # macOS: sign, notarize, DMG, MAR (only when signing secrets are available)
+  # macOS: DMG. With Apple signing secrets it is signed, notarized and gets a
+  # MAR update; without them it is ad-hoc signed and ships as a DMG only.
   # --------------------------------------------------------------------------
   sign-macos:
     needs: prepare
     runs-on: macos-latest
-    timeout-minutes: 120
+    timeout-minutes: 360
 
-    if: ${{ needs.prepare.outputs.has_secrets == 'true' }}
+    if: ${{ needs.prepare.outputs.build_macos == 'true' }}
 
     env:
       HAS_CODESIGN: ${{ secrets.CODESIGN_IDENTITY }}
@@ -122,10 +144,12 @@ jobs:
       HAS_SIGN_DB: ${{ secrets.HILAL_SIGNING_DB_BASE64 }}
 
     steps:
+      # Manual runs build the dispatched commit, so release fixes made after
+      # the tag still apply to an existing release.
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          ref: ${{ needs.prepare.outputs.tag }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || needs.prepare.outputs.tag }}
 
       - name: Cache cargo
         uses: actions/cache@v5
@@ -174,7 +198,7 @@ jobs:
             --github-output "$GITHUB_OUTPUT"
 
       - name: Import signing certificate
-        if: ${{ env.HAS_CERT != '' }}
+        if: ${{ env.HAS_CERT != '' && needs.prepare.outputs.has_secrets == 'true' }}
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
           MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
@@ -197,12 +221,22 @@ jobs:
           scripts/build-macos.sh package --no-symlinks
 
       - name: Sign and notarize
+        if: ${{ needs.prepare.outputs.has_secrets == 'true' }}
         env:
           CODESIGN_IDENTITY: ${{ secrets.CODESIGN_IDENTITY }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: scripts/sign-macos.sh --notarize
+
+      # Apple Silicon refuses to run unsigned code, so seal the bundle with an
+      # ad-hoc signature. Users still have to clear the quarantine flag.
+      - name: Ad-hoc sign
+        if: ${{ needs.prepare.outputs.has_secrets != 'true' }}
+        run: |
+          APP_BUNDLE="$(find engine/obj-*/dist -name '*.app' -type d -print -quit)"
+          codesign --sign - --force --deep --entitlements scripts/macos-entitlements.plist "$APP_BUNDLE"
+          codesign --verify --deep --strict "$APP_BUNDLE"
 
       - name: Create DMG
         run: |
@@ -217,6 +251,7 @@ jobs:
         run: scripts/smoke-browser.sh
 
       - name: Create MAR update
+        if: ${{ needs.prepare.outputs.has_secrets == 'true' }}
         env:
           HILAL_SIGNING_DB_BASE64: ${{ secrets.HILAL_SIGNING_DB_BASE64 }}
           HILAL_SIGNMAR_NSS_DIR: /tmp/signing-db
@@ -233,6 +268,7 @@ jobs:
           scripts/make-full-update.sh "${{ needs.prepare.outputs.tag }}" "dist/${{ steps.release_meta.outputs.macos_arm64_mar }}"
 
       - name: Generate update manifest
+        if: ${{ needs.prepare.outputs.has_secrets == 'true' }}
         run: |
           TAG="${{ needs.prepare.outputs.tag }}"
 
@@ -246,6 +282,7 @@ jobs:
             --output dist/hilal-update-manifest.json
 
       - name: Check packaged release metadata
+        if: ${{ needs.prepare.outputs.has_secrets == 'true' }}
         run: |
           node scripts/check-release-metadata.mjs \
             --release-version "${{ steps.release_meta.outputs.version }}" \
@@ -693,7 +730,7 @@ jobs:
           ref: ${{ needs.prepare.outputs.tag }}
 
       - name: Check release assets before publishing
-        if: ${{ needs.sign-macos.result == 'success' }}
+        if: ${{ needs.sign-macos.result == 'success' && needs.prepare.outputs.has_secrets == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.prepare.outputs.tag }}

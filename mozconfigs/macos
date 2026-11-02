@@ -1,5 +1,10 @@
 . "$topsrcdir/../mozconfigs/base"
 
+if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+  # Configure only bootstraps toolchains on Nightly by default. ESR builds on
+  # CI need Mozilla's pinned clang, libclang and cbindgen, not the runner's.
+  ac_add_options --enable-bootstrap
+fi
 
 # Enable sccache for compiler caching if installed
 if which sccache >/dev/null 2>&1; then
