@@ -262,7 +262,7 @@ export default function App() {
           android: "Android için İndir",
           other: "İndir",
         },
-        viewAllDownloads: "Tüm platformlar (.dmg, .exe, .deb, .zip)",
+        viewAllDownloads: "Tüm platformlar (.dmg, .exe, .zip, .tar.xz)",
       },
       stories: [
         {
@@ -320,7 +320,7 @@ export default function App() {
         platforms: [
           {
             name: "macOS",
-            spec: "Apple Silicon & Intel • Universal .dmg",
+            spec: "Apple Silicon • .dmg",
             iconName: "desktop_mac",
           },
           {
@@ -330,7 +330,7 @@ export default function App() {
           },
           {
             name: "Linux",
-            spec: "Ubuntu / Debian .deb • AppImage • Tarball",
+            spec: "Flatpak • Tarball (.tar.xz)",
             iconName: "terminal",
           },
           {
@@ -395,7 +395,7 @@ export default function App() {
           android: "Download for Android",
           other: "Download",
         },
-        viewAllDownloads: "All platforms (.dmg, .exe, .deb, .zip)",
+        viewAllDownloads: "All platforms (.dmg, .exe, .zip, .tar.xz)",
       },
       stories: [
         {
@@ -453,7 +453,7 @@ export default function App() {
         platforms: [
           {
             name: "macOS",
-            spec: "Apple Silicon & Intel • Universal .dmg",
+            spec: "Apple Silicon • .dmg",
             iconName: "desktop_mac",
           },
           {
@@ -463,7 +463,7 @@ export default function App() {
           },
           {
             name: "Linux",
-            spec: "Ubuntu / Debian .deb • AppImage • Tarball",
+            spec: "Flatpak • Tarball (.tar.xz)",
             iconName: "terminal",
           },
           {

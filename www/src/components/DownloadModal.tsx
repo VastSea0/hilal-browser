@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { GithubRelease, GithubAsset } from "../types";
-import { formatBytes } from "../utils/github";
+import { formatBytes, isBrowserDownload } from "../utils/github";
 
 interface DownloadModalProps {
   isOpen: boolean;
@@ -30,12 +30,12 @@ export default function DownloadModal({
       redownloadBtn: "Tekrar İndir",
       viewAllOnGh: "GitHub Releases'de Tümünü Gör",
       platforms: {
-        macos: "macOS Universal (.dmg)",
+        macos: "macOS Apple Silicon (.dmg)",
         windowsExe: "Windows Kurulum Paketi (.exe)",
         windowsZip: "Windows Taşınabilir (.zip)",
         linuxDeb: "Linux Debian / Ubuntu (.deb)",
         linuxAppImage: "Linux Evrensel (.AppImage)",
-        linuxTar: "Linux Kaynak Paketi (.tar.gz)",
+        linuxTar: "Linux Tarball (.tar.xz)",
         androidApk: "Android Paketi (.apk)",
         androidAab: "Android App Bundle (.aab)"
       }
@@ -52,12 +52,12 @@ export default function DownloadModal({
       redownloadBtn: "Download Again",
       viewAllOnGh: "View All on GitHub Releases",
       platforms: {
-        macos: "macOS Universal (.dmg)",
+        macos: "macOS Apple Silicon (.dmg)",
         windowsExe: "Windows Installer (.exe)",
         windowsZip: "Windows Portable (.zip)",
         linuxDeb: "Linux Debian / Ubuntu (.deb)",
         linuxAppImage: "Linux Universal (.AppImage)",
-        linuxTar: "Linux Tarball (.tar.gz)",
+        linuxTar: "Linux Tarball (.tar.xz)",
         androidApk: "Android Package (.apk)",
         androidAab: "Android App Bundle (.aab)"
       }
@@ -65,7 +65,9 @@ export default function DownloadModal({
   };
 
   const activeT = t[lang] || t.tr;
-  const assets = release?.assets || [];
+  // Releases also carry updater files, checksums, the SBOM and the hil tool;
+  // only list what a person can install.
+  const assets = (release?.assets || []).filter(isBrowserDownload);
 
   useEffect(() => {
     if (isOpen) {

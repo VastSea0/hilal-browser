@@ -202,11 +202,12 @@ export function detectOS(): DetectionOS {
 
 // Release files that are not the browser: the hil patch manager, update
 // archives and manifests, and build artifacts.
-function isBrowserDownload(asset: GithubAsset): boolean {
+export function isBrowserDownload(asset: GithubAsset): boolean {
   const name = asset.name.toLowerCase();
   return !(
     name === "hil" ||
     name === "hil.exe" ||
+    name === "sha256sums" ||
     name.endsWith(".mar") ||
     name.endsWith(".json") ||
     name.endsWith(".sha256") ||
