@@ -6,6 +6,9 @@ base: org.mozilla.firefox.BaseApp
 base-version: '25.08'
 command: hilal
 
+# Repackages the Linux release tarball that CI built and UI-tested, the way
+# Zen and Firefox are published on Flathub. Flathub hosts and updates it for
+# free; the browser's own updater is turned off inside the Flatpak.
 
 finish-args:
   - --allow=devel
@@ -25,13 +28,12 @@ finish-args:
   - --talk-name=org.gtk.vfs.*
   - --system-talk-name=org.freedesktop.NetworkManager
   - --own-name=org.gkdevstudio.Hilal.*
-  - --own-name=org.mpris.MediaPlayer2.hilal.*
+  - --own-name=org.mpris.MediaPlayer2.firefox.*
   - --persist=.mozilla
   - --env=DICPATH=/usr/share/hunspell
 
 cleanup:
   - /include
-  - /lib/debug
   - /lib/pkgconfig
   - /share/aclocal
   - /share/man
@@ -40,20 +42,38 @@ modules:
   - name: hilal-browser
     buildsystem: simple
     build-commands:
-      - install -d "$FLATPAK_DEST/lib"
-      - tar -xf hilal-browser/app-archive.tar.xz -C "$FLATPAK_DEST/lib"
+      - mkdir -p "$FLATPAK_DEST/lib"
+      - mv firefox "$FLATPAK_DEST/lib/hilal"
+      # Keep Hilal's policies (uBlock, langpacks) and only switch off the
+      # built-in updater; Flathub delivers updates.
+      - >-
+        python3 -c "import json,sys; p=sys.argv[1]; d=json.load(open(p));
+        d.setdefault('policies', {})['DisableAppUpdate']=True;
+        d['policies'].pop('AppUpdateURL', None); json.dump(d, open(p,'w'), indent=2)"
+        "$FLATPAK_DEST/lib/hilal/distribution/policies.json"
       - install -Dm755 hilal-browser/flatpak/hilal "$FLATPAK_DEST/bin/hilal"
       - install -Dm644 hilal-browser/flatpak/org.gkdevstudio.Hilal.desktop "$FLATPAK_DEST/share/applications/org.gkdevstudio.Hilal.desktop"
       - install -Dm644 hilal-browser/flatpak/org.gkdevstudio.Hilal.metainfo.xml "$FLATPAK_DEST/share/metainfo/org.gkdevstudio.Hilal.metainfo.xml"
-      - install -Dm644 hilal-browser/flatpak/policies.json "$FLATPAK_DEST/lib/firefox/distribution/policies.json"
-      - install -Dm644 hilal-browser/LICENSE "$FLATPAK_DEST/share/licenses/org.gkdevstudio.Hilal/hilal-browser/LICENSE"
-      - install -Dm644 hilal-browser/branding/hilal/default16.png "$FLATPAK_DEST/share/icons/hicolor/16x16/apps/org.gkdevstudio.Hilal.png"
-      - install -Dm644 hilal-browser/branding/hilal/default32.png "$FLATPAK_DEST/share/icons/hicolor/32x32/apps/org.gkdevstudio.Hilal.png"
-      - install -Dm644 hilal-browser/branding/hilal/default48.png "$FLATPAK_DEST/share/icons/hicolor/48x48/apps/org.gkdevstudio.Hilal.png"
-      - install -Dm644 hilal-browser/branding/hilal/default64.png "$FLATPAK_DEST/share/icons/hicolor/64x64/apps/org.gkdevstudio.Hilal.png"
-      - install -Dm644 hilal-browser/branding/hilal/default128.png "$FLATPAK_DEST/share/icons/hicolor/128x128/apps/org.gkdevstudio.Hilal.png"
-      - install -Dm644 hilal-browser/branding/hilal/default256.png "$FLATPAK_DEST/share/icons/hicolor/256x256/apps/org.gkdevstudio.Hilal.png"
+      - install -Dm644 hilal-browser/LICENSE "$FLATPAK_DEST/share/licenses/org.gkdevstudio.Hilal/LICENSE"
+      - for size in 16 32 48 64 128 256; do install -Dm644 "hilal-browser/changes/browser/branding/hilal/default$size.png" "$FLATPAK_DEST/share/icons/hicolor/${size}x${size}/apps/org.gkdevstudio.Hilal.png"; done
     sources:
+      # HILAL_ARCHIVE_BEGIN
+      - type: archive
+        url: https://github.com/VastSea0/hilal-browser/releases/download/v0.4.0-alpha.1/Hilal-0.4.0-alpha.1-linux-x86_64.tar.xz
+        sha256: 0000000000000000000000000000000000000000000000000000000000000000
+        strip-components: 0
+        only-arches:
+          - x86_64
+        # Flathub's external data checker opens an update pull request in the
+        # Flathub repo for every new release. /releases/latest skips the
+        # nightly pre-release.
+        x-checker-data:
+          type: json
+          url: https://api.github.com/repos/VastSea0/hilal-browser/releases/latest
+          version-query: .tag_name | sub("^v"; "")
+          url-query: .assets[] | select(.name | test("-linux-x86_64\\.tar\\.xz$")) | .browser_download_url
+          is-main-source: true
+      # HILAL_ARCHIVE_END
       # HILAL_SOURCE_BEGIN
       - type: git
         url: https://github.com/VastSea0/hilal-browser.git

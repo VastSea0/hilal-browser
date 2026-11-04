@@ -306,6 +306,56 @@ jobs:
           path: ui-smoke/
           retention-days: 14
 
+  # Builds the Flatpak from the tested tarball exactly as Flathub would and
+  # runs the UI smoke inside the sandbox.
+  test-flatpak:
+    needs: [plan, build]
+    if: >-
+      always() && !cancelled() && contains(needs.plan.outputs.targets, 'linux') &&
+      (needs.plan.outputs.build == 'false' || needs.build.result == 'success' || needs.build.result == 'failure')
+    name: test (flatpak)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: package-linux
+          path: package
+          run-id: ${{ needs.plan.outputs.artifacts_run }}
+          github-token: ${{ github.token }}
+
+      - name: Install Flatpak tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends flatpak flatpak-builder xvfb dbus-x11 fonts-dejavu-core
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Build and install the Flatpak
+        run: |
+          tarball="$(ls package/*.linux-*.tar.xz | head -n1)"
+          python3 scripts/ci/flatpak-test-manifest.py org.gkdevstudio.Hilal.yml "$tarball" . flatpak-test.yml
+          flatpak-builder --user --install-deps-from=flathub --install --force-clean \
+            --disable-rofiles-fuse flatpak-build flatpak-test.yml
+
+      - name: UI smoke inside the Flatpak
+        run: |
+          dbus-run-session -- xvfb-run -a -s "-screen 0 1600x1000x24" \
+            python3 scripts/ci/ui-smoke.py --binary scripts/ci/flatpak-run.sh \
+              --pref browser.tabs.inTitlebar=1 --out ui-smoke
+
+      - name: Summary
+        if: always()
+        run: cat ui-smoke/summary.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ui-smoke-flatpak
+          path: ui-smoke/
+          retention-days: 14
+
   test-macos:
     needs: [plan, build]
     if: >-
