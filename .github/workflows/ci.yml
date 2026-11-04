@@ -34,9 +34,20 @@ on:
         description: "Publish the packages as the nightly pre-release"
         type: boolean
         default: true
+  # release.yml builds releases through this same pipeline.
+  workflow_call:
+    inputs:
+      targets:
+        type: string
+        default: all
+      publish_nightly:
+        type: boolean
+        default: false
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # github.workflow is the caller's name when called, so a release run does
+  # not cancel the main branch CI or the other way around.
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -50,9 +61,12 @@ jobs:
       targets: ${{ steps.plan.outputs.targets }}
       build: ${{ steps.plan.outputs.build }}
       artifacts_run: ${{ steps.plan.outputs.artifacts_run }}
+      build_date: ${{ steps.plan.outputs.build_date }}
     steps:
       - id: plan
         run: |
+          # One build ID for all platforms, so the update server can compare them.
+          echo "build_date=$(date -u +%Y%m%d%H%M%S)" >> "$GITHUB_OUTPUT"
           t="${{ inputs.targets || 'all' }}"
           if [ "$t" = all ]; then
             echo 'targets=["linux","macos","windows"]' >> "$GITHUB_OUTPUT"
@@ -82,6 +96,7 @@ jobs:
       SCCACHE_CACHE_SIZE: 3G
       MOZBUILD_STATE_PATH: /mnt/mozbuild
       HILAL_MAC_TOOLS: /mnt/mac-tools
+      MOZ_BUILD_DATE: ${{ needs.plan.outputs.build_date }}
     steps:
       - name: Free disk space
         run: |
@@ -134,6 +149,14 @@ jobs:
           mkdir -p bin
           cp hil/target/release/hil bin/hil
 
+      - name: Add Rust cross targets
+        if: matrix.target != 'linux'
+        run: |
+          case "${{ matrix.target }}" in
+            macos) rustup target add aarch64-apple-darwin ;;
+            windows) rustup target add x86_64-pc-windows-msvc ;;
+          esac
+
       - name: Set up Firefox source
         run: ./bin/hil setup
 
@@ -178,8 +201,10 @@ jobs:
 
       # Proves on every build that complete updates can be made and signed
       # with the key that matches the updater's certificate. Release builds
-      # publish these; nightlies do not.
+      # publish these; nightlies do not. The macOS MAR is made on the macOS
+      # runner from the ad-hoc signed bundle instead.
       - name: Create signed update (MAR)
+        if: matrix.target != 'macos'
         env:
           MAR_KEY: ${{ secrets.HILAL_MAR_SIGNING_KEY }}
         run: |
@@ -190,7 +215,9 @@ jobs:
           python3 -m venv /mnt/build-mar
           /mnt/build-mar/bin/pip install -q mar==3.2.1
           (umask 077; printf '%s\n' "$MAR_KEY" > /mnt/mar-key.pem)
-          version="$(sed -n 's/^version *= *"\(.*\)"/\1/p' manifest.toml | head -n1)"
+          # The MAR carries the Firefox app version: the updater refuses one
+          # that is lower than the installed version.
+          version="$(sed -n 's/^version=//p' dist/BUILD_INFO)"
           HILAL_MAR_SIGNING_KEY=/mnt/mar-key.pem HILAL_BUILD_MAR=/mnt/build-mar/bin/mar \
             scripts/make-full-update.sh "$version" "dist/hilal-${{ matrix.target }}.complete.mar"
           rm -f /mnt/mar-key.pem
@@ -314,6 +341,32 @@ jobs:
           hdiutil create -volname "Hilal Browser" -srcfolder "app/Hilal Browser.app" -ov -format UDZO "signed/$(basename "$dmg")"
           cp package/BUILD_INFO signed/ 2>/dev/null || true
 
+      - name: Create signed update (MAR)
+        env:
+          MAR_KEY: ${{ secrets.HILAL_MAR_SIGNING_KEY }}
+        run: |
+          if [ -z "$MAR_KEY" ]; then
+            echo "::warning::HILAL_MAR_SIGNING_KEY is not set, so no signed update was made."
+            exit 0
+          fi
+          # Firefox's update packaging scripts at the pinned commit; they are
+          # plain shell and need no build tree.
+          commit="$(sed -n 's/^commit *= *"\(.*\)"/\1/p' upstream.lock)"
+          mkdir -p /tmp/update-packaging
+          for f in make_full_update.sh common.sh; do
+            curl -fsSL "https://raw.githubusercontent.com/mozilla-firefox/firefox/$commit/tools/update-packaging/$f" -o "/tmp/update-packaging/$f"
+          done
+          chmod +x /tmp/update-packaging/*.sh
+          python3 -m venv /tmp/build-mar
+          /tmp/build-mar/bin/pip install -q mar==3.2.1
+          key="$(mktemp)"
+          printf '%s\n' "$MAR_KEY" > "$key"
+          version="$(sed -n 's/^version=//p' package/BUILD_INFO)"
+          HILAL_UPDATE_ROOT="$PWD/app/Hilal Browser.app" HILAL_UPDATE_PACKAGING_DIR=/tmp/update-packaging \
+          HILAL_MAR_SIGNING_KEY="$key" HILAL_BUILD_MAR=/tmp/build-mar/bin/mar \
+            scripts/make-full-update.sh "$version" signed/hilal-macos.complete.mar
+          rm -f "$key"
+
       - name: UI smoke
         run: |
           python3 scripts/ci/ui-smoke.py --binary "app/Hilal Browser.app/Contents/MacOS/firefox" --out ui-smoke
@@ -387,7 +440,7 @@ jobs:
     needs: [plan, build, test-linux, test-macos, test-windows]
     if: >-
       always() && !cancelled() && github.ref == 'refs/heads/main' &&
-      needs.plan.outputs.build == 'true' && (inputs.publish_nightly != false) &&
+      needs.plan.outputs.build == 'true' && (github.event_name == 'push' || inputs.publish_nightly) &&
       (needs.test-linux.result == 'success' || needs.test-macos.result == 'success' || needs.test-windows.result == 'success')
     runs-on: ubuntu-latest
     permissions:
