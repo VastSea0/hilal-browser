@@ -85,6 +85,8 @@ fun BrowserScreen(
     val tabs by store.tabs.collectAsState()
     val selectedId by store.selectedId.collectAsState()
     val thumbnails by store.thumbnails.collectAsState()
+    val workspaces by store.workspaces.collectAsState()
+    val activeWorkspaceId by store.activeWorkspaceId.collectAsState()
     val selected: Tab? = tabs.firstOrNull { it.id == selectedId }
     val state: TabState? by remember(selected) { selected?.state ?: flowOf(null) }.collectAsState(selected?.current)
     val settings by container.settings.settings.collectAsState()
@@ -95,7 +97,7 @@ fun BrowserScreen(
     val host = rememberGeckoHostState()
 
     val isPrivate = state?.isPrivate == true
-    val sameModeTabs = tabs.filter { it.current.isPrivate == isPrivate }
+    val sameModeTabs = tabs.filter { it.current.isPrivate == isPrivate && (isPrivate || it.current.workspaceId == activeWorkspaceId) }
     val fullscreen = state?.isFullscreen == true
 
     LaunchedEffect(fullscreen) { onFullscreenChange(fullscreen) }
@@ -140,7 +142,7 @@ fun BrowserScreen(
             haptics = { currentHaptics },
             spatialSpec = { motion.fastSpatialSpec() },
             neighbours = {
-                val list = store.tabs.value.filter { it.current.isPrivate == (store.selected?.current?.isPrivate == true) }
+                val list = store.visibleTabs(isPrivate = store.selected?.current?.isPrivate == true)
                 val i = list.indexOfFirst { it.id == store.selectedId.value }
                 list.getOrNull(i - 1)?.id to list.getOrNull(i + 1)?.id
             },
@@ -344,6 +346,8 @@ fun BrowserScreen(
                 tabs = tabs,
                 selectedId = selectedId,
                 thumbnails = thumbnails,
+                workspaces = workspaces,
+                activeWorkspaceId = activeWorkspaceId,
                 initialPrivate = isPrivate,
                 onSelect = { id ->
                     store.select(id)
@@ -351,6 +355,11 @@ fun BrowserScreen(
                 },
                 onClose = store::close,
                 onCloseAll = store::closeAll,
+                onSwitchWorkspace = store::switchWorkspace,
+                onMoveTab = store::moveToWorkspace,
+                onCreateWorkspace = { edit -> store.createWorkspace(edit.name, edit.icon, edit.color, edit.isolated) },
+                onUpdateWorkspace = { id, edit -> store.updateWorkspace(id, edit.name, edit.icon, edit.color, edit.isolated) },
+                onDeleteWorkspace = store::deleteWorkspace,
                 onNewTab = { private ->
                     store.newTab(isPrivate = private)
                     overlay = Overlay.Editor

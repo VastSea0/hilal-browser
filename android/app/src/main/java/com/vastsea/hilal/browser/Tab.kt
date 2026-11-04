@@ -21,6 +21,8 @@ data class TabState(
     val security: Security = Security.None,
     val isPrivate: Boolean = false,
     val isFullscreen: Boolean = false,
+    /** Ignored for private tabs. */
+    val workspaceId: String = Workspace.DEFAULT_ID,
     val lastAccessed: Long = System.currentTimeMillis(),
 ) {
     val isBlank: Boolean get() = url.isEmpty() || url == ABOUT_BLANK

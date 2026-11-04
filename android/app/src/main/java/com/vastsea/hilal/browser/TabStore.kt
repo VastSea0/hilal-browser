@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import com.vastsea.hilal.R
 import com.vastsea.hilal.data.HistoryDao
 import com.vastsea.hilal.downloads.DownloadController
 import kotlinx.coroutines.CoroutineScope
@@ -71,6 +72,12 @@ class TabStore(
     private val _events = MutableSharedFlow<BrowserEvent>(extraBufferCapacity = 8)
     val events: SharedFlow<BrowserEvent> = _events.asSharedFlow()
 
+    private val _workspaces = MutableStateFlow(listOf(Workspace.default(context.getString(R.string.workspace_default))))
+    val workspaces: StateFlow<List<Workspace>> = _workspaces.asStateFlow()
+
+    private val _activeWorkspaceId = MutableStateFlow(Workspace.DEFAULT_ID)
+    val activeWorkspaceId: StateFlow<String> = _activeWorkspaceId.asStateFlow()
+
     private var recentlyClosed: ClosedTab? = null
     private var persistJob: Job? = null
     private val stateFile = File(context.filesDir, "tabs.json")
@@ -80,11 +87,17 @@ class TabStore(
 
     fun tab(id: String): Tab? = _tabs.value.firstOrNull { it.id == id }
 
+    fun workspace(id: String): Workspace? = _workspaces.value.firstOrNull { it.id == id }
+
     /** Restores the last session once per process. Leaves one blank tab if nothing was saved. */
     suspend fun restore() {
         if (restored) return
         restored = true
         val saved = withContext(Dispatchers.IO) { readState() }
+        if (saved != null && saved.workspaces.isNotEmpty()) {
+            _workspaces.value = saved.workspaces
+        }
+        _activeWorkspaceId.value = saved?.activeWorkspaceId?.takeIf { workspace(it) != null } ?: Workspace.DEFAULT_ID
         if (saved == null || saved.tabs.isEmpty()) {
             newTab()
             return
@@ -93,14 +106,23 @@ class TabStore(
             createTab(
                 id = entry.id,
                 isPrivate = false,
-                initial = TabState(id = entry.id, url = entry.url, title = entry.title, lastAccessed = entry.lastAccessed),
+                initial = TabState(
+                    id = entry.id,
+                    url = entry.url,
+                    title = entry.title,
+                    workspaceId = entry.workspaceId.takeIf { workspace(it) != null } ?: Workspace.DEFAULT_ID,
+                    lastAccessed = entry.lastAccessed,
+                ),
             ).also { tab ->
                 tab.sessionState = entry.sessionState
                 if (entry.sessionState == null) tab.pendingUrl = entry.url
             }
         }
         _tabs.value = restoredTabs
-        select(saved.selectedId?.takeIf { id -> restoredTabs.any { it.id == id } } ?: restoredTabs.last().id)
+        val inActive = restoredTabs.filter { it.current.workspaceId == _activeWorkspaceId.value }
+        val selectedId = saved.selectedId?.takeIf { id -> restoredTabs.any { it.id == id } }
+            ?: inActive.maxByOrNull { it.current.lastAccessed }?.id
+        if (selectedId != null) select(selectedId) else newTab()
     }
 
     fun newTab(
@@ -108,9 +130,10 @@ class TabStore(
         isPrivate: Boolean = false,
         select: Boolean = true,
         parentId: String? = null,
+        workspaceId: String = _activeWorkspaceId.value,
     ): Tab {
         val id = UUID.randomUUID().toString()
-        val tab = createTab(id, isPrivate, TabState(id = id, url = url ?: "", isPrivate = isPrivate))
+        val tab = createTab(id, isPrivate, TabState(id = id, url = url ?: "", isPrivate = isPrivate, workspaceId = workspaceId))
         tab.pendingUrl = url
         insertTab(tab, parentId)
         if (select) select(tab.id) else if (url != null) ensureOpen(tab)
@@ -120,20 +143,24 @@ class TabStore(
 
     /**
      * Creates a tab whose session Gecko itself opens and loads, for window.open, target=_blank
-     * and extension tabs. The returned session must not be opened by the caller.
+     * and extension tabs. The returned session must not be opened by the caller. The tab joins
+     * its opener's workspace so it shares the opener's cookies.
      */
     fun adoptSession(url: String?, isPrivate: Boolean, parentId: String?, select: Boolean): GeckoSession {
         val id = UUID.randomUUID().toString()
-        val child = createTab(id, isPrivate, TabState(id = id, url = url.orEmpty()))
+        val workspaceId = parentId?.let(::tab)?.current?.workspaceId ?: _activeWorkspaceId.value
+        val child = createTab(id, isPrivate, TabState(id = id, url = url.orEmpty(), workspaceId = workspaceId))
         insertTab(child, parentId)
         if (select) {
             selected?.session?.setActive(false)
             _selectedId.value = id
+            if (!isPrivate) _activeWorkspaceId.value = workspaceId
         }
         schedulePersist()
         return child.session
     }
 
+    /** Selects a tab; a normal tab also makes its workspace the active one. */
     fun select(id: String) {
         val tab = tab(id) ?: return
         val previous = selected
@@ -141,11 +168,16 @@ class TabStore(
         ensureOpen(tab)
         tab.session.setActive(true)
         tab.update { it.copy(lastAccessed = System.currentTimeMillis()) }
+        if (!tab.current.isPrivate) _activeWorkspaceId.value = tab.current.workspaceId
         _selectedId.value = id
         schedulePersist()
     }
 
-    fun close(id: String) {
+    /** Tabs shown together: the private tabs, or the normal tabs of the active workspace. */
+    fun visibleTabs(isPrivate: Boolean, workspaceId: String = _activeWorkspaceId.value): List<Tab> =
+        _tabs.value.filter { it.belongsTo(isPrivate, workspaceId) }
+
+    fun close(id: String, notify: Boolean = true) {
         val list = _tabs.value
         val index = list.indexOfFirst { it.id == id }
         if (index < 0) return
@@ -158,14 +190,19 @@ class TabStore(
         _thumbnails.update { it - id }
         _tabs.value = remaining
         if (_selectedId.value == id) {
-            val sameMode = remaining.filter { it.current.isPrivate == tab.current.isPrivate }
-            val next = sameMode.getOrNull(index.coerceAtMost(sameMode.lastIndex))
-                ?: sameMode.lastOrNull()
-                ?: remaining.lastOrNull()
-            if (next != null) select(next.id) else _selectedId.value = null
+            val group = remaining.filter { it.belongsTo(tab.current.isPrivate, tab.current.workspaceId) }
+            val groupIndex = list.filter { it.belongsTo(tab.current.isPrivate, tab.current.workspaceId) }.indexOf(tab)
+            val next = group.getOrNull(groupIndex.coerceAtMost(group.lastIndex))
+            when {
+                next != null -> select(next.id)
+                // A workspace never goes empty under the user; it gets a fresh start page instead.
+                !tab.current.isPrivate && workspace(tab.current.workspaceId) != null ->
+                    newTab(workspaceId = tab.current.workspaceId)
+                else -> remaining.lastOrNull()?.let { select(it.id) } ?: run { _selectedId.value = null }
+            }
         }
         tab.session.close()
-        _events.tryEmit(BrowserEvent.TabClosed(tab.current.displayTitle, tab.current.isPrivate))
+        if (notify) _events.tryEmit(BrowserEvent.TabClosed(tab.current.displayTitle, tab.current.isPrivate))
         schedulePersist()
     }
 
@@ -173,17 +210,85 @@ class TabStore(
         val closed = recentlyClosed ?: return
         recentlyClosed = null
         val id = UUID.randomUUID().toString()
-        val tab = createTab(id, closed.state.isPrivate, closed.state.copy(id = id, isLoading = false, progress = 0))
+        val workspaceId = closed.state.workspaceId.takeIf { workspace(it) != null } ?: Workspace.DEFAULT_ID
+        val tab = createTab(
+            id,
+            closed.state.isPrivate,
+            closed.state.copy(id = id, isLoading = false, progress = 0, workspaceId = workspaceId),
+        )
         tab.sessionState = closed.sessionState
         if (closed.sessionState == null) tab.pendingUrl = closed.state.url
         _tabs.update { list -> list.toMutableList().apply { add(closed.index.coerceIn(0, size), tab) } }
         select(id)
     }
 
+    /** Closes every private tab, or every tab of the active workspace. */
     fun closeAll(isPrivate: Boolean) {
-        _tabs.value.filter { it.current.isPrivate == isPrivate }.forEach { close(it.id) }
+        visibleTabs(isPrivate).forEach { close(it.id) }
         recentlyClosed = null
     }
+
+    /** Makes [id] active and selects its most recently used tab, opening a blank one if it has none. */
+    fun switchWorkspace(id: String) {
+        if (workspace(id) == null) return
+        _activeWorkspaceId.value = id
+        val target = visibleTabs(isPrivate = false, workspaceId = id).maxByOrNull { it.current.lastAccessed }
+        if (target != null) select(target.id) else newTab(workspaceId = id)
+    }
+
+    fun createWorkspace(name: String, icon: WorkspaceIcon, color: WorkspaceColor, isolated: Boolean): Workspace {
+        val workspace = Workspace.create(name, icon, color, isolated)
+        _workspaces.update { it + workspace }
+        switchWorkspace(workspace.id)
+        return workspace
+    }
+
+    /**
+     * Renames or restyles a workspace. Turning isolation on or off moves its tabs to a different
+     * cookie jar, so their sessions are reopened from their saved history.
+     */
+    fun updateWorkspace(id: String, name: String, icon: WorkspaceIcon, color: WorkspaceColor, isolated: Boolean) {
+        val old = workspace(id) ?: return
+        val updated = old.copy(name = name.trim().ifEmpty { old.name }, icon = icon, color = color, isolated = isolated)
+        _workspaces.update { list -> list.map { if (it.id == id) updated else it } }
+        if (old.contextId != updated.contextId) {
+            old.contextId?.let { runtime.storageController.clearDataForSessionContext(it) }
+            visibleTabs(isPrivate = false, workspaceId = id).forEach(::rebuild)
+        }
+        schedulePersist()
+    }
+
+    /** Closes the workspace's tabs and, if it was isolated, deletes its cookies and site data. */
+    fun deleteWorkspace(id: String) {
+        val workspace = workspace(id) ?: return
+        if (id == Workspace.DEFAULT_ID) return
+        if (_activeWorkspaceId.value == id) switchWorkspace(Workspace.DEFAULT_ID)
+        visibleTabs(isPrivate = false, workspaceId = id).forEach { close(it.id, notify = false) }
+        recentlyClosed = null
+        _workspaces.update { list -> list.filterNot { it.id == id } }
+        workspace.contextId?.let { runtime.storageController.clearDataForSessionContext(it) }
+        schedulePersist()
+    }
+
+    /** Moves a normal tab to another workspace, reopening it there if the cookie jar differs. */
+    fun moveToWorkspace(tabId: String, workspaceId: String) {
+        val tab = tab(tabId) ?: return
+        val target = workspace(workspaceId) ?: return
+        if (tab.current.isPrivate || tab.current.workspaceId == workspaceId) return
+        val oldContext = workspace(tab.current.workspaceId)?.contextId
+        val wasSelected = _selectedId.value == tabId
+        tab.update { it.copy(workspaceId = workspaceId) }
+        if (oldContext != target.contextId) rebuild(tab)
+        if (wasSelected) {
+            // Keep the user in the workspace they were looking at.
+            val stay = visibleTabs(isPrivate = false).maxByOrNull { it.current.lastAccessed }
+            if (stay != null) select(stay.id) else newTab()
+        }
+        schedulePersist()
+    }
+
+    private fun Tab.belongsTo(isPrivate: Boolean, workspaceId: String): Boolean =
+        current.isPrivate == isPrivate && (isPrivate || current.workspaceId == workspaceId)
 
     fun load(id: String, url: String) {
         val tab = tab(id) ?: return
@@ -267,14 +372,15 @@ class TabStore(
     }
 
     private fun createTab(id: String, isPrivate: Boolean, initial: TabState): Tab {
-        val tab = Tab(id, newSession(isPrivate), initial.copy(isPrivate = isPrivate))
+        val tab = Tab(id, newSession(isPrivate, initial.workspaceId), initial.copy(isPrivate = isPrivate))
         attachDelegates(tab)
         return tab
     }
 
-    private fun newSession(isPrivate: Boolean) = GeckoSession(
+    private fun newSession(isPrivate: Boolean, workspaceId: String) = GeckoSession(
         GeckoSessionSettings.Builder()
             .usePrivateMode(isPrivate)
+            .contextId(if (isPrivate) null else workspace(workspaceId)?.contextId)
             .useTrackingProtection(true)
             .suspendMediaWhenInactive(false)
             .build()
@@ -414,7 +520,7 @@ class TabStore(
 
     private fun rebuild(tab: Tab) {
         tab.session.close()
-        tab.session = newSession(tab.current.isPrivate)
+        tab.session = newSession(tab.current.isPrivate, tab.current.workspaceId)
         attachDelegates(tab)
         tab.update { it.copy(isLoading = false, progress = 0) }
         if (tab.sessionState == null) tab.pendingUrl = tab.current.url
@@ -555,14 +661,28 @@ class TabStore(
         return SavedState(
             selectedId = _selectedId.value?.takeIf { id -> persistent.any { it.id == id } },
             tabs = persistent.map {
-                SavedTab(it.id, it.current.url, it.current.title, it.sessionState, it.current.lastAccessed)
+                SavedTab(it.id, it.current.url, it.current.title, it.sessionState, it.current.workspaceId, it.current.lastAccessed)
             },
+            workspaces = _workspaces.value,
+            activeWorkspaceId = _activeWorkspaceId.value,
         )
     }
 
     private fun writeState(state: SavedState) {
         val json = JSONObject().apply {
             put("selected", state.selectedId)
+            put("activeWorkspace", state.activeWorkspaceId)
+            put("workspaces", JSONArray().apply {
+                state.workspaces.forEach { workspace ->
+                    put(JSONObject().apply {
+                        put("id", workspace.id)
+                        put("name", workspace.name)
+                        put("icon", workspace.icon.name)
+                        put("color", workspace.color.name)
+                        put("isolated", workspace.isolated)
+                    })
+                }
+            })
             put("tabs", JSONArray().apply {
                 state.tabs.forEach { tab ->
                     put(JSONObject().apply {
@@ -570,6 +690,7 @@ class TabStore(
                         put("url", tab.url)
                         put("title", tab.title)
                         put("state", tab.sessionState)
+                        put("workspace", tab.workspaceId)
                         put("lastAccessed", tab.lastAccessed)
                     })
                 }
@@ -584,6 +705,20 @@ class TabStore(
         if (!stateFile.exists()) return null
         val json = JSONObject(stateFile.readText())
         val array = json.getJSONArray("tabs")
+        val workspaceArray = json.optJSONArray("workspaces") ?: JSONArray()
+        val workspaces = (0 until workspaceArray.length()).mapNotNull { i ->
+            val o = workspaceArray.getJSONObject(i)
+            val id = o.optString("id").takeIf { it.isNotEmpty() } ?: return@mapNotNull null
+            Workspace(
+                id = id,
+                name = o.optString("name"),
+                icon = WorkspaceIcon.entries.firstOrNull { it.name == o.optString("icon") } ?: WorkspaceIcon.Circle,
+                color = WorkspaceColor.entries.firstOrNull { it.name == o.optString("color") } ?: WorkspaceColor.Blue,
+                isolated = o.optBoolean("isolated"),
+            )
+        }.let { list ->
+            if (list.none { it.id == Workspace.DEFAULT_ID }) listOf(_workspaces.value.first()) + list else list
+        }
         SavedState(
             selectedId = json.optString("selected").takeIf { it.isNotEmpty() },
             tabs = (0 until array.length()).map { i ->
@@ -593,13 +728,29 @@ class TabStore(
                     url = o.optString("url"),
                     title = o.optString("title"),
                     sessionState = o.optString("state").takeIf { it.isNotEmpty() && it != "null" },
+                    workspaceId = o.optString("workspace").ifEmpty { Workspace.DEFAULT_ID },
                     lastAccessed = o.optLong("lastAccessed", System.currentTimeMillis()),
                 )
             },
+            workspaces = workspaces,
+            activeWorkspaceId = json.optString("activeWorkspace").takeIf { it.isNotEmpty() },
         )
     }.getOrNull()
 
-    private data class SavedTab(val id: String, val url: String, val title: String, val sessionState: String?, val lastAccessed: Long)
-    private data class SavedState(val selectedId: String?, val tabs: List<SavedTab>)
+    private data class SavedTab(
+        val id: String,
+        val url: String,
+        val title: String,
+        val sessionState: String?,
+        val workspaceId: String,
+        val lastAccessed: Long,
+    )
+
+    private data class SavedState(
+        val selectedId: String?,
+        val tabs: List<SavedTab>,
+        val workspaces: List<Workspace>,
+        val activeWorkspaceId: String?,
+    )
     private data class ClosedTab(val state: TabState, val sessionState: String?, val index: Int)
 }

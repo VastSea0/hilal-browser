@@ -153,4 +153,18 @@
     <string name="settings_about">About</string>
     <string name="settings_version">Version %1$s</string>
     <string name="settings_source">Source code</string>
+
+    <!-- Workspaces -->
+    <string name="workspace_default">Default</string>
+    <string name="workspace_new">New workspace</string>
+    <string name="workspace_edit">Edit workspace</string>
+    <string name="workspace_name">Name</string>
+    <string name="workspace_isolated">Separate cookies and logins</string>
+    <string name="workspace_isolated_summary">Sites in this workspace will not see your logins from other workspaces</string>
+    <string name="workspace_isolated_off_warning">Turning this off signs you out of sites in this workspace</string>
+    <string name="workspace_delete">Delete</string>
+    <string name="workspace_delete_title">Delete %1$s?</string>
+    <string name="workspace_delete_body">Its tabs will be closed. If it kept its own cookies and logins, they are deleted too.</string>
+    <string name="workspace_move_to">Move to workspace</string>
+    <string name="save">Save</string>
 </resources>

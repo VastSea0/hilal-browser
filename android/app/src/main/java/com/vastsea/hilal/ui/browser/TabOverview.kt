@@ -2,7 +2,9 @@ package com.vastsea.hilal.ui.browser
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -53,6 +55,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -63,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import com.vastsea.hilal.R
 import com.vastsea.hilal.browser.Tab
 import com.vastsea.hilal.browser.TabState
+import com.vastsea.hilal.browser.Workspace
 import com.vastsea.hilal.search.InputResolver
 import com.vastsea.hilal.ui.theme.LocalHaptics
 import kotlinx.coroutines.launch
@@ -73,20 +77,32 @@ fun TabOverview(
     tabs: List<Tab>,
     selectedId: String?,
     thumbnails: Map<String, ImageBitmap>,
+    workspaces: List<Workspace>,
+    activeWorkspaceId: String,
     initialPrivate: Boolean,
     onSelect: (String) -> Unit,
     onClose: (String) -> Unit,
     onCloseAll: (isPrivate: Boolean) -> Unit,
     onNewTab: (isPrivate: Boolean) -> Unit,
+    onSwitchWorkspace: (String) -> Unit,
+    onMoveTab: (tabId: String, workspaceId: String) -> Unit,
+    onCreateWorkspace: (WorkspaceEdit) -> Unit,
+    onUpdateWorkspace: (id: String, WorkspaceEdit) -> Unit,
+    onDeleteWorkspace: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var showPrivate by remember { mutableStateOf(initialPrivate) }
-    val visible = tabs.filter { it.current.isPrivate == showPrivate }
-    val normalCount = tabs.count { !it.current.isPrivate }
-    val privateCount = tabs.size - normalCount
+    val visible = tabs.filter {
+        it.current.isPrivate == showPrivate && (showPrivate || it.current.workspaceId == activeWorkspaceId)
+    }
+    val workspaceCounts = tabs.filterNot { it.current.isPrivate }.groupingBy { it.current.workspaceId }.eachCount()
+    val normalCount = workspaceCounts[activeWorkspaceId] ?: 0
+    val privateCount = tabs.count { it.current.isPrivate }
     val grid = rememberLazyGridState()
+    // null: closed, Unit: new workspace, a Workspace: editing it.
+    var editing by remember { mutableStateOf<Any?>(null) }
 
-    LaunchedEffect(showPrivate) {
+    LaunchedEffect(showPrivate, activeWorkspaceId) {
         val index = visible.indexOfFirst { it.id == selectedId }
         if (index >= 0) grid.scrollToItem(index)
     }
@@ -118,6 +134,17 @@ fun TabOverview(
                         Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.close))
                     }
                 }
+                if (!showPrivate) {
+                    WorkspaceStrip(
+                        workspaces = workspaces,
+                        activeId = activeWorkspaceId,
+                        tabCounts = workspaceCounts,
+                        onSwitch = onSwitchWorkspace,
+                        onEdit = { editing = it },
+                        onAdd = { editing = Unit },
+                        modifier = Modifier.padding(bottom = 4.dp),
+                    )
+                }
                 if (visible.isEmpty()) {
                     Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                         Text(
@@ -142,6 +169,8 @@ fun TabOverview(
                                 selected = tab.id == selectedId,
                                 onClick = { onSelect(tab.id) },
                                 onClose = { onClose(tab.id) },
+                                moveTargets = if (showPrivate) emptyList() else workspaces.filter { it.id != activeWorkspaceId },
+                                onMove = { workspaceId -> onMoveTab(tab.id, workspaceId) },
                                 modifier = Modifier.animateItem(
                                     fadeInSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
                                     placementSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
@@ -164,6 +193,22 @@ fun TabOverview(
             )
         }
     }
+
+    editing?.let { target ->
+        val workspace = target as? Workspace
+        WorkspaceEditorSheet(
+            workspace = workspace,
+            onSave = { edit ->
+                editing = null
+                if (workspace == null) onCreateWorkspace(edit) else onUpdateWorkspace(workspace.id, edit)
+            },
+            onDelete = {
+                editing = null
+                workspace?.let { onDeleteWorkspace(it.id) }
+            },
+            onDismiss = { editing = null },
+        )
+    }
 }
 
 @Composable
@@ -185,7 +230,11 @@ private fun OverviewMenu(enabled: Boolean, onCloseAll: () -> Unit) {
     }
 }
 
-/** A tab card. Swipe it sideways to close; it follows the finger and fades as it goes. */
+/**
+ * A tab card. Swipe it sideways to close; it follows the finger and fades as it goes.
+ * Long press offers to move it to another workspace.
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TabCard(
     tab: TabState,
@@ -193,8 +242,11 @@ private fun TabCard(
     selected: Boolean,
     onClick: () -> Unit,
     onClose: () -> Unit,
+    moveTargets: List<Workspace>,
+    onMove: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var menuOpen by remember { mutableStateOf(false) }
     val haptics = LocalHaptics.current
     val scope = rememberCoroutineScope()
     val offset = remember { Animatable(0f) }
@@ -203,7 +255,6 @@ private fun TabCard(
     val spatial = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
 
     Surface(
-        onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
         border = if (selected) BorderStroke(3.dp, if (tab.isPrivate) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary) else null,
@@ -232,8 +283,36 @@ private fun TabCard(
                     }
                     armed = false
                 },
+            )
+            .clip(RoundedCornerShape(24.dp))
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = if (moveTargets.isEmpty()) null else {
+                    {
+                        haptics.longPress()
+                        menuOpen = true
+                    }
+                },
             ),
     ) {
+        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+            Text(
+                stringResource(R.string.workspace_move_to),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+            moveTargets.forEach { workspace ->
+                DropdownMenuItem(
+                    text = { Text(workspace.name) },
+                    leadingIcon = { Icon(workspace.icon.vector, null, tint = workspace.color.color) },
+                    onClick = {
+                        menuOpen = false
+                        onMove(workspace.id)
+                    },
+                )
+            }
+        }
         Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

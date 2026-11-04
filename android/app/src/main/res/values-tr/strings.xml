@@ -151,4 +151,18 @@
     <string name="settings_about">Hakkında</string>
     <string name="settings_version">Sürüm %1$s</string>
     <string name="settings_source">Kaynak kodu</string>
+
+    <!-- Workspaces -->
+    <string name="workspace_default">Varsayılan</string>
+    <string name="workspace_new">Yeni çalışma alanı</string>
+    <string name="workspace_edit">Çalışma alanını düzenle</string>
+    <string name="workspace_name">Ad</string>
+    <string name="workspace_isolated">Ayrı çerezler ve oturumlar</string>
+    <string name="workspace_isolated_summary">Bu alandaki siteler diğer çalışma alanlarındaki oturumlarınızı görmez</string>
+    <string name="workspace_isolated_off_warning">Bunu kapatırsanız bu alandaki sitelerden çıkış yapılır</string>
+    <string name="workspace_delete">Sil</string>
+    <string name="workspace_delete_title">%1$s silinsin mi?</string>
+    <string name="workspace_delete_body">Sekmeleri kapatılır. Kendi çerezleri ve oturumları varsa onlar da silinir.</string>
+    <string name="workspace_move_to">Çalışma alanına taşı</string>
+    <string name="save">Kaydet</string>
 </resources>
