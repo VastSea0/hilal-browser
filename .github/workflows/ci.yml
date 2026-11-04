@@ -50,7 +50,9 @@ concurrency:
   # github.workflow is the caller's name when called, so a release run does
   # not cancel the main branch CI or the other way around.
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # A build takes hours; cancelling it on every push meant none finished.
+  # Let the running build finish and queue only the newest push after it.
+  cancel-in-progress: false
 
 permissions:
   contents: read
