@@ -95,6 +95,56 @@ You can obtain one at http://mozilla.org/MPL/2.0/. */
   justify-self: end;
 }
 
+/* Windows and Linux keep the window buttons at the end, after "Skip". */
+@media not (-moz-platform: macos) {
+  #hilal-welcome-overlay .hw-header {
+    grid-template-columns: 1fr auto 1fr auto;
+    column-gap: 12px;
+  }
+
+  #hilal-welcome-overlay .hw-header > :nth-child(2) {
+    grid-column: 2;
+  }
+
+  #hilal-welcome-overlay .hw-header > .hw-link {
+    grid-column: 3;
+  }
+
+  #hilal-welcome-overlay .hw-traffic-slot {
+    grid-column: 4;
+    grid-row: 1;
+    min-width: 0;
+    justify-self: end;
+  }
+}
+
+@media (-moz-gtk-csd-reversed-placement) {
+  #hilal-welcome-overlay .hw-header {
+    grid-template-columns: auto 1fr auto 1fr;
+  }
+
+  #hilal-welcome-overlay .hw-header > :nth-child(2) {
+    grid-column: 3;
+  }
+
+  #hilal-welcome-overlay .hw-header > .hw-link {
+    grid-column: 4;
+  }
+
+  #hilal-welcome-overlay .hw-traffic-slot {
+    grid-column: 1;
+    justify-self: start;
+  }
+}
+
+@media (-moz-platform: windows) {
+  #hilal-welcome-overlay .hw-traffic-slot {
+    align-self: stretch;
+    align-items: stretch;
+    margin-inline-end: -16px;
+  }
+}
+
 #hilal-welcome-overlay .hw-header button,
 #hilal-welcome-overlay .hw-traffic-slot {
   -moz-window-dragging: no-drag;

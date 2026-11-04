@@ -614,7 +614,7 @@
       }
     }
 
-    // The overlay covers the titlebar, so the macOS window buttons are moved
+    // The overlay covers the titlebar, so the window buttons are moved
     // into its header while it is shown and put back afterwards.
 
     _attachTrafficLights() {

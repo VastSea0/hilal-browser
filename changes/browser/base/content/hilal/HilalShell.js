@@ -449,7 +449,7 @@
       const topTrafficSlot = document.createElement("div");
       topTrafficSlot.id = "hilal-topbar-traffic-slot";
 
-      // Shared macOS traffic lights container
+      // Window buttons container, moved between the topbar and the tab strip
       const spacer = document.createElement("div");
       spacer.id = "hilal-traffic-lights-spacer";
 

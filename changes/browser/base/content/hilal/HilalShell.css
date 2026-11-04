@@ -74,40 +74,48 @@
   box-sizing: border-box !important;
 }
 
-/* Traffic lights spacer on macOS */
+/* Window buttons. macOS draws its traffic lights at the start of the row;
+   Windows and Linux get the regular caption buttons at the end (or at the
+   start when GTK is set to put them on the left). Upstream rules still hide
+   them when the system draws the titlebar. */
 #hilal-traffic-lights-spacer {
   display: flex !important;
   align-items: center !important;
-  width: 72px !important;
-  min-width: 72px !important;
   height: 100% !important;
   -moz-window-dragging: drag !important;
 }
 
 #hilal-traffic-lights-spacer .titlebar-buttonbox-container {
-  display: flex !important;
-  visibility: visible !important;
-  align-items: center !important;
   height: 100% !important;
   -moz-window-dragging: no-drag !important;
 }
 
 #hilal-traffic-lights-spacer .titlebar-buttonbox {
-  display: flex !important;
-  visibility: visible !important;
-  appearance: auto !important;
-  -moz-default-appearance: -moz-window-button-box !important;
-  height: 16px !important;
-  width: 60px !important;
-  min-width: 60px !important;
   margin: 0 !important;
-  padding: 0 !important;
   -moz-window-dragging: no-drag !important;
 }
 
-@media not (-moz-platform: macos) {
+@media (-moz-platform: macos) {
   #hilal-traffic-lights-spacer {
-    display: none !important;
+    width: 72px !important;
+    min-width: 72px !important;
+  }
+
+  #hilal-traffic-lights-spacer .titlebar-buttonbox-container {
+    display: flex !important;
+    visibility: visible !important;
+    align-items: center !important;
+  }
+
+  #hilal-traffic-lights-spacer .titlebar-buttonbox {
+    display: flex !important;
+    visibility: visible !important;
+    appearance: auto !important;
+    -moz-default-appearance: -moz-window-button-box !important;
+    height: 16px !important;
+    width: 60px !important;
+    min-width: 60px !important;
+    padding: 0 !important;
   }
 }
 
@@ -120,6 +128,42 @@
 #hilal-htabs-traffic-slot {
   display: flex;
   align-items: center;
+}
+
+@media not (-moz-platform: macos) {
+  #hilal-topbar-traffic-slot,
+  #hilal-htabs-traffic-slot {
+    order: 1000;
+
+    &:empty {
+      display: none;
+    }
+  }
+}
+
+@media (-moz-gtk-csd-reversed-placement) {
+  #hilal-topbar-traffic-slot,
+  #hilal-htabs-traffic-slot {
+    order: -1;
+  }
+}
+
+/* Caption buttons fill the window corner, as in other Windows apps. */
+@media (-moz-platform: windows) {
+  #hilal-topbar-traffic-slot,
+  #hilal-htabs-traffic-slot {
+    align-self: stretch;
+    align-items: stretch;
+  }
+
+  #hilal-topbar-traffic-slot {
+    margin-block: -7px;
+    margin-inline-end: -16px;
+  }
+
+  #hilal-htabs-traffic-slot {
+    margin-inline-end: -12px;
+  }
 }
 
 /* Workspaces slot in topbar (active in dual and horizontal modes) */
