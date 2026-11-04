@@ -27,6 +27,7 @@ const paths = {
   updateManifest: "dist/hilal-update-manifest.json",
   releaseWorkflow: ".github/workflows/release.yml",
   ciWorkflow: ".github/workflows/ci.yml",
+  buildWorkflow: ".github/workflows/build-target.yml",
   verifyWorkflow: ".github/workflows/verify-patches.yml",
 };
 
@@ -432,7 +433,7 @@ function checkCiBuildConfiguration() {
       `${name} must bootstrap Mozilla's toolchains.`,
     ]),
     [
-      paths.ciWorkflow,
+      paths.buildWorkflow,
       /name: Add swap/,
       "CI builds must add swap before the Firefox build.",
     ],
@@ -458,7 +459,7 @@ function checkCiBuildConfiguration() {
     "mozilla-actions/sccache-action@v0.0.8",
   ];
 
-  for (const file of [paths.releaseWorkflow, paths.verifyWorkflow, paths.ciWorkflow]) {
+  for (const file of [paths.releaseWorkflow, paths.verifyWorkflow, paths.ciWorkflow, paths.buildWorkflow]) {
     if (!existsSync(abs(file))) {
       continue;
     }

@@ -85,171 +85,38 @@ jobs:
             echo "artifacts_run=${{ github.run_id }}" >> "$GITHUB_OUTPUT"
           fi
 
-  build:
+  build-linux:
     needs: plan
-    if: needs.plan.outputs.build == 'true'
-    name: build (${{ matrix.target }})
-    runs-on: ubuntu-24.04
-    timeout-minutes: 355
-    strategy:
-      fail-fast: false
-      matrix:
-        target: ${{ fromJSON(needs.plan.outputs.targets) }}
-    env:
-      SCCACHE_DIR: /mnt/sccache
-      SCCACHE_CACHE_SIZE: 3G
-      MOZBUILD_STATE_PATH: /mnt/mozbuild
-      HILAL_MAC_TOOLS: /mnt/mac-tools
-      MOZ_BUILD_DATE: ${{ needs.plan.outputs.build_date }}
-    steps:
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
-            /usr/local/share/powershell /usr/share/swift /usr/lib/jvm \
-            /usr/local/share/boost /opt/hostedtoolcache/CodeQL \
-            /opt/hostedtoolcache/Ruby /opt/hostedtoolcache/PyPy \
-            /usr/local/cuda-* /usr/share/miniconda
-          sudo apt-get clean
-          docker system prune -af >/dev/null 2>&1 || true
-          sudo mkdir -p /mnt/sccache /mnt/mozbuild /mnt/mac-tools
-          sudo chown -R "$USER" /mnt/sccache /mnt/mozbuild /mnt/mac-tools
-          df -h / /mnt
+    if: needs.plan.outputs.build == 'true' && contains(needs.plan.outputs.targets, 'linux')
+    uses: ./.github/workflows/build-target.yml
+    with:
+      target: linux
+      build_date: ${{ needs.plan.outputs.build_date }}
+    secrets: inherit
 
-      - uses: actions/checkout@v7
+  build-macos:
+    needs: plan
+    if: needs.plan.outputs.build == 'true' && contains(needs.plan.outputs.targets, 'macos')
+    uses: ./.github/workflows/build-target.yml
+    with:
+      target: macos
+      build_date: ${{ needs.plan.outputs.build_date }}
+    secrets: inherit
 
-      # mach's taskgraph site does not install on newer Pythons, and without it
-      # toolchain bootstrap fails quietly.
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.13"
-
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libgtk-3-dev libdbus-glib-1-dev libpulse-dev libasound2-dev \
-            libx11-xcb-dev libxt-dev nasm msitools
-
-      - name: Add swap
-        run: |
-          sudo fallocate -l 12G /mnt/swapfile
-          sudo chmod 600 /mnt/swapfile
-          sudo mkswap /mnt/swapfile
-          sudo swapon /mnt/swapfile
-          free -h
-
-      - name: Cache hil
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            hil/target/
-          key: hil-${{ runner.os }}-${{ hashFiles('hil/Cargo.toml', 'hil/Cargo.lock', 'hil/src/**') }}
-
-      - name: Build hil
-        run: |
-          cargo build --release --manifest-path hil/Cargo.toml
-          mkdir -p bin
-          cp hil/target/release/hil bin/hil
-
-      - name: Add Rust cross targets
-        if: matrix.target != 'linux'
-        run: |
-          case "${{ matrix.target }}" in
-            macos) rustup target add aarch64-apple-darwin ;;
-            windows) rustup target add x86_64-pc-windows-msvc ;;
-          esac
-
-      - name: Set up Firefox source
-        run: ./bin/hil setup
-
-      - name: Apply Hilal patches
-        run: ./bin/hil apply --force
-
-      - name: Install sccache
-        run: |
-          v=0.19.0
-          curl -fsSL "https://github.com/mozilla/sccache/releases/download/v$v/sccache-v$v-x86_64-unknown-linux-musl.tar.gz" | tar -xz -C /tmp
-          sudo install "/tmp/sccache-v$v-x86_64-unknown-linux-musl/sccache" /usr/local/bin/sccache
-
-      - name: Restore compiler cache
-        uses: actions/cache/restore@v5
-        with:
-          path: /mnt/sccache
-          key: sccache-${{ matrix.target }}-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
-          restore-keys: |
-            sccache-${{ matrix.target }}-${{ hashFiles('upstream.lock') }}-
-            sccache-${{ matrix.target }}-
-
-      - name: Fetch macOS packaging tools
-        if: matrix.target == 'macos'
-        run: |
-          cd engine
-          ./mach artifact toolchain --from-build linux64-hfsplus linux64-libdmg
-          mv hfsplus dmg "$HILAL_MAC_TOOLS/"
-          ls -la "$HILAL_MAC_TOOLS"/*
-
-      - name: Build and package
-        env:
-          SAFEBROWSING_KEY: ${{ secrets.HILAL_SAFEBROWSING_API_KEY }}
-        run: |
-          if [ -n "$SAFEBROWSING_KEY" ]; then
-            (umask 077; printf '%s' "$SAFEBROWSING_KEY" > /mnt/safebrowsing.key)
-            export HILAL_SAFEBROWSING_KEY_FILE=/mnt/safebrowsing.key
-          else
-            echo "::warning::HILAL_SAFEBROWSING_API_KEY is not set, so phishing and malware protection is off in this build."
-          fi
-          scripts/ci/build.sh ${{ matrix.target }}
-          rm -f /mnt/safebrowsing.key
-
-      # Proves on every build that complete updates can be made and signed
-      # with the key that matches the updater's certificate. Release builds
-      # publish these; nightlies do not. The macOS MAR is made on the macOS
-      # runner from the ad-hoc signed bundle instead.
-      - name: Create signed update (MAR)
-        if: matrix.target != 'macos'
-        env:
-          MAR_KEY: ${{ secrets.HILAL_MAR_SIGNING_KEY }}
-        run: |
-          if [ -z "$MAR_KEY" ]; then
-            echo "::warning::HILAL_MAR_SIGNING_KEY is not set, so no signed update was made."
-            exit 0
-          fi
-          python3 -m venv /mnt/build-mar
-          /mnt/build-mar/bin/pip install -q mar==3.2.1
-          (umask 077; printf '%s\n' "$MAR_KEY" > /mnt/mar-key.pem)
-          # The MAR carries the Firefox app version: the updater refuses one
-          # that is lower than the installed version.
-          version="$(sed -n 's/^version=//p' dist/BUILD_INFO)"
-          HILAL_MAR_SIGNING_KEY=/mnt/mar-key.pem HILAL_BUILD_MAR=/mnt/build-mar/bin/mar \
-            scripts/make-full-update.sh "$version" "dist/hilal-${{ matrix.target }}.complete.mar"
-          rm -f /mnt/mar-key.pem
-
-      - name: Compiler cache stats
-        if: always()
-        run: sccache --show-stats || true
-
-      - name: Save compiler cache
-        if: always()
-        uses: actions/cache/save@v5
-        with:
-          path: /mnt/sccache
-          key: sccache-${{ matrix.target }}-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
-
-      - name: Upload package
-        uses: actions/upload-artifact@v7
-        with:
-          name: package-${{ matrix.target }}
-          path: dist/
-          if-no-files-found: error
-          retention-days: 14
+  build-windows:
+    needs: plan
+    if: needs.plan.outputs.build == 'true' && contains(needs.plan.outputs.targets, 'windows')
+    uses: ./.github/workflows/build-target.yml
+    with:
+      target: windows
+      build_date: ${{ needs.plan.outputs.build_date }}
+    secrets: inherit
 
   test-linux:
-    needs: [plan, build]
+    needs: [plan, build-linux]
     if: >-
       always() && !cancelled() && contains(needs.plan.outputs.targets, 'linux') &&
-      (needs.plan.outputs.build == 'false' || needs.build.result == 'success' || needs.build.result == 'failure')
+      (needs.plan.outputs.build == 'false' || needs.build-linux.result == 'success')
     name: test (linux ${{ matrix.session }})
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -313,10 +180,10 @@ jobs:
   # Builds the Flatpak from the tested tarball exactly as Flathub would and
   # runs the UI smoke inside the sandbox.
   test-flatpak:
-    needs: [plan, build]
+    needs: [plan, build-linux]
     if: >-
       always() && !cancelled() && contains(needs.plan.outputs.targets, 'linux') &&
-      (needs.plan.outputs.build == 'false' || needs.build.result == 'success' || needs.build.result == 'failure')
+      (needs.plan.outputs.build == 'false' || needs.build-linux.result == 'success')
     name: test (flatpak)
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -361,10 +228,10 @@ jobs:
           retention-days: 14
 
   test-macos:
-    needs: [plan, build]
+    needs: [plan, build-macos]
     if: >-
       always() && !cancelled() && contains(needs.plan.outputs.targets, 'macos') &&
-      (needs.plan.outputs.build == 'false' || needs.build.result == 'success' || needs.build.result == 'failure')
+      (needs.plan.outputs.build == 'false' || needs.build-macos.result == 'success')
     name: test (macos)
     runs-on: macos-latest
     timeout-minutes: 30
@@ -443,10 +310,10 @@ jobs:
           retention-days: 14
 
   test-windows:
-    needs: [plan, build]
+    needs: [plan, build-windows]
     if: >-
       always() && !cancelled() && contains(needs.plan.outputs.targets, 'windows') &&
-      (needs.plan.outputs.build == 'false' || needs.build.result == 'success' || needs.build.result == 'failure')
+      (needs.plan.outputs.build == 'false' || needs.build-windows.result == 'success')
     name: test (windows)
     runs-on: windows-latest
     timeout-minutes: 30
@@ -491,7 +358,7 @@ jobs:
   # account. Release checks (`/releases/latest`) skip pre-releases, so the
   # updater never offers it to stable users.
   publish-nightly:
-    needs: [plan, build, test-linux, test-macos, test-windows]
+    needs: [plan, test-linux, test-flatpak, test-macos, test-windows]
     if: >-
       always() && !cancelled() && github.ref == 'refs/heads/main' &&
       needs.plan.outputs.build == 'true' && (github.event_name == 'push' || inputs.publish_nightly) &&
