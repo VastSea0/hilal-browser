@@ -59,12 +59,48 @@ Branding and preferences are **overlays**, not patches:
 
 ## Build & Test
 
+- CI build of one target: `scripts/ci/build.sh linux|macos|windows`
 - Build: `scripts/build-macos.sh`
 - Front-end only (faster): `scripts/build-macos.sh faster`
 - C++/Rust only: `scripts/build-macos.sh binaries`
 - Run: `(cd engine && ./mach run)`
 - Tests: `(cd engine && ./mach test --auto)`
 - Format modified files: `(cd engine && ./mach format)`
+
+## Zero-Cost Rule
+
+Hilal is built, tested, signed and shipped without spending money. The
+maintainer has no Apple Developer account, no paid certificates and no
+servers. Every proposal must keep it that way:
+
+- Builds and tests run on free GitHub-hosted runners (the repo is public).
+  macOS and Windows are cross-compiled on Linux, as Mozilla and Zen do.
+- Downloads are hosted on GitHub Releases; the update endpoint runs on the
+  Vercel free tier (`www/api/update.ts`).
+- Updates are signed with self-made keys (`docs/UPDATES.md`).
+- macOS builds are ad-hoc signed. Windows signing may only come from a free
+  program such as SignPath Foundation.
+- Do not add a dependency on a paid service, a self-hosted server or a
+  machine the maintainer has to keep running.
+
+Priority is Linux first (the open source community), then macOS and Windows,
+but a change is only done when it works on all three.
+
+## Testing Without a Local Machine
+
+The maintainer cannot build or test on their own machines, so CI is the test
+lab. `.github/workflows/ci.yml` builds every push to main for all three
+platforms, launches each package on its own OS (Linux under X11 and Wayland)
+and checks the chrome with `scripts/ci/ui-smoke.py`, which also saves
+screenshots as artifacts. When you change browser chrome:
+
+- Add or extend a check in `scripts/ci/ui-smoke.py` for what you changed.
+- Look at the screenshots of the CI run (`gh run download <id> -n ui-smoke-<os>`)
+  before saying a change works on an OS.
+- To rerun only the tests against an earlier build, dispatch ci.yml with
+  `reuse_build_run=<run id>`.
+- Packages that pass are published as the `nightly` pre-release for human
+  testers. Releases (`v*` tags) go through the same pipeline.
 
 ## Code Style
 
