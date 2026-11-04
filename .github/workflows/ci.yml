@@ -166,6 +166,25 @@ jobs:
       - name: Build and package
         run: scripts/ci/build.sh ${{ matrix.target }}
 
+      # Proves on every build that complete updates can be made and signed
+      # with the key that matches the updater's certificate. Release builds
+      # publish these; nightlies do not.
+      - name: Create signed update (MAR)
+        env:
+          MAR_KEY: ${{ secrets.HILAL_MAR_SIGNING_KEY }}
+        run: |
+          if [ -z "$MAR_KEY" ]; then
+            echo "::warning::HILAL_MAR_SIGNING_KEY is not set, so no signed update was made."
+            exit 0
+          fi
+          python3 -m venv /mnt/build-mar
+          /mnt/build-mar/bin/pip install -q mar==3.2.1
+          (umask 077; printf '%s\n' "$MAR_KEY" > /mnt/mar-key.pem)
+          version="$(sed -n 's/^version *= *"\(.*\)"/\1/p' manifest.toml | head -n1)"
+          HILAL_MAR_SIGNING_KEY=/mnt/mar-key.pem HILAL_BUILD_MAR=/mnt/build-mar/bin/mar \
+            scripts/make-full-update.sh "$version" "dist/hilal-${{ matrix.target }}.complete.mar"
+          rm -f /mnt/mar-key.pem
+
       - name: Compiler cache stats
         if: always()
         run: sccache --show-stats || true
