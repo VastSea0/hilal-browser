@@ -165,4 +165,10 @@
     <string name="workspace_delete_body">Sekmeleri kapatılır. Kendi çerezleri ve oturumları varsa onlar da silinir.</string>
     <string name="workspace_move_to">Çalışma alanına taşı</string>
     <string name="save">Kaydet</string>
+
+    <!-- Live updates -->
+    <string name="settings_live_updates">Canlı güncellemeler</string>
+    <string name="settings_live_updates_summary">Günde birkaç kez GitHub\'dan site düzeltmeleri, arama motoru değişiklikleri ve duyurular içeren küçük, imzalı bir dosya indirir; böylece bunlar yeni uygulama sürümü beklemeden gelir. Hakkınızda hiçbir şey gönderilmez.</string>
+    <string name="live_apk_update_title">Hilal\'in yeni sürümü çıktı</string>
+    <string name="live_apk_update_body">%1$s sürümünü indirmek için dokunun.</string>
 </resources>

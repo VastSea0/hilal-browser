@@ -13,7 +13,9 @@ Hilal uses Firefox's built-in application updater for desktop builds:
 Release gating for update metadata, packaged browser smoke, and manual checks is
 tracked separately in `docs/STABLE-READINESS.md`.
 
-Android keeps the updater disabled and uses platform package mechanisms.
+Android keeps the updater disabled and uses platform package mechanisms for the
+app itself. Data, site fixes and notices reach Android without an APK through
+live updates (`docs/ANDROID-LIVE-UPDATES.md`).
 
 Flatpak builds disable Firefox's built-in updater. Updates for
 `org.gkdevstudio.Hilal` are delivered by Flatpak/Flathub.

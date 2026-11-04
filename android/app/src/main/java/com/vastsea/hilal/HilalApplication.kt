@@ -7,6 +7,8 @@ import com.vastsea.hilal.data.HilalDatabase
 import com.vastsea.hilal.data.SettingsRepository
 import com.vastsea.hilal.downloads.DownloadController
 import com.vastsea.hilal.gecko.GeckoProvider
+import com.vastsea.hilal.live.LiveApplier
+import com.vastsea.hilal.live.LiveUpdates
 import com.vastsea.hilal.search.SuggestionProvider
 import com.vastsea.hilal.telemetry.Telemetry
 import kotlinx.coroutines.CoroutineScope
@@ -44,6 +46,8 @@ class AppContainer(val app: Application) {
     }
     val suggestions by lazy { SuggestionProvider(database.history(), database.bookmarks()) }
     val telemetry by lazy { Telemetry(app) }
+    val live by lazy { LiveUpdates(app, appScope) }
+    val liveApplier by lazy { LiveApplier(runtime, appScope, live) }
 }
 
 val android.content.Context.container: AppContainer

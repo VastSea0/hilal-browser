@@ -167,4 +167,10 @@
     <string name="workspace_delete_body">Its tabs will be closed. If it kept its own cookies and logins, they are deleted too.</string>
     <string name="workspace_move_to">Move to workspace</string>
     <string name="save">Save</string>
+
+    <!-- Live updates -->
+    <string name="settings_live_updates">Live updates</string>
+    <string name="settings_live_updates_summary">A few times a day, download a small signed file from GitHub with site fixes, search engine changes and notices, so they arrive without a new app version. Nothing about you is sent.</string>
+    <string name="live_apk_update_title">A new Hilal version is out</string>
+    <string name="live_apk_update_body">Tap to download version %1$s.</string>
 </resources>

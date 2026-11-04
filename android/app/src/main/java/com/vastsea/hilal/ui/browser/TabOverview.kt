@@ -79,6 +79,7 @@ fun TabOverview(
     thumbnails: Map<String, ImageBitmap>,
     workspaces: List<Workspace>,
     activeWorkspaceId: String,
+    showWorkspaces: Boolean,
     initialPrivate: Boolean,
     onSelect: (String) -> Unit,
     onClose: (String) -> Unit,
@@ -134,7 +135,7 @@ fun TabOverview(
                         Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.close))
                     }
                 }
-                if (!showPrivate) {
+                if (!showPrivate && showWorkspaces) {
                     WorkspaceStrip(
                         workspaces = workspaces,
                         activeId = activeWorkspaceId,

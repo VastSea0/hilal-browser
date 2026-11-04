@@ -13,7 +13,7 @@ data class SearchEngine(
 data class Bang(val trigger: String, val name: String, val urlTemplate: String)
 
 object SearchEngines {
-    val all = listOf(
+    private val builtIn = listOf(
         SearchEngine("DuckDuckGo", "https://duckduckgo.com/?q=%s", "https://duckduckgo.com/ac/?q=%s&type=list"),
         SearchEngine("Google", "https://www.google.com/search?q=%s", "https://suggestqueries.google.com/complete/search?client=firefox&q=%s"),
         SearchEngine("Brave", "https://search.brave.com/search?q=%s", "https://search.brave.com/api/suggest?q=%s"),
@@ -23,11 +23,17 @@ object SearchEngines {
         SearchEngine("Yandex", "https://yandex.com/search/?text=%s", "https://suggest.yandex.com/suggest-ff.cgi?part=%s"),
     )
 
+    /** Engines from a live update; one with a built-in name replaces it, others are added. */
+    @Volatile
+    var live: List<SearchEngine> = emptyList()
+
+    val all: List<SearchEngine> get() = mergeByKey(builtIn, live) { it.name.lowercase() }
+
     fun byName(name: String): SearchEngine = all.firstOrNull { it.name.equals(name, ignoreCase = true) } ?: all.first()
 }
 
 object Bangs {
-    val all = listOf(
+    private val builtIn = listOf(
         Bang("g", "Google", "https://www.google.com/search?q=%s"),
         Bang("ddg", "DuckDuckGo", "https://duckduckgo.com/?q=%s"),
         Bang("b", "Bing", "https://www.bing.com/search?q=%s"),
@@ -43,6 +49,12 @@ object Bangs {
         Bang("so", "Stack Overflow", "https://stackoverflow.com/search?q=%s"),
         Bang("mdn", "MDN", "https://developer.mozilla.org/search?q=%s"),
     )
+
+    /** Bangs from a live update; one with a built-in trigger replaces it, others are added. */
+    @Volatile
+    var live: List<Bang> = emptyList()
+
+    val all: List<Bang> get() = mergeByKey(builtIn, live) { it.trigger.lowercase() }
 
     /** Bangs whose trigger starts with what the user typed after "!". */
     fun matching(input: String): List<Bang> {
@@ -93,4 +105,12 @@ object InputResolver {
     fun host(url: String): String = android.net.Uri.parse(url).host?.removePrefix("www.") ?: displayUrl(url)
 
     private fun encode(text: String) = URLEncoder.encode(text, "UTF-8")
+}
+
+private fun <T> mergeByKey(base: List<T>, overrides: List<T>, key: (T) -> String): List<T> {
+    if (overrides.isEmpty()) return base
+    val byKey = overrides.associateBy(key)
+    val replaced = base.map { byKey[key(it)] ?: it }
+    val baseKeys = base.map(key).toSet()
+    return replaced + overrides.filter { key(it) !in baseKeys }
 }

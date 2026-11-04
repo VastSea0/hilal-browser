@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
             container.downloads.failInterrupted()
             container.tabs.restore()
             container.addons.start()
+            container.liveApplier.start()
             handleIntent(intent)
             ready = true
             container.telemetry.pingIfAllowed(
@@ -49,6 +50,14 @@ class MainActivity : ComponentActivity() {
                 tabCount = container.tabs.tabs.value.size,
                 ublockEnabled = true,
             )
+        }
+
+        // Live updates follow their switch in settings; turning it off drops the bundle.
+        lifecycleScope.launch {
+            container.settings.settings.collect { settings ->
+                if (settings.liveUpdates) container.live.start { container.settings.current.liveUpdates }
+                else container.live.disable()
+            }
         }
 
         // Pages follow the app theme unless the user asked for dark websites everywhere.
@@ -72,6 +81,11 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleIntent(intent)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        container.live.checkIfStale(container.settings.current.liveUpdates)
     }
 
     override fun onStop() {

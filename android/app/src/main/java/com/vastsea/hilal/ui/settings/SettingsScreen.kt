@@ -129,11 +129,20 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit, onOpen: (String)
             section(R.string.settings_privacy)
             item {
                 SwitchItem(
-                    shapes = ListItemDefaults.segmentedShapes(0, 1),
+                    shapes = ListItemDefaults.segmentedShapes(0, 2),
                     title = stringResource(R.string.settings_telemetry),
                     summary = stringResource(R.string.settings_telemetry_summary),
                     checked = settings.telemetry,
                     onChange = { value -> repo.update { it.copy(telemetry = value) } },
+                )
+            }
+            item {
+                SwitchItem(
+                    shapes = ListItemDefaults.segmentedShapes(1, 2),
+                    title = stringResource(R.string.settings_live_updates),
+                    summary = stringResource(R.string.settings_live_updates_summary),
+                    checked = settings.liveUpdates,
+                    onChange = { value -> repo.update { it.copy(liveUpdates = value) } },
                 )
             }
 

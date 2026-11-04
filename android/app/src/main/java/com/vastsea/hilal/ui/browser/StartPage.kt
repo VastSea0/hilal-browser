@@ -19,8 +19,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -41,11 +45,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.vastsea.hilal.AppContainer
 import com.vastsea.hilal.R
+import com.vastsea.hilal.live.Notice
+import com.vastsea.hilal.live.LocalizedText
 import com.vastsea.hilal.search.InputResolver
 
 private data class Site(val url: String, val title: String)
 
-/** Shown for empty tabs: the most visited sites and recent bookmarks, nothing remote. */
+/**
+ * Shown for empty tabs: notices from live updates, the most visited sites and recent bookmarks.
+ * Nothing on it is loaded from the web when it opens.
+ */
 @Composable
 fun StartPage(
     container: AppContainer,
@@ -57,6 +66,16 @@ fun StartPage(
     val bookmarks by remember { container.database.bookmarks().all() }.collectAsState(emptyList())
     val sites = remember(frequent) { frequent.map { Site(it.url, it.title) } }
     val marks = remember(bookmarks) { bookmarks.take(8).map { Site(it.url, it.title) } }
+    val live by container.live.config.collectAsState()
+    val dismissed by container.live.dismissed.collectAsState()
+    val apkTitle = stringResource(R.string.live_apk_update_title)
+    val apkBody = live.apkUpdate?.let { stringResource(R.string.live_apk_update_body, it.versionName) }
+    val notices = remember(live, dismissed, apkBody) {
+        val apk = live.apkUpdate?.let { release ->
+            Notice("apk-${release.versionCode}", LocalizedText(mapOf("en" to apkTitle)), apkBody?.let { LocalizedText(mapOf("en" to it)) }, release.url)
+        }
+        (listOfNotNull(apk) + live.notices).filter { it.id !in dismissed }
+    }
 
     Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
@@ -68,6 +87,15 @@ fun StartPage(
             item(span = { GridItemSpan(maxLineSpan) }) {
                 if (isPrivate) PrivateHeader() else Header()
             }
+            if (!isPrivate) {
+                items(notices, key = { "n" + it.id }, span = { GridItemSpan(maxLineSpan) }) { notice ->
+                    NoticeCard(
+                        notice = notice,
+                        onOpen = { notice.url?.let(onOpen) },
+                        onDismiss = { container.live.dismiss(notice.id) },
+                    )
+                }
+            }
             if (!isPrivate && sites.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) { SectionTitle(stringResource(R.string.start_frequent)) }
                 items(sites, key = { "f" + it.url }) { site -> SiteTile(site, onOpen) }
@@ -75,6 +103,36 @@ fun StartPage(
             if (!isPrivate && marks.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) { SectionTitle(stringResource(R.string.start_bookmarks)) }
                 items(marks, key = { "b" + it.url }) { site -> SiteTile(site, onOpen) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NoticeCard(notice: Notice, onOpen: () -> Unit, onDismiss: () -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .then(if (notice.url != null) Modifier.clickable(onClick = onOpen) else Modifier),
+    ) {
+        Row(verticalAlignment = Alignment.Top, modifier = Modifier.padding(start = 20.dp, top = 8.dp, end = 4.dp, bottom = 16.dp)) {
+            Column(Modifier.weight(1f).padding(top = 8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (notice.id.startsWith("apk-")) {
+                        Icon(Icons.Outlined.SystemUpdate, null, Modifier.size(20.dp).padding(end = 4.dp))
+                    }
+                    Text(notice.title.get(), style = MaterialTheme.typography.titleMedium)
+                }
+                notice.body?.let {
+                    Spacer(Modifier.height(4.dp))
+                    Text(it.get(), style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+            IconButton(onClick = onDismiss) {
+                Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.close))
             }
         }
     }

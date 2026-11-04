@@ -87,6 +87,7 @@ fun BrowserScreen(
     val thumbnails by store.thumbnails.collectAsState()
     val workspaces by store.workspaces.collectAsState()
     val activeWorkspaceId by store.activeWorkspaceId.collectAsState()
+    val live by container.live.config.collectAsState()
     val selected: Tab? = tabs.firstOrNull { it.id == selectedId }
     val state: TabState? by remember(selected) { selected?.state ?: flowOf(null) }.collectAsState(selected?.current)
     val settings by container.settings.settings.collectAsState()
@@ -348,6 +349,7 @@ fun BrowserScreen(
                 thumbnails = thumbnails,
                 workspaces = workspaces,
                 activeWorkspaceId = activeWorkspaceId,
+                showWorkspaces = live.flag("workspaces", true) || workspaces.size > 1,
                 initialPrivate = isPrivate,
                 onSelect = { id ->
                     store.select(id)

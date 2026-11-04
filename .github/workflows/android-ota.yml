@@ -1,0 +1,97 @@
+name: Android Live Update
+
+# Publishes android/ota/ as a signed bundle on the rolling "android-ota" release. Installed
+# apps pick it up within hours (and at their next start) without a new APK. See
+# docs/ANDROID-LIVE-UPDATES.md. Pull requests only validate the sources.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'android/ota/**'
+      - 'scripts/android-ota/**'
+      - '.github/workflows/android-ota.yml'
+  pull_request:
+    paths:
+      - 'android/ota/**'
+      - 'scripts/android-ota/**'
+  # Refresh the "new version" notice after each Android release.
+  workflow_run:
+    workflows: ['Android Release']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-ota
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Validate sources
+        run: python3 scripts/android-ota/build.py > /dev/null
+
+      - name: Find the newest Android APK release
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${{ github.repository }}/releases?per_page=50" > releases.json
+          python3 - <<'EOF'
+          import json, re
+          releases = json.load(open("releases.json"))
+          for release in releases:
+              tag = release["tag_name"]
+              match = re.fullmatch(r"android-v(\d+)\.(\d+)\.(\d+)", tag)
+              if release["draft"] or release["prerelease"] or not match:
+                  continue
+              apk = next((a for a in release["assets"] if a["name"].endswith(".apk")), None)
+              if not apk:
+                  continue
+              major, minor, patch = map(int, match.groups())
+              json.dump({
+                  "versionCode": major * 10000 + minor * 100 + patch,
+                  "versionName": f"{major}.{minor}.{patch}",
+                  "url": apk["browser_download_url"],
+              }, open("latest-apk.json", "w"))
+              print(f"latest APK: {tag}")
+              break
+          else:
+              print("no Android APK release yet")
+          EOF
+
+      - name: Build and sign the bundle
+        if: github.event_name != 'pull_request'
+        env:
+          OTA_SIGNING_KEY: ${{ secrets.ANDROID_OTA_SIGNING_KEY }}
+        run: |
+          if [ -z "$OTA_SIGNING_KEY" ]; then
+            echo "::error::Set the ANDROID_OTA_SIGNING_KEY secret (see docs/ANDROID-LIVE-UPDATES.md)"
+            exit 1
+          fi
+          umask 077
+          printf '%s\n' "$OTA_SIGNING_KEY" > "$RUNNER_TEMP/ota-key.pem"
+          APK_ARG=()
+          [ -f latest-apk.json ] && APK_ARG=(--latest-apk latest-apk.json)
+          python3 scripts/android-ota/build.py --key "$RUNNER_TEMP/ota-key.pem" --out ota.json "${APK_ARG[@]}"
+          rm -f "$RUNNER_TEMP/ota-key.pem"
+
+      - name: Publish on the android-ota release
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view android-ota > /dev/null 2>&1; then
+            gh release create android-ota --prerelease --latest=false \
+              --title "Android live update" \
+              --notes "Signed live update bundle for Hilal on Android. Apps download ota.json from here; it is not something to install."
+          fi
+          gh release upload android-ota ota.json --clobber

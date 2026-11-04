@@ -18,6 +18,7 @@ data class Settings(
     val darkWebsites: Boolean = false,
     val haptics: Boolean = true,
     val telemetry: Boolean = true,
+    val liveUpdates: Boolean = true,
 )
 
 /**
@@ -40,6 +41,7 @@ class SettingsRepository(context: Context) {
             .putBoolean(KEY_DARK_WEBSITES, next.darkWebsites)
             .putBoolean(KEY_HAPTICS, next.haptics)
             .putBoolean(KEY_TELEMETRY, next.telemetry)
+            .putBoolean(KEY_LIVE_UPDATES, next.liveUpdates)
             .apply()
         _settings.value = next
     }
@@ -52,6 +54,7 @@ class SettingsRepository(context: Context) {
         darkWebsites = prefs.getBoolean(KEY_DARK_WEBSITES, false),
         haptics = prefs.getBoolean(KEY_HAPTICS, true),
         telemetry = prefs.getBoolean(KEY_TELEMETRY, true),
+        liveUpdates = prefs.getBoolean(KEY_LIVE_UPDATES, true),
     )
 
     private companion object {
@@ -62,5 +65,6 @@ class SettingsRepository(context: Context) {
         const val KEY_DARK_WEBSITES = "dark_websites"
         const val KEY_HAPTICS = "haptics"
         const val KEY_TELEMETRY = "anonymous_telemetry_enabled"
+        const val KEY_LIVE_UPDATES = "live_updates"
     }
 }

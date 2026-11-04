@@ -1,0 +1,12 @@
+{
+  "manifest_version": 2,
+  "name": "Hilal Live",
+  "version": "1.0",
+  "description": "Applies site fixes from Hilal live updates.",
+  "browser_specific_settings": {
+    "gecko": { "id": "live@hilal.vastsea.com" }
+  },
+  "background": { "scripts": ["background.js"] },
+  "incognito": "spanning",
+  "permissions": ["nativeMessaging", "geckoViewAddons", "<all_urls>"]
+}
