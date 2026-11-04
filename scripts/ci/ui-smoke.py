@@ -153,6 +153,29 @@ return out;
 """
 
 
+ADDONS_JS = r"""
+const resolve = arguments[arguments.length - 1];
+const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
+AddonManager.getAllAddons().then(
+  list => resolve(list.map(a => ({ id: a.id, type: a.type, active: a.isActive }))),
+  e => resolve([{ id: "error", type: String(e), active: false }])
+);
+"""
+
+POLICIES_JS = r"""
+const active = Services.policies.getActivePolicies() || {};
+const status = { 0: "inactive", 1: "active", 2: "failed" }[Services.policies.status] || String(Services.policies.status);
+const key = Services.urlFormatter.formatURL("%GOOGLE_SAFEBROWSING_API_KEY%");
+return {
+  status,
+  names: Object.keys(active),
+  updateURL: active.AppUpdateURL ? String(active.AppUpdateURL.spec || active.AppUpdateURL) : null,
+  updatesDisabled: !!active.DisableAppUpdate || !Services.policies.isAllowed("appUpdate"),
+  safebrowsingKey: !!key && !key.includes("no-google-safebrowsing-api-key") && !key.startsWith("%"),
+};
+"""
+
+
 def wait_for(m, js, timeout=60, interval=0.5):
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -175,6 +198,10 @@ def main():
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--pref", action="append", default=[], metavar="NAME=JSON",
                         help="extra pref for the test profile, e.g. browser.tabs.inTitlebar=1")
+    parser.add_argument("--expect-updates", choices=["hilal", "disabled", "any"], default="hilal",
+                        help="hilal: updates come from Hilal's server; disabled: Flatpak and other package managers")
+    parser.add_argument("--require-safebrowsing", action="store_true",
+                        help="fail when the build has no Google Safe Browsing key")
     args = parser.parse_args()
 
     out = Path(args.out)
@@ -199,9 +226,12 @@ def main():
     checks = []
     report = {"host": platform.platform(), "checks": checks}
 
-    def check(name, ok, detail=None):
-        checks.append({"name": name, "ok": bool(ok), "detail": detail})
-        print(("PASS " if ok else "FAIL ") + name + (f": {detail}" if detail and not ok else ""), flush=True)
+    def check(name, ok, detail=None, known_issue=None):
+        """known_issue: a tracked bug; the check is reported but does not fail the run."""
+        status = "PASS" if ok else ("WARN" if known_issue else "FAIL")
+        checks.append({"name": name, "ok": bool(ok), "status": status, "detail": detail,
+                       "known_issue": known_issue})
+        print(f"{status} {name}" + (f": {known_issue or detail}" if detail and not ok else ""), flush=True)
 
     try:
         m = Marionette(port, timeout=args.timeout)
@@ -271,6 +301,34 @@ def main():
         m.script("gBrowser.removeTab(gBrowser.selectedTab)")
         check("tab closes", wait_for(m, f"return gBrowser.tabs.length == {before}", 10))
 
+        # Release-critical pieces that only show up in a running browser.
+        addons = None
+        deadline = time.time() + 30
+        while time.time() < deadline:
+            addons = m.script(ADDONS_JS, asynchronous=True)
+            if any(a["id"] == "uBlock0@raymondhill.net" and a["active"] for a in addons):
+                break
+            time.sleep(1)
+        report["addons"] = addons
+        check("bundled uBlock Origin is installed and active",
+              any(a["id"] == "uBlock0@raymondhill.net" and a["active"] for a in addons), addons)
+        check("bundled Turkish language pack is installed",
+              any(a["id"] == "langpack-tr@firefox.mozilla.org" for a in addons), addons,
+              known_issue="the self-built langpack is unsigned and release builds require signed langpacks")
+
+        policies = m.script(POLICIES_JS)
+        report["policies"] = policies
+        check("enterprise policies loaded without errors", policies["status"] == "active", policies)
+        if args.expect_updates == "hilal":
+            check("updates point at the Hilal update server",
+                  "hilal-browser.vercel.app/update/" in (policies["updateURL"] or ""), policies)
+        elif args.expect_updates == "disabled":
+            check("built-in updater is disabled", policies["updatesDisabled"], policies)
+
+        report["safebrowsing_key"] = policies["safebrowsingKey"]
+        if args.require_safebrowsing:
+            check("Safe Browsing has an API key", policies["safebrowsingKey"], policies)
+
         errors = m.script(ERRORS_JS)
         report["chrome_errors"] = errors
         hilal_errors = [e for e in errors if "hilal" in e["source"].lower()]
@@ -292,9 +350,9 @@ def main():
         shutil.rmtree(profile, ignore_errors=True)
 
     (out / "report.json").write_text(json.dumps(report, indent=2))
-    failed = [c for c in checks if not c["ok"]]
+    failed = [c for c in checks if c["status"] == "FAIL"]
     lines = [f"## Hilal UI smoke ({report['host']})", ""]
-    lines += [f"- {'PASS' if c['ok'] else 'FAIL'} {c['name']}" for c in checks]
+    lines += [f"- {c['status']} {c['name']}" + (f" ({c['known_issue']})" if c['status'] == 'WARN' else "") for c in checks]
     if failed:
         lines += ["", "### Failures", ""]
         lines += [f"- {c['name']}: `{json.dumps(c['detail'])}`" for c in failed]

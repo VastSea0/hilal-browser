@@ -343,7 +343,7 @@ jobs:
         run: |
           dbus-run-session -- xvfb-run -a -s "-screen 0 1600x1000x24" \
             python3 scripts/ci/ui-smoke.py --binary scripts/ci/flatpak-run.sh \
-              --pref browser.tabs.inTitlebar=1 --out ui-smoke
+              --pref browser.tabs.inTitlebar=1 --expect-updates disabled --out ui-smoke
 
       - name: Summary
         if: always()
