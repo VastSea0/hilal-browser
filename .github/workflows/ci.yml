@@ -164,7 +164,17 @@ jobs:
           ls -la "$HILAL_MAC_TOOLS"/*
 
       - name: Build and package
-        run: scripts/ci/build.sh ${{ matrix.target }}
+        env:
+          SAFEBROWSING_KEY: ${{ secrets.HILAL_SAFEBROWSING_API_KEY }}
+        run: |
+          if [ -n "$SAFEBROWSING_KEY" ]; then
+            (umask 077; printf '%s' "$SAFEBROWSING_KEY" > /mnt/safebrowsing.key)
+            export HILAL_SAFEBROWSING_KEY_FILE=/mnt/safebrowsing.key
+          else
+            echo "::warning::HILAL_SAFEBROWSING_API_KEY is not set, so phishing and malware protection is off in this build."
+          fi
+          scripts/ci/build.sh ${{ matrix.target }}
+          rm -f /mnt/safebrowsing.key
 
       # Proves on every build that complete updates can be made and signed
       # with the key that matches the updater's certificate. Release builds
