@@ -53,18 +53,21 @@ The output defaults to:
 dist/hilal-<version>.complete.mar
 ```
 
-For production releases, sign the MAR during creation by pointing the script at
-an NSS database containing the private key whose public certificate is embedded
-in the shipped updater:
+For production releases, sign the MAR during creation with the PEM private key
+whose certificate is compiled into the updater. Signing uses Mozilla's
+build-mar (`pip install mar`), so it works on Linux for macOS and Windows
+cross builds too:
 
 ```bash
-HILAL_SIGNMAR_NSS_DIR=/secure/path/to/nss-db \
-HILAL_SIGNMAR_CERT=mar_sig \
-scripts/make-full-update.sh 0.2.0-alpha.4
+HILAL_MAR_SIGNING_KEY=/secure/path/primary.key.pem \
+HILAL_BUILD_MAR="$(command -v mar)" \
+scripts/make-full-update.sh 0.5.0
 ```
 
-Without signing variables, the script creates an unsigned MAR and prints a
-production warning.
+The script verifies the signed MAR against
+`changes/toolkit/mozapps/update/updater/release_primary.der` and fails if the
+key does not match. Unsigned MARs need `--allow-unsigned` and are only for
+local testing.
 
 ## Publish Update XML
 
@@ -180,98 +183,43 @@ Do not ship production updates with unsigned MARs or with
 `--enable-unverified-updates`. The browser's `updater` binary accepts MARs
 signed by a private key whose public certificate is compiled into the browser.
 
-### NSS Database & Certificate Setup
+### Keys and Certificates
 
-Create an NSS (Network Security Services) database containing the private
-signing key. Overlay the public certificate DER files in the repository so the
-browser build compiles them into the updater.
+The current keys were created on 2026-11-04 with OpenSSL (RSA 4096, SHA-384
+signatures). The private keys are not in git; the maintainer keeps them in a
+backup outside the repository, and the primary key is the GitHub Actions secret
+`HILAL_MAR_SIGNING_KEY`. Losing the primary key means installed browsers can
+only be updated by a manual reinstall, so keep more than one copy.
 
-To generate a new primary/secondary update signing keypair locally:
+To create a new key pair (for example during rotation):
 
-1. **Initialize NSS Database**:
-   Create a signing database outside version control:
-   ```bash
-   mkdir -p /path/to/signing-db
-   engine/obj-aarch64-apple-darwin25.4.0/dist/bin/certutil -N -d sql:/path/to/signing-db --empty-password
-   ```
+```bash
+openssl genrsa -out secondary.key.pem 4096
+openssl req -new -x509 -key secondary.key.pem -sha384 -days 3650 \
+  -subj "/CN=Hilal Update Secondary" -outform DER -out release_secondary.der
+cp release_secondary.der changes/toolkit/mozapps/update/updater/
+```
 
-2. **Generate Keypair & Certificate**:
-   Generate a 4096-bit RSA self-signed update signing certificate:
-   ```bash
-   dd if=/dev/urandom of=noise.bin bs=2048 count=1
-   engine/obj-aarch64-apple-darwin25.4.0/dist/bin/certutil -S -d sql:/path/to/signing-db \
-     -n mar_sig \
-     -s "CN=Hilal Update Primary" \
-     -t "C,," \
-     -x -g 4096 -v 120 \
-     -z noise.bin
-   ```
-
-3. **Export Public Certificate**:
-   ```bash
-   engine/obj-aarch64-apple-darwin25.4.0/dist/bin/certutil -L -d sql:/path/to/signing-db -n mar_sig -r > release_primary.der
-   ```
-
-4. **Embed Certificate into Build**:
-   Copy the exported certificate to the overlay directory:
-   ```bash
-   cp release_primary.der changes/toolkit/mozapps/update/updater/release_primary.der
-   ```
-   `./bin/hil apply` copies this file into the Firefox source tree. The build
-   system compiles the certificate bytes into the updater's `primaryCertData`.
+`./bin/hil apply` copies the certificates into the Firefox tree and the build
+compiles them into the updater, which accepts a MAR signed by either one.
 
 ### Key Rotation Procedure
 
-To rotate signing keys without breaking updates for existing users:
+1. Ship a release whose updater trusts both the current primary and a new
+   secondary certificate.
+2. Once users are on that release, sign MARs with the secondary key.
+3. In a later release, promote the secondary certificate to
+   `release_primary.der` and add a new secondary.
 
-1. **Generate a New Keypair**:
-   Generate a new certificate/key in a separate or the same NSS database, naming it `mar_sig_secondary`.
-2. **Export and Overlay**:
-   Export the new certificate as `release_secondary.der` and place it at:
-   `changes/toolkit/mozapps/update/updater/release_secondary.der`
-3. **Build and Ship Both Certs**:
-   Release a browser version that trusts MARs signed by either key.
-4. **Transition Signing**:
-   After older builds update, sign MAR packages with `mar_sig_secondary`.
-5. **Finalize Rotation**:
-   In the next release cycle, promote `release_secondary.der` to
-   `release_primary.der` and generate a new secondary certificate.
+### CI Secret
 
-### CI/CD Secret Integration
+Store the PEM text of the primary private key as the repository secret
+`HILAL_MAR_SIGNING_KEY`:
 
-To sign MAR packages in CI without checking private key database files into git:
+```bash
+gh secret set HILAL_MAR_SIGNING_KEY < primary.key.pem
+```
 
-1. **Package the NSS Database**:
-   Compress the NSS database files (`cert9.db`, `key4.db`, `pkcs11.txt`):
-   ```bash
-   tar -czf signing-db.tar.gz -C /path/to/signing-db .
-   ```
-
-2. **Encode to Base64**:
-   ```bash
-   base64 -i signing-db.tar.gz -o signing-db.base64
-   ```
-
-3. **Configure GitHub Secrets**:
-   Save `signing-db.base64` as a repository secret named
-   `HILAL_SIGNING_DB_BASE64`.
-
-4. **Restore Database in CI**:
-   Add a GitHub Actions step:
-   ```yaml
-   - name: Restore Signing NSS Database
-     run: |
-       echo "${{ secrets.HILAL_SIGNING_DB_BASE64 }}" | base64 -d > signing-db.tar.gz
-       mkdir -p /tmp/signing-db
-       tar -xzf signing-db.tar.gz -C /tmp/signing-db
-   ```
-
-5. **Generate and Sign the Update MAR**:
-   ```yaml
-   - name: Create Signed Update MAR
-     env:
-       HILAL_SIGNMAR_NSS_DIR: /tmp/signing-db
-       HILAL_SIGNMAR_CERT: mar_sig
-     run: |
-       scripts/make-full-update.sh 0.3.0
-   ```
+The CI workflow writes it to a private temporary file, makes and verifies the
+MAR for each platform, and deletes the file. Without the secret, builds still
+pass but no signed MAR is made.
