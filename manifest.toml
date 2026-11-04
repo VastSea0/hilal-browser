@@ -48,7 +48,7 @@ reason = "Bundled distribution extensions (langpacks)"
 
 [[patches]]
 path   = "browser/ublock.patch"
-reason = "Hilal distribution setup for integrated uBlock"
+reason = "Ship policies.json and the bundled uBlock Origin and langpacks in every package"
 
 [[patches]]
 path   = "browser/config/version.patch"

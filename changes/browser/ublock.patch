@@ -20,3 +20,16 @@ index b174449a0989..2e6119c58052 100644
 +    "extensions/langpack-*@firefox.mozilla.org.xpi",
 +    "extensions/uBlock0@raymondhill.net.xpi",
 +]
+diff --git a/browser/installer/package-manifest.in b/browser/installer/package-manifest.in
+index 5936f8a8d9bd..785d6344b09d 100644
+--- a/browser/installer/package-manifest.in
++++ b/browser/installer/package-manifest.in
+@@ -462,6 +462,6 @@ bin/libfreebl_64int_3.so
+ @BINPATH@/desktop-launcher/desktop-launcher@BIN_SUFFIX@
+ #endif
+ 
+-#if defined(BUILT_BY_MOZILLA)
++; Hilal ships its policies and bundled add-ons in distribution/, so package
++; it for every build, not only Mozilla's.
+ @RESPATH@/distribution/*
+-#endif
