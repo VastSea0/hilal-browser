@@ -1,0 +1,19 @@
+# CI build for macOS arm64, cross-compiled on Linux (scripts/ci/build.sh macos).
+# Configure bootstraps the macOS SDK; the DMG tools come from Mozilla's
+# toolchain index (see .github/workflows/ci.yml).
+. "$topsrcdir/../mozconfigs/base"
+
+ac_add_options --enable-bootstrap
+ac_add_options --target=aarch64-apple-darwin
+ac_add_options --disable-debug-symbols
+
+HILAL_MAC_TOOLS="${HILAL_MAC_TOOLS:-$HOME/mac-tools}"
+export MKFSHFS="$HILAL_MAC_TOOLS/hfsplus/newfs_hfs"
+export DMG_TOOL="$HILAL_MAC_TOOLS/dmg/dmg"
+export HFS_TOOL="$HILAL_MAC_TOOLS/dmg/hfsplus"
+
+# Clang defaults to apple-a7 for this target, which leaves out M1 features.
+export CFLAGS="$CFLAGS -mcpu=apple-m1"
+export CXXFLAGS="$CXXFLAGS -mcpu=apple-m1"
+
+unset MOZ_STDCXX_COMPAT

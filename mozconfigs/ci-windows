@@ -1,0 +1,10 @@
+# CI build for Windows x64, cross-compiled on Linux (scripts/ci/build.sh windows).
+# Configure bootstraps the Visual Studio sysroot, wine and the windows-rs
+# crate from Mozilla's toolchain index.
+. "$topsrcdir/../mozconfigs/base"
+
+ac_add_options --enable-bootstrap
+ac_add_options --target=x86_64-pc-windows-msvc
+ac_add_options --disable-debug-symbols
+
+export WINEDEBUG=-all

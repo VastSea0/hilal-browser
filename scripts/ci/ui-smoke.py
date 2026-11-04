@@ -1,0 +1,307 @@
+#!/usr/bin/env python3
+"""Launch a packaged Hilal build and check the browser chrome through Marionette.
+
+Runs on Linux, macOS and Windows with only the Python standard library, so CI
+can test release packages on real runners without a Firefox source tree.
+
+    python3 scripts/ci/ui-smoke.py --binary path/to/hilal --out ui-smoke
+
+Writes screenshots, report.json and summary.md into --out. Exits non-zero when
+a check fails.
+"""
+
+import argparse
+import base64
+import json
+import os
+import platform
+import shutil
+import socket
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+
+
+class MarionetteError(Exception):
+    pass
+
+
+class Marionette:
+    def __init__(self, port, timeout=90):
+        deadline = time.time() + timeout
+        last_error = None
+        while time.time() < deadline:
+            try:
+                self.sock = socket.create_connection(("127.0.0.1", port), timeout=10)
+                break
+            except OSError as e:
+                last_error = e
+                time.sleep(0.5)
+        else:
+            raise MarionetteError(f"could not connect to Marionette: {last_error}")
+        self.sock.settimeout(120)
+        self.buf = b""
+        self.msg_id = 0
+        self._read()  # server hello
+
+    def _read(self):
+        while b":" not in self.buf:
+            self._recv()
+        length, self.buf = self.buf.split(b":", 1)
+        length = int(length)
+        while len(self.buf) < length:
+            self._recv()
+        data, self.buf = self.buf[:length], self.buf[length:]
+        return json.loads(data)
+
+    def _recv(self):
+        chunk = self.sock.recv(1 << 20)
+        if not chunk:
+            raise MarionetteError("Marionette connection closed")
+        self.buf += chunk
+
+    def send(self, name, params=None):
+        self.msg_id += 1
+        data = json.dumps([0, self.msg_id, name, params or {}]).encode()
+        self.sock.sendall(str(len(data)).encode() + b":" + data)
+        while True:
+            msg = self._read()
+            if msg[0] == 1 and msg[1] == self.msg_id:
+                break
+        _, _, error, result = msg
+        if error:
+            raise MarionetteError(f"{name}: {error.get('error')}: {error.get('message')}")
+        return result
+
+    def script(self, source, args=None, asynchronous=False):
+        command = "WebDriver:ExecuteAsyncScript" if asynchronous else "WebDriver:ExecuteScript"
+        result = self.send(command, {"script": source, "args": args or []})
+        return result.get("value") if isinstance(result, dict) else result
+
+    def context(self, name):
+        self.send("Marionette:SetContext", {"value": name})
+
+    def screenshot(self, path):
+        result = self.send("WebDriver:TakeScreenshot", {"full": False, "hash": False})
+        Path(path).write_bytes(base64.b64decode(result["value"]))
+
+
+USER_PREFS = {
+    "browser.shell.checkDefaultBrowser": False,
+    "browser.startup.homepage_override.mstone": "ignore",
+    "browser.aboutwelcome.enabled": False,
+    "datareporting.policy.dataSubmissionEnabled": False,
+    "app.update.disabledForTesting": True,
+    "browser.sessionstore.resume_from_crash": False,
+    "toolkit.startup.max_resumed_crashes": -1,
+    "dom.disable_open_during_load": False,
+}
+
+# Collects the state of the Hilal shell; runs in the chrome window.
+STATE_JS = r"""
+const doc = document;
+const rect = el => {
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  const cs = getComputedStyle(el);
+  return {
+    x: Math.round(r.x), y: Math.round(r.y),
+    w: Math.round(r.width), h: Math.round(r.height),
+    display: cs.display, visibility: cs.visibility,
+  };
+};
+const buttons = {};
+for (const cls of ["titlebar-min", "titlebar-max", "titlebar-restore", "titlebar-close"]) {
+  const el = doc.querySelector("#hilal-traffic-lights-spacer ." + cls) ||
+             doc.querySelector("#hilal-welcome-overlay ." + cls);
+  buttons[cls] = rect(el);
+}
+const root = doc.documentElement;
+return {
+  platform: AppConstants.platform,
+  version: AppConstants.MOZ_APP_VERSION_DISPLAY,
+  customtitlebar: root.hasAttribute("customtitlebar"),
+  sizemode: root.getAttribute("sizemode"),
+  tabMode: root.getAttribute("data-tab-mode"),
+  window: { w: window.innerWidth, h: window.innerHeight },
+  shell: !!window.gHilalShell,
+  headerShell: rect(doc.getElementById("hilal-header-shell")),
+  topbar: rect(doc.getElementById("hilal-topbar")),
+  urlbar: rect(doc.querySelector("#hilal-header-shell input, #hilal-url-input")),
+  welcome: !!doc.getElementById("hilal-welcome-overlay"),
+  buttonBox: rect(doc.querySelector("#hilal-welcome-overlay .titlebar-buttonbox-container") ||
+                  doc.querySelector("#hilal-traffic-lights-spacer .titlebar-buttonbox-container")),
+  buttons,
+  tabs: gBrowser.tabs.length,
+  selectedURL: gBrowser.selectedBrowser.currentURI.spec,
+};
+"""
+
+# Errors logged from chrome code since startup, Hilal files first.
+ERRORS_JS = r"""
+const out = [];
+for (const m of Services.console.getMessageArray() || []) {
+  let e;
+  try { e = m.QueryInterface(Ci.nsIScriptError); } catch (_) { continue; }
+  if (e.flags & Ci.nsIScriptError.warningFlag) continue;
+  if (!e.sourceName || !/^(chrome|resource):/.test(e.sourceName)) continue;
+  out.push({ source: e.sourceName, line: e.lineNumber, message: e.errorMessage });
+}
+return out;
+"""
+
+
+def wait_for(m, js, timeout=60, interval=0.5):
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if m.script(js):
+            return True
+        time.sleep(interval)
+    return False
+
+
+def free_port():
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--binary", required=True)
+    parser.add_argument("--out", default="ui-smoke")
+    parser.add_argument("--timeout", type=int, default=120)
+    parser.add_argument("--pref", action="append", default=[], metavar="NAME=JSON",
+                        help="extra pref for the test profile, e.g. browser.tabs.inTitlebar=1")
+    args = parser.parse_args()
+
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    profile = Path(tempfile.mkdtemp(prefix="hilal-smoke-"))
+    port = free_port()
+    prefs = dict(USER_PREFS, **{"marionette.port": port})
+    for item in args.pref:
+        name, value = item.split("=", 1)
+        prefs[name] = json.loads(value)
+    (profile / "user.js").write_text(
+        "".join(f"user_pref({json.dumps(k)}, {json.dumps(v)});\n" for k, v in prefs.items())
+    )
+
+    log = open(out / "browser.log", "w")
+    env = dict(os.environ, MOZ_CRASHREPORTER_DISABLE="1", MOZ_DISABLE_AUTO_SAFE_MODE="1")
+    cmd = [args.binary, "-no-remote", "-marionette", "-remote-allow-system-access",
+           "-purgecaches", "-profile", str(profile)]
+    print("Launching:", " ".join(cmd), flush=True)
+    proc = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT, env=env)
+
+    checks = []
+    report = {"host": platform.platform(), "checks": checks}
+
+    def check(name, ok, detail=None):
+        checks.append({"name": name, "ok": bool(ok), "detail": detail})
+        print(("PASS " if ok else "FAIL ") + name + (f": {detail}" if detail and not ok else ""), flush=True)
+
+    try:
+        m = Marionette(port, timeout=args.timeout)
+        m.send("WebDriver:NewSession", {"capabilities": {"alwaysMatch": {"acceptInsecureCerts": True}}})
+        m.send("WebDriver:SetTimeouts", {"script": 60000})
+        m.context("chrome")
+
+        check("browser window opened", wait_for(m, "return typeof gBrowser != 'undefined' && !!gBrowser.selectedBrowser", 60))
+        check("Hilal shell started", wait_for(m, "return !!document.getElementById('hilal-header-shell')", 60))
+        time.sleep(2)
+
+        state = m.script(STATE_JS)
+        report["first_run"] = state
+        m.screenshot(out / "01-first-run.png")
+        check("welcome screen shown on first run", state["welcome"])
+
+        is_mac = state["platform"] == "macosx"
+
+        def check_window_buttons(label, s):
+            b = s["buttons"]
+            if not s["customtitlebar"]:
+                check(f"{label}: system titlebar in use, no own window buttons", b["titlebar-close"] is None or b["titlebar-close"]["display"] == "none" or b["titlebar-close"]["w"] == 0)
+                return
+            if is_mac:
+                box = s["buttonBox"]
+                check(f"{label}: macOS traffic lights have room", box and box["w"] > 0 and box["display"] != "none", box)
+                return
+            maxish = b["titlebar-restore"] if s["sizemode"] == "maximized" else b["titlebar-max"]
+            for name, r in (("minimize", b["titlebar-min"]), ("maximize/restore", maxish), ("close", b["titlebar-close"])):
+                visible = r and r["w"] > 0 and r["h"] > 0 and r["display"] != "none" and r["visibility"] == "visible"
+                inside = visible and 0 <= r["x"] and r["x"] + r["w"] <= s["window"]["w"] + 1 and r["y"] < 80
+                check(f"{label}: {name} button visible", visible, r)
+                check(f"{label}: {name} button inside the top of the window", inside, r)
+
+        check_window_buttons("welcome", state)
+
+        # Leave the welcome screen the way a user would.
+        m.script("document.querySelector('#hilal-welcome-overlay .hw-link')?.click()")
+        check("welcome screen closes", wait_for(m, "return !document.getElementById('hilal-welcome-overlay')", 10))
+        time.sleep(1)
+
+        for mode in ("vertical", "dual", "horizontal"):
+            m.script("gHilalShell.setTabMode(arguments[0], false)", [mode])
+            time.sleep(1)
+            s = m.script(STATE_JS)
+            report[f"mode_{mode}"] = s
+            m.screenshot(out / f"02-mode-{mode}.png")
+            check(f"{mode} tabs: top bar laid out", s["topbar"] and s["topbar"]["w"] > 200 and s["topbar"]["h"] > 0, s["topbar"])
+            check_window_buttons(f"{mode} tabs", s)
+        m.script("gHilalShell.setTabMode(arguments[0], false)", ["vertical"])
+
+        # Load a page in the content process.
+        page = "data:text/html;charset=utf-8,<title>Hilal smoke</title><h1 style='font:48px sans-serif'>Hilal smoke page</h1>"
+        m.script("gBrowser.selectedBrowser.loadURI(Services.io.newURI(arguments[0]), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})", [page])
+        check("page loads in a tab", wait_for(m, "return gBrowser.selectedBrowser.contentTitle == 'Hilal smoke'", 30))
+        time.sleep(1)
+        m.screenshot(out / "03-page.png")
+
+        before = m.script("return gBrowser.tabs.length")
+        m.script("gHilalShell.openNewTab()")
+        check("new tab opens", wait_for(m, f"return gBrowser.tabs.length == {before + 1}", 10))
+        time.sleep(2)
+        m.screenshot(out / "04-new-tab.png")
+        check("new tab page loads", "newtab" in m.script("return gBrowser.selectedBrowser.currentURI.spec") or "hilal" in m.script("return gBrowser.selectedBrowser.currentURI.spec"),
+              m.script("return gBrowser.selectedBrowser.currentURI.spec"))
+
+        m.script("gBrowser.removeTab(gBrowser.selectedTab)")
+        check("tab closes", wait_for(m, f"return gBrowser.tabs.length == {before}", 10))
+
+        errors = m.script(ERRORS_JS)
+        report["chrome_errors"] = errors
+        hilal_errors = [e for e in errors if "hilal" in e["source"].lower()]
+        check("no errors from Hilal chrome code", not hilal_errors, hilal_errors[:10])
+
+        try:
+            m.send("Marionette:Quit", {"flags": ["eForceQuit"]})
+        except MarionetteError:
+            pass
+    except Exception as e:
+        check("smoke run finished", False, f"{type(e).__name__}: {e}")
+    finally:
+        try:
+            proc.wait(timeout=30)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait()
+        log.close()
+        shutil.rmtree(profile, ignore_errors=True)
+
+    (out / "report.json").write_text(json.dumps(report, indent=2))
+    failed = [c for c in checks if not c["ok"]]
+    lines = [f"## Hilal UI smoke ({report['host']})", ""]
+    lines += [f"- {'PASS' if c['ok'] else 'FAIL'} {c['name']}" for c in checks]
+    if failed:
+        lines += ["", "### Failures", ""]
+        lines += [f"- {c['name']}: `{json.dumps(c['detail'])}`" for c in failed]
+    (out / "summary.md").write_text("\n".join(lines) + "\n")
+    print(f"{len(checks) - len(failed)}/{len(checks)} checks passed")
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,11 @@
+# CI build for Linux x86_64 (scripts/ci/build.sh linux).
+. "$topsrcdir/../mozconfigs/base"
+
+# Mozilla's pinned clang, sysroot and Rust tools instead of the runner's, so
+# the binaries run on the same distros as Firefox.
+ac_add_options --enable-bootstrap
+ac_add_options --enable-linker=lld
+ac_add_options --disable-debug-symbols
+
+# Match upstream Firefox's libstdc++ ABI (build/unix/mozconfig.stdcxx).
+export MOZ_STDCXX_COMPAT=1
