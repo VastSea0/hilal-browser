@@ -26,9 +26,8 @@ const paths = {
   flatpakMetainfo: "flatpak/org.gkdevstudio.Hilal.metainfo.xml",
   updateManifest: "dist/hilal-update-manifest.json",
   releaseWorkflow: ".github/workflows/release.yml",
+  ciWorkflow: ".github/workflows/ci.yml",
   verifyWorkflow: ".github/workflows/verify-patches.yml",
-  linuxMozconfig: "mozconfigs/linux",
-  windowsMozconfig: "mozconfigs/windows",
 };
 
 const metadata = {
@@ -422,30 +421,25 @@ function checkFlatpakScreenshotTags() {
 
 function checkCiBuildConfiguration() {
   const requiredPatterns = [
-    [
-      paths.linuxMozconfig,
-      /MOZ_MAKE_FLAGS="-j2"/,
-      "Linux CI build must remain capped at two parallel jobs.",
-    ],
-    [
-      paths.linuxMozconfig,
+    ...["ci-linux", "ci-macos", "ci-windows"].map(name => [
+      `mozconfigs/${name}`,
       /ac_add_options --disable-debug-symbols/,
-      "Linux CI build must disable unpublished debug symbols.",
-    ],
+      `${name} must disable unpublished debug symbols.`,
+    ]),
+    ...["ci-linux", "ci-macos", "ci-windows"].map(name => [
+      `mozconfigs/${name}`,
+      /ac_add_options --enable-bootstrap/,
+      `${name} must bootstrap Mozilla's toolchains.`,
+    ]),
     [
-      paths.windowsMozconfig,
-      /MOZ_MAKE_FLAGS="-j[12]"|MOZ_MAKE_FLAGS="-j2"/,
-      "Windows CI build must cap parallel jobs to avoid rustc/clang OOM failures.",
-    ],
-    [
-      paths.windowsMozconfig,
-      /ac_add_options --disable-debug-symbols/,
-      "Windows CI build must disable unpublished debug symbols.",
+      paths.ciWorkflow,
+      /name: Add swap/,
+      "CI builds must add swap before the Firefox build.",
     ],
     [
       paths.releaseWorkflow,
-      /name: Configure build swap/,
-      "Linux release workflow must configure swap before the Firefox build.",
+      /uses: \.\/\.github\/workflows\/ci\.yml/,
+      "Releases must be built and tested by ci.yml.",
     ],
   ];
 
@@ -464,7 +458,7 @@ function checkCiBuildConfiguration() {
     "mozilla-actions/sccache-action@v0.0.8",
   ];
 
-  for (const file of [paths.releaseWorkflow, paths.verifyWorkflow]) {
+  for (const file of [paths.releaseWorkflow, paths.verifyWorkflow, paths.ciWorkflow]) {
     if (!existsSync(abs(file))) {
       continue;
     }

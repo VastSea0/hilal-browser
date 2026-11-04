@@ -9,7 +9,11 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/make-full-update.sh [--allow-unsigned] <version> [output.mar]
+  scripts/make-full-update.sh [--allow-unsigned] <app-version> [output.mar]
+
+<app-version> is the Firefox application version of the build (for example
+153.5.1), not Hilal's display version: the updater rejects a MAR whose version
+is lower than the installed one.
 
 Options:
   --allow-unsigned       Allow creating an unsigned MAR for development/local testing.
@@ -21,6 +25,11 @@ Environment:
                          Required unless --allow-unsigned is passed.
   HILAL_BUILD_MAR        Mozilla's build-mar CLI (pip install mar), used for
                          signing. Defaults to `mar` on PATH.
+  HILAL_UPDATE_ROOT      Packaged app to make the MAR from instead of the build
+                         tree's dist/firefox (a .app bundle on macOS).
+  HILAL_UPDATE_PACKAGING_DIR
+                         Firefox's tools/update-packaging, needed with
+                         HILAL_UPDATE_ROOT.
 
 Notes:
   Run after a successful package build. This creates a complete MAR from the
@@ -59,42 +68,48 @@ if [ ${#ARGS[@]} -lt 1 ]; then
   exit 1
 fi
 
-require_firefox_src
-
 version="${ARGS[0]}"
 channel="${HILAL_MAR_CHANNEL_ID:-${MAR_CHANNEL_ID:-hilal-release}}"
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 out="${ARGS[1]:-$repo_root/dist/hilal-$version.complete.mar}"
 
-log "Resolving Firefox object directory..."
-obj_dir="$(
-  cd "$HILAL_FIREFOX_SRC"
-  ./mach environment --format json | python3 -c 'import json, sys; print(json.load(sys.stdin)["topobjdir"])'
-)"
-
-dist_dir="$obj_dir/dist"
-package_root="$dist_dir/firefox"
-
-if [ ! -d "$package_root" ]; then
-  die "Packaged app not found at $package_root. Run scripts/build-macos.sh package or scripts/build-linux.sh package first."
-fi
-
-mar_bin="$dist_dir/host/bin/mar"
-if [ ! -x "$mar_bin" ] && [ -x "$mar_bin.exe" ]; then
-  mar_bin="$mar_bin.exe"
-fi
-if [ ! -x "$mar_bin" ]; then
-  die "MAR tool not found at $dist_dir/host/bin/mar. Build/package Firefox first."
-fi
-
-update_root="$package_root"
-mac_app="$(find "$package_root" -maxdepth 1 -type d -name '*.app' | head -n 1 || true)"
-if [ -n "$mac_app" ]; then
-  update_root="$mac_app"
-  precomplete="$update_root/Contents/Resources/precomplete"
+if [ -n "${HILAL_UPDATE_ROOT:-}" ]; then
+  # A packaged app outside a build tree, e.g. the ad-hoc signed macOS bundle.
+  update_root="$HILAL_UPDATE_ROOT"
+  packaging_dir="${HILAL_UPDATE_PACKAGING_DIR:?HILAL_UPDATE_PACKAGING_DIR must point at tools/update-packaging from Firefox}"
+  mar_bin=""
+  [ -d "$update_root" ] || die "HILAL_UPDATE_ROOT is not a directory: $update_root"
 else
-  precomplete="$update_root/precomplete"
+  require_firefox_src
+  packaging_dir="$HILAL_FIREFOX_SRC/tools/update-packaging"
+
+  log "Resolving Firefox object directory..."
+  obj_dir="$(
+    cd "$HILAL_FIREFOX_SRC"
+    ./mach environment --format json | python3 -c 'import json, sys; print(json.load(sys.stdin)["topobjdir"])'
+  )"
+
+  dist_dir="$obj_dir/dist"
+  package_root="$dist_dir/firefox"
+
+  if [ ! -d "$package_root" ]; then
+    die "Packaged app not found at $package_root. Run ./mach package first."
+  fi
+
+  mar_bin="$dist_dir/host/bin/mar"
+  if [ ! -x "$mar_bin" ] && [ -x "$mar_bin.exe" ]; then
+    mar_bin="$mar_bin.exe"
+  fi
+
+  update_root="$package_root"
+  mac_app="$(find "$package_root" -maxdepth 1 -type d -name '*.app' | head -n 1 || true)"
+  [ -n "$mac_app" ] && update_root="$mac_app"
 fi
+
+case "$update_root" in
+  *.app) precomplete="$update_root/Contents/Resources/precomplete" ;;
+  *) precomplete="$update_root/precomplete" ;;
+esac
 
 mkdir -p "$(dirname "$out")"
 touch "$precomplete"
@@ -127,19 +142,17 @@ EOF
   chmod +x "$mar_command"
   log "  signing : $HILAL_MAR_SIGNING_KEY"
 elif [ "$ALLOW_UNSIGNED" = "1" ]; then
+  [ -x "$mar_bin" ] || die "MAR tool not found at $mar_bin. Build/package Firefox first."
   mar_command="$mar_bin"
   warn "MAR is unsigned. This is dangerous and not suitable for production updates."
 else
   die "Production updates must be signed. Set HILAL_MAR_SIGNING_KEY or pass --allow-unsigned for development/testing."
 fi
 
-(
-  cd "$HILAL_FIREFOX_SRC"
-  MAR="$mar_command" \
-    MOZ_PRODUCT_VERSION="$version" \
-    MAR_CHANNEL_ID="$channel" \
-    ./tools/update-packaging/make_full_update.sh "$out" "$update_root"
-)
+MAR="$mar_command" \
+  MOZ_PRODUCT_VERSION="$version" \
+  MAR_CHANNEL_ID="$channel" \
+  "$packaging_dir/make_full_update.sh" "$out" "$update_root"
 
 if [ -n "${HILAL_MAR_SIGNING_KEY:-}" ]; then
   # Check against the certificate the updater ships with, not the key itself,

@@ -1,762 +1,129 @@
 name: Build and Release
 
+# Releases go through the same pipeline as every main push (ci.yml): all
+# platforms are built on Linux runners and UI-tested on their own OS. A
+# release is published only when every platform passed.
+#
+# Everything here is free: GitHub-hosted runners, GitHub Releases for hosting,
+# and self-made MAR signing keys. macOS builds are ad-hoc signed (no Apple
+# Developer ID), Windows builds are unsigned until SignPath signing is set up.
+
 on:
   push:
     tags: ["v*"]
   workflow_dispatch:
     inputs:
       tag:
-        description: "Version tag to build (e.g. v0.3.0-alpha.3)"
+        description: "Existing version tag to (re)build, e.g. v0.4.0-alpha.2"
         required: true
         type: string
-      platforms:
-        description: "Target platforms"
-        required: true
-        type: choice
-        options:
-          - all
-          - macos-only
-          - linux-only
-          - windows-only
-        default: "all"
 
 permissions:
   contents: write
-
-env:
-  HILAL_FIREFOX_UPSTREAM: "https://github.com/mozilla-firefox/firefox.git"
+  actions: read
 
 jobs:
-  # --------------------------------------------------------------------------
-  # Prepare: determine tag, create draft release, decide which platforms run
-  # --------------------------------------------------------------------------
   prepare:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.vars.outputs.tag }}
-      build_number: ${{ github.run_number }}
-      build_linux: ${{ steps.platforms.outputs.linux }}
-      build_windows: ${{ steps.platforms.outputs.windows }}
-      build_macos: ${{ steps.platforms.outputs.macos }}
-      has_secrets: ${{ steps.check_secrets.outputs.has_secrets }}
-
     steps:
       - name: Determine tag
         id: vars
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="${{ github.event.inputs.tag }}"
-          else
-            TAG="${{ github.ref_name }}"
-          fi
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Build #${{ github.run_number }} for tag: $TAG"
+        run: echo "tag=${{ inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
 
-      - name: Determine platforms
-        id: platforms
-        run: |
-          PLAT="${{ github.event.inputs.platforms || 'all' }}"
-          if [ "$PLAT" = "all" ] || [ "$PLAT" = "linux-only" ]; then
-            echo "linux=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "linux=false" >> "$GITHUB_OUTPUT"
-          fi
-          if [ "$PLAT" = "all" ] || [ "$PLAT" = "windows-only" ]; then
-            echo "windows=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "windows=false" >> "$GITHUB_OUTPUT"
-          fi
-          if [ "$PLAT" = "all" ] || [ "$PLAT" = "macos-only" ]; then
-            echo "macos=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "macos=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Checkout release tag
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
         with:
           ref: ${{ steps.vars.outputs.tag }}
 
-      - name: Derive release metadata
-        id: release_meta
-        run: node scripts/release-env.mjs --tag "${{ steps.vars.outputs.tag }}" --github-output "$GITHUB_OUTPUT"
-
       - name: Check release metadata
         run: |
+          node scripts/release-env.mjs --tag "${{ steps.vars.outputs.tag }}" --json > release-env.json
           node scripts/check-release-metadata.mjs \
-            --release-version "${{ steps.release_meta.outputs.version }}" \
-            --release-tag "${{ steps.release_meta.outputs.tag }}"
+            --release-version "$(node -p 'require("./release-env.json").version')" \
+            --release-tag "${{ steps.vars.outputs.tag }}"
 
-      - name: Check macOS signing secrets
-        id: check_secrets
-        run: |
-          if [ -n "${{ secrets.CODESIGN_IDENTITY }}" ] && \
-             [ -n "${{ secrets.APPLE_ID }}" ] && \
-             [ -n "${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}" ] && \
-             [ -n "${{ secrets.APPLE_TEAM_ID }}" ]; then
-            echo "has_secrets=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_secrets=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      # Re-running a platform for a published release must not turn it back
-      # into a draft.
-      - name: Check for an existing release
-        id: existing
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if gh release view "${{ steps.vars.outputs.tag }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Create GitHub release (DRAFT)
-        if: ${{ steps.existing.outputs.exists != 'true' }}
-        uses: softprops/action-gh-release@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.vars.outputs.tag }}
-          name: "Hilal Browser ${{ steps.vars.outputs.tag }} (build #${{ github.run_number }})"
-          generate_release_notes: true
-          draft: true
-          prerelease: ${{ steps.release_meta.outputs.prerelease == 'true' }}
-
-  # --------------------------------------------------------------------------
-  # macOS: DMG. With Apple signing secrets it is signed, notarized and gets a
-  # MAR update; without them it is ad-hoc signed and ships as a DMG only.
-  # --------------------------------------------------------------------------
-  sign-macos:
+  build:
     needs: prepare
-    runs-on: macos-latest
-    timeout-minutes: 360
+    uses: ./.github/workflows/ci.yml
+    with:
+      targets: all
+      publish_nightly: false
+    secrets: inherit
 
-    if: ${{ needs.prepare.outputs.build_macos == 'true' }}
-
+  publish:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
     env:
-      HAS_CODESIGN: ${{ secrets.CODESIGN_IDENTITY }}
-      HAS_APPLE_ID: ${{ secrets.APPLE_ID }}
-      HAS_APPLE_PASS: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-      HAS_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      HAS_CERT: ${{ secrets.MACOS_CERTIFICATE }}
-      HAS_SIGN_DB: ${{ secrets.HILAL_SIGNING_DB_BASE64 }}
-
+      TAG: ${{ needs.prepare.outputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
     steps:
-      # Manual runs build the dispatched commit, so release fixes made after
-      # the tag still apply to an existing release.
-      - name: Checkout
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || needs.prepare.outputs.tag }}
+          ref: ${{ needs.prepare.outputs.tag }}
 
-      # The runner's default Python 3.15 cannot set up mach's taskgraph site,
-      # so toolchain bootstrap silently fails and configure falls back to
-      # Xcode's clang without a usable linker.
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - uses: actions/download-artifact@v8
         with:
-          python-version: "3.13"
+          path: artifacts
 
-      - name: Cache cargo
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            hil/target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('hil/Cargo.toml') }}
-
-      - name: Compile hil tool
+      - name: Assemble release assets
+        id: assets
         run: |
-          cargo build --release --manifest-path hil/Cargo.toml
-          mkdir -p bin
-          cp hil/target/release/hil bin/hil
-          strip bin/hil
-
-      - name: Cache Firefox source checkout
-        uses: actions/cache@v5
-        with:
-          path: |
-            engine
-            !engine/obj-*
-          key: ${{ runner.os }}-firefox-${{ hashFiles('upstream.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-firefox-
-
-      - name: Setup Firefox source
-        run: ./bin/hil setup
-
-      - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.10
-
-      - name: Apply patches
-        run: ./bin/hil apply --force
-
-      - name: Derive packaged release metadata
-        id: release_meta
-        run: |
-          node scripts/release-env.mjs \
-            --tag "${{ needs.prepare.outputs.tag }}" \
-            --firefox-src engine \
-            --require-firefox-version \
-            --github-output "$GITHUB_OUTPUT"
-
-      - name: Import signing certificate
-        if: ${{ env.HAS_CERT != '' && needs.prepare.outputs.has_secrets == 'true' }}
-        env:
-          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
-        run: |
-          CERT_PATH="$(mktemp).p12"
-          echo "$MACOS_CERTIFICATE" | base64 --decode > "$CERT_PATH"
-          security create-keychain -p "" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "" build.keychain
-          security import "$CERT_PATH" -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security set-keychain-settings -lut 3600 build.keychain
-          security set-key-partition-list -S apple-tool:,apple: -k "" build.keychain
-          rm -f "$CERT_PATH"
-
-      - name: Build and package
-        env:
-          SCCACHE_GHA_ENABLED: "true"
-        run: |
-          export CODESIGN_IDENTITY="$HAS_CODESIGN"
-          # The runner's Homebrew rustup proxies ignore argv[0], so configure's
-          # `rustup which` unwrap runs rustc instead. Hand it the real binaries.
-          export RUSTC="$(rustup which rustc)"
-          export CARGO="$(rustup which cargo)"
-          echo "Using $RUSTC and $CARGO"
-          scripts/build-macos.sh package --no-symlinks
-
-      - name: Sign and notarize
-        if: ${{ needs.prepare.outputs.has_secrets == 'true' }}
-        env:
-          CODESIGN_IDENTITY: ${{ secrets.CODESIGN_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: scripts/sign-macos.sh --notarize
-
-      # Apple Silicon refuses to run unsigned code, so seal the bundle with an
-      # ad-hoc signature. Users still have to clear the quarantine flag.
-      - name: Ad-hoc sign
-        if: ${{ needs.prepare.outputs.has_secrets != 'true' }}
-        run: |
-          APP_BUNDLE="$(find engine/obj-*/dist -name '*.app' -type d -print -quit)"
-          codesign --sign - --force --deep --entitlements scripts/macos-entitlements.plist "$APP_BUNDLE"
-          codesign --verify --deep --strict "$APP_BUNDLE"
-
-      - name: Create DMG
-        run: |
-          APP_BUNDLE="$(find engine/obj-*/dist -name '*.app' -type d -print -quit)"
-          echo "HILAL_APP_BUNDLE=$APP_BUNDLE" >> "$GITHUB_ENV"
-          DMG_NAME="${{ steps.release_meta.outputs.macos_arm64_dmg }}"
+          set -euo pipefail
+          node scripts/release-env.mjs --tag "$TAG" --github-output "$GITHUB_OUTPUT"
+          v="${TAG#v}"
           mkdir -p dist
-          hdiutil create -volname "Hilal Browser" -srcfolder "$APP_BUNDLE" -ov -format UDZO "dist/$DMG_NAME"
-          echo "dmg_path=dist/$DMG_NAME" >> "$GITHUB_ENV"
+          cp artifacts/package-linux/*.linux-*.tar.xz "dist/Hilal-$v-linux-x86_64.tar.xz"
+          cp artifacts/package-macos-signed/*.dmg "dist/Hilal-Browser-$TAG-macOS.dmg"
+          cp artifacts/package-windows/*.win64.zip "dist/Hilal-$v-win64.zip"
+          inst="$(ls artifacts/package-windows/*.installer.exe 2>/dev/null | head -n1 || true)"
+          [ -n "$inst" ] && cp "$inst" "dist/Hilal-$v-win64-setup.exe"
 
-      - name: Smoke packaged browser
-        run: scripts/smoke-browser.sh
+          mars=()
+          for pair in linux:package-linux/hilal-linux macos:package-macos-signed/hilal-macos windows:package-windows/hilal-windows; do
+            name="${pair%%:*}"; src="artifacts/${pair#*:}.complete.mar"
+            case "$name" in
+              linux) platform=linux-x86_64 ;;
+              macos) platform=macos-arm64 ;;
+              windows) platform=windows-x86_64 ;;
+            esac
+            if [ -f "$src" ]; then
+              dest="hilal-$TAG-$platform.complete.mar"
+              cp "$src" "dist/$dest"
+              mars+=(--mar "$platform=dist/$dest" --mar-url "$platform=https://github.com/$GH_REPO/releases/download/$TAG/$dest")
+            else
+              echo "::warning::No signed $platform update; is HILAL_MAR_SIGNING_KEY set?"
+            fi
+          done
 
-      - name: Create MAR update
-        if: ${{ needs.prepare.outputs.has_secrets == 'true' }}
-        env:
-          HILAL_SIGNING_DB_BASE64: ${{ secrets.HILAL_SIGNING_DB_BASE64 }}
-          HILAL_SIGNMAR_NSS_DIR: /tmp/signing-db
-          HILAL_SIGNMAR_CERT: mar_sig
-        run: |
-          if [ -z "$HILAL_SIGNING_DB_BASE64" ]; then
-            echo "HILAL_SIGNING_DB_BASE64 is required for production release MAR signing." >&2
-            exit 1
+          app_version="$(sed -n 's/^version=//p' artifacts/package-linux/BUILD_INFO)"
+          build_id="$(sed -n 's/^buildid=//p' artifacts/package-linux/BUILD_INFO)"
+          if [ ${#mars[@]} -gt 0 ]; then
+            node scripts/generate-update-manifest.mjs \
+              --version "$TAG" \
+              --display-version "$v" \
+              --app-version "$app_version" \
+              --build-id "$build_id" \
+              --channel hilal-release \
+              "${mars[@]}" \
+              --output dist/hilal-update-manifest.json
           fi
-          mkdir -p /tmp/signing-db
-          echo "$HILAL_SIGNING_DB_BASE64" | base64 -d > signing-db.tar.gz
-          tar -xzf signing-db.tar.gz -C /tmp/signing-db
-
-          scripts/make-full-update.sh "${{ needs.prepare.outputs.tag }}" "dist/${{ steps.release_meta.outputs.macos_arm64_mar }}"
-
-      - name: Generate update manifest
-        if: ${{ needs.prepare.outputs.has_secrets == 'true' }}
-        run: |
-          TAG="${{ needs.prepare.outputs.tag }}"
-
-          node scripts/generate-update-manifest.mjs \
-            --version "$TAG" \
-            --display-version "${{ steps.release_meta.outputs.display_version }}" \
-            --app-version "${{ steps.release_meta.outputs.firefox_app_version }}" \
-            --channel "${{ steps.release_meta.outputs.channel }}" \
-            --mar macos-arm64="dist/${{ steps.release_meta.outputs.macos_arm64_mar }}" \
-            --mar-url macos-arm64="https://github.com/VastSea0/hilal-browser/releases/download/$TAG/${{ steps.release_meta.outputs.macos_arm64_mar }}" \
-            --output dist/hilal-update-manifest.json
-
-      - name: Check packaged release metadata
-        if: ${{ needs.prepare.outputs.has_secrets == 'true' }}
-        run: |
-          node scripts/check-release-metadata.mjs \
-            --release-version "${{ steps.release_meta.outputs.version }}" \
-            --release-tag "${{ steps.release_meta.outputs.tag }}" \
-            --check-dist \
-            --require-update-manifest \
-            --require-platform macos-arm64
-
-      - name: Generate Checksums
-        run: |
-          cd dist
-          shasum -a 256 $(find . -maxdepth 1 -type f ! -name "SHA256SUMS") > SHA256SUMS
-          echo "Checksums generated: dist/SHA256SUMS"
+          (cd dist && sha256sum * > SHA256SUMS)
+          ls -la dist
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
         with:
-          format: 'spdx-json'
-          output-file: 'dist/hilal-browser-sbom.spdx.json'
+          format: spdx-json
+          output-file: dist/hilal-browser-sbom.spdx.json
 
-      - name: Upload assets
-        uses: softprops/action-gh-release@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ needs.prepare.outputs.tag }}
-          files: |
-            dist/*.dmg
-            dist/*.mar
-            dist/hilal-update-manifest.json
-            dist/SHA256SUMS
-            dist/hilal-browser-sbom.spdx.json
-
-  # --------------------------------------------------------------------------
-  # Linux: build, package, AppImage, tar.gz
-  # --------------------------------------------------------------------------
-  build-linux:
-    needs: prepare
-    if: ${{ needs.prepare.outputs.build_linux == 'true' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-
-    env:
-      SCCACHE_DIR: ${{ github.workspace }}/.sccache
-
-    steps:
-      - name: Free disk space
+      - name: Upload and publish
         run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /usr/local/share/powershell
-          sudo rm -rf /usr/share/swift
-          sudo rm -rf /usr/lib/jvm
-          sudo rm -rf /usr/local/share/boost
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo rm -rf /opt/hostedtoolcache/Ruby
-          sudo rm -rf /opt/hostedtoolcache/PyPy
-          sudo rm -rf /usr/local/cuda-*
-          sudo rm -rf /usr/share/miniconda
-          sudo apt-get clean
-          docker system prune -af 2>/dev/null || true
-          df -h
-
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ needs.prepare.outputs.tag }}
-
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            nasm yasm libgtk-3-dev libpulse-dev libdbus-1-dev \
-            libasound2-dev libx11-xcb-dev libxt-dev libdbus-glib-1-dev \
-            pulseaudio libpulse-dev libfuse2
-
-      - name: Install AppImageTool
-        run: |
-          sudo wget -O /usr/local/bin/appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
-          sudo chmod +x /usr/local/bin/appimagetool
-
-      - name: Cache cargo
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            hil/target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('hil/Cargo.toml') }}
-
-      - name: Cache sccache
-        uses: actions/cache@v5
-        with:
-          path: .sccache
-          key: ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-
-            ${{ runner.os }}-sccache-v2-
-
-      - name: Compile hil tool
-        run: |
-          cargo build --release --manifest-path hil/Cargo.toml
-          mkdir -p bin
-          cp hil/target/release/hil bin/hil
-          strip bin/hil
-
-      - name: Upload hil tool to release
-        uses: softprops/action-gh-release@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ needs.prepare.outputs.tag }}
-          fail_on_unmatched_files: false
-          files: bin/hil
-
-      - name: Cache Firefox source checkout
-        uses: actions/cache@v5
-        with:
-          path: |
-            engine
-            !engine/obj-*
-          key: ${{ runner.os }}-firefox-${{ hashFiles('upstream.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-firefox-
-
-      - name: Setup Firefox source
-        run: ./bin/hil setup
-
-      # Install sccache manually instead of using mozilla-actions/sccache-action.
-      # The action's post-job hook exits with code 2 and marks the entire job as
-      # failed even though every real step succeeded.
-      - name: Setup sccache
-        continue-on-error: true
-        run: |
-          # Check if sccache is already on PATH
-          if command -v sccache >/dev/null 2>&1; then
-            echo "sccache found: $(command -v sccache)"
-            sccache --version
-            sccache --start-server || true
-            exit 0
+          # Not marked as a pre-release even for alphas: the update server
+          # skips pre-releases, which is how the nightly stays out of updates.
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --draft --title "Hilal Browser $TAG" --generate-notes
           fi
-          # Search the hosted tool cache (GitHub runners store tools here)
-          SCCACHE_BIN="$(find /opt/hostedtoolcache/sccache -name sccache -type f 2>/dev/null | head -1)" || true
-          if [ -n "$SCCACHE_BIN" ] && [ -x "$SCCACHE_BIN" ]; then
-            SCCACHE_DIR="$(dirname "$SCCACHE_BIN")"
-            echo "$SCCACHE_DIR" >> "$GITHUB_PATH"
-            export PATH="$SCCACHE_DIR:$PATH"
-            echo "Found sccache in tool cache: $SCCACHE_BIN"
-            sccache --version
-            sccache --start-server || true
-            exit 0
-          fi
-          # Fallback: download a known-good release
-          echo "Downloading sccache v0.8.2..."
-          SCCACHE_ARCHIVE="sccache-v0.8.2-x86_64-unknown-linux-musl"
-          if curl -fsSL "https://github.com/mozilla/sccache/releases/download/v0.8.2/${SCCACHE_ARCHIVE}.tar.gz" -o /tmp/sccache.tar.gz; then
-            tar -xzf /tmp/sccache.tar.gz -C /tmp
-            sudo cp "/tmp/${SCCACHE_ARCHIVE}/sccache" /usr/local/bin/sccache
-            sudo chmod +x /usr/local/bin/sccache
-            echo "Installed sccache v0.8.2"
-            sccache --version
-            sccache --start-server || true
-          else
-            echo "Could not install sccache -- building without compiler cache"
-          fi
-
-      - name: Apply patches
-        run: ./bin/hil apply --force
-
-      - name: Configure build swap
-        run: |
-          if [ -z "$(swapon --show --noheadings)" ]; then
-            sudo fallocate -l 8G /swapfile
-            sudo chmod 600 /swapfile
-            sudo mkswap /swapfile
-            if sudo swapon /swapfile; then
-              sudo sysctl vm.swappiness=10
-            else
-              sudo rm -f /swapfile
-              echo "Swap could not be enabled; continuing with reduced parallelism."
-            fi
-          fi
-          free -h
-          swapon --show
-
-      - name: Build and package (AppImage)
-        env:
-          SCCACHE_GHA_ENABLED: "true"
-        run: scripts/build-linux.sh build appimage-build
-
-      - name: Stop sccache
-        if: always()
-        run: sccache --show-stats 2>/dev/null || true; sccache --stop-server 2>/dev/null || true
-
-      - name: Upload Linux artifacts (safety net)
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: linux-artifacts-build${{ github.run_number }}
-          path: |
-            dist/*.tar.gz
-            dist/*.AppImage
-          if-no-files-found: warn
-          retention-days: 5
-
-      - name: List build outputs
-        if: always()
-        run: |
-          echo "=== dist/ contents ==="
-          ls -lah dist/ 2>/dev/null || echo "dist/ does not exist"
-
-      - name: Upload Linux Assets to release
-        if: always()
-        uses: softprops/action-gh-release@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ needs.prepare.outputs.tag }}
-          fail_on_unmatched_files: false
-          files: |
-            dist/*.tar.gz
-            dist/*.AppImage
-
-  # --------------------------------------------------------------------------
-  # Windows: build, package, installer + zip
-  # --------------------------------------------------------------------------
-  build-windows:
-    needs: prepare
-    if: ${{ needs.prepare.outputs.build_windows == 'true' }}
-    runs-on: windows-latest
-    timeout-minutes: 300
-
-    env:
-      SCCACHE_DIR: ${{ github.workspace }}/.sccache
-
-    steps:
-      - name: Free disk space
-        shell: pwsh
-        run: |
-          Write-Host "=== Disk space before cleanup ==="
-          Get-PSDrive -PSProvider FileSystem | Format-Table Name, @{n="Used(GB)";e={[math]::Round($_.Used/1GB,2)}}, @{n="Free(GB)";e={[math]::Round($_.Free/1GB,2)}}
-          Remove-Item -Recurse -Force "C:\Program Files\dotnet" -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force "C:\Program Files (x86)\Microsoft SDKs\Azure" -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force "C:\Program Files\MongoDB" -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force "C:\imagegeneration" -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force "C:\hostedtoolcache\CodeQL" -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force "C:\hostedtoolcache\Java*" -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force "C:\hostedtoolcache\go" -ErrorAction SilentlyContinue
-          Write-Host "=== Disk space after cleanup ==="
-          Get-PSDrive -PSProvider FileSystem | Format-Table Name, @{n="Used(GB)";e={[math]::Round($_.Used/1GB,2)}}, @{n="Free(GB)";e={[math]::Round($_.Free/1GB,2)}}
-
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ needs.prepare.outputs.tag }}
-
-      - name: Install MozillaBuild
-        shell: pwsh
-        run: |
-          $url = "https://ftp.mozilla.org/pub/mozilla/libraries/win32/MozillaBuildSetup-Latest.exe"
-          $out = "$env:TEMP\MozillaBuildSetup.exe"
-          Write-Host "Downloading MozillaBuild..."
-          Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing
-          Write-Host "Installing MozillaBuild silently..."
-          Start-Process -FilePath $out -ArgumentList "/S" -Wait
-          Remove-Item $out -ErrorAction SilentlyContinue
-          if (Test-Path "C:\mozilla-build") {
-            Write-Host "MozillaBuild installed successfully."
-          } else {
-            throw "MozillaBuild installation failed."
-          }
-
-      - name: Cache cargo
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~\.cargo\bin\
-            ~\.cargo\registry\index\
-            ~\.cargo\registry\cache\
-            ~\.cargo\git\db\
-            hil\target\
-          key: ${{ runner.os }}-cargo-${{ hashFiles('hil/Cargo.toml') }}
-
-      - name: Cache sccache
-        uses: actions/cache@v5
-        with:
-          path: .sccache
-          key: ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-sccache-v2-${{ hashFiles('upstream.lock') }}-
-            ${{ runner.os }}-sccache-v2-
-
-      - name: Compile hil tool
-        shell: pwsh
-        run: |
-          cargo build --release --manifest-path hil/Cargo.toml
-          New-Item -ItemType Directory -Path bin -Force | Out-Null
-          Copy-Item hil/target/release/hil.exe bin/hil.exe
-
-      - name: Upload hil.exe to release
-        uses: softprops/action-gh-release@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ needs.prepare.outputs.tag }}
-          fail_on_unmatched_files: false
-          files: bin/hil.exe
-
-      - name: Cache Firefox source checkout
-        uses: actions/cache@v5
-        with:
-          path: |
-            engine
-            !engine/obj-*
-          key: ${{ runner.os }}-firefox-${{ hashFiles('upstream.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-firefox-
-
-      - name: Setup Firefox source
-        shell: pwsh
-        run: .\bin\hil.exe setup
-
-      # Install sccache manually to avoid post-job hook failures.
-      - name: Setup sccache
-        continue-on-error: true
-        shell: pwsh
-        run: |
-          $sccache = Get-Command sccache -ErrorAction SilentlyContinue
-          if (-not $sccache) {
-            # Search the hosted tool cache
-            $found = Get-ChildItem -Path "C:\hostedtoolcache\sccache" -Recurse -Filter "sccache.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-            if ($found) {
-              $sccacheDir = $found.DirectoryName
-              Write-Host "Found sccache at: $sccacheDir"
-              echo "$sccacheDir" | Out-File -FilePath $env:GITHUB_PATH -Append
-              $env:PATH = "$sccacheDir;$env:PATH"
-            } else {
-              Write-Host "Downloading sccache v0.8.2..."
-              $archive = "sccache-v0.8.2-x86_64-pc-windows-msvc"
-              $url = "https://github.com/mozilla/sccache/releases/download/v0.8.2/${archive}.tar.gz"
-              try {
-                Invoke-WebRequest -Uri $url -OutFile "$env:TEMP\sccache.tar.gz" -UseBasicParsing
-                tar -xzf "$env:TEMP\sccache.tar.gz" -C "$env:TEMP"
-                Copy-Item "$env:TEMP\${archive}\sccache.exe" "C:\Windows\sccache.exe" -Force
-                Write-Host "Installed sccache from release archive"
-              } catch {
-                Write-Host "Failed to install sccache: $_"
-                Write-Host "Building without compiler cache"
-              }
-            }
-          }
-          try {
-            sccache --version
-            sccache --start-server
-          } catch {
-            Write-Host "sccache server failed to start: $_"
-          }
-
-      - name: Apply patches
-        shell: pwsh
-        run: .\bin\hil.exe apply --force
-
-      - name: Build and Package
-        shell: pwsh
-        run: .\scripts\build-windows.ps1 -Package -SkipApply
-
-      - name: Stop sccache
-        if: always()
-        shell: pwsh
-        run: |
-          try { sccache --show-stats } catch {}
-          try { sccache --stop-server } catch {}
-          exit 0
-
-      - name: List build outputs
-        if: always()
-        shell: pwsh
-        run: |
-          Write-Host "=== Searching for build outputs ==="
-          $objDirs = Get-ChildItem -Path "engine" -Directory -Filter "obj-*" -ErrorAction SilentlyContinue
-          foreach ($dir in $objDirs) {
-            $distPath = Join-Path $dir.FullName "dist"
-            if (Test-Path $distPath) {
-              Write-Host "`n--- $distPath ---"
-              Get-ChildItem -Path $distPath -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
-                $_.Extension -in ".exe", ".zip", ".tar", ".gz", ".xz", ".msi"
-              } | ForEach-Object { Write-Host "  $($_.FullName) ($([math]::Round($_.Length/1MB, 2)) MB)" }
-            }
-          }
-
-      - name: Upload Windows artifacts (safety net)
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: windows-artifacts-build${{ github.run_number }}
-          path: |
-            engine/obj-*/dist/*.exe
-            engine/obj-*/dist/install/**/*.exe
-            engine/obj-*/dist/*.zip
-          if-no-files-found: warn
-          retention-days: 5
-
-      # mach names the packages after Firefox and also leaves an xpt_artifacts.zip
-      # that is not meant for users. Publish only the installer and the portable
-      # zip, named like the Linux assets.
-      - name: Name Windows release assets
-        if: always()
-        shell: pwsh
-        run: |
-          $version = "${{ needs.prepare.outputs.tag }}".TrimStart("v")
-          New-Item -ItemType Directory -Force -Path "dist" | Out-Null
-          $installer = Get-ChildItem -Path "engine/obj-*/dist/install/sea/*.installer.exe", "engine/obj-*/dist/*.installer.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-          $zip = Get-ChildItem -Path "engine/obj-*/dist/*.win64.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
-          if ($installer) { Copy-Item $installer.FullName "dist/Hilal-$version-win64-setup.exe" }
-          if ($zip) { Copy-Item $zip.FullName "dist/Hilal-$version-win64.zip" }
-          Get-ChildItem dist
-
-      - name: Upload Windows Assets to release
-        if: always()
-        uses: softprops/action-gh-release@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ needs.prepare.outputs.tag }}
-          fail_on_unmatched_files: false
-          files: |
-            dist/Hilal-*-win64-setup.exe
-            dist/Hilal-*-win64.zip
-
-  # --------------------------------------------------------------------------
-  # Publish: mark the draft release as live once at least one platform finished
-  # --------------------------------------------------------------------------
-  publish-release:
-    needs: [prepare, sign-macos, build-linux, build-windows]
-    if: ${{ always() && !cancelled() && needs.prepare.result == 'success' && (needs.sign-macos.result == 'success' || needs.build-linux.result == 'success' || needs.build-windows.result == 'success') }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout release tooling
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ needs.prepare.outputs.tag }}
-
-      - name: Check release assets before publishing
-        if: ${{ needs.sign-macos.result == 'success' && needs.prepare.outputs.has_secrets == 'true' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ needs.prepare.outputs.tag }}
-        run: |
-          gh release view "$TAG" --json tagName,isDraft,isPrerelease,assets > release.json
-          node scripts/check-release-assets.mjs \
-            --release-json release.json \
-            --tag "$TAG" \
-            --platform macos-arm64
-
-      - name: Publish release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ needs.prepare.outputs.tag }}
-        run: |
+          gh release upload "$TAG" dist/* --clobber
           gh release edit "$TAG" --draft=false
