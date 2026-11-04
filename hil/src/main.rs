@@ -278,28 +278,22 @@ fn move_engine_to_commit(commit: &str, engine_path: &Path) -> Result<()> {
     Ok(())
 }
 
-fn setup_git(commit: &str, engine_path: &Path, repo_root: &Path) -> Result<()> {
+fn setup_git(commit: &str, engine_path: &Path, _repo_root: &Path) -> Result<()> {
     if engine_path.exists() {
         println!("[hil] Removing existing engine/ directory...");
         fs::remove_dir_all(engine_path)?;
     }
 
-    println!("[hil] Cloning Firefox from upstream git repository...");
-    let output = Command::new("git")
-        .args(&[
-            "clone",
-            "--filter=blob:none",
-            "https://github.com/mozilla-firefox/firefox.git",
-            "engine",
-        ])
-        .current_dir(repo_root)
-        .output()?;
-    if !output.status.success() {
-        bail!(
-            "Failed to clone Firefox repository: {}",
-            String::from_utf8_lossy(&output.stderr)
-        );
-    }
+    // Only the pinned commit is fetched. Firefox's full history costs many
+    // gigabytes and tens of minutes; `git fetch --unshallow` adds it later.
+    let upstream = std::env::var("HILAL_FIREFOX_UPSTREAM")
+        .unwrap_or_else(|_| "https://github.com/mozilla-firefox/firefox.git".to_string());
+    fs::create_dir_all(engine_path)?;
+    run_cmd(&["git", "init", "-q"], engine_path)?;
+    run_cmd(&["git", "remote", "add", "origin", &upstream], engine_path)?;
+    println!("[hil] Fetching pinned Firefox commit {} from {}...", commit, upstream);
+    run_cmd(&["git", "fetch", "--depth", "1", "origin", commit], engine_path)
+        .context("Failed to fetch the pinned Firefox commit")?;
 
     // Set local git config for committing
     run_cmd(&["git", "config", "user.name", "Hilal Tool"], engine_path)?;
