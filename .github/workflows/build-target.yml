@@ -15,6 +15,9 @@ on:
 
 permissions:
   contents: read
+  # A called workflow's own permissions replace the caller's, and the cache
+  # cleanup step needs to delete caches.
+  actions: write
 
 jobs:
   build:
