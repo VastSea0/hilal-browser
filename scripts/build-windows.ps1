@@ -35,6 +35,20 @@ $Sccache = $false
 $Apply = $false
 $SkipApply = $false
 
+# Helper functions must be defined before the argument loop because
+# $ErrorActionPreference = "Stop" makes an undefined function fatal.
+function Write-Step($msg) {
+    Write-Host "[hilal] $msg" -ForegroundColor Cyan
+}
+
+function Write-Warn($msg) {
+    Write-Host "[hilal] $msg" -ForegroundColor Yellow
+}
+
+function Write-Err($msg) {
+    Write-Host "[hilal] $msg" -ForegroundColor Red
+}
+
 foreach ($arg in $args) {
     switch ($arg.ToLower()) {
         "-faster"     { $Faster = $true }
@@ -47,18 +61,6 @@ foreach ($arg in $args) {
         "-skipapply"  { $SkipApply = $true }
         default       { Write-Warn "Ignored unexpected argument: $arg" }
     }
-}
-
-function Write-Step($msg) {
-    Write-Host "[hilal] $msg" -ForegroundColor Cyan
-}
-
-function Write-Warn($msg) {
-    Write-Host "[hilal] $msg" -ForegroundColor Yellow
-}
-
-function Write-Err($msg) {
-    Write-Host "[hilal] $msg" -ForegroundColor Red
 }
 
 # --- 1. Resolve repo root and Firefox src -----------------------------------

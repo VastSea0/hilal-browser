@@ -488,7 +488,7 @@ for step in "${steps[@]}"; do
     
     final_cli_cmd=("./mach" "cli")
     if [ ${#cli_sub_args[@]} -gt 0 ]; then
-      final_cli_cmd+=("${cli_sub_args[*]:-}")
+      final_cli_cmd+=("${cli_sub_args[@]:-}")
     fi
     (cd "$HILAL_FIREFOX_SRC" && "${final_cli_cmd[@]}")
 
