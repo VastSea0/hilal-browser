@@ -15,6 +15,9 @@ on:
 
 permissions:
   contents: read
+  # Needed for the cache prune step (gh cache delete) to succeed; the caller
+  # grants it, but a workflow's own permissions block clamps GITHUB_TOKEN.
+  actions: write
 
 jobs:
   build:
