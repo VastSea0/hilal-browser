@@ -121,13 +121,13 @@ jobs:
           SAFEBROWSING_KEY: ${{ secrets.HILAL_SAFEBROWSING_API_KEY }}
         run: |
           if [ -n "$SAFEBROWSING_KEY" ]; then
-            (umask 077; printf '%s' "$SAFEBROWSING_KEY" > /mnt/safebrowsing.key)
-            export HILAL_SAFEBROWSING_KEY_FILE=/mnt/safebrowsing.key
+            (umask 077; printf '%s' "$SAFEBROWSING_KEY" > "$RUNNER_TEMP/safebrowsing.key")
+            export HILAL_SAFEBROWSING_KEY_FILE="$RUNNER_TEMP/safebrowsing.key"
           else
             echo "::warning::HILAL_SAFEBROWSING_API_KEY is not set, so phishing and malware protection is off in this build."
           fi
           scripts/ci/build.sh ${{ inputs.target }}
-          rm -f /mnt/safebrowsing.key
+          rm -f "$RUNNER_TEMP/safebrowsing.key"
 
       # Proves on every build that complete updates can be made and signed
       # with the key that matches the updater's certificate. Release builds
@@ -142,15 +142,15 @@ jobs:
             echo "::warning::HILAL_MAR_SIGNING_KEY is not set, so no signed update was made."
             exit 0
           fi
-          python3 -m venv /mnt/build-mar
-          /mnt/build-mar/bin/pip install -q mar==3.2.1
-          (umask 077; printf '%s\n' "$MAR_KEY" > /mnt/mar-key.pem)
+          python3 -m venv "$RUNNER_TEMP/build-mar"
+          "$RUNNER_TEMP/build-mar"/bin/pip install -q mar==3.2.1
+          (umask 077; printf '%s\n' "$MAR_KEY" > "$RUNNER_TEMP/mar-key.pem")
           # The MAR carries the Firefox app version: the updater refuses one
           # that is lower than the installed version.
           version="$(sed -n 's/^version=//p' dist/BUILD_INFO)"
-          HILAL_MAR_SIGNING_KEY=/mnt/mar-key.pem HILAL_BUILD_MAR=/mnt/build-mar/bin/mar \
+          HILAL_MAR_SIGNING_KEY="$RUNNER_TEMP/mar-key.pem" HILAL_BUILD_MAR="$RUNNER_TEMP/build-mar"/bin/mar \
             scripts/make-full-update.sh "$version" "dist/hilal-${{ inputs.target }}.complete.mar"
-          rm -f /mnt/mar-key.pem
+          rm -f "$RUNNER_TEMP/mar-key.pem"
 
       - name: Compiler cache stats
         if: always()
