@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Paths that DownloadController exposes through FileProvider so that
+     pre-Android 10 downloads can be opened with content:// URIs. -->
+<paths>
+    <external-files-path name="downloads" path="Download/" />
+    <files-path name="files-downloads" path="Download/" />
+</paths>

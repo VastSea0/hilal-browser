@@ -8,6 +8,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 import android.webkit.URLUtil
+import androidx.core.content.FileProvider
 import com.vastsea.hilal.data.DownloadDao
 import com.vastsea.hilal.data.DownloadEntry
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +47,19 @@ class DownloadController(private val context: Context, private val dao: Download
         }
     }
 
-    suspend fun delete(entry: DownloadEntry) = dao.delete(entry.id)
+    suspend fun delete(entry: DownloadEntry) {
+        withContext(Dispatchers.IO) {
+            val uri = entry.contentUri?.let(Uri::parse)
+            runCatching {
+                when {
+                    uri?.scheme == "file" -> File(uri.path ?: "").delete()
+                    uri != null -> context.contentResolver.delete(uri, null, null) > 0
+                    else -> false
+                }
+            }
+            dao.delete(entry.id)
+        }
+    }
 
     suspend fun failInterrupted() = dao.failInterrupted()
 
@@ -75,7 +88,10 @@ class DownloadController(private val context: Context, private val dao: Download
         val dir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: context.filesDir
         val file = uniqueFile(dir, fileName)
         val size = file.outputStream().use { out -> body.use { it.copyCounting(out) } }
-        return Uri.fromFile(file) to size
+        // file:// URIs crash ACTION_VIEW with FileUriExposedException; share
+        // through FileProvider so other apps can read the file.
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        return uri to size
     }
 
     private fun uniqueFile(dir: File, name: String): File {

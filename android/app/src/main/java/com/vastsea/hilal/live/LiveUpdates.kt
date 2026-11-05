@@ -100,9 +100,15 @@ class LiveUpdates(context: Context, private val scope: CoroutineScope) {
 
     private var loop: Job? = null
 
+    // Set by disable(); checked after the download completes so an in-flight
+    // check cannot resurrect a bundle that was just disabled.
+    @Volatile
+    private var updateEnabled = true
+
     /** Applies the cached bundle, then checks for a new one now and every few hours. */
     fun start(enabled: () -> Boolean) {
         if (loop != null) return
+        updateEnabled = true
         loop = scope.launch {
             withContext(Dispatchers.IO) { runCatching { cacheFile.readText() }.getOrNull() }
                 ?.let { verify(it) }
@@ -118,12 +124,17 @@ class LiveUpdates(context: Context, private val scope: CoroutineScope) {
     fun checkIfStale(enabled: Boolean) {
         if (!enabled) return
         if (System.currentTimeMillis() - prefs.getLong(KEY_LAST_CHECK, 0) < MIN_RECHECK_MS) return
-        scope.launch { checkNow() }
+        scope.launch {
+            if (updateEnabled) checkNow()
+        }
     }
 
     suspend fun checkNow() {
         prefs.edit().putLong(KEY_LAST_CHECK, System.currentTimeMillis()).apply()
         val envelope = withContext(Dispatchers.IO) { download() } ?: return
+        // If live updates were turned off while we were downloading, the
+        // user expects no bundle to be applied or written to disk.
+        if (!updateEnabled) return
         val next = verify(envelope) ?: return
         if (next.serial <= _config.value.serial) return
         withContext(Dispatchers.IO) {
@@ -136,6 +147,7 @@ class LiveUpdates(context: Context, private val scope: CoroutineScope) {
 
     /** Turned off in settings: forget the bundle so nothing from it stays applied. */
     fun disable() {
+        updateEnabled = false
         loop?.cancel()
         loop = null
         cacheFile.delete()
