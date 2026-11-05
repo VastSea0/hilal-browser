@@ -175,6 +175,7 @@ fn validate(repo_root: &Path) -> Result<()> {
         if !seen.insert(&entry.path) {
             bail!("Duplicate manifest path: {}", entry.path);
         }
+        ensure_manifest_path_valid(&entry.path)?;
         let path = repo_root.join("changes").join(&entry.path);
         if !path.exists() {
             bail!(
@@ -188,6 +189,19 @@ fn validate(repo_root: &Path) -> Result<()> {
         "[hil] Repository metadata is valid ({} manifest entries).",
         manifest.patches.len()
     );
+    Ok(())
+}
+
+fn ensure_manifest_path_valid(path: &str) -> Result<()> {
+    let p = Path::new(path);
+    if p.is_absolute() {
+        bail!("Manifest path must be relative: {}", path);
+    }
+    if p.components()
+        .any(|c| matches!(c, std::path::Component::ParentDir))
+    {
+        bail!("Manifest path must not contain '..': {}", path);
+    }
     Ok(())
 }
 
@@ -291,9 +305,15 @@ fn setup_git(commit: &str, engine_path: &Path, _repo_root: &Path) -> Result<()> 
     fs::create_dir_all(engine_path)?;
     run_cmd(&["git", "init", "-q"], engine_path)?;
     run_cmd(&["git", "remote", "add", "origin", &upstream], engine_path)?;
-    println!("[hil] Fetching pinned Firefox commit {} from {}...", commit, upstream);
-    run_cmd(&["git", "fetch", "--depth", "1", "origin", commit], engine_path)
-        .context("Failed to fetch the pinned Firefox commit")?;
+    println!(
+        "[hil] Fetching pinned Firefox commit {} from {}...",
+        commit, upstream
+    );
+    run_cmd(
+        &["git", "fetch", "--depth", "1", "origin", commit],
+        engine_path,
+    )
+    .context("Failed to fetch the pinned Firefox commit")?;
 
     // Set local git config for committing
     run_cmd(&["git", "config", "user.name", "Hilal Tool"], engine_path)?;
@@ -381,6 +401,7 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
     let mut copied = 0;
 
     for entry in &manifest.patches {
+        ensure_manifest_path_valid(&entry.path)?;
         let src = repo_root.join("changes").join(&entry.path);
         let dst = engine_path.join(&entry.path);
 
@@ -395,8 +416,12 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
             // Check if already applied
             let mut already_applied = false;
             if !force {
+                let src_str = src
+                    .to_str()
+                    .context("Manifest path is not valid UTF-8")?
+                    .to_string();
                 let check = Command::new("git")
-                    .args(&["apply", "--check", "--reverse", src.to_str().unwrap()])
+                    .args(["apply", "--check", "--reverse", &src_str])
                     .current_dir(engine_path)
                     .output()?;
                 if check.status.success() {
@@ -410,9 +435,34 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
             }
 
             println!("[hil] Applying patch: {}", entry.path);
-            if !dry_run {
+            if dry_run {
+                // Simulate: verify the patch applies cleanly without touching disk.
+                let src_str = src
+                    .to_str()
+                    .context("Manifest path is not valid UTF-8")?
+                    .to_string();
+                let check = Command::new("git")
+                    .args(["apply", "--check", "--whitespace=nowarn", &src_str])
+                    .current_dir(engine_path)
+                    .output()?;
+                if !check.status.success() {
+                    bail!(
+                        "Dry run: patch changes/{} would fail to apply. Error:\n{}",
+                        entry.path,
+                        String::from_utf8_lossy(&check.stderr)
+                    );
+                }
+                applied += 1;
+                continue;
+            }
+
+            {
                 let apply = Command::new("git")
-                    .args(&["apply", "--whitespace=nowarn", src.to_str().unwrap()])
+                    .args([
+                        "apply",
+                        "--whitespace=nowarn",
+                        src.to_str().context("Manifest path is not valid UTF-8")?,
+                    ])
                     .current_dir(engine_path)
                     .output()?;
                 if !apply.status.success() {
@@ -433,8 +483,8 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
                         }
                         run_cmd(&args, engine_path)?;
                     }
-                    Command::new("git")
-                        .args(&[
+                    let commit = Command::new("git")
+                        .args([
                             "commit",
                             "--allow-empty",
                             "-m",
@@ -442,6 +492,13 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
                         ])
                         .current_dir(engine_path)
                         .output()?;
+                    if !commit.status.success() {
+                        bail!(
+                            "Failed to commit applied patch changes/{}. Error:\n{}",
+                            entry.path,
+                            String::from_utf8_lossy(&commit.stderr)
+                        );
+                    }
                 }
             }
             applied += 1;
@@ -450,7 +507,9 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
             if !dry_run {
                 if src.is_dir() {
                     fs::create_dir_all(&dst)?;
-                    copy_dir_recursive(&src, &dst)?;
+                    // Mirror instead of plain copy so files that were deleted
+                    // from the overlay do not survive in engine/.
+                    mirror_dir(&src, &dst)?;
                 } else {
                     if let Some(parent) = dst.parent() {
                         fs::create_dir_all(parent)?;
@@ -461,8 +520,8 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
                 // Commit the overlay change
                 if std::env::var("GITHUB_ACTIONS").is_err() {
                     run_cmd(&["git", "add", &entry.path], engine_path)?;
-                    Command::new("git")
-                        .args(&[
+                    let commit = Command::new("git")
+                        .args([
                             "commit",
                             "--allow-empty",
                             "-m",
@@ -470,6 +529,13 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
                         ])
                         .current_dir(engine_path)
                         .output()?;
+                    if !commit.status.success() {
+                        bail!(
+                            "Failed to commit overlay changes/{}. Error:\n{}",
+                            entry.path,
+                            String::from_utf8_lossy(&commit.stderr)
+                        );
+                    }
                 }
             }
             copied += 1;
@@ -510,6 +576,25 @@ fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<()> {
     Ok(())
 }
 
+// Copy everything from src into dst, then remove entries that exist only in
+// dst. Turns the copy into a true "sync" so deletions in the source tree are
+// reflected in the destination instead of resurrected on the next sync.
+fn mirror_dir(src: &Path, dst: &Path) -> Result<()> {
+    copy_dir_recursive(src, dst)?;
+    for entry in fs::read_dir(dst)? {
+        let entry = entry?;
+        let path = entry.path();
+        if !src.join(entry.file_name()).exists() {
+            if path.is_dir() {
+                fs::remove_dir_all(&path)?;
+            } else {
+                fs::remove_file(&path)?;
+            }
+        }
+    }
+    Ok(())
+}
+
 fn download_ublock(engine_path: &Path) -> Result<()> {
     let ubo_version = "1.57.2";
     let ubo_url = format!(
@@ -537,8 +622,12 @@ fn download_ublock(engine_path: &Path) -> Result<()> {
         "[hil] Downloading uBlock Origin v{} extension...",
         ubo_version
     );
+    let ubo_path_str = ubo_path
+        .to_str()
+        .context("Engine path is not valid UTF-8")?
+        .to_string();
     let curl_output = Command::new("curl")
-        .args(&["-L", "-f", "-s", "-o", ubo_path.to_str().unwrap(), &ubo_url])
+        .args(["-L", "-f", "-s", "-o", &ubo_path_str, &ubo_url])
         .output()
         .context("Failed to run curl command to download uBlock")?;
     if !curl_output.status.success() {
@@ -654,20 +743,53 @@ fn get_patch_files(patch_path: &Path) -> Result<Vec<String>> {
     let content = fs::read_to_string(patch_path)?;
     let mut files = Vec::new();
     for line in content.lines() {
-        if line.starts_with("diff --git a/") {
-            if let Some(pos) = line[11..].find(" b/") {
-                let file_path = &line[pos + 14..];
-                let trimmed = file_path.trim();
-                let cleaned = if trimmed.starts_with('"') && trimmed.ends_with('"') {
-                    trimmed[1..trimmed.len() - 1].to_string()
-                } else {
-                    trimmed.to_string()
-                };
-                files.push(cleaned);
+        if !line.starts_with("diff --git ") {
+            continue;
+        }
+        let rest = &line["diff --git ".len()..];
+        // The header is either: a/foo b/foo
+        // or, when a path has spaces/specials: "a/x y" "b/x y"
+        match split_two_paths(rest) {
+            Some((a, b)) if a.starts_with("a/") && b.starts_with("b/") => {
+                files.push(b[2..].to_string());
             }
+            _ => {}
         }
     }
     Ok(files)
+}
+
+// Split "a/… b/…" or "\"a/…\" \"b/…\"" into its two path tokens, honouring
+// quotes and backslash escapes inside quoted tokens.
+fn split_two_paths(rest: &str) -> Option<(String, String)> {
+    let bytes: Vec<char> = rest.chars().collect();
+    let mut tokens = Vec::new();
+    let mut cur = String::new();
+    let mut in_quotes = false;
+    let mut escaped = false;
+    for &ch in &bytes {
+        if escaped {
+            cur.push(ch);
+            escaped = false;
+        } else if ch == '\\' && in_quotes {
+            escaped = true;
+        } else if ch == '"' {
+            in_quotes = !in_quotes;
+        } else if ch == ' ' && !in_quotes {
+            if !cur.is_empty() {
+                tokens.push(std::mem::take(&mut cur));
+            }
+        } else {
+            cur.push(ch);
+        }
+    }
+    if !cur.is_empty() {
+        tokens.push(cur);
+    }
+    if tokens.len() != 2 {
+        return None;
+    }
+    Some((tokens.remove(0), tokens.remove(0)))
 }
 
 fn strip_hilal_block(content: &str) -> String {
@@ -750,6 +872,16 @@ path = "browser/example.patch"
         let _ = fs::remove_file(temp_patch);
         assert_eq!(files, vec!["browser/confvars.sh"]);
     }
+
+    #[test]
+    fn get_patch_files_extracts_quoted_paths_with_spaces() {
+        let temp_patch = Path::new("test_temp_patch_quoted.patch");
+        let content = "diff --git \"a/browser/my dir/file name\" \"b/browser/my dir/file name\"\n--- a/browser/my dir/file name\n+++ b/browser/my dir/file name\n";
+        fs::write(temp_patch, content).unwrap();
+        let files = get_patch_files(temp_patch).unwrap();
+        let _ = fs::remove_file(temp_patch);
+        assert_eq!(files, vec!["browser/my dir/file name"]);
+    }
 }
 
 fn refresh(repo_root: &Path, engine_path: &Path) -> Result<()> {
@@ -767,33 +899,65 @@ fn refresh(repo_root: &Path, engine_path: &Path) -> Result<()> {
         println!("[hil] Warning: You have uncommitted changes in engine/. These changes will not be captured in the diff until they are committed or amended to the corresponding commits.");
     }
 
-    // Get the list of commits between upstream-base and HEAD
-    let commits_str = run_cmd(
-        &["git", "rev-list", "--reverse", "upstream-base..HEAD"],
+    // Get the commits between upstream-base and HEAD, newest-to-oldest order
+    // reversed so the first entry is the earliest commit after upstream-base.
+    let log_str = run_cmd(
+        &[
+            "git",
+            "log",
+            "--format=%H %s",
+            "--reverse",
+            "upstream-base..HEAD",
+        ],
         engine_path,
     )?;
-    let commits: Vec<&str> = commits_str.lines().collect();
+    let commits: Vec<(String, String)> = log_str
+        .lines()
+        .filter_map(|line| {
+            let mut parts = line.splitn(2, ' ');
+            let hash = parts.next()?;
+            let subject = parts.next()?.to_string();
+            Some((hash.to_string(), subject))
+        })
+        .collect();
 
-    let mut commit_index = 0;
+    // Track how many entries were consumed positionally, as a fallback for
+    // engines whose commit subjects do not follow the "Apply patch:" /
+    // "Sync overlay:" convention.
+    let mut positional_index = 0;
+
+    // Find the commit for a manifest entry: first by exact subject match,
+    // then by positional order as a fallback.
+    let find_commit = |entry_path: &str, prefix: &str, fallback_index: usize| -> Option<String> {
+        let expected = format!("{} {}", prefix, entry_path);
+        if let Some((hash, _)) = commits.iter().find(|(_, subject)| *subject == expected) {
+            return Some(hash.clone());
+        }
+        commits.get(fallback_index).map(|(hash, _)| hash.clone())
+    };
 
     for entry in &manifest.patches {
+        ensure_manifest_path_valid(&entry.path)?;
         let src = repo_root.join("changes").join(&entry.path);
         let dst = engine_path.join(&entry.path);
 
         if entry.path.ends_with(".patch") {
-            if commit_index >= commits.len() {
-                println!(
-                    "[hil] Warning: No commit found corresponding to patch changes/{}",
-                    entry.path
-                );
-                continue;
-            }
-            let commit_hash = commits[commit_index];
-            commit_index += 1;
+            let prefix = "Apply patch:";
+            let commit_hash = match find_commit(&entry.path, prefix, positional_index) {
+                Some(hash) => hash,
+                None => {
+                    println!(
+                        "[hil] Warning: No commit found corresponding to patch changes/{}",
+                        entry.path
+                    );
+                    continue;
+                }
+            };
+            positional_index += 1;
 
             // Get git diff for this commit
             let parent = format!("{}~1", commit_hash);
-            let diff = run_cmd(&["git", "diff", &parent, commit_hash], engine_path)?;
+            let diff = run_cmd(&["git", "diff", &parent, &commit_hash], engine_path)?;
 
             if !diff.trim().is_empty() {
                 // Read existing patch to preserve its header description
@@ -812,11 +976,20 @@ fn refresh(repo_root: &Path, engine_path: &Path) -> Result<()> {
             }
         } else {
             // Overlay
-            commit_index += 1; // Overlays are also committed
+            let prefix = "Sync overlay:";
+            match find_commit(&entry.path, prefix, positional_index) {
+                Some(_) => {}
+                None => {
+                    continue;
+                }
+            }
+            positional_index += 1;
             if dst.exists() {
                 if dst.is_dir() {
                     fs::create_dir_all(&src)?;
-                    copy_dir_recursive(&dst, &src)?;
+                    // Mirror so files removed from the overlay in engine/
+                    // are also removed from changes/.
+                    mirror_dir(&dst, &src)?;
                 } else {
                     if let Some(parent) = src.parent() {
                         fs::create_dir_all(parent)?;
@@ -871,7 +1044,10 @@ fn verify(repo_root: &Path) -> Result<()> {
     }
     let tarball_path = repo_root.join("scratch/firefox-e28b34ab33.tar.gz");
     if !tarball_path.exists() {
-        println!("[hil] Tarball archive not found. Run 'hil setup'");
+        println!(
+            "[hil] Tarball archive not found at scratch/firefox-e28b34ab33.tar.gz. \
+             Download it from the URL in upstream.lock first."
+        );
         return Ok(());
     }
     let current_sha = get_file_sha256(&tarball_path)?;
@@ -969,7 +1145,11 @@ fn build(
         if clobber {
             c.arg("-Clobber");
         }
-        c.arg("-SkipApply");
+        // The build() function above already applied patches unless the user
+        // asked to skip, in which case let the script do its own apply step.
+        if !skip_apply {
+            c.arg("-SkipApply");
+        }
         c
     } else {
         let script_name = if target_platform == "macos" {
@@ -981,11 +1161,14 @@ fn build(
         c.arg(repo_root.join("scripts").join(script_name));
         if faster {
             c.arg("faster");
-        } else if binaries {
+        }
+        if binaries {
             c.arg("binaries");
-        } else if run_after {
+        }
+        if run_after {
             c.arg("run");
-        } else if package_after {
+        }
+        if package_after {
             c.arg("package");
         }
         c
@@ -1040,15 +1223,23 @@ fn doctor(repo_root: &Path, strict: bool) -> Result<()> {
             .output();
         match reg_check {
             Ok(output) => {
-                let out_str = String::from_utf8_lossy(&output.stdout);
-                if out_str.contains("0x1") || out_str.contains("1") {
-                    println!("[OK] Windows Long Paths are enabled in registry.");
+                if !output.status.success() {
+                    println!("[WARNING] Failed to query registry for LongPathsEnabled.");
+                    warnings += 1;
                 } else {
-                    println!("[ERROR] Windows Long Paths are NOT enabled in registry (LongPathsEnabled = 0).");
-                    println!("        Firefox builds will fail midway due to deep folder structures.");
-                    println!("        Enable via elevated PowerShell:");
-                    println!("        New-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem\" -Name \"LongPathsEnabled\" -Value 1 -PropertyType DWORD -Force");
-                    errors += 1;
+                    let out_str = String::from_utf8_lossy(&output.stdout);
+                    let enabled = out_str.lines().any(|line| {
+                        line.trim_start().starts_with("LongPathsEnabled") && line.contains("0x1")
+                    });
+                    if enabled {
+                        println!("[OK] Windows Long Paths are enabled in registry.");
+                    } else {
+                        println!("[ERROR] Windows Long Paths are NOT enabled in registry (LongPathsEnabled = 0).");
+                        println!("        Firefox builds will fail midway due to deep folder structures.");
+                        println!("        Enable via elevated PowerShell:");
+                        println!("        New-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem\" -Name \"LongPathsEnabled\" -Value 1 -PropertyType DWORD -Force");
+                        errors += 1;
+                    }
                 }
             }
             Err(_) => {
@@ -1202,11 +1393,13 @@ fn doctor(repo_root: &Path, strict: bool) -> Result<()> {
         }
 
         // 8. Rust targets check
-        let rust_check = Command::new("rustc")
-            .args(&["--print", "target-list"])
+        // `rustc --print target-list` enumerates built-in targets, so it is
+        // always true; check rustup for actually installed targets instead.
+        let rust_check = Command::new("rustup")
+            .args(["target", "list", "--installed"])
             .output();
         match rust_check {
-            Ok(output) => {
+            Ok(output) if output.status.success() => {
                 let out_str = String::from_utf8_lossy(&output.stdout);
                 if out_str.contains("x86_64-pc-windows-msvc") {
                     println!("[OK] Rust target 'x86_64-pc-windows-msvc' is installed.");
@@ -1216,8 +1409,12 @@ fn doctor(repo_root: &Path, strict: bool) -> Result<()> {
                     errors += 1;
                 }
             }
+            Ok(_) => {
+                println!("[WARNING] 'rustup target list --installed' failed. Cannot verify Rust target 'x86_64-pc-windows-msvc'.");
+                warnings += 1;
+            }
             Err(_) => {
-                println!("[WARNING] rustc compiler not found in PATH.");
+                println!("[WARNING] rustup not found in PATH. Cannot verify Rust target 'x86_64-pc-windows-msvc'.");
                 warnings += 1;
             }
         }
