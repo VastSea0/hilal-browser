@@ -29,7 +29,12 @@ cd "$engine"
 export MOZBUILD_STATE_PATH="${MOZBUILD_STATE_PATH:-$HOME/.mozbuild}"
 
 ./mach --no-interactive build
-./mach package
+
+# Translations are compiled into the app instead of shipped as langpack
+# add-ons: release builds require signed langpacks and ours cannot be signed.
+IFS=', ' read -r -a locales <<< "${HILAL_LOCALES:-tr}"
+"$repo/scripts/setup-locales.sh" "${locales[@]}"
+./mach package-multi-locale --locales en-US "${locales[@]}"
 
 objdir="$(./mach environment --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["topobjdir"])')"
 mkdir -p "$repo/dist"

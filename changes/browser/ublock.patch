@@ -2,7 +2,7 @@ diff --git a/browser/app/distribution/moz.build b/browser/app/distribution/moz.b
 index b174449a0989..2e6119c58052 100644
 --- a/browser/app/distribution/moz.build
 +++ b/browser/app/distribution/moz.build
-@@ -4,7 +4,13 @@
+@@ -4,7 +4,12 @@
  
  DIST_SUBDIR = ""
  
@@ -17,7 +17,6 @@ index b174449a0989..2e6119c58052 100644
 +]
 +
 +FINAL_TARGET_FILES.distribution.extensions += [
-+    "extensions/langpack-*@firefox.mozilla.org.xpi",
 +    "extensions/uBlock0@raymondhill.net.xpi",
 +]
 diff --git a/browser/installer/package-manifest.in b/browser/installer/package-manifest.in

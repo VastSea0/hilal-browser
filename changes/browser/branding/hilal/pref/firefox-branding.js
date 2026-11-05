@@ -50,9 +50,6 @@ pref("userChrome.icon.1-25px_stroke", true);
 // Follow the OS language when a matching locale is installed; otherwise use en-US.
 pref("intl.locale.requested", "");
 
-// Allow custom compiled unsigned language packs
-pref("extensions.langpacks.signatures.required", false);
-
 // Privacy-first Hilal defaults, informed by Betterfox and arkenfox.
 // These are default prefs rather than locked prefs, so users can still opt in.
 pref("hilal.privacy.level", "standard");

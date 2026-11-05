@@ -1,8 +1,10 @@
 # Localization Workflow
 
-Hilal can bundle Firefox language packs plus Hilal-specific UI strings. The
-browser follows the operating system language when a matching bundled locale is
-installed. Without a matching bundled locale, Firefox falls back to `en-US`.
+Hilal builds its translations into the browser (a multi-locale build), using
+Firefox's official translations plus Hilal-specific UI strings. They are not
+shipped as language pack add-ons, because release builds only load signed
+langpacks. The browser follows the operating system language when a matching
+built-in locale exists. Without a matching bundled locale, Firefox falls back to `en-US`.
 
 The default is controlled by:
 
@@ -67,20 +69,12 @@ and merges any Hilal custom strings from `changes/browser/locales/<locale>/`.
    `scripts/setup-locales.sh de` also performs this merge after fetching the
    official locale files.
 
-5. Build the language pack:
+5. Add the locale to the build. CI builds the locales in `HILAL_LOCALES`
+   (default `tr`, see `scripts/ci/build.sh`). Locally, after `./mach build`:
 
    ```bash
-   scripts/build-langpacks.sh de
+   (cd engine && ./mach package-multi-locale --locales en-US tr de)
    ```
-
-   This writes the final XPI to both:
-
-   ```text
-   engine/browser/app/distribution/extensions/langpack-de@firefox.mozilla.org.xpi
-   changes/browser/app/distribution/extensions/langpack-de@firefox.mozilla.org.xpi
-   ```
-
-6. Build or package the browser normally with the platform scripts.
 
 ## Useful Commands
 
@@ -89,14 +83,12 @@ Run all known custom locale folders:
 ```bash
 scripts/setup-locales.sh
 python3 scripts/check-locales.py
-scripts/build-langpacks.sh
 ```
 
 Run a specific set:
 
 ```bash
 HILAL_LOCALES="tr,de,fr" scripts/setup-locales.sh
-HILAL_LOCALES="tr,de,fr" scripts/build-langpacks.sh
 ```
 
 If `./bin/hil apply --force` warns that a target locale directory does not

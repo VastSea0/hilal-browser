@@ -8,7 +8,6 @@
     "locales:setup": "bash scripts/setup-locales.sh",
     "locales:merge": "python3 scripts/merge-locales.py . engine",
     "locales:check": "python3 scripts/check-locales.py",
-    "locales:build": "bash scripts/build-langpacks.sh",
     "release:env": "node scripts/release-env.mjs",
     "release:check-assets": "node scripts/check-release-assets.mjs",
     "smoke:browser": "bash scripts/smoke-browser.sh",

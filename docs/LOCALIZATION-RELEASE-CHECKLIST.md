@@ -1,6 +1,6 @@
 # Localization Release Checklist
 
-Use this checklist before publishing a release with bundled language packs.
+Use this checklist before publishing a release with more built-in locales.
 
 ## Before Building
 
@@ -22,23 +22,13 @@ Use this checklist before publishing a release with bundled language packs.
    python3 scripts/check-locales.py --reference tr
    ```
 
-4. Build bundled language pack XPIs:
+4. Add the locales to `HILAL_LOCALES` for the CI build (`scripts/ci/build.sh`
+   defaults to `tr`). CI packages them with `mach package-multi-locale`.
 
-   ```bash
-   scripts/build-langpacks.sh
-   ```
-
-5. Confirm every selected locale has an overlay artifact:
-
-   ```text
-   changes/browser/app/distribution/extensions/langpack-<locale>@firefox.mozilla.org.xpi
-   ```
-
-6. Review the repo diff. Locale changes should normally include:
+5. Review the repo diff. Locale changes should normally include:
 
    ```text
    changes/browser/locales/<locale>/
-   changes/browser/app/distribution/extensions/langpack-<locale>@firefox.mozilla.org.xpi
    ```
 
 ## Smoke Checks
@@ -54,5 +44,6 @@ Use this checklist before publishing a release with bundled language packs.
 
 - Linux release artifacts should include the tar.gz package and AppImage.
 - Windows release artifacts should include the installer and zip package.
-- Rebuild language pack XPIs whenever Hilal custom strings or upstream Firefox
-  locale files change.
+- `scripts/setup-locales.sh` fetches the firefox-l10n revision pinned in
+  `engine/browser/locales/l10n-changesets.json`, so translations match the
+  Firefox version.

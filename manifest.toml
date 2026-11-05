@@ -44,11 +44,11 @@ reason = "Hilal Bangs implementation"
 
 [[patches]]
 path   = "browser/app/distribution/extensions"
-reason = "Bundled distribution extensions (langpacks)"
+reason = "Bundled distribution extensions"
 
 [[patches]]
 path   = "browser/ublock.patch"
-reason = "Ship policies.json and the bundled uBlock Origin and langpacks in every package"
+reason = "Ship policies.json and the bundled uBlock Origin in every package"
 
 [[patches]]
 path   = "browser/config/version.patch"

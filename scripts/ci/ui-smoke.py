@@ -312,9 +312,9 @@ def main():
         report["addons"] = addons
         check("bundled uBlock Origin is installed and active",
               any(a["id"] == "uBlock0@raymondhill.net" and a["active"] for a in addons), addons)
-        check("bundled Turkish language pack is installed",
-              any(a["id"] == "langpack-tr@firefox.mozilla.org" for a in addons), addons,
-              known_issue="the self-built langpack is unsigned and release builds require signed langpacks")
+        locales = m.script("return Services.locale.availableLocales")
+        report["locales"] = locales
+        check("Turkish is built in", "tr" in locales, locales)
 
         policies = m.script(POLICIES_JS)
         report["policies"] = policies

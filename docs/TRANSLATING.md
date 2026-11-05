@@ -72,8 +72,8 @@ After strings are added:
 
 ```bash
 scripts/setup-locales.sh de
-scripts/build-langpacks.sh de
+(cd engine && ./mach build && ./mach package-multi-locale --locales en-US de)
 ```
 
-Then build or run the browser, open Settings > Hilal Preferences > Language
+Then run the packaged browser, open Settings > Hilal Preferences > Language
 Selection, choose the locale, and restart when prompted.

@@ -85,9 +85,17 @@ mkdir -p "$L10N_TEMP"
     printf '%s/*\n' "$locale" >> .git/info/sparse-checkout
   done
 
-  log "Fetching official Firefox localizations: ${LOCALES[*]}"
-  git fetch --depth=1 origin main
-  git reset --hard origin/main
+  # One firefox-l10n commit serves every locale, so take the pinned revision
+  # of the first one; it matches the strings of the pinned Firefox version.
+  revision="$(python3 -c 'import json, sys
+try:
+    print(json.load(open(sys.argv[1]))[sys.argv[2]]["revision"])
+except Exception:
+    print("main")' "$HILAL_FIREFOX_SRC/browser/locales/l10n-changesets.json" "${LOCALES[0]}")"
+
+  log "Fetching official Firefox localizations at $revision: ${LOCALES[*]}"
+  git fetch --depth=1 origin "$revision"
+  git reset --hard FETCH_HEAD
   git read-tree -mu HEAD
 )
 

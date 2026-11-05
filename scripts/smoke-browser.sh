@@ -181,14 +181,11 @@ check_distribution() {
 
   local extension_dir="$distribution_dir/extensions"
   local ublock="$extension_dir/uBlock0@raymondhill.net.xpi"
-  local langpack="$extension_dir/langpack-tr@firefox.mozilla.org.xpi"
   require_file "$ublock"
-  require_file "$langpack"
 
   for rel in \
     "policies.json" \
-    "extensions/uBlock0@raymondhill.net.xpi" \
-    "extensions/langpack-tr@firefox.mozilla.org.xpi"; do
+    "extensions/uBlock0@raymondhill.net.xpi"; do
     local source="$HILAL_REPO_ROOT/changes/browser/app/distribution/$rel"
     local packaged="$distribution_dir/$rel"
     [ -f "$source" ] || continue
