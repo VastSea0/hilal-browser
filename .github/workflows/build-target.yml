@@ -183,6 +183,8 @@ jobs:
       # the next build starts cold (hours instead of minutes).
       - name: Drop older compiler caches
         if: always() && steps.build.outcome == 'success' && steps.save-cache.outcome == 'success'
+        # Housekeeping only; a failure here must not fail the build.
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           KEEP: sccache-${{ inputs.target }}-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
