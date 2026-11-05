@@ -5,9 +5,9 @@ export TMPDIR="${XDG_CACHE_HOME:-$HOME/.cache}/tmp"
 mkdir -p "$TMPDIR"
 
 if [ -x /app/lib/hilal/firefox ]; then
-    exec /app/lib/hilal/firefox --name org.gkdevstudio.Hilal "$@"
+    exec /app/lib/hilal/firefox --name io.github.VastSea0.Hilal "$@"
 elif [ -x /app/lib/Hilal/firefox ]; then
-    exec /app/lib/Hilal/firefox --name org.gkdevstudio.Hilal "$@"
+    exec /app/lib/Hilal/firefox --name io.github.VastSea0.Hilal "$@"
 else
-    exec /app/lib/firefox/firefox --name org.gkdevstudio.Hilal "$@"
+    exec /app/lib/firefox/firefox --name io.github.VastSea0.Hilal "$@"
 fi

@@ -1,4 +1,4 @@
-app-id: org.gkdevstudio.Hilal
+app-id: io.github.VastSea0.Hilal
 runtime: org.freedesktop.Platform
 runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
@@ -27,7 +27,7 @@ finish-args:
   - --talk-name=org.freedesktop.FileManager1
   - --talk-name=org.gtk.vfs.*
   - --system-talk-name=org.freedesktop.NetworkManager
-  - --own-name=org.gkdevstudio.Hilal.*
+  - --own-name=io.github.VastSea0.Hilal.*
   - --own-name=org.mpris.MediaPlayer2.firefox.*
   - --persist=.mozilla
   - --env=DICPATH=/usr/share/hunspell
@@ -52,10 +52,10 @@ modules:
         d['policies'].pop('AppUpdateURL', None); json.dump(d, open(p,'w'), indent=2)"
         "$FLATPAK_DEST/lib/hilal/distribution/policies.json"
       - install -Dm755 hilal-browser/flatpak/hilal "$FLATPAK_DEST/bin/hilal"
-      - install -Dm644 hilal-browser/flatpak/org.gkdevstudio.Hilal.desktop "$FLATPAK_DEST/share/applications/org.gkdevstudio.Hilal.desktop"
-      - install -Dm644 hilal-browser/flatpak/org.gkdevstudio.Hilal.metainfo.xml "$FLATPAK_DEST/share/metainfo/org.gkdevstudio.Hilal.metainfo.xml"
-      - install -Dm644 hilal-browser/LICENSE "$FLATPAK_DEST/share/licenses/org.gkdevstudio.Hilal/LICENSE"
-      - for size in 16 32 48 64 128 256; do install -Dm644 "hilal-browser/changes/browser/branding/hilal/default$size.png" "$FLATPAK_DEST/share/icons/hicolor/${size}x${size}/apps/org.gkdevstudio.Hilal.png"; done
+      - install -Dm644 hilal-browser/flatpak/io.github.VastSea0.Hilal.desktop "$FLATPAK_DEST/share/applications/io.github.VastSea0.Hilal.desktop"
+      - install -Dm644 hilal-browser/flatpak/io.github.VastSea0.Hilal.metainfo.xml "$FLATPAK_DEST/share/metainfo/io.github.VastSea0.Hilal.metainfo.xml"
+      - install -Dm644 hilal-browser/LICENSE "$FLATPAK_DEST/share/licenses/io.github.VastSea0.Hilal/LICENSE"
+      - for size in 16 32 48 64 128 256; do install -Dm644 "hilal-browser/changes/browser/branding/hilal/default$size.png" "$FLATPAK_DEST/share/icons/hicolor/${size}x${size}/apps/io.github.VastSea0.Hilal.png"; done
     sources:
       # HILAL_ARCHIVE_BEGIN
       - type: archive

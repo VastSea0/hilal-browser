@@ -1,6 +1,6 @@
 # Build Hilal for Flatpak
 
-Hilal's Flatpak package is defined by `org.gkdevstudio.Hilal.yml`. It builds
+Hilal's Flatpak package is defined by `io.github.VastSea0.Hilal.yml`. It builds
 Firefox from the pinned upstream commit in `upstream.lock`, applies the Hilal
 patch and overlay layer, installs the browser under `/app/lib/firefox`, and
 exports the `hilal` command.
@@ -8,7 +8,7 @@ exports the `hilal` command.
 The Flatpak app id is:
 
 ```text
-org.gkdevstudio.Hilal
+io.github.VastSea0.Hilal
 ```
 
 ## Current Flathub Status
@@ -67,7 +67,7 @@ Export a local OSTree repo:
 ```bash
 scripts/build-flatpak.sh repo
 flatpak --user --no-gpg-verify remote-add hilal-local repo
-flatpak --user install hilal-local org.gkdevstudio.Hilal
+flatpak --user install hilal-local io.github.VastSea0.Hilal
 ```
 
 ## Linting
@@ -87,8 +87,8 @@ are missing.
 Before opening a human-authored Flathub PR:
 
 - Cut a stable Hilal release tag.
-- Update `org.gkdevstudio.Hilal.yml` to point at the stable Hilal tag and commit.
-- Update `flatpak/org.gkdevstudio.Hilal.metainfo.xml` release data and screenshot URLs.
+- Update `io.github.VastSea0.Hilal.yml` to point at the stable Hilal tag and commit.
+- Update `flatpak/io.github.VastSea0.Hilal.metainfo.xml` release data and screenshot URLs.
 - Run `scripts/build-flatpak.sh check-ready`.
 - Run `scripts/build-flatpak.sh lint`.
 - Build and smoke-test both `x86_64` and `aarch64`.
@@ -105,4 +105,4 @@ package are delivered by Flathub.
 
 The bundled uBlock Origin XPI is checksum-pinned in the manifest. Its source
 repository is also included in the manifest and its GPL license is installed
-into `/app/share/licenses/org.gkdevstudio.Hilal/uBlock-Origin/`.
+into `/app/share/licenses/io.github.VastSea0.Hilal/uBlock-Origin/`.

@@ -206,7 +206,7 @@ jobs:
       - name: Build and install the Flatpak
         run: |
           tarball="$(ls package/*.linux-*.tar.xz | head -n1)"
-          python3 scripts/ci/flatpak-test-manifest.py org.gkdevstudio.Hilal.yml "$tarball" . flatpak-test.yml
+          python3 scripts/ci/flatpak-test-manifest.py io.github.VastSea0.Hilal.yml "$tarball" . flatpak-test.yml
           flatpak-builder --user --install-deps-from=flathub --install --force-clean \
             --disable-rofiles-fuse flatpak-build flatpak-test.yml
 

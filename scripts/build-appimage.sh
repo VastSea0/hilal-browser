@@ -24,7 +24,7 @@ TARGET_DIST_DIR="$HILAL_REPO_ROOT/dist"
 CONFIG_FILE="$HILAL_REPO_ROOT/config.yml"
 APPIMAGE_TOOL_URL="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
 APP_NAME="Hilal"
-APP_ID="org.gkdevstudio.Hilal"
+APP_ID="io.github.VastSea0.Hilal"
 
 usage() {
   cat <<'USAGE'
@@ -193,7 +193,7 @@ fi
 
 DESKTOP_SRC="$HILAL_REPO_ROOT/flatpak/$APP_ID.desktop"
 if [ ! -f "$DESKTOP_SRC" ]; then
-  DESKTOP_SRC="$HILAL_REPO_ROOT/flatpak/org.gkdevstudio.Hilal.desktop"
+  DESKTOP_SRC="$HILAL_REPO_ROOT/flatpak/io.github.VastSea0.Hilal.desktop"
 fi
 
 if [ -f "$DESKTOP_SRC" ]; then
@@ -226,9 +226,9 @@ export XDG_DATA_DIRS="$HERE/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/sha
 export MOZ_LEGACY_PROFILES=1
 
 if [ -f "$HERE/usr/firefox" ]; then
-  exec "$HERE/usr/firefox" --name org.gkdevstudio.Hilal "$@"
+  exec "$HERE/usr/firefox" --name io.github.VastSea0.Hilal "$@"
 elif [ -f "$HERE/usr/bin/firefox" ]; then
-  exec "$HERE/usr/bin/firefox" --name org.gkdevstudio.Hilal "$@"
+  exec "$HERE/usr/bin/firefox" --name io.github.VastSea0.Hilal "$@"
 else
   echo "Failed to launch Hilal: firefox binary not found." >&2
   exit 1

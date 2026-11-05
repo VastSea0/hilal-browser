@@ -18,7 +18,7 @@ app itself. Data, site fixes and notices reach Android without an APK through
 live updates (`docs/ANDROID-LIVE-UPDATES.md`).
 
 Flatpak builds disable Firefox's built-in updater. Updates for
-`org.gkdevstudio.Hilal` are delivered by Flatpak/Flathub.
+`io.github.VastSea0.Hilal` are delivered by Flatpak/Flathub.
 
 ## Build-Time Channel
 

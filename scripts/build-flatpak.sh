@@ -33,7 +33,7 @@ fi
 HILAL_REPO_ROOT="$(cd "$(dirname "$0")/../" && pwd)"
 TARGET_DIST_DIR="${HILAL_REPO_ROOT}/dist"
 CONFIG_FILE="${HILAL_REPO_ROOT}/config.yml"
-APP_ID="org.gkdevstudio.Hilal"
+APP_ID="io.github.VastSea0.Hilal"
 BUILD_DIR="${HILAL_REPO_ROOT}/flatpak-build"
 REPO_DIR="${HILAL_REPO_ROOT}/repo"
 
@@ -87,8 +87,8 @@ find_manifest() {
     for candidate in \
         "$HILAL_REPO_ROOT/flatpak/$APP_ID.json" \
         "$HILAL_REPO_ROOT/$APP_ID.json" \
-        "$HILAL_REPO_ROOT/flatpak/org.gkdevstudio.Hilal.json" \
-        "$HILAL_REPO_ROOT/org.gkdevstudio.Hilal.json"; do
+        "$HILAL_REPO_ROOT/flatpak/io.github.VastSea0.Hilal.json" \
+        "$HILAL_REPO_ROOT/io.github.VastSea0.Hilal.json"; do
         if [ -f "$candidate" ]; then
             echo "$candidate"
             return 0

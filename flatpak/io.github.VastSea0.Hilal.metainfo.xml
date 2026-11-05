@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>org.gkdevstudio.Hilal</id>
-  <metadata_license>MPL-2.0</metadata_license>
+  <id>io.github.VastSea0.Hilal</id>
+  <metadata_license>CC0-1.0</metadata_license>
   <project_license>MPL-2.0 AND GPL-3.0-only</project_license>
 
   <name>Hilal</name>
   <summary>Privacy-first web browser built on Firefox</summary>
-  <developer id="org.gkdevstudio">
-    <name>GK Dev Studio</name>
+  <developer id="io.github.VastSea0">
+    <name>Hilal</name>
   </developer>
 
-  <launchable type="desktop-id">org.gkdevstudio.Hilal.desktop</launchable>
+  <launchable type="desktop-id">io.github.VastSea0.Hilal.desktop</launchable>
   <provides>
     <binary>hilal</binary>
   </provides>
@@ -67,6 +67,6 @@
   </branding>
 
   <custom>
-    <value key="flathub::manifest">https://github.com/VastSea0/hilal-browser/blob/main/org.gkdevstudio.Hilal.yml</value>
+    <value key="flathub::manifest">https://github.com/VastSea0/hilal-browser/blob/main/io.github.VastSea0.Hilal.yml</value>
   </custom>
 </component>
