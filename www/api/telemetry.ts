@@ -22,6 +22,41 @@ const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY;
 const FIRESTORE_COLLECTION = "hilal-browser";
 const STATS_COLLECTION = "hilal-browser-stats";
 
+// Aggregate counters (installs vs active pings). Awaited by the handler so
+// the write is not dropped when the serverless function freezes on return.
+async function updateAggregateCounters(isFirstRun: boolean): Promise<void> {
+  if (!FIREBASE_PROJECT_ID || !FIREBASE_API_KEY) return;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const statField = isFirstRun ? "total_installs" : "total_pings";
+  const dailyField = isFirstRun ? "installs" : "active_pings";
+
+  const commitUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents:commit?key=${FIREBASE_API_KEY}`;
+  await fetch(commitUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      writes: [
+        {
+          transform: {
+            document: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${STATS_COLLECTION}/summary`,
+            fieldTransforms: [
+              { fieldPath: statField, increment: { integerValue: 1 } },
+            ],
+          },
+        },
+        {
+          transform: {
+            document: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${STATS_COLLECTION}/daily_${todayStr}`,
+            fieldTransforms: [
+              { fieldPath: dailyField, increment: { integerValue: 1 } },
+            ],
+          },
+        },
+      ],
+    }),
+  }).catch(() => {});
+}
+
 export default async function handler(
   req: IncomingMessage,
   res: ServerResponse
@@ -39,7 +74,9 @@ export default async function handler(
 
   // Health check on GET — stats are strictly private
   if (req.method === "GET") {
-    const parsedUrl = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+    // Constant base: req.headers.host is attacker-controlled and can break
+    // URL parsing.
+    const parsedUrl = new URL(req.url || "/", "https://telemetry.hilal.local");
     const adminKey = parsedUrl.searchParams.get("key") || req.headers["x-telemetry-admin-key"];
     const configuredSecret = process.env.TELEMETRY_ADMIN_SECRET;
 
@@ -180,36 +217,7 @@ export default async function handler(
     });
 
     if (firestoreRes.ok) {
-      // 2. Concurrently update aggregate counters (installs vs active pings)
-      const todayStr = new Date().toISOString().slice(0, 10);
-      const statField = isFirstRun ? "total_installs" : "total_pings";
-      const dailyField = isFirstRun ? "installs" : "active_pings";
-
-      const commitUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents:commit?key=${FIREBASE_API_KEY}`;
-      fetch(commitUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          writes: [
-            {
-              transform: {
-                document: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${STATS_COLLECTION}/summary`,
-                fieldTransforms: [
-                  { fieldPath: statField, increment: { integerValue: 1 } },
-                ],
-              },
-            },
-            {
-              transform: {
-                document: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${STATS_COLLECTION}/daily_${todayStr}`,
-                fieldTransforms: [
-                  { fieldPath: dailyField, increment: { integerValue: 1 } },
-                ],
-              },
-            },
-          ],
-        }),
-      }).catch(() => {});
+      await updateAggregateCounters(isFirstRun);
 
       res.statusCode = 200;
       res.setHeader("Content-Type", "application/json; charset=utf-8");
