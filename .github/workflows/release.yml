@@ -20,7 +20,8 @@ on:
 
 permissions:
   contents: write
-  actions: read
+  # ci.yml deletes superseded compiler caches.
+  actions: write
 
 jobs:
   prepare:

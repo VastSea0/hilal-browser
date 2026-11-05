@@ -56,11 +56,14 @@ concurrency:
 
 permissions:
   contents: read
-  actions: read
+  # write: build-target.yml deletes superseded compiler caches.
+  actions: write
 
 jobs:
   plan:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     outputs:
       targets: ${{ steps.plan.outputs.targets }}
       build: ${{ steps.plan.outputs.build }}
@@ -77,9 +80,36 @@ jobs:
           else
             echo "targets=[\"$t\"]" >> "$GITHUB_OUTPUT"
           fi
-          if [ -n "${{ inputs.reuse_build_run }}" ]; then
+          reuse="${{ inputs.reuse_build_run }}"
+
+          # A push that only touches the tests or the packaging around the
+          # build retests the newest packages instead of building again.
+          # Releases (tag pushes calling this workflow) always build.
+          if [ -z "$reuse" ] && [ "${{ github.event_name }}" = push ] && [ "${{ github.ref }}" = refs/heads/main ]; then
+            changed="$(gh api "repos/$GITHUB_REPOSITORY/compare/${{ github.event.before }}...${{ github.sha }}" \
+              -q '.files[].filename' 2>/dev/null)" || changed=""
+            build_paths="$(printf '%s\n' "$changed" | grep -v -E \
+              '^(scripts/ci/(ui-smoke\.py|flatpak-[^/]+|flatpak-run\.sh)|scripts/(build-appimage|build-flatpak)\.sh|scripts/[^/]+\.mjs|flatpak/.*|io\.github\.VastSea0\.Hilal\.yml|\.github/workflows/(ci|release|android-[^/]+)\.yml|(www|docs|media|android|playstore|scripts/android-ota)/.*|.*\.md)$' || true)"
+            if [ -n "$changed" ] && [ -z "$build_paths" ]; then
+              for id in $(gh run list -R "$GITHUB_REPOSITORY" -w ci.yml -b main -L 30 \
+                          --json databaseId,conclusion -q '.[] | select(.conclusion == "success" or .conclusion == "failure") | .databaseId'); do
+                names="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$id/artifacts" \
+                  -q '[.artifacts[] | select(.expired | not) | .name] | join(" ")')"
+                # Only the newest run that built counts; older packages would
+                # miss its changes.
+                [[ " $names " == *" package-"* ]] || continue
+                if [[ " $names " == *" package-linux "* && " $names " == *" package-macos "* && " $names " == *" package-windows "* ]]; then
+                  reuse="$id"
+                  echo "::notice::Only test/packaging files changed; testing the packages of run $id."
+                fi
+                break
+              done
+            fi
+          fi
+
+          if [ -n "$reuse" ]; then
             echo "build=false" >> "$GITHUB_OUTPUT"
-            echo "artifacts_run=${{ inputs.reuse_build_run }}" >> "$GITHUB_OUTPUT"
+            echo "artifacts_run=$reuse" >> "$GITHUB_OUTPUT"
           else
             echo "build=true" >> "$GITHUB_OUTPUT"
             echo "artifacts_run=${{ github.run_id }}" >> "$GITHUB_OUTPUT"

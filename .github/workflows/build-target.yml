@@ -28,18 +28,20 @@ jobs:
       HILAL_MAC_TOOLS: /mnt/mac-tools
       MOZ_BUILD_DATE: ${{ inputs.build_date }}
     steps:
+      # Deleting takes minutes, so it runs in the background while the
+      # source is fetched; "Build and package" waits for it.
       - name: Free disk space
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
-            /usr/local/share/powershell /usr/share/swift /usr/lib/jvm \
-            /usr/local/share/boost /opt/hostedtoolcache/CodeQL \
-            /opt/hostedtoolcache/Ruby /opt/hostedtoolcache/PyPy \
-            /usr/local/cuda-* /usr/share/miniconda
-          sudo apt-get clean
-          docker system prune -af >/dev/null 2>&1 || true
           sudo mkdir -p /mnt/sccache /mnt/mozbuild /mnt/mac-tools
           sudo chown -R "$USER" /mnt/sccache /mnt/mozbuild /mnt/mac-tools
-          df -h / /mnt
+          nohup bash -c '
+            sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+              /usr/local/share/powershell /usr/share/swift /usr/lib/jvm \
+              /usr/local/share/boost /opt/hostedtoolcache/CodeQL \
+              /opt/hostedtoolcache/Ruby /opt/hostedtoolcache/PyPy \
+              /usr/local/cuda-* /usr/share/miniconda
+            docker system prune -af
+            touch "$RUNNER_TEMP/disk-freed"' > "$RUNNER_TEMP/free-disk.log" 2>&1 &
 
       - uses: actions/checkout@v7
 
@@ -49,12 +51,23 @@ jobs:
         with:
           python-version: "3.13"
 
+      # The Azure apt mirror sometimes needs minutes for a few MB, so keep
+      # the .debs; apt only downloads what changed since.
+      - name: Cache apt packages
+        uses: actions/cache@v5
+        with:
+          path: ~/apt-cache
+          key: apt-build-${{ runner.os }}-v1
+
       - name: Install build dependencies
         run: |
+          mkdir -p ~/apt-cache/partial
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
+          sudo apt-get install -y --no-install-recommends -o Dir::Cache::Archives="$HOME/apt-cache" \
             libgtk-3-dev libdbus-glib-1-dev libpulse-dev libasound2-dev \
             libx11-xcb-dev libxt-dev nasm msitools
+          sudo rm -rf ~/apt-cache/partial ~/apt-cache/lock
+          sudo chown -R "$USER" ~/apt-cache
 
       - name: Add swap
         run: |
@@ -117,9 +130,13 @@ jobs:
           ls -la "$HILAL_MAC_TOOLS"/*
 
       - name: Build and package
+        id: build
         env:
           SAFEBROWSING_KEY: ${{ secrets.HILAL_SAFEBROWSING_API_KEY }}
         run: |
+          until [ -e "$RUNNER_TEMP/disk-freed" ]; do sleep 5; done
+          cat "$RUNNER_TEMP/free-disk.log"
+          df -h / /mnt
           if [ -n "$SAFEBROWSING_KEY" ]; then
             (umask 077; printf '%s' "$SAFEBROWSING_KEY" > "$RUNNER_TEMP/safebrowsing.key")
             export HILAL_SAFEBROWSING_KEY_FILE="$RUNNER_TEMP/safebrowsing.key"
@@ -157,11 +174,25 @@ jobs:
         run: sccache --show-stats || true
 
       - name: Save compiler cache
+        id: save-cache
         if: always()
         uses: actions/cache/save@v5
         with:
           path: /mnt/sccache
           key: sccache-${{ inputs.target }}-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
+
+      # Each run saves a new ~900 MB cache per target and the repository
+      # gets 10 GB. Without this, LRU eviction can drop the newest cache and
+      # the next build starts cold (hours instead of minutes).
+      - name: Drop older compiler caches
+        if: always() && steps.build.outcome == 'success' && steps.save-cache.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KEEP: sccache-${{ inputs.target }}-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
+        run: |
+          gh cache list -R "$GITHUB_REPOSITORY" --key "sccache-${{ inputs.target }}-" --limit 100 \
+            --json id,key -q ".[] | select(.key != \"$KEEP\") | .id" |
+            xargs -r -n1 gh cache delete -R "$GITHUB_REPOSITORY"
 
       - name: Upload package
         uses: actions/upload-artifact@v7
