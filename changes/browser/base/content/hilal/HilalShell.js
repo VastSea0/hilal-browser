@@ -416,6 +416,7 @@
       });
 
       this.themeChildWindows();
+      this.themeInContentPages();
       this.trackSiteAccent();
 
       if (typeof CustomizableUI !== "undefined") {
@@ -521,6 +522,51 @@
       window.addEventListener(
         "unload",
         () => Services.ww.unregisterNotification(observer),
+        { once: true }
+      );
+    },
+
+    // Add-ons and the other about: pages that run in this process load
+    // hilal-in-content.css; give them this window's accent, and keep it in
+    // step when the accent changes. Settings does this itself.
+    themeInContentPages() {
+      const copy = doc => {
+        const root = doc?.documentElement;
+        if (
+          !root ||
+          !doc.documentURI?.startsWith("about:") ||
+          /^about:(preferences|settings|blank|newtab|home)/.test(doc.documentURI)
+        ) {
+          return;
+        }
+        const style = document.documentElement.style;
+        for (let i = 0; i < style.length; i++) {
+          if (style[i].startsWith("--")) {
+            root.style.setProperty(style[i], style.getPropertyValue(style[i]));
+          }
+        }
+      };
+      const onLoad = event => {
+        const doc = event.originalTarget;
+        if (doc?.nodeType == Node.DOCUMENT_NODE && doc != document) {
+          copy(doc);
+        }
+      };
+      window.addEventListener("DOMContentLoaded", onLoad, true);
+      const onAccent = subject => {
+        if (subject != window) {
+          return;
+        }
+        for (const browser of gBrowser.browsers) {
+          if (!browser.isRemoteBrowser) {
+            copy(browser.contentDocument);
+          }
+        }
+      };
+      Services.obs.addObserver(onAccent, "hilal-accent-changed");
+      window.addEventListener(
+        "unload",
+        () => Services.obs.removeObserver(onAccent, "hilal-accent-changed"),
         { once: true }
       );
     },

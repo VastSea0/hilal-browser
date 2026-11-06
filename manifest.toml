@@ -175,5 +175,13 @@ path   = "toolkit/themes/shared/hilal-error-pages.css"
 reason = "Material 3 Expressive error pages"
 
 [[patches]]
+path   = "toolkit/themes/hilal-in-content.patch"
+reason = "Load Hilal's Material styles on Add-ons and Firefox's info pages"
+
+[[patches]]
+path   = "toolkit/themes/shared/hilal-in-content.css"
+reason = "Material 3 Expressive in-content pages"
+
+[[patches]]
 path   = "toolkit/themes/shared/hilal-shape-cookie9.svg"
 reason = "Shape behind the error page illustration"
