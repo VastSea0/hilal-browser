@@ -2752,6 +2752,16 @@
     },
 
     navigate(rawUrl) {
+      // Firefox has no pages at these addresses; open the matching panels.
+      const panels = {
+        "about:bookmarks": "viewBookmarksSidebar",
+        "about:history": "viewHistorySidebar",
+      };
+      const typed = String(rawUrl ?? "").trim().toLowerCase();
+      if (panels[typed]) {
+        SidebarController.show(panels[typed]);
+        return;
+      }
       if (!rawUrl || !window.gBrowser) return;
       let url = rawUrl.trim();
       if (!url) return;
