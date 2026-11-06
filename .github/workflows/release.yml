@@ -113,7 +113,6 @@ jobs:
               "${mars[@]}" \
               --output dist/hilal-update-manifest.json
           fi
-          (cd dist && sha256sum * > SHA256SUMS)
           ls -la dist
 
       - name: Generate SBOM
@@ -121,6 +120,12 @@ jobs:
         with:
           format: spdx-json
           output-file: dist/hilal-browser-sbom.spdx.json
+
+      - name: Create checksums
+        run: |
+          set -euo pipefail
+          sha256sum dist/* | sed 's#dist/##' > dist/SHA256SUMS
+          ls -la dist
 
       - name: Upload and publish
         run: |

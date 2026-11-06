@@ -34,8 +34,17 @@ const m3Stagger = {
   },
 };
 
-function formatHighlightText(text: string) {
+function escapeHtml(text: string): string {
   return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// Escape before formatting so raw HTML in the changelog cannot reach the DOM.
+function formatHighlightText(text: string) {
+  return escapeHtml(text)
     .replace(
       /\*\*(.*?)\*\*/g,
       '<strong class="font-semibold text-[var(--on-surface)]">$1</strong>'

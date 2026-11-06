@@ -84,7 +84,7 @@ interface HistoryDao {
     @Query(
         """
         SELECT * FROM history
-        WHERE url LIKE '%' || :query || '%' OR title LIKE '%' || :query || '%'
+        WHERE url LIKE '%' || :query || '%' ESCAPE '\' OR title LIKE '%' || :query || '%' ESCAPE '\'
         ORDER BY visitCount * 1.0 / (1 + (:now - lastVisited) / 86400000.0) DESC
         LIMIT :limit
         """
@@ -118,7 +118,7 @@ interface BookmarkDao {
     @Query("UPDATE bookmarks SET title = :title, url = :url WHERE id = :id")
     suspend fun update(id: Long, title: String, url: String)
 
-    @Query("SELECT * FROM bookmarks WHERE url LIKE '%' || :query || '%' OR title LIKE '%' || :query || '%' LIMIT :limit")
+    @Query("SELECT * FROM bookmarks WHERE url LIKE '%' || :query || '%' ESCAPE '\\' OR title LIKE '%' || :query || '%' ESCAPE '\\' LIMIT :limit")
     suspend fun search(query: String, limit: Int = 4): List<Bookmark>
 }
 

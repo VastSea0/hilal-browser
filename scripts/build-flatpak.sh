@@ -287,10 +287,11 @@ if [ -d "$HILAL_REPO_ROOT/flatpak" ]; then
     echo -e "${BLUE}[Action]${NC} Copying auxiliary flatpak/ files to source directory..."
     find "$HILAL_REPO_ROOT/flatpak" -maxdepth 1 ! -name "*.json" ! -name "*.json.bak" -not -path "$HILAL_REPO_ROOT/flatpak" -exec cp -R -t "$LOCAL_SRC_DIR/" {} +
 fi
-if [ -d "$HILAL_REPO_ROOT/branding/hilal" ]; then
-    echo -e "${BLUE}[Action]${NC} Copying icons from branding/hilal to source directory..."
+BRAND_DIR="$HILAL_REPO_ROOT/changes/browser/branding/hilal"
+if [ -d "$BRAND_DIR" ]; then
+    echo -e "${BLUE}[Action]${NC} Copying icons from changes/browser/branding/hilal to source directory..."
     mkdir -p "$LOCAL_SRC_DIR/branding/hilal"
-    cp "$HILAL_REPO_ROOT/branding/hilal"/default*.png "$LOCAL_SRC_DIR/branding/hilal/" 2>/dev/null || true
+    cp "$BRAND_DIR"/default*.png "$LOCAL_SRC_DIR/branding/hilal/" 2>/dev/null || true
 fi
 
 MANIFEST_PATH=$(find_manifest)
@@ -422,8 +423,11 @@ else
 fi
 NEXT_BUILD=$((CURRENT_BUILD + 1))
 
-sed -i "s/^build_count:.*/build_count: $NEXT_BUILD/" "$CONFIG_FILE" 2>/dev/null || \
-echo "build_count: $NEXT_BUILD" > "$CONFIG_FILE"
+if grep -q '^build_count:' "$CONFIG_FILE"; then
+    sed -i "s/^build_count:.*/build_count: $NEXT_BUILD/" "$CONFIG_FILE"
+else
+    echo "build_count: $NEXT_BUILD" >> "$CONFIG_FILE"
+fi
 
 if [ "$cmd" = "install" ]; then
     if flatpak info "$APP_ID" >/dev/null 2>&1; then

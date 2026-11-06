@@ -128,26 +128,30 @@ async function fetchGithubReleasesGraphQL(limit: number): Promise<ReleaseSummary
       `GitHub GraphQL returned no releases: ${JSON.stringify(data?.errors ?? data)}`
     );
   }
-  return nodes.map((node: any) =>
-    normalizeRelease({
-      id: node.databaseId,
-      tag_name: node.tagName,
-      name: node.name,
-      published_at: node.publishedAt || node.createdAt,
-      body: node.description,
-      html_url: node.url,
-      draft: node.isDraft,
-      prerelease: node.isPrerelease,
-      // GraphQL has no numeric asset ids; derive unique ones for UI keys.
-      assets: (node.releaseAssets?.nodes || []).map((asset: any, index: number) => ({
-        id: Number(node.databaseId || 0) * 1000 + index + 1,
-        name: asset.name,
-        size: asset.size,
-        browser_download_url: asset.downloadUrl,
-        content_type: asset.contentType,
-      })),
-    })
-  );
+  // Drafts must not appear on the public site; the REST endpoint never
+  // returns them, so keep the GraphQL path consistent.
+  return nodes
+    .filter((node: any) => !node.isDraft)
+    .map((node: any) =>
+      normalizeRelease({
+        id: node.databaseId,
+        tag_name: node.tagName,
+        name: node.name,
+        published_at: node.publishedAt || node.createdAt,
+        body: node.description,
+        html_url: node.url,
+        draft: node.isDraft,
+        prerelease: node.isPrerelease,
+        // GraphQL has no numeric asset ids; derive unique ones for UI keys.
+        assets: (node.releaseAssets?.nodes || []).map((asset: any, index: number) => ({
+          id: Number(node.databaseId || 0) * 1000 + index + 1,
+          name: asset.name,
+          size: asset.size,
+          browser_download_url: asset.downloadUrl,
+          content_type: asset.contentType,
+        })),
+      })
+    );
 }
 
 async function fetchGithubReleasesRest(limit: number): Promise<ReleaseSummary[]> {

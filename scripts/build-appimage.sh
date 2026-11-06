@@ -297,7 +297,11 @@ if [ -f "$APPIMAGE_PATH" ] ; then
 
   NEXT_BUILD=$((CURRENT_BUILD + 1))
 
-  sed -i "s/^build_count:.*/build_count: $NEXT_BUILD/" "$CONFIG_FILE" 2>/dev/null || echo "build_count: $NEXT_BUILD" > "$CONFIG_FILE"
+  if grep -q '^build_count:' "$CONFIG_FILE"; then
+    sed -i "s/^build_count:.*/build_count: $NEXT_BUILD/" "$CONFIG_FILE"
+  else
+    echo "build_count: $NEXT_BUILD" >> "$CONFIG_FILE"
+  fi
 
   rm -rf "$APPDIR"
 

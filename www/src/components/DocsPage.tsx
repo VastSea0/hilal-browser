@@ -87,8 +87,18 @@ function CodeBlock({
 }
 
 // Inline Markdown Parser
-function formatInline(text: string): string {
+function escapeHtml(text: string): string {
   return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// Content is escaped before inline formatting is applied so raw HTML cannot
+// pass through dangerouslySetInnerHTML.
+function formatInline(text: string): string {
+  return escapeHtml(text)
     .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-[var(--md-sys-color-on-surface)]">$1</strong>')
     .replace(
       /`([^`]+)`/g,
@@ -317,12 +327,28 @@ export default function DocsPage({ lang, initialSectionId }: DocsPageProps) {
     }
   };
 
+  // In-page anchors must not rely on bare "#" hashes: the app-wide hash
+  // router resolves unknown hashes to the home view, which would unmount
+  // the docs page mid-click.
+  const handleJumpSubsection = (subId: string) => {
+    window.history.pushState(null, "", `#docs/${activeSectionId}/${subId}`);
+    const el = document.getElementById(subId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedText(text);
-    setTimeout(() => {
-      setCopiedText(null);
-    }, 2200);
+    if (!navigator.clipboard?.writeText) return;
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopiedText(text);
+        setTimeout(() => {
+          setCopiedText(null);
+        }, 2200);
+      })
+      .catch(() => {});
   };
 
   const activeSection = useMemo(() => {
@@ -492,13 +518,14 @@ export default function DocsPage({ lang, initialSectionId }: DocsPageProps) {
                 </div>
                 <div className="space-y-0.5">
                   {activeSection.subsections.map((sub) => (
-                    <a
+                    <button
                       key={sub.id}
-                      href={`#${sub.id}`}
-                      className="block px-3 py-1.5 rounded-lg text-xs text-[var(--on-surface-variant)] hover:text-[var(--primary)] hover:bg-[var(--on-surface)]/5 transition-colors line-clamp-1 no-underline"
+                      type="button"
+                      onClick={() => handleJumpSubsection(sub.id)}
+                      className="block w-full px-3 py-1.5 rounded-lg text-left text-xs text-[var(--on-surface-variant)] hover:text-[var(--primary)] hover:bg-[var(--on-surface)]/5 transition-colors line-clamp-1 cursor-pointer"
                     >
                       {sub.title}
-                    </a>
+                    </button>
                   ))}
                 </div>
               </div>

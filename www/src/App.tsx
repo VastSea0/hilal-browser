@@ -154,15 +154,20 @@ export default function App() {
   }, [lang]);
 
   useEffect(() => {
+    let active = true;
     const loadData = async () => {
       try {
-        setReleases(await fetchGithubReleases());
+        const data = await fetchGithubReleases();
+        if (active) setReleases(data);
       } catch {
-        setReleases([]);
+        if (active) setReleases([]);
       }
     };
     loadData();
-  }, [lang]);
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
@@ -213,9 +218,12 @@ export default function App() {
 
   const handleCopyCommand = () => {
     const cmd = "git clone https://github.com/VastSea0/hilal-browser.git && cd hilal-browser && ./bin/hil setup";
-    navigator.clipboard.writeText(cmd);
-    setCopiedClone(true);
-    setTimeout(() => setCopiedClone(false), 2000);
+    navigator.clipboard?.writeText(cmd)
+      .then(() => {
+        setCopiedClone(true);
+        setTimeout(() => setCopiedClone(false), 2000);
+      })
+      .catch(() => {});
   };
 
   const isDark = theme === "dark";

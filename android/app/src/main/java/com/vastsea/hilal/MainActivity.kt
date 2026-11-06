@@ -18,12 +18,30 @@ import kotlinx.coroutines.launch
 import org.mozilla.geckoview.GeckoRuntimeSettings
 
 class MainActivity : ComponentActivity() {
-    private var permissionCallback: ((Boolean) -> Unit)? = null
+    // Queue of Gecko permission requests waiting for the system dialog.
+    // A single slot loses requests made while another dialog is pending.
+    private data class PermissionRequest(
+        val permissions: List<String>,
+        val callback: (Boolean) -> Unit,
+    )
+
+    private var permissionQueue: MutableList<PermissionRequest> = mutableListOf()
+
     private val permissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-            permissionCallback?.invoke(result.values.all { it })
-            permissionCallback = null
+            val current = permissionQueue.removeFirstOrNull()
+            current?.let {
+                it.callback(result.filterKeys { k -> it.permissions.contains(k) }.values.all { it })
+            }
+            launchNextPermissionRequest()
         }
+
+    private fun launchNextPermissionRequest() {
+        if (permissionQueue.isNotEmpty()) {
+            val request = permissionQueue[0]
+            permissionLauncher.launch(request.permissions.toTypedArray())
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splash = installSplashScreen()
@@ -34,8 +52,8 @@ class MainActivity : ComponentActivity() {
         splash.setKeepOnScreenCondition { !ready }
 
         AndroidPermissions.attach { permissions, callback ->
-            permissionCallback = callback
-            permissionLauncher.launch(permissions.toTypedArray())
+            permissionQueue.add(PermissionRequest(permissions, callback))
+            if (permissionQueue.size == 1) launchNextPermissionRequest()
         }
 
         lifecycleScope.launch {
@@ -95,6 +113,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         AndroidPermissions.detach()
+        // Gecko never gets an answer for requests the system dialog was about;
+        // reject them so the waiting pages do not hang forever.
+        val pending = permissionQueue
+        permissionQueue = mutableListOf()
+        pending.forEach { it.callback(false) }
         super.onDestroy()
     }
 

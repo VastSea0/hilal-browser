@@ -31,8 +31,14 @@ class SuggestionProvider(
         }
         return coroutineScope {
             val remote = async { if (includeRemote) remote(text, engine) else emptyList() }
-            val marks = withContext(Dispatchers.IO) { bookmarks.search(text) }
-            val visits = withContext(Dispatchers.IO) { history.search(text) }
+            // The LIKE clauses use ESCAPE '\'; escape the wildcard characters
+            // so user input is matched literally.
+            val likeText = text
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_")
+            val marks = withContext(Dispatchers.IO) { bookmarks.search(likeText) }
+            val visits = withContext(Dispatchers.IO) { history.search(likeText) }
             val pages = (marks.map { Suggestion.Page(it.url, it.title, true) } +
                 visits.map { Suggestion.Page(it.url, it.title, false) })
                 .distinctBy { it.url }
