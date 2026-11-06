@@ -507,9 +507,10 @@ fn apply(repo_root: &Path, engine_path: &Path, force: bool, dry_run: bool) -> Re
             if !dry_run {
                 if src.is_dir() {
                     fs::create_dir_all(&dst)?;
-                    // Mirror instead of plain copy so files that were deleted
-                    // from the overlay do not survive in engine/.
-                    mirror_dir(&src, &dst)?;
+                    // Plain copy: overlays may live inside upstream folders
+                    // (e.g. the updater certs), so mirroring would delete
+                    // Firefox's own files from engine/.
+                    copy_dir_recursive(&src, &dst)?;
                 } else {
                     if let Some(parent) = dst.parent() {
                         fs::create_dir_all(parent)?;
@@ -571,25 +572,6 @@ fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<()> {
             copy_dir_recursive(&path, &target)?;
         } else {
             fs::copy(&path, &target)?;
-        }
-    }
-    Ok(())
-}
-
-// Copy everything from src into dst, then remove entries that exist only in
-// dst. Turns the copy into a true "sync" so deletions in the source tree are
-// reflected in the destination instead of resurrected on the next sync.
-fn mirror_dir(src: &Path, dst: &Path) -> Result<()> {
-    copy_dir_recursive(src, dst)?;
-    for entry in fs::read_dir(dst)? {
-        let entry = entry?;
-        let path = entry.path();
-        if !src.join(entry.file_name()).exists() {
-            if path.is_dir() {
-                fs::remove_dir_all(&path)?;
-            } else {
-                fs::remove_file(&path)?;
-            }
         }
     }
     Ok(())
@@ -987,9 +969,9 @@ fn refresh(repo_root: &Path, engine_path: &Path) -> Result<()> {
             if dst.exists() {
                 if dst.is_dir() {
                     fs::create_dir_all(&src)?;
-                    // Mirror so files removed from the overlay in engine/
-                    // are also removed from changes/.
-                    mirror_dir(&dst, &src)?;
+                    // Same reason as in apply(): never delete files that are
+                    // not part of the overlay.
+                    copy_dir_recursive(&dst, &src)?;
                 } else {
                     if let Some(parent) = src.parent() {
                         fs::create_dir_all(parent)?;
