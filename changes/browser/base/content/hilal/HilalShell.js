@@ -296,7 +296,15 @@
       // Lets Boosts that follow the workspace color restyle their pages.
       Services.obs.notifyObservers(window, "hilal-accent-changed");
       try {
-        Services.ppmm.sharedData.set("hilal:activeTheme", this.getThemeData());
+        // Content-process pages such as Passwords apply the Material tokens.
+        const tokens = {};
+        const style = document.documentElement.style;
+        for (let i = 0; i < style.length; i++) {
+          if (/^--(?!md-sys-)[a-z-]+$/.test(style[i])) {
+            tokens[style[i]] = style.getPropertyValue(style[i]);
+          }
+        }
+        Services.ppmm.sharedData.set("hilal:activeTheme", { ...this.getThemeData(), tokens });
         Services.ppmm.sharedData.flush();
       } catch (e) {}
     },

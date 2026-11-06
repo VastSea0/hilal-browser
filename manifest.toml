@@ -183,5 +183,9 @@ path   = "toolkit/themes/shared/hilal-in-content.css"
 reason = "Material 3 Expressive in-content pages"
 
 [[patches]]
+path   = "browser/components/hilal-aboutlogins-theme.patch"
+reason = "Passwords page follows the browser's accent colors"
+
+[[patches]]
 path   = "toolkit/themes/shared/hilal-shape-cookie9.svg"
 reason = "Shape behind the error page illustration"
