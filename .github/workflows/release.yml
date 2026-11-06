@@ -124,8 +124,12 @@ jobs:
           # Not marked as a pre-release even for alphas: the update server
           # skips pre-releases, which is how the nightly stays out of updates.
           if ! gh release view "$TAG" >/dev/null 2>&1; then
+            # Compare with the previous desktop release, not whichever tag
+            # (android-ota, mobile-v*) happens to be newest.
+            prev="$(gh release list -L 50 --json tagName -q '.[].tagName' | grep -E '^v[0-9]' | grep -vx "$TAG" | head -n1 || true)"
             gh release create "$TAG" --draft --title "Hilal Browser $TAG" \
-              --notes-file .github/release-notes-header.md --generate-notes
+              --notes-file .github/release-notes-header.md --generate-notes \
+              ${prev:+--notes-start-tag "$prev"}
           fi
           gh release upload "$TAG" dist/* --clobber
           gh release edit "$TAG" --draft=false
