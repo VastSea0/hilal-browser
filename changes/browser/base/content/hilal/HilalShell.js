@@ -760,7 +760,7 @@
       // Suggestions Dropdown Container (M3 Search View Specification)
       const suggestionsDropdown = document.createElement("div");
       suggestionsDropdown.id = "hilal-search-dropdown";
-      suggestionsDropdown.className = "vertical round medium-elevate surface-container-high";
+      suggestionsDropdown.setAttribute("role", "listbox");
       urlContainer.appendChild(suggestionsDropdown);
 
       topbar.appendChild(urlContainer);
@@ -1003,19 +1003,13 @@
     updateModeButton() {
       const btn = document.getElementById("hilal-layout-mode-btn");
       if (!btn) return;
-
-      if (this.tabMode === "vertical") {
-        btn.title = "Tab Layout: Vertical Only (Click to switch)";
-        btn.innerHTML = this.MODE_ICONS.vertical;
-      } else if (this.tabMode === "dual") {
-        btn.title =
-          "Tab Layout: Dual Mode (Safari Style: Horizontal & Vertical, Click to switch)";
-        btn.innerHTML = this.MODE_ICONS.dual;
-      } else {
-        btn.title =
-          "Tab Layout: Horizontal Only (Chrome Style, Click to switch)";
-        btn.innerHTML = this.MODE_ICONS.horizontal;
-      }
+      const mode = this.MODE_ICONS[this.tabMode] ? this.tabMode : "horizontal";
+      btn.innerHTML = this.MODE_ICONS[mode];
+      document.l10n.formatValue(`hilal-shell-layout-${mode}`).then(label => {
+        if (label) {
+          btn.title = label;
+        }
+      });
     },
 
     showModeContextMenu(anchor, event) {
@@ -1316,9 +1310,7 @@
       items.forEach((item, index) => {
         const row = document.createElement("div");
         const isSelected = index === this._selectedSuggestionIndex;
-        row.className = `hilal-search-item row wave round tiny-space ${
-          isSelected ? "secondary-container selected" : ""
-        }`;
+        row.className = `hilal-search-item${isSelected ? " selected" : ""}`;
         row.dataset.index = index;
 
         // Icon container
@@ -1356,26 +1348,26 @@
           img.src = favSrc;
           img.onerror = () => {
             img.remove();
-            iconDiv.innerHTML = `<i class="tiny">${iconName}</i>`;
+            iconDiv.innerHTML = `<i>${iconName}</i>`;
           };
           iconDiv.appendChild(img);
         } else {
-          iconDiv.innerHTML = `<i class="tiny">${iconName}</i>`;
+          iconDiv.innerHTML = `<i>${iconName}</i>`;
         }
         row.appendChild(iconDiv);
 
         // Content
         const contentDiv = document.createElement("div");
-        contentDiv.className = "max";
+        contentDiv.className = "hilal-search-item-text";
 
         const labelSpan = document.createElement("div");
-        labelSpan.className = "hilal-search-item-label bold";
+        labelSpan.className = "hilal-search-item-label";
         labelSpan.textContent = item.label;
         contentDiv.appendChild(labelSpan);
 
         if (item.sub) {
           const subSpan = document.createElement("div");
-          subSpan.className = "hilal-search-item-sub small-text opacity";
+          subSpan.className = "hilal-search-item-sub";
           if (typeof item.sub === "object") {
             document.l10n.setAttributes(subSpan, item.sub.id, item.sub.args);
           } else {
@@ -1389,26 +1381,26 @@
         // Trailing Beer CSS chip or icon
         if (item.type === "tab") {
           const trail = document.createElement("span");
-          trail.className = "chip small primary";
+          trail.className = "hilal-search-chip";
           trail.setAttribute("data-l10n-id", "hilal-shell-switch-to-tab");
           trail.textContent = "Switch to tab";
           row.appendChild(trail);
         } else if (item.type === "bang") {
           const trail = document.createElement("span");
-          trail.className = "chip small tertiary";
+          trail.className = "hilal-search-chip";
           trail.setAttribute("data-l10n-id", "hilal-shell-bang");
           trail.textContent = "Bang";
           row.appendChild(trail);
         } else if (item.type === "bang_hint") {
           const trail = document.createElement("span");
-          trail.className = "chip small tertiary";
+          trail.className = "hilal-search-chip";
           trail.setAttribute("data-l10n-id", "hilal-shell-shortcut");
           trail.textContent = "Shortcut";
           row.appendChild(trail);
         } else if (item.type === "search" || item.type === "suggestion") {
           const trail = document.createElement("i");
-          trail.className = "small opacity";
-          trail.textContent = "call_made";
+          trail.className = "hilal-search-trail";
+          trail.textContent = "north_west";
           row.appendChild(trail);
         }
 
@@ -1438,7 +1430,6 @@
       items.forEach((item, i) => {
         const isSel = i === index;
         item.classList.toggle("selected", isSel);
-        item.classList.toggle("secondary-container", isSel);
         if (isSel) {
           item.scrollIntoView({ block: "nearest" });
         }
