@@ -2267,7 +2267,7 @@
       );
       const rect = anchor.getBoundingClientRect();
       panel.style.top = `${rect.bottom + 8}px`;
-      panel.style.left = `${Math.max(8, Math.min(rect.left - 160, window.innerWidth - 376))}px`;
+      panel.style.left = `${Math.max(8, Math.min(rect.left - 160, window.innerWidth - 320))}px`;
       document.documentElement.appendChild(panel);
 
       const close = e => {

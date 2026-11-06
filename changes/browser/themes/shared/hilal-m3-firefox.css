@@ -118,48 +118,264 @@
     --arrowpanel-border-radius: 24px;
   }
 
-  /* Rows in the app menu and other panel subviews */
-  .subviewbutton,
-  .panel-subview-body > .subviewbutton,
-  .PanelUI-subView .subviewbutton {
-    border-radius: 12px !important;
+  /* ------------------------------------------------------------------
+   * Panels: Material 3 Expressive grouped lists, like the color panel.
+   * Each run of rows between separators is a group of tonal cards: the
+   * group's outer corners are large, the inner ones small, with a 2px gap.
+   * ---------------------------------------------------------------- */
+  panel[type="arrow"] {
+    --panel-padding: 6px;
+    --panel-border-radius: 24px;
+  }
+
+  .panel-subview-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0 !important;
+  }
+
+  .panel-subview-body > :is(.subviewbutton, toolbaritem, .toolbaritem-combined-buttons):where(:not(#appMenu-menu-message)) {
+    margin: 0 !important;
     min-height: 40px;
+    padding-inline: 14px !important;
+    border-radius: 6px !important;
+    background-color: var(--surface-container-high) !important;
+    color: var(--on-surface) !important;
+    font-size: 14px;
+    font-weight: 500;
   }
 
-  .subviewbutton:not([disabled]):hover {
-    background-color: color-mix(in srgb, var(--on-surface) 8%, transparent) !important;
+  /* Hidden rows (Firefox keeps many) are skipped when finding a group's
+     first and last visible row. */
+  .panel-subview-body > :is(.subviewbutton, toolbaritem, .toolbaritem-combined-buttons):is(:first-child, toolbarseparator + *, toolbarseparator + [hidden] + *, toolbarseparator + [hidden] + [hidden] + *, toolbarseparator + [hidden] + [hidden] + [hidden] + *, #appMenu-fxa-status2) {
+    border-start-start-radius: 18px !important;
+    border-start-end-radius: 18px !important;
   }
 
-  .subviewbutton:not([disabled]):hover:active,
-  .subviewbutton[open] {
-    background-color: color-mix(in srgb, var(--on-surface) 12%, transparent) !important;
+  .panel-subview-body > :is(.subviewbutton, toolbaritem, .toolbaritem-combined-buttons):is(:last-child, :has(+ toolbarseparator), :has(+ [hidden] + toolbarseparator), :has(+ [hidden] + [hidden] + toolbarseparator), :has(+ [hidden] + [hidden] + [hidden] + toolbarseparator), #appMenu-fxa-status2) {
+    border-end-start-radius: 18px !important;
+    border-end-end-radius: 18px !important;
   }
 
+  .panel-subview-body > .subviewbutton:not([disabled]):hover,
+  .panel-subview-body > .subviewbutton[open] {
+    background-color: color-mix(in srgb, var(--on-surface) 8%, var(--surface-container-high)) !important;
+  }
+
+  .panel-subview-body > .subviewbutton:not([disabled]):hover:active {
+    background-color: color-mix(in srgb, var(--on-surface) 12%, var(--surface-container-high)) !important;
+  }
+
+  .subviewbutton > .toolbarbutton-icon {
+    fill: var(--on-surface-variant) !important;
+    -moz-context-properties: fill, fill-opacity;
+  }
+
+  /* Keyboard shortcuts and arrows read as secondary text */
+  .subviewbutton :is(.toolbarbutton-text + .menu-accel-container, .menu-accel, [shortcut]::after),
+  .subviewbutton > .subviewbutton-iconic-arrow,
+  .subviewbutton-nav::after {
+    color: var(--on-surface-variant) !important;
+    fill: var(--on-surface-variant) !important;
+  }
+
+  /* Separators become the gap between groups */
+  .panel-subview-body > toolbarseparator {
+    appearance: none !important;
+    min-height: 0 !important;
+    height: 6px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-image: none !important;
+    background: none !important;
+    visibility: hidden;
+  }
+
+  /* Firefox's message slot at the top of the app menu stays out of the
+     card layout; it is empty unless Firefox shows a message there. */
+  #appMenu-menu-message:empty,
+  #appMenu-menu-message:not(:has(> :not([hidden]))) {
+    display: none !important;
+  }
+
+  /* App menu: account row */
+  #appMenu-fxa-status2 {
+    min-height: 52px;
+    gap: 12px;
+    align-items: center;
+  }
+
+  #appMenu-fxa-status2 > #appMenu-fxa-text {
+    flex: 1;
+    text-align: start;
+    margin-inline-start: 4px !important;
+    padding-inline-start: 24px !important;
+    background-position: left center !important;
+  }
+
+  #appMenu-fxa-label2 {
+    border-radius: 9999px !important;
+  }
+
+  /* App menu: zoom as M3 icon buttons around a tonal value pill */
+  #appMenu-zoom-controls {
+    gap: 4px;
+  }
+
+  #appMenu-zoom-controls > toolbarbutton {
+    border-radius: 9999px !important;
+    min-width: 32px;
+    min-height: 32px;
+    margin: 0 !important;
+  }
+
+
+  #appMenu-zoom-controls > toolbarbutton:not(#appMenu-zoomReset-button2) {
+    background-color: var(--surface-container-highest) !important;
+  }
+
+  #appMenu-zoomReset-button2 {
+    background-color: var(--secondary-container) !important;
+    color: var(--on-secondary-container) !important;
+    padding-inline: 12px !important;
+    font-weight: 600;
+  }
+
+  /* Subview headers ("Bookmarks", "History", ...) */
+  .panel-header {
+    min-height: 48px;
+    padding: 4px 8px !important;
+  }
+
+  .panel-header > h1 {
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .panel-header > .subviewbutton-back {
+    border-radius: 9999px !important;
+  }
+
+  .panel-header + toolbarseparator {
+    display: none;
+  }
+
+  /* ------------------------------------------------------------------
+   * Shared panel parts: headers, content cards, dropdowns and footer
+   * buttons. The translations panel, permission prompts, site information,
+   * downloads and extensions panels are all built from these.
+   * ---------------------------------------------------------------- */
+  panel[type="arrow"] .panel-header > h1,
+  panel[type="arrow"] .panel-header .translations-panel-header-wrapper,
+  .popup-notification-description {
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    color: var(--on-surface) !important;
+  }
+
+  panel[type="arrow"] .panel-header {
+    padding: 10px 10px 6px 14px !important;
+  }
+
+  .translations-panel-content {
+    margin: 0 !important;
+    padding: 14px !important;
+    gap: 6px;
+    border-radius: 18px;
+    background-color: var(--surface-container-high);
+    color: var(--on-surface-variant);
+  }
+
+  .translations-panel-content :is(label, .translations-panel-label) {
+    color: var(--on-surface) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    margin-block: 6px 2px !important;
+  }
+
+  /* Dropdowns in panels: filled tonal fields */
+  panel[type="arrow"] menulist {
+    appearance: none !important;
+    min-height: 44px !important;
+    margin-inline: 0 !important;
+    padding-inline: 16px 12px !important;
+    border: none !important;
+    border-radius: 14px !important;
+    background-color: var(--surface-container-highest) !important;
+    color: var(--on-surface) !important;
+    font-weight: 500;
+  }
+
+  panel[type="arrow"] menulist:hover {
+    background-color: color-mix(in srgb, var(--on-surface) 8%, var(--surface-container-highest)) !important;
+  }
+
+  panel[type="arrow"] menulist[open] {
+    box-shadow: inset 0 0 0 2px var(--primary) !important;
+  }
+
+  /* Footer and prompt buttons: pills; the default action is filled */
+  :is(.panel-footer, .popup-notification-button-container) {
+    gap: 8px !important;
+    padding: 12px 6px 6px !important;
+    margin: 0 !important;
+    background: none !important;
+    border: none !important;
+  }
+
+  :is(.footer-button, .popup-notification-primary-button, .popup-notification-secondary-button, .popup-notification-dropmarker) {
+    appearance: none !important;
+    min-height: 40px !important;
+    margin: 0 !important;
+    padding-inline: 20px !important;
+    border: none !important;
+    border-radius: 9999px !important;
+    background-color: var(--secondary-container) !important;
+    color: var(--on-secondary-container) !important;
+    font-weight: 500 !important;
+  }
+
+  :is(.footer-button, .popup-notification-secondary-button):not([disabled]):hover {
+    background-color: color-mix(in srgb, var(--on-secondary-container) 8%, var(--secondary-container)) !important;
+  }
+
+  :is(.footer-button[default], .popup-notification-primary-button) {
+    background-color: var(--primary) !important;
+    color: var(--on-primary) !important;
+  }
+
+  :is(.footer-button[default], .popup-notification-primary-button):not([disabled]):hover {
+    background-color: color-mix(in srgb, var(--on-primary) 8%, var(--primary)) !important;
+  }
+
+  /* Gear and info buttons in panel headers */
+  :is(.panel-info-button, .translations-panel-settings-gear-icon, .subviewbutton-back) {
+    border-radius: 9999px !important;
+  }
+
+  /* Permission prompts and other doorhangers */
+  popupnotification {
+    padding: 8px !important;
+  }
+
+  popupnotificationcontent {
+    padding: 12px 14px !important;
+    border-radius: 18px;
+    background-color: var(--surface-container-high);
+  }
+
+  /* Firefox's own separators elsewhere in panels and menus */
   toolbarseparator,
   menuseparator {
     border-color: var(--outline-variant) !important;
     border-image: none !important;
   }
 
-  /* Headers of panel subviews ("Bookmarks", "History", ...) */
-  .panel-header > h1 {
-    font-weight: 600;
-  }
-
   /* Text fields in panels and dialogs */
   :root :is(input[type="text"], input[type="search"], input[type="url"], input:not([type])) {
     background-color: var(--surface-container-highest);
     color: var(--on-surface);
-  }
-
-  /* Firefox account row at the top of the app menu */
-  #appMenu-fxa-label2,
-  #appMenu-fxa-status2 {
-    border-radius: 16px !important;
-  }
-
-  /* The gradient line under the account row is Firefox branding */
-  #appMenu-fxa-separator {
-    border-image: none !important;
   }
 }
