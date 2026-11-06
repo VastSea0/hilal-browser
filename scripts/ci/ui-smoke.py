@@ -127,6 +127,7 @@ return {
   tabMode: root.getAttribute("data-tab-mode"),
   window: { w: window.innerWidth, h: window.innerHeight },
   shell: !!window.gHilalShell,
+  shellErrors: window.gHilalShell?.startupErrors || [],
   headerShell: rect(doc.getElementById("hilal-header-shell")),
   // Firefox's own chrome; with the shell running neither may take up room.
   nativeNavBar: rect(doc.getElementById("nav-bar")),
@@ -285,6 +286,7 @@ def main():
             hidden = lambda r: not r or r["w"] == 0 or r["h"] == 0 or r["display"] == "none" or r["visibility"] != "visible"
             check(f"{label}: Firefox's own toolbar hidden", hidden(nav), nav)
             check(f"{label}: Firefox's own sidebar hidden", hidden(side), side)
+            check(f"{label}: shell started without errors", not s["shellErrors"], s["shellErrors"])
 
         # Go through the welcome screen the way a user does: Start, then Next
         # on every step and Finish, keeping the default choices.

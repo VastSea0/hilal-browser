@@ -347,6 +347,7 @@
         return;
       }
       this.initialized = true;
+      this.startupErrors = [];
 
       // Read saved tab mode preference
       if (typeof Services !== "undefined") {
@@ -380,6 +381,7 @@
         try {
           step();
         } catch (e) {
+          this.startupErrors.push(`${step}: ${e}`);
           console.error("Hilal shell: startup step failed", step.toString(), e);
         }
       }
