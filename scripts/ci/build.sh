@@ -50,7 +50,11 @@ case "$target" in
     ;;
   windows)
     find "$objdir/dist" -maxdepth 1 -type f -name '*.win64.zip' -exec cp {} "$repo/dist/" \;
-    find "$objdir/dist/install/sea" -maxdepth 1 -type f -name '*.installer.exe' -exec cp {} "$repo/dist/" \; 2>/dev/null || true
+    # make package writes the installer next to the zip (dist/install/sea in
+    # Mozilla's automation). A release without it is broken, so fail here.
+    installer="$(find "$objdir/dist" -maxdepth 3 -type f -name '*.installer.exe' | head -n1)"
+    [ -n "$installer" ] || { echo "No Windows installer was built." >&2; exit 1; }
+    cp "$installer" "$repo/dist/"
     ;;
 esac
 

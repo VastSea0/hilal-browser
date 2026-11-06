@@ -197,6 +197,33 @@ jobs:
             python3 scripts/ci/ui-smoke.py --binary app/firefox/firefox \
               --pref browser.tabs.inTitlebar=1 --out ui-smoke
 
+      - name: Build the AppImage
+        if: matrix.session == 'x11'
+        run: |
+          mkdir -p .appimagetool dist
+          curl -fsSL -o .appimagetool/appimagetool \
+            https://github.com/AppImage/appimagetool/releases/download/1.9.0/appimagetool-x86_64.AppImage
+          chmod +x .appimagetool/appimagetool
+          cp package/*.linux-*.tar.* dist/
+          HILAL_FIREFOX_SRC=/nonexistent APPIMAGE_EXTRACT_AND_RUN=1 scripts/build-appimage.sh build
+          mkdir appimage && mv dist/*.AppImage appimage/Hilal-x86_64.AppImage
+
+      # Runs from the extracted image: runners have no FUSE. A restart would
+      # outlive the extracted copy, so that part is left to the tarball runs.
+      - name: UI smoke (AppImage)
+        if: matrix.session == 'x11'
+        run: |
+          APPIMAGE_EXTRACT_AND_RUN=1 dbus-run-session -- xvfb-run -a -s "-screen 0 1600x1000x24" \
+            python3 scripts/ci/ui-smoke.py --binary appimage/Hilal-x86_64.AppImage \
+              --no-restart --out ui-smoke-appimage
+
+      - uses: actions/upload-artifact@v7
+        if: matrix.session == 'x11'
+        with:
+          name: package-appimage
+          path: appimage/
+          retention-days: 14
+
       - name: UI smoke (Wayland)
         if: matrix.session == 'wayland'
         run: |
@@ -208,13 +235,15 @@ jobs:
 
       - name: Summary
         if: always()
-        run: cat ui-smoke/summary.md >> "$GITHUB_STEP_SUMMARY" || true
+        run: cat ui-smoke/summary.md ui-smoke-appimage/summary.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
 
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ui-smoke-linux-${{ matrix.session }}
-          path: ui-smoke/
+          path: |
+            ui-smoke/
+            ui-smoke-appimage/
           retention-days: 14
 
   # Installs the latest release and lets its own updater move it to this
@@ -445,20 +474,38 @@ jobs:
           Expand-Archive $zip.FullName -DestinationPath app
           Get-ChildItem app
 
-      - name: UI smoke
+      - name: UI smoke (portable zip)
         shell: pwsh
         run: python scripts/ci/ui-smoke.py --binary app/firefox/firefox.exe --out ui-smoke
+
+      # Most Windows users run the installer and use Windows in Turkish, so
+      # the installed copy is tested that way.
+      - name: Install with the setup program
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem package/*.installer.exe | Select-Object -First 1
+          if (-not $setup) { throw "The build has no installer." }
+          $dir = Join-Path $env:RUNNER_TEMP "Hilal"
+          Start-Process -Wait -FilePath $setup.FullName -ArgumentList "/S", "/InstallDirectoryPath=$dir"
+          if (-not (Test-Path "$dir/firefox.exe")) { throw "The installer did not install Hilal to $dir." }
+          Get-ChildItem $dir | Select-Object -First 20
+
+      - name: UI smoke (installed, Turkish)
+        shell: pwsh
+        run: python scripts/ci/ui-smoke.py --binary "$env:RUNNER_TEMP/Hilal/firefox.exe" --locale tr --out ui-smoke-installed
 
       - name: Summary
         if: always()
         shell: bash
-        run: cat ui-smoke/summary.md >> "$GITHUB_STEP_SUMMARY" || true
+        run: cat ui-smoke/summary.md ui-smoke-installed/summary.md >> "$GITHUB_STEP_SUMMARY" || true
 
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ui-smoke-windows
-          path: ui-smoke/
+          path: |
+            ui-smoke/
+            ui-smoke-installed/
           retention-days: 14
 
   # A rolling pre-release friends and testers can download without a GitHub
@@ -487,6 +534,7 @@ jobs:
           mkdir -p out
           if [ "$LINUX_OK" = true ]; then
             cp artifacts/package-linux/*.linux-*.tar.* out/Hilal-nightly-linux-x86_64.tar.xz
+            cp artifacts/package-appimage/Hilal-x86_64.AppImage out/Hilal-nightly-x86_64.AppImage 2>/dev/null || true
           fi
           if [ "$MACOS_OK" = true ]; then
             cp artifacts/package-macos-signed/*.dmg out/Hilal-nightly-macos-arm64.dmg

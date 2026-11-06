@@ -128,6 +128,10 @@ return {
   window: { w: window.innerWidth, h: window.innerHeight },
   shell: !!window.gHilalShell,
   headerShell: rect(doc.getElementById("hilal-header-shell")),
+  // Firefox's own chrome; with the shell running neither may take up room.
+  nativeNavBar: rect(doc.getElementById("nav-bar")),
+  nativeSidebar: rect(doc.querySelector("sidebar-main")),
+  locale: Services.locale.appLocaleAsBCP47,
   topbar: rect(doc.getElementById("hilal-topbar")),
   urlbar: rect(doc.querySelector("#hilal-header-shell input, #hilal-url-input")),
   welcome: !!doc.getElementById("hilal-welcome-overlay"),
@@ -200,6 +204,8 @@ def main():
                         help="extra pref for the test profile, e.g. browser.tabs.inTitlebar=1")
     parser.add_argument("--expect-updates", choices=["hilal", "disabled", "any"], default="hilal",
                         help="hilal: updates come from Hilal's server; disabled: Flatpak and other package managers")
+    parser.add_argument("--locale", help="app locale to run in, e.g. tr")
+    parser.add_argument("--no-restart", action="store_true", help="skip the restart check")
     parser.add_argument("--require-safebrowsing", action="store_true",
                         help="fail when the build has no Google Safe Browsing key")
     args = parser.parse_args()
@@ -209,6 +215,8 @@ def main():
     profile = Path(tempfile.mkdtemp(prefix="hilal-smoke-"))
     port = free_port()
     prefs = dict(USER_PREFS, **{"marionette.port": port})
+    if args.locale:
+        prefs["intl.locale.requested"] = args.locale
     for item in args.pref:
         name, value = item.split("=", 1)
         prefs[name] = json.loads(value)
@@ -267,11 +275,31 @@ def main():
                 check(f"{label}: {name} button inside the top of the window", inside, r)
 
         check_window_buttons("welcome", state)
+        if args.locale:
+            check(f"running in {args.locale}", state["locale"] == args.locale, state["locale"])
 
-        # Leave the welcome screen the way a user would.
-        m.script("document.querySelector('#hilal-welcome-overlay .hw-link')?.click()")
-        check("welcome screen closes", wait_for(m, "return !document.getElementById('hilal-welcome-overlay')", 10))
-        time.sleep(1)
+        def check_shell(label, s):
+            """The Hilal shell is what users see, not Firefox's own chrome."""
+            hs, nav, side = s["headerShell"], s["nativeNavBar"], s["nativeSidebar"]
+            check(f"{label}: Hilal top bar shown", bool(hs and hs["w"] > 200 and hs["h"] > 0 and hs["display"] != "none"), hs)
+            hidden = lambda r: not r or r["w"] == 0 or r["h"] == 0 or r["display"] == "none" or r["visibility"] != "visible"
+            check(f"{label}: Firefox's own toolbar hidden", hidden(nav), nav)
+            check(f"{label}: Firefox's own sidebar hidden", hidden(side), side)
+
+        # Go through the welcome screen the way a user does: Start, then Next
+        # on every step and Finish, keeping the default choices.
+        for step in range(6):
+            if not m.script("return !!document.getElementById('hilal-welcome-overlay')"):
+                break
+            m.screenshot(out / f"01-welcome-{step}.png")
+            m.script("document.querySelector('#hilal-welcome-overlay .hw-primary')?.click()")
+            time.sleep(1)
+        check("welcome screen finishes", wait_for(m, "return !document.getElementById('hilal-welcome-overlay')", 15))
+        time.sleep(2)
+        state = m.script(STATE_JS)
+        report["after_welcome"] = state
+        m.screenshot(out / "01-after-welcome.png")
+        check_shell("after welcome", state)
 
         for mode in ("vertical", "dual", "horizontal"):
             m.script("gHilalShell.setTabMode(arguments[0], false)", [mode])
@@ -338,7 +366,30 @@ def main():
         check("Extreme privacy turns fingerprinting resistance on", rfp["extreme"] is True, rfp)
         check("Standard privacy leaves it off", rfp["standard"] is False, rfp)
 
+        # Errors from the first run; the restarted process has its own console.
         errors = m.script(ERRORS_JS)
+
+        # Users start the browser again with the same profile; the shell has to
+        # come back then too.
+        if not args.no_restart:
+            try:
+                m.send("Marionette:Quit", {"flags": ["eRestart", "eAttemptQuit"]})
+            except MarionetteError:
+                pass
+            m = Marionette(port, timeout=args.timeout)
+            m.send("WebDriver:NewSession", {"capabilities": {"alwaysMatch": {"acceptInsecureCerts": True}}})
+            m.send("WebDriver:SetTimeouts", {"script": 60000})
+            m.context("chrome")
+            check("browser restarts", wait_for(m, "return typeof gBrowser != 'undefined' && !!gBrowser.selectedBrowser", 60))
+            wait_for(m, "return !!document.getElementById('hilal-header-shell')", 30)
+            time.sleep(3)
+            state = m.script(STATE_JS)
+            report["after_restart"] = state
+            m.screenshot(out / "05-after-restart.png")
+            check("no welcome screen after restart", not state["welcome"])
+            check_shell("after restart", state)
+            errors += m.script(ERRORS_JS)
+
         report["chrome_errors"] = errors
         hilal_errors = [e for e in errors if "hilal" in e["source"].lower()]
         check("no errors from Hilal chrome code", not hilal_errors, hilal_errors[:10])
