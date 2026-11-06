@@ -360,18 +360,29 @@
         }
       }
 
-      this.ensureTabContextMenuReady();
-      this.createHeaderShell();
-      this.createSidebar();
-      this.setupUrlSearchAndSuggestions();
-      this.installPopupAnchorFallback();
-      this.mountNativeToolbarElements();
-      this.bindBrowserEvents();
-      this.hookWorkspaces();
-      this.setTabMode(this.tabMode, false);
-      this.renderWorkspaces();
-      this.renderTabs();
-      this.syncUrl();
+      // One failing step must not leave the user with Firefox's own chrome
+      // and no Hilal shell, so each step runs and reports on its own.
+      const steps = [
+        () => this.ensureTabContextMenuReady(),
+        () => this.createHeaderShell(),
+        () => this.createSidebar(),
+        () => this.setupUrlSearchAndSuggestions(),
+        () => this.installPopupAnchorFallback(),
+        () => this.mountNativeToolbarElements(),
+        () => this.bindBrowserEvents(),
+        () => this.hookWorkspaces(),
+        () => this.setTabMode(this.tabMode, false),
+        () => this.renderWorkspaces(),
+        () => this.renderTabs(),
+        () => this.syncUrl(),
+      ];
+      for (const step of steps) {
+        try {
+          step();
+        } catch (e) {
+          console.error("Hilal shell: startup step failed", step.toString(), e);
+        }
+      }
 
       // Firefox focuses its own urlbar for new windows, new tabs and menu
       // commands, but it lives in the hidden toolbar; send that focus to the
