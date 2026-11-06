@@ -1947,3 +1947,256 @@ browser[type="content"],
   opacity: 1;
   transform: translate(-50%, 0);
 }
+
+/* Color panel (palette button): Material 3 Expressive grouped cards */
+#hilal-color-panel {
+  position: fixed;
+  z-index: 100003;
+  width: 360px;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 28px;
+  background: var(--surface-container);
+  color: var(--on-surface);
+  box-shadow: var(--md-sys-elevation-3);
+  font-family: var(--font-sans);
+  animation: hcp-in 250ms var(--md-sys-motion-easing-emphasized);
+}
+
+@keyframes hcp-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+}
+
+#hilal-color-panel i {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+}
+
+#hilal-color-panel .hcp-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--surface-container-high);
+}
+
+#hilal-color-panel .hcp-card:first-child {
+  border-start-start-radius: 20px;
+  border-start-end-radius: 20px;
+}
+
+#hilal-color-panel .hcp-card:last-child {
+  border-end-start-radius: 20px;
+  border-end-end-radius: 20px;
+}
+
+#hilal-color-panel .hcp-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--on-surface);
+}
+
+#hilal-color-panel .hcp-swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  justify-items: center;
+}
+
+#hilal-color-panel .hcp-swatch {
+  appearance: none;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--hcp-swatch);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-radius 200ms var(--md-sys-motion-easing-emphasized),
+              transform 200ms var(--md-sys-motion-easing-emphasized);
+}
+
+#hilal-color-panel .hcp-swatch:hover {
+  transform: scale(1.06);
+}
+
+/* The selected color morphs into a rounded square, as M3 Expressive does */
+#hilal-color-panel .hcp-swatch[aria-checked="true"] {
+  border-radius: 16px;
+  box-shadow: 0 0 0 3px var(--surface-container-high), 0 0 0 5px var(--on-surface);
+}
+
+#hilal-color-panel .hcp-swatch > i {
+  opacity: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+#hilal-color-panel .hcp-swatch[aria-checked="true"] > i {
+  opacity: 1;
+}
+
+#hilal-color-panel .hcp-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--on-surface-variant);
+}
+
+#hilal-color-panel .hcp-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+#hilal-color-panel .hcp-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#hilal-color-panel .hcp-rows[hidden] {
+  display: none;
+}
+
+#hilal-color-panel .hcp-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 56px;
+  padding: 8px 4px;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+#hilal-color-panel .hcp-row-icon {
+  color: var(--on-surface-variant);
+}
+
+#hilal-color-panel .hcp-row-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+#hilal-color-panel .hcp-row-title {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+#hilal-color-panel .hcp-row-desc {
+  font-size: 13px;
+  color: var(--on-surface-variant);
+}
+
+/* M3 switch */
+#hilal-color-panel .hcp-switch {
+  appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 52px;
+  height: 32px;
+  margin: 0;
+  border: 2px solid var(--outline);
+  border-radius: 16px;
+  background: var(--surface-container-highest);
+  cursor: pointer;
+  transition: background-color 200ms, border-color 200ms;
+}
+
+#hilal-color-panel .hcp-switch::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--outline);
+  transform: translateY(-50%);
+  transition: left 250ms var(--md-sys-motion-easing-emphasized),
+              width 250ms var(--md-sys-motion-easing-emphasized),
+              height 250ms var(--md-sys-motion-easing-emphasized),
+              background-color 200ms;
+}
+
+#hilal-color-panel .hcp-switch:checked {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+#hilal-color-panel .hcp-switch:checked::before {
+  left: 22px;
+  width: 24px;
+  height: 24px;
+  background: var(--on-primary);
+}
+
+/* M3 Expressive connected button group */
+#hilal-color-panel .hcp-segmented {
+  display: flex;
+  gap: 2px;
+}
+
+#hilal-color-panel .hcp-segment {
+  appearance: none;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 8px;
+  background: var(--surface-container-highest);
+  color: var(--on-surface);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-radius 200ms var(--md-sys-motion-easing-emphasized),
+              background-color 200ms;
+}
+
+#hilal-color-panel .hcp-segment:first-child {
+  border-start-start-radius: 22px;
+  border-end-start-radius: 22px;
+}
+
+#hilal-color-panel .hcp-segment:last-child {
+  border-start-end-radius: 22px;
+  border-end-end-radius: 22px;
+}
+
+#hilal-color-panel .hcp-segment > i {
+  display: none;
+  font-size: 18px;
+}
+
+#hilal-color-panel .hcp-segment[aria-checked="true"] {
+  border-radius: 22px;
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+#hilal-color-panel .hcp-segment[aria-checked="true"] > i {
+  display: inline;
+}

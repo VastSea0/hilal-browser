@@ -155,8 +155,11 @@ export class HilalBoostsChild extends JSWindowActorChild {
     if (declared && saturation(declared) > 0.2) {
       accent = declared;
     }
-    if (!accent) {
-      // No usable theme-color: guess from the page header, then links.
+    const bc = this.browsingContext;
+    const boosted = !!bc.hilalBoostsData || !!bc.isHilalBoostsInverted;
+    if (!accent && !boosted) {
+      // No usable theme-color: guess from the page header, then links. A
+      // boosted page shows the boost's colors, so no guess is made there.
       const header = doc.querySelector("header, nav, [role='banner']");
       const candidates = [
         header && win.getComputedStyle(header).backgroundColor,
@@ -183,6 +186,7 @@ export class HilalBoostsChild extends JSWindowActorChild {
       domain: this.#hostWithoutPort,
       accent: accent ? hex(accent) : null,
       ownTheme,
+      boosted,
     });
   }
 
@@ -555,6 +559,14 @@ export class HilalBoostsChild extends JSWindowActorChild {
           );
         }
         this.#setSyncedField(browsingContext, "hilalBoostsData", primaryColor);
+        // A boost can also set the browser's accent while its site is shown.
+        let browserAccent = null;
+        if (boostData.tintBrowser && !boostData.autoTheme) {
+          const rgb = this.#hslToRgb(boostData.dotAngleDeg / 360, 0.75, 0.55);
+          browserAccent =
+            "#" + rgb.map(c => c.toString(16).padStart(2, "0")).join("");
+        }
+        this.sendAsyncMessage("HilalBoost:BoostAccent", { color: browserAccent });
         // The complementary accent is derived in the backend by rotating the
         // primary accent's hue by this delta (in degrees).
         this.#setSyncedField(
@@ -567,6 +579,7 @@ export class HilalBoostsChild extends JSWindowActorChild {
     } else {
       this.#setSyncedField(browsingContext, "isHilalBoostsInverted", false);
     }
+    this.sendAsyncMessage("HilalBoost:BoostAccent", { color: null });
     this.#setSyncedField(browsingContext, "hilalBoostsData", 0);
     this.#setSyncedField(browsingContext, "hilalBoostsComplementaryRotation", 0);
   }

@@ -69,7 +69,8 @@
     _currentColor: "blue",
     _listenerAttached: false,
     _prefObserver: null,
-    // Accent of the selected page, used when hilal.theme.followSite is on.
+    // Accent the selected page asks for (its boost or, with
+    // hilal.theme.followSite, its own color). Wins over the workspace color.
     _siteColor: null,
 
     setSiteColor(color) {
@@ -77,17 +78,12 @@
         return;
       }
       this._siteColor = color;
-      if (Services.prefs.getBoolPref("hilal.theme.followSite", false)) {
-        this.applyTheme();
-      }
+      this.applyTheme();
     },
 
     getEffectiveColor(colorInput) {
       try {
-        if (
-          this._siteColor &&
-          Services.prefs.getBoolPref("hilal.theme.followSite", false)
-        ) {
+        if (this._siteColor) {
           return this._siteColor;
         }
         if (typeof Services !== "undefined" && Services.prefs) {
@@ -156,7 +152,6 @@
         try {
           Services.prefs.addObserver("hilal.theme.accentMode", this._prefObserver);
           Services.prefs.addObserver("hilal.theme.globalAccentColor", this._prefObserver);
-          Services.prefs.addObserver("hilal.theme.followSite", this._prefObserver);
           Services.prefs.addObserver("hilal.workspaces.data", this._prefObserver);
           Services.prefs.addObserver("layout.css.prefers-color-scheme.content-override", this._prefObserver);
         } catch (e) {}
@@ -446,17 +441,38 @@
      */
     setSiteAccent(browser, color) {
       browser._hilalSiteAccent = color;
-      if (browser == gBrowser.selectedBrowser) {
-        MaterialYouTheme.setSiteColor(color);
+      this.updatePageAccent(browser);
+    },
+
+    // A boost with "Color the browser" on sets the accent for its site.
+    setBoostAccent(browser, color) {
+      browser._hilalBoostAccent = color;
+      this.updatePageAccent(browser);
+    },
+
+    updatePageAccent(browser = gBrowser.selectedBrowser) {
+      if (browser != gBrowser.selectedBrowser) {
+        return;
       }
+      const followSite = Services.prefs.getBoolPref("hilal.theme.followSite", false);
+      MaterialYouTheme.setSiteColor(
+        browser._hilalBoostAccent ||
+          (followSite && browser._hilalSiteAccent) ||
+          null
+      );
     },
 
     trackSiteAccent() {
-      gBrowser.tabContainer.addEventListener("TabSelect", () => {
-        MaterialYouTheme.setSiteColor(
-          gBrowser.selectedBrowser._hilalSiteAccent || null
-        );
-      });
+      gBrowser.tabContainer.addEventListener("TabSelect", () =>
+        this.updatePageAccent()
+      );
+      const onFollowSite = () => this.updatePageAccent();
+      Services.prefs.addObserver("hilal.theme.followSite", onFollowSite);
+      window.addEventListener(
+        "unload",
+        () => Services.prefs.removeObserver("hilal.theme.followSite", onFollowSite),
+        { once: true }
+      );
       gBrowser.addTabsProgressListener({
         onLocationChange(browser, webProgress, request, location, flags) {
           if (!webProgress.isTopLevel ||
@@ -465,6 +481,7 @@
           }
           // Pages without the boosts actor (about:, file:) have no accent.
           if (!location.schemeIs("http") && !location.schemeIs("https")) {
+            browser._hilalBoostAccent = null;
             HilalShell.setSiteAccent(browser, null);
           }
         },
@@ -2070,94 +2087,216 @@
       this._toastTimer = setTimeout(() => toast.classList.remove("visible"), 2600);
     },
 
-    openThemePicker(anchor, event) {
-      const existing = document.getElementById("hilal-theme-menu");
+    // The palette button in the address bar: accent color, colors from
+    // websites and automatic boosts, as one Material 3 Expressive panel.
+    openThemePicker(anchor) {
+      const existing = document.getElementById("hilal-color-panel");
       if (existing) {
         existing.remove();
         return;
       }
-
-      const menu = document.createElement("div");
-      menu.id = "hilal-theme-menu";
-      menu.className =
-        "beer menu vertical round medium-elevate active surface-container-high";
-
-      const title = document.createElement("label");
-      title.className = "bold uppercase small-text opacity padding";
-      title.setAttribute("data-l10n-id", "hilal-shell-accent-color");
-      title.textContent = "Accent color";
-      menu.appendChild(title);
-
-      const swatchesRow = document.createElement("div");
-      swatchesRow.className = "hilal-theme-swatches-row";
-
-      const colors = [
-        { name: "blue", hex: "#37adff" },
-        { name: "turquoise", hex: "#00c79a" },
-        { name: "green", hex: "#51cd00" },
-        { name: "yellow", hex: "#ffcb00" },
-        { name: "orange", hex: "#ff9f00" },
-        { name: "red", hex: "#ff613d" },
-        { name: "pink", hex: "#ff4bda" },
-        { name: "purple", hex: "#af51f5" },
-      ];
-
-      const currentActiveColor = MaterialYouTheme._currentColor || "blue";
-
-      colors.forEach(({ name, hex }) => {
-        const swatch = document.createElement("button");
-        swatch.className = "circle hilal-theme-swatch";
-        if (name === currentActiveColor) {
-          swatch.classList.add("active");
-        }
-        swatch.style.backgroundColor = hex;
-        swatch.title = name.charAt(0).toUpperCase() + name.slice(1);
-        swatch.addEventListener("click", e => {
-          e.stopPropagation();
-          MaterialYouTheme.applyTheme(name);
-          if (typeof Services !== "undefined") {
-            try {
-              const raw = Services.prefs.getStringPref(
-                "hilal.workspaces.data",
-                "[]"
-              );
-              const workspaces = JSON.parse(raw);
-              const activeId = Services.prefs.getStringPref(
-                "hilal.workspaces.active",
-                workspaces[0]?.id
-              );
-              const activeWs = workspaces.find(w => w.id === activeId);
-              if (activeWs) {
-                activeWs.color = name;
-                Services.prefs.setStringPref(
-                  "hilal.workspaces.data",
-                  JSON.stringify(workspaces)
-                );
-              }
-            } catch (err) {}
+      const html = (tag, attrs = {}, ...children) => {
+        const el = document.createElementNS("http://www.w3.org/1999/xhtml", tag);
+        for (const [k, v] of Object.entries(attrs)) {
+          if (k == "l10n") {
+            document.l10n.setAttributes(el, v);
+          } else if (k.startsWith("on")) {
+            el.addEventListener(k.slice(2), v);
+          } else if (v !== false && v != null) {
+            el.setAttribute(k, v === true ? "" : v);
           }
-          this.renderWorkspaces();
-          this.renderTabs();
-          menu.remove();
+        }
+        el.append(...children);
+        return el;
+      };
+      const prefs = Services.prefs;
+      const host = (() => {
+        try {
+          const uri = gBrowser.selectedBrowser.currentURI;
+          return uri.schemeIs("http") || uri.schemeIs("https") ? uri.host.replace(/^www\./, "") : "";
+        } catch (e) {
+          return "";
+        }
+      })();
+      const excludedList = () =>
+        prefs.getStringPref("hilal.boosts.auto.excluded", "").split(",").map(d => d.trim()).filter(Boolean);
+
+      const switchRow = (icon, titleId, descId, descArgs, checked, onChange) => {
+        const input = html("input", {
+          type: "checkbox",
+          role: "switch",
+          class: "hcp-switch",
+          checked,
+          onchange: e => onChange(e.target.checked),
         });
-        swatchesRow.appendChild(swatch);
-      });
-      menu.appendChild(swatchesRow);
+        return html(
+          "label",
+          { class: "hcp-row" },
+          html("i", { class: "hcp-row-icon" }, icon),
+          html(
+            "span",
+            { class: "hcp-row-text" },
+            html("span", { class: "hcp-row-title", l10n: titleId }),
+            descId ? html("span", { class: "hcp-row-desc", l10n: descArgs ? { id: descId, args: descArgs } : descId }) : ""
+          ),
+          input
+        );
+      };
 
+      // Accent color
+      const current = MaterialYouTheme._currentColor || "blue";
+      const swatches = html("div", { class: "hcp-swatches", role: "radiogroup" });
+      for (const [name, hex] of Object.entries(MaterialYouTheme.COLOR_MAP)) {
+        swatches.append(
+          html(
+            "button",
+            {
+              class: "hcp-swatch",
+              role: "radio",
+              "aria-checked": name == current ? "true" : "false",
+              title: name,
+              style: `--hcp-swatch: ${hex}`,
+              onclick: () => {
+                this.setWorkspaceAccent(name);
+                for (const b of swatches.children) {
+                  b.setAttribute("aria-checked", b == swatches.querySelector(`[title="${name}"]`));
+                }
+              },
+            },
+            html("i", {}, "check")
+          )
+        );
+      }
+      const pageColor = MaterialYouTheme._siteColor;
+      const accentCard = html(
+        "section",
+        { class: "hcp-card" },
+        html("h3", { class: "hcp-title", l10n: "hilal-color-panel-accent" }),
+        swatches,
+        pageColor
+          ? html(
+              "p",
+              { class: "hcp-note" },
+              html("span", { class: "hcp-dot", style: `background: ${pageColor}` }),
+              html("span", { l10n: "hilal-color-panel-page-color" })
+            )
+          : ""
+      );
+
+      // Colors from websites
+      const siteCard = html(
+        "section",
+        { class: "hcp-card" },
+        switchRow(
+          "travel_explore",
+          "hilal-color-panel-follow-site",
+          "hilal-color-panel-follow-site-desc",
+          null,
+          prefs.getBoolPref("hilal.theme.followSite", false),
+          on => prefs.setBoolPref("hilal.theme.followSite", on)
+        )
+      );
+
+      // Automatic boosts
+      const mode = prefs.getStringPref("hilal.boosts.auto.mode", "off");
+      const segmented = html("div", { class: "hcp-segmented", role: "radiogroup" });
+      for (const value of ["off", "compatible", "all"]) {
+        segmented.append(
+          html(
+            "button",
+            {
+              class: "hcp-segment",
+              role: "radio",
+              "aria-checked": value == mode ? "true" : "false",
+              onclick: () => {
+                prefs.setStringPref("hilal.boosts.auto.mode", value);
+                for (const b of segmented.children) {
+                  b.setAttribute("aria-checked", b.dataset.value == value);
+                }
+                boostRows.hidden = value == "off";
+              },
+              "data-value": value,
+            },
+            html("i", {}, "check"),
+            html("span", { l10n: `hilal-auto-boost-${value}` })
+          )
+        );
+      }
+      const boostRows = html(
+        "div",
+        { class: "hcp-rows", hidden: mode == "off" },
+        host
+          ? switchRow(
+              "web",
+              "hilal-color-panel-this-site",
+              "hilal-color-panel-this-site-desc",
+              { host },
+              !excludedList().includes(host),
+              on => {
+                const list = excludedList().filter(d => d != host);
+                if (!on) {
+                  list.push(host);
+                }
+                prefs.setStringPref("hilal.boosts.auto.excluded", list.join(","));
+              }
+            )
+          : "",
+        switchRow(
+          "dark_mode",
+          "hilal-auto-boost-darken-title",
+          null,
+          null,
+          prefs.getBoolPref("hilal.boosts.auto.darken", true),
+          on => prefs.setBoolPref("hilal.boosts.auto.darken", on)
+        )
+      );
+      const boostCard = html(
+        "section",
+        { class: "hcp-card" },
+        html("h3", { class: "hcp-title", l10n: "hilal-auto-boost-title" }),
+        segmented,
+        boostRows
+      );
+
+      const panel = html(
+        "div",
+        { id: "hilal-color-panel", class: "beer", role: "dialog" },
+        accentCard,
+        siteCard,
+        boostCard
+      );
       const rect = anchor.getBoundingClientRect();
-      menu.style.position = "fixed";
-      menu.style.top = `${rect.bottom + 6}px`;
-      menu.style.right = `${window.innerWidth - rect.right}px`;
-      menu.style.display = "flex";
-      document.body.appendChild(menu);
+      panel.style.top = `${rect.bottom + 8}px`;
+      panel.style.left = `${Math.max(8, Math.min(rect.left - 160, window.innerWidth - 376))}px`;
+      document.documentElement.appendChild(panel);
 
-      const onDocClick = e => {
-        if (!menu.contains(e.target) && !anchor.contains(e.target)) {
-          menu.remove();
-          document.removeEventListener("mousedown", onDocClick);
+      const close = e => {
+        if (e.type == "keydown" ? e.key == "Escape" : !panel.contains(e.target) && !anchor.contains(e.target)) {
+          panel.remove();
+          document.removeEventListener("mousedown", close, true);
+          document.removeEventListener("keydown", close, true);
         }
       };
-      setTimeout(() => document.addEventListener("mousedown", onDocClick), 0);
+      setTimeout(() => {
+        document.addEventListener("mousedown", close, true);
+        document.addEventListener("keydown", close, true);
+      }, 0);
+    },
+
+    // Gives the active workspace a new accent color.
+    setWorkspaceAccent(name) {
+      MaterialYouTheme.applyTheme(name);
+      try {
+        const workspaces = JSON.parse(Services.prefs.getStringPref("hilal.workspaces.data", "[]"));
+        const activeId = Services.prefs.getStringPref("hilal.workspaces.active", workspaces[0]?.id);
+        const active = workspaces.find(w => w.id === activeId);
+        if (active) {
+          active.color = name;
+          Services.prefs.setStringPref("hilal.workspaces.data", JSON.stringify(workspaces));
+        }
+      } catch (err) {}
+      this.renderWorkspaces();
+      this.renderTabs();
     },
 
     mountNativeToolbarElements() {

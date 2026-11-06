@@ -1,115 +1,15 @@
 
-## Hilal welcome screen
 
-hilal-welcome-skip = Kurulumu atla
-hilal-welcome-back = Geri
-hilal-welcome-next = Devam
-hilal-welcome-finish = Gezinmeye başla
-hilal-welcome-step = Adım { $current } / { $total }
-hilal-welcome-start = Başlayın
-hilal-welcome-intro-title = { -brand-short-name }'e hoş geldiniz
-hilal-welcome-intro-sub = Birkaç seçimden sonra gezinmeye hazırsınız.
+## Hilal color panel
 
-hilal-welcome-look-title = Görünümü seçin
-hilal-welcome-look-sub = Bunları daha sonra Ayarlar'dan değiştirebilirsiniz.
-hilal-welcome-theme-label = Tema
-hilal-welcome-theme-system = Sistem
-hilal-welcome-theme-light = Açık
-hilal-welcome-theme-dark = Koyu
-hilal-welcome-tabs-label = Sekmeler
-hilal-welcome-tabs-vertical = Dikey
-hilal-welcome-tabs-vertical-desc = Sekmeler solda kenar çubuğunda
-hilal-welcome-tabs-horizontal = Yatay
-hilal-welcome-tabs-horizontal-desc = Sekmeler pencerenin üstünde
-
-hilal-welcome-privacy-title = Gizlilik ve arama
-hilal-welcome-privacy-sub = Sıkı seviyeler daha fazla izlemeyi engeller ama bazı siteleri bozabilir.
-hilal-welcome-privacy-label = Koruma seviyesi
-hilal-welcome-privacy-standard = Dengeli
-hilal-welcome-privacy-standard-desc = Sıkı izleyici koruması, yalnızca HTTPS ve izleme bağlantısı temizliği. Arama önerileri kapalı.
-hilal-welcome-privacy-strict = Sıkı
-hilal-welcome-privacy-strict-desc = Ayrıca siteleri birbirinden yalıtır ve WebRTC'yi kapatır. Bazı görüntülü aramalar çalışmayabilir.
-hilal-welcome-privacy-extreme = Maksimum
-hilal-welcome-privacy-extreme-desc = Ayrıca parmak izine karşı direnir; JavaScript, kamera, mikrofon ve konumu engeller. Geçmiş kaydedilmez. Birçok site çalışmaz.
-hilal-welcome-search-label = Arama motoru
-
-hilal-welcome-ready-title = Neredeyse bitti
-hilal-welcome-ready-sub = Bunları şimdi ya da daha sonra Ayarlar'dan yapabilirsiniz.
-hilal-welcome-workspaces = Başlangıç çalışma alanlarını oluştur
-hilal-welcome-workspaces-desc = Kişisel, İş ve Sosyal; her birinin kendi çerezleri ve oturumları olur.
-hilal-welcome-default = { -brand-short-name }'i varsayılan tarayıcı yap
-hilal-welcome-default-desc = Diğer uygulamalardaki bağlantılar burada açılır.
-hilal-welcome-import = Başka bir tarayıcıdan içe aktar
-hilal-welcome-import-desc = Yer imleri, geçmiş ve parolalar.
-hilal-welcome-import-button = İçe aktar
-hilal-welcome-workspace-label-personal = Kişisel
-hilal-welcome-workspace-label-work = İş
-hilal-welcome-workspace-label-social = Sosyal
-
-## Hilal toolbar and shell
-
-hilal-toolbar-clear =
-    .title = Temizle
-hilal-toolbar-copy-url =
-    .title = Sayfa adresini kopyala
-hilal-toolbar-theme =
-    .title = Sayfa teması
-hilal-toolbar-sidebar-toggle =
-    .title = Kenar çubuğunu aç veya kapat
-hilal-toolbar-settings =
-    .title = Ayarlar
-hilal-toolbar-newtab =
-    .title = Yeni sekme
-hilal-toolbar-back =
-    .title = Geri
-hilal-toolbar-forward =
-    .title = İleri
-hilal-toolbar-reload =
-    .title = Yeniden yükle
-hilal-toolbar-close-tab =
-    .title = Sekmeyi kapat
-    .aria-label = Sekmeyi kapat
-hilal-toolbar-split-view =
-    .title = Bölünmüş görünüm
-hilal-toolbar-new-workspace =
-    .title = Yeni çalışma alanı
-
-hilal-shell-new-workspace = Yeni çalışma alanı
-hilal-shell-workspaces = Çalışma alanları
-hilal-shell-accent-color = Vurgu rengi
-hilal-shell-results = Sonuçlar
-hilal-shell-switch-to-tab = Sekmeye geç
-hilal-shell-bang = Bang
-hilal-shell-shortcut = Kısayol
-hilal-shell-search-with = { $engine } ile ara
-hilal-shell-search = Ara
-hilal-shell-search-suggestion = Arama önerisi
-hilal-shell-visit-website = Siteye git
-hilal-shell-layout-vertical = Kenar çubuğunda dikey sekmeler
-hilal-shell-layout-dual = Kenar çubuğu ve sekme şeridi
-hilal-shell-layout-horizontal = Yatay sekmeler
-
-## Hilal About dialog
-
-hilal-about-community = { -brand-short-name }, gönüllülerin <label data-l10n-name="hilal-about-firefox-link">Firefox</label> üzerine geliştirdiği özgür ve açık kaynaklı bir tarayıcıdır. <label data-l10n-name="hilal-about-contributors-link">Geliştirenleri görün</label>.
-hilal-about-helpus = Yardım etmek ister misiniz? <label data-l10n-name="hilal-about-contribute-link">GitHub'da katkıda bulunun</label> ya da <label data-l10n-name="hilal-about-issue-link">bir sorun bildirin</label>.
-hilal-about-source-link = Kaynak kodu
-
-## Hilal workspace dialog
-
-hilal-ws-dialog-new-title = Yeni çalışma alanı
-hilal-ws-dialog-edit-title = Çalışma alanını düzenle
-hilal-ws-dialog-emoji = Emoji
-hilal-ws-dialog-color = Renk
-hilal-ws-dialog-name = Ad
-hilal-ws-dialog-name-input =
-    .placeholder = Çalışma alanı adı
-hilal-ws-dialog-default-name = Çalışma alanı
-hilal-ws-dialog-cancel =
-    .label = Vazgeç
-hilal-ws-dialog-create =
-    .label = Oluştur
-hilal-ws-dialog-save =
-    .label = Kaydet
-hilal-ws-dialog-delete =
-    .label = Sil
+hilal-color-panel-accent = Vurgu rengi
+hilal-color-panel-page-color = Bu sayfa tarayıcıyı boyuyor
+hilal-color-panel-follow-site = Sitenin rengini kullan
+hilal-color-panel-follow-site-desc = Tarayıcı bulunduğunuz sayfanın rengini alır
+hilal-color-panel-this-site = Bu sitede
+hilal-color-panel-this-site-desc = { $host } için otomatik Boost
+hilal-auto-boost-title = Otomatik Boost
+hilal-auto-boost-off = Kapalı
+hilal-auto-boost-compatible = Uyumlu
+hilal-auto-boost-all = Tüm siteler
+hilal-auto-boost-darken-title = Koyu modda açık sayfaları koyulaştır

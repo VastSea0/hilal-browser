@@ -14,8 +14,8 @@
  * workspace accent (MaterialYouTheme in HilalShell.js).
  */
 
-@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
-@namespace html url("http://www.w3.org/1999/xhtml");
+/* No @namespace here: a default namespace would also apply to :root, and
+ * the browser window's root is an XHTML element. */
 
 @media -moz-pref("hilal.material3.enabled") {
   :root,
@@ -142,12 +142,12 @@
   }
 
   /* Headers of panel subviews ("Bookmarks", "History", ...) */
-  .panel-header > html|h1 {
+  .panel-header > h1 {
     font-weight: 600;
   }
 
   /* Text fields in panels and dialogs */
-  :root :is(html|input[type="text"], html|input[type="search"], html|input[type="url"], html|input:not([type])) {
+  :root :is(input[type="text"], input[type="search"], input[type="url"], input:not([type])) {
     background-color: var(--surface-container-highest);
     color: var(--on-surface);
   }

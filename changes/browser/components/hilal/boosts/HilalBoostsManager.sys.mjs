@@ -156,6 +156,9 @@ class nsHilalBoostsManager {
         // Follows the accent color of the window's workspace
         autoTheme: false,
 
+        // Hilal: the browser takes the boost's color while the site is shown
+        tintBrowser: false,
+
         // Hilal: the boost only applies while the browser is in dark mode
         nightOnly: false,
 

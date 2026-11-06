@@ -135,6 +135,13 @@ export class nsHilalBoostEditor {
       .getElementById("hilal-boost-invert")
       .addEventListener("click", this.onToggleInvert.bind(this));
     this.doc
+      .getElementById("hilal-boost-tint-browser")
+      .addEventListener("change", event => {
+        this.currentBoostData.tintBrowser = event.target.checked;
+        this.currentBoostData.changeWasMade = true;
+        this.updateCurrentBoost();
+      });
+    this.doc
       .getElementById("hilal-boost-magic-theme")
       .addEventListener("click", this.onToggleAutoTheme.bind(this));
     this.doc
@@ -1290,6 +1297,11 @@ ${cssSelector} {
       !!this.currentBoostData.autoTheme
     );
     invertButton.setAttribute("aria-pressed", !!this.currentBoostData.smartInvert);
+    const tintBrowser = this.doc.getElementById("hilal-boost-tint-browser");
+    tintBrowser.checked = !!this.currentBoostData.tintBrowser;
+    // The browser follows its own accent when the boost does too.
+    tintBrowser.disabled =
+      !this.currentBoostData.enableColorBoost || !!this.currentBoostData.autoTheme;
     // The switch turns color changes on, so it is the inverse of "disable".
     disableButton.checked = !!this.currentBoostData.enableColorBoost;
 

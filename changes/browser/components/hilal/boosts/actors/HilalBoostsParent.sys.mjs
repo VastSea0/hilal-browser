@@ -12,9 +12,10 @@ ChromeUtils.defineESModuleGetters(lazy, {
 const AUTO_MODE_PREF = "hilal.boosts.auto.mode";
 const AUTO_EXCLUDED_PREF = "hilal.boosts.auto.excluded";
 
-// Domains whose pages style themselves (dark color scheme or a dark page),
-// learned when a page finishes loading. "Compatible" automatic boosts skip
-// them; remembering them avoids tinting the next page of the site first.
+// Whether a domain's pages are dark on their own (a dark color scheme or a
+// dark page), learned when a page finishes loading without an automatic
+// boost on it. "Compatible" automatic boosts skip such sites, and only light
+// pages are turned dark. Unknown domains are left as they are until known.
 const ownThemeDomains = new Map();
 
 export class HilalBoostsParent extends JSWindowActorParent {
@@ -52,7 +53,8 @@ export class HilalBoostsParent extends JSWindowActorParent {
       autoTheme: true,
       smartInvert:
         Services.prefs.getBoolPref("hilal.boosts.auto.darken", true) &&
-        !!win?.MaterialYouTheme?.isDarkMode?.(),
+        !!win?.MaterialYouTheme?.isDarkMode?.() &&
+        ownThemeDomains.get(domain) === false,
       changeWasMade: true,
     });
     return { id: "automatic", domain, automatic: true, boostEntry: entry };
@@ -263,6 +265,15 @@ export class HilalBoostsParent extends JSWindowActorParent {
         }
         break;
       }
+      case "HilalBoost:BoostAccent": {
+        const color = message.data?.color;
+        const browser = this.browsingContext.top.embedderElement;
+        browser?.ownerDocument?.defaultView?.gHilalShell?.setBoostAccent?.(
+          browser,
+          /^#[0-9a-f]{6}$/i.test(color ?? "") ? color : null
+        );
+        break;
+      }
       case "HilalBoost:GetBrowserAccent": {
         // The site's own color must not feed back into what it is told.
         const theme = this.browsingContext.topChromeWindow?.MaterialYouTheme;
@@ -280,25 +291,30 @@ export class HilalBoostsParent extends JSWindowActorParent {
         };
       }
       case "HilalBoost:SiteTheme": {
-        const { domain, accent, ownTheme } = message.data ?? {};
+        const { domain, accent, ownTheme, boosted } = message.data ?? {};
         if (typeof domain != "string" || !domain) {
           break;
         }
         const hadOwnTheme = ownThemeDomains.get(domain);
-        ownThemeDomains.set(domain, !!ownTheme);
+        // A boosted page reports the boost's colors, not its own.
+        if (!boosted) {
+          ownThemeDomains.set(domain, !!ownTheme);
+        }
         const browser = this.browsingContext.top.embedderElement;
-        const win = browser?.ownerGlobal;
+        // A <browser>'s ownerGlobal is undefined from a window actor parent.
+        const win = browser?.ownerDocument?.defaultView;
         if (browser && win?.gHilalShell?.setSiteAccent) {
           win.gHilalShell.setSiteAccent(
             browser,
             /^#[0-9a-f]{6}$/i.test(accent ?? "") ? accent : null
           );
         }
-        // The first visit was tinted before the page could say it styles
-        // itself; undo that now that we know.
+        // The first page of a site loads before Hilal knows whether it is
+        // dark on its own; apply what follows from that now.
         if (
-          !!ownTheme != !!hadOwnTheme &&
-          Services.prefs.getStringPref(AUTO_MODE_PREF, "off") == "compatible" &&
+          !boosted &&
+          hadOwnTheme !== !!ownTheme &&
+          Services.prefs.getStringPref(AUTO_MODE_PREF, "off") != "off" &&
           !lazy.gHilalBoostsManager.registeredBoostForDomain(domain)
         ) {
           this.sendAsyncMessage("HilalBoost:BoostDataUpdated", {
