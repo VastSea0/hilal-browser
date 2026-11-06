@@ -498,3 +498,32 @@ groupbox.settings-group-card html|button:not(.m3-swatch-circle) {
     transition: none;
   }
 }
+
+/* Sidebar buttons: a grid of switches, each with its label */
+.hilal-footer-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.hilal-footer-choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 16px;
+  border-radius: 6px;
+  background-color: var(--surface-container-high);
+  color: var(--on-surface);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.hilal-footer-choice:first-child {
+  border-start-start-radius: 18px;
+}
+
+.hilal-footer-choice:last-child {
+  border-end-end-radius: 18px;
+}

@@ -364,6 +364,14 @@ def main():
             check_window_buttons(f"{mode} tabs", s)
         m.script("gHilalShell.setTabMode(arguments[0], false)", ["vertical"])
 
+        # Settings change the layout and density through prefs while the
+        # window is open.
+        m.script("Services.prefs.setStringPref('hilal.sidebar.density', 'compact'); Services.prefs.setStringPref('hilal.tabs.layoutMode', 'dual')")
+        time.sleep(0.5)
+        live = m.script("return [document.documentElement.getAttribute('hilal-sidebar-density'), gHilalShell.tabMode]")
+        check("sidebar follows layout and density settings", live == ["compact", "dual"], live)
+        m.script("Services.prefs.clearUserPref('hilal.sidebar.density'); Services.prefs.setStringPref('hilal.tabs.layoutMode', 'vertical')")
+
         # Load a page in the content process.
         page = "data:text/html;charset=utf-8,<title>Hilal smoke</title><h1 style='font:48px sans-serif'>Hilal smoke page</h1>"
         m.script("gBrowser.selectedBrowser.loadURI(Services.io.newURI(arguments[0]), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})", [page])

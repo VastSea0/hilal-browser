@@ -68,7 +68,7 @@ index b66ff919d93b..e2566bfa9b76 100644
    };
  
    const items = includeIsDefaultPane
-@@ -1815,6 +1831,1452 @@ gMainPane.initialized = new Promise(res => {
+@@ -1815,6 +1831,1476 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
@@ -434,6 +434,30 @@ index b66ff919d93b..e2566bfa9b76 100644
 +      wireCheckbox(document.getElementById("hilalFollowSiteColor"), "hilal.theme.followSite", false);
 +    } catch (e) {
 +      console.error("Hilal automatic colors init error:", e);
++    }
++
++    // Sidebar and tabs: segmented choices and footer button switches
++    // carry their pref in data-pref.
++    for (const group of document.querySelectorAll("#hilalSidebarGroup m3e-segmented-button[data-pref]")) {
++      const pref = group.dataset.pref;
++      const show = value => {
++        for (const seg of group.querySelectorAll("m3e-button-segment")) {
++          const on = seg.getAttribute("value") === value;
++          seg.checked = on;
++          seg.toggleAttribute("checked", on);
++        }
++      };
++      show(Services.prefs.getStringPref(pref, group.dataset.default));
++      group.addEventListener("click", e => {
++        const value = e.target.closest("m3e-button-segment")?.getAttribute("value");
++        if (value) {
++          Services.prefs.setStringPref(pref, value);
++          show(value);
++        }
++      });
++    }
++    for (const toggle of document.querySelectorAll("#hilalSidebarFooterChoices m3e-switch[data-pref]")) {
++      wireCheckbox(toggle, toggle.dataset.pref, Services.prefs.getDefaultBranch("").getBoolPref(toggle.dataset.pref, false));
 +    }
 +
 +    if (hilalPrivacyLevelRadioGroup) {

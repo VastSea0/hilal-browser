@@ -1005,6 +1005,35 @@
       this.themeSidebarPanels();
       Services.prefs.addObserver("hilal.sidebar.footer.", this._footerObserver = () => this.updateFooterButtons());
       window.addEventListener("unload", () => Services.prefs.removeObserver("hilal.sidebar.footer.", this._footerObserver), { once: true });
+
+      // Settings can change the tab layout and the sidebar density while
+      // windows are open.
+      const applyDensity = () =>
+        document.documentElement.setAttribute(
+          "hilal-sidebar-density",
+          Services.prefs.getStringPref("hilal.sidebar.density", "comfortable")
+        );
+      applyDensity();
+      const onLayoutPref = (subject, topic, pref) => {
+        if (pref == "hilal.sidebar.density") {
+          applyDensity();
+          return;
+        }
+        const mode = Services.prefs.getStringPref("hilal.tabs.layoutMode", "vertical");
+        if (mode != this.tabMode) {
+          this.setTabMode(mode, false);
+        }
+      };
+      Services.prefs.addObserver("hilal.sidebar.density", onLayoutPref);
+      Services.prefs.addObserver("hilal.tabs.layoutMode", onLayoutPref);
+      window.addEventListener(
+        "unload",
+        () => {
+          Services.prefs.removeObserver("hilal.sidebar.density", onLayoutPref);
+          Services.prefs.removeObserver("hilal.tabs.layoutMode", onLayoutPref);
+        },
+        { once: true }
+      );
       // Firefox's panel opens and closes from other places too (menus, keys).
       document.getElementById("sidebar-box") &&
         new MutationObserver(() => this.updateFooterButtons()).observe(

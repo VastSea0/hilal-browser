@@ -225,6 +225,7 @@ pref("hilal.boosts.dissolve-on-zap", true);
 pref("hilal.boosts.custom-fonts", false);
 
 // Buttons at the bottom of the sidebar.
+pref("hilal.sidebar.density", "comfortable");
 pref("hilal.sidebar.footer.bookmarks", true);
 pref("hilal.sidebar.footer.history", true);
 pref("hilal.sidebar.footer.downloads", true);

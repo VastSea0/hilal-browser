@@ -149,3 +149,24 @@ hilal-auto-boost-darken-title = Koyu modda açık sayfaları koyulaştır
 hilal-auto-boost-darken-desc = Hilal koyu moddayken otomatik Boost açık renkli sayfaları koyu yapar.
 hilal-follow-site-title = Tarayıcıda sitenin rengini kullan
 hilal-follow-site-desc = Bulunduğunuz sayfanın vurgu rengini alır: sitenin tema renginden ya da tasarımından tahmin ederek.
+
+## Hilal sidebar and tabs
+
+hilal-sidebar-header = Kenar çubuğu ve sekmeler
+hilal-tab-layout-title = Sekme düzeni
+hilal-tab-layout-desc = Sekmelerin gösterileceği yer
+hilal-tab-layout-vertical = Kenar çubuğu
+hilal-tab-layout-dual = İkisi de
+hilal-tab-layout-horizontal = Üst
+hilal-sidebar-density-title = Yoğunluk
+hilal-sidebar-density-desc = Sıkı düzen kenar çubuğuna daha çok sekme sığdırır
+hilal-sidebar-density-comfortable = Rahat
+hilal-sidebar-density-compact = Sıkı
+hilal-sidebar-footer-title = Kenar çubuğu düğmeleri
+hilal-sidebar-footer-desc = Kenar çubuğunun altında gösterilen kısayollar
+hilal-sidebar-footer-bookmarks = Yer imleri
+hilal-sidebar-footer-history = Geçmiş
+hilal-sidebar-footer-downloads = İndirilenler
+hilal-sidebar-footer-passwords = Parolalar
+hilal-sidebar-footer-privacy = Gizlilik ve güvenlik
+hilal-sidebar-footer-settings = Ayarlar

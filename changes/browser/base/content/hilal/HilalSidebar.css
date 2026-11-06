@@ -331,3 +331,46 @@
   mask-size: 100% 100%;
   transform: rotate(20deg);
 }
+
+/* ---------------------------------------------------------------------------
+ * Compact density: shorter tab rows and buttons for more tabs on screen
+ * ------------------------------------------------------------------------- */
+
+:root[hilal-sidebar-density="compact"] #hilal-sidebar .hilal-tab-pill {
+  height: 32px !important;
+  min-height: 32px !important;
+  gap: 8px !important;
+  padding-inline-start: 10px !important;
+  border-radius: 16px !important;
+}
+
+:root[hilal-sidebar-density="compact"] #hilal-sidebar .hilal-tab-title {
+  font-size: 13px !important;
+}
+
+:root[hilal-sidebar-density="compact"] #hilal-sidebar .hilal-tab-close-btn {
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+}
+
+:root[hilal-sidebar-density="compact"] #hilal-sidebar #hilal-tab-list {
+  gap: 0 !important;
+}
+
+:root[hilal-sidebar-density="compact"] #hilal-sidebar button.hilal-btn {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+}
+
+:root[hilal-sidebar-density="compact"] #hilal-sidebar .hilal-ws-chip {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  max-width: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+}
+
