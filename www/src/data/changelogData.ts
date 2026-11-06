@@ -31,11 +31,701 @@ export interface ReleaseGroup {
 }
 
 
-export const REPO_COMMITS_TOTAL = 579;
-export const REPO_RELEASES_TOTAL = 12;
-export const LATEST_RELEASE_TAG = "v0.4.0-alpha.1";
+export const REPO_COMMITS_TOTAL = 648;
+export const REPO_RELEASES_TOTAL = 13;
+export const LATEST_RELEASE_TAG = "v0.4.0-alpha.2";
 
 export const ALL_COMMITS: CommitEntry[] = [
+  {
+    "hash": "6ae60cf39574901128138c7152b0e8ae488d6262",
+    "shortHash": "6ae60cf",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T22:28:24+03:00",
+    "subject": "Polish the Hilal menu and color panel: unclipped labels and motion",
+    "body": "Labels no longer lose their first letter to the ellipsis clip, Beer CSS no\nlonger reshapes hovered rows, and both panels get M3 Expressive motion:\nstate-layer transitions, rows that round into pills when pressed, buttons\nthat shrink on press, an exit animation, and a height transition when the\nmenu switches pages. Reduced motion turns the animations off.",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6ae60cf39574901128138c7152b0e8ae488d6262"
+  },
+  {
+    "hash": "963d96fe7e5834508dc1db3dd1144d936f15ee0a",
+    "shortHash": "963d96f",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T22:26:36+03:00",
+    "subject": "Replace Firefox's app menu with Hilal's own Material 3 Expressive menu",
+    "body": "The menu button opens a menu built like the color panel: grouped tonal\ncards, Material Symbols icons, keyboard shortcuts, a zoom row and sub pages\nfor More Tools and Help. Items run the same Firefox commands as the stock\nmenu and use Firefox's translated labels.",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/963d96fe7e5834508dc1db3dd1144d936f15ee0a"
+  },
+  {
+    "hash": "e54e0241431a7d586550c9be13803ec8cb874cdc",
+    "shortHash": "e54e024",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T22:20:43+03:00",
+    "subject": "Lay out the app menu and shared panel parts as M3 Expressive cards",
+    "body": "The app menu's rows become tonal card groups with large outer and small\ninner corners, separators turn into gaps, and zoom gets pill buttons.\nPanel headers, content, dropdowns and footer buttons used by the\ntranslations panel, permission prompts and other doorhangers get the same\ntreatment: content on a tonal card, filled rounded dropdowns, pill buttons\nwith a filled default action. The color panel is more compact.",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e54e0241431a7d586550c9be13803ec8cb874cdc"
+  },
+  {
+    "hash": "daa46074e5bea31e2efd8ebfdd82f76f1589645c",
+    "shortHash": "daa4607",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T22:12:23+03:00",
+    "subject": "Fix the Material token bridge and the automatic colors",
+    "body": "- hilal-m3-firefox.css declared a default XUL namespace, which also applies\n  to :root; the browser window's root is XHTML, so none of its rules ever\n  matched. Without it the panels, menus and buttons take the M3 tokens.\n- The site and boost accents never reached the window: a <browser>'s\n  ownerGlobal is undefined from a window actor parent.\n- Automatic boosts darkened every page, turning dark sites light. Only\n  pages known to be light are darkened now; a site's own look is learned\n  from a load without an automatic boost on it.\n- A boost can color the browser while its site is shown (new switch in\n  the Colors card).\n- The palette button opens a Material 3 Expressive color panel with the\n  accent colors, the site color switch, the automatic boost mode, an\n  on/off for the current site and the darken switch.",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/daa46074e5bea31e2efd8ebfdd82f76f1589645c"
+  },
+  {
+    "hash": "ad026bb5d7d39afd5315adf91eba2938eb32b758",
+    "shortHash": "ad026bb",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T21:50:50+03:00",
+    "subject": "Website: follow Hilal Browser's accent color when opened in it",
+    "body": "A chip in the navigation bar shows up only inside Hilal and switches\nbetween the browser's accent and the site's own colors.",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ad026bb5d7d39afd5315adf91eba2938eb32b758"
+  },
+  {
+    "hash": "3df74ab00c5bef0490b6ffd8cac05148e7428adf",
+    "shortHash": "3df74ab",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T21:50:50+03:00",
+    "subject": "Add automatic boosts and site-colored browser chrome",
+    "body": "Sites without a boost of their own can be recolored with the browser's\naccent color (hilal.boosts.auto.mode: off, all, or compatible, which skips\npages that already style themselves dark), and turned dark while Hilal is\ndark. The browser can also take the selected page's accent color, from its\ntheme-color or guessed from its header and links. Both are in Settings >\nHilal > Automatic Colors.\n\nHilal's own website is told the browser's accent through two attributes\non its root element; no other site can see them.\n\nThe UI smoke checks both against a local page and the live website.",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/3df74ab00c5bef0490b6ffd8cac05148e7428adf"
+  },
+  {
+    "hash": "18113510a67f44c269d892e5841211214d2ea70f",
+    "shortHash": "1811351",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T21:45:27+03:00",
+    "subject": "Install desktop-file-utils for appimagetool",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/18113510a67f44c269d892e5841211214d2ea70f"
+  },
+  {
+    "hash": "efd30ec05e7854b5f3ded66c9788612cc385c0af",
+    "shortHash": "efd30ec",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T21:45:08+03:00",
+    "subject": "Merge pull request #37 from AtaberkCelil/main",
+    "body": "Bugs fixed",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/efd30ec05e7854b5f3ded66c9788612cc385c0af"
+  },
+  {
+    "hash": "554e550bd101f5deec8d42313aa53ec7f0bcfacb",
+    "shortHash": "554e550",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T21:44:01+03:00",
+    "subject": "Install ImageMagick in the Linux test job for whole-screen captures",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/554e550bd101f5deec8d42313aa53ec7f0bcfacb"
+  },
+  {
+    "hash": "64cef09d65648e7feb8caa64127633ea755cfb41",
+    "shortHash": "64cef09",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T21:43:52+03:00",
+    "subject": "Give Firefox's own panels, buttons and dialogs the Material 3 look",
+    "body": "hilal-m3-firefox.css maps Firefox's design tokens (buttons, panels, menus,\ninputs, links, focus rings, corner radii) onto Hilal's Material tokens, so\nthe app menu, the translations panel, permission prompts and moz-button\nfollow the same colors and shapes as the Boosts editor and the workspace\naccent. The About dialog loads the same tokens and gets the window's accent\nwhen it opens. The workspace dialog drops its duplicated injected CSS,\nfollows M3 dialog specs and is now translated.\n\nThe UI smoke captures the app menu, the workspace dialog and the About\ndialog, and checks the workspace dialog is translated in Turkish.",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/64cef09d65648e7feb8caa64127633ea755cfb41"
+  },
+  {
+    "hash": "38c0e10d80802473f281562591afafd5dc272a2d",
+    "shortHash": "38c0e10",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T20:37:20+03:00",
+    "subject": "Record shell startup failures and fail the UI smoke on them",
+    "body": "",
+    "category": "style",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/38c0e10d80802473f281562591afafd5dc272a2d"
+  },
+  {
+    "hash": "5a40ac5d1662b1aa5462a6bbdafe3642fb265eb2",
+    "shortHash": "5a40ac5",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T20:37:08+03:00",
+    "subject": "Keep starting the Hilal shell when one startup step fails",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5a40ac5d1662b1aa5462a6bbdafe3642fb265eb2"
+  },
+  {
+    "hash": "60acb1ce24abf180266c280ea34701ebba0a16fe",
+    "shortHash": "60acb1c",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T20:36:33+03:00",
+    "subject": "Ship and test every package users install",
+    "body": "The Windows installer was built but never picked up after the move to\npackage-multi-locale, and the AppImage had not been built since the CI\nmove, so v0.4.0-alpha.2 shipped without both. Collect the installer from\nwhere make package writes it and fail when it is missing, build the\nAppImage from the tested tarball, and refuse to publish a release that\nlacks either or a signed update.\n\nThe UI smoke now goes through the welcome screen by clicking it like a\nuser, checks that Firefox's own toolbar and sidebar stay hidden, restarts\nthe browser with the same profile and checks the shell again. Windows also\ninstalls with the setup program and runs that copy in Turkish.",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/60acb1ce24abf180266c280ea34701ebba0a16fe"
+  },
+  {
+    "hash": "242014c61fa604c57734b60badd2bf642bb2ac7d",
+    "shortHash": "242014c",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T20:25:33+03:00",
+    "subject": "Generate release notes against the previous desktop release [skip ci]",
+    "body": "",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/242014c61fa604c57734b60badd2bf642bb2ac7d"
+  },
+  {
+    "hash": "ac4cba115bb26f4c4fc93885ae16cde5dc914365",
+    "shortHash": "ac4cba1",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T20:25:18+03:00",
+    "subject": "Tell macOS users how to open the unsigned app",
+    "body": "README, docs/INSTALL-MACOS.md, the website docs and download dialog, and the\nrelease and nightly notes now give the one-line xattr fix.",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ac4cba115bb26f4c4fc93885ae16cde5dc914365"
+  },
+  {
+    "hash": "f07cc43f1583171f448e62545195c41a67c62bde",
+    "shortHash": "f07cc43",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T19:15:13+03:00",
+    "subject": "Drop desktop workspaces from the roadmap; they already exist",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f07cc43f1583171f448e62545195c41a67c62bde"
+  },
+  {
+    "hash": "0ecf834998544fb390eaa0b15640637883d7f79d",
+    "shortHash": "0ecf834",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T19:14:59+03:00",
+    "subject": "Add a roadmap",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/0ecf834998544fb390eaa0b15640637883d7f79d"
+  },
+  {
+    "hash": "d8fe777587c134588bd55a05e1d141aa70b301a8",
+    "shortHash": "d8fe777",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T19:14:31+03:00",
+    "subject": "Test updating the latest release to each build through its own updater",
+    "body": "",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d8fe777587c134588bd55a05e1d141aa70b301a8"
+  },
+  {
+    "hash": "6fc0aa14ba673a334a46db20054660852d6a4aca",
+    "shortHash": "6fc0aa1",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T19:09:45+03:00",
+    "subject": "Check in the UI smoke that Extreme privacy turns on fingerprinting resistance",
+    "body": "",
+    "category": "style",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6fc0aa14ba673a334a46db20054660852d6a4aca"
+  },
+  {
+    "hash": "cdf178d4df84369ef6d8058954ac3bfd11b1c877",
+    "shortHash": "cdf178d",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T19:08:15+03:00",
+    "subject": "Watch for new ESR point releases and test their bump automatically",
+    "body": "Also diff test-only pushes against the commit the reused packages were\nbuilt from, so a skipped queued push cannot hide a build change. [skip ci]",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cdf178d4df84369ef6d8058954ac3bfd11b1c877"
+  },
+  {
+    "hash": "beae074f03a35f2e99816b62d5db3291c4717c4d",
+    "shortHash": "beae074",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T19:06:12+03:00",
+    "subject": "Move to Firefox ESR 153.6.0",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/beae074f03a35f2e99816b62d5db3291c4717c4d"
+  },
+  {
+    "hash": "a01bffafa9936a9d58a6ceb100d1079798779dd7",
+    "shortHash": "a01bffa",
+    "author": "AtaberkCelil",
+    "date": "2026-11-06T17:49:59+03:00",
+    "subject": "Merge remote-tracking branch 'origin/main'",
+    "body": "# Conflicts:\n#",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a01bffafa9936a9d58a6ceb100d1079798779dd7"
+  },
+  {
+    "hash": "69b79814bf99c9be4d59079f80ffdf7e4834436c",
+    "shortHash": "69b7981",
+    "author": "AtaberkCelil",
+    "date": "2026-11-06T17:44:43+03:00",
+    "subject": "Fix BookmarkDao.search crashing on the SQLite ESCAPE clause",
+    "body": "In a normal Kotlin string the '\\' between quotes decodes to an escaped\nquote, so the query reaches SQLite with ESCAPE '' and fails. Escape it\nso the ESCAPE character is a single backslash.",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/69b79814bf99c9be4d59079f80ffdf7e4834436c"
+  },
+  {
+    "hash": "9399b2a01dd4445ff2ef7c4537d6a846d231c4a9",
+    "shortHash": "9399b2a",
+    "author": "AtaberkCelil",
+    "date": "2026-11-06T17:44:43+03:00",
+    "subject": "hil build: actually skip applying patches on Windows",
+    "body": "--skip-apply skipped the apply in hil but omitted -SkipApply from the\ninvoked build-windows.ps1, so the script re-applied the patches anyway.\nPass -SkipApply unconditionally: build() always leaves the engine\nalready patched.",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9399b2a01dd4445ff2ef7c4537d6a846d231c4a9"
+  },
+  {
+    "hash": "bbd56cc1d81415b2c4a7ad299fd94c758d8ba8fd",
+    "shortHash": "bbd56cc",
+    "author": "AtaberkCelil",
+    "date": "2026-11-06T17:44:25+03:00",
+    "subject": "hil: never delete files outside an overlay when syncing",
+    "body": "Overlays can live inside upstream folders (e.g. the updater certificates\nin toolkit/mozapps/update/updater), so mirroring during apply/refresh\ndeleted Firefox's own files in engine/ and broke the build. Go back to\nplain recursive copy.",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/bbd56cc1d81415b2c4a7ad299fd94c758d8ba8fd"
+  },
+  {
+    "hash": "12466f2a1dac6666a90dbc0bc14cd47a552c3b98",
+    "shortHash": "12466f2",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T16:37:35+03:00",
+    "subject": "Do not save a compiler cache from a cancelled build",
+    "body": "",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/12466f2a1dac6666a90dbc0bc14cd47a552c3b98"
+  },
+  {
+    "hash": "018a7a3dd6814f822e175c75efc41fcfa75ee062",
+    "shortHash": "018a7a3",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T14:51:41+03:00",
+    "subject": "Keep tag builds from deleting main's compiler cache",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/018a7a3dd6814f822e175c75efc41fcfa75ee062"
+  },
+  {
+    "hash": "132a99bece9e766c26d25d160266f8b233814d3f",
+    "shortHash": "132a99b",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T12:33:43+03:00",
+    "subject": "Release 0.4.0-alpha.2",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/132a99bece9e766c26d25d160266f8b233814d3f"
+  },
+  {
+    "hash": "723f56d6157549ce3b67ad2cae7f87ab42098746",
+    "shortHash": "723f56d",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T03:04:29+03:00",
+    "subject": "Give the Linux smoke tests room for a cold apt cache",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/723f56d6157549ce3b67ad2cae7f87ab42098746"
+  },
+  {
+    "hash": "55c74d87c061d152786792719dd7479adc45b06f",
+    "shortHash": "55c74d8",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T02:15:28+03:00",
+    "subject": "Never fail a build over compiler cache cleanup",
+    "body": "",
+    "category": "refactor",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/55c74d87c061d152786792719dd7479adc45b06f"
+  },
+  {
+    "hash": "e6e5dc610d45abd7d459f6df00497499bcfbe089",
+    "shortHash": "e6e5dc6",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T02:08:17+03:00",
+    "subject": "Let the build workflow delete superseded caches",
+    "body": "A reusable workflow's permissions block replaces the caller's, so the\ncache cleanup step only had contents: read. Spotted by AtaberkCelil in #37.",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e6e5dc610d45abd7d459f6df00497499bcfbe089"
+  },
+  {
+    "hash": "179e2f1586e783ca78c600394d55d8fe5ab3fa42",
+    "shortHash": "179e2f1",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T01:49:21+03:00",
+    "subject": "Cache apt packages in the Linux and Flatpak test jobs too",
+    "body": "The Wayland smoke test timed out after 30 minutes spent downloading\npackages from the slow Azure mirror. The install logic moves into\nscripts/ci/apt-install.sh, shared by the build and test jobs.",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/179e2f1586e783ca78c600394d55d8fe5ab3fa42"
+  },
+  {
+    "hash": "6361a081e6627da79133343073b2580ea8cf5c14",
+    "shortHash": "6361a08",
+    "author": "AtaberkCelil",
+    "date": "2026-11-06T01:39:53+03:00",
+    "subject": "Fix Android runtime bugs",
+    "body": "- downloads: expose pre-Android 10 files through FileProvider instead of\n  file:// URIs, which crashed ACTION_VIEW with FileUriExposedException;\n  delete now removes the file or MediaStore entry, not just the row\n- permissions: queue Gecko permission requests instead of overwriting a\n  single callback slot, so concurrent requests (or activity recreation)\n  no longer leave a page waiting forever; pending requests are rejected\n  on destroy\n- live updates: gate in-flight checks on the disabled flag so a download\n  finishing after disable() can no longer resurrect the bundle and cache\n- suggestions: escape LIKE wildcards in history and bookmark search with\n  ESCAPE '\\' so % and _ match literally",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6361a081e6627da79133343073b2580ea8cf5c14"
+  },
+  {
+    "hash": "e738cd98eb79968b210b2a29b69fafabd37c7938",
+    "shortHash": "e738cd9",
+    "author": "AtaberkCelil",
+    "date": "2026-11-06T01:39:49+03:00",
+    "subject": "Fix website bugs and leaks",
+    "body": "- telemetry.ts: parse the request URL with a constant base; a crafted\n  Host header crashed the handler instead of returning the health JSON\n- telemetry.ts: await the aggregate counter writes before responding;\n  fire-and-forget fetches can be frozen away on serverless and counters\n  silently stop updating\n- releases: filter draft releases out of the GraphQL path so drafts are\n  not served on the public /releases.json, matching the REST fallback\n- DocsPage: section TOC links no longer use bare anchor hashes that the\n  app-wide hash router resolves to the home view, unmounting the docs\n  page mid-click; copy buttons now check clipboard availability\n- formatInline/formatHighlightText: escape HTML before inline markdown\n  formatting so raw content cannot reach dangerouslySetInnerHTML\n- App: fetch releases once with a stale-response guard instead of\n  refetching on every language toggle",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e738cd98eb79968b210b2a29b69fafabd37c7938"
+  },
+  {
+    "hash": "977bca77ebaabcd92d4c034c1c111e43a2c3a54f",
+    "shortHash": "977bca7",
+    "author": "AtaberkCelil",
+    "date": "2026-11-06T01:39:45+03:00",
+    "subject": "Fix CI and release asset bugs",
+    "body": "- build-target.yml: grant actions:write; the workflow's own permissions\n  block clamps GITHUB_TOKEN, so gh cache delete always failed with 403\n  and killed the job before the package was uploaded\n- release.yml: generate SHA256SUMS after the SBOM step so every released\n  file, including the SBOM itself, gets a checksum entry",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/977bca77ebaabcd92d4c034c1c111e43a2c3a54f"
+  },
+  {
+    "hash": "eddaf98ddcf2bb0bbd353449c62121ca507252b5",
+    "shortHash": "eddaf98",
+    "author": "AtaberkCelil",
+    "date": "2026-11-06T01:39:42+03:00",
+    "subject": "Fix build script bugs on Linux, Flatpak and Windows",
+    "body": "- build-linux.sh cli step: join CLI args with [@] so multi-argument\n  invocations are not collapsed into one argument\n- build-flatpak.sh: copy icons from changes/browser/branding/hilal\n  instead of the nonexistent branding/ directory, which silently left\n  Flatpak builds without icons\n- build-flatpak.sh / build-appimage.sh: append build_count when the\n  config exists but lacks the key; sed succeeds with no match so the\n  counter could stay 1 forever\n- build-windows.ps1: define Write-Step/Write-Warn/Write-Err before the\n  argument loop; with ErrorActionPreference Stop an unexpected argument\n  previously crashed the script instead of warning",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/eddaf98ddcf2bb0bbd353449c62121ca507252b5"
+  },
+  {
+    "hash": "1c271d9a40ecbff20b0ceb15e9b8d8c7feba5ce3",
+    "shortHash": "1c271d9",
+    "author": "AtaberkCelil",
+    "date": "2026-11-06T01:39:37+03:00",
+    "subject": "Fix flag handling and reliability bugs in hil",
+    "body": "- build: pass faster/binaries/run/package flags independently instead of\n  dropping all but the first on Unix\n- build: only pass -SkipApply to the Windows script when patches were\n  already applied in-process, so --skip-apply no longer builds an\n  unpatched engine\n- apply: make --dry-run actually verify each patch with git apply --check\n- apply: fail when committing an applied patch or overlay fails instead\n  of continuing silently\n- apply/refresh: mirror directory overlays so files deleted from the\n  overlay no longer survive in engine/ and get copied back by refresh\n- refresh: match commits to manifest entries by commit subject instead\n  of trusting positional order only\n- get_patch_files: parse quoted 'diff --git \"a/..\" \"b/..\"' headers so\n  patches with spaces in paths are committed, not left dangling\n- validate/apply/refresh: reject absolute or '..' manifest paths\n- doctor: check rustup for the actually installed msvc target, parse\n  LongPathsEnabled properly and treat failed registry queries as\n  warnings\n- replace path unwraps with anyhow context",
+    "category": "fix",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1c271d9a40ecbff20b0ceb15e9b8d8c7feba5ce3"
+  },
+  {
+    "hash": "9fcfb75b9ef66bc630550a51f7d8f8af23893434",
+    "shortHash": "9fcfb75",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T01:07:32+03:00",
+    "subject": "Speed up CI and keep its compiler cache warm",
+    "body": "- Delete superseded sccache entries after a successful build; three\n  ~900 MB caches per run filled the 10 GB limit, and eviction of the\n  newest one makes the next build start cold.\n- Keep the build dependency .debs in the Actions cache; the Azure apt\n  mirror sometimes took 8 minutes for 16 MB.\n- Free runner disk space in the background while the source is fetched.\n- Pushes that only touch tests, packaging, docs or the website retest\n  the newest packages instead of building.",
+    "category": "perf",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9fcfb75b9ef66bc630550a51f7d8f8af23893434"
+  },
+  {
+    "hash": "ef8e76c3319501f451d3ad208bbc6a2d3cbe04e6",
+    "shortHash": "ef8e76c",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T00:33:51+03:00",
+    "subject": "Keep build secrets and the MAR tool in RUNNER_TEMP",
+    "body": "/mnt is not writable by the runner user, so creating the signed update\nfailed on Linux and Windows as soon as HILAL_MAR_SIGNING_KEY was set.",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ef8e76c3319501f451d3ad208bbc6a2d3cbe04e6"
+  },
+  {
+    "hash": "85b0d1d787b6fd9819d5e30405181a6ed39423ac",
+    "shortHash": "85b0d1d",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-06T00:11:07+03:00",
+    "subject": "Build Turkish into the browser instead of shipping an unsigned langpack",
+    "body": "Release builds enforce signed langpacks, so the bundled Turkish XPI never\nloaded. CI now packages with mach package-multi-locale (HILAL_LOCALES,\ndefault tr), setup-locales fetches the firefox-l10n revision pinned for\nthis Firefox version, and the smoke test checks that tr is an available\nlocale. The langpack XPI, its builder and the prefs that tried to allow\nunsigned langpacks are removed.",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/85b0d1d787b6fd9819d5e30405181a6ed39423ac"
+  },
+  {
+    "hash": "5c55947d5c2dbd85340f6b17ba7afb5423f1b5ae",
+    "shortHash": "5c55947",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-05T23:24:23+03:00",
+    "subject": "Use io.github.VastSea0.Hilal as the Linux app ID",
+    "body": "The gkdevstudio name is retired and there is no domain, so use the\nGitHub-based ID that Flathub verifies through the GitHub account. Also\nset the AppStream metadata license to CC0-1.0, since appstreamcli\nrejects MPL-2.0 there and that failed the Flatpak CI job.",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5c55947d5c2dbd85340f6b17ba7afb5423f1b5ae"
+  },
+  {
+    "hash": "7e497d7fa4cf891e59cd414f886b065d00db7406",
+    "shortHash": "7e497d7",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-05T01:51:41+03:00",
+    "subject": "Package distribution/ in every build so policies and uBlock ship",
+    "body": "package-manifest.in only packaged distribution/ for Mozilla's own\nbuilds, so no Hilal package (tarball, DMG, zip, installer or Flatpak)\ncarried policies.json or the bundled add-ons: uBlock Origin never\ninstalled and the updater had no Hilal update URL. The CI UI smoke\ncaught it on all four platforms; local runs from the objdir hid it.",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/7e497d7fa4cf891e59cd414f886b065d00db7406"
+  },
+  {
+    "hash": "bbab627dda05734eb7a3b44543fd1fd66ddf065f",
+    "shortHash": "bbab627",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-05T01:18:41+03:00",
+    "subject": "Start each platform's tests as soon as its own build is done [skip ci]",
+    "body": "The build matrix made every test wait for the slowest build (Windows).\nEach target is now its own call of build-target.yml.",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/bbab627dda05734eb7a3b44543fd1fd66ddf065f"
+  },
+  {
+    "hash": "a5a6967d5a9f9908abac9164c842896bbdda57d3",
+    "shortHash": "a5a6967",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T22:58:06+03:00",
+    "subject": "Let a running CI build finish instead of cancelling it on each push [skip ci]",
+    "body": "",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a5a6967d5a9f9908abac9164c842896bbdda57d3"
+  },
+  {
+    "hash": "5e831366499870943220dd639d0fab561ad98eb1",
+    "shortHash": "5e83136",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T22:38:36+03:00",
+    "subject": "Keep Android-only changes out of the desktop CI [skip ci]",
+    "body": "",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5e831366499870943220dd639d0fab561ad98eb1"
+  },
+  {
+    "hash": "ba31e4555eb03e170bf94308d66787f5af4b0b92",
+    "shortHash": "ba31e45",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T22:37:56+03:00",
+    "subject": "Add signed live updates to the Android app",
+    "body": "A signed bundle built from android/ota/ is published on the rolling\nandroid-ota GitHub release and checked by the app at start, on return to\nthe foreground and every six hours. It carries feature flags, start page\nnotices, search engines, bangs and site fixes, which the built-in Hilal\nLive extension registers as content scripts, plus the newest APK release\nso older apps offer the update. The app verifies an ECDSA P-256\nsignature against a compiled-in key and refuses older bundles. Live\nupdates can be turned off in settings.",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ba31e4555eb03e170bf94308d66787f5af4b0b92"
+  },
+  {
+    "hash": "c7267b4fef7c69c7d2c04da5f1ea8546af4c5caf",
+    "shortHash": "c7267b4",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T22:30:27+03:00",
+    "subject": "Add workspaces to the Android app",
+    "body": "Normal tabs belong to a workspace. The tab overview shows a workspace\nstrip to switch, create and edit them, and a long press on a tab card\nmoves it to another workspace. Like the desktop containers, a workspace\ncan keep its own cookies and logins through a Gecko session context,\nwhich is cleared when the workspace is deleted.",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c7267b4fef7c69c7d2c04da5f1ea8546af4c5caf"
+  },
+  {
+    "hash": "210cf3409c82b61bf615127da94edc627e7aa615",
+    "shortHash": "210cf34",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T21:59:54+03:00",
+    "subject": "Check bundled add-ons, policies, updates and Safe Browsing in the UI smoke [skip ci]",
+    "body": "Runs the release checks against the running browser: uBlock Origin is\nactive, policies load, updates point at Hilal's server (or are off in the\nFlatpak) and whether a Safe Browsing key is built in. The Turkish\nlanguage pack check is reported as a known issue: release builds reject\nthe self-built, unsigned langpack, so the Turkish UI never loads.",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/210cf3409c82b61bf615127da94edc627e7aa615"
+  },
+  {
+    "hash": "af5dd8358be8fbc7dd15e7a82510a6d6c45740d4",
+    "shortHash": "af5dd83",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T21:56:29+03:00",
+    "subject": "List only installable files in the website download dialog",
+    "body": "The dialog showed every release asset, labelling update MARs, checksums\nand the SBOM as Linux tarballs and hil.exe as the Windows installer. Also\nstop promising a universal DMG and .deb packages that are not built.",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/af5dd8358be8fbc7dd15e7a82510a6d6c45740d4"
+  },
+  {
+    "hash": "2cb16cf8c5ad6ba3f15d295c3dec9845c17f31b4",
+    "shortHash": "2cb16cf",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T21:55:27+03:00",
+    "subject": "Make the Flatpak manifest buildable and test it in CI [skip ci]",
+    "body": "The manifest expected an archive that was never in git, pointed at icon\npaths that do not exist and replaced Hilal's policies.json, dropping the\nbundled uBlock and langpack policies. It now repackages the tested Linux\nrelease tarball like Zen's Flathub app, merges DisableAppUpdate into the\nexisting policies and lets Flathub's external data checker pick up new\nreleases. CI builds it from the fresh tarball and runs the UI smoke\ninside the sandbox.",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2cb16cf8c5ad6ba3f15d295c3dec9845c17f31b4"
+  },
+  {
+    "hash": "d72739ac2fe208401dc67b772fea64f13bee371b",
+    "shortHash": "d72739a",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T21:53:28+03:00",
+    "subject": "Document the zero-cost rule and CI-as-test-lab for agents [skip ci]",
+    "body": "",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d72739ac2fe208401dc67b772fea64f13bee371b"
+  },
+  {
+    "hash": "882acf72ad07ba2415338508c46b3e5398237822",
+    "shortHash": "882acf7",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T21:53:01+03:00",
+    "subject": "Share one build ID across platforms, add Rust cross targets, allow release calls",
+    "body": "",
+    "category": "feature",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/882acf72ad07ba2415338508c46b3e5398237822"
+  },
+  {
+    "hash": "471dee2a7cdc04f0f2beb8d47508c4dcfc90281c",
+    "shortHash": "471dee2",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T21:53:01+03:00",
+    "subject": "Release through the CI pipeline with signed updates for every platform [skip ci]",
+    "body": "release.yml now calls ci.yml, so a release is built and UI-tested\nexactly like main and is published only when all platforms pass. It\nthen attaches signed MARs for Linux, macOS and Windows and an update\nmanifest covering all three. MARs carry the Firefox app version, since\nthe updater refuses one lower than the installed version, and the macOS\nMAR is made from the ad-hoc signed bundle on the macOS runner.",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/471dee2a7cdc04f0f2beb8d47508c4dcfc90281c"
+  },
+  {
+    "hash": "c6e8546ba39220a8508b9af6a9b1652ce4620bf0",
+    "shortHash": "c6e8546",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T21:47:55+03:00",
+    "subject": "Fetch only the pinned Firefox commit in hil setup [skip ci]",
+    "body": "A blob-less clone still downloads Firefox's whole commit history and\ntook over 15 minutes per CI job. A depth-1 fetch of the pinned commit is\nall apply and refresh need.",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c6e8546ba39220a8508b9af6a9b1652ce4620bf0"
+  },
+  {
+    "hash": "5dd9c3ccf11a583b8f8f5145c03f6e7c897c7314",
+    "shortHash": "5dd9c3c",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T21:47:04+03:00",
+    "subject": "Build with a Google Safe Browsing key when one is configured [skip ci]",
+    "body": "Without a key Firefox's phishing and malware protection does nothing.\nThe key is free for non-commercial use; CI reads it from the\nHILAL_SAFEBROWSING_API_KEY secret and warns when it is missing.",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5dd9c3ccf11a583b8f8f5145c03f6e7c897c7314"
+  },
+  {
+    "hash": "3f0b92cf060df68e1e7c70b5cb5fe4516f0a5c6f",
+    "shortHash": "3f0b92c",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T21:47:04+03:00",
+    "subject": "Turn RLBox library sandboxing back on for shipped builds [skip ci]",
+    "body": "It was switched off to save build time. Firefox sandboxes several\nthird-party libraries with it on every desktop platform; keep it off only\nfor HILAL_DEV_BUILD and the offline Flatpak build.",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/3f0b92cf060df68e1e7c70b5cb5fe4516f0a5c6f"
+  },
+  {
+    "hash": "53160b115fcfc5207846822fde07a6e1a7038f14",
+    "shortHash": "53160b1",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T21:46:02+03:00",
+    "subject": "Make and verify a signed update MAR in every CI build [skip ci]",
+    "body": "",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/53160b115fcfc5207846822fde07a6e1a7038f14"
+  },
+  {
+    "hash": "fe95ac861f648afd48e9da5f1f42bd92443415d8",
+    "shortHash": "fe95ac8",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T21:46:02+03:00",
+    "subject": "Sign updates with new keys through build-mar [skip ci]",
+    "body": "The private keys behind the old updater certificates are gone, so no\nrelease could ever ship a signed update. Replace both certificates with\nnew RSA-4096 ones and sign MARs with Mozilla's build-mar and a PEM key,\nwhich works on Linux for cross-compiled macOS and Windows builds. The\nsigned MAR is verified against the certificate the updater ships with.",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/fe95ac861f648afd48e9da5f1f42bd92443415d8"
+  },
+  {
+    "hash": "539a6c5ef55a1736dae03db3f01365feb201680f",
+    "shortHash": "539a6c5",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T21:38:44+03:00",
+    "subject": "Build and UI-test every main push on free GitHub runners",
+    "body": "Linux is built natively; macOS and Windows are cross-compiled on Linux\nlike Mozilla and Zen do, with the macOS SDK and Windows sysroot\nbootstrapped from Mozilla's public toolchain index. Each package is then\nlaunched on its own OS (Linux under X11 and Wayland) and checked through\nMarionette with a dependency-free script that also takes screenshots.\nPackages that pass are published as the rolling nightly pre-release.",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/539a6c5ef55a1736dae03db3f01365feb201680f"
+  },
+  {
+    "hash": "279b8b6b04cfaa3817d1e0773a063b27c2327f17",
+    "shortHash": "279b8b6",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-04T21:31:47+03:00",
+    "subject": "Show the window buttons on Windows and Linux",
+    "body": "The shell hid the titlebar button box everywhere except macOS. Keep the\ntraffic light sizing macOS-only, put the caption buttons at the end of\nthe top row (start when GTK places them on the left), and let upstream\nrules hide them when the system draws the titlebar.",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/279b8b6b04cfaa3817d1e0773a063b27c2327f17"
+  },
+  {
+    "hash": "80f3709086808338f669d114d87cdaa0d500b5c5",
+    "shortHash": "80f3709",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-02T21:43:53+03:00",
+    "subject": "Give the macOS release build the real rustc and cargo instead of rustup proxies",
+    "body": "",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/80f3709086808338f669d114d87cdaa0d500b5c5"
+  },
+  {
+    "hash": "fd4217b9888ff57efb52cfce16b6e2e64977f767",
+    "shortHash": "fd4217b",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-02T20:47:12+03:00",
+    "subject": "Pin Python 3.13 in the macOS release build so toolchain bootstrap works",
+    "body": "",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/fd4217b9888ff57efb52cfce16b6e2e64977f767"
+  },
+  {
+    "hash": "d8e67956c0889d5c0e41aeee6125772471f82fdc",
+    "shortHash": "d8e6795",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-02T13:17:37+03:00",
+    "subject": "Build an ad-hoc signed macOS DMG in CI when Apple signing secrets are missing",
+    "body": "",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d8e67956c0889d5c0e41aeee6125772471f82fdc"
+  },
+  {
+    "hash": "6b8ef221968f33c4a03e430a34401cb2d601fc90",
+    "shortHash": "6b8ef22",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-02T00:11:24+03:00",
+    "subject": "Name the Windows release assets after Hilal and skip the xpt archive",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6b8ef221968f33c4a03e430a34401cb2d601fc90"
+  },
+  {
+    "hash": "a235697b8da52fc939a29da0ef30fc316213ccfb",
+    "shortHash": "a235697",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-01T20:12:52+03:00",
+    "subject": "Bootstrap Mozilla's toolchains in CI release builds",
+    "body": "",
+    "category": "build",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a235697b8da52fc939a29da0ef30fc316213ccfb"
+  },
+  {
+    "hash": "71caba5cb7415aac0dae8ef58089fdcc9afbb2b5",
+    "shortHash": "71caba5",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-01T19:59:14+03:00",
+    "subject": "Install cbindgen in the release builds",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/71caba5cb7415aac0dae8ef58089fdcc9afbb2b5"
+  },
+  {
+    "hash": "cf5f0006013d3e1b78db2075c17333f5915fbbd9",
+    "shortHash": "cf5f000",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-01T19:47:34+03:00",
+    "subject": "Use current desktop screenshots in the Flatpak metainfo",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cf5f0006013d3e1b78db2075c17333f5915fbbd9"
+  },
+  {
+    "hash": "76f5f33add45639bf032f367ff3c577cc365703e",
+    "shortHash": "76f5f33",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-01T19:46:21+03:00",
+    "subject": "Release v0.4.0-alpha.1",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/76f5f33add45639bf032f367ff3c577cc365703e"
+  },
+  {
+    "hash": "6c936e145b58bfaf93524ee8d1243a240f460b44",
+    "shortHash": "6c936e1",
+    "author": "Egehan KAHRAMAN",
+    "date": "2026-11-01T19:46:21+03:00",
+    "subject": "Ignore the local Vercel link and env files",
+    "body": "",
+    "category": "chore",
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6c936e145b58bfaf93524ee8d1243a240f460b44"
+  },
   {
     "hash": "eef8f4e00de976f84fedf29df0e9d1c92b538bfb",
     "shortHash": "eef8f4e",
@@ -5830,12 +6520,2124 @@ export const ALL_COMMITS: CommitEntry[] = [
 
 export const RELEASES_DATA: ReleaseGroup[] = [
   {
+    "tag": "main",
+    "version": "Geliştirme / Unreleased",
+    "isDev": true,
+    "date": "2026-11-06T22:28:24+03:00",
+    "commitCount": 32,
+    "commits": [
+      {
+        "hash": "6ae60cf39574901128138c7152b0e8ae488d6262",
+        "shortHash": "6ae60cf",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T22:28:24+03:00",
+        "subject": "Polish the Hilal menu and color panel: unclipped labels and motion",
+        "body": "Labels no longer lose their first letter to the ellipsis clip, Beer CSS no\nlonger reshapes hovered rows, and both panels get M3 Expressive motion:\nstate-layer transitions, rows that round into pills when pressed, buttons\nthat shrink on press, an exit animation, and a height transition when the\nmenu switches pages. Reduced motion turns the animations off.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6ae60cf39574901128138c7152b0e8ae488d6262"
+      },
+      {
+        "hash": "963d96fe7e5834508dc1db3dd1144d936f15ee0a",
+        "shortHash": "963d96f",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T22:26:36+03:00",
+        "subject": "Replace Firefox's app menu with Hilal's own Material 3 Expressive menu",
+        "body": "The menu button opens a menu built like the color panel: grouped tonal\ncards, Material Symbols icons, keyboard shortcuts, a zoom row and sub pages\nfor More Tools and Help. Items run the same Firefox commands as the stock\nmenu and use Firefox's translated labels.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/963d96fe7e5834508dc1db3dd1144d936f15ee0a"
+      },
+      {
+        "hash": "e54e0241431a7d586550c9be13803ec8cb874cdc",
+        "shortHash": "e54e024",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T22:20:43+03:00",
+        "subject": "Lay out the app menu and shared panel parts as M3 Expressive cards",
+        "body": "The app menu's rows become tonal card groups with large outer and small\ninner corners, separators turn into gaps, and zoom gets pill buttons.\nPanel headers, content, dropdowns and footer buttons used by the\ntranslations panel, permission prompts and other doorhangers get the same\ntreatment: content on a tonal card, filled rounded dropdowns, pill buttons\nwith a filled default action. The color panel is more compact.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e54e0241431a7d586550c9be13803ec8cb874cdc"
+      },
+      {
+        "hash": "daa46074e5bea31e2efd8ebfdd82f76f1589645c",
+        "shortHash": "daa4607",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T22:12:23+03:00",
+        "subject": "Fix the Material token bridge and the automatic colors",
+        "body": "- hilal-m3-firefox.css declared a default XUL namespace, which also applies\n  to :root; the browser window's root is XHTML, so none of its rules ever\n  matched. Without it the panels, menus and buttons take the M3 tokens.\n- The site and boost accents never reached the window: a <browser>'s\n  ownerGlobal is undefined from a window actor parent.\n- Automatic boosts darkened every page, turning dark sites light. Only\n  pages known to be light are darkened now; a site's own look is learned\n  from a load without an automatic boost on it.\n- A boost can color the browser while its site is shown (new switch in\n  the Colors card).\n- The palette button opens a Material 3 Expressive color panel with the\n  accent colors, the site color switch, the automatic boost mode, an\n  on/off for the current site and the darken switch.",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/daa46074e5bea31e2efd8ebfdd82f76f1589645c"
+      },
+      {
+        "hash": "ad026bb5d7d39afd5315adf91eba2938eb32b758",
+        "shortHash": "ad026bb",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T21:50:50+03:00",
+        "subject": "Website: follow Hilal Browser's accent color when opened in it",
+        "body": "A chip in the navigation bar shows up only inside Hilal and switches\nbetween the browser's accent and the site's own colors.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ad026bb5d7d39afd5315adf91eba2938eb32b758"
+      },
+      {
+        "hash": "3df74ab00c5bef0490b6ffd8cac05148e7428adf",
+        "shortHash": "3df74ab",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T21:50:50+03:00",
+        "subject": "Add automatic boosts and site-colored browser chrome",
+        "body": "Sites without a boost of their own can be recolored with the browser's\naccent color (hilal.boosts.auto.mode: off, all, or compatible, which skips\npages that already style themselves dark), and turned dark while Hilal is\ndark. The browser can also take the selected page's accent color, from its\ntheme-color or guessed from its header and links. Both are in Settings >\nHilal > Automatic Colors.\n\nHilal's own website is told the browser's accent through two attributes\non its root element; no other site can see them.\n\nThe UI smoke checks both against a local page and the live website.",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/3df74ab00c5bef0490b6ffd8cac05148e7428adf"
+      },
+      {
+        "hash": "18113510a67f44c269d892e5841211214d2ea70f",
+        "shortHash": "1811351",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T21:45:27+03:00",
+        "subject": "Install desktop-file-utils for appimagetool",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/18113510a67f44c269d892e5841211214d2ea70f"
+      },
+      {
+        "hash": "efd30ec05e7854b5f3ded66c9788612cc385c0af",
+        "shortHash": "efd30ec",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T21:45:08+03:00",
+        "subject": "Merge pull request #37 from AtaberkCelil/main",
+        "body": "Bugs fixed",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/efd30ec05e7854b5f3ded66c9788612cc385c0af"
+      },
+      {
+        "hash": "554e550bd101f5deec8d42313aa53ec7f0bcfacb",
+        "shortHash": "554e550",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T21:44:01+03:00",
+        "subject": "Install ImageMagick in the Linux test job for whole-screen captures",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/554e550bd101f5deec8d42313aa53ec7f0bcfacb"
+      },
+      {
+        "hash": "64cef09d65648e7feb8caa64127633ea755cfb41",
+        "shortHash": "64cef09",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T21:43:52+03:00",
+        "subject": "Give Firefox's own panels, buttons and dialogs the Material 3 look",
+        "body": "hilal-m3-firefox.css maps Firefox's design tokens (buttons, panels, menus,\ninputs, links, focus rings, corner radii) onto Hilal's Material tokens, so\nthe app menu, the translations panel, permission prompts and moz-button\nfollow the same colors and shapes as the Boosts editor and the workspace\naccent. The About dialog loads the same tokens and gets the window's accent\nwhen it opens. The workspace dialog drops its duplicated injected CSS,\nfollows M3 dialog specs and is now translated.\n\nThe UI smoke captures the app menu, the workspace dialog and the About\ndialog, and checks the workspace dialog is translated in Turkish.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/64cef09d65648e7feb8caa64127633ea755cfb41"
+      },
+      {
+        "hash": "38c0e10d80802473f281562591afafd5dc272a2d",
+        "shortHash": "38c0e10",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T20:37:20+03:00",
+        "subject": "Record shell startup failures and fail the UI smoke on them",
+        "body": "",
+        "category": "style",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/38c0e10d80802473f281562591afafd5dc272a2d"
+      },
+      {
+        "hash": "5a40ac5d1662b1aa5462a6bbdafe3642fb265eb2",
+        "shortHash": "5a40ac5",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T20:37:08+03:00",
+        "subject": "Keep starting the Hilal shell when one startup step fails",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5a40ac5d1662b1aa5462a6bbdafe3642fb265eb2"
+      },
+      {
+        "hash": "60acb1ce24abf180266c280ea34701ebba0a16fe",
+        "shortHash": "60acb1c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T20:36:33+03:00",
+        "subject": "Ship and test every package users install",
+        "body": "The Windows installer was built but never picked up after the move to\npackage-multi-locale, and the AppImage had not been built since the CI\nmove, so v0.4.0-alpha.2 shipped without both. Collect the installer from\nwhere make package writes it and fail when it is missing, build the\nAppImage from the tested tarball, and refuse to publish a release that\nlacks either or a signed update.\n\nThe UI smoke now goes through the welcome screen by clicking it like a\nuser, checks that Firefox's own toolbar and sidebar stay hidden, restarts\nthe browser with the same profile and checks the shell again. Windows also\ninstalls with the setup program and runs that copy in Turkish.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/60acb1ce24abf180266c280ea34701ebba0a16fe"
+      },
+      {
+        "hash": "242014c61fa604c57734b60badd2bf642bb2ac7d",
+        "shortHash": "242014c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T20:25:33+03:00",
+        "subject": "Generate release notes against the previous desktop release [skip ci]",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/242014c61fa604c57734b60badd2bf642bb2ac7d"
+      },
+      {
+        "hash": "ac4cba115bb26f4c4fc93885ae16cde5dc914365",
+        "shortHash": "ac4cba1",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T20:25:18+03:00",
+        "subject": "Tell macOS users how to open the unsigned app",
+        "body": "README, docs/INSTALL-MACOS.md, the website docs and download dialog, and the\nrelease and nightly notes now give the one-line xattr fix.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ac4cba115bb26f4c4fc93885ae16cde5dc914365"
+      },
+      {
+        "hash": "f07cc43f1583171f448e62545195c41a67c62bde",
+        "shortHash": "f07cc43",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T19:15:13+03:00",
+        "subject": "Drop desktop workspaces from the roadmap; they already exist",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f07cc43f1583171f448e62545195c41a67c62bde"
+      },
+      {
+        "hash": "0ecf834998544fb390eaa0b15640637883d7f79d",
+        "shortHash": "0ecf834",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T19:14:59+03:00",
+        "subject": "Add a roadmap",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/0ecf834998544fb390eaa0b15640637883d7f79d"
+      },
+      {
+        "hash": "d8fe777587c134588bd55a05e1d141aa70b301a8",
+        "shortHash": "d8fe777",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T19:14:31+03:00",
+        "subject": "Test updating the latest release to each build through its own updater",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d8fe777587c134588bd55a05e1d141aa70b301a8"
+      },
+      {
+        "hash": "6fc0aa14ba673a334a46db20054660852d6a4aca",
+        "shortHash": "6fc0aa1",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T19:09:45+03:00",
+        "subject": "Check in the UI smoke that Extreme privacy turns on fingerprinting resistance",
+        "body": "",
+        "category": "style",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6fc0aa14ba673a334a46db20054660852d6a4aca"
+      },
+      {
+        "hash": "cdf178d4df84369ef6d8058954ac3bfd11b1c877",
+        "shortHash": "cdf178d",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T19:08:15+03:00",
+        "subject": "Watch for new ESR point releases and test their bump automatically",
+        "body": "Also diff test-only pushes against the commit the reused packages were\nbuilt from, so a skipped queued push cannot hide a build change. [skip ci]",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cdf178d4df84369ef6d8058954ac3bfd11b1c877"
+      },
+      {
+        "hash": "beae074f03a35f2e99816b62d5db3291c4717c4d",
+        "shortHash": "beae074",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T19:06:12+03:00",
+        "subject": "Move to Firefox ESR 153.6.0",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/beae074f03a35f2e99816b62d5db3291c4717c4d"
+      },
+      {
+        "hash": "a01bffafa9936a9d58a6ceb100d1079798779dd7",
+        "shortHash": "a01bffa",
+        "author": "AtaberkCelil",
+        "date": "2026-11-06T17:49:59+03:00",
+        "subject": "Merge remote-tracking branch 'origin/main'",
+        "body": "# Conflicts:\n#",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a01bffafa9936a9d58a6ceb100d1079798779dd7"
+      },
+      {
+        "hash": "69b79814bf99c9be4d59079f80ffdf7e4834436c",
+        "shortHash": "69b7981",
+        "author": "AtaberkCelil",
+        "date": "2026-11-06T17:44:43+03:00",
+        "subject": "Fix BookmarkDao.search crashing on the SQLite ESCAPE clause",
+        "body": "In a normal Kotlin string the '\\' between quotes decodes to an escaped\nquote, so the query reaches SQLite with ESCAPE '' and fails. Escape it\nso the ESCAPE character is a single backslash.",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/69b79814bf99c9be4d59079f80ffdf7e4834436c"
+      },
+      {
+        "hash": "9399b2a01dd4445ff2ef7c4537d6a846d231c4a9",
+        "shortHash": "9399b2a",
+        "author": "AtaberkCelil",
+        "date": "2026-11-06T17:44:43+03:00",
+        "subject": "hil build: actually skip applying patches on Windows",
+        "body": "--skip-apply skipped the apply in hil but omitted -SkipApply from the\ninvoked build-windows.ps1, so the script re-applied the patches anyway.\nPass -SkipApply unconditionally: build() always leaves the engine\nalready patched.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9399b2a01dd4445ff2ef7c4537d6a846d231c4a9"
+      },
+      {
+        "hash": "bbd56cc1d81415b2c4a7ad299fd94c758d8ba8fd",
+        "shortHash": "bbd56cc",
+        "author": "AtaberkCelil",
+        "date": "2026-11-06T17:44:25+03:00",
+        "subject": "hil: never delete files outside an overlay when syncing",
+        "body": "Overlays can live inside upstream folders (e.g. the updater certificates\nin toolkit/mozapps/update/updater), so mirroring during apply/refresh\ndeleted Firefox's own files in engine/ and broke the build. Go back to\nplain recursive copy.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/bbd56cc1d81415b2c4a7ad299fd94c758d8ba8fd"
+      },
+      {
+        "hash": "12466f2a1dac6666a90dbc0bc14cd47a552c3b98",
+        "shortHash": "12466f2",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T16:37:35+03:00",
+        "subject": "Do not save a compiler cache from a cancelled build",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/12466f2a1dac6666a90dbc0bc14cd47a552c3b98"
+      },
+      {
+        "hash": "018a7a3dd6814f822e175c75efc41fcfa75ee062",
+        "shortHash": "018a7a3",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T14:51:41+03:00",
+        "subject": "Keep tag builds from deleting main's compiler cache",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/018a7a3dd6814f822e175c75efc41fcfa75ee062"
+      },
+      {
+        "hash": "6361a081e6627da79133343073b2580ea8cf5c14",
+        "shortHash": "6361a08",
+        "author": "AtaberkCelil",
+        "date": "2026-11-06T01:39:53+03:00",
+        "subject": "Fix Android runtime bugs",
+        "body": "- downloads: expose pre-Android 10 files through FileProvider instead of\n  file:// URIs, which crashed ACTION_VIEW with FileUriExposedException;\n  delete now removes the file or MediaStore entry, not just the row\n- permissions: queue Gecko permission requests instead of overwriting a\n  single callback slot, so concurrent requests (or activity recreation)\n  no longer leave a page waiting forever; pending requests are rejected\n  on destroy\n- live updates: gate in-flight checks on the disabled flag so a download\n  finishing after disable() can no longer resurrect the bundle and cache\n- suggestions: escape LIKE wildcards in history and bookmark search with\n  ESCAPE '\\' so % and _ match literally",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6361a081e6627da79133343073b2580ea8cf5c14"
+      },
+      {
+        "hash": "e738cd98eb79968b210b2a29b69fafabd37c7938",
+        "shortHash": "e738cd9",
+        "author": "AtaberkCelil",
+        "date": "2026-11-06T01:39:49+03:00",
+        "subject": "Fix website bugs and leaks",
+        "body": "- telemetry.ts: parse the request URL with a constant base; a crafted\n  Host header crashed the handler instead of returning the health JSON\n- telemetry.ts: await the aggregate counter writes before responding;\n  fire-and-forget fetches can be frozen away on serverless and counters\n  silently stop updating\n- releases: filter draft releases out of the GraphQL path so drafts are\n  not served on the public /releases.json, matching the REST fallback\n- DocsPage: section TOC links no longer use bare anchor hashes that the\n  app-wide hash router resolves to the home view, unmounting the docs\n  page mid-click; copy buttons now check clipboard availability\n- formatInline/formatHighlightText: escape HTML before inline markdown\n  formatting so raw content cannot reach dangerouslySetInnerHTML\n- App: fetch releases once with a stale-response guard instead of\n  refetching on every language toggle",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e738cd98eb79968b210b2a29b69fafabd37c7938"
+      },
+      {
+        "hash": "977bca77ebaabcd92d4c034c1c111e43a2c3a54f",
+        "shortHash": "977bca7",
+        "author": "AtaberkCelil",
+        "date": "2026-11-06T01:39:45+03:00",
+        "subject": "Fix CI and release asset bugs",
+        "body": "- build-target.yml: grant actions:write; the workflow's own permissions\n  block clamps GITHUB_TOKEN, so gh cache delete always failed with 403\n  and killed the job before the package was uploaded\n- release.yml: generate SHA256SUMS after the SBOM step so every released\n  file, including the SBOM itself, gets a checksum entry",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/977bca77ebaabcd92d4c034c1c111e43a2c3a54f"
+      },
+      {
+        "hash": "eddaf98ddcf2bb0bbd353449c62121ca507252b5",
+        "shortHash": "eddaf98",
+        "author": "AtaberkCelil",
+        "date": "2026-11-06T01:39:42+03:00",
+        "subject": "Fix build script bugs on Linux, Flatpak and Windows",
+        "body": "- build-linux.sh cli step: join CLI args with [@] so multi-argument\n  invocations are not collapsed into one argument\n- build-flatpak.sh: copy icons from changes/browser/branding/hilal\n  instead of the nonexistent branding/ directory, which silently left\n  Flatpak builds without icons\n- build-flatpak.sh / build-appimage.sh: append build_count when the\n  config exists but lacks the key; sed succeeds with no match so the\n  counter could stay 1 forever\n- build-windows.ps1: define Write-Step/Write-Warn/Write-Err before the\n  argument loop; with ErrorActionPreference Stop an unexpected argument\n  previously crashed the script instead of warning",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/eddaf98ddcf2bb0bbd353449c62121ca507252b5"
+      },
+      {
+        "hash": "1c271d9a40ecbff20b0ceb15e9b8d8c7feba5ce3",
+        "shortHash": "1c271d9",
+        "author": "AtaberkCelil",
+        "date": "2026-11-06T01:39:37+03:00",
+        "subject": "Fix flag handling and reliability bugs in hil",
+        "body": "- build: pass faster/binaries/run/package flags independently instead of\n  dropping all but the first on Unix\n- build: only pass -SkipApply to the Windows script when patches were\n  already applied in-process, so --skip-apply no longer builds an\n  unpatched engine\n- apply: make --dry-run actually verify each patch with git apply --check\n- apply: fail when committing an applied patch or overlay fails instead\n  of continuing silently\n- apply/refresh: mirror directory overlays so files deleted from the\n  overlay no longer survive in engine/ and get copied back by refresh\n- refresh: match commits to manifest entries by commit subject instead\n  of trusting positional order only\n- get_patch_files: parse quoted 'diff --git \"a/..\" \"b/..\"' headers so\n  patches with spaces in paths are committed, not left dangling\n- validate/apply/refresh: reject absolute or '..' manifest paths\n- doctor: check rustup for the actually installed msvc target, parse\n  LongPathsEnabled properly and treat failed registry queries as\n  warnings\n- replace path unwraps with anyhow context",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1c271d9a40ecbff20b0ceb15e9b8d8c7feba5ce3"
+      }
+    ],
+    "highlights": null,
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/commits/main",
+    "compareUrl": "https://github.com/VastSea0/hilal-browser/compare/v0.4.0-alpha.2...main"
+  },
+  {
+    "tag": "v0.4.0-alpha.2",
+    "version": "0.4.0-alpha.2",
+    "isDev": false,
+    "date": "2026-11-06T12:33:43+03:00",
+    "commitCount": 32,
+    "commits": [
+      {
+        "hash": "132a99bece9e766c26d25d160266f8b233814d3f",
+        "shortHash": "132a99b",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T12:33:43+03:00",
+        "subject": "Release 0.4.0-alpha.2",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/132a99bece9e766c26d25d160266f8b233814d3f"
+      },
+      {
+        "hash": "723f56d6157549ce3b67ad2cae7f87ab42098746",
+        "shortHash": "723f56d",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T03:04:29+03:00",
+        "subject": "Give the Linux smoke tests room for a cold apt cache",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/723f56d6157549ce3b67ad2cae7f87ab42098746"
+      },
+      {
+        "hash": "55c74d87c061d152786792719dd7479adc45b06f",
+        "shortHash": "55c74d8",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T02:15:28+03:00",
+        "subject": "Never fail a build over compiler cache cleanup",
+        "body": "",
+        "category": "refactor",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/55c74d87c061d152786792719dd7479adc45b06f"
+      },
+      {
+        "hash": "e6e5dc610d45abd7d459f6df00497499bcfbe089",
+        "shortHash": "e6e5dc6",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T02:08:17+03:00",
+        "subject": "Let the build workflow delete superseded caches",
+        "body": "A reusable workflow's permissions block replaces the caller's, so the\ncache cleanup step only had contents: read. Spotted by AtaberkCelil in #37.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e6e5dc610d45abd7d459f6df00497499bcfbe089"
+      },
+      {
+        "hash": "179e2f1586e783ca78c600394d55d8fe5ab3fa42",
+        "shortHash": "179e2f1",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T01:49:21+03:00",
+        "subject": "Cache apt packages in the Linux and Flatpak test jobs too",
+        "body": "The Wayland smoke test timed out after 30 minutes spent downloading\npackages from the slow Azure mirror. The install logic moves into\nscripts/ci/apt-install.sh, shared by the build and test jobs.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/179e2f1586e783ca78c600394d55d8fe5ab3fa42"
+      },
+      {
+        "hash": "9fcfb75b9ef66bc630550a51f7d8f8af23893434",
+        "shortHash": "9fcfb75",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T01:07:32+03:00",
+        "subject": "Speed up CI and keep its compiler cache warm",
+        "body": "- Delete superseded sccache entries after a successful build; three\n  ~900 MB caches per run filled the 10 GB limit, and eviction of the\n  newest one makes the next build start cold.\n- Keep the build dependency .debs in the Actions cache; the Azure apt\n  mirror sometimes took 8 minutes for 16 MB.\n- Free runner disk space in the background while the source is fetched.\n- Pushes that only touch tests, packaging, docs or the website retest\n  the newest packages instead of building.",
+        "category": "perf",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9fcfb75b9ef66bc630550a51f7d8f8af23893434"
+      },
+      {
+        "hash": "ef8e76c3319501f451d3ad208bbc6a2d3cbe04e6",
+        "shortHash": "ef8e76c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T00:33:51+03:00",
+        "subject": "Keep build secrets and the MAR tool in RUNNER_TEMP",
+        "body": "/mnt is not writable by the runner user, so creating the signed update\nfailed on Linux and Windows as soon as HILAL_MAR_SIGNING_KEY was set.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ef8e76c3319501f451d3ad208bbc6a2d3cbe04e6"
+      },
+      {
+        "hash": "85b0d1d787b6fd9819d5e30405181a6ed39423ac",
+        "shortHash": "85b0d1d",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-06T00:11:07+03:00",
+        "subject": "Build Turkish into the browser instead of shipping an unsigned langpack",
+        "body": "Release builds enforce signed langpacks, so the bundled Turkish XPI never\nloaded. CI now packages with mach package-multi-locale (HILAL_LOCALES,\ndefault tr), setup-locales fetches the firefox-l10n revision pinned for\nthis Firefox version, and the smoke test checks that tr is an available\nlocale. The langpack XPI, its builder and the prefs that tried to allow\nunsigned langpacks are removed.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/85b0d1d787b6fd9819d5e30405181a6ed39423ac"
+      },
+      {
+        "hash": "5c55947d5c2dbd85340f6b17ba7afb5423f1b5ae",
+        "shortHash": "5c55947",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-05T23:24:23+03:00",
+        "subject": "Use io.github.VastSea0.Hilal as the Linux app ID",
+        "body": "The gkdevstudio name is retired and there is no domain, so use the\nGitHub-based ID that Flathub verifies through the GitHub account. Also\nset the AppStream metadata license to CC0-1.0, since appstreamcli\nrejects MPL-2.0 there and that failed the Flatpak CI job.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5c55947d5c2dbd85340f6b17ba7afb5423f1b5ae"
+      },
+      {
+        "hash": "7e497d7fa4cf891e59cd414f886b065d00db7406",
+        "shortHash": "7e497d7",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-05T01:51:41+03:00",
+        "subject": "Package distribution/ in every build so policies and uBlock ship",
+        "body": "package-manifest.in only packaged distribution/ for Mozilla's own\nbuilds, so no Hilal package (tarball, DMG, zip, installer or Flatpak)\ncarried policies.json or the bundled add-ons: uBlock Origin never\ninstalled and the updater had no Hilal update URL. The CI UI smoke\ncaught it on all four platforms; local runs from the objdir hid it.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/7e497d7fa4cf891e59cd414f886b065d00db7406"
+      },
+      {
+        "hash": "bbab627dda05734eb7a3b44543fd1fd66ddf065f",
+        "shortHash": "bbab627",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-05T01:18:41+03:00",
+        "subject": "Start each platform's tests as soon as its own build is done [skip ci]",
+        "body": "The build matrix made every test wait for the slowest build (Windows).\nEach target is now its own call of build-target.yml.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/bbab627dda05734eb7a3b44543fd1fd66ddf065f"
+      },
+      {
+        "hash": "a5a6967d5a9f9908abac9164c842896bbdda57d3",
+        "shortHash": "a5a6967",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T22:58:06+03:00",
+        "subject": "Let a running CI build finish instead of cancelling it on each push [skip ci]",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a5a6967d5a9f9908abac9164c842896bbdda57d3"
+      },
+      {
+        "hash": "5e831366499870943220dd639d0fab561ad98eb1",
+        "shortHash": "5e83136",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T22:38:36+03:00",
+        "subject": "Keep Android-only changes out of the desktop CI [skip ci]",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5e831366499870943220dd639d0fab561ad98eb1"
+      },
+      {
+        "hash": "ba31e4555eb03e170bf94308d66787f5af4b0b92",
+        "shortHash": "ba31e45",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T22:37:56+03:00",
+        "subject": "Add signed live updates to the Android app",
+        "body": "A signed bundle built from android/ota/ is published on the rolling\nandroid-ota GitHub release and checked by the app at start, on return to\nthe foreground and every six hours. It carries feature flags, start page\nnotices, search engines, bangs and site fixes, which the built-in Hilal\nLive extension registers as content scripts, plus the newest APK release\nso older apps offer the update. The app verifies an ECDSA P-256\nsignature against a compiled-in key and refuses older bundles. Live\nupdates can be turned off in settings.",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ba31e4555eb03e170bf94308d66787f5af4b0b92"
+      },
+      {
+        "hash": "c7267b4fef7c69c7d2c04da5f1ea8546af4c5caf",
+        "shortHash": "c7267b4",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T22:30:27+03:00",
+        "subject": "Add workspaces to the Android app",
+        "body": "Normal tabs belong to a workspace. The tab overview shows a workspace\nstrip to switch, create and edit them, and a long press on a tab card\nmoves it to another workspace. Like the desktop containers, a workspace\ncan keep its own cookies and logins through a Gecko session context,\nwhich is cleared when the workspace is deleted.",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c7267b4fef7c69c7d2c04da5f1ea8546af4c5caf"
+      },
+      {
+        "hash": "210cf3409c82b61bf615127da94edc627e7aa615",
+        "shortHash": "210cf34",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T21:59:54+03:00",
+        "subject": "Check bundled add-ons, policies, updates and Safe Browsing in the UI smoke [skip ci]",
+        "body": "Runs the release checks against the running browser: uBlock Origin is\nactive, policies load, updates point at Hilal's server (or are off in the\nFlatpak) and whether a Safe Browsing key is built in. The Turkish\nlanguage pack check is reported as a known issue: release builds reject\nthe self-built, unsigned langpack, so the Turkish UI never loads.",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/210cf3409c82b61bf615127da94edc627e7aa615"
+      },
+      {
+        "hash": "af5dd8358be8fbc7dd15e7a82510a6d6c45740d4",
+        "shortHash": "af5dd83",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T21:56:29+03:00",
+        "subject": "List only installable files in the website download dialog",
+        "body": "The dialog showed every release asset, labelling update MARs, checksums\nand the SBOM as Linux tarballs and hil.exe as the Windows installer. Also\nstop promising a universal DMG and .deb packages that are not built.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/af5dd8358be8fbc7dd15e7a82510a6d6c45740d4"
+      },
+      {
+        "hash": "2cb16cf8c5ad6ba3f15d295c3dec9845c17f31b4",
+        "shortHash": "2cb16cf",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T21:55:27+03:00",
+        "subject": "Make the Flatpak manifest buildable and test it in CI [skip ci]",
+        "body": "The manifest expected an archive that was never in git, pointed at icon\npaths that do not exist and replaced Hilal's policies.json, dropping the\nbundled uBlock and langpack policies. It now repackages the tested Linux\nrelease tarball like Zen's Flathub app, merges DisableAppUpdate into the\nexisting policies and lets Flathub's external data checker pick up new\nreleases. CI builds it from the fresh tarball and runs the UI smoke\ninside the sandbox.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2cb16cf8c5ad6ba3f15d295c3dec9845c17f31b4"
+      },
+      {
+        "hash": "d72739ac2fe208401dc67b772fea64f13bee371b",
+        "shortHash": "d72739a",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T21:53:28+03:00",
+        "subject": "Document the zero-cost rule and CI-as-test-lab for agents [skip ci]",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d72739ac2fe208401dc67b772fea64f13bee371b"
+      },
+      {
+        "hash": "882acf72ad07ba2415338508c46b3e5398237822",
+        "shortHash": "882acf7",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T21:53:01+03:00",
+        "subject": "Share one build ID across platforms, add Rust cross targets, allow release calls",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/882acf72ad07ba2415338508c46b3e5398237822"
+      },
+      {
+        "hash": "471dee2a7cdc04f0f2beb8d47508c4dcfc90281c",
+        "shortHash": "471dee2",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T21:53:01+03:00",
+        "subject": "Release through the CI pipeline with signed updates for every platform [skip ci]",
+        "body": "release.yml now calls ci.yml, so a release is built and UI-tested\nexactly like main and is published only when all platforms pass. It\nthen attaches signed MARs for Linux, macOS and Windows and an update\nmanifest covering all three. MARs carry the Firefox app version, since\nthe updater refuses one lower than the installed version, and the macOS\nMAR is made from the ad-hoc signed bundle on the macOS runner.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/471dee2a7cdc04f0f2beb8d47508c4dcfc90281c"
+      },
+      {
+        "hash": "c6e8546ba39220a8508b9af6a9b1652ce4620bf0",
+        "shortHash": "c6e8546",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T21:47:55+03:00",
+        "subject": "Fetch only the pinned Firefox commit in hil setup [skip ci]",
+        "body": "A blob-less clone still downloads Firefox's whole commit history and\ntook over 15 minutes per CI job. A depth-1 fetch of the pinned commit is\nall apply and refresh need.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c6e8546ba39220a8508b9af6a9b1652ce4620bf0"
+      },
+      {
+        "hash": "5dd9c3ccf11a583b8f8f5145c03f6e7c897c7314",
+        "shortHash": "5dd9c3c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T21:47:04+03:00",
+        "subject": "Build with a Google Safe Browsing key when one is configured [skip ci]",
+        "body": "Without a key Firefox's phishing and malware protection does nothing.\nThe key is free for non-commercial use; CI reads it from the\nHILAL_SAFEBROWSING_API_KEY secret and warns when it is missing.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5dd9c3ccf11a583b8f8f5145c03f6e7c897c7314"
+      },
+      {
+        "hash": "3f0b92cf060df68e1e7c70b5cb5fe4516f0a5c6f",
+        "shortHash": "3f0b92c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T21:47:04+03:00",
+        "subject": "Turn RLBox library sandboxing back on for shipped builds [skip ci]",
+        "body": "It was switched off to save build time. Firefox sandboxes several\nthird-party libraries with it on every desktop platform; keep it off only\nfor HILAL_DEV_BUILD and the offline Flatpak build.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/3f0b92cf060df68e1e7c70b5cb5fe4516f0a5c6f"
+      },
+      {
+        "hash": "53160b115fcfc5207846822fde07a6e1a7038f14",
+        "shortHash": "53160b1",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T21:46:02+03:00",
+        "subject": "Make and verify a signed update MAR in every CI build [skip ci]",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/53160b115fcfc5207846822fde07a6e1a7038f14"
+      },
+      {
+        "hash": "fe95ac861f648afd48e9da5f1f42bd92443415d8",
+        "shortHash": "fe95ac8",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T21:46:02+03:00",
+        "subject": "Sign updates with new keys through build-mar [skip ci]",
+        "body": "The private keys behind the old updater certificates are gone, so no\nrelease could ever ship a signed update. Replace both certificates with\nnew RSA-4096 ones and sign MARs with Mozilla's build-mar and a PEM key,\nwhich works on Linux for cross-compiled macOS and Windows builds. The\nsigned MAR is verified against the certificate the updater ships with.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/fe95ac861f648afd48e9da5f1f42bd92443415d8"
+      },
+      {
+        "hash": "539a6c5ef55a1736dae03db3f01365feb201680f",
+        "shortHash": "539a6c5",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T21:38:44+03:00",
+        "subject": "Build and UI-test every main push on free GitHub runners",
+        "body": "Linux is built natively; macOS and Windows are cross-compiled on Linux\nlike Mozilla and Zen do, with the macOS SDK and Windows sysroot\nbootstrapped from Mozilla's public toolchain index. Each package is then\nlaunched on its own OS (Linux under X11 and Wayland) and checked through\nMarionette with a dependency-free script that also takes screenshots.\nPackages that pass are published as the rolling nightly pre-release.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/539a6c5ef55a1736dae03db3f01365feb201680f"
+      },
+      {
+        "hash": "279b8b6b04cfaa3817d1e0773a063b27c2327f17",
+        "shortHash": "279b8b6",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-04T21:31:47+03:00",
+        "subject": "Show the window buttons on Windows and Linux",
+        "body": "The shell hid the titlebar button box everywhere except macOS. Keep the\ntraffic light sizing macOS-only, put the caption buttons at the end of\nthe top row (start when GTK places them on the left), and let upstream\nrules hide them when the system draws the titlebar.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/279b8b6b04cfaa3817d1e0773a063b27c2327f17"
+      },
+      {
+        "hash": "80f3709086808338f669d114d87cdaa0d500b5c5",
+        "shortHash": "80f3709",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-02T21:43:53+03:00",
+        "subject": "Give the macOS release build the real rustc and cargo instead of rustup proxies",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/80f3709086808338f669d114d87cdaa0d500b5c5"
+      },
+      {
+        "hash": "fd4217b9888ff57efb52cfce16b6e2e64977f767",
+        "shortHash": "fd4217b",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-02T20:47:12+03:00",
+        "subject": "Pin Python 3.13 in the macOS release build so toolchain bootstrap works",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/fd4217b9888ff57efb52cfce16b6e2e64977f767"
+      },
+      {
+        "hash": "d8e67956c0889d5c0e41aeee6125772471f82fdc",
+        "shortHash": "d8e6795",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-02T13:17:37+03:00",
+        "subject": "Build an ad-hoc signed macOS DMG in CI when Apple signing secrets are missing",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d8e67956c0889d5c0e41aeee6125772471f82fdc"
+      },
+      {
+        "hash": "6b8ef221968f33c4a03e430a34401cb2d601fc90",
+        "shortHash": "6b8ef22",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-02T00:11:24+03:00",
+        "subject": "Name the Windows release assets after Hilal and skip the xpt archive",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6b8ef221968f33c4a03e430a34401cb2d601fc90"
+      }
+    ],
+    "highlights": {
+      "added": [
+        "Updates are signed with Hilal's own keys and checked before they install, on Linux, macOS and Windows.",
+        "Safe Browsing protection is built in when a Google Safe Browsing key is configured for the build."
+      ],
+      "changed": [
+        "Turkish is built into the browser instead of shipping as a separate language pack, so it works out of the box.",
+        "The Linux and Flatpak app ID is now io.github.VastSea0.Hilal.",
+        "RLBox library sandboxing is turned back on.",
+        "The policies and uBlock Origin ship in every package.",
+        "Every release is built and UI-tested on Linux (X11 and Wayland), macOS and Windows before it is published."
+      ],
+      "fixed": [
+        "The window buttons show on Windows and Linux.",
+        "The website download dialog lists only installable files.",
+        "The Windows release files are named after Hilal."
+      ]
+    },
+    "githubUrl": "https://github.com/VastSea0/hilal-browser/releases/tag/v0.4.0-alpha.2",
+    "compareUrl": "https://github.com/VastSea0/hilal-browser/compare/v0.4.0-alpha.1...v0.4.0-alpha.2"
+  },
+  {
     "tag": "v0.4.0-alpha.1",
     "version": "0.4.0-alpha.1",
     "isDev": false,
-    "date": "",
-    "commitCount": 0,
-    "commits": [],
+    "date": "2026-11-01T20:12:52+03:00",
+    "commitCount": 143,
+    "commits": [
+      {
+        "hash": "a235697b8da52fc939a29da0ef30fc316213ccfb",
+        "shortHash": "a235697",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T20:12:52+03:00",
+        "subject": "Bootstrap Mozilla's toolchains in CI release builds",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a235697b8da52fc939a29da0ef30fc316213ccfb"
+      },
+      {
+        "hash": "71caba5cb7415aac0dae8ef58089fdcc9afbb2b5",
+        "shortHash": "71caba5",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T19:59:14+03:00",
+        "subject": "Install cbindgen in the release builds",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/71caba5cb7415aac0dae8ef58089fdcc9afbb2b5"
+      },
+      {
+        "hash": "cf5f0006013d3e1b78db2075c17333f5915fbbd9",
+        "shortHash": "cf5f000",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T19:47:34+03:00",
+        "subject": "Use current desktop screenshots in the Flatpak metainfo",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cf5f0006013d3e1b78db2075c17333f5915fbbd9"
+      },
+      {
+        "hash": "76f5f33add45639bf032f367ff3c577cc365703e",
+        "shortHash": "76f5f33",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T19:46:21+03:00",
+        "subject": "Release v0.4.0-alpha.1",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/76f5f33add45639bf032f367ff3c577cc365703e"
+      },
+      {
+        "hash": "6c936e145b58bfaf93524ee8d1243a240f460b44",
+        "shortHash": "6c936e1",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T19:46:21+03:00",
+        "subject": "Ignore the local Vercel link and env files",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6c936e145b58bfaf93524ee8d1243a240f460b44"
+      },
+      {
+        "hash": "eef8f4e00de976f84fedf29df0e9d1c92b538bfb",
+        "shortHash": "eef8f4e",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T17:40:02+03:00",
+        "subject": "Add the launch film to the website's home page",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/eef8f4e00de976f84fedf29df0e9d1c92b538bfb"
+      },
+      {
+        "hash": "e4a7299904168c49ce2ab1c69e7362fe579e71dd",
+        "shortHash": "e4a7299",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:58:45+03:00",
+        "subject": "Fix the website description and stop loading the icon font twice",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e4a7299904168c49ce2ab1c69e7362fe579e71dd"
+      },
+      {
+        "hash": "b603a3421790398d9ca3a99837c884586f8b5391",
+        "shortHash": "b603a34",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:58:45+03:00",
+        "subject": "Load the website's changelog, docs and privacy pages on demand",
+        "body": "The commit history was part of the first download for every visitor.\nContributors now come from a small file of their own, and the other pages\nload when opened, cutting the main bundle from 729 KB to 444 KB.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/b603a3421790398d9ca3a99837c884586f8b5391"
+      },
+      {
+        "hash": "6f8cd6bf27806152fa07123be6b1e998e21df08e",
+        "shortHash": "6f8cd6b",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:58:45+03:00",
+        "subject": "List every release on the website and pick a real download for each system",
+        "body": "GitHub's REST release list leaves out releases made by the build workflow,\nso the site only saw five releases. The server now lists releases through\nGraphQL, the page loads them from /api/releases, each system gets the\nnewest release with a file for it, the hil tool is never offered as the\nbrowser, and the made-up fallback release with dead links is gone.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6f8cd6bf27806152fa07123be6b1e998e21df08e"
+      },
+      {
+        "hash": "f2377106c31fc93d1e6022053b36b5ad33067e78",
+        "shortHash": "f237710",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:48:33+03:00",
+        "subject": "Drop the unused react-icons package from the website",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f2377106c31fc93d1e6022053b36b5ad33067e78"
+      },
+      {
+        "hash": "411da42de86596c32488066e0bf6ddfef58d0d92",
+        "shortHash": "411da42",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:48:33+03:00",
+        "subject": "List the open source projects Hilal uses and their licenses",
+        "body": "Add THIRD_PARTY_NOTICES.md with what each project is used for, how it\nis included and its license, a README section, and a Hilal Browser\nComponents section in about:license with the MIT texts the bundled\nBeer CSS and M3E files require.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/411da42de86596c32488066e0bf6ddfef58d0d92"
+      },
+      {
+        "hash": "d38fbb77e50d10b6decd0b083fae76080f0457a5",
+        "shortHash": "d38fbb7",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:43:26+03:00",
+        "subject": "Rebuild the Turkish language pack with the new Boost editor strings",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d38fbb77e50d10b6decd0b083fae76080f0457a5"
+      },
+      {
+        "hash": "5c49a1c30741399229bd9550c2f0af4b3d1c021b",
+        "shortHash": "5c49a1c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:43:03+03:00",
+        "subject": "Redesign the Boost editor in Material 3 Expressive",
+        "body": "Replace Zen's layout with Hilal's own: a color wheel, a connected button\ngroup for invert, theme and adjust, inline sliders, font chips, a size\nstepper, a case segmented button and connected tiles for Zap, Focus and\nCustom CSS.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5c49a1c30741399229bd9550c2f0af4b3d1c021b"
+      },
+      {
+        "hash": "3e12f40ebec6561e47081eb12fcf95302311df84",
+        "shortHash": "3e12f40",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:30:09+03:00",
+        "subject": "Document how Boosts are built and how to enable sharing",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/3e12f40ebec6561e47081eb12fcf95302311df84"
+      },
+      {
+        "hash": "0e07e2e81eb4f1fe4db181b4fb737e899230f906",
+        "shortHash": "0e07e2e",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:29:00+03:00",
+        "subject": "Keep the Boost editor's font card visible in dark mode",
+        "body": "",
+        "category": "style",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/0e07e2e81eb4f1fe4db181b4fb737e899230f906"
+      },
+      {
+        "hash": "42c8ad269b3d92d40eec081da0fe182217fd53d0",
+        "shortHash": "42c8ad2",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:25:36+03:00",
+        "subject": "Note the return of Boosts and compact mode in the changelog",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/42c8ad269b3d92d40eec081da0fe182217fd53d0"
+      },
+      {
+        "hash": "1d9c5a5d464d396f4296467f1f98df7cd5060ccd",
+        "shortHash": "1d9c5a5",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:25:10+03:00",
+        "subject": "Rebuild the Turkish language pack with the Boosts strings",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1d9c5a5d464d396f4296467f1f98df7cd5060ccd"
+      },
+      {
+        "hash": "ad33f065a13fabfd069ba5a9fef661d1da27224e",
+        "shortHash": "ad33f06",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:19:05+03:00",
+        "subject": "Keep en-US out of the custom locale list",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ad33f065a13fabfd069ba5a9fef661d1da27224e"
+      },
+      {
+        "hash": "64a18d422507addd48ab75cf34c8caa32b86fce3",
+        "shortHash": "64a18d4",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:18:27+03:00",
+        "subject": "Add night-only Boosts that apply only while Hilal is dark",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/64a18d422507addd48ab75cf34c8caa32b86fce3"
+      },
+      {
+        "hash": "541ea6456e787fdbaabcb9792da0a2fc77c1fbcf",
+        "shortHash": "541ea64",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:16:04+03:00",
+        "subject": "Give the Boost share and receive dialogs the shell's colors and buttons",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/541ea6456e787fdbaabcb9792da0a2fc77c1fbcf"
+      },
+      {
+        "hash": "ed14e7d6408e508515642902770a02f92a8efdad",
+        "shortHash": "ed14e7d",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:13:49+03:00",
+        "subject": "Show the Zap bar as a floating Material toolbar",
+        "body": "The browser window never defined the bar's element, so it rendered as an\nempty box; load its module on demand. Also put the code editor's back\narrow before its label.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ed14e7d6408e508515642902770a02f92a8efdad"
+      },
+      {
+        "hash": "a54b2bddda0ad5634365dcc8989f1a084543d410",
+        "shortHash": "a54b2bd",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:09:55+03:00",
+        "subject": "Theme the Boosts editor and dialogs with the shell's Material colors",
+        "body": "",
+        "category": "style",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a54b2bddda0ad5634365dcc8989f1a084543d410"
+      },
+      {
+        "hash": "b143ec02d7fb2ae1fecdeafaee28a1a6e88f0b27",
+        "shortHash": "b143ec0",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:06:21+03:00",
+        "subject": "Add a Boost button and menu to the address bar",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/b143ec02d7fb2ae1fecdeafaee28a1a6e88f0b27"
+      },
+      {
+        "hash": "76e1ca9cbbc10e0bde6c9e8e32bd7837937af760",
+        "shortHash": "76e1ca9",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T16:06:21+03:00",
+        "subject": "Port Zen's Boosts with its color backend",
+        "body": "Per-site colors, fonts, text size and case, Zap, Focus, custom CSS and\nsharing, adapted from Zen Browser's MPL-2.0 Boosts for ESR 153.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/76e1ca9cbbc10e0bde6c9e8e32bd7837937af760"
+      },
+      {
+        "hash": "c1348f870492f97099598369a5f6010f530ac2aa",
+        "shortHash": "c1348f8",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T15:41:46+03:00",
+        "subject": "Host shared Boosts on the website",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c1348f870492f97099598369a5f6010f530ac2aa"
+      },
+      {
+        "hash": "aaee9792097809f46470d5e0f02f1df05ccc585d",
+        "shortHash": "aaee979",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T02:02:44+03:00",
+        "subject": "Show System Language in Hilal's language setting until one is chosen",
+        "body": "Without an explicit choice Firefox reports the OS locale as requested,\nfor example en-TR, which the selector added as a raw code. Select the\nSystem Language entry instead, and show the native name for a chosen\nlocale that has no language pack.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/aaee9792097809f46470d5e0f02f1df05ccc585d"
+      },
+      {
+        "hash": "811ce38ff15cc89c1beec866e303e759490a135d",
+        "shortHash": "811ce38",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T02:02:44+03:00",
+        "subject": "Tidy the settings navigation, cards and theme picker",
+        "body": "- The navigation buttons were 52px tall with Firefox's own 34px button\n  and accent bar inside, because the styles targeted a ::part the\n  component does not expose. Style the button through the variables\n  moz-page-nav-button reads and give the heading room from the list.\n- Firefox cards padded their host, article and content, so their titles\n  sat far inside the card. Leave the padding to moz-card itself, and\n  give Hilal's cards the same padding so both line up.\n- The icons in Hilal's card headers were never drawn: their svg tags had\n  no namespace, so the XHTML parser made them empty XUL elements that\n  still pushed the titles to the right.\n- Website appearance tiles were sized to their labels; make them equal.",
+        "category": "style",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/811ce38ff15cc89c1beec866e303e759490a135d"
+      },
+      {
+        "hash": "b56a0a2dc4427669a242ea6362b4230a4d7086fe",
+        "shortHash": "b56a0a2",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T01:52:20+03:00",
+        "subject": "Open the release notes and download dialog from the browser's links",
+        "body": "Desktop builds point their update details at /releases and their manual\nupdate link at /download, but the site only knew /changelog and showed\nthe home page for both. Treat /releases as the release notes and open\nthe download dialog on /download.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/b56a0a2dc4427669a242ea6362b4230a4d7086fe"
+      },
+      {
+        "hash": "9448833f3a3474dba52674c0f2a27b2b29ac98ac",
+        "shortHash": "9448833",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T01:48:16+03:00",
+        "subject": "Animate the shell like the Android app",
+        "body": "Closed tabs now shrink out of the vertical list and the horizontal strip\ninstead of vanishing, horizontal tabs grow in when opened, the address\nbar suggestions and the workspace, layout and theme menus scale in from\nwhere they open, and tabs and shell buttons tighten their corners and\nshrink a little while pressed. Workspace switches still swap the tab\nlist at once, and everything stays still with reduced motion.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9448833f3a3474dba52674c0f2a27b2b29ac98ac"
+      },
+      {
+        "hash": "320886914c38277ed2f94ddc3ecb7334e08e104d",
+        "shortHash": "3208869",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T01:45:19+03:00",
+        "subject": "Bring compact mode back for the Material shell",
+        "body": "Compact mode was dropped with the old interface, but its shortcuts\nstayed and did nothing. In the shell it now hides the sidebar, the top\nbar or both; moving the pointer to the left or top edge of the window\nslides them in over the page, and they slide out again when the pointer\nleaves. Both are switches in a new Compact mode card in Hilal's\nsettings and toggle with Cmd/Ctrl+Alt+M and Cmd/Ctrl+Alt+T. The top\nbar setting now uses the same pref name in the shell and in settings.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/320886914c38277ed2f94ddc3ecb7334e08e104d"
+      },
+      {
+        "hash": "2c188127ff3bdbaf5a97ae1b4cd2bf3d806a0093",
+        "shortHash": "2c18812",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T01:45:19+03:00",
+        "subject": "Run each Hilal keyboard shortcut once per key press",
+        "body": "The shortcut manager's init ran twice, so its command listener was\nadded twice and every Hilal shortcut fired two times: toggles such as\nCmd/Ctrl+Alt+E ended where they started and the next and previous\nworkspace shortcuts skipped a workspace. Initialize only once.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2c188127ff3bdbaf5a97ae1b4cd2bf3d806a0093"
+      },
+      {
+        "hash": "a8b5b75f7a86d8eb7a52047e193a80862686d2f9",
+        "shortHash": "a8b5b75",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T01:39:10+03:00",
+        "subject": "Flatten the settings page cards and drop Firefox-only extras",
+        "body": "Each setting row inside a card was drawn as its own bordered box, and\nnested options added another box inside it, so cards held three or four\nlayers of borders. Show the rows as plain lines with dividers, like the\nHilal panes, unbox Firefox's cards when they sit inside a Hilal card,\nand stop setting-group from adding extra space between cards.\n\nAlso hide Mozilla's \"Same settings, new look!\" redesign banner and drop\nthe Firefox mascot from the default browser prompt.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a8b5b75f7a86d8eb7a52047e193a80862686d2f9"
+      },
+      {
+        "hash": "75f26e535e07e4af5139fd8e59b847a21588b109",
+        "shortHash": "75f26e5",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T01:27:44+03:00",
+        "subject": "Make custom keyboard shortcuts for Firefox commands take effect",
+        "body": "Firefox's own key elements take their key and modifiers from Fluent, and\nthe shortcut manager re-inserts the keyset after applying overrides, so\nFluent translated them again and put the default keys back. Overrides\nonly ever worked for Hilal's own untranslated keys. Hold the\ndata-l10n-id aside while a key is overridden and restore it on reset.\n\nThe shell also caught Cmd/Ctrl+T and Cmd/Ctrl+L itself, so those kept\nworking after being reassigned. Firefox's commands already reach the\nshell's address bar through the redirected gURLBar.focus and select,\nso drop that handler.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/75f26e535e07e4af5139fd8e59b847a21588b109"
+      },
+      {
+        "hash": "7ca3fb5f6b53d9b34efa2dc8e7ffe26e40ec9e79",
+        "shortHash": "7ca3fb5",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T01:22:52+03:00",
+        "subject": "Lay out the shell's dropdown menus as vertical lists",
+        "body": "The workspace, layout and theme menus are opened with an inline\ndisplay: flex, so their items ran in a row: in horizontal tab mode the\nworkspace menu showed the workspaces side by side with a vertical\nseparator and a wrapped \"New Workspace\". Give the menus a column\nlayout, their own surface and item styles, and localize the new\nworkspace entry.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/7ca3fb5f6b53d9b34efa2dc8e7ffe26e40ec9e79"
+      },
+      {
+        "hash": "5b067dc053bcf812b1f16d284b688ee1a2fea1f0",
+        "shortHash": "5b067dc",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T01:22:52+03:00",
+        "subject": "Size the shell from Beer's 16px root again",
+        "body": "Beer CSS measures everything in rem and expects a 16px root. Its html\nrule used to give browser chrome that root; since scoping Beer to the\nshell, chrome kept its 11px root and every rem-based size in the shell\nshrank by 11/16, which made the suggestion details 8px tall and\nsqueezed the address bar. Resolve Beer's rem values to pixels when\ngenerating hilal-beer.css instead of changing Firefox's own root size.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5b067dc053bcf812b1f16d284b688ee1a2fea1f0"
+      },
+      {
+        "hash": "ed5d300df8bd36547b3b362c7a29853c0a5a55d3",
+        "shortHash": "ed5d300",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T01:17:34+03:00",
+        "subject": "Stop clipping toolbar icons and drawing square hovers in the shell",
+        "body": "Firefox pads the icon box of toolbar buttons, which pushed the 18px icons\noutside the shell's 32px buttons, and paints its own hover background\nand focus ring on that box. The buttons also kept appearance: auto, so\nmacOS drew its square toolbar bezel on hover. Reset both so the round\nbutton is the only hover and focus indicator.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ed5d300df8bd36547b3b362c7a29853c0a5a55d3"
+      },
+      {
+        "hash": "b48029db939f12aa546befafd2ed829a73d52113",
+        "shortHash": "b48029d",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T01:11:17+03:00",
+        "subject": "Join the segments of settings' segmented buttons",
+        "body": "The settings stylesheet padded each m3e-button-segment host, and since\nthe segment draws its outline inside its shadow root, the padding\nshowed up as gaps between the segments.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/b48029db939f12aa546befafd2ed829a73d52113"
+      },
+      {
+        "hash": "6b5a8208fb8a74f2c5688dd905b52097cf29bb09",
+        "shortHash": "6b5a820",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T01:10:14+03:00",
+        "subject": "Make the About dialog describe Hilal and link to working pages",
+        "body": "The dialog listed \"Mozilla Firefox Official Build\" and\n\"mozilla-official - 1.0\" from Mozilla's distribution.ini, which the\nuBlock patch shipped unconditionally, plus a \"hilal - 1\" line from\nunused distribution prefs. Its text and donation, terms and privacy\nlinks were Mozilla's or pointed at the repository.\n\nStop shipping distribution.ini, drop the distribution prefs, describe\nHilal in its own words with links to the contributors, contribution\nguide, issue tracker, source code and privacy policy, and add Turkish\ntranslations. Also keep the wordmark's words together, shorten the\nversion line so it fits next to \"What's new\", and match the macOS\ntitle bar to the dark dialog.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6b5a8208fb8a74f2c5688dd905b52097cf29bb09"
+      },
+      {
+        "hash": "2d7c88fb429fa1ee506830af7a172ca87843a741",
+        "shortHash": "2d7c88f",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T00:48:39+03:00",
+        "subject": "Show current desktop and Android screenshots in the README",
+        "body": "",
+        "category": "docs",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2d7c88fb429fa1ee506830af7a172ca87843a741"
+      },
+      {
+        "hash": "f22fa35ab9fb74bd4d0a958d921b1d9f2e769ad0",
+        "shortHash": "f22fa35",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T00:48:14+03:00",
+        "subject": "Present the website's screenshots in frames that follow the site theme",
+        "body": "Every feature tab now has its own screenshot (layout, workspaces,\nprivacy, search shortcuts, add-ons) instead of two images repeated, in\nlight and dark versions that follow the site theme. Desktop shots sit\nin a window frame and Android shots in a phone frame. The hero pairs\nthe new tab page with the Android start page, and the Android section\nlets visitors pick a feature to see its screen.",
+        "category": "style",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f22fa35ab9fb74bd4d0a958d921b1d9f2e769ad0"
+      },
+      {
+        "hash": "9c805eb1dfa027af4d4b192a5fa150590f1b049f",
+        "shortHash": "9c805eb",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T00:31:00+03:00",
+        "subject": "Cover the settings page padding behind the sticky search field",
+        "body": ".main-content has 24px of top padding, which a sticky top: 0 leaves\nopen, so settings scrolled past the search field stayed visible above\nit.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9c805eb1dfa027af4d4b192a5fa150590f1b049f"
+      },
+      {
+        "hash": "cbde70348bd284ca06ab2cefabe5bcf040f98b59",
+        "shortHash": "cbde703",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T00:19:57+03:00",
+        "subject": "Stop clipping the address bar suggestions in the shell",
+        "body": "Scoping Beer CSS turned its body rule into a rule on every .beer root,\nso the shell header got overflow-x: hidden and cut off the suggestion\ndropdown that hangs below it. Carry over only the inherited text styles\nfrom Beer's html and body rules.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cbde70348bd284ca06ab2cefabe5bcf040f98b59"
+      },
+      {
+        "hash": "9ac559f31493051e46119812f44c11a77c9dfb00",
+        "shortHash": "9ac559f",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T00:11:44+03:00",
+        "subject": "Show current desktop and Android 2.0 screenshots on the website",
+        "body": "Replace the pre-ESR desktop images, which showed compact mode and the\nold new tab page, with screenshots of the current shell, and add an\nAndroid section with screenshots of the 2.0 app.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9ac559f31493051e46119812f44c11a77c9dfb00"
+      },
+      {
+        "hash": "573b281f2f696e29579563bae2c5685f2371e7b9",
+        "shortHash": "573b281",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-11-01T00:10:13+03:00",
+        "subject": "Redesign the new tab page and connect it to its window through an actor",
+        "body": "The page sent search, navigation and theme requests over a\nBroadcastChannel that never reaches browser chrome from the content\nprocess, so searches went to a hardcoded DuckDuckGo, about: links did\nnothing and the page never followed the window's accent color. A\nHilalNewTab actor now carries those requests: searches go through the\nshell like the address bar (bangs, fixup, default engine), and the\ntheme updates live when the accent changes.\n\nThe new layout has a large clock and date card, a search field,\nshortcut tiles and quick links. Shortcut icons come from the large\nsite icons Firefox ships for its own new tab page or from the favicon\ncache, so the page no longer fetches favicons from the sites.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/573b281f2f696e29579563bae2c5685f2371e7b9"
+      },
+      {
+        "hash": "8a01e9442e909b56d8365b5264137b5a5fe4424d",
+        "shortHash": "8a01e94",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-31T20:47:55+03:00",
+        "subject": "Keep Beer CSS from restyling Firefox's own menus and panels",
+        "body": "Beer CSS was imported into browser.xhtml as is, so its page-level rules\n(html and body fonts, label font-size, a universal selector) also hit\nthe app menu and other panels: menu item labels shrank to zero height\nand disappeared. Generate hilal-beer.css, which wraps Beer in\n@scope (.beer) so only the shell's elements get it, and load that\ninstead.",
+        "category": "style",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/8a01e9442e909b56d8365b5264137b5a5fe4424d"
+      },
+      {
+        "hash": "796394c9d0af9f49a94c3b3eeac31ffc54496e16",
+        "shortHash": "796394c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-31T20:37:48+03:00",
+        "subject": "Drop an unused option and a redundant default from the macOS build script",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/796394c9d0af9f49a94c3b3eeac31ffc54496e16"
+      },
+      {
+        "hash": "6f448ed0efecd37603ad02970d3c911936605cc9",
+        "shortHash": "6f448ed",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-31T20:36:12+03:00",
+        "subject": "Record the ESR move and shell changes in the changelog",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6f448ed0efecd37603ad02970d3c911936605cc9"
+      },
+      {
+        "hash": "ea9a57a9baefc26e4390915206b7745cae8c42ce",
+        "shortHash": "ea9a57a",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-31T20:35:58+03:00",
+        "subject": "Rewrite the website's Android and upstream sync docs from the real code",
+        "body": "The Android section described files, settings and a privacy model that\nthe app never had. Base it on docs/MOBILE.md instead, and describe\nmoving to the next ESR point release for upstream syncs.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ea9a57a9baefc26e4390915206b7745cae8c42ce"
+      },
+      {
+        "hash": "1ef7c980351df3660d835e2b9aa700765a2696fc",
+        "shortHash": "1ef7c98",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-31T20:34:24+03:00",
+        "subject": "Add contributing and security guides and describe the Android app in the README",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1ef7c980351df3660d835e2b9aa700765a2696fc"
+      },
+      {
+        "hash": "4ff15586a0a979e5b22f997884ed1399302095b7",
+        "shortHash": "4ff1558",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-31T20:33:45+03:00",
+        "subject": "Remove the unused Fenix build path and update ESR version examples",
+        "body": "The Android app lives in android/ and is built with Gradle against\nGeckoView from Maven, as docs/MOBILE.md describes. The old scripts and\nmozconfigs for building Fenix from engine/ were no longer used.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/4ff15586a0a979e5b22f997884ed1399302095b7"
+      },
+      {
+        "hash": "a2d05ef4ffdb3d60e08813326ad8b0742b967a23",
+        "shortHash": "a2d05ef",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-31T20:33:06+03:00",
+        "subject": "Make the privacy policy and Play Store texts match what the Android app does",
+        "body": "The policy and the Data safety guide claimed that the device model was\ncollected, that no camera, microphone or location permissions were\nrequested, and the store listing claimed zero telemetry. None of that\nmatched the code: the app sends an opt-out daily ping with a random\ninstallation ID, app and Android version, CPU architecture, language and\na few settings, and requests camera, microphone and location for sites.\n\nAlso point store links at the project site instead of a personal one,\ndrop the unused duplicate policy copies, and replace leftover\ninstructions that referred to another AI tool.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a2d05ef4ffdb3d60e08813326ad8b0742b967a23"
+      },
+      {
+        "hash": "863d38951a2d9754d1e8f9df83cac92bb9435ccd",
+        "shortHash": "863d389",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-31T20:29:53+03:00",
+        "subject": "Add an opt-in dev build mode and drop a machine-specific PATH from the macOS build",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/863d38951a2d9754d1e8f9df83cac92bb9435ccd"
+      },
+      {
+        "hash": "bd8fe052dc3791366540bc45e405f0359b14d47a",
+        "shortHash": "bd8fe05",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-31T20:29:21+03:00",
+        "subject": "Remove outdated screenshots of the pre-ESR and compact mode interfaces",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/bd8fe052dc3791366540bc45e405f0359b14d47a"
+      },
+      {
+        "hash": "90f041f29caac777dab4ae2024d9d4056262de84",
+        "shortHash": "90f041f",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-31T20:29:08+03:00",
+        "subject": "Describe the current Material shell on the website instead of removed features",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/90f041f29caac777dab4ae2024d9d4056262de84"
+      },
+      {
+        "hash": "3bc7e69f156f36cab6d847ce8d15d16da609fa30",
+        "shortHash": "3bc7e69",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-31T20:28:06+03:00",
+        "subject": "Drop the AI Studio scaffolding and unused packages from the website",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/3bc7e69f156f36cab6d847ce8d15d16da609fa30"
+      },
+      {
+        "hash": "90fe3bec8b2e901c824973d08380d7eda5135b82",
+        "shortHash": "90fe3be",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T21:58:14+03:00",
+        "subject": "Keep the mach state on the internal disk by default",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/90fe3bec8b2e901c824973d08380d7eda5135b82"
+      },
+      {
+        "hash": "20db3f62792e8c64c626ded5f1b7c6830edf0c51",
+        "shortHash": "20db3f6",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T04:28:31+03:00",
+        "subject": "Keep the minified release APK from Android CI for testing",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/20db3f62792e8c64c626ded5f1b7c6830edf0c51"
+      },
+      {
+        "hash": "bfcde7d06426d2fcd136b41b02b112e0480bc1e6",
+        "shortHash": "bfcde7d",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T04:23:19+03:00",
+        "subject": "Let R8 ignore java.beans references from GeckoView's SnakeYAML",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/bfcde7d06426d2fcd136b41b02b112e0480bc1e6"
+      },
+      {
+        "hash": "8fa36f1f9718cb59664d86f24703f47c1a13d4fe",
+        "shortHash": "8fa36f1",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T04:17:51+03:00",
+        "subject": "Show typed addresses as addresses, not searches, in the editor",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/8fa36f1f9718cb59664d86f24703f47c1a13d4fe"
+      },
+      {
+        "hash": "90c6fc084f6c2c63969210ff310863743ffe3535",
+        "shortHash": "90c6fc0",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T04:11:59+03:00",
+        "subject": "Build the minified release variant on Android CI too",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/90c6fc084f6c2c63969210ff310863743ffe3535"
+      },
+      {
+        "hash": "7fc96d508c5d03304ccf418b5f9ea48230ceb934",
+        "shortHash": "7fc96d5",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T04:07:20+03:00",
+        "subject": "Fix Android compile errors found by CI",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/7fc96d508c5d03304ccf418b5f9ea48230ceb934"
+      },
+      {
+        "hash": "951b6c135e08f6bc0e85b5e79f5d468fe7fd0642",
+        "shortHash": "951b6c1",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T04:03:55+03:00",
+        "subject": "Move GeckoProvider out of the ignored engine/ path",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/951b6c135e08f6bc0e85b5e79f5d468fe7fd0642"
+      },
+      {
+        "hash": "02e89d3b7423ed5c1ee5bc8accb47b5217f3980e",
+        "shortHash": "02e89d3",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T04:00:55+03:00",
+        "subject": "Build Android with AGP 9.5 and compile SDK 37",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/02e89d3b7423ed5c1ee5bc8accb47b5217f3980e"
+      },
+      {
+        "hash": "7e64b462b31fb9564f25931dd818d71e9466cd6d",
+        "shortHash": "7e64b46",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T03:58:27+03:00",
+        "subject": "Use the runner's Android SDK instead of setup-android",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/7e64b462b31fb9564f25931dd818d71e9466cd6d"
+      },
+      {
+        "hash": "c0244ef8f60b7b0700c09f38db4d7ff3f5c39997",
+        "shortHash": "c0244ef",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T03:57:27+03:00",
+        "subject": "Build Android on CI and publish signed releases from android-v tags",
+        "body": "Every push touching android/ builds a debug APK. Tags android-vX.Y.Z\nbuild a release APK and AAB signed with the upload key from repository\nsecrets, refuse to publish a debug-signed APK, and attach the APK and\nits SHA-256 to a GitHub release. The old workflow signed each release\nwith the runner's throwaway debug key, so installed apps could not\nupdate.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c0244ef8f60b7b0700c09f38db4d7ff3f5c39997"
+      },
+      {
+        "hash": "aba5db58d60ebbc08bae764a125699fa2d54546f",
+        "shortHash": "aba5db5",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T03:57:27+03:00",
+        "subject": "Rewrite the Android app on Material 3 Expressive",
+        "body": "The old interface imitated Material 3 Expressive with custom shapes and\nanimations, vibrated on every tap, kept history and bookmarks only in\nmemory, and auto-accepted every add-on permission. Replace it with:\n\n- the real expressive components and MotionScheme from material3 1.5;\n- a bottom address bar whose pill carries all gestures: tap to edit,\n  swipe sideways to switch tabs with the page following the finger,\n  swipe up for the tab overview, long press for quick actions;\n- haptics only when a drag crosses its commit point or on long press;\n- Room-backed history, bookmarks and downloads, and a saved tab session;\n- page dialogs, site permissions, context menus, find in page;\n- add-on permission prompts, with only the bundled uBlock auto-accepted;\n- downloads streamed from Gecko's own response into MediaStore.\n\nSettings keep their SharedPreferences keys, so the search engine and the\ntelemetry choice survive the upgrade. The signing password is no longer\nhardcoded in the build file.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/aba5db58d60ebbc08bae764a125699fa2d54546f"
+      },
+      {
+        "hash": "99845221cdb59a9f3a805c6d3bf93f30044c7b71",
+        "shortHash": "9984522",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T03:57:27+03:00",
+        "subject": "Keep Android releases out of the desktop updater and offer APKs on Android",
+        "body": "Android and desktop releases share the repository, so the newest release\ncould be either. The desktop updater now skips android- and mobile- tags,\nthe download button picks the newest APK release on Android and the\nnewest desktop release elsewhere, and /android/latest.apk redirects to\nthe current APK.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/99845221cdb59a9f3a805c6d3bf93f30044c7b71"
+      },
+      {
+        "hash": "53a5ad8c8f617cb71242c0b24fac03b452fc96c8",
+        "shortHash": "53a5ad8",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T03:11:07+03:00",
+        "subject": "Keep only Lepton's icon rules and turn them on",
+        "body": "Hilal shipped all of Firefox-UI-Fix behind hilal.uifix.enabled, which\nnothing set, so none of its 31k lines ran. Replace it with Lepton's Icons\nsection (menus, context menus, panels, library) from upstream d800e21,\nenable it with upstream's recommended userChrome.icon.* prefs, and ship\nexactly the SVGs it references: 17 were missing, 58 were unused.\n\nscripts/sync-lepton-icons.sh regenerates the stylesheet and icons from\nupstream's compiled CSS. The Lepton overrides file and its settings\nstrings go away with the rest.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/53a5ad8c8f617cb71242c0b24fac03b452fc96c8"
+      },
+      {
+        "hash": "ea967c6b8501137e01d9072c93cdfb9c0ea63df5",
+        "shortHash": "ea967c6",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T03:11:07+03:00",
+        "subject": "Remove the Tahoe theme and leftover compact mode styles",
+        "body": "The Tahoe glass theme was off by default and its actor was already gone.\nDrop hilal-tahoe.css, its pref, the shell's message to the missing\nHilalTahoe actor, the compact mode and Safari sidebar CSS in sidebar.css\nthat nothing turned on any more, and their settings strings.",
+        "category": "style",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ea967c6b8501137e01d9072c93cdfb9c0ea63df5"
+      },
+      {
+        "hash": "eade111cc7d7f06fc4f4c3df15a2ad7c1c6e8c56",
+        "shortHash": "eade111",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-30T03:10:51+03:00",
+        "subject": "Ignore the local intro video project",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/eade111cc7d7f06fc4f4c3df15a2ad7c1c6e8c56"
+      },
+      {
+        "hash": "8f71711578da4f6db14e532557eaf4e06591bbc3",
+        "shortHash": "8f71711",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-21T01:25:02+03:00",
+        "subject": "Open the tab context menu at the pointer",
+        "body": "The shell opened tabContextMenu anchored below the tab row; Firefox\nopens its context menus at the pointer. Mouse invocations now use\nopenPopupAtScreen with the event's coordinates, and keyboard\ninvocations, which have none, keep the row anchor. On macOS the menu\nis native, so its final position could only be checked through the\ncall arguments, not by measuring the popup.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/8f71711578da4f6db14e532557eaf4e06591bbc3"
+      },
+      {
+        "hash": "2589c1bac86264ae8007a705cc3b9c608c8d4fa8",
+        "shortHash": "2589c1b",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-21T01:21:39+03:00",
+        "subject": "Localize the shell's labels and tooltips",
+        "body": "The shell hardcoded its suggestion labels (\"Results\", \"SWITCH TO TAB\",\n\"Search with ...\"), layout menu entries and several tooltips in\nEnglish. Back and reload pointed at Firefox ids that do not exist on\nESR, and the close button used a menu item string that never reaches\nan HTML title. All of these now use Hilal Fluent messages, with Turkish\ntranslations, including the toolbar tooltips that had none. Messages on\nicon buttons carry only attributes so Fluent leaves the icon in place.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2589c1bac86264ae8007a705cc3b9c608c8d4fa8"
+      },
+      {
+        "hash": "ee5fd87fa6ebbb539f08ff46386dd14789edc4f0",
+        "shortHash": "ee5fd87",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-21T01:17:42+03:00",
+        "subject": "Remove dead Boosts hooks from the shell",
+        "body": "Boosts is not part of the Material shell build, so gHilalBoosts never\nexists; the theme menu item, page action handler and accent-color branch\nthat referred to it could never run.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ee5fd87fa6ebbb539f08ff46386dd14789edc4f0"
+      },
+      {
+        "hash": "c18efb8703ec9ef6f5a4bc1d7065789d73fc312a",
+        "shortHash": "c18efb8",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-21T01:14:43+03:00",
+        "subject": "Mark private windows in the shell and keep their address bar empty",
+        "body": "The shell's chrome looked identical in private and normal windows; once\na site replaced about:privatebrowsing nothing showed that the window\nwas private. The top bar now carries Firefox's private browsing\nindicator and label. The address bar also showed \"about:privatebrowsing\"\ninstead of staying empty; blank pages are now detected with Firefox's\nisBlankPageURL.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c18efb8703ec9ef6f5a4bc1d7065789d73fc312a"
+      },
+      {
+        "hash": "81f401a13b138f1bb5a4498d469bc198cf389e12",
+        "shortHash": "81f401a",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-21T01:11:47+03:00",
+        "subject": "Hide the shell during video and other DOM fullscreen",
+        "body": "Firefox hides its toolbars when a page goes fullscreen, but the shell's\ntop bar, sidebar and the padded, rounded content frame stayed, so\nfullscreen video was boxed into 1012x768 of a 1280x830 window. The\nshell is now hidden and the frame removed while inDOMFullscreen is set.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/81f401a13b138f1bb5a4498d469bc198cf389e12"
+      },
+      {
+        "hash": "9aeaab0404bcd963bcab4c7f2ce5ebed86aa043b",
+        "shortHash": "9aeaab0",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-21T01:07:15+03:00",
+        "subject": "Send urlbar focus to the shell and fix pinned extension sync on ESR",
+        "body": "Firefox focuses its own urlbar for new windows, new tabs and commands\nsuch as File > Open Location, but that urlbar sits in the hidden\ntoolbar, so the focus was lost and typed text went nowhere. Those calls\nnow focus the shell's address bar, and the initial focus decision for\na new window is repeated once the shell exists.\n\nPinned extension buttons were never moved into the shell because\nCustomizableUI.getWidgetNode is not public on ESR; the exception also\naborted the rest of the sync. The public getWidget().forWindow() API is\nused instead.",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9aeaab0404bcd963bcab4c7f2ce5ebed86aa043b"
+      },
+      {
+        "hash": "d4f84d9d22640989c0b58790062d68e7f743b312",
+        "shortHash": "d4f84d9",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-21T00:58:11+03:00",
+        "subject": "Leave tab and reload shortcuts to Firefox's own commands",
+        "body": "The shell handled Accel+T/W/R itself by key letter only, so\nAccel+Shift+T opened a blank tab instead of reopening the closed one,\nAccel+Shift+W closed a tab instead of the window, Accel+Shift+R did a\nnormal reload, and closing skipped Firefox's multi-tab warning and\nlast-tab handling. Only shortcuts that would otherwise focus the\nhidden native urlbar are taken over now: Accel+L, Alt+D on Windows and\nLinux, and Accel+T so the new tab focuses the shell's address bar.\n\nAddresses sent from the Hilal new tab page now go through the same\nnavigation path as the address bar instead of a system-principal load.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d4f84d9d22640989c0b58790062d68e7f743b312"
+      },
+      {
+        "hash": "12d92185635e84c5f732c33015ac6df2f73c26c3",
+        "shortHash": "12d9218",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-21T00:54:47+03:00",
+        "subject": "Show the downloads button and main menu in the shell toolbar",
+        "body": "The shell hid Firefox's toolbar without carrying over the main menu\nbutton, so on Windows and Linux, which have no menu bar by default,\nprint, find, history, add-ons and new private window were unreachable\nfrom the UI. Downloads also gave no feedback because the downloads\nbutton lived in the hidden toolbar. Both native buttons now sit at the\nend of the shell's top bar, so their panels anchor there and the\ndownloads button keeps Firefox's show-when-needed behaviour.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/12d92185635e84c5f732c33015ac6df2f73c26c3"
+      },
+      {
+        "hash": "5c32eb4955b20b59a4ede2c8bb34ece106837c90",
+        "shortHash": "5c32eb4",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-21T00:51:28+03:00",
+        "subject": "Anchor site info and permission prompts to the shell's address bar",
+        "body": "The shell hides Firefox's urlbar, so every doorhanger (location, camera,\npassword saving, add-on installs) lost its anchor and opened at the\nwindow's top-left corner. PopupNotifications now falls back to the\nshell's security icon when Firefox's own fallbacks are hidden.\n\nThat icon could not be clicked, leaving no way to see a site's\ncertificate or permissions; it now opens the identity panel and is\nreachable by keyboard. It also showed a lock for any https URL; it now\nfollows Firefox's identity state, so mixed content, certificate errors\nand overrides are not presented as secure.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5c32eb4955b20b59a4ede2c8bb34ece106837c90"
+      },
+      {
+        "hash": "718f2e01f1379fbf0814844abb0bd60b0ed9ae7a",
+        "shortHash": "718f2e0",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-21T00:45:21+03:00",
+        "subject": "Make the shell address bar follow Firefox's loading and privacy rules",
+        "body": "The shell's own address bar loaded every typed address with the system\nprincipal through gBrowser.loadURI, guessed addresses with a\n\"has a dot and no space\" rule (so localhost:8000 became a search and\nfile.txt became https://file.txt) and fell back to Google when no\nengine was found. It now resolves input with Services.uriFixup, loads\nthrough openTrustedLinkIn like the address bar, and refuses typed\njavascript: URLs.\n\nLive search suggestions were fetched on every keystroke regardless of\nbrowser.search.suggest.enabled, which Hilal's privacy levels turn off,\nand in private windows, with a hardcoded Google endpoint as fallback.\nThey now honour those prefs and the private-window rule.\n\nFocusing an empty address bar no longer opens a list of open tabs, and\nthe current tab is not offered as a \"switch to tab\" result.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/718f2e01f1379fbf0814844abb0bd60b0ed9ae7a"
+      },
+      {
+        "hash": "7b9325fb1e2546e8cc8ba552748a8fbf53b569e5",
+        "shortHash": "7b9325f",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-20T23:43:33+03:00",
+        "subject": "Rewrite the welcome screen as a short, plain setup flow",
+        "body": "The previous screen stacked badges, glows, pills and a summary card over\nfour crowded steps, shipped a 730 KB stylesheet, and maximized the\nwindow when it closed. It is replaced by an intro and three steps:\ntheme and tab layout, privacy level and search engine, then optional\nstarter workspaces, default browser and import. Accent colors and\npinned sites stay in Settings.\n\nThe privacy descriptions now match what each level sets. Balanced was\ndescribed as enabling fingerprinting resistance, disabling WebGL and\nclearing cookies on close; it does none of these.\n\nThe markup avoids header/main/footer and resets Beer's global button\nstyles, which otherwise turned the overlay into a page grid and drew\na full-window ripple ellipse. Search engines come from SearchService,\nsince Services.search does not exist on ESR. The window buttons are\nstill borrowed for the header and restored on close, and the unused\nwelcome screenshots are dropped from the jar.",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/7b9325fb1e2546e8cc8ba552748a8fbf53b569e5"
+      },
+      {
+        "hash": "eca090e8894baa199089353b55e1da9209f18b71",
+        "shortHash": "eca090e",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-20T23:25:10+03:00",
+        "subject": "Adopt the Material 3 Expressive shell on Firefox ESR 153",
+        "body": "Port the shell from feature/material3-expressive-ui onto the ESR base.\nOnly the Material work itself was carried over: the branch's stale\ncopies of upstream files (including 627 lines reverted in updater.cpp),\nthe Mach port IPC hack, the statfs patch and the sandbox/GPU-process\nprefs were left out.\n\nAs on the branch, the shell replaces Boosts, Tahoe, the sidebar\nredesign, compact mode and the Lepton prefs, so their patches and the\nBoosts layout backend are gone.\n\nFixes found while testing the build:\n- Welcome: lost the macOS window buttons and the menubar copy of them\n  when the overlay closed; set sidebar.revamp=true, which would bring\n  back the native sidebar next to the shell's; wrote the tab layout to\n  a pref the shell does not read; showed the old 10-step copy because\n  Fluent strings overrode the 4-step headings; offered Boosts as an\n  accent mode; rendered the GitHub tile invisible.\n- Shell borrowed the #TabsToolbar window buttons that AIWindow anchors\n  on (TypeError at startup); it now takes the #nav-bar copy.\n- Settings: the M3E component bundle was never packaged, so no switch\n  rendered; Material buttons listened for XUL \"command\" events and\n  did nothing; upstream pane stylesheets were dropped; Boosts, compact\n  mode and native sidebar controls were wired to nothing; titles and\n  buttons fell back to hardcoded Turkish; the Bangs form used the\n  removed XUL grid and overflowed.\n\nEvery upstream file is now owned by exactly one patch, so patches no\nlonger depend on each other's context. The applied tree matches the\nbuild that was tested.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/eca090e8894baa199089353b55e1da9209f18b71"
+      },
+      {
+        "hash": "ed1022a0c99606bcba5180df80d45f6ade4a8f6a",
+        "shortHash": "ed1022a",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-20T21:22:01+03:00",
+        "subject": "Support an engine/ symlinked to an external disk on macOS",
+        "body": "Ignore engine when it is a symlink, include mozconfigs/base from the\nrepository rather than $topsrcdir/.., and drop the objdir name\nhardcoded to a Darwin 25.5 host so mach picks the default.",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ed1022a0c99606bcba5180df80d45f6ade4a8f6a"
+      },
+      {
+        "hash": "c567dc487d59c7d2e36f77a5b166332574532f26",
+        "shortHash": "c567dc4",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-20T21:22:01+03:00",
+        "subject": "hil: move an existing engine to a new pin instead of recloning",
+        "body": "setup recloned all of Firefox when upstream.lock changed, and apply\nonly created upstream-base when it was missing, so 'apply --force'\nafter a pin bump reset the tree to the old base. setup now fetches the\nnew commit into the existing checkout (keeping ignored build\ndirectories and refusing to discard local edits), and apply refuses to\nrun when upstream-base does not match the lock.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c567dc487d59c7d2e36f77a5b166332574532f26"
+      },
+      {
+        "hash": "7678eb46e0b0ac32f683338c0f9ada5d2ce40308",
+        "shortHash": "7678eb4",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-20T20:45:04+03:00",
+        "subject": "Bring the Material 3 Expressive website redesign to main",
+        "body": "Ports the www/ changes from feature/material3-expressive-ui (Beer CSS,\nMaterial Symbols, redesigned download dialog, changelog build fixes for\nshallow clones) on top of main, keeping what main added after the\nbranch diverged: the Android download entries, mobile docs, privacy\npolicy page, telemetry endpoint and the keystore/secret ignore rules.\n\nThe branch copy claimed \"no telemetry\" outright. The Android app sends\nopt-out anonymous statistics, so the hero, privacy story and FAQ now say\nthat only the desktop browser sends no telemetry.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/7678eb46e0b0ac32f683338c0f9ada5d2ce40308"
+      },
+      {
+        "hash": "cf72ac0257a0ea453c2f7f03825e55a764da7f38",
+        "shortHash": "cf72ac0",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-20T20:37:41+03:00",
+        "subject": "Rebase onto Firefox ESR 153.5.1",
+        "body": "Hilal now tracks the Extended Support Release instead of a Nightly\nsnapshot. The patches were written for 153.0a1, the base ESR 153 was\nbranched from, so the rebase was small; ESR receives security and\nstability fixes for a year without feature churn.\n\nConflicts resolved: Hilal version display, the Hilal userContext rules\nin urlbar-searchbar.css, appended prefs in firefox.js, and the Boosts\nfields in nsPresContext.h and SVGImageContext.h, which now coexist with\nthe StyleLinkParameters members added on ESR.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cf72ac0257a0ea453c2f7f03825e55a764da7f38"
+      },
+      {
+        "hash": "277925d47e25e11542bae6b4cf55cab2b3bf263d",
+        "shortHash": "277925d",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-20T20:29:00+03:00",
+        "subject": "Strip whitespace-only changes from patches",
+        "body": "compact-mode-preferences.patch reindented 337 unrelated lines of\nfirefox.js, and several other patches carried similar noise. These hunks\nconflict with every upstream change nearby. Indentation-sensitive files\n(moz.build, Python, YAML, Fluent, jar manifests) were left untouched.\nIgnoring whitespace, the applied tree is unchanged.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/277925d47e25e11542bae6b4cf55cab2b3bf263d"
+      },
+      {
+        "hash": "a37db220121da00651f1e5f9fff7862f06025be2",
+        "shortHash": "a37db22",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-20T20:05:08+03:00",
+        "subject": "Remove transparent macOS chrome",
+        "body": "The patch forced every top-level window non-opaque regardless of the\npref and modified WebRender, nsCocoaWindow and StaticPrefList, which\nmade it a crash source and a rebase burden. macOS now uses the same\nopaque surfaces as the other platforms.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a37db220121da00651f1e5f9fff7862f06025be2"
+      },
+      {
+        "hash": "fe8b4fc3b3cfdecb69d82fd9b87292780820afbb",
+        "shortHash": "fe8b4fc",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-20T20:01:34+03:00",
+        "subject": "Keep only Hilal signing certificates in the updater overlay",
+        "body": "The other 55 files were unchanged upstream copies, and the moz.build\nchange is already carried by secure-update-signatures.patch.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/fe8b4fc3b3cfdecb69d82fd9b87292780820afbb"
+      },
+      {
+        "hash": "c78fd407d55434a56a99873c76c365151e14cdd6",
+        "shortHash": "c78fd40",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-20T20:00:17+03:00",
+        "subject": "Replace themes/shared snapshot with Hilal-only overlay and a patch",
+        "body": "The overlay shipped 455 copies of upstream files, 448 of them unchanged.\nOn any newer base they silently reverted upstream fixes. The 7 files\nHilal actually modifies are now a patch, so upstream changes surface as\nconflicts. The applied tree on 153.0a1 is byte-identical.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c78fd407d55434a56a99873c76c365151e14cdd6"
+      },
+      {
+        "hash": "954bb0d79a8056380c08cbc170883dc65f200712",
+        "shortHash": "954bb0d",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-10-20T20:00:17+03:00",
+        "subject": "Restore upstream pin to 153.0a1, the base the patch stack targets",
+        "body": "The pin was moved to 157.0a1 in 565690b, but the rebased patches only\nlanded on the Material 3 Expressive branch, leaving 23 of 31 patches\nfailing to apply on main.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/954bb0d79a8056380c08cbc170883dc65f200712"
+      },
+      {
+        "hash": "bbfc33118f3f78ff0c39498cf7ff6c5040ce71cd",
+        "shortHash": "bbfc331",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-21T20:21:19+03:00",
+        "subject": "Fix desktop profile initialization by setting MOZ_APP_PROFILE to Hilal",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/bbfc33118f3f78ff0c39498cf7ff6c5040ce71cd"
+      },
+      {
+        "hash": "9c7432cc0b7d01ecc4a73268e844b35324588374",
+        "shortHash": "9c7432c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-20T01:30:55+03:00",
+        "subject": "chore(android): bump version to 1.1.0 (versionCode 3)",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9c7432cc0b7d01ecc4a73268e844b35324588374"
+      },
+      {
+        "hash": "96b2fbc57de29387663e358bb218b211f186508a",
+        "shortHash": "96b2fbc",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-20T00:24:53+03:00",
+        "subject": "feat(android): support deep linking and external application intents",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/96b2fbc57de29387663e358bb218b211f186508a"
+      },
+      {
+        "hash": "7c1a098264867c2763fd882c3c85e017f2093a2e",
+        "shortHash": "7c1a098",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-20T00:09:12+03:00",
+        "subject": "fix(android): resolve content cut-off under docked Omnibox and bottom bar",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/7c1a098264867c2763fd882c3c85e017f2093a2e"
+      },
+      {
+        "hash": "1f3ca960f82dee0504bf2c2b55e9c11efe207878",
+        "shortHash": "1f3ca96",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-20T00:04:27+03:00",
+        "subject": "fix(android): resolve share crash in OptionsBottomSheet",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1f3ca960f82dee0504bf2c2b55e9c11efe207878"
+      },
+      {
+        "hash": "4cf3d61e80770734687aa88df51a125fda81a907",
+        "shortHash": "4cf3d61",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-20T00:01:03+03:00",
+        "subject": "fix(android): resolve share crash and streamline Omnibox editing UX",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/4cf3d61e80770734687aa88df51a125fda81a907"
+      },
+      {
+        "hash": "a5cbc0d12d08560d2a36420f90340a98771d6bb6",
+        "shortHash": "a5cbc0d",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-19T23:56:08+03:00",
+        "subject": "android: redesign Omnibox with site identity badge, syntax highlighting, smart paste, and action parking",
+        "body": "- Site identity chip: display live high-res favicon with HTTPS lock badge\n  on web pages, private incognito badge in private tabs, and search engine\n  badge in edit mode\n- URL syntax highlighting: bold prominent domain with muted path/query\n- Action parking: contextual animated Stop button when loading, Share and\n  Refresh actions when idle\n- Smart clipboard paste: automatically suggest clipboard URL in edit mode\n- onStop hook: wire up GeckoSession.stop() to cancel loading immediately",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a5cbc0d12d08560d2a36420f90340a98771d6bb6"
+      },
+      {
+        "hash": "67a352c8f427bdca2557a2e1c70b6d070c573baf",
+        "shortHash": "67a352c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-19T23:43:19+03:00",
+        "subject": "android: add tab previews, addon icons, download manager notifications, and new tab customization",
+        "body": "- Tab previews: capture GeckoView pixels as scaled bitmap thumbnails on page\n  finish and tray open; display in TabsTray with live website favicons\n- Addon management: display official AMO icons for featured and installed\n  extensions; add progress spinner and toast/haptic feedback on install\n- Download manager: implement onExternalResponse with Android DownloadManager,\n  providing native download tray notifications and progress tracking\n- New tab customization: replace letter placeholders with high-res domain\n  favicons; add wallpaper theme palette selector with smooth gradients",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/67a352c8f427bdca2557a2e1c70b6d070c573baf"
+      },
+      {
+        "hash": "70fbe927f4c6c84f00e61dacfcbf108f1b2d78ec",
+        "shortHash": "70fbe92",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-19T23:05:10+03:00",
+        "subject": "android: replace fake animations with genuine spring physics",
+        "body": "- BouncyModifier: Animatable spring loop replaces animateFloatAsState,\n  press/release use separate tuned springs (dampingRatio 0.52 / MediumBouncy)\n- BrowserBottomBar: per-button Animatable weights, pressed expands, siblings\n  compress, all spring back concurrently; removes delay(220) hack\n- TabsTray: tab card tilt/scale driven by animateFloatAsState spring instead\n  of hardcoded 0.98/1.02; animateItem() on LazyVerticalGrid for enter/exit\n- MainActivity: TabsTray wrapped in AnimatedVisibility with slideInVertically\n  spring + fadeIn; bar hide uses EaseInQuart tween, bar reveal uses\n  LowBouncy spring (asymmetric)\n- Omnibox: floating pill gets animateContentSize spring, animated border\n  color and elevation on focus",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/70fbe927f4c6c84f00e61dacfcbf108f1b2d78ec"
+      },
+      {
+        "hash": "84a558143f3c44fdcd20519d9a0767e18df64165",
+        "shortHash": "84a5581",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-13T12:30:24+03:00",
+        "subject": "security: enforce strict TELEMETRY_ADMIN_SECRET without hardcoded fallback",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/84a558143f3c44fdcd20519d9a0767e18df64165"
+      },
+      {
+        "hash": "395b8d02b62ed30f2863026e31824cb9b0244eea",
+        "shortHash": "395b8d0",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-13T12:27:12+03:00",
+        "subject": "fix(telemetry): restrict telemetry stats behind admin secret key",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/395b8d02b62ed30f2863026e31824cb9b0244eea"
+      },
+      {
+        "hash": "6ebbb0b7fdd42b6bdc08455000701ef0275761c1",
+        "shortHash": "6ebbb0b",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-13T12:20:14+03:00",
+        "subject": "feat: add first run installation tracking, anonymous installation ID, and live stats",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6ebbb0b7fdd42b6bdc08455000701ef0275761c1"
+      },
+      {
+        "hash": "29b0d6203848ecf8d5d57bcdfc117eff5c5f1426",
+        "shortHash": "29b0d62",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-13T12:09:21+03:00",
+        "subject": "feat: add zero-sdk anonymous telemetry endpoint and privacy opt-out toggle",
+        "body": "- Add TelemetryManager in Android with pure Kotlin HttpURLConnection and 24h throttling\n- Add user-facing Anonymous Usage Reports toggle in SettingsScreen under Privacy & Security\n- Add /api/telemetry serverless endpoint in Vercel to sanitize Zero-PII and forward to Firestore /hilal-browser collection\n- Add rewrite rule in vercel.json for /api/telemetry",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/29b0d6203848ecf8d5d57bcdfc117eff5c5f1426"
+      },
+      {
+        "hash": "5c0f76f0519e29ef17de82d9de6519aef43ae8b9",
+        "shortHash": "5c0f76f",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-12T21:22:00+03:00",
+        "subject": "feat(android): add default ublock origin, add-ons manager, tab vault, and customizable new tab",
+        "body": "- Bundle uBlock Origin extension by default and auto-enable on launch\n- Add Firefox WebExtensions management screen with AMO link and custom XPI installer\n- Redesign minimal new tab page with customizable shortcuts grid and workspace badge\n- Implement Candy Browser-style Tab Vault with coverflow depth transforms and spring dismiss\n- Decouple top and bottom toolbar scroll-hide behaviors and fix floating omnibox layout\n- Add custom search engine management with %s query parameter formatting",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5c0f76f0519e29ef17de82d9de6519aef43ae8b9"
+      },
+      {
+        "hash": "9c3e3349132b319e059e9e44bd83786dc399ce0a",
+        "shortHash": "9c3e334",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-12T21:00:39+03:00",
+        "subject": "feat(android): implement tactile haptics and pixelplayer-style bouncy spring motion",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/9c3e3349132b319e059e9e44bd83786dc399ce0a"
+      },
+      {
+        "hash": "434a74f3ca2e821e9af6d3320bd2fe182e629530",
+        "shortHash": "434a74f",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-12T20:51:06+03:00",
+        "subject": "feat(android): rewrite ui and ux with material 3 expressive design",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/434a74f3ca2e821e9af6d3320bd2fe182e629530"
+      },
+      {
+        "hash": "2c2309390e868d22009c93a243b09aeab9d5a118",
+        "shortHash": "2c23093",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T22:53:09+03:00",
+        "subject": "refactor(www): restore full docs page layout and integrate mobile architecture subcategory",
+        "body": "",
+        "category": "refactor",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2c2309390e868d22009c93a243b09aeab9d5a118"
+      },
+      {
+        "hash": "06eece43011c31afa08e43a085428645cd0da154",
+        "shortHash": "06eece4",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T22:40:03+03:00",
+        "subject": "fix(ci): handle shallow clones and missing tags gracefully in changelog builder",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/06eece43011c31afa08e43a085428645cd0da154"
+      },
+      {
+        "hash": "a12776cc6c11d5e8647fe2d46e874a1a7290c05b",
+        "shortHash": "a12776c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T22:37:11+03:00",
+        "subject": "feat(www): add mobile developer docs, privacy policy, and android release support",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a12776cc6c11d5e8647fe2d46e874a1a7290c05b"
+      },
+      {
+        "hash": "a6ea631c553502a349ca09aa8ca395d76e1e278b",
+        "shortHash": "a6ea631",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T22:36:51+03:00",
+        "subject": "docs(android): add play store metadata, graphics, and mobile architecture docs",
+        "body": "",
+        "category": "docs",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/a6ea631c553502a349ca09aa8ca395d76e1e278b"
+      },
+      {
+        "hash": "accb406e836cb18102319372a5a34c800d0bb09b",
+        "shortHash": "accb406",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T20:24:58+03:00",
+        "subject": "feat(android): bump compileSdk and targetSdk to 36, increment versionCode to 2",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/accb406e836cb18102319372a5a34c800d0bb09b"
+      },
+      {
+        "hash": "fb16875c8605f79aa211a2e85a42e7a8da7fc188",
+        "shortHash": "fb16875",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T19:56:04+03:00",
+        "subject": "feat(android): configure release signing with upload keystore and ignore keystores",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/fb16875c8605f79aa211a2e85a42e7a8da7fc188"
+      },
+      {
+        "hash": "d55a101101e4cbcaab7117cf0922f2334e3402ea",
+        "shortHash": "d55a101",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T08:26:11+03:00",
+        "subject": "Merge pull request #36 from VastSea0/feat/android-browser",
+        "body": "feat(android): introduce Hilal Browser for Android with GeckoView and M3E",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/d55a101101e4cbcaab7117cf0922f2334e3402ea"
+      },
+      {
+        "hash": "5620c6730ab7610fd61e0c8769ce3eea9749c43a",
+        "shortHash": "5620c67",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T08:24:50+03:00",
+        "subject": "feat(android): add private browsing mode, Google Play developer link, release workflow, and version 1.0.0",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5620c6730ab7610fd61e0c8769ce3eea9749c43a"
+      },
+      {
+        "hash": "21c895810bcef6d8425e2e40c58f8cbe53823387",
+        "shortHash": "21c8958",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T08:03:31+03:00",
+        "subject": "feat(android): add Compose Previews for all screens and components in light and dark modes",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/21c895810bcef6d8425e2e40c58f8cbe53823387"
+      },
+      {
+        "hash": "cecab3cfdce65dcb89fb9f0f5720ce3ce4a7fd14",
+        "shortHash": "cecab3c",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T08:00:13+03:00",
+        "subject": "feat(android): redesign Settings screen with M3E grouped rows, fullscreen webview, and typography upgrades",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cecab3cfdce65dcb89fb9f0f5720ce3ce4a7fd14"
+      },
+      {
+        "hash": "ed861e9730c15b3a8b104c7c3326f8b544e5cb0d",
+        "shortHash": "ed861e9",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T08:00:11+03:00",
+        "subject": "feat(android): update TabsTray with workspace emojis, swipe-to-dismiss, and options sheet actions",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ed861e9730c15b3a8b104c7c3326f8b544e5cb0d"
+      },
+      {
+        "hash": "f8fc0de63615f81cecd993f111bba960478fff46",
+        "shortHash": "f8fc0de",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T08:00:02+03:00",
+        "subject": "feat(android): add BangsScreen, HistoryScreen, and BookmarksScreen with swipe actions",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/f8fc0de63615f81cecd993f111bba960478fff46"
+      },
+      {
+        "hash": "09f4dc88ff5fa60246acd5d35f93f4808601c6f3",
+        "shortHash": "09f4dc8",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T07:59:03+03:00",
+        "subject": "feat(android): add models for bookmarks, history, and workspace emoji",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/09f4dc88ff5fa60246acd5d35f93f4808601c6f3"
+      },
+      {
+        "hash": "e8bd28a23f4329f0d317271b13a532e721251e2b",
+        "shortHash": "e8bd28a",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T07:28:45+03:00",
+        "subject": "feat(android): add dark theme toggle, GeckoView content blocking and full localization",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e8bd28a23f4329f0d317271b13a532e721251e2b"
+      },
+      {
+        "hash": "82eaeaf86296f9bfb99d98741aec4974f3c150b1",
+        "shortHash": "82eaeaf",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T07:28:40+03:00",
+        "subject": "feat(android): implement M3 Expressive morphing loading indicator and genuine shortcut icons",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/82eaeaf86296f9bfb99d98741aec4974f3c150b1"
+      },
+      {
+        "hash": "cb60d505d01ead30c88fbad576e3b50f4990c9e9",
+        "shortHash": "cb60d50",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T07:28:34+03:00",
+        "subject": "feat(android): add Turkish and English string resources for UI localization",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cb60d505d01ead30c88fbad576e3b50f4990c9e9"
+      },
+      {
+        "hash": "2bf0edb71ce2365f8d6a33a11917ab3ba6fb933d",
+        "shortHash": "2bf0edb",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-09T07:16:13+03:00",
+        "subject": "feat(android): introduce Hilal Browser for Android with GeckoView and M3E",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/2bf0edb71ce2365f8d6a33a11917ab3ba6fb933d"
+      },
+      {
+        "hash": "565690bd3672f36035f8a1c2dfd8680f75145014",
+        "shortHash": "565690b",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T07:13:23+03:00",
+        "subject": "chore: update Firefox upstream version to 157.0a1",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/565690bd3672f36035f8a1c2dfd8680f75145014"
+      },
+      {
+        "hash": "1f1d74fdbef8c7e81a8d313927d62e5f3ba87df8",
+        "shortHash": "1f1d74f",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T07:12:08+03:00",
+        "subject": "remove obsolete project documentation",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/1f1d74fdbef8c7e81a8d313927d62e5f3ba87df8"
+      },
+      {
+        "hash": "56915631df94bf7e1dc81d51a6f50e8a92a39eaf",
+        "shortHash": "5691563",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T07:00:55+03:00",
+        "subject": "docs(www): rewrite copy across landing page to be direct, natural, and authentic",
+        "body": "",
+        "category": "docs",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/56915631df94bf7e1dc81d51a6f50e8a92a39eaf"
+      },
+      {
+        "hash": "cbd8f3274531afad949586733cf2ccf9242bcaca",
+        "shortHash": "cbd8f32",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T06:58:08+03:00",
+        "subject": "feat(www): fetch and display real repository contributors on landing and changelog pages",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/cbd8f3274531afad949586733cf2ccf9242bcaca"
+      },
+      {
+        "hash": "c1af69a30ce04d32c338d97d09b0dfd3ca4ddcd0",
+        "shortHash": "c1af69a",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T06:56:18+03:00",
+        "subject": "docs(www): emphasize customizable interface over Tahoe theme",
+        "body": "",
+        "category": "docs",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c1af69a30ce04d32c338d97d09b0dfd3ca4ddcd0"
+      },
+      {
+        "hash": "6e26f957cad9ad932487cac3fcd382a6ce7dd9a0",
+        "shortHash": "6e26f95",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T06:55:15+03:00",
+        "subject": "refactor(www): remove redundant nested card wrappers around screenshots",
+        "body": "",
+        "category": "refactor",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/6e26f957cad9ad932487cac3fcd382a6ce7dd9a0"
+      },
+      {
+        "hash": "ed4a1390a4129f40c2c0bdb82ab52c674f048121",
+        "shortHash": "ed4a139",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T06:53:40+03:00",
+        "subject": "refactor(www): streamline floating navbar and harmonize changelog page styling",
+        "body": "",
+        "category": "refactor",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/ed4a1390a4129f40c2c0bdb82ab52c674f048121"
+      },
+      {
+        "hash": "de4bdb4c4a96e96b4cb9c235e2680bff4c85860f",
+        "shortHash": "de4bdb4",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T06:52:44+03:00",
+        "subject": "chore: update changelog data with latest feature commit and increment commit count",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/de4bdb4c4a96e96b4cb9c235e2680bff4c85860f"
+      },
+      {
+        "hash": "4611aae44c4ef4a5340e4ed4ab2591d13e16d995",
+        "shortHash": "4611aae",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T06:52:27+03:00",
+        "subject": "feat: implement automated changelog generation and display page for web documentation",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/4611aae44c4ef4a5340e4ed4ab2591d13e16d995"
+      },
+      {
+        "hash": "b454a46a46e4a871a66c7e33267d80983ba6f15e",
+        "shortHash": "b454a46",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-09-06T06:42:13+03:00",
+        "subject": "Update application update channels and URLs to hilal-browser.vercel.app",
+        "body": "Migrate update policy URL, branding download/release endpoints, about dialog links, smoke tests, and documentation from the expired gkdevstudio.org domain to hilal-browser.vercel.app.",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/b454a46a46e4a871a66c7e33267d80983ba6f15e"
+      },
+      {
+        "hash": "936f28ac9520540e952f13129144aacc956b4ab0",
+        "shortHash": "936f28a",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-08-30T17:02:00+03:00",
+        "subject": "feat(tahoe): restore dual tabstrip for Tahoe Safari mode and mark as experimental",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/936f28ac9520540e952f13129144aacc956b4ab0"
+      },
+      {
+        "hash": "4d3bb801eafb00acb0e4094e022c2fbc65813b1f",
+        "shortHash": "4d3bb80",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-08-30T16:55:43+03:00",
+        "subject": "chore: update hero chip text and localize key highlights section label",
+        "body": "",
+        "category": "chore",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/4d3bb801eafb00acb0e4094e022c2fbc65813b1f"
+      },
+      {
+        "hash": "5c0997298f857ed70631dfff01aa73f3d58bcd57",
+        "shortHash": "5c09972",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-08-30T16:55:32+03:00",
+        "subject": "fix(ui): hide tab labels in vertical pinned tab grid to display only icons",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/5c0997298f857ed70631dfff01aa73f3d58bcd57"
+      },
+      {
+        "hash": "48b9aef721ca8634c5bf97458bc588f167ee2917",
+        "shortHash": "48b9aef",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-08-30T16:54:47+03:00",
+        "subject": "refactor: migrate DownloadModal to Material Design 3 and update copy",
+        "body": "",
+        "category": "refactor",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/48b9aef721ca8634c5bf97458bc588f167ee2917"
+      },
+      {
+        "hash": "fc0b74367b8ab17af4eaae9bb210334a9113cbb8",
+        "shortHash": "fc0b743",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-08-30T16:53:03+03:00",
+        "subject": "refactor: overhaul landing page with modernized UI, optimized asset loading, and expanded feature documentation",
+        "body": "",
+        "category": "refactor",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/fc0b74367b8ab17af4eaae9bb210334a9113cbb8"
+      },
+      {
+        "hash": "c5bafe95647627369a8506854c5fb45a61d6764d",
+        "shortHash": "c5bafe9",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-08-30T16:47:06+03:00",
+        "subject": "fix(ui): disable horizontal tabs in branding prefs and enforce single-line vertical tabs",
+        "body": "",
+        "category": "fix",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/c5bafe95647627369a8506854c5fb45a61d6764d"
+      },
+      {
+        "hash": "e07e4ee13612f5b6d29d813cb9825b021d5f7a09",
+        "shortHash": "e07e4ee",
+        "author": "Egehan KAHRAMAN",
+        "date": "2026-08-30T16:35:04+03:00",
+        "subject": "feat: isolate Tahoe Safari shell and restore standard Hilal UI as primary",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/e07e4ee13612f5b6d29d813cb9825b021d5f7a09"
+      },
+      {
+        "hash": "fc3bacd6032f1495193e815b09421bf604bb9966",
+        "shortHash": "fc3bacd",
+        "author": "VastSea0",
+        "date": "2026-06-24T16:09:35+03:00",
+        "subject": "feat: add build and doctor commands to hil CLI and update Windows build documentation",
+        "body": "",
+        "category": "feature",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/fc3bacd6032f1495193e815b09421bf604bb9966"
+      },
+      {
+        "hash": "7a6d266d6cb58875bfb61e8d3d4fae639e3a0108",
+        "shortHash": "7a6d266",
+        "author": "VastSea0",
+        "date": "2026-06-22T16:13:14+03:00",
+        "subject": "ci: optimize Windows and Linux build caching and parallelism",
+        "body": "",
+        "category": "build",
+        "githubUrl": "https://github.com/VastSea0/hilal-browser/commit/7a6d266d6cb58875bfb61e8d3d4fae639e3a0108"
+      }
+    ],
     "highlights": {
       "added": [
         "Boosts are back, rebuilt from Zen Browser's Boosts (MPL 2.0). Per site, you can recolor a page without touching its images, invert it, change its contrast, brightness and saturation, set its font, text size and case, hide elements with Zap, keep only what matters with Focus, and add your own CSS. Open them with the bolt button in the address bar.",

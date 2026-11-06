@@ -15,7 +15,7 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "name": "Egehan KAHRAMAN",
     "avatarUrl": "https://github.com/VastSea0.png",
     "githubUrl": "https://github.com/VastSea0",
-    "contributions": 567,
+    "contributions": 627,
     "role": "Lead Developer"
   },
   {
@@ -24,6 +24,14 @@ export const CONTRIBUTORS_DATA: ContributorItem[] = [
     "avatarUrl": "https://github.com/greenkod.png",
     "githubUrl": "https://github.com/greenkod",
     "contributions": 11,
+    "role": "Contributor"
+  },
+  {
+    "username": "AtaberkCelil",
+    "name": "Ataberk Celil",
+    "avatarUrl": "https://github.com/AtaberkCelil.png",
+    "githubUrl": "https://github.com/AtaberkCelil",
+    "contributions": 9,
     "role": "Contributor"
   },
   {

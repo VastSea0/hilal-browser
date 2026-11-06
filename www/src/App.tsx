@@ -11,6 +11,8 @@ function GithubIcon({ className = "w-4 h-4" }: { className?: string }) {
 import { GithubRelease } from "./types";
 import {
   fetchGithubReleases,
+  fetchGithubContributors,
+  mergeContributors,
   FALLBACK_RELEASE_TR,
   FALLBACK_RELEASE_EN,
   detectOS,
@@ -21,7 +23,7 @@ import {
 
 import DownloadModal from "./components/DownloadModal";
 import { DesktopFrame, PhoneFrame, screen } from "./components/DeviceFrames";
-import { CONTRIBUTORS_DATA } from "./data/contributorsData";
+import { CONTRIBUTORS_DATA, ContributorItem } from "./data/contributorsData";
 import { applyAccentPalette, paletteFromAccent, useHilalBrowser } from "./utils/hilalAccent";
 
 // Pages other than home load on demand, so the commit history and the docs
@@ -110,6 +112,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [androidTab, setAndroidTab] = useState<number>(0);
   const [copiedClone, setCopiedClone] = useState<boolean>(false);
+  const [liveContributors, setLiveContributors] = useState<ContributorItem[] | null>(null);
+  const contributors = mergeContributors(CONTRIBUTORS_DATA, liveContributors);
 
   useEffect(() => {
     setDetectedOS(detectOS());
@@ -176,9 +180,17 @@ export default function App() {
         if (active) setReleases([]);
       }
     };
+    const syncContributors = () => {
+      fetchGithubContributors(CONTRIBUTORS_DATA).then((list) => {
+        if (active) setLiveContributors(list);
+      });
+    };
+    syncContributors();
     loadData();
+    const timer = window.setInterval(syncContributors, 30000);
     return () => {
       active = false;
+      window.clearInterval(timer);
     };
   }, []);
 
@@ -1033,7 +1045,7 @@ export default function App() {
                     <span>{lang === "tr" ? "Projeye Katkıda Bulunanlar" : "Project Contributors"}</span>
                   </span>
                   <div className="flex flex-wrap items-center justify-center gap-2.5">
-                    {CONTRIBUTORS_DATA.map((c) => (
+                    {contributors.map((c) => (
                       <a
                         key={c.username}
                         href={c.githubUrl}

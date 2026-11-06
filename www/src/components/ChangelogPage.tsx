@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { RELEASES_DATA } from "../data/changelogData";
-import { CONTRIBUTORS_DATA } from "../data/contributorsData";
+import { CONTRIBUTORS_DATA, ContributorItem } from "../data/contributorsData";
+import { fetchGithubContributors, mergeContributors } from "../utils/github";
 
 interface ChangelogPageProps {
   lang: "tr" | "en";
@@ -56,6 +58,19 @@ function formatHighlightText(text: string) {
 }
 
 export default function ChangelogPage({ lang }: ChangelogPageProps) {
+  const [liveContributors, setLiveContributors] = useState<ContributorItem[] | null>(null);
+  const contributors = mergeContributors(CONTRIBUTORS_DATA, liveContributors);
+
+  useEffect(() => {
+    let active = true;
+    fetchGithubContributors(CONTRIBUTORS_DATA).then((list) => {
+      if (active) setLiveContributors(list);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const formatDate = (isoStr: string) => {
     if (!isoStr) return "";
     try {
@@ -121,7 +136,7 @@ export default function ChangelogPage({ lang }: ChangelogPageProps) {
               <i className="text-base text-[var(--primary)]">group</i>
               <span>{lang === "tr" ? "Katkıda Bulunanlar:" : "Contributors:"}</span>
               <div className="flex items-center -space-x-1.5 ml-1">
-                {CONTRIBUTORS_DATA.map((c) => (
+                {contributors.map((c) => (
                   <a
                     key={c.username}
                     href={c.githubUrl}
