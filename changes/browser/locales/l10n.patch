@@ -182,7 +182,7 @@ diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser
 index a890aeb558f8..d2d9d9a51752 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2686,3 +2686,147 @@ security-privacy-issue-warning-ech =
+@@ -2686,3 +2686,157 @@ security-privacy-issue-warning-ech =
  security-privacy-issue-warning-proxy-autodetection =
    .label = Proxy auto-configuration is enabled
    .description = Proxy auto-configuration could let untrusted networks to monitor your activity.
@@ -227,6 +227,16 @@ index a890aeb558f8..d2d9d9a51752 100644
 +hilal-theme-color-header = Accent Color & Theme
 +hilal-accent-mode-title = Accent Color Mode
 +hilal-accent-mode-desc = Choose how theme accent colors are determined across workspaces and the browser
++hilal-auto-colors-header = Automatic Colors
++hilal-auto-boost-title = Automatic boosts
++hilal-auto-boost-desc = Recolor sites you have not boosted with the browser's accent color. "Compatible" leaves sites that already have a dark theme alone.
++hilal-auto-boost-off = Off
++hilal-auto-boost-compatible = Compatible
++hilal-auto-boost-all = All sites
++hilal-auto-boost-darken-title = Darken light pages in dark mode
++hilal-auto-boost-darken-desc = Automatic boosts turn light pages dark while Hilal is dark.
++hilal-follow-site-title = Use the site's color for the browser
++hilal-follow-site-desc = Take the accent color of the page you are on, from its theme color or a guess from its design.
 +hilal-accent-mode-workspace = Workspaces
 +    .label = Workspaces
 +hilal-accent-mode-global = Global Accent

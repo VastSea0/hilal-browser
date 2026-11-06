@@ -69,9 +69,27 @@
     _currentColor: "blue",
     _listenerAttached: false,
     _prefObserver: null,
+    // Accent of the selected page, used when hilal.theme.followSite is on.
+    _siteColor: null,
+
+    setSiteColor(color) {
+      if (color == this._siteColor) {
+        return;
+      }
+      this._siteColor = color;
+      if (Services.prefs.getBoolPref("hilal.theme.followSite", false)) {
+        this.applyTheme();
+      }
+    },
 
     getEffectiveColor(colorInput) {
       try {
+        if (
+          this._siteColor &&
+          Services.prefs.getBoolPref("hilal.theme.followSite", false)
+        ) {
+          return this._siteColor;
+        }
         if (typeof Services !== "undefined" && Services.prefs) {
           const mode = Services.prefs.getStringPref("hilal.theme.accentMode", "workspace");
           if (mode === "global") {
@@ -138,6 +156,7 @@
         try {
           Services.prefs.addObserver("hilal.theme.accentMode", this._prefObserver);
           Services.prefs.addObserver("hilal.theme.globalAccentColor", this._prefObserver);
+          Services.prefs.addObserver("hilal.theme.followSite", this._prefObserver);
           Services.prefs.addObserver("hilal.workspaces.data", this._prefObserver);
           Services.prefs.addObserver("layout.css.prefers-color-scheme.content-override", this._prefObserver);
         } catch (e) {}
@@ -402,6 +421,7 @@
       });
 
       this.themeChildWindows();
+      this.trackSiteAccent();
 
       if (typeof CustomizableUI !== "undefined") {
         try {
@@ -418,6 +438,37 @@
         const obs = new MutationObserver(() => this.syncExtensions());
         obs.observe(nbTarget, { childList: true });
       }
+    },
+
+    /**
+     * Records the accent a page declares (or Hilal guessed) for its browser,
+     * and applies it when that browser is the selected one.
+     */
+    setSiteAccent(browser, color) {
+      browser._hilalSiteAccent = color;
+      if (browser == gBrowser.selectedBrowser) {
+        MaterialYouTheme.setSiteColor(color);
+      }
+    },
+
+    trackSiteAccent() {
+      gBrowser.tabContainer.addEventListener("TabSelect", () => {
+        MaterialYouTheme.setSiteColor(
+          gBrowser.selectedBrowser._hilalSiteAccent || null
+        );
+      });
+      gBrowser.addTabsProgressListener({
+        onLocationChange(browser, webProgress, request, location, flags) {
+          if (!webProgress.isTopLevel ||
+              flags & Ci.nsIWebProgressListener.LOCATION_CHANGE_SAME_DOCUMENT) {
+            return;
+          }
+          // Pages without the boosts actor (about:, file:) have no accent.
+          if (!location.schemeIs("http") && !location.schemeIs("https")) {
+            HilalShell.setSiteAccent(browser, null);
+          }
+        },
+      });
     },
 
     // Dialog windows such as About load the same Material tokens; give them

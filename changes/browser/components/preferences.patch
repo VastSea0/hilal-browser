@@ -68,7 +68,7 @@ index b66ff919d93b..e2566bfa9b76 100644
    };
  
    const items = includeIsDefaultPane
-@@ -1815,6 +1831,1391 @@ gMainPane.initialized = new Promise(res => {
+@@ -1815,6 +1831,1417 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
@@ -392,6 +392,32 @@ index b66ff919d93b..e2566bfa9b76 100644
 +    }
 +
 +    refreshHilalSidebarCustomList();
++    // Automatic colors: boosts for unboosted sites and the site's accent.
++    const hilalAutoBoostMode = document.getElementById("hilalAutoBoostMode");
++    if (hilalAutoBoostMode) {
++      const showMode = mode => {
++        for (const seg of hilalAutoBoostMode.querySelectorAll("m3e-button-segment")) {
++          const on = seg.getAttribute("value") === mode;
++          seg.checked = on;
++          seg.toggleAttribute("checked", on);
++        }
++      };
++      showMode(Services.prefs.getStringPref("hilal.boosts.auto.mode", "off"));
++      hilalAutoBoostMode.addEventListener("click", e => {
++        const seg = e.target.closest("m3e-button-segment");
++        const mode = seg?.getAttribute("value");
++        if (mode) {
++          Services.prefs.setStringPref("hilal.boosts.auto.mode", mode);
++          showMode(mode);
++        }
++      });
++    }
++    try {
++      wireCheckbox(document.getElementById("hilalAutoBoostDarken"), "hilal.boosts.auto.darken", true);
++      wireCheckbox(document.getElementById("hilalFollowSiteColor"), "hilal.theme.followSite", false);
++    } catch (e) {
++      console.error("Hilal automatic colors init error:", e);
++    }
 +
 +    if (hilalPrivacyLevelRadioGroup) {
 +      const updatePrivacyLevelUI = (level) => {

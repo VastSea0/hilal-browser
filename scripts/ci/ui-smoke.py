@@ -390,6 +390,51 @@ def main():
         check("Extreme privacy turns fingerprinting resistance on", rfp["extreme"] is True, rfp)
         check("Standard privacy leaves it off", rfp["standard"] is False, rfp)
 
+        # Automatic colors, against a local page that declares a theme color.
+        import http.server, threading
+        page_dir = Path(tempfile.mkdtemp(prefix="hilal-site-"))
+        (page_dir / "index.html").write_text(
+            "<!doctype html><meta name='theme-color' content='#e8590c'>"
+            "<title>Hilal colors</title><body style='background:#fff'><h1>Colors</h1>"
+        )
+        handler = lambda *a, **kw: http.server.SimpleHTTPRequestHandler(*a, directory=str(page_dir), **kw)
+        server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        site = f"http://127.0.0.1:{server.server_address[1]}/"
+        m.script("""
+          Services.prefs.setStringPref('hilal.boosts.auto.mode', 'all');
+          Services.prefs.setBoolPref('hilal.theme.followSite', true);
+        """)
+        m.script("gBrowser.selectedBrowser.loadURI(Services.io.newURI(arguments[0]), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})", [site])
+        check("local page loads", wait_for(m, "return gBrowser.selectedBrowser.contentTitle == 'Hilal colors'", 30))
+        check("automatic boost recolors an unboosted site",
+              wait_for(m, "return gBrowser.selectedBrowser.browsingContext.hilalBoostsData != 0", 10))
+        check("browser takes the site's theme color",
+              wait_for(m, "return MaterialYouTheme._siteColor == '#e8590c'", 10),
+              m.script("return MaterialYouTheme._siteColor"))
+        time.sleep(1)
+        m.screenshot(out / "05-site-colors.png")
+        m.script("""
+          Services.prefs.setStringPref('hilal.boosts.auto.mode', 'off');
+          Services.prefs.setBoolPref('hilal.theme.followSite', false);
+        """)
+        check("turning automatic boosts off restores the site",
+              wait_for(m, "return gBrowser.selectedBrowser.browsingContext.hilalBoostsData == 0", 10))
+        server.shutdown()
+
+        # Hilal's own website learns the browser's accent; needs the network.
+        m.script("gBrowser.selectedBrowser.loadURI(Services.io.newURI('https://hilal-browser.vercel.app/'), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})")
+        if wait_for(m, "return gBrowser.selectedBrowser.currentURI.host == 'hilal-browser.vercel.app' && !gBrowser.selectedBrowser.webProgress.isLoadingDocument", 30):
+            m.context("content")
+            marked = wait_for(m, "return !!document.documentElement.getAttribute('data-hilal-accent')", 15)
+            attrs = m.script("return [document.documentElement.getAttribute('data-hilal-browser'), document.documentElement.getAttribute('data-hilal-accent')]")
+            m.context("chrome")
+            check("Hilal's website gets the browser's accent", marked, attrs)
+            time.sleep(2)
+            m.screenshot(out / "05-hilal-website.png")
+        else:
+            print("SKIP Hilal's website did not load (no network?)", flush=True)
+
         # Material surfaces drawn by Firefox's own components, for review.
         m.script("PanelUI.show()")
         check("app menu opens", wait_for(m, "return PanelUI.panel.state == 'open'", 10))

@@ -201,9 +201,15 @@ pref("hilal.workspaces.remember_host_mapping", false);
 // First-run toolbar initialization
 pref("hilal.toolbar.initialized", false);
 
-// Site Customizer and dynamic UI tinting preferences
-pref("hilal.boosts.auto_palette.enabled", false);
-pref("hilal.boosts.browser_ui.enabled", false);
+// Automatic boosts for sites without a boost of their own:
+// "off", "all", or "compatible" (skips pages that style themselves dark).
+pref("hilal.boosts.auto.mode", "off");
+// Comma separated domains automatic boosts leave alone.
+pref("hilal.boosts.auto.excluded", "");
+// Automatic boosts turn light pages dark while the browser is dark.
+pref("hilal.boosts.auto.darken", true);
+// Take the selected page's accent color as the browser's accent.
+pref("hilal.theme.followSite", false);
 
 // Theme and accent color preferences ("workspace" | "global" | "boosts")
 pref("hilal.theme.accentMode", "workspace");
