@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="www/public/screens/desktop-dark-newtab.webp" alt="Hilal's new tab page on desktop" width="800" />
+  <img src="media/features/images/new-tab.webp" alt="Hilal's new tab page: the time on Material 3 Expressive shapes, a search bar and shortcuts" width="800" />
 </p>
 
 <p align="center">
@@ -29,10 +29,18 @@ The project is in alpha and was previously developed as Huma Browser.
 
 ### Interface
 
-- Material 3 Expressive shell with its own top bar, address bar, and sidebar
-- Vertical sidebar tabs or a horizontal tab strip, switchable at any time
+- Material 3 Expressive shell with its own top bar, address bar, sidebar, menu and color panel
+- Vertical sidebar tabs, a horizontal tab strip, or both, switchable at any time
 - Light, dark, and system themes with per-workspace or global accent colors
-- Material 3 new tab page and settings page
+- Material 3 Expressive shapes on the new tab page, the About dialog and error pages
+- Settings, the About dialog and Firefox's own panels restyled to match
+
+### Colors and Boosts
+
+- Boosts restyle any site: recolor it without touching images, turn it dark, change its font and text size, zap elements away, or keep only what matters with Focus
+- Boosts can be shared as a link and can color the browser while their site is open
+- Automatic boosts recolor sites you have not boosted, on every site or only where it fits
+- The browser can take each site's own color, from its theme color or a guess from its design
 
 ### Workspaces
 
@@ -51,6 +59,19 @@ The project is in alpha and was previously developed as Huma Browser.
 - In-browser language selection and Turkish localization
 
 Privacy profiles are hardening presets, not anonymity modes; they do not hide your public IP address.
+
+## See it in action
+
+| | |
+|---|---|
+| <img src="media/features/images/color-panel.webp" alt="The color panel with accent colors, site colors and automatic boosts" /> | <img src="media/features/images/boosts-dark.webp" alt="The Boosts editor next to a Wikipedia page it has turned dark" /> |
+| **Colors that follow you.** Each workspace has an accent color; the palette button also lets the browser take each site's own color. [Video](media/features/videos/02-colors.mp4) | **Boosts.** Recolor any site, turn it dark, change its font and size, then share it as a link. [Video](media/features/videos/03-boosts.mp4) |
+| <img src="media/features/images/menu.webp" alt="Hilal's Material 3 Expressive menu" /> | <img src="media/features/images/bookmarks-panel.webp" alt="The bookmarks panel next to the sidebar" /> |
+| **A menu of its own,** with sub pages for tools and help. [Video](media/features/videos/04-menu-sidebar-layouts.mp4) | **Bookmarks and history** open right next to your tabs. |
+| <img src="media/features/images/horizontal-tabs.webp" alt="Hilal with horizontal tabs" /> | <img src="media/features/images/settings.webp" alt="Hilal's settings" /> |
+| **Tabs your way:** in a sidebar, along the top, or both. | **Settings** in the same style, Firefox's own panes included. [Video](media/features/videos/05-settings.mp4) |
+
+More images and videos, and what each one shows, are in [media/features](media/features/README.md).
 
 ## Android
 
