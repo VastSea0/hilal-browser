@@ -149,7 +149,8 @@ jobs:
       (needs.plan.outputs.build == 'false' || needs.build-linux.result == 'success')
     name: test (linux ${{ matrix.session }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # Room for a slow apt mirror when the package cache is cold.
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
