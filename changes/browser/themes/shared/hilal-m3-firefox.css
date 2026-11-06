@@ -378,4 +378,122 @@
     background-color: var(--surface-container-highest);
     color: var(--on-surface);
   }
+
+  /* ------------------------------------------------------------------
+   * Site information: a title, then the connection row and the clear
+   * cookies action as tonal segments of one group.
+   * ---------------------------------------------------------------- */
+  #identity-popup-mainView-panel-header {
+    justify-content: flex-start !important;
+    padding: 14px 18px 10px !important;
+  }
+
+  #identity-popup-mainView-panel-header > h1 {
+    text-align: start !important;
+  }
+
+  #identity-popup-mainView {
+    padding: 0 6px 6px;
+  }
+
+  #identity-popup-security-button,
+  #identity-popup-clear-sitedata-button {
+    min-height: 48px !important;
+    margin: 0 0 2px !important;
+    padding-inline: 14px !important;
+    border-radius: 6px !important;
+    background-color: var(--surface-container-high) !important;
+    color: var(--on-surface) !important;
+  }
+
+  #identity-popup-security-button {
+    border-radius: 18px 18px 6px 6px !important;
+  }
+
+  #identity-popup-mainView:has(#identity-popup-clear-sitedata-footer[hidden]) #identity-popup-security-button {
+    border-radius: 18px !important;
+  }
+
+  #identity-popup-clear-sitedata-footer {
+    margin: 0 !important;
+    padding: 0 0 6px !important;
+    border: none !important;
+  }
+
+  #identity-popup-clear-sitedata-footer > toolbarseparator {
+    display: none;
+  }
+
+  #identity-popup-clear-sitedata-button {
+    border-radius: 6px 6px 18px 18px !important;
+  }
+
+  :is(#identity-popup-security-button, #identity-popup-clear-sitedata-button):hover {
+    background-color: color-mix(in srgb, var(--on-surface) 8%, var(--surface-container-high)) !important;
+  }
+
+  .identity-popup-warning-box {
+    border-radius: 14px !important;
+  }
+
+  /* ------------------------------------------------------------------
+   * Downloads: each download a tonal row, "Show all downloads" a
+   * tonal button.
+   * ---------------------------------------------------------------- */
+  #downloadsPanel-mainView {
+    padding: 6px !important;
+  }
+
+  #downloadsListBox > richlistitem {
+    margin: 0 0 2px !important;
+    border-radius: 6px !important;
+    background-color: var(--surface-container-high) !important;
+  }
+
+  #downloadsListBox > richlistitem:first-child {
+    border-start-start-radius: 18px !important;
+    border-start-end-radius: 18px !important;
+  }
+
+  #downloadsListBox > richlistitem:last-child {
+    border-end-start-radius: 18px !important;
+    border-end-end-radius: 18px !important;
+  }
+
+  #downloadsListBox > richlistitem:hover {
+    background-color: color-mix(in srgb, var(--on-surface) 8%, var(--surface-container-high)) !important;
+  }
+
+  #downloadsListBox .downloadProgress::-moz-progress-bar {
+    background-color: var(--primary) !important;
+    border-radius: 9999px;
+  }
+
+  #emptyDownloads {
+    margin: 0 !important;
+    padding: 18px 16px !important;
+    border-radius: 18px;
+    background-color: var(--surface-container-high);
+    color: var(--on-surface-variant) !important;
+  }
+
+  #downloadsFooterButtons > toolbarseparator {
+    display: none;
+  }
+
+  #downloadsHistory {
+    appearance: none !important;
+    min-height: 44px !important;
+    margin: 6px 0 0 !important;
+    padding-inline: 16px !important;
+    border: none !important;
+    border-radius: 9999px !important;
+    background-color: var(--secondary-container) !important;
+    color: var(--on-secondary-container) !important;
+    font-weight: 500 !important;
+  }
+
+  #downloadsHistory:hover {
+    background-color: color-mix(in srgb, var(--on-secondary-container) 8%, var(--secondary-container)) !important;
+  }
 }
