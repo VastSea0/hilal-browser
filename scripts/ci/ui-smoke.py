@@ -525,6 +525,14 @@ def main():
             m.script("window.close()")
             m.send("WebDriver:SwitchToWindow", {"handle": main_handle})
 
+        # The downloads panel anchors to an icon the shell hides; it has to
+        # open all the same.
+        m.script("DownloadsPanel.showPanel(true)")
+        check("downloads panel opens", wait_for(m, "return DownloadsPanel.panel.state == 'open'", 10),
+              m.script("return DownloadsPanel.panel.state"))
+        m.screenshot(out / "07a-downloads.png")
+        m.script("DownloadsPanel.hidePanel()")
+
         # Add-ons is restyled by hilal-in-content.css and takes the accent.
         m.script("gBrowser.selectedTab = gBrowser.addTab('about:addons', {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})")
         addons_look = None

@@ -383,6 +383,7 @@
         () => this.createSidebar(),
         () => this.setupUrlSearchAndSuggestions(),
         () => this.installPopupAnchorFallback(),
+        () => this.installDownloadsAnchor(),
         () => this.mountNativeToolbarElements(),
         () => this.bindBrowserEvents(),
         () => this.hookWorkspaces(),
@@ -3648,6 +3649,25 @@
           writable: true,
         });
       }
+    },
+
+    // The downloads panel anchors to the button's badge stack, which the
+    // shell hides while no download is running (it draws its own icon).
+    // A popup cannot open on an element without a box, so use the button.
+    installDownloadsAnchor() {
+      const button = window.DownloadsButton;
+      if (!button?.getAnchor || button._hilalAnchor) {
+        return;
+      }
+      const getAnchor = button.getAnchor.bind(button);
+      button._hilalAnchor = true;
+      button.getAnchor = () => {
+        const anchor = getAnchor();
+        if (anchor && !anchor.getBoundingClientRect().width) {
+          return anchor.closest("toolbarbutton") || anchor;
+        }
+        return anchor;
+      };
     },
 
     // Permission, password and add-on prompts anchor to icons inside the
