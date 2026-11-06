@@ -500,8 +500,21 @@
         subject.addEventListener(
           "DOMContentLoaded",
           () => {
-            const root = subject.document?.documentElement;
-            if (root?.id != "aboutDialog") {
+            const doc = subject.document;
+            const root = doc?.documentElement;
+            if (root?.id == "places") {
+              // The Library window takes the Material styles too.
+              for (const href of [
+                "chrome://browser/skin/hilal-m3-tokens.css",
+                "chrome://browser/skin/hilal-m3-firefox.css",
+                "chrome://browser/content/hilal/HilalLibrary.css",
+              ]) {
+                doc.insertBefore(
+                  doc.createProcessingInstruction("xml-stylesheet", `href="${href}" type="text/css"`),
+                  root
+                );
+              }
+            } else if (root?.id != "aboutDialog") {
               return;
             }
             const source = Services.wm.getMostRecentWindow("navigator:browser");

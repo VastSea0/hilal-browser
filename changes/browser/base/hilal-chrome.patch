@@ -27,7 +27,7 @@ diff --git a/browser/base/jar.mn b/browser/base/jar.mn
 index 416391b3ecf2..c23d43a301aa 100644
 --- a/browser/base/jar.mn
 +++ b/browser/base/jar.mn
-@@ -65,6 +65,42 @@ browser.jar:
+@@ -65,6 +65,43 @@ browser.jar:
          content/browser/browser-unified-extensions.js       (content/browser-unified-extensions.js)
          content/browser/browser-graphics-utils.js           (content/browser-graphics-utils.js)
          content/browser/browser-webrtc.js                   (content/browser-webrtc.js)
@@ -40,6 +40,7 @@ index 416391b3ecf2..c23d43a301aa 100644
 +        content/browser/hilal/HilalToolbar.css              (content/hilal/HilalToolbar.css)
 +        content/browser/hilal/HilalSidebar.css              (content/hilal/HilalSidebar.css)
 +        content/browser/hilal/HilalPanelPages.css           (content/hilal/HilalPanelPages.css)
++        content/browser/hilal/HilalLibrary.css              (content/hilal/HilalLibrary.css)
 +        content/browser/hilal/shapes/arch.svg               (content/hilal/shapes/arch.svg)
 +        content/browser/hilal/shapes/burst.svg              (content/hilal/shapes/burst.svg)
 +        content/browser/hilal/shapes/circle.svg             (content/hilal/shapes/circle.svg)
