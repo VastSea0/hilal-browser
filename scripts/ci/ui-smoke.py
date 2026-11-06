@@ -190,6 +190,28 @@ def wait_for(m, js, timeout=60, interval=0.5):
     return False
 
 
+def os_screenshot(path):
+    """Grab the whole screen, which includes popups Marionette cannot draw."""
+    try:
+        if sys.platform.startswith("linux") and shutil.which("import"):
+            subprocess.run(["import", "-window", "root", str(path)], check=True, timeout=30)
+            return True
+        if sys.platform == "win32":
+            ps = (
+                "Add-Type -AssemblyName System.Windows.Forms,System.Drawing;"
+                "$b=[System.Windows.Forms.Screen]::PrimaryScreen.Bounds;"
+                "$i=New-Object System.Drawing.Bitmap $b.Width,$b.Height;"
+                "$g=[System.Drawing.Graphics]::FromImage($i);"
+                "$g.CopyFromScreen($b.Location,[System.Drawing.Point]::Empty,$b.Size);"
+                f"$i.Save('{path}')"
+            )
+            subprocess.run(["powershell", "-NoProfile", "-Command", ps], check=True, timeout=30)
+            return True
+    except (OSError, subprocess.SubprocessError) as e:
+        print("screen capture failed:", e, flush=True)
+    return False
+
+
 def free_port():
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))
@@ -367,6 +389,52 @@ def main():
         report["resist_fingerprinting"] = rfp
         check("Extreme privacy turns fingerprinting resistance on", rfp["extreme"] is True, rfp)
         check("Standard privacy leaves it off", rfp["standard"] is False, rfp)
+
+        # Material surfaces drawn by Firefox's own components, for review.
+        m.script("PanelUI.show()")
+        check("app menu opens", wait_for(m, "return PanelUI.panel.state == 'open'", 10))
+        time.sleep(1)
+        os_screenshot(out / "06-app-menu.png")
+        m.script("PanelUI.hide()")
+
+        m.script("gHilalWorkspaces._showCreateDialog()")
+        check("workspace dialog opens", wait_for(m, "return !!document.getElementById('hilal-ws-dialog')", 10))
+        time.sleep(1)
+        m.screenshot(out / "07-workspace-dialog.png")
+        dialog = m.script("""
+          const d = document.getElementById('hilal-ws-dialog');
+          return {
+            title: d.querySelector('h3').textContent,
+            buttons: [...d.querySelectorAll('moz-button')].map(b => b.label),
+          };
+        """)
+        report["workspace_dialog"] = dialog
+        translated = all(dialog["buttons"]) and dialog["title"] not in ("", "hilal-ws-dialog-new-title")
+        if args.locale == "tr":
+            translated = translated and dialog["title"].lower() != "new workspace" and "Create" not in dialog["buttons"]
+        check("workspace dialog is translated", translated, dialog)
+        m.script("document.getElementById('hilal-ws-dialog-overlay')?.remove()")
+
+        before_handles = m.send("WebDriver:GetWindowHandles")
+        before_handles = before_handles.get("value", before_handles) if isinstance(before_handles, dict) else before_handles
+        main_handle = m.send("WebDriver:GetWindowHandle")
+        main_handle = main_handle.get("value", main_handle) if isinstance(main_handle, dict) else main_handle
+        m.script("openAboutDialog()")
+        about = None
+        deadline = time.time() + 15
+        while time.time() < deadline and not about:
+            handles = m.send("WebDriver:GetWindowHandles")
+            handles = handles.get("value", handles) if isinstance(handles, dict) else handles
+            new = [h for h in handles if h not in before_handles]
+            about = new[0] if new else None
+            time.sleep(0.5)
+        check("About dialog opens", bool(about))
+        if about:
+            m.send("WebDriver:SwitchToWindow", {"handle": about})
+            time.sleep(2)
+            m.screenshot(out / "08-about.png")
+            m.script("window.close()")
+            m.send("WebDriver:SwitchToWindow", {"handle": main_handle})
 
         # Errors from the first run; the restarted process has its own console.
         errors = m.script(ERRORS_JS)

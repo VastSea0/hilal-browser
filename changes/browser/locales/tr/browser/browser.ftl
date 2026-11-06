@@ -94,3 +94,22 @@ hilal-shell-layout-horizontal = Yatay sekmeler
 hilal-about-community = { -brand-short-name }, gönüllülerin <label data-l10n-name="hilal-about-firefox-link">Firefox</label> üzerine geliştirdiği özgür ve açık kaynaklı bir tarayıcıdır. <label data-l10n-name="hilal-about-contributors-link">Geliştirenleri görün</label>.
 hilal-about-helpus = Yardım etmek ister misiniz? <label data-l10n-name="hilal-about-contribute-link">GitHub'da katkıda bulunun</label> ya da <label data-l10n-name="hilal-about-issue-link">bir sorun bildirin</label>.
 hilal-about-source-link = Kaynak kodu
+
+## Hilal workspace dialog
+
+hilal-ws-dialog-new-title = Yeni çalışma alanı
+hilal-ws-dialog-edit-title = Çalışma alanını düzenle
+hilal-ws-dialog-emoji = Emoji
+hilal-ws-dialog-color = Renk
+hilal-ws-dialog-name = Ad
+hilal-ws-dialog-name-input =
+    .placeholder = Çalışma alanı adı
+hilal-ws-dialog-default-name = Çalışma alanı
+hilal-ws-dialog-cancel =
+    .label = Vazgeç
+hilal-ws-dialog-create =
+    .label = Oluştur
+hilal-ws-dialog-save =
+    .label = Kaydet
+hilal-ws-dialog-delete =
+    .label = Sil

@@ -401,6 +401,8 @@
         }
       });
 
+      this.themeChildWindows();
+
       if (typeof CustomizableUI !== "undefined") {
         try {
           CustomizableUI.addListener({
@@ -416,6 +418,43 @@
         const obs = new MutationObserver(() => this.syncExtensions());
         obs.observe(nbTarget, { childList: true });
       }
+    },
+
+    // Dialog windows such as About load the same Material tokens; give them
+    // this window's accent so they match the active workspace.
+    themeChildWindows() {
+      const observer = (subject, topic) => {
+        if (topic != "domwindowopened") {
+          return;
+        }
+        subject.addEventListener(
+          "DOMContentLoaded",
+          () => {
+            const root = subject.document?.documentElement;
+            if (root?.id != "aboutDialog") {
+              return;
+            }
+            const source = Services.wm.getMostRecentWindow("navigator:browser");
+            const style = source?.document.documentElement.style;
+            if (!style) {
+              return;
+            }
+            for (let i = 0; i < style.length; i++) {
+              const name = style[i];
+              if (name.startsWith("--")) {
+                root.style.setProperty(name, style.getPropertyValue(name));
+              }
+            }
+          },
+          { once: true }
+        );
+      };
+      Services.ww.registerNotification(observer);
+      window.addEventListener(
+        "unload",
+        () => Services.ww.unregisterNotification(observer),
+        { once: true }
+      );
     },
 
     ensureTabContextMenuReady() {

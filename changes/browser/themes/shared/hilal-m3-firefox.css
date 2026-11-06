@@ -1,0 +1,165 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*
+ * Firefox design tokens -> Hilal Material 3 tokens.
+ *
+ * Firefox's own components (moz-button, panels, the app menu, the
+ * translations panel, permission prompts, menus, inputs) read the design
+ * tokens from toolkit/themes/shared/design-system. Those are declared inside
+ * @layer, so these unlayered declarations win and every Firefox component
+ * takes the same colors and shapes as the Boosts editor. The --primary,
+ * --surface-* and friends come from hilal-m3-tokens.css and follow the
+ * workspace accent (MaterialYouTheme in HilalShell.js).
+ */
+
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+@namespace html url("http://www.w3.org/1999/xhtml");
+
+@media -moz-pref("hilal.material3.enabled") {
+  :root,
+  :root :is(panel, menupopup) {
+    /* Color roles */
+    --color-accent-primary: var(--primary);
+    --color-accent-primary-hover: color-mix(in srgb, var(--primary) 88%, var(--on-primary));
+    --color-accent-primary-active: color-mix(in srgb, var(--primary) 80%, var(--on-primary));
+    --color-accent-primary-selected: var(--primary);
+    --text-color-accent-primary-selected: var(--on-primary);
+
+    --text-color: var(--on-surface);
+    --text-color-deemphasized: var(--on-surface-variant);
+    --icon-color: var(--on-surface-variant);
+    --link-color: var(--primary);
+    --link-color-hover: color-mix(in srgb, var(--primary) 80%, var(--on-surface));
+    --link-color-active: var(--primary);
+    --link-color-visited: var(--primary);
+
+    --background-color-canvas: var(--surface);
+    --background-color-box: var(--surface-container-low);
+    --background-color-box-info: var(--surface-container-high);
+    --background-color-list-item-hover: color-mix(in srgb, var(--on-surface) 8%, transparent);
+
+    --border-color: var(--outline-variant);
+    --border-color-deemphasized: var(--outline-variant);
+    --border-color-interactive: var(--outline);
+    --border-color-interactive-hover: var(--on-surface-variant);
+    --border-color-selected: var(--primary);
+
+    --focus-outline-color: var(--primary);
+
+    /* Shape: M3 Expressive, as in the Boosts editor */
+    --border-radius-xsmall: 8px;
+    --border-radius-small: 12px;
+    --border-radius-medium: 16px;
+    --border-radius-large: 20px;
+    --border-radius-xlarge: 28px;
+    --border-radius-xxlarge: 32px;
+
+    /* Buttons: filled primary, tonal default, text ghost; all pills */
+    --button-border-radius: 9999px;
+    --button-min-height: 40px;
+    --button-border: none;
+    --button-border-color: transparent;
+    --button-border-color-hover: transparent;
+    --button-border-color-active: transparent;
+    --button-border-color-primary: transparent;
+    --button-border-color-primary-hover: transparent;
+    --button-border-color-primary-active: transparent;
+
+    --button-background-color: var(--secondary-container);
+    --button-background-color-hover: color-mix(in srgb, var(--on-secondary-container) 8%, var(--secondary-container));
+    --button-background-color-active: color-mix(in srgb, var(--on-secondary-container) 12%, var(--secondary-container));
+    --button-text-color: var(--on-secondary-container);
+    --button-text-color-hover: var(--on-secondary-container);
+    --button-text-color-active: var(--on-secondary-container);
+
+    --button-background-color-primary: var(--primary);
+    --button-background-color-primary-hover: color-mix(in srgb, var(--on-primary) 8%, var(--primary));
+    --button-background-color-primary-active: color-mix(in srgb, var(--on-primary) 12%, var(--primary));
+    --button-text-color-primary: var(--on-primary);
+    --button-text-color-primary-hover: var(--on-primary);
+    --button-text-color-primary-active: var(--on-primary);
+
+    --button-background-color-ghost-hover: color-mix(in srgb, var(--on-surface) 8%, transparent);
+    --button-background-color-ghost-active: color-mix(in srgb, var(--on-surface) 12%, transparent);
+    --button-text-color-ghost: var(--primary);
+
+    --button-background-color-destructive: var(--error);
+    --button-text-color-destructive: var(--on-error);
+
+    /* Text fields: M3 filled fields */
+    --input-text-border-radius: 12px;
+    --input-text-border-color: transparent;
+    --input-text-min-height: 40px;
+    --input-border-color: transparent;
+
+    /* Checkboxes and toggles */
+    --checkbox-border-radius: 4px;
+    --checkbox-border-color: var(--on-surface-variant);
+    --checkbox-background-color-checked: var(--primary);
+    --checkbox-border-color-checked: var(--primary);
+    --checkbox-background-color-checked-hover: var(--primary);
+    --checkbox-background-color-checked-active: var(--primary);
+
+    /* Panels and menus: tonal surfaces, large corners, no hard borders */
+    --panel-background-color: var(--surface-container);
+    --panel-text-color: var(--on-surface);
+    --panel-border-color: transparent;
+    --panel-border-radius: 24px;
+    --panel-box-shadow: var(--md-sys-elevation-3);
+    --panel-menuitem-border-radius: 12px;
+    --panel-menuitem-padding-block: 8px;
+    --panel-menuitem-padding-inline: 12px;
+    --panel-separator-color: var(--outline-variant);
+    --arrowpanel-background: var(--surface-container);
+    --arrowpanel-color: var(--on-surface);
+    --arrowpanel-border-color: transparent;
+    --arrowpanel-border-radius: 24px;
+  }
+
+  /* Rows in the app menu and other panel subviews */
+  .subviewbutton,
+  .panel-subview-body > .subviewbutton,
+  .PanelUI-subView .subviewbutton {
+    border-radius: 12px !important;
+    min-height: 40px;
+  }
+
+  .subviewbutton:not([disabled]):hover {
+    background-color: color-mix(in srgb, var(--on-surface) 8%, transparent) !important;
+  }
+
+  .subviewbutton:not([disabled]):hover:active,
+  .subviewbutton[open] {
+    background-color: color-mix(in srgb, var(--on-surface) 12%, transparent) !important;
+  }
+
+  toolbarseparator,
+  menuseparator {
+    border-color: var(--outline-variant) !important;
+    border-image: none !important;
+  }
+
+  /* Headers of panel subviews ("Bookmarks", "History", ...) */
+  .panel-header > html|h1 {
+    font-weight: 600;
+  }
+
+  /* Text fields in panels and dialogs */
+  :root :is(html|input[type="text"], html|input[type="search"], html|input[type="url"], html|input:not([type])) {
+    background-color: var(--surface-container-highest);
+    color: var(--on-surface);
+  }
+
+  /* Firefox account row at the top of the app menu */
+  #appMenu-fxa-label2,
+  #appMenu-fxa-status2 {
+    border-radius: 16px !important;
+  }
+
+  /* The gradient line under the account row is Firefox branding */
+  #appMenu-fxa-separator {
+    border-image: none !important;
+  }
+}

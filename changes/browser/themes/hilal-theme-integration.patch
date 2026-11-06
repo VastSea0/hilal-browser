@@ -10,13 +10,14 @@ index 12d5982b1244..fd5b3a02ddb2 100644
  @import url("chrome://browser/skin/addons/extension-controlled.css");
  @import url("chrome://browser/skin/addons/unified-extensions.css");
  @import url("chrome://browser/skin/downloads/indicator.css");
-@@ -34,6 +35,9 @@
+@@ -34,6 +35,10 @@
  @import url("chrome://browser/skin/customizableui/customizeMode.css");
  @import url("chrome://browser/skin/UITour.css");
  @import url("chrome://browser/skin/formautofill-notification.css");
 +@import url("chrome://browser/skin/hilal-beer.css");
 +@import url("chrome://browser/skin/hilal-m3-tokens.css");
 +@import url("chrome://browser/skin/hilal-material3.css");
++@import url("chrome://browser/skin/hilal-m3-firefox.css");
  
  :root,
  body {
@@ -33,7 +34,7 @@ diff --git a/browser/themes/shared/jar.inc.mn b/browser/themes/shared/jar.inc.mn
 index 7892988bd599..e018c738e99b 100644
 --- a/browser/themes/shared/jar.inc.mn
 +++ b/browser/themes/shared/jar.inc.mn
-@@ -357,3 +357,174 @@
+@@ -357,3 +357,175 @@
    skin/classic/browser/illustrations/market-opt-in.svg         (../shared/illustrations/market-opt-in.svg)
    skin/classic/browser/illustrations/tab-groups.svg            (../shared/illustrations/tab-groups.svg)
    skin/classic/browser/illustrations/yelpRealtime-opt-in.svg   (../shared/illustrations/yelpRealtime-opt-in.svg)
@@ -41,6 +42,7 @@ index 7892988bd599..e018c738e99b 100644
 +  skin/classic/browser/hilal-icons.css                        (../shared/hilal-icons.css)
 +  skin/classic/browser/hilal-m3-tokens.css                    (../shared/hilal-m3-tokens.css)
 +  skin/classic/browser/hilal-material3.css                    (../shared/hilal-material3.css)
++  skin/classic/browser/hilal-m3-firefox.css                   (../shared/hilal-m3-firefox.css)
 +# Beer CSS M3E bundle (real Material 3 Expressive library)
 +  skin/classic/browser/hilal-beer.css                         (../shared/hilal-beer.css)
 +  skin/classic/browser/beer.min.js                            (../shared/beer.min.js)

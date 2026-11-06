@@ -2,15 +2,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/* The About dialog uses the same Material 3 tokens as the browser window.
+ * HilalShell.js copies the window's accent tokens onto this document when the
+ * dialog opens, so it follows the active workspace color. */
+@import url("chrome://browser/skin/hilal-m3-tokens.css");
+@import url("chrome://browser/skin/hilal-m3-firefox.css");
+
 :root {
-  /* Makes the macOS title bar match the dark dialog. */
-  color-scheme: dark;
+  color-scheme: light dark;
 }
 
 #aboutDialogContainer {
-  background-color: #0D1117;
-  color: #FFFFFF;
-  color-scheme: dark;
+  background-color: var(--surface);
+  color: var(--on-surface);
+  font-family: var(--font-sans);
 }
 
 #rightBox {
@@ -19,7 +24,36 @@
   padding-top: 96px;
 }
 
+#version {
+  color: var(--on-surface-variant);
+}
+
+.text-link,
+.text-link:visited {
+  color: var(--primary) !important;
+  text-decoration: none !important;
+  font-weight: 500;
+}
+
+.text-link:hover {
+  text-decoration: underline !important;
+}
+
+#updateBox button,
+#updateButton {
+  appearance: none;
+  border: none;
+  border-radius: 9999px;
+  min-height: 40px;
+  padding-inline: 24px;
+  background-color: var(--primary);
+  color: var(--on-primary);
+  font-weight: 500;
+}
+
 #bottomBox {
-  background-color: hsla(200, 30%, 8%, 0.7);
+  background-color: var(--surface-container);
   padding: 15px 10px 15px;
+  border-start-start-radius: 28px;
+  border-start-end-radius: 28px;
 }

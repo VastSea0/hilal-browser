@@ -10,7 +10,7 @@ index 759a6d2638c3..86c33e291d09 100644
  fullscreen-exit-button = Exit Full Screen (Esc)
  # "esc" is lowercase on mac keyboards, but uppercase elsewhere.
  fullscreen-exit-mac-button = Exit Full Screen (esc)
-@@ -1676,3 +1675,149 @@ reduced-protection-infobar-reload-button = Reload
+@@ -1676,3 +1675,167 @@ reduced-protection-infobar-reload-button = Reload
    .accesskey = R
  reduced-protection-infobar-never-show-button = Don’t show again
    .accesskey = D
@@ -154,6 +154,24 @@ index 759a6d2638c3..86c33e291d09 100644
 +hilal-shell-layout-dual = Sidebar and tab strip
 +hilal-shell-layout-horizontal = Horizontal tabs
 +
++## Hilal workspace dialog
++
++hilal-ws-dialog-new-title = New workspace
++hilal-ws-dialog-edit-title = Edit workspace
++hilal-ws-dialog-emoji = Emoji
++hilal-ws-dialog-color = Color
++hilal-ws-dialog-name = Name
++hilal-ws-dialog-name-input =
++    .placeholder = Workspace name
++hilal-ws-dialog-default-name = Workspace
++hilal-ws-dialog-cancel =
++    .label = Cancel
++hilal-ws-dialog-create =
++    .label = Create
++hilal-ws-dialog-save =
++    .label = Save
++hilal-ws-dialog-delete =
++    .label = Delete
 +
 +## Hilal About dialog
 +
