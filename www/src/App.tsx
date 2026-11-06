@@ -22,6 +22,7 @@ import {
 import DownloadModal from "./components/DownloadModal";
 import { DesktopFrame, PhoneFrame, screen } from "./components/DeviceFrames";
 import { CONTRIBUTORS_DATA } from "./data/contributorsData";
+import { applyAccentPalette, paletteFromAccent, useHilalBrowser } from "./utils/hilalAccent";
 
 // Pages other than home load on demand, so the commit history and the docs
 // are not part of the first download.
@@ -67,6 +68,12 @@ export default function App() {
     const saved = localStorage.getItem("hilal-theme");
     return saved === "light" ? "light" : "dark";
   });
+
+  // In Hilal Browser the site can wear the browser's accent color.
+  const hilal = useHilalBrowser();
+  const [colorSource, setColorSource] = useState<"hilal" | "site">(() =>
+    localStorage.getItem("hilal-color-source") === "site" ? "site" : "hilal"
+  );
 
   const [lang, setLang] = useState<"tr" | "en">(() => {
     const saved = localStorage.getItem("hilal-lang");
@@ -152,6 +159,12 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("hilal-lang", lang);
   }, [lang]);
+
+  useEffect(() => {
+    localStorage.setItem("hilal-color-source", colorSource);
+    const accent = colorSource === "hilal" ? hilal?.accent : null;
+    applyAccentPalette(accent ? paletteFromAccent(accent, theme === "dark") : null);
+  }, [colorSource, hilal?.accent, theme]);
 
   useEffect(() => {
     let active = true;
@@ -607,6 +620,36 @@ export default function App() {
 
           {/* Right Utilities */}
           <div className="flex items-center gap-1.5">
+            {/* Shown only inside Hilal Browser: switch between the
+                browser's accent color and the site's own colors. */}
+            {hilal?.accent && (
+              <button
+                type="button"
+                onClick={() => setColorSource(colorSource === "hilal" ? "site" : "hilal")}
+                className="h-8 pl-2 pr-3 rounded-full flex items-center gap-1.5 text-xs font-semibold text-[var(--on-secondary-container)] bg-[var(--secondary-container)] hover:opacity-90 transition-opacity cursor-pointer border-0"
+                title={
+                  lang === "tr"
+                    ? colorSource === "hilal"
+                      ? "Hilal'in rengi kullanılıyor. Sitenin kendi renklerine geç."
+                      : "Sitenin renkleri kullanılıyor. Hilal'in rengine geç."
+                    : colorSource === "hilal"
+                      ? "Using Hilal's color. Switch to the site's own colors."
+                      : "Using the site's colors. Switch to Hilal's color."
+                }
+                aria-pressed={colorSource === "hilal"}
+              >
+                <span
+                  className="w-4 h-4 rounded-full border border-[var(--outline-variant)]"
+                  style={{ background: colorSource === "hilal" ? hilal.accent : "#0b57d0" }}
+                />
+                <span>
+                  {colorSource === "hilal"
+                    ? lang === "tr" ? "Hilal rengi" : "Hilal color"
+                    : lang === "tr" ? "Site rengi" : "Site color"}
+                </span>
+              </button>
+            )}
+
             {/* Lang Chip */}
             <button
               type="button"
