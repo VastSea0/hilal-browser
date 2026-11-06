@@ -34,7 +34,7 @@ diff --git a/browser/themes/shared/jar.inc.mn b/browser/themes/shared/jar.inc.mn
 index 7892988bd599..e018c738e99b 100644
 --- a/browser/themes/shared/jar.inc.mn
 +++ b/browser/themes/shared/jar.inc.mn
-@@ -357,3 +357,175 @@
+@@ -357,3 +357,176 @@
    skin/classic/browser/illustrations/market-opt-in.svg         (../shared/illustrations/market-opt-in.svg)
    skin/classic/browser/illustrations/tab-groups.svg            (../shared/illustrations/tab-groups.svg)
    skin/classic/browser/illustrations/yelpRealtime-opt-in.svg   (../shared/illustrations/yelpRealtime-opt-in.svg)
@@ -43,6 +43,7 @@ index 7892988bd599..e018c738e99b 100644
 +  skin/classic/browser/hilal-m3-tokens.css                    (../shared/hilal-m3-tokens.css)
 +  skin/classic/browser/hilal-material3.css                    (../shared/hilal-material3.css)
 +  skin/classic/browser/hilal-m3-firefox.css                   (../shared/hilal-m3-firefox.css)
++  skin/classic/browser/preferences/hilal-settings.css         (../shared/preferences/hilal-settings.css)
 +# Beer CSS M3E bundle (real Material 3 Expressive library)
 +  skin/classic/browser/hilal-beer.css                         (../shared/hilal-beer.css)
 +  skin/classic/browser/beer.min.js                            (../shared/beer.min.js)

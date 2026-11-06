@@ -1,0 +1,500 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*
+ * Settings as a Material 3 Expressive page, in the same language as the
+ * Boosts editor and Hilal's menus: tonal surfaces, grouped cards with large
+ * outer and small inner corners, pill buttons and an M3 navigation drawer.
+ *
+ * Loaded after Firefox's preferences.css, hilal-m3-tokens.css and
+ * hilal-m3-firefox.css. Firefox's settings widgets draw inside shadow DOM, so
+ * most of their look is set through the design tokens below. The page copies
+ * the browser window's accent tokens (preferences.js), so it follows the
+ * workspace color.
+ */
+
+@namespace html url("http://www.w3.org/1999/xhtml");
+
+/* ---------------------------------------------------------------------------
+ * Page tokens
+ * ------------------------------------------------------------------------- */
+
+/* Firefox's widgets declare their defaults on :host inside shadow DOM, which
+   beats values inherited from :root. Declaring the same tokens on the host
+   elements themselves wins over :host. */
+:root,
+html|moz-page-nav,
+html|moz-page-nav-button,
+html|moz-card,
+html|moz-fieldset,
+html|moz-box-group,
+html|moz-box-item,
+html|moz-box-link,
+html|moz-box-button,
+html|moz-toggle,
+html|moz-select,
+html|moz-input-search,
+html|moz-input-text,
+html|moz-message-bar,
+html|moz-checkbox,
+html|moz-radio,
+html|moz-promo,
+html|moz-button {
+  --background-color-canvas: var(--surface);
+  --in-content-page-background: var(--surface);
+  --in-content-page-color: var(--on-surface);
+
+  /* Navigation drawer: M3 pill indicator instead of Firefox's side bar */
+  --page-nav-border-color: transparent;
+  --page-nav-button-border-radius: 28px;
+  --page-nav-button-padding: 10px 16px;
+  --page-nav-button-indicator-color: var(--on-secondary-container);
+  --page-nav-button-indicator-width: 0;
+  --page-nav-button-text-color: var(--on-surface-variant);
+  --page-nav-button-text-color-hover: var(--on-surface);
+  --page-nav-button-text-color-active: var(--on-secondary-container);
+  --page-nav-button-background-color: transparent;
+  --page-nav-button-background-color-hover: color-mix(in srgb, var(--on-surface) 8%, transparent);
+  --page-nav-button-background-color-active: color-mix(in srgb, var(--on-surface) 12%, transparent);
+  --page-nav-button-background-color-selected: var(--secondary-container);
+  --page-nav-button-border-color-hover: transparent;
+  --page-nav-button-border-color-active: transparent;
+  --page-nav-hr-background-color: var(--outline-variant);
+
+  /* Cards hold groups of settings */
+  --card-background-color: var(--surface-container);
+  --card-border: none;
+  --card-border-radius: 28px;
+  --card-box-shadow: none;
+  --card-padding: 20px;
+
+  /* Rows inside cards: tonal segments, as in Hilal's menus */
+  --box-border: none;
+  --box-border-width: 0;
+  --box-border-radius: 18px;
+  --box-border-radius-inner: 6px;
+  --box-padding: 16px;
+  --box-label-font-weight: 500;
+  /* List rows read as list items, not links */
+  --box-button-text-color: var(--on-surface);
+  --box-button-text-color-hover: var(--on-surface);
+  --box-button-text-color-active: var(--on-surface);
+  --box-button-background-color: var(--surface-container-high);
+  --box-button-background-color-hover: color-mix(in srgb, var(--on-surface) 6%, var(--surface-container-high));
+  --box-button-background-color-active: color-mix(in srgb, var(--on-surface) 10%, var(--surface-container-high));
+
+  /* Promos such as "Hilal isn't your default" */
+  --promo-border: none;
+  --promo-border-radius: 18px;
+  --promo-background-color: var(--surface-container-high);
+  --promo-heading-text-color: var(--on-surface);
+  --promo-message-text-color: var(--on-surface-variant);
+
+  /* Switches: M3 track and handle */
+  --toggle-width: 52px;
+  --toggle-height: 32px;
+  --toggle-border-radius: 16px;
+  --toggle-border-width: 2px;
+  --toggle-border-color: var(--outline);
+  --toggle-border-color-hover: var(--outline);
+  --toggle-border-color-active: var(--outline);
+  --toggle-background-color: var(--surface-container-highest);
+  --toggle-background-color-hover: var(--surface-container-highest);
+  --toggle-background-color-active: var(--surface-container-highest);
+  --toggle-background-color-pressed: var(--primary);
+  --toggle-background-color-pressed-hover: var(--primary);
+  --toggle-background-color-pressed-active: var(--primary);
+  --toggle-dot-background-color: var(--outline);
+  --toggle-dot-background-color-hover: var(--on-surface-variant);
+  --toggle-dot-background-color-active: var(--on-surface-variant);
+  --toggle-dot-background-color-on-pressed: var(--on-primary);
+  --toggle-dot-width: 16px;
+  --toggle-dot-height: 16px;
+  --toggle-dot-margin: 6px;
+
+  /* Dropdowns and text fields: filled tonal fields */
+  --select-background-color: var(--surface-container-highest);
+  --select-background-color-hover: color-mix(in srgb, var(--on-surface) 8%, var(--surface-container-highest));
+  --select-border: none;
+  --select-border-radius: 14px;
+  --select-min-height: 40px;
+  --select-text-color: var(--on-surface);
+  --select-text-color-hover: var(--on-surface);
+  --input-text-background-color: var(--surface-container-highest);
+  --input-text-border: 1px solid transparent;
+  --input-text-border-radius: 14px;
+  --input-text-color: var(--on-surface);
+
+  /* Message bars: tonal, no outline */
+  --message-bar-background-color: var(--secondary-container);
+  --message-bar-text-color: var(--on-secondary-container);
+  --message-bar-border-color: transparent;
+  --message-bar-border-radius: 18px;
+
+  --focus-outline-color: var(--primary);
+}
+
+:root {
+  background-color: var(--surface) !important;
+  color: var(--on-surface);
+  font-family: var(--font-sans);
+}
+
+html|body {
+  background-color: var(--surface) !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Navigation drawer
+ * ------------------------------------------------------------------------- */
+
+#categories,
+html|moz-page-nav {
+  --page-nav-margin-inline-start: 12px;
+  --page-nav-gap: 2px;
+  --page-nav-button-gap: 2px;
+}
+
+html|moz-page-nav-button {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+html|moz-page-nav-button[selected] {
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+ * Search: an M3 search bar
+ * ------------------------------------------------------------------------- */
+
+#searchInput {
+  --input-text-background-color: var(--surface-container-high);
+  --input-text-border: none;
+  --input-text-border-color: transparent;
+  --focus-outline-color: transparent;
+  --input-text-border-radius: 28px;
+  --input-text-min-height: 56px;
+  --input-height: 56px;
+  --focus-outline: 0 solid transparent;
+  --focus-outline-width: 0;
+  margin-block: 8px 20px !important;
+}
+
+#searchInput:focus-within {
+  --input-text-background-color: var(--surface-container-highest);
+  border-radius: 28px;
+  box-shadow: var(--md-sys-elevation-2);
+}
+
+/* ---------------------------------------------------------------------------
+ * Page and group headings
+ * ------------------------------------------------------------------------- */
+
+html|moz-page-header,
+.header-name,
+.pane-container h1 {
+  font-size: 32px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  color: var(--on-surface) !important;
+}
+
+setting-group,
+groupbox {
+  margin-block: 0 16px !important;
+}
+
+html|moz-card::part(heading),
+html|moz-fieldset::part(label),
+groupbox > label > html|h2,
+groupbox > html|h2,
+.settings-group-header html|h2 {
+  font-size: 18px !important;
+  font-weight: 500 !important;
+  color: var(--on-surface) !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Rows: every control row is a tonal segment of its card's group
+ * ------------------------------------------------------------------------- */
+
+html|moz-box-item,
+html|moz-box-link,
+html|moz-box-button {
+  --link-color: var(--on-surface);
+  --link-color-hover: var(--on-surface);
+  background-color: var(--surface-container-high) !important;
+  border-radius: 6px;
+}
+
+/* Firefox draws its rows inside setting-control's shadow DOM; they take
+   their color and corners from the --box-* tokens above. */
+
+/* ---------------------------------------------------------------------------
+ * Classic groupboxes (panes not yet on Firefox's new widgets) as cards
+ * ------------------------------------------------------------------------- */
+
+#mainPrefPane > groupbox:not([hidden]),
+groupbox.settings-group-card:not([hidden]) {
+  padding: 20px !important;
+  border: none !important;
+  border-radius: 28px !important;
+  background-color: var(--surface-container) !important;
+}
+
+/* The policies notice above search: a tonal banner, not an outlined box */
+#policies-container-content,
+html|nav-notice {
+  --border-color: transparent;
+  border: none !important;
+  border-radius: 18px;
+  background-color: var(--secondary-container) !important;
+  color: var(--on-secondary-container) !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Hilal's own pane
+ * ------------------------------------------------------------------------- */
+
+.settings-group-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.settings-group-header svg {
+  width: 22px;
+  height: 22px;
+  padding: 9px;
+  border-radius: 14px;
+  background-color: var(--primary-container);
+  color: var(--on-primary-container);
+  fill: currentColor;
+}
+
+.settings-group-header html|h2 {
+  margin: 0 !important;
+}
+
+groupbox.settings-group-card:not([hidden]) {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+.settings-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 24px;
+  min-height: 56px;
+  margin: 0 !important;
+  padding: 12px 16px !important;
+  border: none !important;
+  border-radius: 6px !important;
+  background-color: var(--surface-container-high) !important;
+  transition: background-color 150ms linear, border-radius 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* First and last row of a card get the large corners */
+.settings-group-header + .settings-row,
+groupbox.settings-group-card > .settings-row:first-of-type {
+  border-start-start-radius: 18px !important;
+  border-start-end-radius: 18px !important;
+}
+
+groupbox.settings-group-card > .settings-row:last-of-type,
+groupbox.settings-group-card > .settings-row:has(+ :not(.settings-row)) {
+  border-end-start-radius: 18px !important;
+  border-end-end-radius: 18px !important;
+}
+
+.settings-row:hover {
+  background-color: color-mix(in srgb, var(--on-surface) 6%, var(--surface-container-high)) !important;
+}
+
+.settings-row-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.settings-row-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--on-surface);
+}
+
+.settings-row-desc {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--on-surface-variant);
+}
+
+html|m3e-switch {
+  flex-shrink: 0;
+  cursor: pointer;
+  --m3e-switch-selected-track-color: var(--primary);
+  --m3e-switch-selected-handle-color: var(--on-primary);
+  --m3e-switch-selected-icon-color: var(--primary);
+  --m3e-switch-unselected-track-color: var(--surface-container-highest);
+  --m3e-switch-unselected-handle-color: var(--outline);
+  --m3e-switch-unselected-icon-color: var(--surface-container-highest);
+  --m3e-switch-unselected-track-outline-color: var(--outline);
+}
+
+html|m3e-segmented-button {
+  flex-shrink: 0;
+  max-width: 100%;
+  --m3e-segmented-button-height: 40px;
+  --m3e-segmented-button-selected-container-color: var(--secondary-container);
+  --m3e-segmented-button-selected-label-text-color: var(--on-secondary-container);
+  --m3e-segmented-button-unselected-label-text-color: var(--on-surface);
+  --m3e-segmented-button-outline-color: var(--outline-variant);
+}
+
+html|m3e-button-segment {
+  min-width: 96px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Workspace colors */
+.workspace-color-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.workspace-color-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  background-color: var(--surface-container-high);
+}
+
+.workspace-color-row:first-child {
+  border-start-start-radius: 18px;
+  border-start-end-radius: 18px;
+}
+
+.workspace-color-row:last-child {
+  border-end-start-radius: 18px;
+  border-end-end-radius: 18px;
+}
+
+.workspace-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.workspace-emoji-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background-color: var(--surface-container-highest);
+  font-size: 20px;
+}
+
+.workspace-name-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--on-surface);
+}
+
+.workspace-active-badge {
+  padding: 3px 10px;
+  border-radius: 8px;
+  background-color: var(--primary-container);
+  color: var(--on-primary-container);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.color-picker-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.m3-color-swatches {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.m3-swatch-circle {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--swatch-color, #af51f5);
+  cursor: pointer;
+  transition:
+    border-radius 300ms cubic-bezier(0.2, 0, 0, 1),
+    transform 150ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.m3-swatch-circle:hover {
+  transform: scale(1.08);
+}
+
+/* Selected: the circle morphs into a rounded square with a ring */
+.m3-swatch-circle[selected="true"] {
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px var(--surface-container), 0 0 0 4px var(--on-surface);
+}
+
+.custom-color-input {
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+  cursor: pointer;
+}
+
+/* Text buttons inside rows */
+.settings-row html|button:not(.m3-swatch-circle),
+groupbox.settings-group-card html|button:not(.m3-swatch-circle) {
+  min-height: 40px;
+  padding-inline: 20px;
+  border: none;
+  border-radius: 20px;
+  background-color: var(--secondary-container);
+  color: var(--on-secondary-container);
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-row,
+  .m3-swatch-circle {
+    transition: none;
+  }
+}
