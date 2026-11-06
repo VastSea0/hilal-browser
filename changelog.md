@@ -2,6 +2,13 @@
 
 ---
 
+## [Unreleased]
+
+### Security
+- Based on Firefox ESR 153.6.0, which carries Mozilla's latest security fixes.
+
+---
+
 ## [0.4.0-alpha.2] - 2026-11-06
 
 ### Added
