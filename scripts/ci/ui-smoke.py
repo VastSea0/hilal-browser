@@ -329,6 +329,15 @@ def main():
         if args.require_safebrowsing:
             check("Safe Browsing has an API key", policies["safebrowsingKey"], policies)
 
+        rfp = {}
+        for level in ("extreme", "standard"):
+            m.script(f"Services.prefs.setStringPref('hilal.privacy.level', '{level}')")
+            wait_for(m, f"return Services.prefs.getBoolPref('privacy.resistFingerprinting') == {str(level == 'extreme').lower()}", 10)
+            rfp[level] = m.script("return Services.prefs.getBoolPref('privacy.resistFingerprinting')")
+        report["resist_fingerprinting"] = rfp
+        check("Extreme privacy turns fingerprinting resistance on", rfp["extreme"] is True, rfp)
+        check("Standard privacy leaves it off", rfp["standard"] is False, rfp)
+
         errors = m.script(ERRORS_JS)
         report["chrome_errors"] = errors
         hilal_errors = [e for e in errors if "hilal" in e["source"].lower()]
