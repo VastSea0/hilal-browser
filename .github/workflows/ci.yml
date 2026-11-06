@@ -505,6 +505,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           notes="Automatic build of ${GITHUB_SHA::7} from main ($(date -u +%Y-%m-%d)). Not a release: use it to test the latest changes. Every package here passed the UI smoke test on its own OS."
+          notes+=$'\n\n**macOS:** Hilal is not signed by Apple. After dragging it into Applications, run this once in Terminal:\n\n```bash\nxattr -dr com.apple.quarantine "/Applications/Hilal Browser.app"\n```'
           if ! gh release view nightly >/dev/null 2>&1; then
             gh release create nightly --prerelease --title "Hilal Nightly" --notes "$notes" --target "$GITHUB_SHA"
           fi

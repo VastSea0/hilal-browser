@@ -69,6 +69,15 @@ Desktop and Android downloads are available from the
 [releases page](https://github.com/VastSea0/hilal-browser/releases) and the
 [website](https://hilal-browser.vercel.app).
 
+**macOS:** Hilal is not signed by Apple, so macOS may say the app is damaged.
+After dragging it into Applications, run this once in Terminal:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/Hilal Browser.app"
+```
+
+See [docs/INSTALL-MACOS.md](docs/INSTALL-MACOS.md) for details.
+
 ## Build from source
 
 Install the [Firefox build prerequisites](https://firefox-source-docs.mozilla.org/setup/index.html) for your platform first. Rust is also required to compile the `hil` patch manager.

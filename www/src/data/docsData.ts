@@ -354,6 +354,12 @@ engine/obj-aarch64-apple-darwin*/dist/Hilal Browser.app
 
 Yerel geliştirme derlemeleri imzasızdır. macOS Gatekeeper ilk açılışta güvenlik uyarısı verebilir; Finder üzerinden **Sağ Tık → Aç** seçeneğiyle veya terminalden \`./mach run\` ile çalıştırılabilir.
 
+İndirilen sürümler Apple tarafından imzalanmadığı için macOS uygulamayı "hasarlı" diye açmayabilir. Uygulamayı Uygulamalar klasörüne taşıdıktan sonra Terminal'de bir kez şunu çalıştırın:
+
+\`\`\`bash
+xattr -dr com.apple.quarantine "/Applications/Hilal Browser.app"
+\`\`\`
+
 Resmi dağıtım sürümleri için Apple Developer ID Application sertifikası ve Apple Notarization işlemi zorunludur:
 
 \`\`\`bash
@@ -963,6 +969,12 @@ engine/obj-aarch64-apple-darwin*/dist/Hilal Browser.app
 ### Code Signing & Gatekeeper
 
 Local development builds are unsigned. Gatekeeper may flag the application on first launch from Finder; use **Right Click → Open** or launch via \`./mach run\`.
+
+Downloaded releases are not signed by Apple, so macOS may say the app is damaged. After moving it to Applications, run this once in Terminal:
+
+\`\`\`bash
+xattr -dr com.apple.quarantine "/Applications/Hilal Browser.app"
+\`\`\`
 
 Public releases require signing with an Apple Developer ID Application certificate and notarization via \`notarytool\`:
 

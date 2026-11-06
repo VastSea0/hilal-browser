@@ -124,7 +124,8 @@ jobs:
           # Not marked as a pre-release even for alphas: the update server
           # skips pre-releases, which is how the nightly stays out of updates.
           if ! gh release view "$TAG" >/dev/null 2>&1; then
-            gh release create "$TAG" --draft --title "Hilal Browser $TAG" --generate-notes
+            gh release create "$TAG" --draft --title "Hilal Browser $TAG" \
+              --notes-file .github/release-notes-header.md --generate-notes
           fi
           gh release upload "$TAG" dist/* --clobber
           gh release edit "$TAG" --draft=false
