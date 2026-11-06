@@ -13,6 +13,11 @@ features, so the order is: stay secure, reach people, then stand out.
 - [x] Extreme privacy turns on fingerprinting resistance, checked in the UI
       smoke (#22).
 - [ ] Ship with a Google Safe Browsing key.
+- [x] Material 3 Expressive across the browser: shell, menu, color panel,
+      sidebar, new tab, settings, Firefox's panels, the Library window,
+      Add-ons, passwords, error and info pages.
+- [x] Colors from websites and automatic boosts.
+- [x] Sidebar settings: tab layout, density and sidebar buttons.
 
 ## 0.4.0-alpha.4: reach
 
