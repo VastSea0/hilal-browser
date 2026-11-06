@@ -301,3 +301,33 @@
     transition: none !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Workspaces: the active one takes an M3 Expressive cookie shape
+ * ------------------------------------------------------------------------- */
+
+#hilal-sidebar .hilal-ws-chip {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  border: none !important;
+  border-radius: 18px !important;
+  transition:
+    border-radius 300ms var(--md-sys-motion-easing-emphasized),
+    transform 300ms var(--md-sys-motion-easing-emphasized),
+    background-color 150ms linear !important;
+}
+
+#hilal-sidebar .hilal-ws-chip:hover {
+  transform: scale(1.06);
+}
+
+#hilal-sidebar .hilal-ws-chip.active {
+  border-radius: 0 !important;
+  mask-image: url("chrome://browser/content/hilal/shapes/cookie9.svg");
+  mask-size: 100% 100%;
+  transform: rotate(20deg);
+}
