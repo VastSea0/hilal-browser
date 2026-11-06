@@ -525,6 +525,25 @@ def main():
             m.script("window.close()")
             m.send("WebDriver:SwitchToWindow", {"handle": main_handle})
 
+        # Add-ons is restyled by hilal-in-content.css and takes the accent.
+        m.script("gBrowser.selectedTab = gBrowser.addTab('about:addons', {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})")
+        addons_look = None
+        deadline = time.time() + 15
+        while time.time() < deadline and not addons_look:
+            time.sleep(0.5)
+            addons_look = m.script("""
+              const doc = gBrowser.selectedBrowser.contentDocument;
+              if (!doc?.querySelector("categories-box") || doc.readyState != "complete") return null;
+              const css = getComputedStyle(doc.documentElement);
+              return {
+                card: css.getPropertyValue("--card-border-radius").trim(),
+                primary: doc.documentElement.style.getPropertyValue("--primary").trim(),
+              };
+            """)
+        m.screenshot(out / "07b-addons.png")
+        check("Add-ons page has the Material look", bool(addons_look and addons_look["card"] == "24px" and addons_look["primary"]), addons_look)
+        m.script("gBrowser.removeTab(gBrowser.selectedTab, {animate: false})")
+
         # Errors from the first run; the restarted process has its own console.
         errors = m.script(ERRORS_JS)
 
