@@ -10,7 +10,7 @@ index 759a6d2638c3..86c33e291d09 100644
  fullscreen-exit-button = Exit Full Screen (Esc)
  # "esc" is lowercase on mac keyboards, but uppercase elsewhere.
  fullscreen-exit-mac-button = Exit Full Screen (esc)
-@@ -1676,3 +1675,180 @@ reduced-protection-infobar-reload-button = Reload
+@@ -1676,3 +1675,184 @@ reduced-protection-infobar-reload-button = Reload
    .accesskey = R
  reduced-protection-infobar-never-show-button = Don’t show again
    .accesskey = D
@@ -140,6 +140,10 @@ index 759a6d2638c3..86c33e291d09 100644
 +hilal-shell-workspaces = Workspaces
 +hilal-shell-new-workspace = New workspace
 +hilal-shell-accent-color = Accent color
++hilal-app-menu-devtools = Web Developer Tools
++hilal-app-menu-task-manager = Task Manager
++hilal-app-menu-help = Hilal Help
++hilal-app-menu-report = Report a Problem
 +hilal-color-panel-accent = Accent color
 +hilal-color-panel-page-color = This page is coloring the browser
 +hilal-color-panel-follow-site = Use the site's color

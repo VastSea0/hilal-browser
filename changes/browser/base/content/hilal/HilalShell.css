@@ -2200,3 +2200,178 @@ browser[type="content"],
 #hilal-color-panel .hcp-segment[aria-checked="true"] > i {
   display: inline;
 }
+
+/* Hilal's main menu: the same grouped cards as the color panel */
+#hilal-app-menu {
+  position: fixed;
+  z-index: 100003;
+  width: 300px;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 6px;
+  border-radius: 24px;
+  background: var(--surface-container);
+  color: var(--on-surface);
+  box-shadow: var(--md-sys-elevation-3);
+  font-family: var(--font-sans);
+  animation: hcp-in 250ms var(--md-sys-motion-easing-emphasized);
+}
+
+#hilal-app-menu i {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+}
+
+#hilal-app-menu .ham-page {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#hilal-app-menu .ham-enter {
+  animation: ham-slide 250ms var(--md-sys-motion-easing-emphasized);
+}
+
+#hilal-app-menu .ham-enter-back {
+  animation: ham-slide-back 250ms var(--md-sys-motion-easing-emphasized);
+}
+
+@keyframes ham-slide {
+  from { opacity: 0; transform: translateX(24px); }
+}
+
+@keyframes ham-slide-back {
+  from { opacity: 0; transform: translateX(-24px); }
+}
+
+#hilal-app-menu .ham-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#hilal-app-menu .ham-row {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: start;
+  cursor: pointer;
+}
+
+#hilal-app-menu .ham-group > .ham-row:first-child {
+  border-start-start-radius: 18px;
+  border-start-end-radius: 18px;
+}
+
+#hilal-app-menu .ham-group > .ham-row:last-child {
+  border-end-start-radius: 18px;
+  border-end-end-radius: 18px;
+}
+
+#hilal-app-menu button.ham-row:hover:not([disabled]),
+#hilal-app-menu button.ham-row:focus-visible {
+  background: color-mix(in srgb, var(--on-surface) 8%, var(--surface-container-high));
+  outline: none;
+}
+
+#hilal-app-menu button.ham-row:active:not([disabled]) {
+  background: color-mix(in srgb, var(--on-surface) 12%, var(--surface-container-high));
+}
+
+#hilal-app-menu .ham-row[disabled] {
+  opacity: 0.38;
+  cursor: default;
+}
+
+#hilal-app-menu .ham-icon,
+#hilal-app-menu .ham-chevron {
+  color: var(--on-surface-variant);
+}
+
+#hilal-app-menu .ham-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#hilal-app-menu .ham-key {
+  color: var(--on-surface-variant);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+#hilal-app-menu .ham-zoom {
+  gap: 4px;
+  cursor: default;
+}
+
+#hilal-app-menu .ham-zoom > .ham-label {
+  margin-inline-start: 8px;
+}
+
+#hilal-app-menu .ham-icon-button {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--on-surface);
+  cursor: pointer;
+}
+
+#hilal-app-menu .ham-icon-button:hover {
+  background: color-mix(in srgb, var(--on-surface) 10%, transparent);
+}
+
+#hilal-app-menu .ham-zoom-value {
+  appearance: none;
+  min-width: 56px;
+  height: 32px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 16px;
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#hilal-app-menu .ham-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 2px;
+}
+
+#hilal-app-menu .ham-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+#PanelUI-menu-button[open] {
+  background-color: color-mix(in srgb, var(--on-surface) 12%, transparent) !important;
+}

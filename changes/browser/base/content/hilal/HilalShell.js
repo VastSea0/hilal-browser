@@ -2283,6 +2283,208 @@
       }, 0);
     },
 
+    // Hilal's own main menu, built like the color panel. Every item runs the
+    // same Firefox command the stock app menu does, and the labels come from
+    // Firefox's own strings, so they are already translated.
+    async openAppMenu(anchor) {
+      const existing = document.getElementById("hilal-app-menu");
+      if (existing) {
+        existing.remove();
+        return;
+      }
+      const html = (tag, attrs = {}, ...children) => {
+        const el = document.createElementNS("http://www.w3.org/1999/xhtml", tag);
+        for (const [k, v] of Object.entries(attrs)) {
+          if (k.startsWith("on")) {
+            el.addEventListener(k.slice(2), v);
+          } else if (v !== false && v != null) {
+            el.setAttribute(k, v === true ? "" : v);
+          }
+        }
+        el.append(...children);
+        return el;
+      };
+      const ids = [
+        "appmenuitem-new-tab", "appmenuitem-new-window", "appmenuitem-new-private-window",
+        "library-bookmarks-menu", "appmenuitem-history", "appmenuitem-downloads",
+        "appmenuitem-passwords", "appmenuitem-extensions-and-themes", "appmenuitem-print",
+        "appmenuitem-save-page", "appmenuitem-find-in-page", "appmenuitem-translate",
+        "appmenuitem-zoom", "appmenuitem-settings", "appmenuitem-more-tools", "appmenuitem-help",
+        "appmenuitem-fullscreen", "appmenuitem-zoom-enlarge", "appmenuitem-zoom-reduce",
+        "appmenu-customizetoolbar", "appmenu-about", "appmenu-help-more-troubleshooting-info",
+        "appmenuitem-exit2", "hilal-app-menu-devtools", "hilal-app-menu-task-manager",
+        "hilal-app-menu-help", "hilal-app-menu-report",
+      ];
+      const messages = await document.l10n.formatMessages(ids);
+      const text = {};
+      ids.forEach((id, i) => {
+        const m = messages[i];
+        text[id] = m?.value || m?.attributes?.find(a => a.name == "label" || a.name == "value")?.value || "";
+      });
+      const fallback = {
+        "library-bookmarks-menu": "Bookmarks",
+        "appmenuitem-save-page": "Save Page As…",
+        "appmenu-help-more-troubleshooting-info": "Troubleshooting Information",
+      };
+      const t = id => text[id] || fallback[id] || id;
+      const shortcut = keyId => {
+        const key = document.getElementById(keyId);
+        try {
+          return key ? ShortcutUtils.prettifyShortcut(key) : "";
+        } catch (e) {
+          return "";
+        }
+      };
+      const command = id => () => document.getElementById(id)?.doCommand();
+
+      const close = () => {
+        menu.remove();
+        document.removeEventListener("mousedown", onOutside, true);
+        document.removeEventListener("keydown", onKey, true);
+      };
+      const row = ({ icon, label, key, onClick, sub, disabled }) =>
+        html(
+          "button",
+          {
+            class: "ham-row",
+            disabled,
+            onclick: () => {
+              if (sub) {
+                showPage(sub());
+              } else {
+                close();
+                onClick();
+              }
+            },
+          },
+          html("i", { class: "ham-icon" }, icon),
+          html("span", { class: "ham-label" }, label),
+          key ? html("span", { class: "ham-key" }, key) : "",
+          sub ? html("i", { class: "ham-chevron" }, "chevron_right") : ""
+        );
+      const group = (...rows) => html("div", { class: "ham-group" }, ...rows.filter(Boolean));
+
+      const zoomValue = html("button", {
+        class: "ham-zoom-value",
+        onclick: () => {
+          FullZoom.reset();
+          updateZoom();
+        },
+      });
+      const updateZoom = () => {
+        zoomValue.textContent = `${Math.round(ZoomManager.zoom * 100)}%`;
+      };
+      updateZoom();
+      const zoomRow = html(
+        "div",
+        { class: "ham-row ham-zoom" },
+        html("i", { class: "ham-icon" }, "zoom_in"),
+        html("span", { class: "ham-label" }, t("appmenuitem-zoom")),
+        html("button", { class: "ham-icon-button", title: t("appmenuitem-zoom-reduce"), onclick: () => { FullZoom.reduce(); updateZoom(); } }, html("i", {}, "remove")),
+        zoomValue,
+        html("button", { class: "ham-icon-button", title: t("appmenuitem-zoom-enlarge"), onclick: () => { FullZoom.enlarge(); updateZoom(); } }, html("i", {}, "add")),
+        html("button", { class: "ham-icon-button", title: t("appmenuitem-fullscreen"), onclick: () => { close(); BrowserCommands.fullScreen(); } }, html("i", {}, "fullscreen"))
+      );
+
+      const mainPage = () =>
+        html(
+          "div",
+          { class: "ham-page" },
+          group(
+            row({ icon: "tab", label: t("appmenuitem-new-tab"), key: shortcut("key_newNavigatorTab"), onClick: command("cmd_newNavigatorTab") }),
+            row({ icon: "open_in_new", label: t("appmenuitem-new-window"), key: shortcut("key_newNavigator"), onClick: command("cmd_newNavigator") }),
+            row({ icon: "domino_mask", label: t("appmenuitem-new-private-window"), key: shortcut("key_privatebrowsing"), onClick: command("Tools:PrivateBrowsing") })
+          ),
+          group(
+            row({ icon: "bookmarks", label: t("library-bookmarks-menu"), onClick: () => PlacesCommandHook.showPlacesOrganizer("AllBookmarks") }),
+            row({ icon: "history", label: t("appmenuitem-history"), onClick: () => PlacesCommandHook.showPlacesOrganizer("History") }),
+            row({ icon: "download", label: t("appmenuitem-downloads"), key: shortcut("key_openDownloads"), onClick: command("Tools:Downloads") }),
+            row({ icon: "key", label: t("appmenuitem-passwords"), onClick: () => LoginHelper.openPasswordManager(window, { entryPoint: "mainmenu" }) }),
+            row({ icon: "extension", label: t("appmenuitem-extensions-and-themes"), key: shortcut("key_openAddons"), onClick: command("Tools:Addons") })
+          ),
+          group(
+            row({ icon: "print", label: t("appmenuitem-print"), key: shortcut("printKb"), onClick: command("cmd_print") }),
+            row({ icon: "save", label: t("appmenuitem-save-page"), key: shortcut("key_savePage"), onClick: command("Browser:SavePage") }),
+            row({ icon: "search", label: t("appmenuitem-find-in-page"), key: shortcut("key_find"), onClick: command("cmd_find") }),
+            row({ icon: "translate", label: t("appmenuitem-translate"), onClick: () => FullPageTranslationsPanel.open(new CustomEvent("command"), true) }),
+            zoomRow
+          ),
+          group(
+            row({ icon: "settings", label: t("appmenuitem-settings"), key: shortcut("key_preferencesCmdMac"), onClick: () => openPreferences() }),
+            row({ icon: "construction", label: t("appmenuitem-more-tools"), sub: moreToolsPage }),
+            row({ icon: "help", label: t("appmenuitem-help"), sub: helpPage })
+          )
+        );
+
+      const subPage = (title, ...groups) =>
+        html(
+          "div",
+          { class: "ham-page" },
+          html(
+            "div",
+            { class: "ham-header" },
+            html("button", { class: "ham-icon-button", onclick: () => showPage(mainPage(), true) }, html("i", {}, "arrow_back")),
+            html("h2", { class: "ham-title" }, title)
+          ),
+          ...groups
+        );
+      const moreToolsPage = () =>
+        subPage(
+          t("appmenuitem-more-tools"),
+          group(
+            row({ icon: "dashboard_customize", label: t("appmenu-customizetoolbar"), onClick: () => gCustomizeMode.enter() }),
+            row({ icon: "code", label: t("hilal-app-menu-devtools"), key: shortcut("key_toggleToolbox"), onClick: () => document.getElementById("key_toggleToolbox")?.doCommand() }),
+            row({ icon: "monitoring", label: t("hilal-app-menu-task-manager"), onClick: () => switchToTabHavingURI("about:processes", true) })
+          )
+        );
+      const helpPage = () =>
+        subPage(
+          t("appmenuitem-help"),
+          group(
+            row({ icon: "menu_book", label: t("hilal-app-menu-help"), onClick: () => openTrustedLinkIn("https://hilal-browser.vercel.app/#docs", "tab") }),
+            row({ icon: "bug_report", label: t("hilal-app-menu-report"), onClick: () => openTrustedLinkIn("https://github.com/VastSea0/hilal-browser/issues/new/choose", "tab") }),
+            row({ icon: "troubleshoot", label: t("appmenu-help-more-troubleshooting-info"), onClick: () => switchToTabHavingURI("about:support", true) })
+          ),
+          group(row({ icon: "info", label: t("appmenu-about"), onClick: () => openAboutDialog() }))
+        );
+
+      const menu = html("div", { id: "hilal-app-menu", class: "beer", role: "menu" });
+      const showPage = (page, back = false) => {
+        page.classList.add(back ? "ham-enter-back" : "ham-enter");
+        menu.replaceChildren(page);
+        page.querySelector("button:not([disabled])")?.focus({ focusVisible: false });
+      };
+      menu.append(mainPage());
+
+      const rect = anchor.getBoundingClientRect();
+      menu.style.top = `${rect.bottom + 8}px`;
+      menu.style.right = `${Math.max(8, window.innerWidth - rect.right)}px`;
+      document.documentElement.appendChild(menu);
+      anchor.setAttribute("open", "true");
+
+      const onOutside = e => {
+        if (!menu.contains(e.target) && !anchor.contains(e.target)) {
+          close();
+        }
+      };
+      const onKey = e => {
+        if (e.key == "Escape") {
+          close();
+        }
+      };
+      const observer = new MutationObserver(() => {
+        if (!menu.isConnected) {
+          anchor.removeAttribute("open");
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.documentElement, { childList: true });
+      setTimeout(() => {
+        document.addEventListener("mousedown", onOutside, true);
+        document.addEventListener("keydown", onKey, true);
+      }, 0);
+    },
+
     // Gives the active workspace a new accent color.
     setWorkspaceAccent(name) {
       MaterialYouTheme.applyTheme(name);
@@ -2368,6 +2570,24 @@
           if (node && node.parentNode !== nativeSlot) {
             nativeSlot.appendChild(node);
           }
+        }
+        // The menu button opens Hilal's own menu instead of Firefox's panel.
+        const menuButton = document.getElementById("PanelUI-menu-button");
+        if (menuButton && !menuButton._hilalMenu) {
+          menuButton._hilalMenu = true;
+          const open = event => {
+            if (event.type == "keypress" && event.key != "Enter" && event.key != " ") {
+              return;
+            }
+            if (event.type == "mousedown" && event.button != 0) {
+              return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            this.openAppMenu(menuButton);
+          };
+          menuButton.addEventListener("mousedown", open, true);
+          menuButton.addEventListener("keypress", open, true);
         }
       }
     },

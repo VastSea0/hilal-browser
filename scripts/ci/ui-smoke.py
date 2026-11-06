@@ -436,11 +436,13 @@ def main():
             print("SKIP Hilal's website did not load (no network?)", flush=True)
 
         # Material surfaces drawn by Firefox's own components, for review.
-        m.script("PanelUI.show()")
-        check("app menu opens", wait_for(m, "return PanelUI.panel.state == 'open'", 10))
+        m.script("gHilalShell.openAppMenu(document.getElementById('PanelUI-menu-button'))")
+        check("Hilal menu opens", wait_for(m, "return document.querySelectorAll('#hilal-app-menu .ham-row').length > 10", 10))
         time.sleep(1)
-        os_screenshot(out / "06-app-menu.png")
-        m.script("PanelUI.hide()")
+        m.screenshot(out / "06-app-menu.png")
+        labels = m.script("return [...document.querySelectorAll('#hilal-app-menu .ham-label')].map(e => e.textContent)")
+        check("Hilal menu items are labelled", all(labels), labels)
+        m.script("document.getElementById('hilal-app-menu')?.remove()")
 
         m.script("gHilalWorkspaces._showCreateDialog()")
         check("workspace dialog opens", wait_for(m, "return !!document.getElementById('hilal-ws-dialog')", 10))
