@@ -51,6 +51,9 @@ jobs:
       - name: Check repo guardrails
         run: node scripts/check-release-metadata.mjs --hil-bin ./bin/hil
 
+      - name: Check translations cover Hilal's English strings
+        run: python3 scripts/check-locales.py
+
       - name: Upload hil tool
         uses: actions/upload-artifact@v7
         with:

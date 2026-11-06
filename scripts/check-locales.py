@@ -38,6 +38,39 @@ def ftl_ids(path):
     return set(FTL_MESSAGE_RE.findall(path.read_text(encoding="utf-8")))
 
 
+def english_ids():
+    """Fluent IDs Hilal adds in English, keyed by path inside a locale folder."""
+    ids = {}
+    patch = locale_root() / "l10n.patch"
+    target = None
+    for line in patch.read_text(encoding="utf-8").splitlines():
+        if line.startswith("+++ "):
+            path = line[4:].removeprefix("b/")
+            prefix = "browser/locales/en-US/"
+            target = Path(path[len(prefix):]) if path.startswith(prefix) else None
+            continue
+        if target and line.startswith("+"):
+            match = FTL_MESSAGE_RE.match(line[1:])
+            if match and not line[1:2].isspace():
+                ids.setdefault(target, set()).add(match.group(1))
+    en_dir = locale_root() / "en-US"
+    for path in custom_files("en-US"):
+        if path.suffix == ".ftl":
+            ids.setdefault(path.relative_to(en_dir), set()).update(ftl_ids(path))
+    return ids
+
+
+def check_against_english(locale):
+    locale_dir = locale_root() / locale
+    issues = []
+    for rel_path, ids in sorted(english_ids().items()):
+        candidate = locale_dir / rel_path
+        have = ftl_ids(candidate) if candidate.exists() else set()
+        for message_id in sorted(ids - have):
+            issues.append(f"{locale}: missing Fluent message {message_id} in {rel_path}")
+    return issues
+
+
 def check_locale(reference, locale):
     reference_dir = locale_root() / reference
     locale_dir = locale_root() / locale
@@ -85,6 +118,13 @@ def main(argv):
 
     targets = args.locales or [locale for locale in available if locale != args.reference]
     targets = [locale for locale in targets if locale != args.reference]
+
+    english_issues = check_against_english(args.reference)
+    if english_issues:
+        print("[hilal] Locale coverage check failed:", file=sys.stderr)
+        for issue in english_issues:
+            print(f"  - {issue}", file=sys.stderr)
+        return 1
 
     reference_count = len(custom_files(args.reference))
     if not targets:

@@ -300,6 +300,35 @@ def main():
         check_window_buttons("welcome", state)
         if args.locale:
             check(f"running in {args.locale}", state["locale"] == args.locale, state["locale"])
+        if args.locale == "tr":
+            # Hilal's own strings, one per feature, must not fall back to English.
+            english = {
+                "browser/browser.ftl": {
+                    "hilal-welcome-start": "Get started",
+                    "hilal-newtab-add-shortcut": "Add shortcut",
+                    "hilal-shell-workspaces": "Workspaces",
+                    "hilal-color-panel-follow-site": "Use the site's color",
+                    "hilal-app-menu-report": "Report a Problem",
+                    "hilal-auto-boost-title": "Automatic boosts",
+                },
+                "browser/preferences/preferences.ftl": {
+                    "hilal-auto-colors-header": None,
+                },
+            }
+            values = m.script("""
+              const [files] = arguments;
+              const out = {};
+              for (const [file, ids] of Object.entries(files)) {
+                const l10n = new Localization([file], true);
+                out[file] = Object.fromEntries(ids.map(id => [id, l10n.formatValueSync(id)]));
+              }
+              return out;
+            """, [{f: list(ids) for f, ids in english.items()}])
+            untranslated = {
+                id: v for f, ids in english.items() for id, v in values[f].items()
+                if not v or v == id or (ids[id] and v == ids[id])
+            }
+            check("Hilal strings are translated", not untranslated, untranslated)
 
         def check_shell(label, s):
             """The Hilal shell is what users see, not Firefox's own chrome."""
