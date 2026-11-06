@@ -496,4 +496,19 @@
   #downloadsHistory:hover {
     background-color: color-mix(in srgb, var(--on-secondary-container) 8%, var(--secondary-container)) !important;
   }
+
+  /* ------------------------------------------------------------------
+   * Add / edit bookmark: room around the fields and buttons
+   * ---------------------------------------------------------------- */
+  #editBookmarkPanelContent {
+    padding: 4px 10px 0 !important;
+  }
+
+  #editBookmarkPanelBottomContent {
+    padding-inline: 10px !important;
+  }
+
+  #editBookmarkPanel .panel-footer {
+    padding: 12px 10px 10px !important;
+  }
 }
