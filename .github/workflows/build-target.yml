@@ -170,9 +170,12 @@ jobs:
         if: always()
         run: sccache --show-stats || true
 
+      # Only main saves: caches from tag or PR runs are scoped to that ref, so
+      # no later main build could read them, and they would push main's cache
+      # out of the 10 GB quota.
       - name: Save compiler cache
         id: save-cache
-        if: always()
+        if: always() && github.ref == 'refs/heads/main'
         uses: actions/cache/save@v5
         with:
           path: /mnt/sccache
@@ -189,7 +192,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           KEEP: sccache-${{ inputs.target }}-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
         run: |
-          gh cache list -R "$GITHUB_REPOSITORY" --key "sccache-${{ inputs.target }}-" --limit 100 \
+          gh cache list -R "$GITHUB_REPOSITORY" --ref "$GITHUB_REF" --key "sccache-${{ inputs.target }}-" --limit 100 \
             --json id,key -q ".[] | select(.key != \"$KEEP\") | .id" |
             xargs -r -n1 gh cache delete -R "$GITHUB_REPOSITORY"
 
