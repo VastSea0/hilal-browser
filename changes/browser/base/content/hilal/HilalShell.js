@@ -2092,7 +2092,7 @@
     openThemePicker(anchor) {
       const existing = document.getElementById("hilal-color-panel");
       if (existing) {
-        existing.remove();
+        this.closeWithAnimation(existing);
         return;
       }
       const html = (tag, attrs = {}, ...children) => {
@@ -2260,7 +2260,7 @@
 
       const panel = html(
         "div",
-        { id: "hilal-color-panel", class: "beer", role: "dialog" },
+        { id: "hilal-color-panel", role: "dialog" },
         accentCard,
         siteCard,
         boostCard
@@ -2272,7 +2272,7 @@
 
       const close = e => {
         if (e.type == "keydown" ? e.key == "Escape" : !panel.contains(e.target) && !anchor.contains(e.target)) {
-          panel.remove();
+          this.closeWithAnimation(panel);
           document.removeEventListener("mousedown", close, true);
           document.removeEventListener("keydown", close, true);
         }
@@ -2289,7 +2289,7 @@
     async openAppMenu(anchor) {
       const existing = document.getElementById("hilal-app-menu");
       if (existing) {
-        existing.remove();
+        this.closeWithAnimation(existing);
         return;
       }
       const html = (tag, attrs = {}, ...children) => {
@@ -2338,9 +2338,9 @@
       const command = id => () => document.getElementById(id)?.doCommand();
 
       const close = () => {
-        menu.remove();
         document.removeEventListener("mousedown", onOutside, true);
         document.removeEventListener("keydown", onKey, true);
+        this.closeWithAnimation(menu);
       };
       const row = ({ icon, label, key, onClick, sub, disabled }) =>
         html(
@@ -2448,10 +2448,17 @@
           group(row({ icon: "info", label: t("appmenu-about"), onClick: () => openAboutDialog() }))
         );
 
-      const menu = html("div", { id: "hilal-app-menu", class: "beer", role: "menu" });
+      const menu = html("div", { id: "hilal-app-menu", role: "menu" });
+      // Sub pages slide in while the menu grows or shrinks to the new page.
       const showPage = (page, back = false) => {
+        const from = menu.getBoundingClientRect().height;
         page.classList.add(back ? "ham-enter-back" : "ham-enter");
         menu.replaceChildren(page);
+        const to = menu.getBoundingClientRect().height;
+        menu.animate([{ height: `${from}px` }, { height: `${to}px` }], {
+          duration: 300,
+          easing: "cubic-bezier(0.2, 0, 0, 1)",
+        });
         page.querySelector("button:not([disabled])")?.focus({ focusVisible: false });
       };
       menu.append(mainPage());
@@ -2483,6 +2490,17 @@
         document.addEventListener("mousedown", onOutside, true);
         document.addEventListener("keydown", onKey, true);
       }, 0);
+    },
+
+    // Plays the panel's exit animation, then removes it.
+    closeWithAnimation(panel) {
+      if (!panel?.isConnected || panel.hasAttribute("closing")) {
+        return;
+      }
+      panel.setAttribute("closing", "true");
+      const done = () => panel.remove();
+      panel.addEventListener("animationend", done, { once: true });
+      setTimeout(done, 300);
     },
 
     // Gives the active workspace a new accent color.

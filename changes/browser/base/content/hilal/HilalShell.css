@@ -2270,6 +2270,9 @@ browser[type="content"],
   font-weight: 500;
   text-align: start;
   cursor: pointer;
+  transition:
+    background-color 150ms linear,
+    border-radius 300ms var(--md-sys-motion-easing-emphasized);
 }
 
 #hilal-app-menu .ham-group > .ham-row:first-child {
@@ -2288,8 +2291,11 @@ browser[type="content"],
   outline: none;
 }
 
+/* M3 Expressive: a pressed row rounds into a pill */
 #hilal-app-menu button.ham-row:active:not([disabled]) {
   background: color-mix(in srgb, var(--on-surface) 12%, var(--surface-container-high));
+  border-radius: 20px;
+  transition-duration: 150ms, 150ms;
 }
 
 #hilal-app-menu .ham-row[disabled] {
@@ -2305,6 +2311,10 @@ browser[type="content"],
 #hilal-app-menu .ham-label {
   flex: 1;
   min-width: 0;
+  /* Room for glyphs that reach past the text box, so clipping for the
+     ellipsis does not cut the first letter. */
+  padding-inline: 2px;
+  margin-inline: -2px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2374,4 +2384,32 @@ browser[type="content"],
 
 #PanelUI-menu-button[open] {
   background-color: color-mix(in srgb, var(--on-surface) 12%, transparent) !important;
+}
+
+/* Exit animations for Hilal's panels */
+:is(#hilal-app-menu, #hilal-color-panel)[closing] {
+  animation: hilal-panel-out 180ms cubic-bezier(0.3, 0, 0.8, 0.15) forwards;
+  pointer-events: none;
+}
+
+@keyframes hilal-panel-out {
+  to { opacity: 0; transform: translateY(-6px) scale(0.96); }
+}
+
+:is(#hilal-app-menu, #hilal-color-panel) {
+  transform-origin: top right;
+}
+
+:is(#hilal-app-menu .ham-icon-button, #hilal-app-menu .ham-zoom-value, #hilal-color-panel .hcp-segment) {
+  transition: background-color 150ms linear, transform 150ms var(--md-sys-motion-easing-emphasized);
+}
+
+:is(#hilal-app-menu .ham-icon-button, #hilal-app-menu .ham-zoom-value):active {
+  transform: scale(0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(#hilal-app-menu, #hilal-color-panel, #hilal-app-menu .ham-page) {
+    animation: none !important;
+  }
 }
