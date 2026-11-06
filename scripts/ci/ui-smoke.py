@@ -425,10 +425,21 @@ def main():
         # Hilal's own website learns the browser's accent; needs the network.
         m.script("gBrowser.selectedBrowser.loadURI(Services.io.newURI('https://hilal-browser.vercel.app/'), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})")
         if wait_for(m, "return gBrowser.selectedBrowser.currentURI.host == 'hilal-browser.vercel.app' && !gBrowser.selectedBrowser.webProgress.isLoadingDocument", 30):
+            # Marionette's content context stays on the tab the session
+            # started with; switch to the tab showing the site.
+            chrome_handle = m.send("WebDriver:GetWindowHandle")
+            chrome_handle = chrome_handle.get("value", chrome_handle) if isinstance(chrome_handle, dict) else chrome_handle
             m.context("content")
+            handles = m.send("WebDriver:GetWindowHandles")
+            handles = handles.get("value", handles) if isinstance(handles, dict) else handles
+            for handle in reversed(handles):
+                m.send("WebDriver:SwitchToWindow", {"handle": handle})
+                if "hilal-browser.vercel.app" in m.script("return location.host"):
+                    break
             marked = wait_for(m, "return !!document.documentElement.getAttribute('data-hilal-accent')", 15)
             attrs = m.script("return [document.documentElement.getAttribute('data-hilal-browser'), document.documentElement.getAttribute('data-hilal-accent')]")
             m.context("chrome")
+            m.send("WebDriver:SwitchToWindow", {"handle": chrome_handle})
             check("Hilal's website gets the browser's accent", marked, attrs)
             time.sleep(2)
             m.screenshot(out / "05-hilal-website.png")
@@ -446,7 +457,9 @@ def main():
 
         m.script("gHilalWorkspaces._showCreateDialog()")
         check("workspace dialog opens", wait_for(m, "return !!document.getElementById('hilal-ws-dialog')", 10))
-        time.sleep(1)
+        # Fluent fills in the text asynchronously.
+        wait_for(m, "return !!document.querySelector('#hilal-ws-dialog h3')?.textContent", 5)
+        time.sleep(0.5)
         m.screenshot(out / "07-workspace-dialog.png")
         dialog = m.script("""
           const d = document.getElementById('hilal-ws-dialog');
