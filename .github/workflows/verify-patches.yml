@@ -3,6 +3,7 @@ name: Verify patches
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: verify-patches-${{ github.workflow }}-${{ github.ref }}

@@ -84,27 +84,31 @@ jobs:
 
           # A push that only touches the tests or the packaging around the
           # build retests the newest packages instead of building again.
-          # Releases (tag pushes calling this workflow) always build.
+          # Releases (tag pushes calling this workflow) always build. The diff
+          # is taken from the commit those packages were built from, because
+          # queued pushes in between may have been skipped.
           if [ -z "$reuse" ] && [ "${{ github.event_name }}" = push ] && [ "${{ github.ref }}" = refs/heads/main ]; then
-            changed="$(gh api "repos/$GITHUB_REPOSITORY/compare/${{ github.event.before }}...${{ github.sha }}" \
-              -q '.files[].filename' 2>/dev/null)" || changed=""
-            build_paths="$(printf '%s\n' "$changed" | grep -v -E \
-              '^(scripts/ci/(ui-smoke\.py|flatpak-[^/]+|flatpak-run\.sh)|scripts/(build-appimage|build-flatpak)\.sh|scripts/[^/]+\.mjs|flatpak/.*|io\.github\.VastSea0\.Hilal\.yml|\.github/workflows/(ci|release|android-[^/]+)\.yml|(www|docs|media|android|playstore|scripts/android-ota)/.*|.*\.md)$' || true)"
-            if [ -n "$changed" ] && [ -z "$build_paths" ]; then
-              for id in $(gh run list -R "$GITHUB_REPOSITORY" -w ci.yml -b main -L 30 \
-                          --json databaseId,conclusion -q '.[] | select(.conclusion == "success" or .conclusion == "failure") | .databaseId'); do
-                names="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$id/artifacts" \
-                  -q '[.artifacts[] | select(.expired | not) | .name] | join(" ")')"
-                # Only the newest run that built counts; older packages would
-                # miss its changes.
-                [[ " $names " == *" package-"* ]] || continue
-                if [[ " $names " == *" package-linux "* && " $names " == *" package-macos "* && " $names " == *" package-windows "* ]]; then
-                  reuse="$id"
-                  echo "::notice::Only test/packaging files changed; testing the packages of run $id."
-                fi
-                break
-              done
-            fi
+            for row in $(gh run list -R "$GITHUB_REPOSITORY" -w ci.yml -b main -L 30 \
+                           --json databaseId,conclusion,headSha -q '.[] | select(.conclusion == "success" or .conclusion == "failure") | "\(.databaseId):\(.headSha)"'); do
+              id="${row%%:*}"
+              names="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$id/artifacts" \
+                -q '[.artifacts[] | select(.expired | not) | .name] | join(" ")')"
+              # Only the newest run that built counts; older packages would
+              # miss its changes.
+              [[ " $names " == *" package-"* ]] || continue
+              [[ " $names " == *" package-linux "* && " $names " == *" package-macos "* && " $names " == *" package-windows "* ]] || break
+              changed="$(gh api "repos/$GITHUB_REPOSITORY/compare/${row#*:}...${{ github.sha }}" \
+                -q '.files[].filename' 2>/dev/null)" || changed=""
+              # The compare API lists at most 300 files; build when it may have cut some.
+              [ "$(printf '%s\n' "$changed" | wc -l)" -lt 300 ] || changed=""
+              build_paths="$(printf '%s\n' "$changed" | grep -v -E \
+                '^(scripts/ci/(ui-smoke\.py|flatpak-[^/]+|flatpak-run\.sh|esr-bump\.sh)|scripts/(build-appimage|build-flatpak)\.sh|scripts/[^/]+\.mjs|flatpak/.*|io\.github\.VastSea0\.Hilal\.yml|\.github/workflows/(ci|release|esr-watch|verify-patches|android-[^/]+)\.yml|(www|docs|media|android|playstore|scripts/android-ota)/.*|.*\.md)$' || true)"
+              if [ -n "$changed" ] && [ -z "$build_paths" ]; then
+                reuse="$id"
+                echo "::notice::Only test/packaging files changed since run $id; testing its packages."
+              fi
+              break
+            done
           fi
 
           if [ -n "$reuse" ]; then
