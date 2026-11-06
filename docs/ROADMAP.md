@@ -22,7 +22,6 @@ features, so the order is: stay secure, reach people, then stand out.
 
 ## 0.5: stand out
 
-- [ ] Workspaces on desktop that match the Android app.
 - [ ] Split view: two tabs side by side.
 - [ ] More languages. Firefox's own translations are built in, so only
       Hilal's strings need translating.
