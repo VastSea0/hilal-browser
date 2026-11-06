@@ -180,7 +180,7 @@ jobs:
           scripts/ci/apt-install.sh \
             libgtk-3-0t64 libdbus-glib-1-2 libasound2t64 libx11-xcb1 libxtst6 \
             xvfb weston fonts-dejavu-core fonts-noto-color-emoji dbus-x11 \
-            mesa-utils libgl1-mesa-dri imagemagick
+            mesa-utils libgl1-mesa-dri imagemagick desktop-file-utils
 
       - name: Unpack
         run: |
