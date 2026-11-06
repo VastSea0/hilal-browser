@@ -37,7 +37,8 @@
   min-height: 168px !important;
   margin: 0 !important;
   border-radius: 0;
-  background-color: var(--primary-container);
+  /* The pale crescent needs the darker primary in light mode */
+  background-color: light-dark(var(--primary), var(--primary-container));
   /* M3 Expressive cookie shape */
   mask-image: url("chrome://browser/content/hilal/shapes/cookie9.svg");
   mask-size: 100% 100%;
