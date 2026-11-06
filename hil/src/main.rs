@@ -1127,11 +1127,10 @@ fn build(
         if clobber {
             c.arg("-Clobber");
         }
-        // The build() function above already applied patches unless the user
-        // asked to skip, in which case let the script do its own apply step.
-        if !skip_apply {
-            c.arg("-SkipApply");
-        }
+        // build() applies the patches itself, and keeps them applied even
+        // with --skip-apply, so the script's own apply step must always run
+        // skipped.
+        c.arg("-SkipApply");
         c
     } else {
         let script_name = if target_platform == "macos" {
