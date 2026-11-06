@@ -887,7 +887,7 @@
       tabsHeader.className = "row";
 
       const label = document.createElement("label");
-      label.className = "max hilal-tabs-label";
+      label.className = "hilal-tabs-label";
       label.setAttribute("data-l10n-id", "urlbar-search-mode-tabs");
       label.textContent = "TABS";
       tabsHeader.appendChild(label);
@@ -908,13 +908,35 @@
       tabList.id = "hilal-tab-list";
       sidebar.appendChild(tabList);
 
-      // Sidebar Footer (Settings)
+      // Footer: bookmarks, history, downloads, passwords, privacy and
+      // settings, each shown when its hilal.sidebar.footer.* pref is on.
+      // Bookmarks and history open Firefox's own panels next to the
+      // sidebar; the others open their pages.
       const footer = document.createElement("nav");
       footer.id = "hilal-sidebar-footer";
-      footer.className = "row center-align";
+      const footerButton = (id, icon, l10nId, pref, defaultOn, onClick) => {
+        const btn = document.createElement("button");
+        btn.className = "hilal-btn hilal-footer-btn";
+        btn.id = id;
+        btn.innerHTML = `<i>${icon}</i>`;
+        btn.dataset.pref = pref;
+        btn.dataset.default = defaultOn;
+        document.l10n.setAttributes(btn, l10nId);
+        btn.addEventListener("click", onClick);
+        footer.appendChild(btn);
+      };
+      const togglePanel = id => () => {
+        SidebarController.toggle(id);
+        this.updateFooterButtons();
+      };
+      footerButton("hilal-footer-bookmarks", "bookmarks", "hilal-sidebar-bookmarks", "hilal.sidebar.footer.bookmarks", true, togglePanel("viewBookmarksSidebar"));
+      footerButton("hilal-footer-history", "history", "hilal-sidebar-history", "hilal.sidebar.footer.history", true, togglePanel("viewHistorySidebar"));
+      footerButton("hilal-footer-downloads", "download", "hilal-sidebar-downloads", "hilal.sidebar.footer.downloads", true, () => document.getElementById("Tools:Downloads")?.doCommand());
+      footerButton("hilal-footer-passwords", "key", "hilal-sidebar-passwords", "hilal.sidebar.footer.passwords", false, () => LoginHelper.openPasswordManager(window, { entryPoint: "mainmenu" }));
+      footerButton("hilal-footer-privacy", "shield", "hilal-sidebar-privacy", "hilal.sidebar.footer.privacy", false, () => openPreferences("panePrivacy"));
 
       const settingsBtn = document.createElement("button");
-      settingsBtn.className = "circle transparent small hilal-btn";
+      settingsBtn.className = "hilal-btn";
       settingsBtn.id = "hilal-settings-btn";
       settingsBtn.setAttribute("data-l10n-id", "hilal-toolbar-settings");
       settingsBtn.title = "Settings";
@@ -926,15 +948,82 @@
           this.navigate("about:preferences");
         }
       });
+      settingsBtn.dataset.pref = "hilal.sidebar.footer.settings";
+      settingsBtn.dataset.default = "true";
+      settingsBtn.classList.add("hilal-footer-btn");
       footer.appendChild(settingsBtn);
 
       sidebar.appendChild(footer);
+      this.updateFooterButtons();
+      this.themeSidebarPanels();
+      Services.prefs.addObserver("hilal.sidebar.footer.", this._footerObserver = () => this.updateFooterButtons());
+      window.addEventListener("unload", () => Services.prefs.removeObserver("hilal.sidebar.footer.", this._footerObserver), { once: true });
+      // Firefox's panel opens and closes from other places too (menus, keys).
+      document.getElementById("sidebar-box") &&
+        new MutationObserver(() => this.updateFooterButtons()).observe(
+          document.getElementById("sidebar-box"),
+          { attributes: true, attributeFilter: ["hidden", "sidebarcommand"] }
+        );
 
       // Insert sidebar as first child of #browser
       const browserEl = document.getElementById("browser");
       if (browserEl) {
         browserEl.insertBefore(sidebar, browserEl.firstElementChild);
       }
+    },
+
+    // Firefox's bookmarks and history panels are separate documents; give
+    // each one the browser's Material tokens and Hilal's panel styles.
+    themeSidebarPanels() {
+      const browser = document.getElementById("sidebar");
+      if (!browser) {
+        return;
+      }
+      const apply = () => {
+        const doc = browser.contentDocument;
+        if (!doc?.documentElement || doc.getElementById("hilal-panel-sheets")) {
+          return;
+        }
+        const marker = doc.createElementNS("http://www.w3.org/1999/xhtml", "meta");
+        marker.id = "hilal-panel-sheets";
+        doc.documentElement.prepend(marker);
+        for (const href of [
+          "chrome://browser/skin/hilal-m3-tokens.css",
+          "chrome://browser/skin/hilal-m3-firefox.css",
+          "chrome://browser/content/hilal/HilalPanelPages.css",
+        ]) {
+          const pi = doc.createProcessingInstruction(
+            "xml-stylesheet",
+            `href="${href}" type="text/css"`
+          );
+          doc.insertBefore(pi, doc.documentElement);
+        }
+        const style = document.documentElement.style;
+        for (let i = 0; i < style.length; i++) {
+          if (style[i].startsWith("--")) {
+            doc.documentElement.style.setProperty(style[i], style.getPropertyValue(style[i]));
+          }
+        }
+        // The search field's native focus ring is inside its shadow DOM.
+        browser.contentWindow?.customElements
+          ?.whenDefined("moz-input-search")
+          .then(async () => {
+            const search = doc.getElementById("search-box");
+            await search?.updateComplete;
+            search?.shadowRoot?.querySelector("input")?.style.setProperty("outline", "none");
+          });
+      };
+      browser.addEventListener("load", apply, true);
+      apply();
+    },
+
+    updateFooterButtons() {
+      const open = !document.getElementById("sidebar-box")?.hidden && SidebarController.currentID;
+      for (const btn of document.querySelectorAll("#hilal-sidebar-footer .hilal-footer-btn")) {
+        btn.hidden = !Services.prefs.getBoolPref(btn.dataset.pref, btn.dataset.default == "true");
+      }
+      document.getElementById("hilal-footer-bookmarks")?.toggleAttribute("checked", open == "viewBookmarksSidebar");
+      document.getElementById("hilal-footer-history")?.toggleAttribute("checked", open == "viewHistorySidebar");
     },
 
     setTabMode(mode, persist = true) {
@@ -2387,8 +2476,8 @@
             row({ icon: "domino_mask", label: t("appmenuitem-new-private-window"), key: shortcut("key_privatebrowsing"), onClick: command("Tools:PrivateBrowsing") })
           ),
           group(
-            row({ icon: "bookmarks", label: t("library-bookmarks-menu"), onClick: () => PlacesCommandHook.showPlacesOrganizer("AllBookmarks") }),
-            row({ icon: "history", label: t("appmenuitem-history"), onClick: () => PlacesCommandHook.showPlacesOrganizer("History") }),
+            row({ icon: "bookmarks", label: t("library-bookmarks-menu"), onClick: () => SidebarController.show("viewBookmarksSidebar") }),
+            row({ icon: "history", label: t("appmenuitem-history"), onClick: () => SidebarController.show("viewHistorySidebar") }),
             row({ icon: "download", label: t("appmenuitem-downloads"), key: shortcut("key_openDownloads"), onClick: command("Tools:Downloads") }),
             row({ icon: "key", label: t("appmenuitem-passwords"), onClick: () => LoginHelper.openPasswordManager(window, { entryPoint: "mainmenu" }) }),
             row({ icon: "extension", label: t("appmenuitem-extensions-and-themes"), key: shortcut("key_openAddons"), onClick: command("Tools:Addons") })
@@ -2933,7 +3022,7 @@
     createTabPill(tab) {
       const isSelected = tab.selected || tab === window.gBrowser?.selectedTab;
       const pill = document.createElement("div");
-      pill.className = `hilal-tab-pill row wave round tiny-space ${isSelected ? "secondary-container active" : ""}`;
+      pill.className = `hilal-tab-pill${isSelected ? " active" : ""}`;
       pill._tab = tab;
       pill.tab = tab;
       pill.setAttribute("draggable", "true");
@@ -2948,7 +3037,7 @@
 
       // Title container
       const titleSpan = document.createElement("span");
-      titleSpan.className = "max hilal-tab-title";
+      titleSpan.className = "hilal-tab-title";
       const initialTitle = tab.label || tab.getAttribute("label") || "New Tab";
       titleSpan.textContent = initialTitle;
       titleSpan.title = initialTitle;
@@ -2966,7 +3055,7 @@
 
       // Close button — Beer CSS circle transparent button with Material Symbols close icon
       const closeBtn = document.createElement("button");
-      closeBtn.className = "circle transparent small hilal-tab-close-btn";
+      closeBtn.className = "hilal-tab-close-btn";
       closeBtn.setAttribute("aria-label", "Close tab");
       closeBtn.setAttribute("data-l10n-id", "hilal-toolbar-close-tab");
       closeBtn.innerHTML = "<i class=\"tiny\">close</i>";
@@ -3300,7 +3389,6 @@
         }
 
         pill.classList.toggle("active", isSelected);
-        pill.classList.toggle("secondary-container", isSelected);
         pill.classList.toggle("multiselected", isMultiSelected && !isSelected);
         pill.classList.toggle("split-tab", isSplit);
         pill.classList.toggle("split-active", isSplitActive);

@@ -1,8 +1,14 @@
 
 
-## Hilal app menu
+## Hilal sidebar footer
 
-hilal-app-menu-devtools = Web Geliştirici Araçları
-hilal-app-menu-task-manager = Görev Yöneticisi
-hilal-app-menu-help = Hilal Yardım
-hilal-app-menu-report = Sorun Bildir
+hilal-sidebar-bookmarks =
+    .title = Yer imleri
+hilal-sidebar-history =
+    .title = Geçmiş
+hilal-sidebar-downloads =
+    .title = İndirilenler
+hilal-sidebar-passwords =
+    .title = Parolalar
+hilal-sidebar-privacy =
+    .title = Gizlilik ve güvenlik

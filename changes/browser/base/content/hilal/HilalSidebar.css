@@ -1,0 +1,303 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*
+ * The sidebar as a Material 3 Expressive navigation drawer: workspaces,
+ * the tab list as a list of pill rows, the footer buttons, and Firefox's
+ * bookmarks and history panels next to it.
+ *
+ * Loaded after HilalShell.css; selectors start at #hilal-sidebar so they win
+ * over the older rules there and over Beer CSS classes.
+ */
+
+#hilal-sidebar {
+  gap: 2px !important;
+  padding: 8px 6px !important;
+  border: none !important;
+  border-radius: 24px !important;
+  background-color: var(--surface-container-low) !important;
+  box-shadow: none !important;
+}
+
+#hilal-sidebar i {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+}
+
+/* ---------------------------------------------------------------------------
+ * Workspaces and the tabs header
+ * ------------------------------------------------------------------------- */
+
+#hilal-sidebar #hilal-workspaces-bar {
+  gap: 6px !important;
+  padding: 2px 4px 8px !important;
+  margin: 0 0 4px !important;
+  border-bottom: none !important;
+}
+
+#hilal-sidebar #hilal-tabs-bar-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  min-height: 36px;
+  margin: 0 !important;
+  padding: 0 4px 0 12px !important;
+}
+
+#hilal-sidebar .hilal-tabs-label {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1px !important;
+  text-transform: none !important;
+  color: var(--on-surface-variant) !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Icon buttons (new tab, footer)
+ * ------------------------------------------------------------------------- */
+
+#hilal-sidebar button.hilal-btn {
+  appearance: none !important;
+  display: flex;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 18px !important;
+  background: transparent !important;
+  color: var(--on-surface-variant) !important;
+  transition:
+    background-color 150ms linear,
+    border-radius 300ms var(--md-sys-motion-easing-emphasized) !important;
+}
+
+#hilal-sidebar button.hilal-btn[hidden] {
+  display: none !important;
+}
+
+#hilal-sidebar button.hilal-btn > i {
+  font-size: 20px !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+#hilal-sidebar button.hilal-btn:hover {
+  background: color-mix(in srgb, var(--on-surface) 8%, transparent) !important;
+  color: var(--on-surface) !important;
+}
+
+#hilal-sidebar button.hilal-btn:active {
+  background: color-mix(in srgb, var(--on-surface) 12%, transparent) !important;
+  border-radius: 10px !important;
+}
+
+/* A footer button whose panel is open */
+#hilal-sidebar button.hilal-btn[checked] {
+  background: var(--secondary-container) !important;
+  color: var(--on-secondary-container) !important;
+  border-radius: 12px !important;
+}
+
+#hilal-sidebar #hilal-sidebar-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  margin: 4px 0 0 !important;
+  padding: 6px 0 0 !important;
+  border-top: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Tab rows
+ * ------------------------------------------------------------------------- */
+
+#hilal-sidebar #hilal-tab-list {
+  gap: 2px !important;
+  padding: 0 !important;
+}
+
+#hilal-sidebar .hilal-tab-pill {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  margin: 0 !important;
+  padding: 0 4px 0 12px !important;
+  border: none !important;
+  border-radius: 20px !important;
+  background: transparent !important;
+  color: var(--on-surface-variant) !important;
+  box-shadow: none !important;
+}
+
+#hilal-sidebar .hilal-tab-pill:not(.active):hover {
+  background: color-mix(in srgb, var(--on-surface) 8%, transparent) !important;
+  color: var(--on-surface) !important;
+}
+
+#hilal-sidebar .hilal-tab-pill.active {
+  background: var(--secondary-container) !important;
+  color: var(--on-secondary-container) !important;
+}
+
+#hilal-sidebar .hilal-tab-pill:active:not(.dragging) {
+  border-radius: 12px !important;
+  transform: none;
+}
+
+#hilal-sidebar .hilal-tab-pill.multiselected {
+  background: color-mix(in srgb, var(--primary) 14%, transparent) !important;
+  box-shadow: none !important;
+}
+
+#hilal-sidebar .hilal-tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+#hilal-sidebar .hilal-tab-favicon,
+#hilal-sidebar .hilal-tab-icon img {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+#hilal-sidebar .hilal-tab-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding-inline: 2px;
+  margin-inline: -2px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+#hilal-sidebar .hilal-tab-close-btn {
+  appearance: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 16px !important;
+  background: transparent !important;
+  color: inherit !important;
+}
+
+#hilal-sidebar .hilal-tab-close-btn > i {
+  font-size: 18px !important;
+}
+
+#hilal-sidebar .hilal-tab-close-btn:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent) !important;
+}
+
+#hilal-sidebar .hilal-split-badge {
+  display: flex;
+  align-items: center;
+  color: inherit;
+  opacity: 0.7;
+}
+
+#hilal-sidebar .hilal-split-badge > i {
+  font-size: 16px !important;
+}
+
+/* Split view: the two tabs read as one tonal group, joined in the middle */
+#hilal-sidebar .hilal-tab-pill.split-tab {
+  border-left: none !important;
+  background: var(--surface-container-high) !important;
+  color: var(--on-surface) !important;
+}
+
+#hilal-sidebar .hilal-tab-pill.split-tab.split-active {
+  background: var(--secondary-container) !important;
+  color: var(--on-secondary-container) !important;
+}
+
+#hilal-sidebar .hilal-tab-pill.split-tab.split-partner {
+  box-shadow: none !important;
+}
+
+#hilal-sidebar .hilal-tab-pill.split-first {
+  margin-bottom: 0 !important;
+  border-radius: 20px 20px 6px 6px !important;
+}
+
+#hilal-sidebar .hilal-tab-pill.split-last {
+  margin-top: 0 !important;
+  border-radius: 6px 6px 20px 20px !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Firefox's bookmarks and history panels, as a card next to the sidebar
+ * ------------------------------------------------------------------------- */
+
+:root[windowtype="navigator:browser"] #sidebar-box:not([hidden]) {
+  display: flex !important;
+  flex-direction: column;
+  width: 300px !important;
+  min-width: 260px !important;
+  max-width: 420px !important;
+  margin: 0 10px 10px 0 !important;
+  overflow: hidden !important;
+  border: none !important;
+  border-radius: 24px !important;
+  background-color: var(--surface-container-low) !important;
+  color: var(--on-surface) !important;
+  box-shadow: none !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+#sidebar-box #sidebar-header {
+  min-height: 48px;
+  padding: 6px 8px 6px 16px !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+#sidebar-box #sidebar-title {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: var(--on-surface) !important;
+}
+
+#sidebar-box #sidebar-switcher-target,
+#sidebar-box #sidebar-close {
+  border-radius: 18px !important;
+}
+
+#sidebar-box #sidebar {
+  flex: 1;
+  border-radius: 0 0 24px 24px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hilal-sidebar .hilal-tab-pill,
+  #hilal-sidebar button.hilal-btn {
+    transition: none !important;
+  }
+}

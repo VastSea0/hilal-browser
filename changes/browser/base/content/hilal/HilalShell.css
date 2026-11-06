@@ -3,7 +3,7 @@
 /* 1. Complete wipe of Firefox legacy XUL toolbars */
 #navigator-toolbox,
 #sidebar-container,
-#sidebar-box,
+#sidebar-box[hidden],
 #sidebar-splitter,
 #sidebar-launcher-splitter {
   display: none !important;
