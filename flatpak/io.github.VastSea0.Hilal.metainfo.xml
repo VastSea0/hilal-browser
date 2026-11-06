@@ -26,6 +26,7 @@
   </description>
 
   <releases>
+    <release version="0.4.0-alpha.2" date="2026-11-06" type="development"/>
     <release version="0.4.0-alpha.1" date="2026-11-01" type="development"/>
     <release version="0.3.0-alpha.6" date="2026-06-21" type="development"/>
   </releases>
@@ -52,11 +53,11 @@
 
   <screenshots>
     <screenshot type="default">
-      <image type="source">https://raw.githubusercontent.com/VastSea0/hilal-browser/v0.4.0-alpha.1/flatpak/screenshots/desktop-dark-newtab.png</image>
+      <image type="source">https://raw.githubusercontent.com/VastSea0/hilal-browser/v0.4.0-alpha.2/flatpak/screenshots/desktop-dark-newtab.png</image>
       <caption>Hilal Browser new tab page with vertical tabs and workspaces</caption>
     </screenshot>
     <screenshot>
-      <image type="source">https://raw.githubusercontent.com/VastSea0/hilal-browser/v0.4.0-alpha.1/flatpak/screenshots/desktop-light-page.png</image>
+      <image type="source">https://raw.githubusercontent.com/VastSea0/hilal-browser/v0.4.0-alpha.2/flatpak/screenshots/desktop-light-page.png</image>
       <caption>Browsing a page in the light theme</caption>
     </screenshot>
   </screenshots>

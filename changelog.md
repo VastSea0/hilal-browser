@@ -2,6 +2,26 @@
 
 ---
 
+## [0.4.0-alpha.2] - 2026-11-06
+
+### Added
+- Updates are signed with Hilal's own keys and checked before they install, on Linux, macOS and Windows.
+- Safe Browsing protection is built in when a Google Safe Browsing key is configured for the build.
+
+### Changed
+- Turkish is built into the browser instead of shipping as a separate language pack, so it works out of the box.
+- The Linux and Flatpak app ID is now io.github.VastSea0.Hilal.
+- RLBox library sandboxing is turned back on.
+- The policies and uBlock Origin ship in every package.
+- Every release is built and UI-tested on Linux (X11 and Wayland), macOS and Windows before it is published.
+
+### Fixed
+- The window buttons show on Windows and Linux.
+- The website download dialog lists only installable files.
+- The Windows release files are named after Hilal.
+
+---
+
 ## [0.4.0-alpha.1] - 2026-11-01
 
 ### Added
