@@ -15,8 +15,8 @@ on:
 
 permissions:
   contents: read
-  # Needed for the cache prune step (gh cache delete) to succeed; the caller
-  # grants it, but a workflow's own permissions block clamps GITHUB_TOKEN.
+  # A called workflow's own permissions replace the caller's, and the cache
+  # cleanup step needs to delete caches.
   actions: write
 
 jobs:
@@ -54,8 +54,6 @@ jobs:
         with:
           python-version: "3.13"
 
-      # The Azure apt mirror sometimes needs minutes for a few MB, so keep
-      # the .debs; apt only downloads what changed since.
       - name: Cache apt packages
         uses: actions/cache@v5
         with:
@@ -64,13 +62,9 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          mkdir -p ~/apt-cache/partial
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends -o Dir::Cache::Archives="$HOME/apt-cache" \
+          scripts/ci/apt-install.sh \
             libgtk-3-dev libdbus-glib-1-dev libpulse-dev libasound2-dev \
             libx11-xcb-dev libxt-dev nasm msitools
-          sudo rm -rf ~/apt-cache/partial ~/apt-cache/lock
-          sudo chown -R "$USER" ~/apt-cache
 
       - name: Add swap
         run: |
@@ -176,9 +170,15 @@ jobs:
         if: always()
         run: sccache --show-stats || true
 
+      # Only main saves: caches from tag or PR runs are scoped to that ref, so
+      # no later main build could read them, and they would push main's cache
+      # out of the 10 GB quota. A cancelled or skipped build would save a
+      # nearly empty cache that the next build restores as the newest one.
       - name: Save compiler cache
         id: save-cache
-        if: always()
+        if: >-
+          always() && github.ref == 'refs/heads/main' &&
+          (steps.build.outcome == 'success' || steps.build.outcome == 'failure')
         uses: actions/cache/save@v5
         with:
           path: /mnt/sccache
@@ -189,11 +189,13 @@ jobs:
       # the next build starts cold (hours instead of minutes).
       - name: Drop older compiler caches
         if: always() && steps.build.outcome == 'success' && steps.save-cache.outcome == 'success'
+        # Housekeeping only; a failure here must not fail the build.
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           KEEP: sccache-${{ inputs.target }}-${{ hashFiles('upstream.lock') }}-${{ github.run_id }}
         run: |
-          gh cache list -R "$GITHUB_REPOSITORY" --key "sccache-${{ inputs.target }}-" --limit 100 \
+          gh cache list -R "$GITHUB_REPOSITORY" --ref "$GITHUB_REF" --key "sccache-${{ inputs.target }}-" --limit 100 \
             --json id,key -q ".[] | select(.key != \"$KEEP\") | .id" |
             xargs -r -n1 gh cache delete -R "$GITHUB_REPOSITORY"
 

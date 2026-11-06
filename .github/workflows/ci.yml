@@ -149,7 +149,8 @@ jobs:
       (needs.plan.outputs.build == 'false' || needs.build-linux.result == 'success')
     name: test (linux ${{ matrix.session }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # Room for a slow apt mirror when the package cache is cold.
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -164,10 +165,15 @@ jobs:
           run-id: ${{ needs.plan.outputs.artifacts_run }}
           github-token: ${{ github.token }}
 
+      - name: Cache apt packages
+        uses: actions/cache@v5
+        with:
+          path: ~/apt-cache
+          key: apt-test-linux-v1
+
       - name: Install runtime dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
+          scripts/ci/apt-install.sh \
             libgtk-3-0t64 libdbus-glib-1-2 libasound2t64 libx11-xcb1 libxtst6 \
             xvfb weston fonts-dejavu-core fonts-noto-color-emoji dbus-x11 \
             mesa-utils libgl1-mesa-dri
@@ -227,10 +233,15 @@ jobs:
           run-id: ${{ needs.plan.outputs.artifacts_run }}
           github-token: ${{ github.token }}
 
+      - name: Cache apt packages
+        uses: actions/cache@v5
+        with:
+          path: ~/apt-cache
+          key: apt-test-flatpak-v1
+
       - name: Install Flatpak tooling
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends flatpak flatpak-builder xvfb dbus-x11 fonts-dejavu-core
+          scripts/ci/apt-install.sh flatpak flatpak-builder xvfb dbus-x11 fonts-dejavu-core
           flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
       - name: Build and install the Flatpak
