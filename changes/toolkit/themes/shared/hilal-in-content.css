@@ -274,7 +274,7 @@ html:has(#restoreTab) .title::before {
   height: 136px;
   background:
     url("chrome://branding/content/about-logo.png") center / 64px no-repeat,
-    var(--primary-container);
+    light-dark(var(--primary), var(--primary-container));
   mask: url("chrome://global/skin/hilal-shape-cookie9.svg") center / 100% 100% no-repeat;
 }
 
@@ -305,7 +305,7 @@ img.illustration[src*="cpm-fox-illustration"] {
   height: 168px;
   padding: 44px;
   content: url("chrome://branding/content/about-logo.png");
-  background-color: var(--primary-container);
+  background-color: light-dark(var(--primary), var(--primary-container));
   mask: url("chrome://global/skin/hilal-shape-cookie9.svg") center / 100% 100% no-repeat;
 }
 

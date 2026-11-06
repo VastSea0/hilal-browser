@@ -55,7 +55,7 @@ body {
   aspect-ratio: 1;
   padding: 0 !important;
   margin-inline: auto;
-  background: var(--primary-container);
+  background: light-dark(var(--primary), var(--primary-container));
   mask: url("chrome://global/skin/hilal-shape-cookie9.svg") center / 100% 100% no-repeat;
 }
 
