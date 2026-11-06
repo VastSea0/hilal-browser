@@ -10,6 +10,7 @@
       type="image/png"
       href="chrome://branding/content/icon32.png"
     />
+    <link rel="stylesheet" href="chrome://browser/skin/hilal-shapes.css" />
     <link
       rel="stylesheet"
       href="chrome://browser/content/hilal/newtab/newtab.css"
@@ -18,20 +19,23 @@
   </head>
   <body>
     <main class="home">
-      <section class="clock-card" aria-hidden="true">
-        <div class="clock" id="clock">
-          <span id="clock-hours"></span><span class="clock-sep">:</span
-          ><span id="clock-minutes"></span
-          ><span class="clock-period" id="clock-period"></span>
+      <section class="clock" aria-hidden="true">
+        <div class="clock-unit clock-hours">
+          <span class="hilal-shape clock-shape" data-shape="cookie9"></span>
+          <span class="clock-digits" id="clock-hours"></span>
         </div>
-        <div class="clock-date" id="clock-date"></div>
+        <div class="clock-unit clock-minutes">
+          <span class="hilal-shape clock-shape" data-shape="puffy"></span>
+          <span class="clock-digits" id="clock-minutes"></span>
+        </div>
       </section>
+      <p class="clock-date">
+        <span id="clock-date"></span>
+        <span class="clock-period" id="clock-period"></span>
+      </p>
 
       <form class="search" id="search-form" autocomplete="off">
-        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" />
-          <line x1="20.5" y1="20.5" x2="16" y2="16" />
-        </svg>
+        <i class="search-icon" aria-hidden="true">search</i>
         <input
           type="text"
           id="search-input"
@@ -47,46 +51,36 @@
           data-l10n-id="hilal-newtab-search-clear"
           hidden
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <line x1="17" y1="7" x2="7" y2="17" />
-            <line x1="7" y1="7" x2="17" y2="17" />
-          </svg>
+          <i aria-hidden="true">close</i>
         </button>
         <button
           type="submit"
           class="search-submit"
           data-l10n-id="hilal-newtab-search-submit"
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="13 6 19 12 13 18" />
-          </svg>
+          <i aria-hidden="true">arrow_forward</i>
         </button>
       </form>
 
       <section class="shortcuts" id="shortcuts"></section>
 
       <nav class="chips">
-        <button
-          class="chip"
-          data-url="about:bookmarks"
-          data-l10n-id="hilal-newtab-bookmarks"
-        ></button>
-        <button
-          class="chip"
-          data-url="about:history"
-          data-l10n-id="hilal-newtab-history"
-        ></button>
-        <button
-          class="chip"
-          data-url="about:downloads"
-          data-l10n-id="hilal-newtab-downloads"
-        ></button>
-        <button
-          class="chip"
-          data-url="about:preferences"
-          data-l10n-id="hilal-newtab-settings-chip"
-        ></button>
+        <button class="chip" data-url="hilal:bookmarks">
+          <i aria-hidden="true">bookmarks</i>
+          <span data-l10n-id="hilal-newtab-bookmarks"></span>
+        </button>
+        <button class="chip" data-url="hilal:history">
+          <i aria-hidden="true">history</i>
+          <span data-l10n-id="hilal-newtab-history"></span>
+        </button>
+        <button class="chip" data-url="hilal:downloads">
+          <i aria-hidden="true">download</i>
+          <span data-l10n-id="hilal-newtab-downloads"></span>
+        </button>
+        <button class="chip" data-url="hilal:settings">
+          <i aria-hidden="true">settings</i>
+          <span data-l10n-id="hilal-newtab-settings-chip"></span>
+        </button>
       </nav>
     </main>
 

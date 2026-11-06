@@ -1,0 +1,67 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* Material 3 Expressive shapes as masks (generated; see shapes/*.svg).
+ *
+ *   <div class="hilal-shape" data-shape="cookie9">  or
+ *   mask-image: var(--hilal-shape-cookie9);
+ */
+
+:root {
+  --hilal-shape-cookie4: url("chrome://browser/content/hilal/shapes/cookie4.svg");
+  --hilal-shape-cookie6: url("chrome://browser/content/hilal/shapes/cookie6.svg");
+  --hilal-shape-cookie7: url("chrome://browser/content/hilal/shapes/cookie7.svg");
+  --hilal-shape-cookie9: url("chrome://browser/content/hilal/shapes/cookie9.svg");
+  --hilal-shape-cookie12: url("chrome://browser/content/hilal/shapes/cookie12.svg");
+  --hilal-shape-clover4: url("chrome://browser/content/hilal/shapes/clover4.svg");
+  --hilal-shape-clover8: url("chrome://browser/content/hilal/shapes/clover8.svg");
+  --hilal-shape-sunny: url("chrome://browser/content/hilal/shapes/sunny.svg");
+  --hilal-shape-very-sunny: url("chrome://browser/content/hilal/shapes/very-sunny.svg");
+  --hilal-shape-burst: url("chrome://browser/content/hilal/shapes/burst.svg");
+  --hilal-shape-soft-burst: url("chrome://browser/content/hilal/shapes/soft-burst.svg");
+  --hilal-shape-flower: url("chrome://browser/content/hilal/shapes/flower.svg");
+  --hilal-shape-puffy: url("chrome://browser/content/hilal/shapes/puffy.svg");
+  --hilal-shape-pentagon: url("chrome://browser/content/hilal/shapes/pentagon.svg");
+  --hilal-shape-gem: url("chrome://browser/content/hilal/shapes/gem.svg");
+  --hilal-shape-diamond: url("chrome://browser/content/hilal/shapes/diamond.svg");
+  --hilal-shape-triangle: url("chrome://browser/content/hilal/shapes/triangle.svg");
+  --hilal-shape-circle: url("chrome://browser/content/hilal/shapes/circle.svg");
+  --hilal-shape-square: url("chrome://browser/content/hilal/shapes/square.svg");
+  --hilal-shape-pill: url("chrome://browser/content/hilal/shapes/pill.svg");
+  --hilal-shape-arch: url("chrome://browser/content/hilal/shapes/arch.svg");
+  --hilal-shape-semicircle: url("chrome://browser/content/hilal/shapes/semicircle.svg");
+  --hilal-shape-oval: url("chrome://browser/content/hilal/shapes/oval.svg");
+  --hilal-shape-heart: url("chrome://browser/content/hilal/shapes/heart.svg");
+}
+
+.hilal-shape {
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+.hilal-shape[data-shape="cookie4"] { mask-image: var(--hilal-shape-cookie4); }
+.hilal-shape[data-shape="cookie6"] { mask-image: var(--hilal-shape-cookie6); }
+.hilal-shape[data-shape="cookie7"] { mask-image: var(--hilal-shape-cookie7); }
+.hilal-shape[data-shape="cookie9"] { mask-image: var(--hilal-shape-cookie9); }
+.hilal-shape[data-shape="cookie12"] { mask-image: var(--hilal-shape-cookie12); }
+.hilal-shape[data-shape="clover4"] { mask-image: var(--hilal-shape-clover4); }
+.hilal-shape[data-shape="clover8"] { mask-image: var(--hilal-shape-clover8); }
+.hilal-shape[data-shape="sunny"] { mask-image: var(--hilal-shape-sunny); }
+.hilal-shape[data-shape="very-sunny"] { mask-image: var(--hilal-shape-very-sunny); }
+.hilal-shape[data-shape="burst"] { mask-image: var(--hilal-shape-burst); }
+.hilal-shape[data-shape="soft-burst"] { mask-image: var(--hilal-shape-soft-burst); }
+.hilal-shape[data-shape="flower"] { mask-image: var(--hilal-shape-flower); }
+.hilal-shape[data-shape="puffy"] { mask-image: var(--hilal-shape-puffy); }
+.hilal-shape[data-shape="pentagon"] { mask-image: var(--hilal-shape-pentagon); }
+.hilal-shape[data-shape="gem"] { mask-image: var(--hilal-shape-gem); }
+.hilal-shape[data-shape="diamond"] { mask-image: var(--hilal-shape-diamond); }
+.hilal-shape[data-shape="triangle"] { mask-image: var(--hilal-shape-triangle); }
+.hilal-shape[data-shape="circle"] { mask-image: var(--hilal-shape-circle); }
+.hilal-shape[data-shape="square"] { mask-image: var(--hilal-shape-square); }
+.hilal-shape[data-shape="pill"] { mask-image: var(--hilal-shape-pill); }
+.hilal-shape[data-shape="arch"] { mask-image: var(--hilal-shape-arch); }
+.hilal-shape[data-shape="semicircle"] { mask-image: var(--hilal-shape-semicircle); }
+.hilal-shape[data-shape="oval"] { mask-image: var(--hilal-shape-oval); }
+.hilal-shape[data-shape="heart"] { mask-image: var(--hilal-shape-heart); }

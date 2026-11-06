@@ -31,8 +31,18 @@ export class HilalNewTabParent extends JSWindowActorParent {
     }
 
     switch (message.name) {
-      case "GetTheme":
-        return win.MaterialYouTheme?.getThemeData() ?? null;
+      case "GetTheme": {
+        // The page uses the same Material tokens as the browser chrome.
+        const theme = win.MaterialYouTheme?.getThemeData() ?? {};
+        const style = win.document.documentElement.style;
+        const tokens = {};
+        for (let i = 0; i < style.length; i++) {
+          if (style[i].startsWith("--") && !style[i].startsWith("--md-sys-")) {
+            tokens[style[i]] = style.getPropertyValue(style[i]);
+          }
+        }
+        return { ...theme, tokens };
+      }
       case "GetSiteIcons": {
         const icons = await getTippyTopIcons();
         const result = {};
@@ -44,13 +54,26 @@ export class HilalNewTabParent extends JSWindowActorParent {
         }
         return result;
       }
-      case "Navigate":
+      case "Navigate": {
+        const input = message.data.input;
+        // The page's chips open the browser's own panels and windows.
+        const actions = {
+          "hilal:bookmarks": () => win.SidebarController.show("viewBookmarksSidebar"),
+          "hilal:history": () => win.SidebarController.show("viewHistorySidebar"),
+          "hilal:downloads": () => win.document.getElementById("Tools:Downloads")?.doCommand(),
+          "hilal:settings": () => win.openPreferences(),
+        };
+        if (actions[input]) {
+          actions[input]();
+          return null;
+        }
         // The shell loads into the selected tab, which is the one the user
         // typed in unless the tab was switched in the meantime.
         if (win.gBrowser.selectedBrowser == browser) {
-          win.gHilalShell?.navigate(message.data.input);
+          win.gHilalShell?.navigate(input);
         }
         return null;
+      }
     }
     return null;
   }

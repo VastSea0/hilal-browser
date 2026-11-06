@@ -2,140 +2,174 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/* The shell overrides these with the window's accent color. */
-:root {
-  --accent: #af51f5;
-  --primary: oklch(0.82 0.14 305);
-  --bg: color-mix(in srgb, var(--accent) 14%, #131217);
-  --surface: color-mix(in srgb, var(--accent) 22%, #1b1922);
-  --surface-high: color-mix(in srgb, var(--accent) 32%, #262330);
-  --outline: color-mix(in srgb, var(--accent) 25%, rgb(255 255 255 / 0.08));
-  --on-surface: #f3f4f6;
-  --on-surface-variant: #a8a3b3;
+/*
+ * Hilal's new tab page in Material 3 Expressive. The colors are the browser's
+ * Material tokens, sent by HilalNewTabParent; the values here only cover the
+ * first paint before they arrive. Shapes come from hilal-shapes.css.
+ */
 
-  --primary-container: color-mix(in srgb, var(--primary) 22%, var(--bg));
-  --on-primary-container: color-mix(in srgb, var(--primary) 70%, var(--on-surface));
-  --spring: cubic-bezier(0.34, 1.4, 0.64, 1);
-
-  color-scheme: dark;
+@font-face {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-weight: 100 700;
+  src: url("chrome://browser/skin/material-symbols-outlined.woff2") format("woff2");
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --primary: oklch(0.42 0.14 305);
-    --bg: color-mix(in srgb, var(--accent) 8%, #f7f6fa);
-    --surface: #ffffff;
-    --surface-high: color-mix(in srgb, var(--accent) 12%, #ebeaf2);
-    --outline: color-mix(in srgb, var(--accent) 15%, rgb(0 0 0 / 0.08));
-    --on-surface: #1b1a20;
-    --on-surface-variant: #5f5b68;
+:root {
+  color-scheme: light dark;
+  --primary: light-dark(#6750a4, #d0bcff);
+  --on-primary: light-dark(#ffffff, #381e72);
+  --primary-container: light-dark(#eaddff, #4f378b);
+  --on-primary-container: light-dark(#21005d, #eaddff);
+  --secondary-container: light-dark(#e8def8, #4a4458);
+  --on-secondary-container: light-dark(#1d192b, #e8def8);
+  --tertiary-container: light-dark(#ffd8e4, #633b48);
+  --on-tertiary-container: light-dark(#31111d, #ffd8e4);
+  --surface: light-dark(#fef7ff, #141218);
+  --surface-container-low: light-dark(#f7f2fa, #1d1b20);
+  --surface-container: light-dark(#f3edf7, #211f26);
+  --surface-container-high: light-dark(#ece6f0, #2b2930);
+  --surface-container-highest: light-dark(#e6e0e9, #36343b);
+  --on-surface: light-dark(#1d1b20, #e6e0e9);
+  --on-surface-variant: light-dark(#49454f, #cac4d0);
+  --outline-variant: light-dark(#cac4d0, #49454f);
+  --error: light-dark(#b3261e, #f2b8b5);
 
-    color-scheme: light;
-  }
+  --emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --spring: cubic-bezier(0.42, 1.67, 0.21, 0.9);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
+  height: 100%;
   margin: 0;
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 32px 24px;
-  background: var(--bg);
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
   color: var(--on-surface);
-  font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-svg {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-button {
-  font: inherit;
-  color: inherit;
-  border: none;
-  background: none;
-  cursor: pointer;
+i {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1;
+  user-select: none;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .home {
-  width: min(100%, 680px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 28px;
-  padding-bottom: 6vh;
+  width: min(720px, 100% - 48px);
+  padding-block: 32px 64px;
 }
 
-/* Clock */
+/* ---------------------------------------------------------------------------
+ * Clock: hours and minutes on two expressive shapes
+ * ------------------------------------------------------------------------- */
 
-.clock-card {
+.clock {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 28px 56px 26px;
-  border-radius: 48px;
+  gap: 8px;
+}
+
+.clock-unit {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 148px;
+  height: 148px;
+}
+
+.clock-shape {
+  position: absolute;
+  inset: 0;
+  animation: shape-turn 60s linear infinite;
+}
+
+.clock-hours .clock-shape {
   background: var(--primary-container);
+}
+
+.clock-minutes .clock-shape {
+  background: var(--tertiary-container);
+  animation-direction: reverse;
+}
+
+@keyframes shape-turn {
+  to { transform: rotate(1turn); }
+}
+
+.clock-digits {
+  position: relative;
+  font-size: 72px;
+  font-weight: 600;
+  letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.clock-hours .clock-digits {
   color: var(--on-primary-container);
 }
 
-.clock {
-  font-size: clamp(72px, 11vw, 120px);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-}
-
-.clock-sep {
-  margin-inline: 0.04em;
-  color: color-mix(in srgb, currentColor 55%, transparent);
-}
-
-.clock-period {
-  margin-inline-start: 0.25em;
-  font-size: 0.3em;
-  font-weight: 500;
-  letter-spacing: 0;
+.clock-minutes .clock-digits {
+  color: var(--on-tertiary-container);
 }
 
 .clock-date {
-  margin-top: 10px;
-  font-size: 17px;
+  display: inline-flex;
+  gap: 6px;
+  margin: 16px 0 28px;
+  padding: 6px 16px;
+  border-radius: 16px;
+  background: var(--surface-container-high);
+  color: var(--on-surface-variant);
+  font-size: 14px;
   font-weight: 500;
-  color: color-mix(in srgb, currentColor 80%, transparent);
 }
 
-/* Search */
+.clock-period:empty {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Search
+ * ------------------------------------------------------------------------- */
 
 .search {
-  width: 100%;
-  height: 60px;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-inline: 22px 8px;
-  border-radius: 30px;
-  background: var(--surface-high);
-  outline: 2px solid transparent;
-  transition: outline-color 150ms;
+  width: 100%;
+  height: 56px;
+  padding: 0 8px 0 20px;
+  border-radius: 28px;
+  background: var(--surface-container-high);
+  transition:
+    background-color 200ms linear,
+    box-shadow 250ms var(--emphasized);
 }
 
 .search:focus-within {
-  outline-color: var(--primary);
+  background: var(--surface-container-highest);
+  box-shadow: 0 2px 6px 2px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
 .search-icon {
-  flex: none;
+  font-size: 24px;
   color: var(--on-surface-variant);
 }
 
@@ -144,24 +178,33 @@ button {
   min-width: 0;
   height: 100%;
   border: none;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-size: 17px;
   outline: none;
+  background: transparent;
+  color: var(--on-surface);
+  font: inherit;
+  font-size: 16px;
 }
 
 .search-input::placeholder {
   color: var(--on-surface-variant);
 }
 
-.icon-button {
-  width: 40px;
-  height: 40px;
+.icon-button,
+.search-submit {
   display: grid;
   place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
   border-radius: 20px;
+  background: transparent;
   color: var(--on-surface-variant);
+  cursor: pointer;
+  transition:
+    background-color 150ms linear,
+    border-radius 300ms var(--emphasized);
 }
 
 .icon-button:hover {
@@ -173,28 +216,29 @@ button {
 }
 
 .search-submit {
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border-radius: 22px;
   background: var(--primary);
-  color: var(--bg);
-  transition: border-radius 250ms var(--spring);
+  color: var(--on-primary);
 }
 
 .search-submit:hover {
-  border-radius: 14px;
+  background: color-mix(in srgb, var(--on-primary) 8%, var(--primary));
 }
 
-/* Shortcuts */
+:is(.icon-button, .search-submit):active {
+  border-radius: 12px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Shortcuts: icons on shapes
+ * ------------------------------------------------------------------------- */
 
 .shortcuts {
   display: grid;
   grid-template-columns: repeat(auto-fill, 96px);
   justify-content: center;
-  gap: 12px 8px;
+  gap: 4px;
   width: 100%;
+  margin-top: 28px;
 }
 
 .tile {
@@ -203,163 +247,204 @@ button {
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 8px 4px;
+  padding: 10px 4px 8px;
+  border: none;
   border-radius: 20px;
-  color: inherit;
+  background: none;
+  color: var(--on-surface);
   text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 150ms linear;
+}
+
+.tile:hover {
+  background: color-mix(in srgb, var(--on-surface) 6%, transparent);
 }
 
 .tile-icon {
   position: relative;
-  width: 64px;
-  height: 64px;
   display: grid;
   place-items: center;
-  border-radius: 22px;
-  background: var(--surface);
-  transition:
-    border-radius 300ms var(--spring),
-    background-color 150ms;
+  width: 56px;
+  height: 56px;
 }
 
-.tile:hover .tile-icon,
-.tile:focus-visible .tile-icon {
-  border-radius: 32px;
-  background: var(--surface-high);
-}
-
-.tile-icon img {
+.tile-shape {
   position: absolute;
-  width: 32px;
-  height: 32px;
-  visibility: hidden;
+  inset: 0;
+  background: var(--surface-container-highest);
+  transition:
+    transform 400ms var(--spring),
+    background-color 200ms linear;
 }
 
-.tile-icon.has-image img {
-  visibility: visible;
+.tile:hover .tile-shape {
+  transform: rotate(30deg) scale(1.06);
+  background: var(--secondary-container);
 }
 
-.tile-icon.rich {
-  overflow: hidden;
+.tile:active .tile-shape {
+  transform: rotate(60deg) scale(0.94);
 }
 
-.tile-icon.rich img {
-  width: 100%;
-  height: 100%;
+.tile-icon > img {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: contain;
+  display: none;
 }
 
-.tile-icon.has-image .tile-letter {
-  visibility: hidden;
+.tile-icon.has-image > img,
+.tile-icon.rich > img {
+  display: block;
 }
 
 .tile-letter {
-  font-size: 24px;
+  position: relative;
+  color: var(--on-surface);
+  font-size: 22px;
   font-weight: 600;
-  color: var(--primary);
+}
+
+.tile-icon.has-image > .tile-letter,
+.tile-icon.rich > .tile-letter {
+  display: none;
+}
+
+.tile-icon > i {
+  position: relative;
+  font-size: 24px;
+  color: var(--on-surface-variant);
 }
 
 .tile-label {
-  max-width: 100%;
+  max-width: 88px;
   overflow: hidden;
+  padding-inline: 2px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--on-surface-variant);
 }
 
 .tile-edit {
   position: absolute;
-  top: 0;
-  right: 2px;
+  top: 2px;
+  inset-inline-end: 2px;
   width: 28px;
   height: 28px;
-  background: var(--surface-high);
-  visibility: hidden;
+  opacity: 0;
+  transition: opacity 150ms linear;
 }
 
-.tile-edit svg {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
+.tile-edit > i {
+  font-size: 18px;
 }
 
-.tile:hover .tile-edit,
-.tile-edit:focus-visible {
-  visibility: visible;
+.tile:is(:hover, :focus-within) .tile-edit {
+  opacity: 1;
 }
 
-.tile-add .tile-icon {
-  background: none;
-  border: 2px dashed var(--outline);
-  color: var(--on-surface-variant);
-}
-
-/* Chips */
+/* ---------------------------------------------------------------------------
+ * Chips
+ * ------------------------------------------------------------------------- */
 
 .chips {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
+  margin-top: 24px;
 }
 
 .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   height: 36px;
-  padding-inline: 16px;
-  border-radius: 12px;
-  border: 1px solid var(--outline);
-  color: var(--on-surface-variant);
-  font-size: 14px;
+  padding: 0 16px 0 12px;
+  border: none;
+  border-radius: 18px;
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+  font: inherit;
   font-weight: 500;
-  transition: border-radius 250ms var(--spring), background-color 150ms;
+  cursor: pointer;
+  transition:
+    background-color 150ms linear,
+    border-radius 300ms var(--emphasized);
+}
+
+.chip > i {
+  font-size: 18px;
+  color: var(--primary);
 }
 
 .chip:hover {
-  border-radius: 18px;
-  background: var(--surface);
-  color: var(--on-surface);
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
 }
 
-/* Dialog */
+.chip:active {
+  border-radius: 10px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Shortcut dialog
+ * ------------------------------------------------------------------------- */
 
 .dialog {
-  width: min(92vw, 400px);
+  width: min(400px, 100% - 32px);
   padding: 24px;
   border: none;
   border-radius: 28px;
-  background: var(--surface-high);
+  background: var(--surface-container-high);
   color: var(--on-surface);
+  box-shadow: 0 4px 12px 3px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.24);
 }
 
 .dialog::backdrop {
-  background: rgb(0 0 0 / 0.4);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.dialog[open] {
+  animation: dialog-in 300ms var(--emphasized);
+}
+
+@keyframes dialog-in {
+  from { opacity: 0; transform: scale(0.94); }
 }
 
 .dialog-title {
-  margin: 0 0 20px;
-  font-size: 22px;
-  font-weight: 500;
+  margin: 0 0 16px;
+  font-size: 24px;
+  font-weight: 400;
 }
 
 .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   font-size: 13px;
+  font-weight: 500;
   color: var(--on-surface-variant);
 }
 
 .field input {
   height: 48px;
-  padding-inline: 14px;
-  border: 1px solid var(--outline);
-  border-radius: 12px;
-  background: var(--bg);
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  outline: none;
+  background: var(--surface-container-highest);
   color: var(--on-surface);
   font: inherit;
   font-size: 15px;
-  outline: none;
 }
 
 .field input:focus {
@@ -370,7 +455,7 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 20px;
 }
 
 .spacer {
@@ -380,12 +465,17 @@ button {
 .text-button,
 .filled-button {
   height: 40px;
-  padding-inline: 18px;
+  padding: 0 20px;
+  border: none;
   border-radius: 20px;
+  font: inherit;
   font-weight: 500;
+  cursor: pointer;
+  transition: border-radius 300ms var(--emphasized), background-color 150ms linear;
 }
 
 .text-button {
+  background: transparent;
   color: var(--primary);
 }
 
@@ -394,7 +484,7 @@ button {
 }
 
 .text-button.danger {
-  color: #f2726b;
+  color: var(--error);
 }
 
 .text-button[hidden] {
@@ -403,5 +493,32 @@ button {
 
 .filled-button {
   background: var(--primary);
-  color: var(--bg);
+  color: var(--on-primary);
+}
+
+:is(.text-button, .filled-button):active {
+  border-radius: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clock-shape {
+    animation: none;
+  }
+
+  .tile-shape,
+  .dialog[open] {
+    transition: none;
+    animation: none;
+  }
+}
+
+@media (max-height: 640px) {
+  .clock-unit {
+    width: 112px;
+    height: 112px;
+  }
+
+  .clock-digits {
+    font-size: 54px;
+  }
 }
