@@ -181,6 +181,26 @@ return {
 """
 
 
+# Asks Google's Safe Browsing API for its threat lists with the key built into
+# the browser. The response is 200 only when Google accepts the key. The key
+# itself is never returned, so it does not end up in the report.
+SAFEBROWSING_API_JS = r"""
+const resolve = arguments[arguments.length - 1];
+const key = Services.urlFormatter.formatURL("%GOOGLE_SAFEBROWSING_API_KEY%");
+fetch("https://safebrowsing.googleapis.com/v4/threatLists?key=" + encodeURIComponent(key))
+  .then(async r => {
+    let lists = 0, error = null;
+    try {
+      const body = await r.json();
+      lists = (body.threatLists || []).length;
+      error = body.error ? body.error.status || body.error.message : null;
+    } catch (_) {}
+    resolve({ status: r.status, lists, error });
+  })
+  .catch(e => resolve({ status: 0, lists: 0, error: String(e) }));
+"""
+
+
 def wait_for(m, js, timeout=60, interval=0.5):
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -417,6 +437,11 @@ def main():
         report["safebrowsing_key"] = policies["safebrowsingKey"]
         if args.require_safebrowsing:
             check("Safe Browsing has an API key", policies["safebrowsingKey"], policies)
+        if policies["safebrowsingKey"]:
+            api = m.script(SAFEBROWSING_API_JS, asynchronous=True)
+            report["safebrowsing_api"] = api
+            check("Google accepts the Safe Browsing key",
+                  api["status"] == 200 and api["lists"] > 0, api)
 
         rfp = {}
         for level in ("extreme", "standard"):
