@@ -127,7 +127,12 @@ return {
   tabMode: root.getAttribute("data-tab-mode"),
   window: { w: window.innerWidth, h: window.innerHeight },
   shell: !!window.gHilalShell,
+  shellErrors: window.gHilalShell?.startupErrors || [],
   headerShell: rect(doc.getElementById("hilal-header-shell")),
+  // Firefox's own chrome; with the shell running neither may take up room.
+  nativeNavBar: rect(doc.getElementById("nav-bar")),
+  nativeSidebar: rect(doc.querySelector("sidebar-main")),
+  locale: Services.locale.appLocaleAsBCP47,
   topbar: rect(doc.getElementById("hilal-topbar")),
   urlbar: rect(doc.querySelector("#hilal-header-shell input, #hilal-url-input")),
   welcome: !!doc.getElementById("hilal-welcome-overlay"),
@@ -176,12 +181,54 @@ return {
 """
 
 
+# Asks Google's Safe Browsing API for its threat lists with the key built into
+# the browser. The response is 200 only when Google accepts the key. The key
+# itself is never returned, so it does not end up in the report.
+SAFEBROWSING_API_JS = r"""
+const resolve = arguments[arguments.length - 1];
+const key = Services.urlFormatter.formatURL("%GOOGLE_SAFEBROWSING_API_KEY%");
+fetch("https://safebrowsing.googleapis.com/v4/threatLists?key=" + encodeURIComponent(key))
+  .then(async r => {
+    let lists = 0, error = null;
+    try {
+      const body = await r.json();
+      lists = (body.threatLists || []).length;
+      error = body.error ? body.error.status || body.error.message : null;
+    } catch (_) {}
+    resolve({ status: r.status, lists, error });
+  })
+  .catch(e => resolve({ status: 0, lists: 0, error: String(e) }));
+"""
+
+
 def wait_for(m, js, timeout=60, interval=0.5):
     deadline = time.time() + timeout
     while time.time() < deadline:
         if m.script(js):
             return True
         time.sleep(interval)
+    return False
+
+
+def os_screenshot(path):
+    """Grab the whole screen, which includes popups Marionette cannot draw."""
+    try:
+        if sys.platform.startswith("linux") and shutil.which("import"):
+            subprocess.run(["import", "-window", "root", str(path)], check=True, timeout=30)
+            return True
+        if sys.platform == "win32":
+            ps = (
+                "Add-Type -AssemblyName System.Windows.Forms,System.Drawing;"
+                "$b=[System.Windows.Forms.Screen]::PrimaryScreen.Bounds;"
+                "$i=New-Object System.Drawing.Bitmap $b.Width,$b.Height;"
+                "$g=[System.Drawing.Graphics]::FromImage($i);"
+                "$g.CopyFromScreen($b.Location,[System.Drawing.Point]::Empty,$b.Size);"
+                f"$i.Save('{path}')"
+            )
+            subprocess.run(["powershell", "-NoProfile", "-Command", ps], check=True, timeout=30)
+            return True
+    except (OSError, subprocess.SubprocessError) as e:
+        print("screen capture failed:", e, flush=True)
     return False
 
 
@@ -200,6 +247,8 @@ def main():
                         help="extra pref for the test profile, e.g. browser.tabs.inTitlebar=1")
     parser.add_argument("--expect-updates", choices=["hilal", "disabled", "any"], default="hilal",
                         help="hilal: updates come from Hilal's server; disabled: Flatpak and other package managers")
+    parser.add_argument("--locale", help="app locale to run in, e.g. tr")
+    parser.add_argument("--no-restart", action="store_true", help="skip the restart check")
     parser.add_argument("--require-safebrowsing", action="store_true",
                         help="fail when the build has no Google Safe Browsing key")
     args = parser.parse_args()
@@ -209,6 +258,8 @@ def main():
     profile = Path(tempfile.mkdtemp(prefix="hilal-smoke-"))
     port = free_port()
     prefs = dict(USER_PREFS, **{"marionette.port": port})
+    if args.locale:
+        prefs["intl.locale.requested"] = args.locale
     for item in args.pref:
         name, value = item.split("=", 1)
         prefs[name] = json.loads(value)
@@ -267,11 +318,61 @@ def main():
                 check(f"{label}: {name} button inside the top of the window", inside, r)
 
         check_window_buttons("welcome", state)
+        if args.locale:
+            check(f"running in {args.locale}", state["locale"] == args.locale, state["locale"])
+        if args.locale == "tr":
+            # Hilal's own strings, one per feature, must not fall back to English.
+            english = {
+                "browser/browser.ftl": {
+                    "hilal-welcome-start": "Get started",
+                    "hilal-newtab-add-shortcut": "Add shortcut",
+                    "hilal-shell-workspaces": "Workspaces",
+                    "hilal-color-panel-follow-site": "Use the site's color",
+                    "hilal-app-menu-report": "Report a Problem",
+                    "hilal-auto-boost-title": "Automatic boosts",
+                },
+                "browser/preferences/preferences.ftl": {
+                    "hilal-auto-colors-header": None,
+                },
+            }
+            values = m.script("""
+              const [files] = arguments;
+              const out = {};
+              for (const [file, ids] of Object.entries(files)) {
+                const l10n = new Localization([file], true);
+                out[file] = Object.fromEntries(ids.map(id => [id, l10n.formatValueSync(id)]));
+              }
+              return out;
+            """, [{f: list(ids) for f, ids in english.items()}])
+            untranslated = {
+                id: v for f, ids in english.items() for id, v in values[f].items()
+                if not v or v == id or (ids[id] and v == ids[id])
+            }
+            check("Hilal strings are translated", not untranslated, untranslated)
 
-        # Leave the welcome screen the way a user would.
-        m.script("document.querySelector('#hilal-welcome-overlay .hw-link')?.click()")
-        check("welcome screen closes", wait_for(m, "return !document.getElementById('hilal-welcome-overlay')", 10))
-        time.sleep(1)
+        def check_shell(label, s):
+            """The Hilal shell is what users see, not Firefox's own chrome."""
+            hs, nav, side = s["headerShell"], s["nativeNavBar"], s["nativeSidebar"]
+            check(f"{label}: Hilal top bar shown", bool(hs and hs["w"] > 200 and hs["h"] > 0 and hs["display"] != "none"), hs)
+            hidden = lambda r: not r or r["w"] == 0 or r["h"] == 0 or r["display"] == "none" or r["visibility"] != "visible"
+            check(f"{label}: Firefox's own toolbar hidden", hidden(nav), nav)
+            check(f"{label}: Firefox's own sidebar hidden", hidden(side), side)
+            check(f"{label}: shell started without errors", not s["shellErrors"], s["shellErrors"])
+
+        # Go through the welcome screen the way a user does: Start, then Next
+        # on every step and Finish, keeping the default choices.
+        for step in range(6):
+            if not m.script("return !!document.getElementById('hilal-welcome-overlay')"):
+                break
+            m.screenshot(out / f"01-welcome-{step}.png")
+            m.script("document.querySelector('#hilal-welcome-overlay .hw-primary')?.click()")
+            time.sleep(1)
+        check("welcome screen finishes", wait_for(m, "return !document.getElementById('hilal-welcome-overlay')", 15))
+        time.sleep(2)
+        state = m.script(STATE_JS)
+        report["after_welcome"] = state
+        m.screenshot(out / "01-after-welcome.png")
+        check_shell("after welcome", state)
 
         for mode in ("vertical", "dual", "horizontal"):
             m.script("gHilalShell.setTabMode(arguments[0], false)", [mode])
@@ -282,6 +383,14 @@ def main():
             check(f"{mode} tabs: top bar laid out", s["topbar"] and s["topbar"]["w"] > 200 and s["topbar"]["h"] > 0, s["topbar"])
             check_window_buttons(f"{mode} tabs", s)
         m.script("gHilalShell.setTabMode(arguments[0], false)", ["vertical"])
+
+        # Settings change the layout and density through prefs while the
+        # window is open.
+        m.script("Services.prefs.setStringPref('hilal.sidebar.density', 'compact'); Services.prefs.setStringPref('hilal.tabs.layoutMode', 'dual')")
+        time.sleep(0.5)
+        live = m.script("return [document.documentElement.getAttribute('hilal-sidebar-density'), gHilalShell.tabMode]")
+        check("sidebar follows layout and density settings", live == ["compact", "dual"], live)
+        m.script("Services.prefs.clearUserPref('hilal.sidebar.density'); Services.prefs.setStringPref('hilal.tabs.layoutMode', 'vertical')")
 
         # Load a page in the content process.
         page = "data:text/html;charset=utf-8,<title>Hilal smoke</title><h1 style='font:48px sans-serif'>Hilal smoke page</h1>"
@@ -328,8 +437,178 @@ def main():
         report["safebrowsing_key"] = policies["safebrowsingKey"]
         if args.require_safebrowsing:
             check("Safe Browsing has an API key", policies["safebrowsingKey"], policies)
+        if policies["safebrowsingKey"]:
+            api = m.script(SAFEBROWSING_API_JS, asynchronous=True)
+            report["safebrowsing_api"] = api
+            check("Google accepts the Safe Browsing key",
+                  api["status"] == 200 and api["lists"] > 0, api)
 
+        rfp = {}
+        for level in ("extreme", "standard"):
+            m.script(f"Services.prefs.setStringPref('hilal.privacy.level', '{level}')")
+            wait_for(m, f"return Services.prefs.getBoolPref('privacy.resistFingerprinting') == {str(level == 'extreme').lower()}", 10)
+            rfp[level] = m.script("return Services.prefs.getBoolPref('privacy.resistFingerprinting')")
+        report["resist_fingerprinting"] = rfp
+        check("Extreme privacy turns fingerprinting resistance on", rfp["extreme"] is True, rfp)
+        check("Standard privacy leaves it off", rfp["standard"] is False, rfp)
+
+        # Automatic colors, against a local page that declares a theme color.
+        import http.server, threading
+        page_dir = Path(tempfile.mkdtemp(prefix="hilal-site-"))
+        (page_dir / "index.html").write_text(
+            "<!doctype html><meta name='theme-color' content='#e8590c'>"
+            "<title>Hilal colors</title><body style='background:#fff'><h1>Colors</h1>"
+        )
+        handler = lambda *a, **kw: http.server.SimpleHTTPRequestHandler(*a, directory=str(page_dir), **kw)
+        server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        site = f"http://127.0.0.1:{server.server_address[1]}/"
+        m.script("""
+          Services.prefs.setStringPref('hilal.boosts.auto.mode', 'all');
+          Services.prefs.setBoolPref('hilal.theme.followSite', true);
+        """)
+        m.script("gBrowser.selectedBrowser.loadURI(Services.io.newURI(arguments[0]), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})", [site])
+        check("local page loads", wait_for(m, "return gBrowser.selectedBrowser.contentTitle == 'Hilal colors'", 30))
+        check("automatic boost recolors an unboosted site",
+              wait_for(m, "return gBrowser.selectedBrowser.browsingContext.hilalBoostsData != 0", 10))
+        check("browser takes the site's theme color",
+              wait_for(m, "return MaterialYouTheme._siteColor == '#e8590c'", 10),
+              m.script("return MaterialYouTheme._siteColor"))
+        time.sleep(1)
+        m.screenshot(out / "05-site-colors.png")
+        m.script("""
+          Services.prefs.setStringPref('hilal.boosts.auto.mode', 'off');
+          Services.prefs.setBoolPref('hilal.theme.followSite', false);
+        """)
+        check("turning automatic boosts off restores the site",
+              wait_for(m, "return gBrowser.selectedBrowser.browsingContext.hilalBoostsData == 0", 10))
+        server.shutdown()
+
+        # Hilal's own website learns the browser's accent; needs the network.
+        m.script("gBrowser.selectedBrowser.loadURI(Services.io.newURI('https://hilal-browser.vercel.app/'), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})")
+        if wait_for(m, "return gBrowser.selectedBrowser.currentURI.host == 'hilal-browser.vercel.app' && !gBrowser.selectedBrowser.webProgress.isLoadingDocument", 30):
+            # Marionette's content context stays on the tab the session
+            # started with; switch to the tab showing the site.
+            chrome_handle = m.send("WebDriver:GetWindowHandle")
+            chrome_handle = chrome_handle.get("value", chrome_handle) if isinstance(chrome_handle, dict) else chrome_handle
+            m.context("content")
+            handles = m.send("WebDriver:GetWindowHandles")
+            handles = handles.get("value", handles) if isinstance(handles, dict) else handles
+            for handle in reversed(handles):
+                m.send("WebDriver:SwitchToWindow", {"handle": handle})
+                if "hilal-browser.vercel.app" in m.script("return location.host"):
+                    break
+            marked = wait_for(m, "return !!document.documentElement.getAttribute('data-hilal-accent')", 15)
+            attrs = m.script("return [document.documentElement.getAttribute('data-hilal-browser'), document.documentElement.getAttribute('data-hilal-accent')]")
+            m.context("chrome")
+            m.send("WebDriver:SwitchToWindow", {"handle": chrome_handle})
+            check("Hilal's website gets the browser's accent", marked, attrs)
+            time.sleep(2)
+            m.screenshot(out / "05-hilal-website.png")
+        else:
+            print("SKIP Hilal's website did not load (no network?)", flush=True)
+
+        # Material surfaces drawn by Firefox's own components, for review.
+        m.script("gHilalShell.openAppMenu(document.getElementById('PanelUI-menu-button'))")
+        check("Hilal menu opens", wait_for(m, "return document.querySelectorAll('#hilal-app-menu .ham-row').length > 10", 10))
+        time.sleep(1)
+        m.screenshot(out / "06-app-menu.png")
+        labels = m.script("return [...document.querySelectorAll('#hilal-app-menu .ham-label')].map(e => e.textContent)")
+        check("Hilal menu items are labelled", all(labels), labels)
+        m.script("document.getElementById('hilal-app-menu')?.remove()")
+
+        m.script("gHilalWorkspaces._showCreateDialog()")
+        check("workspace dialog opens", wait_for(m, "return !!document.getElementById('hilal-ws-dialog')", 10))
+        # Fluent fills in the text asynchronously.
+        wait_for(m, "return !!document.querySelector('#hilal-ws-dialog h3')?.textContent", 5)
+        time.sleep(0.5)
+        m.screenshot(out / "07-workspace-dialog.png")
+        dialog = m.script("""
+          const d = document.getElementById('hilal-ws-dialog');
+          return {
+            title: d.querySelector('h3').textContent,
+            buttons: [...d.querySelectorAll('moz-button')].map(b => b.label),
+          };
+        """)
+        report["workspace_dialog"] = dialog
+        translated = all(dialog["buttons"]) and dialog["title"] not in ("", "hilal-ws-dialog-new-title")
+        if args.locale == "tr":
+            translated = translated and dialog["title"].lower() != "new workspace" and "Create" not in dialog["buttons"]
+        check("workspace dialog is translated", translated, dialog)
+        m.script("document.getElementById('hilal-ws-dialog-overlay')?.remove()")
+
+        before_handles = m.send("WebDriver:GetWindowHandles")
+        before_handles = before_handles.get("value", before_handles) if isinstance(before_handles, dict) else before_handles
+        main_handle = m.send("WebDriver:GetWindowHandle")
+        main_handle = main_handle.get("value", main_handle) if isinstance(main_handle, dict) else main_handle
+        m.script("openAboutDialog()")
+        about = None
+        deadline = time.time() + 15
+        while time.time() < deadline and not about:
+            handles = m.send("WebDriver:GetWindowHandles")
+            handles = handles.get("value", handles) if isinstance(handles, dict) else handles
+            new = [h for h in handles if h not in before_handles]
+            about = new[0] if new else None
+            time.sleep(0.5)
+        check("About dialog opens", bool(about))
+        if about:
+            m.send("WebDriver:SwitchToWindow", {"handle": about})
+            time.sleep(2)
+            m.screenshot(out / "08-about.png")
+            m.script("window.close()")
+            m.send("WebDriver:SwitchToWindow", {"handle": main_handle})
+
+        # The downloads panel anchors to an icon the shell hides; it has to
+        # open all the same.
+        m.script("DownloadsPanel.showPanel(true)")
+        check("downloads panel opens", wait_for(m, "return DownloadsPanel.panel.state == 'open'", 10),
+              m.script("return DownloadsPanel.panel.state"))
+        m.screenshot(out / "07a-downloads.png")
+        m.script("DownloadsPanel.hidePanel()")
+
+        # Add-ons is restyled by hilal-in-content.css and takes the accent.
+        m.script("gBrowser.selectedTab = gBrowser.addTab('about:addons', {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})")
+        addons_look = None
+        deadline = time.time() + 15
+        while time.time() < deadline and not addons_look:
+            time.sleep(0.5)
+            addons_look = m.script("""
+              const doc = gBrowser.selectedBrowser.contentDocument;
+              if (!doc?.querySelector("categories-box") || doc.readyState != "complete") return null;
+              const css = getComputedStyle(doc.documentElement);
+              return {
+                card: css.getPropertyValue("--card-border-radius").trim(),
+                primary: doc.documentElement.style.getPropertyValue("--primary").trim(),
+              };
+            """)
+        m.screenshot(out / "07b-addons.png")
+        check("Add-ons page has the Material look", bool(addons_look and addons_look["card"] == "24px" and addons_look["primary"]), addons_look)
+        m.script("gBrowser.removeTab(gBrowser.selectedTab, {animate: false})")
+
+        # Errors from the first run; the restarted process has its own console.
         errors = m.script(ERRORS_JS)
+
+        # Users start the browser again with the same profile; the shell has to
+        # come back then too.
+        if not args.no_restart:
+            try:
+                m.send("Marionette:Quit", {"flags": ["eRestart", "eAttemptQuit"]})
+            except MarionetteError:
+                pass
+            m = Marionette(port, timeout=args.timeout)
+            m.send("WebDriver:NewSession", {"capabilities": {"alwaysMatch": {"acceptInsecureCerts": True}}})
+            m.send("WebDriver:SetTimeouts", {"script": 60000})
+            m.context("chrome")
+            check("browser restarts", wait_for(m, "return typeof gBrowser != 'undefined' && !!gBrowser.selectedBrowser", 60))
+            wait_for(m, "return !!document.getElementById('hilal-header-shell')", 30)
+            time.sleep(3)
+            state = m.script(STATE_JS)
+            report["after_restart"] = state
+            m.screenshot(out / "05-after-restart.png")
+            check("no welcome screen after restart", not state["welcome"])
+            check_shell("after restart", state)
+            errors += m.script(ERRORS_JS)
+
         report["chrome_errors"] = errors
         hilal_errors = [e for e in errors if "hilal" in e["source"].lower()]
         check("no errors from Hilal chrome code", not hilal_errors, hilal_errors[:10])

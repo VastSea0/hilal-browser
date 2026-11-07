@@ -94,3 +94,100 @@ hilal-shell-layout-horizontal = Yatay sekmeler
 hilal-about-community = { -brand-short-name }, gönüllülerin <label data-l10n-name="hilal-about-firefox-link">Firefox</label> üzerine geliştirdiği özgür ve açık kaynaklı bir tarayıcıdır. <label data-l10n-name="hilal-about-contributors-link">Geliştirenleri görün</label>.
 hilal-about-helpus = Yardım etmek ister misiniz? <label data-l10n-name="hilal-about-contribute-link">GitHub'da katkıda bulunun</label> ya da <label data-l10n-name="hilal-about-issue-link">bir sorun bildirin</label>.
 hilal-about-source-link = Kaynak kodu
+
+## Hilal workspace dialog
+
+hilal-ws-dialog-new-title = Yeni çalışma alanı
+hilal-ws-dialog-edit-title = Çalışma alanını düzenle
+hilal-ws-dialog-emoji = Emoji
+hilal-ws-dialog-color = Renk
+hilal-ws-dialog-name = Ad
+hilal-ws-dialog-name-input =
+    .placeholder = Çalışma alanı adı
+hilal-ws-dialog-default-name = Çalışma alanı
+hilal-ws-dialog-cancel =
+    .label = Vazgeç
+hilal-ws-dialog-create =
+    .label = Oluştur
+hilal-ws-dialog-save =
+    .label = Kaydet
+hilal-ws-dialog-delete =
+    .label = Sil
+
+## Hilal New Tab
+
+hilal-newtab-title = Yeni Sekme
+hilal-newtab-active-workspace =
+    .title = Etkin çalışma alanı
+hilal-newtab-default-workspace = Varsayılan
+hilal-newtab-search-input =
+    .placeholder = Web'de arayın veya adres yazın…
+    .title = Web'de arayın veya adres yazın
+    .aria-label = Web'de arayın veya adres yazın
+hilal-newtab-search-clear =
+    .title = Temizle
+    .aria-label = Temizle
+hilal-newtab-search-submit =
+    .title = Ara
+    .aria-label = Ara
+hilal-newtab-bookmarks = Yer imleri
+hilal-newtab-history = Geçmiş
+hilal-newtab-downloads = İndirilenler
+hilal-newtab-settings-chip = Ayarlar
+hilal-newtab-customize = Özelleştir
+hilal-newtab-add-shortcut = Kısayol ekle
+hilal-newtab-remove-shortcut =
+    .title = Kaldır
+    .aria-label = Kaldır
+hilal-newtab-edit-shortcut =
+    .title = Diğer işlemler
+    .aria-label = Diğer işlemler
+hilal-newtab-dialog-title = Kısayol ekle
+hilal-newtab-dialog-edit-title = Kısayolu düzenle
+hilal-newtab-field-name = Ad
+hilal-newtab-field-name-input =
+    .placeholder = ör. GitHub
+    .aria-label = Kısayol adı
+hilal-newtab-field-url = Adres
+hilal-newtab-field-url-input =
+    .placeholder = https://…
+    .aria-label = Kısayol adresi
+hilal-newtab-dialog-cancel = Vazgeç
+hilal-newtab-dialog-save = Kaydet
+hilal-newtab-dialog-delete = Kaldır
+
+## Hilal sidebar footer
+
+hilal-sidebar-bookmarks =
+    .title = Yer imleri
+hilal-sidebar-history =
+    .title = Geçmiş
+hilal-sidebar-downloads =
+    .title = İndirilenler
+hilal-sidebar-passwords =
+    .title = Parolalar
+hilal-sidebar-privacy =
+    .title = Gizlilik ve güvenlik
+
+## Hilal menu
+
+hilal-app-menu-devtools = Web geliştirici araçları
+hilal-app-menu-task-manager = Görev yöneticisi
+hilal-app-menu-help = Hilal yardımı
+hilal-app-menu-report = Sorun bildir
+
+## Hilal color panel
+
+hilal-color-panel-accent = Vurgu rengi
+hilal-color-panel-page-color = Bu sayfa tarayıcıyı renklendiriyor
+hilal-color-panel-follow-site = Sitenin rengini kullan
+hilal-color-panel-follow-site-desc = Tarayıcı bulunduğunuz sayfanın rengini alır
+hilal-color-panel-this-site = Bu sitede
+# Variables:
+#   $host (String) - the site's host name
+hilal-color-panel-this-site-desc = { $host } için otomatik Boost
+hilal-auto-boost-title = Otomatik Boost
+hilal-auto-boost-off = Kapalı
+hilal-auto-boost-compatible = Uyumlu
+hilal-auto-boost-all = Tüm siteler
+hilal-auto-boost-darken-title = Koyu modda açık sayfaları koyulaştır

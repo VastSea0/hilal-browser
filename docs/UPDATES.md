@@ -124,7 +124,7 @@ Alpha, beta, and release-candidate tags are GitHub prereleases. Set
 builds.
 
 `--version` is the Hilal release shown to users. `--app-version` must be the
-Firefox/Gecko version shipped in the build, for example `153.5.1`. Firefox sends
+Firefox/Gecko version shipped in the build, for example `153.6.0`. Firefox sends
 that app version in update requests, so using the Hilal release value here can
 make a build offer an update to itself.
 
@@ -162,7 +162,7 @@ Optional:
 
 ```bash
 HILAL_UPDATE_BUILD_ID=20260524000000
-HILAL_UPDATE_FIREFOX_VERSION=153.5.1
+HILAL_UPDATE_FIREFOX_VERSION=153.6.0
 HILAL_UPDATE_DETAILS_URL=https://hilal-browser.vercel.app/#surumler
 HILAL_UPDATE_MACOS_MAR_HASH_FUNCTION=sha512
 HILAL_UPDATE_REPO=VastSea0/hilal-browser

@@ -126,3 +126,47 @@ hilal-global-color-desc = Tüm çalışma alanlarında ve tarayıcı arayüzünd
 hilal-global-color-title = Ana Vurgu Rengi
 hilal-theme-color-header = Vurgu Rengi ve Tema
 hilal-workspace-colors-subdesc = Her çalışma alanı için ayrı bir vurgu rengi seçin. Çalışma alanı değiştiğinde tarayıcı teması da güncellenir.
+
+hilal-accent-mode-boosts = Dinamik Boost
+    .label = Dinamik Boost
+hilal-workspace-active-badge = Etkin
+    .label = Etkin
+hilal-boosts-mode-title = Hilal Boost etkin rengi
+hilal-boosts-mode-desc = Ziyaret ettiğiniz sitenin baskın vurgu rengini otomatik olarak bulur ve tüm tarayıcıya uygular
+hilal-boosts-live-status = Canlı web renklendirmesi etkin
+    .label = Canlı web renklendirmesi etkin
+hilal-bangs-custom-label = (özel)
+
+## Automatic colors
+
+hilal-auto-colors-header = Otomatik Renkler
+hilal-auto-boost-title = Otomatik Boost
+hilal-auto-boost-desc = Boost yapmadığınız siteleri tarayıcının vurgu rengiyle yeniden boyar. "Uyumlu" seçeneği zaten koyu teması olan siteleri olduğu gibi bırakır.
+hilal-auto-boost-off = Kapalı
+hilal-auto-boost-compatible = Uyumlu
+hilal-auto-boost-all = Tüm siteler
+hilal-auto-boost-darken-title = Koyu modda açık sayfaları koyulaştır
+hilal-auto-boost-darken-desc = Hilal koyu moddayken otomatik Boost açık renkli sayfaları koyu yapar.
+hilal-follow-site-title = Tarayıcıda sitenin rengini kullan
+hilal-follow-site-desc = Bulunduğunuz sayfanın vurgu rengini alır: sitenin tema renginden ya da tasarımından tahmin ederek.
+
+## Hilal sidebar and tabs
+
+hilal-sidebar-header = Kenar çubuğu ve sekmeler
+hilal-tab-layout-title = Sekme düzeni
+hilal-tab-layout-desc = Sekmelerin gösterileceği yer
+hilal-tab-layout-vertical = Kenar çubuğu
+hilal-tab-layout-dual = İkisi de
+hilal-tab-layout-horizontal = Üst
+hilal-sidebar-density-title = Yoğunluk
+hilal-sidebar-density-desc = Sıkı düzen kenar çubuğuna daha çok sekme sığdırır
+hilal-sidebar-density-comfortable = Rahat
+hilal-sidebar-density-compact = Sıkı
+hilal-sidebar-footer-title = Kenar çubuğu düğmeleri
+hilal-sidebar-footer-desc = Kenar çubuğunun altında gösterilen kısayollar
+hilal-sidebar-footer-bookmarks = Yer imleri
+hilal-sidebar-footer-history = Geçmiş
+hilal-sidebar-footer-downloads = İndirilenler
+hilal-sidebar-footer-passwords = Parolalar
+hilal-sidebar-footer-privacy = Gizlilik ve güvenlik
+hilal-sidebar-footer-settings = Ayarlar

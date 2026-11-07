@@ -82,6 +82,82 @@
   </div>
 </groupbox>
 
+<!-- Group: Sidebar and tabs -->
+<groupbox id="hilalSidebarGroup" class="settings-group-card" data-category="paneHilal" hidden="true">
+  <div class="settings-group-header">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+      <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v12h5V6H4zm7 0v12h9V6h-9z"/>
+    </svg>
+    <html:h2 data-l10n-id="hilal-sidebar-header"/>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-row-text">
+      <span class="settings-row-title" data-l10n-id="hilal-tab-layout-title"/>
+      <span class="settings-row-desc" data-l10n-id="hilal-tab-layout-desc"/>
+    </div>
+    <html:m3e-segmented-button id="hilalTabLayout" data-pref="hilal.tabs.layoutMode" data-default="vertical">
+      <html:m3e-button-segment value="vertical">
+        <html:span data-l10n-id="hilal-tab-layout-vertical"/>
+      </html:m3e-button-segment>
+      <html:m3e-button-segment value="dual">
+        <html:span data-l10n-id="hilal-tab-layout-dual"/>
+      </html:m3e-button-segment>
+      <html:m3e-button-segment value="horizontal">
+        <html:span data-l10n-id="hilal-tab-layout-horizontal"/>
+      </html:m3e-button-segment>
+    </html:m3e-segmented-button>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-row-text">
+      <span class="settings-row-title" data-l10n-id="hilal-sidebar-density-title"/>
+      <span class="settings-row-desc" data-l10n-id="hilal-sidebar-density-desc"/>
+    </div>
+    <html:m3e-segmented-button id="hilalSidebarDensity" data-pref="hilal.sidebar.density" data-default="comfortable">
+      <html:m3e-button-segment value="comfortable">
+        <html:span data-l10n-id="hilal-sidebar-density-comfortable"/>
+      </html:m3e-button-segment>
+      <html:m3e-button-segment value="compact">
+        <html:span data-l10n-id="hilal-sidebar-density-compact"/>
+      </html:m3e-button-segment>
+    </html:m3e-segmented-button>
+  </div>
+
+  <div class="settings-row hilal-footer-row" style="border-bottom: none;">
+    <div class="settings-row-text">
+      <span class="settings-row-title" data-l10n-id="hilal-sidebar-footer-title"/>
+      <span class="settings-row-desc" data-l10n-id="hilal-sidebar-footer-desc"/>
+    </div>
+  </div>
+  <html:div id="hilalSidebarFooterChoices" class="hilal-footer-choices">
+    <html:label class="hilal-footer-choice">
+      <html:m3e-switch id="hilalSidebarFooter-bookmarks" data-pref="hilal.sidebar.footer.bookmarks" icons="both"></html:m3e-switch>
+      <html:span data-l10n-id="hilal-sidebar-footer-bookmarks"/>
+    </html:label>
+    <html:label class="hilal-footer-choice">
+      <html:m3e-switch id="hilalSidebarFooter-history" data-pref="hilal.sidebar.footer.history" icons="both"></html:m3e-switch>
+      <html:span data-l10n-id="hilal-sidebar-footer-history"/>
+    </html:label>
+    <html:label class="hilal-footer-choice">
+      <html:m3e-switch id="hilalSidebarFooter-downloads" data-pref="hilal.sidebar.footer.downloads" icons="both"></html:m3e-switch>
+      <html:span data-l10n-id="hilal-sidebar-footer-downloads"/>
+    </html:label>
+    <html:label class="hilal-footer-choice">
+      <html:m3e-switch id="hilalSidebarFooter-passwords" data-pref="hilal.sidebar.footer.passwords" icons="both"></html:m3e-switch>
+      <html:span data-l10n-id="hilal-sidebar-footer-passwords"/>
+    </html:label>
+    <html:label class="hilal-footer-choice">
+      <html:m3e-switch id="hilalSidebarFooter-privacy" data-pref="hilal.sidebar.footer.privacy" icons="both"></html:m3e-switch>
+      <html:span data-l10n-id="hilal-sidebar-footer-privacy"/>
+    </html:label>
+    <html:label class="hilal-footer-choice">
+      <html:m3e-switch id="hilalSidebarFooter-settings" data-pref="hilal.sidebar.footer.settings" icons="both"></html:m3e-switch>
+      <html:span data-l10n-id="hilal-sidebar-footer-settings"/>
+    </html:label>
+  </html:div>
+</groupbox>
+
 <!-- Group 3: Theme & Accent Color Customization -->
 <groupbox id="hilalThemeColorsGroup" class="settings-group-card" data-category="paneHilal" hidden="true">
   <div class="settings-group-header">
@@ -127,6 +203,50 @@
     </div>
   </vbox>
 
+</groupbox>
+
+<!-- Group 4: Automatic colors -->
+<groupbox id="hilalAutoColorsGroup" class="settings-group-card" data-category="paneHilal" hidden="true">
+  <div class="settings-group-header">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+      <path d="M7 14c-1.66 0-3 1.34-3 3 0 1.31-1.16 2-2 2 .92 1.22 2.49 2 4 2 2.21 0 4-1.79 4-4 0-1.66-1.34-3-3-3zm13.71-9.37-1.34-1.34a.996.996 0 0 0-1.41 0L9 12.25 11.75 15l8.96-8.96a.996.996 0 0 0 0-1.41z"/>
+    </svg>
+    <html:h2 data-l10n-id="hilal-auto-colors-header"/>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-row-text">
+      <span class="settings-row-title" data-l10n-id="hilal-auto-boost-title"/>
+      <span class="settings-row-desc" data-l10n-id="hilal-auto-boost-desc"/>
+    </div>
+    <html:m3e-segmented-button id="hilalAutoBoostMode">
+      <html:m3e-button-segment value="off">
+        <html:span data-l10n-id="hilal-auto-boost-off"/>
+      </html:m3e-button-segment>
+      <html:m3e-button-segment value="compatible">
+        <html:span data-l10n-id="hilal-auto-boost-compatible"/>
+      </html:m3e-button-segment>
+      <html:m3e-button-segment value="all">
+        <html:span data-l10n-id="hilal-auto-boost-all"/>
+      </html:m3e-button-segment>
+    </html:m3e-segmented-button>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-row-text">
+      <span class="settings-row-title" data-l10n-id="hilal-auto-boost-darken-title"/>
+      <span class="settings-row-desc" data-l10n-id="hilal-auto-boost-darken-desc"/>
+    </div>
+    <html:m3e-switch id="hilalAutoBoostDarken" icons="both"></html:m3e-switch>
+  </div>
+
+  <div class="settings-row" style="border-bottom: none;">
+    <div class="settings-row-text">
+      <span class="settings-row-title" data-l10n-id="hilal-follow-site-title"/>
+      <span class="settings-row-desc" data-l10n-id="hilal-follow-site-desc"/>
+    </div>
+    <html:m3e-switch id="hilalFollowSiteColor" icons="both"></html:m3e-switch>
+  </div>
 </groupbox>
 
 <!-- Group 5: Privacy Profiles -->

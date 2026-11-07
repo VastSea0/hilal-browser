@@ -2,24 +2,228 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/* The About dialog as a Material 3 Expressive surface. Firefox's markup and
+ * update logic stay; everything visual is set here. HilalShell.js copies the
+ * browser window's accent tokens onto this document when it opens. */
+@import url("chrome://browser/skin/hilal-m3-tokens.css");
+@import url("chrome://browser/skin/hilal-m3-firefox.css");
+
 :root {
-  /* Makes the macOS title bar match the dark dialog. */
-  color-scheme: dark;
+  color-scheme: light dark;
 }
 
 #aboutDialogContainer {
-  background-color: #0D1117;
-  color: #FFFFFF;
-  color-scheme: dark;
+  background-color: var(--surface-container);
+  color: var(--on-surface);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
 }
 
+#clientBox {
+  gap: 28px;
+  padding: 28px 28px 12px;
+}
+
+/* Logo on a large tonal tile */
+/* Firefox gives #leftBox flex="1"; the tile keeps a fixed size. */
+#leftBox {
+  flex: 0 0 168px !important;
+  width: 168px !important;
+  min-width: 168px !important;
+  max-width: 168px !important;
+  max-height: 168px !important;
+  height: 168px;
+  min-height: 168px !important;
+  margin: 0 !important;
+  border-radius: 0;
+  /* The pale crescent needs the darker primary in light mode */
+  background-color: light-dark(var(--primary), var(--primary-container));
+  /* M3 Expressive cookie shape */
+  mask-image: url("chrome://browser/content/hilal/shapes/cookie9.svg");
+  mask-size: 100% 100%;
+  background-size: 116px auto !important;
+  background-position: center !important;
+}
+
+/* Title as text, so it follows the theme colors */
 #rightBox {
-  background-size: auto 64px;
-  margin-inline: 30px;
-  padding-top: 96px;
+  flex: 1;
+  max-width: 460px;
+  margin: 0 !important;
+  padding-top: 0 !important;
+  background-image: none !important;
 }
 
+#rightBox::before {
+  content: "Hilal Browser";
+  display: block;
+  margin-bottom: 16px;
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  color: var(--on-surface);
+}
+
+#detailsBox {
+  gap: 8px;
+}
+
+/* Update status card */
+#updateBox {
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 !important;
+  padding: 16px;
+  border-radius: 24px;
+  background-color: var(--surface-container-high);
+}
+
+#updateInfo {
+  gap: 8px;
+}
+
+#updateDeck description {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--on-surface);
+}
+
+#updateBox button {
+  appearance: none;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 24px;
+  border: none;
+  border-radius: 20px;
+  background-color: var(--primary);
+  color: var(--on-primary);
+  font: inherit;
+  font-weight: 500;
+  transition: border-radius 300ms cubic-bezier(0.2, 0, 0, 1), background-color 150ms linear;
+}
+
+#updateBox button:hover {
+  background-color: color-mix(in srgb, var(--on-primary) 8%, var(--primary));
+}
+
+#updateBox button:active {
+  border-radius: 12px;
+}
+
+/* Version as a tonal chip, release notes next to it */
+#version {
+  flex: none !important;
+  width: fit-content;
+  margin: 0 !important;
+  padding: 4px 12px;
+  border-radius: 8px;
+  background-color: var(--secondary-container);
+  color: var(--on-secondary-container) !important;
+  font-size: 13px;
+  font-weight: 500 !important;
+  user-select: text;
+}
+
+#updateInfo > hbox {
+  justify-content: flex-start;
+  align-items: center !important;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#currentChannelText {
+  margin: 4px 4px 0 !important;
+  font-size: 12px;
+  color: var(--on-surface-variant);
+}
+
+#currentChannel {
+  color: var(--on-surface);
+  font-weight: 600;
+}
+
+/* Links in running text */
+.text-link,
+.text-link:visited {
+  color: var(--primary) !important;
+  text-decoration: none !important;
+  font-weight: 500;
+}
+
+.text-link:hover {
+  text-decoration: underline !important;
+}
+
+/* Help and feedback as tonal buttons */
+#updateInfo > .text-blurb {
+  display: flex;
+  gap: 8px;
+  margin: 0 !important;
+}
+
+#updateInfo > .text-blurb > .text-link {
+  margin: 0 !important;
+  padding: 6px 14px;
+  border-radius: 16px;
+  background-color: var(--secondary-container);
+  color: var(--on-secondary-container) !important;
+  font-size: 13px;
+}
+
+#updateInfo > .text-blurb > .text-link:hover {
+  text-decoration: none !important;
+  background-color: color-mix(in srgb, var(--on-secondary-container) 8%, var(--secondary-container));
+}
+
+/* About Hilal and how to help, on a card */
+#communityDesc,
+#contributeDesc {
+  margin: 0 !important;
+  padding: 14px 16px;
+  background-color: var(--surface-container-high);
+  color: var(--on-surface-variant);
+}
+
+#communityDesc {
+  margin-top: 8px !important;
+  border-radius: 24px 24px 6px 6px;
+}
+
+#contributeDesc {
+  margin-top: 2px !important;
+  border-radius: 6px 6px 24px 24px;
+}
+
+/* Footer: text buttons */
 #bottomBox {
-  background-color: hsla(200, 30%, 8%, 0.7);
-  padding: 15px 10px 15px;
+  padding: 4px 16px 16px !important;
+  min-height: 0 !important;
+  background: none !important;
+  border: none !important;
+}
+
+#bottomBox > hbox {
+  gap: 4px;
+}
+
+.bottom-link {
+  margin: 0 !important;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.bottom-link:hover {
+  text-decoration: none !important;
+  background-color: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+#trademark {
+  margin-top: 4px !important;
+  font-size: 11px;
+  color: var(--on-surface-variant);
+  text-align: center;
 }

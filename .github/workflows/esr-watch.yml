@@ -1,0 +1,65 @@
+name: ESR watch
+
+# ESR point releases carry Mozilla's security fixes, so Hilal should move to
+# each one as soon as it is out. Once a day this checks for a newer point
+# release of the pinned ESR line. When there is one, it pushes the bump to an
+# esr/<version> branch, builds and tests that branch through ci.yml, and opens
+# an issue a maintainer closes by merging the branch into main.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+  issues: write
+
+concurrency:
+  group: esr-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Look for a newer ESR point release
+        id: bump
+        run: echo "version=$(scripts/ci/esr-bump.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: Push the bump and start its build
+        if: steps.bump.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          branch="esr/$VERSION"
+          title="Move to Firefox ESR $VERSION"
+          if git ls-remote --exit-code origin "refs/heads/$branch" >/dev/null; then
+            echo "$branch already exists."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git commit -am "$title"
+          git push origin "$branch"
+
+          # Pushes made with GITHUB_TOKEN start no workflows; dispatches do.
+          gh workflow run verify-patches.yml --ref "$branch" || true
+          gh workflow run ci.yml --ref "$branch" -f publish_nightly=false
+
+          gh issue create --title "$title" --body "$(cat <<EOF
+          Mozilla released Firefox ESR $VERSION, which carries security fixes.
+
+          The branch \`$branch\` moves \`upstream.lock\` to it. Its build and UI tests run in [CI](https://github.com/$GITHUB_REPOSITORY/actions/workflows/ci.yml?query=branch%3A${branch//\//%2F}).
+
+          - If CI is green, merge it: \`git fetch origin && git merge --ff-only origin/$branch && git push\`, then delete the branch.
+          - If a patch no longer applies, follow docs/UPSTREAM-SYNC.md on that branch.
+          EOF
+          )"

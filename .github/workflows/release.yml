@@ -78,8 +78,10 @@ jobs:
           cp artifacts/package-linux/*.linux-*.tar.xz "dist/Hilal-$v-linux-x86_64.tar.xz"
           cp artifacts/package-macos-signed/*.dmg "dist/Hilal-Browser-$TAG-macOS.dmg"
           cp artifacts/package-windows/*.win64.zip "dist/Hilal-$v-win64.zip"
-          inst="$(ls artifacts/package-windows/*.installer.exe 2>/dev/null | head -n1 || true)"
-          [ -n "$inst" ] && cp "$inst" "dist/Hilal-$v-win64-setup.exe"
+          # Every package a user can pick must be there; a release without the
+          # Windows installer or the AppImage is not shipped.
+          cp artifacts/package-windows/*.installer.exe "dist/Hilal-$v-win64-setup.exe"
+          cp artifacts/package-appimage/Hilal-x86_64.AppImage "dist/Hilal-$v-x86_64.AppImage"
 
           mars=()
           for pair in linux:package-linux/hilal-linux macos:package-macos-signed/hilal-macos windows:package-windows/hilal-windows; do
@@ -94,7 +96,8 @@ jobs:
               cp "$src" "dist/$dest"
               mars+=(--mar "$platform=dist/$dest" --mar-url "$platform=https://github.com/$GH_REPO/releases/download/$TAG/$dest")
             else
-              echo "::warning::No signed $platform update; is HILAL_MAR_SIGNING_KEY set?"
+              echo "::error::No signed $platform update; is HILAL_MAR_SIGNING_KEY set?"
+              exit 1
             fi
           done
 
@@ -129,7 +132,12 @@ jobs:
           # Not marked as a pre-release even for alphas: the update server
           # skips pre-releases, which is how the nightly stays out of updates.
           if ! gh release view "$TAG" >/dev/null 2>&1; then
-            gh release create "$TAG" --draft --title "Hilal Browser $TAG" --generate-notes
+            # Compare with the previous desktop release, not whichever tag
+            # (android-ota, mobile-v*) happens to be newest.
+            prev="$(gh release list -L 50 --json tagName -q '.[].tagName' | grep -E '^v[0-9]' | grep -vx "$TAG" | head -n1 || true)"
+            gh release create "$TAG" --draft --title "Hilal Browser $TAG" \
+              --notes-file .github/release-notes-header.md --generate-notes \
+              ${prev:+--notes-start-tag "$prev"}
           fi
           gh release upload "$TAG" dist/* --clobber
           gh release edit "$TAG" --draft=false

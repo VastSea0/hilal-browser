@@ -1,20 +1,24 @@
 diff --git a/docshell/base/BrowsingContext.h b/docshell/base/BrowsingContext.h
-index 7796a6a12c8e..960bb6752068 100644
+index 55ef835c24db..6f3eb3978fe1 100644
 --- a/docshell/base/BrowsingContext.h
 +++ b/docshell/base/BrowsingContext.h
-@@ -265,6 +265,11 @@ struct EmbedderColorSchemes {
-   FIELD(HistoryEntryCount, uint32_t)                                          \
-   FIELD(HasRestoreData, bool)                                                 \
-   FIELD(SessionStoreEpoch, uint32_t)                                          \
-+  /* Hilal Boosts: accent color, complementary hue rotation and smart       \
-+   * invert, read by HilalBoostsBackend when resolving page colors. */      \
-+  FIELD(HilalBoostsData, nscolor)                                             \
-+  FIELD(HilalBoostsComplementaryRotation, float)                              \
-+  FIELD(IsHilalBoostsInverted, bool)                                          \
-   /* Whether we can execute scripts in this BrowsingContext. Has no effect    \
-    * unless scripts are also allowed in the parent WindowContext. */          \
-   FIELD(AllowJavascript, bool)                                                \
-@@ -671,6 +676,11 @@ class BrowsingContext : public nsILoadContext, public nsWrapperCache {
+@@ -313,6 +313,15 @@ struct EmbedderColorSchemes {
+         {.mTopOnly = true, .mCanSet = CanSet::Unrestricted})                   \
+   FIELD(SessionStoreEpoch, uint32_t,                                           \
+         {.mTopOnly = true, .mCanSet = CanSet::ParentOnly})                     \
++  /* Hilal Boosts: accent color, complementary hue rotation and smart        \
++   * invert, read by HilalBoostsBackend when resolving page colors. A tab's    \
++   * content process applies its own boost, so content may set them. */       \
++  FIELD(HilalBoostsData, nscolor,                                              \
++        {.mTopOnly = true, .mCanSet = CanSet::Unrestricted})                   \
++  FIELD(HilalBoostsComplementaryRotation, float,                               \
++        {.mTopOnly = true, .mCanSet = CanSet::Unrestricted})                   \
++  FIELD(IsHilalBoostsInverted, bool,                                           \
++        {.mTopOnly = true, .mCanSet = CanSet::Unrestricted})                   \
+   /* Whether we can execute scripts in this BrowsingContext. Has no effect     \
+    * unless scripts are also allowed in the parent WindowContext. */           \
+   FIELD(AllowJavascript, bool,                                                 \
+@@ -726,6 +735,11 @@ class BrowsingContext : public nsILoadContext, public nsWrapperCache {
  
    bool FullscreenAllowed() const;
  
@@ -26,24 +30,10 @@ index 7796a6a12c8e..960bb6752068 100644
    float FullZoom() const { return GetFullZoom(); }
    float TextZoom() const { return GetTextZoom(); }
  
-@@ -1290,6 +1300,23 @@ class BrowsingContext : public nsILoadContext, public nsWrapperCache {
-   }
+@@ -1348,6 +1362,9 @@ class BrowsingContext : public nsILoadContext, public nsWrapperCache {
+   void DidSet(FieldIndex<I>, T&& aOldValue) {}
  
    void DidSet(FieldIndex<IDX_SessionStoreEpoch>, uint32_t aOldValue);
-+  // A tab's content process applies its own boost, so these may be set from
-+  // content, but only on the top-level context the backend reads them from.
-+  bool CanSet(FieldIndex<IDX_HilalBoostsData>, const nscolor&,
-+              ContentParent*) {
-+    return IsTop();
-+  }
-+  bool CanSet(FieldIndex<IDX_HilalBoostsComplementaryRotation>, const float&,
-+              ContentParent*) {
-+    return IsTop();
-+  }
-+  bool CanSet(FieldIndex<IDX_IsHilalBoostsInverted>, const bool&,
-+              ContentParent*) {
-+    return IsTop();
-+  }
 +  void DidSet(FieldIndex<IDX_HilalBoostsData>, nscolor aOldValue);
 +  void DidSet(FieldIndex<IDX_HilalBoostsComplementaryRotation>, float aOldValue);
 +  void DidSet(FieldIndex<IDX_IsHilalBoostsInverted>, bool aOldValue);
@@ -132,10 +122,10 @@ index 55f874429fd8..f0a410b45abd 100644
  
  sRGBColor ToSRGBColor(const StyleAbsoluteColor&);
 diff --git a/image/AutoRestoreSVGState.h b/image/AutoRestoreSVGState.h
-index de4c6e0f0044..78fb3446f357 100644
+index 984cfaa782a6..cbaa4fe6c259 100644
 --- a/image/AutoRestoreSVGState.h
 +++ b/image/AutoRestoreSVGState.h
-@@ -49,6 +49,9 @@ class MOZ_STACK_CLASS AutoRestoreSVGState final {
+@@ -52,6 +52,9 @@ class MOZ_STACK_CLASS AutoRestoreSVGState final {
          }
          return dom::PrefersColorSchemeOverride::None;
        }());
@@ -144,9 +134,9 @@ index de4c6e0f0044..78fb3446f357 100644
 +                               aSVGContext.GetHilalBoostsInverted());
      }
  
-     aSVGDocumentWrapper->mIsDrawing = true;
+     // Set context paint (if specified) on the document:
 diff --git a/layout/base/PresShell.cpp b/layout/base/PresShell.cpp
-index f5d4d0963ab8..89b720bf79be 100644
+index d6d77b6105ae..cfac7777b943 100644
 --- a/layout/base/PresShell.cpp
 +++ b/layout/base/PresShell.cpp
 @@ -136,6 +136,7 @@
@@ -157,7 +147,7 @@ index f5d4d0963ab8..89b720bf79be 100644
  #include "nsAnimationManager.h"
  #include "nsAutoLayoutPhase.h"
  #include "nsCOMArray.h"
-@@ -5659,7 +5660,8 @@ nscolor PresShell::GetDefaultBackgroundColorToDraw() const {
+@@ -5656,7 +5657,8 @@ nscolor PresShell::GetDefaultBackgroundColorToDraw() const {
    if (!mPresContext) {
      return NS_RGB(255, 255, 255);
    }
@@ -168,10 +158,10 @@ index f5d4d0963ab8..89b720bf79be 100644
  
  void PresShell::UpdateCanvasBackground() {
 diff --git a/layout/base/nsPresContext.h b/layout/base/nsPresContext.h
-index 81a9b2938022..5e83694454dc 100644
+index 68726c6802ee..e5f9d4cfa019 100644
 --- a/layout/base/nsPresContext.h
 +++ b/layout/base/nsPresContext.h
-@@ -594,6 +594,22 @@ class nsPresContext : public nsISupports,
+@@ -593,6 +593,22 @@ class nsPresContext : public nsISupports,
     */
    void SetColorSchemeOverride(mozilla::dom::PrefersColorSchemeOverride);
  
@@ -194,7 +184,7 @@ index 81a9b2938022..5e83694454dc 100644
    /**
     * Sets the effective link parameters overrides, and invalidate stuff as
     * needed.
-@@ -1444,6 +1460,11 @@ class nsPresContext : public nsISupports,
+@@ -1439,6 +1455,11 @@ class nsPresContext : public nsISupports,
    mozilla::StyleForcedColors mForcedColors;
    mozilla::StyleLinkParameters mLinkParameters;
  
@@ -254,7 +244,7 @@ index 1b5c87856611..723a75f7652e 100644
        LookAndFeel::ColorID colorID;
        if (selectionValue == nsISelectionController::SELECTION_ON) {
 diff --git a/layout/generic/nsIFrame.h b/layout/generic/nsIFrame.h
-index 9b2f05208aa7..91507b94fe0b 100644
+index 257cc037eab7..3af30803cf65 100644
 --- a/layout/generic/nsIFrame.h
 +++ b/layout/generic/nsIFrame.h
 @@ -1010,7 +1010,7 @@ class nsIFrame : public nsQueryFrame {
@@ -280,10 +270,10 @@ index ea3ad969a9dc..bb82496a10ec 100644
        nsLayoutUtils::GetInflatedFontMetricsForFrame(this);
  
 diff --git a/layout/generic/nsTextFrame.cpp b/layout/generic/nsTextFrame.cpp
-index 1c4f5c614d58..79160bf5ab5b 100644
+index 402600f70f4a..c7d0619ce643 100644
 --- a/layout/generic/nsTextFrame.cpp
 +++ b/layout/generic/nsTextFrame.cpp
-@@ -6386,7 +6386,7 @@ void nsTextFrame::DrawSelectionDecorations(
+@@ -6396,7 +6396,7 @@ void nsTextFrame::DrawSelectionDecorations(
            computedStyleFromPseudo->StyleTextReset()->mTextDecorationStyle;
        params.color =
            computedStyleFromPseudo->StyleTextReset()
@@ -970,7 +960,7 @@ index b1f811989697..5f5b92e70edb 100644
  
  }  // namespace mozilla
 diff --git a/layout/svg/SVGTextFrame.cpp b/layout/svg/SVGTextFrame.cpp
-index c09ea3ee85d2..86de2edb1d69 100644
+index 90d288158cd9..614832daa0e5 100644
 --- a/layout/svg/SVGTextFrame.cpp
 +++ b/layout/svg/SVGTextFrame.cpp
 @@ -2665,9 +2665,9 @@ void SVGTextDrawPathCallbacks::ApplyOpacity(
@@ -986,7 +976,7 @@ index c09ea3ee85d2..86de2edb1d69 100644
    }
    aColor.a *= SVGUtils::GetOpacity(aOpacity, mContextPaint);
  }
-@@ -5090,8 +5090,8 @@ bool SVGTextFrame::ShouldRenderAsPath(nsTextFrame* aFrame,
+@@ -5091,8 +5091,8 @@ bool SVGTextFrame::ShouldRenderAsPath(nsTextFrame* aFrame,
    // It's possible nsTextFrame will support non-opaque shadows in the future,
    // in which case this test can be removed.
    if (style->mFill.kind.IsColor() && aFrame->StyleText()->HasTextShadow() &&
@@ -1071,10 +1061,10 @@ index a4367a69d488..f0fefa994c8a 100644
    static void MakeFillPatternFor(nsIFrame* aFrame, gfxContext* aContext,
                                   GeneralPattern* aOutPattern,
 diff --git a/layout/tables/nsTableFrame.cpp b/layout/tables/nsTableFrame.cpp
-index 64876e5cc3be..a8a442955973 100644
+index 7c6c774a93d2..6c194476eaec 100644
 --- a/layout/tables/nsTableFrame.cpp
 +++ b/layout/tables/nsTableFrame.cpp
-@@ -4076,7 +4076,7 @@ static void GetColorAndStyle(const nsIFrame* aFrame, WritingMode aTableWM,
+@@ -4090,7 +4090,7 @@ static void GetColorAndStyle(const nsIFrame* aFrame, WritingMode aTableWM,
      return;
    }
    *aColor = aFrame->Style()->GetVisitedDependentColor(
@@ -1116,10 +1106,10 @@ index f88360d5a787..1b1df582a113 100644
        this, *fontMet, &aRenderingContext, text.get(), text.Length(),
        textRect.TopLeft() + nsPoint(0, baseline), cellContext);
 diff --git a/modules/libpref/init/StaticPrefList.yaml b/modules/libpref/init/StaticPrefList.yaml
-index 1964b95528db..b372d29784b9 100644
+index ce7b15fbe97b..ad6f8b068e61 100644
 --- a/modules/libpref/init/StaticPrefList.yaml
 +++ b/modules/libpref/init/StaticPrefList.yaml
-@@ -8724,6 +8724,23 @@
+@@ -8706,6 +8706,23 @@
    value: 0
    mirror: always
  

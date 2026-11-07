@@ -201,9 +201,15 @@ pref("hilal.workspaces.remember_host_mapping", false);
 // First-run toolbar initialization
 pref("hilal.toolbar.initialized", false);
 
-// Site Customizer and dynamic UI tinting preferences
-pref("hilal.boosts.auto_palette.enabled", false);
-pref("hilal.boosts.browser_ui.enabled", false);
+// Automatic boosts for sites without a boost of their own:
+// "off", "all", or "compatible" (skips pages that style themselves dark).
+pref("hilal.boosts.auto.mode", "off");
+// Comma separated domains automatic boosts leave alone.
+pref("hilal.boosts.auto.excluded", "");
+// Automatic boosts turn light pages dark while the browser is dark.
+pref("hilal.boosts.auto.darken", true);
+// Take the selected page's accent color as the browser's accent.
+pref("hilal.theme.followSite", false);
 
 // Theme and accent color preferences ("workspace" | "global" | "boosts")
 pref("hilal.theme.accentMode", "workspace");
@@ -217,3 +223,12 @@ pref("browser.settings-redesign.promo.dismissed", true);
 pref("hilal.boosts.enabled", true);
 pref("hilal.boosts.dissolve-on-zap", true);
 pref("hilal.boosts.custom-fonts", false);
+
+// Buttons at the bottom of the sidebar.
+pref("hilal.sidebar.density", "comfortable");
+pref("hilal.sidebar.footer.bookmarks", true);
+pref("hilal.sidebar.footer.history", true);
+pref("hilal.sidebar.footer.downloads", true);
+pref("hilal.sidebar.footer.passwords", false);
+pref("hilal.sidebar.footer.privacy", false);
+pref("hilal.sidebar.footer.settings", true);

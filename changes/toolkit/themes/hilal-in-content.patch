@@ -1,0 +1,46 @@
+diff --git a/toolkit/themes/shared/in-content/info-pages.css b/toolkit/themes/shared/in-content/info-pages.css
+--- a/toolkit/themes/shared/in-content/info-pages.css
++++ b/toolkit/themes/shared/in-content/info-pages.css
+@@ -3,6 +3,7 @@
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+ @import url("chrome://global/skin/in-content/common.css");
++@import url("chrome://global/skin/hilal-in-content.css");
+ 
+ :root {
+   --in-content-container-min-width: 13em;
+diff --git a/toolkit/mozapps/extensions/content/aboutaddons.css b/toolkit/mozapps/extensions/content/aboutaddons.css
+--- a/toolkit/mozapps/extensions/content/aboutaddons.css
++++ b/toolkit/mozapps/extensions/content/aboutaddons.css
+@@ -1,6 +1,8 @@
+ /* This Source Code Form is subject to the terms of the Mozilla Public
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
++
++@import url("chrome://global/skin/hilal-in-content.css");
+ 
+ :root {
+   --addon-icon-size: 32px;
+diff --git a/toolkit/themes/shared/desktop-jar.inc.mn b/toolkit/themes/shared/desktop-jar.inc.mn
+--- a/toolkit/themes/shared/desktop-jar.inc.mn
++++ b/toolkit/themes/shared/desktop-jar.inc.mn
+@@ -17,6 +17,7 @@
+   skin/classic/global/aboutNetError.css                    (../../shared/aboutNetError.css)
+   skin/classic/global/hilal-error-pages.css                (../../shared/hilal-error-pages.css)
+   skin/classic/global/hilal-shape-cookie9.svg              (../../shared/hilal-shape-cookie9.svg)
++  skin/classic/global/hilal-in-content.css                 (../../shared/hilal-in-content.css)
+   skin/classic/global/aboutNetworking.css                  (../../shared/aboutNetworking.css)
+   skin/classic/global/aboutReader.css                      (../../shared/aboutReader.css)
+   skin/classic/global/aboutLicense.css                     (../../shared/aboutLicense.css)
+diff --git a/browser/components/aboutlogins/content/common.css b/browser/components/aboutlogins/content/common.css
+--- a/browser/components/aboutlogins/content/common.css
++++ b/browser/components/aboutlogins/content/common.css
+@@ -1,6 +1,8 @@
+ /* This Source Code Form is subject to the terms of the Mozilla Public
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
++
++@import url("chrome://global/skin/hilal-in-content.css");
+ 
+ /* [hidden] isn't applying to elements in Shadow DOM. */
+ :host([hidden]),

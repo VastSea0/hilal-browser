@@ -3,7 +3,7 @@
 /* 1. Complete wipe of Firefox legacy XUL toolbars */
 #navigator-toolbox,
 #sidebar-container,
-#sidebar-box,
+#sidebar-box[hidden],
 #sidebar-splitter,
 #sidebar-launcher-splitter {
   display: none !important;
@@ -1504,9 +1504,9 @@ browser[type="content"],
 #hilal-ws-dialog {
   background: var(--md-sys-color-surface-container-high, #21252d) !important;
   color: var(--md-sys-color-on-surface, #f3f4f6) !important;
-  border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.14)) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+  border: none !important;
+  border-radius: 28px !important;
+  box-shadow: var(--md-sys-elevation-3) !important;
   padding: 24px !important;
   width: 440px !important;
   max-width: 90vw !important;
@@ -1514,21 +1514,19 @@ browser[type="content"],
   flex-direction: column !important;
   gap: 14px !important;
   box-sizing: border-box !important;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
 #hilal-ws-dialog h3 {
   margin: 0 !important;
-  font-size: 18px !important;
-  font-weight: 700 !important;
+  font-size: 24px !important;
+  font-weight: 400 !important;
   color: var(--md-sys-color-on-surface, #ffffff) !important;
 }
 
 #hilal-ws-dialog label {
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1px !important;
   color: var(--md-sys-color-on-surface-variant, #c3c7cf) !important;
 }
 
@@ -1536,9 +1534,9 @@ browser[type="content"],
   appearance: none !important;
   background: var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.08)) !important;
   color: var(--md-sys-color-on-surface, #ffffff) !important;
-  border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.16)) !important;
-  border-radius: 10px !important;
-  padding: 10px 14px !important;
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  padding: 10px 16px !important;
   font-size: 14px !important;
   outline: none !important;
   width: 100% !important;
@@ -1548,7 +1546,7 @@ browser[type="content"],
 
 #hilal-ws-name-input:focus {
   border-color: var(--md-sys-color-primary, #af51f5) !important;
-  box-shadow: 0 0 0 2px var(--md-sys-color-primary, #af51f5) !important;
+  box-shadow: inset 0 0 0 1px var(--md-sys-color-primary, #af51f5) !important;
 }
 
 #hilal-ws-name-input[aria-invalid] {
@@ -1562,9 +1560,9 @@ browser[type="content"],
   max-height: 130px !important;
   overflow-y: auto !important;
   padding: 8px !important;
-  background: var(--md-sys-color-surface-container, rgba(0, 0, 0, 0.25)) !important;
-  border-radius: 12px !important;
-  border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.08)) !important;
+  background: var(--md-sys-color-surface-container-low, rgba(0, 0, 0, 0.25)) !important;
+  border-radius: 16px !important;
+  border: none !important;
   scrollbar-width: thin !important;
 }
 
@@ -1579,7 +1577,7 @@ browser[type="content"],
   appearance: none !important;
   border: 1px solid transparent !important;
   background: transparent !important;
-  border-radius: 8px !important;
+  border-radius: 12px !important;
   cursor: pointer !important;
   width: 38px !important;
   height: 38px !important;
@@ -1599,7 +1597,8 @@ browser[type="content"],
 
 .hilal-ws-emoji-choice.hilal-ws-choice-selected {
   background: var(--md-sys-color-primary-container, rgba(175, 81, 245, 0.25)) !important;
-  border-color: var(--md-sys-color-primary, #af51f5) !important;
+  border-color: transparent !important;
+  border-radius: 16px !important;
 }
 
 .hilal-ws-color-choice {
@@ -1623,8 +1622,9 @@ browser[type="content"],
 }
 
 .hilal-ws-color-choice.hilal-ws-choice-selected {
-  border-color: var(--md-sys-color-primary, #af51f5) !important;
-  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: 0 0 0 2px var(--md-sys-color-on-surface, #fff) !important;
 }
 
 #hilal-ws-dialog-actions {
@@ -1946,4 +1946,470 @@ browser[type="content"],
 #hilal-toast.visible {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+/* Color panel (palette button): Material 3 Expressive grouped cards */
+#hilal-color-panel {
+  position: fixed;
+  z-index: 100003;
+  width: 312px;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 24px;
+  background: var(--surface-container);
+  color: var(--on-surface);
+  box-shadow: var(--md-sys-elevation-3);
+  font-family: var(--font-sans);
+  animation: hcp-in 250ms var(--md-sys-motion-easing-emphasized);
+}
+
+@keyframes hcp-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+}
+
+#hilal-color-panel i {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+}
+
+#hilal-color-panel .hcp-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: var(--surface-container-high);
+}
+
+#hilal-color-panel .hcp-card:first-child {
+  border-start-start-radius: 18px;
+  border-start-end-radius: 18px;
+}
+
+#hilal-color-panel .hcp-card:last-child {
+  border-end-start-radius: 18px;
+  border-end-end-radius: 18px;
+}
+
+#hilal-color-panel .hcp-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--on-surface);
+}
+
+#hilal-color-panel .hcp-swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  justify-items: center;
+}
+
+#hilal-color-panel .hcp-swatch {
+  appearance: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--hcp-swatch);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-radius 200ms var(--md-sys-motion-easing-emphasized),
+              transform 200ms var(--md-sys-motion-easing-emphasized);
+}
+
+#hilal-color-panel .hcp-swatch:hover {
+  transform: scale(1.06);
+}
+
+/* The selected color morphs into a rounded square, as M3 Expressive does */
+#hilal-color-panel .hcp-swatch[aria-checked="true"] {
+  border-radius: 12px;
+  box-shadow: 0 0 0 2px var(--surface-container-high), 0 0 0 4px var(--on-surface);
+}
+
+#hilal-color-panel .hcp-swatch > i {
+  opacity: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+#hilal-color-panel .hcp-swatch[aria-checked="true"] > i {
+  opacity: 1;
+}
+
+#hilal-color-panel .hcp-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--on-surface-variant);
+}
+
+#hilal-color-panel .hcp-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+#hilal-color-panel .hcp-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#hilal-color-panel .hcp-rows[hidden] {
+  display: none;
+}
+
+#hilal-color-panel .hcp-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 4px 0;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+#hilal-color-panel .hcp-row-icon {
+  color: var(--on-surface-variant);
+}
+
+#hilal-color-panel .hcp-row-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+#hilal-color-panel .hcp-row-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+#hilal-color-panel .hcp-row-desc {
+  font-size: 12px;
+  color: var(--on-surface-variant);
+}
+
+/* M3 switch */
+#hilal-color-panel .hcp-switch {
+  appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 26px;
+  margin: 0;
+  border: 2px solid var(--outline);
+  border-radius: 13px;
+  background: var(--surface-container-highest);
+  cursor: pointer;
+  transition: background-color 200ms, border-color 200ms;
+}
+
+#hilal-color-panel .hcp-switch::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--outline);
+  transform: translateY(-50%);
+  transition: left 250ms var(--md-sys-motion-easing-emphasized),
+              width 250ms var(--md-sys-motion-easing-emphasized),
+              height 250ms var(--md-sys-motion-easing-emphasized),
+              background-color 200ms;
+}
+
+#hilal-color-panel .hcp-switch:checked {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+#hilal-color-panel .hcp-switch:checked::before {
+  left: 20px;
+  width: 18px;
+  height: 18px;
+  background: var(--on-primary);
+}
+
+/* M3 Expressive connected button group */
+#hilal-color-panel .hcp-segmented {
+  display: flex;
+  gap: 2px;
+}
+
+#hilal-color-panel .hcp-segment {
+  appearance: none;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 6px;
+  background: var(--surface-container-highest);
+  color: var(--on-surface);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-radius 200ms var(--md-sys-motion-easing-emphasized),
+              background-color 200ms;
+}
+
+#hilal-color-panel .hcp-segment:first-child {
+  border-start-start-radius: 18px;
+  border-end-start-radius: 18px;
+}
+
+#hilal-color-panel .hcp-segment:last-child {
+  border-start-end-radius: 18px;
+  border-end-end-radius: 18px;
+}
+
+#hilal-color-panel .hcp-segment > i {
+  display: none;
+  font-size: 18px;
+}
+
+#hilal-color-panel .hcp-segment[aria-checked="true"] {
+  border-radius: 18px;
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+#hilal-color-panel .hcp-segment[aria-checked="true"] > i {
+  display: inline;
+}
+
+/* Hilal's main menu: the same grouped cards as the color panel */
+#hilal-app-menu {
+  position: fixed;
+  z-index: 100003;
+  width: 300px;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 6px;
+  border-radius: 24px;
+  background: var(--surface-container);
+  color: var(--on-surface);
+  box-shadow: var(--md-sys-elevation-3);
+  font-family: var(--font-sans);
+  animation: hcp-in 250ms var(--md-sys-motion-easing-emphasized);
+}
+
+#hilal-app-menu i {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+}
+
+#hilal-app-menu .ham-page {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#hilal-app-menu .ham-enter {
+  animation: ham-slide 250ms var(--md-sys-motion-easing-emphasized);
+}
+
+#hilal-app-menu .ham-enter-back {
+  animation: ham-slide-back 250ms var(--md-sys-motion-easing-emphasized);
+}
+
+@keyframes ham-slide {
+  from { opacity: 0; transform: translateX(24px); }
+}
+
+@keyframes ham-slide-back {
+  from { opacity: 0; transform: translateX(-24px); }
+}
+
+#hilal-app-menu .ham-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#hilal-app-menu .ham-row {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    background-color 150ms linear,
+    border-radius 300ms var(--md-sys-motion-easing-emphasized);
+}
+
+#hilal-app-menu .ham-group > .ham-row:first-child {
+  border-start-start-radius: 18px;
+  border-start-end-radius: 18px;
+}
+
+#hilal-app-menu .ham-group > .ham-row:last-child {
+  border-end-start-radius: 18px;
+  border-end-end-radius: 18px;
+}
+
+#hilal-app-menu button.ham-row:hover:not([disabled]),
+#hilal-app-menu button.ham-row:focus-visible {
+  background: color-mix(in srgb, var(--on-surface) 8%, var(--surface-container-high));
+  outline: none;
+}
+
+/* M3 Expressive: a pressed row rounds into a pill */
+#hilal-app-menu button.ham-row:active:not([disabled]) {
+  background: color-mix(in srgb, var(--on-surface) 12%, var(--surface-container-high));
+  border-radius: 20px;
+  transition-duration: 150ms, 150ms;
+}
+
+#hilal-app-menu .ham-row[disabled] {
+  opacity: 0.38;
+  cursor: default;
+}
+
+#hilal-app-menu .ham-icon,
+#hilal-app-menu .ham-chevron {
+  color: var(--on-surface-variant);
+}
+
+#hilal-app-menu .ham-label {
+  flex: 1;
+  min-width: 0;
+  /* Room for glyphs that reach past the text box, so clipping for the
+     ellipsis does not cut the first letter. */
+  padding-inline: 2px;
+  margin-inline: -2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#hilal-app-menu .ham-key {
+  color: var(--on-surface-variant);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+#hilal-app-menu .ham-zoom {
+  gap: 4px;
+  cursor: default;
+}
+
+#hilal-app-menu .ham-zoom > .ham-label {
+  margin-inline-start: 8px;
+}
+
+#hilal-app-menu .ham-icon-button {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--on-surface);
+  cursor: pointer;
+}
+
+#hilal-app-menu .ham-icon-button:hover {
+  background: color-mix(in srgb, var(--on-surface) 10%, transparent);
+}
+
+#hilal-app-menu .ham-zoom-value {
+  appearance: none;
+  min-width: 56px;
+  height: 32px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 16px;
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#hilal-app-menu .ham-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 2px;
+}
+
+#hilal-app-menu .ham-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+#PanelUI-menu-button[open] {
+  background-color: color-mix(in srgb, var(--on-surface) 12%, transparent) !important;
+}
+
+/* Exit animations for Hilal's panels */
+:is(#hilal-app-menu, #hilal-color-panel)[closing] {
+  animation: hilal-panel-out 180ms cubic-bezier(0.3, 0, 0.8, 0.15) forwards;
+  pointer-events: none;
+}
+
+@keyframes hilal-panel-out {
+  to { opacity: 0; transform: translateY(-6px) scale(0.96); }
+}
+
+:is(#hilal-app-menu, #hilal-color-panel) {
+  transform-origin: top right;
+}
+
+:is(#hilal-app-menu .ham-icon-button, #hilal-app-menu .ham-zoom-value, #hilal-color-panel .hcp-segment) {
+  transition: background-color 150ms linear, transform 150ms var(--md-sys-motion-easing-emphasized);
+}
+
+:is(#hilal-app-menu .ham-icon-button, #hilal-app-menu .ham-zoom-value):active {
+  transform: scale(0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(#hilal-app-menu, #hilal-color-panel, #hilal-app-menu .ham-page) {
+    animation: none !important;
+  }
 }

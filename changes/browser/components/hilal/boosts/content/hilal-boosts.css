@@ -929,3 +929,37 @@ button {
     mask-composite: exclude;
   }
 }
+
+/* "Color the browser" row in the Colors card */
+
+.hb-switch-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px 16px;
+  border-radius: 20px;
+  background: var(--hb-surface-high);
+  color: var(--hb-on-surface);
+  cursor: pointer;
+}
+
+.hb-switch-row:has(.hb-switch:disabled) {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.hb-switch-row-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.hb-switch-row-desc {
+  color: var(--hb-on-surface-variant);
+  font-size: 12px;
+  font-weight: 400;
+}

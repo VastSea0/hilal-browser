@@ -1,0 +1,212 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*
+ * The Library window (bookmarks, history and downloads) in Hilal's Material
+ * 3 Expressive style: a navigation list on a tonal surface and the content
+ * on a large rounded card. HilalShell.js adds this sheet, the Material
+ * tokens and hilal-m3-firefox.css to the window and copies the browser
+ * window's accent tokens onto it.
+ */
+
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+@namespace html url("http://www.w3.org/1999/xhtml");
+
+#places {
+  background-color: var(--surface-container-low) !important;
+  color: var(--on-surface) !important;
+  font-family: var(--font-sans);
+}
+
+/* Toolbar: pill buttons and a filled search pill */
+#placesToolbox,
+#placesToolbar {
+  appearance: none !important;
+  padding: 8px 10px !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--on-surface) !important;
+}
+
+#placesToolbar > :is(toolbarbutton, #placesMenu > menu) {
+  appearance: none !important;
+  min-height: 36px !important;
+  margin: 0 2px !important;
+  padding-inline: 12px !important;
+  border: none !important;
+  border-radius: 18px !important;
+  background: transparent !important;
+  color: var(--on-surface) !important;
+}
+
+#placesMenu > menu {
+  appearance: none !important;
+  min-height: 36px !important;
+  padding-inline: 14px !important;
+  border-radius: 18px !important;
+  color: var(--on-surface) !important;
+}
+
+#placesToolbar > toolbarbutton:not([disabled]):hover,
+#placesMenu > menu:hover,
+#placesMenu > menu[open] {
+  background-color: color-mix(in srgb, var(--on-surface) 8%, transparent) !important;
+}
+
+#placesToolbar > toolbarbutton[disabled] {
+  opacity: 0.38;
+}
+
+#searchFilter {
+  --input-text-background-color: var(--surface-container-high);
+  --input-text-border: none;
+  --input-text-border-color: transparent;
+  --input-text-border-radius: 20px;
+  --input-text-min-height: 40px;
+  --focus-outline-color: transparent;
+  margin-inline-end: 4px !important;
+}
+
+/* Navigation list on the left */
+#placesView {
+  gap: 10px;
+  padding: 0 10px 10px !important;
+  background: transparent !important;
+}
+
+#placesView > splitter {
+  appearance: none !important;
+  width: 4px !important;
+  min-width: 4px !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+#placesList {
+  margin: 0 !important;
+  padding: 4px 0 !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--on-surface) !important;
+}
+
+#placesList > treechildren::-moz-tree-row {
+  min-height: 40px !important;
+  border: none !important;
+  border-radius: 20px !important;
+  background-color: transparent !important;
+}
+
+#placesList > treechildren::-moz-tree-row(hover) {
+  background-color: color-mix(in srgb, var(--on-surface) 8%, transparent) !important;
+}
+
+#placesList > treechildren::-moz-tree-row(selected) {
+  background-color: var(--secondary-container) !important;
+}
+
+#placesList > treechildren::-moz-tree-cell-text {
+  margin-inline-start: 6px !important;
+  color: var(--on-surface) !important;
+  font-weight: 500;
+}
+
+#placesList > treechildren::-moz-tree-cell-text(selected) {
+  color: var(--on-secondary-container) !important;
+}
+
+#placesList > treechildren::-moz-tree-image,
+#placesList > treechildren::-moz-tree-twisty {
+  fill: var(--on-surface-variant) !important;
+}
+
+/* Content on a card */
+#contentView {
+  overflow: hidden;
+  border-radius: 24px;
+  background-color: var(--surface-container) !important;
+}
+
+#placeContent,
+#downloadsListBox {
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--on-surface) !important;
+}
+
+#placeContent > treecols {
+  border: none !important;
+  background: transparent !important;
+}
+
+#placeContent treecol {
+  appearance: none !important;
+  min-height: 36px;
+  padding-inline: 14px !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--on-surface-variant) !important;
+  font-weight: 500;
+}
+
+#placeContent > treechildren::-moz-tree-row {
+  min-height: 36px !important;
+  border: none !important;
+  border-radius: 18px !important;
+  background-color: transparent !important;
+}
+
+#placeContent > treechildren::-moz-tree-row(hover) {
+  background-color: color-mix(in srgb, var(--on-surface) 6%, transparent) !important;
+}
+
+#placeContent > treechildren::-moz-tree-row(selected) {
+  background-color: var(--secondary-container) !important;
+}
+
+#placeContent > treechildren::-moz-tree-cell-text {
+  color: var(--on-surface) !important;
+}
+
+#placeContent > treechildren::-moz-tree-cell-text(selected) {
+  color: var(--on-secondary-container) !important;
+}
+
+#downloadsListBox > richlistitem {
+  margin: 4px 8px 0 !important;
+  border-radius: 18px !important;
+  border: none !important;
+}
+
+#downloadsListBox > richlistitem:hover {
+  background-color: color-mix(in srgb, var(--on-surface) 6%, transparent) !important;
+}
+
+#downloadsListBox > richlistitem[selected] {
+  background-color: var(--secondary-container) !important;
+  color: var(--on-secondary-container) !important;
+}
+
+#downloadsListBox .downloadProgress::-moz-progress-bar {
+  background-color: var(--primary) !important;
+}
+
+/* Details of the selected bookmark */
+#detailsPane {
+  margin-top: 10px;
+  padding: 12px 16px !important;
+  border: none !important;
+  border-radius: 24px;
+  background-color: var(--surface-container) !important;
+  color: var(--on-surface) !important;
+}
+
+#places splitter#contentSplitter,
+#places #contentView + splitter {
+  appearance: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  border: none !important;
+}

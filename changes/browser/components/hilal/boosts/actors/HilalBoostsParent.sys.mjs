@@ -5,11 +5,60 @@
 const lazy = {};
 
 ChromeUtils.defineESModuleGetters(lazy, {
+  AppConstants: "resource://gre/modules/AppConstants.sys.mjs",
   gHilalBoostsManager: "resource:///modules/hilal/boosts/HilalBoostsManager.sys.mjs",
 });
 
+const AUTO_MODE_PREF = "hilal.boosts.auto.mode";
+const AUTO_EXCLUDED_PREF = "hilal.boosts.auto.excluded";
+
+// Whether a domain's pages are dark on their own (a dark color scheme or a
+// dark page), learned when a page finishes loading without an automatic
+// boost on it. "Compatible" automatic boosts skip such sites, and only light
+// pages are turned dark. Unknown domains are left as they are until known.
+const ownThemeDomains = new Map();
+
 export class HilalBoostsParent extends JSWindowActorParent {
   #zapBar = null;
+
+  /**
+   * The boost Hilal applies on its own to a site the user has not boosted,
+   * or null. It follows the window's accent color, and turns light pages dark
+   * while the browser is in dark mode.
+   *
+   * @param {string} domain
+   * @param {Window} win - The browser window showing the page.
+   * @returns {object|null}
+   */
+  static automaticBoost(domain, win) {
+    const mode = Services.prefs.getStringPref(AUTO_MODE_PREF, "off");
+    if (mode != "all" && mode != "compatible") {
+      return null;
+    }
+    const excluded = Services.prefs
+      .getStringPref(AUTO_EXCLUDED_PREF, "")
+      .split(",")
+      .map(d => d.trim())
+      .filter(Boolean);
+    if (excluded.some(d => domain == d || domain.endsWith("." + d))) {
+      return null;
+    }
+    if (mode == "compatible" && ownThemeDomains.get(domain)) {
+      return null;
+    }
+    const entry = lazy.gHilalBoostsManager.getEmptyBoostEntry();
+    Object.assign(entry.boostData, {
+      boostName: "Automatic",
+      enableColorBoost: true,
+      autoTheme: true,
+      smartInvert:
+        Services.prefs.getBoolPref("hilal.boosts.auto.darken", true) &&
+        !!win?.MaterialYouTheme?.isDarkMode?.() &&
+        ownThemeDomains.get(domain) === false,
+      changeWasMade: true,
+    });
+    return { id: "automatic", domain, automatic: true, boostEntry: entry };
+  }
 
   static OBSERVERS = [
     "hilal-boosts-update",
@@ -39,6 +88,7 @@ export class HilalBoostsParent extends JSWindowActorParent {
     HilalBoostsParent.OBSERVERS.forEach(observe => {
       Services.obs.addObserver(this._observe, observe);
     });
+    Services.prefs.addObserver("hilal.boosts.auto.", this._observe);
   }
 
   /**
@@ -48,6 +98,7 @@ export class HilalBoostsParent extends JSWindowActorParent {
     HilalBoostsParent.OBSERVERS.forEach(observe => {
       Services.obs.removeObserver(this._observe, observe);
     });
+    Services.prefs.removeObserver("hilal.boosts.auto.", this._observe);
     this.#setZapBarVisible(false);
   }
 
@@ -106,6 +157,7 @@ export class HilalBoostsParent extends JSWindowActorParent {
     switch (topic) {
       case "hilal-boosts-update":
       case "hilal-accent-changed":
+      case "nsPref:changed":
         this.sendAsyncMessage("HilalBoost:BoostDataUpdated", {
           unloadStyles: true,
         });
@@ -213,6 +265,64 @@ export class HilalBoostsParent extends JSWindowActorParent {
         }
         break;
       }
+      case "HilalBoost:BoostAccent": {
+        const color = message.data?.color;
+        const browser = this.browsingContext.top.embedderElement;
+        browser?.ownerDocument?.defaultView?.gHilalShell?.setBoostAccent?.(
+          browser,
+          /^#[0-9a-f]{6}$/i.test(color ?? "") ? color : null
+        );
+        break;
+      }
+      case "HilalBoost:GetBrowserAccent": {
+        // The site's own color must not feed back into what it is told.
+        const theme = this.browsingContext.topChromeWindow?.MaterialYouTheme;
+        const siteColor = theme?._siteColor;
+        if (theme) {
+          theme._siteColor = null;
+        }
+        const accent = theme?.getThemeData()?.accent;
+        if (theme) {
+          theme._siteColor = siteColor;
+        }
+        return {
+          version: lazy.AppConstants.MOZ_APP_VERSION_DISPLAY,
+          accent: /^#[0-9a-f]{6}$/i.test(accent ?? "") ? accent : null,
+        };
+      }
+      case "HilalBoost:SiteTheme": {
+        const { domain, accent, ownTheme, boosted } = message.data ?? {};
+        if (typeof domain != "string" || !domain) {
+          break;
+        }
+        const hadOwnTheme = ownThemeDomains.get(domain);
+        // A boosted page reports the boost's colors, not its own.
+        if (!boosted) {
+          ownThemeDomains.set(domain, !!ownTheme);
+        }
+        const browser = this.browsingContext.top.embedderElement;
+        // A <browser>'s ownerGlobal is undefined from a window actor parent.
+        const win = browser?.ownerDocument?.defaultView;
+        if (browser && win?.gHilalShell?.setSiteAccent) {
+          win.gHilalShell.setSiteAccent(
+            browser,
+            /^#[0-9a-f]{6}$/i.test(accent ?? "") ? accent : null
+          );
+        }
+        // The first page of a site loads before Hilal knows whether it is
+        // dark on its own; apply what follows from that now.
+        if (
+          !boosted &&
+          hadOwnTheme !== !!ownTheme &&
+          Services.prefs.getStringPref(AUTO_MODE_PREF, "off") != "off" &&
+          !lazy.gHilalBoostsManager.registeredBoostForDomain(domain)
+        ) {
+          this.sendAsyncMessage("HilalBoost:BoostDataUpdated", {
+            unloadStyles: true,
+          });
+        }
+        break;
+      }
       case "HilalBoost:GetBoostForDomain": {
         const domain = message.data;
         const embedder = this.browsingContext.top.embedderElement;
@@ -221,12 +331,14 @@ export class HilalBoostsParent extends JSWindowActorParent {
           break;
         }
 
+        const win = this.browsingContext.topChromeWindow;
         const exists = lazy.gHilalBoostsManager.registeredBoostForDomain(domain);
-        if (!exists) {
+        const boost = exists
+          ? lazy.gHilalBoostsManager.loadActiveBoostFromStore(domain)
+          : HilalBoostsParent.automaticBoost(domain, win);
+        if (!boost) {
           break;
         }
-
-        const boost = lazy.gHilalBoostsManager.loadActiveBoostFromStore(domain);
         if (
           !lazy.gHilalBoostsManager.isBoostInEffect(
             boost.boostEntry.boostData,
@@ -254,8 +366,9 @@ export class HilalBoostsParent extends JSWindowActorParent {
           }
         }
 
-        const styleData =
-          await lazy.gHilalBoostsManager.getStyleSheetForBoost(domain);
+        const styleData = boost.automatic
+          ? null
+          : await lazy.gHilalBoostsManager.getStyleSheetForBoost(domain);
 
         return {
           ...boost,

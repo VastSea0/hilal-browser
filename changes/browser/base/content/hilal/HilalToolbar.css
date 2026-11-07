@@ -1,0 +1,392 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*
+ * The top bar: navigation, the address bar with its suggestions, and the
+ * buttons on the right, as Material 3 Expressive components.
+ *
+ * Loaded after HilalShell.css. Selectors start at #hilal-header-shell so they
+ * win over the older rules there and over Beer CSS classes.
+ */
+
+/* ---------------------------------------------------------------------------
+ * Bar
+ * ------------------------------------------------------------------------- */
+
+#hilal-header-shell #hilal-topbar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-height: 56px !important;
+  padding-block: 0 !important;
+}
+
+#hilal-header-shell :is(#hilal-nav-group, #hilal-top-right-group, #hilal-extensions-slot, #hilal-native-slot) {
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  margin: 0 !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Icon buttons: 40px targets, 22px Material Symbols, M3 state layers.
+ * Firefox's own toolbar buttons (extensions, downloads, menu) get the same
+ * shape, and their icons are replaced with the matching Material Symbol.
+ * ------------------------------------------------------------------------- */
+
+/* Display is left to Firefox and the shell: many of these buttons are hidden
+   or collapsed on purpose. */
+#hilal-header-shell :is(#hilal-nav-group, #hilal-top-right-group) > button.hilal-btn,
+#hilal-header-shell :is(#hilal-native-slot, #hilal-extensions-slot) toolbarbutton {
+  appearance: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 20px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--on-surface-variant) !important;
+  fill: var(--on-surface-variant) !important;
+  -moz-context-properties: fill, fill-opacity;
+  transition:
+    background-color 150ms linear,
+    border-radius 300ms var(--md-sys-motion-easing-emphasized),
+    transform 150ms var(--md-sys-motion-easing-emphasized) !important;
+}
+
+#hilal-header-shell :is(#hilal-nav-group, #hilal-top-right-group) > button.hilal-btn:hover:not([disabled]),
+#hilal-header-shell :is(#hilal-native-slot, #hilal-extensions-slot) toolbarbutton:hover:not([disabled]),
+#hilal-header-shell :is(#hilal-native-slot, #hilal-extensions-slot) toolbarbutton[open] {
+  background: color-mix(in srgb, var(--on-surface) 8%, transparent) !important;
+  color: var(--on-surface) !important;
+  fill: var(--on-surface) !important;
+}
+
+/* Pressed: the circle squares off a little, as M3 Expressive buttons do */
+#hilal-header-shell :is(#hilal-nav-group, #hilal-top-right-group) > button.hilal-btn:active:not([disabled]),
+#hilal-header-shell :is(#hilal-native-slot, #hilal-extensions-slot) toolbarbutton:active:not([disabled]) {
+  background: color-mix(in srgb, var(--on-surface) 12%, transparent) !important;
+  border-radius: 12px !important;
+}
+
+#hilal-header-shell :is(#hilal-nav-group, #hilal-top-right-group) > button.hilal-btn[disabled] {
+  opacity: 0.38 !important;
+}
+
+#hilal-header-shell button.hilal-btn > i,
+#hilal-header-shell :is(#hilal-native-slot, #hilal-extensions-slot) toolbarbutton:is(#downloads-button, #PanelUI-menu-button, #unified-extensions-button)::before {
+  font-family: "Material Symbols Outlined" !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  font-size: 22px !important;
+  line-height: 1 !important;
+  width: auto !important;
+  height: auto !important;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#hilal-header-shell :is(#hilal-native-slot, #hilal-extensions-slot) toolbarbutton:is(#downloads-button, #PanelUI-menu-button, #unified-extensions-button) :is(.toolbarbutton-icon, .toolbarbutton-badge-stack) {
+  display: none !important;
+}
+
+#hilal-header-shell #downloads-button::before {
+  content: "download";
+}
+
+#hilal-header-shell #PanelUI-menu-button::before {
+  content: "menu";
+}
+
+#hilal-header-shell #unified-extensions-button::before {
+  content: "extension";
+}
+
+/* A download in progress or finished keeps Firefox's indicator */
+#hilal-header-shell #downloads-button:is([progress], [attention])::before {
+  display: none;
+}
+
+#hilal-header-shell #downloads-button:is([progress], [attention]) .toolbarbutton-badge-stack {
+  display: flex !important;
+}
+
+/* Extension buttons keep their own icon at the Material size */
+#hilal-header-shell #hilal-extensions-slot toolbarbutton:not(#unified-extensions-button) .toolbarbutton-icon {
+  width: 20px !important;
+  height: 20px !important;
+  padding: 0 !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Address bar: an M3 search bar
+ * ------------------------------------------------------------------------- */
+
+#hilal-header-shell #hilal-url-container {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  max-width: 680px !important;
+  padding: 0 4px 0 14px !important;
+  border: none !important;
+  border-radius: 22px !important;
+  background: var(--surface-container-high) !important;
+  box-shadow: none !important;
+  transition:
+    background-color 200ms linear,
+    box-shadow 250ms var(--md-sys-motion-easing-emphasized) !important;
+}
+
+#hilal-header-shell #hilal-url-container:hover {
+  background: color-mix(in srgb, var(--on-surface) 4%, var(--surface-container-high)) !important;
+}
+
+/* Focused: the bar lifts and brightens instead of drawing a thick ring */
+#hilal-header-shell #hilal-url-container:focus-within {
+  background: var(--surface-container-highest) !important;
+  box-shadow: var(--md-sys-elevation-2) !important;
+}
+
+#hilal-header-shell #hilal-url-security-icon {
+  width: 24px !important;
+  height: 24px !important;
+  margin-inline-end: 6px !important;
+  font-family: "Material Symbols Outlined" !important;
+  font-size: 20px !important;
+  line-height: 24px !important;
+  color: var(--on-surface-variant) !important;
+  border-radius: 12px;
+  cursor: pointer !important;
+}
+
+#hilal-header-shell #hilal-url-input {
+  height: 100% !important;
+  color: var(--on-surface) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+#hilal-header-shell #hilal-url-input::placeholder {
+  color: var(--on-surface-variant) !important;
+  opacity: 1 !important;
+}
+
+/* No !important on display: the clear button is hidden with an inline style */
+#hilal-header-shell #hilal-url-container > button.hilal-btn {
+  appearance: none !important;
+  display: flex;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 18px !important;
+  background: transparent !important;
+  color: var(--on-surface-variant) !important;
+  transition:
+    background-color 150ms linear,
+    border-radius 300ms var(--md-sys-motion-easing-emphasized) !important;
+}
+
+#hilal-header-shell #hilal-url-container > button.hilal-btn > i {
+  font-size: 20px !important;
+}
+
+#hilal-header-shell #hilal-url-container > button.hilal-btn:hover {
+  background: color-mix(in srgb, var(--on-surface) 8%, transparent) !important;
+  color: var(--on-surface) !important;
+}
+
+#hilal-header-shell #hilal-url-container > button.hilal-btn:active {
+  background: color-mix(in srgb, var(--on-surface) 12%, transparent) !important;
+  border-radius: 10px !important;
+}
+
+/* Firefox's page actions (bookmark star, reader view) in the same size */
+#hilal-header-shell #hilal-page-actions-slot :is(.urlbar-page-action, #star-button-box):not([hidden]) {
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 18px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#hilal-header-shell #hilal-page-actions-slot :is(.urlbar-page-action, #star-button-box):hover {
+  background: color-mix(in srgb, var(--on-surface) 8%, transparent) !important;
+}
+
+#hilal-header-shell #hilal-page-actions-slot .urlbar-icon {
+  width: 18px !important;
+  height: 18px !important;
+  fill: var(--on-surface-variant) !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Suggestions: an M3 search view under the bar, rows as grouped cards
+ * ------------------------------------------------------------------------- */
+
+#hilal-header-shell #hilal-search-dropdown {
+  top: calc(100% + 6px) !important;
+  inset-inline: 0 !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  max-height: 480px !important;
+  padding: 6px !important;
+  border: none !important;
+  border-radius: 24px !important;
+  background: var(--surface-container) !important;
+  color: var(--on-surface) !important;
+  box-shadow: var(--md-sys-elevation-3) !important;
+  animation: hilal-search-in 250ms var(--md-sys-motion-easing-emphasized);
+}
+
+@keyframes hilal-search-in {
+  from { opacity: 0; transform: translateY(-6px); }
+}
+
+#hilal-header-shell .hilal-search-header {
+  padding: 8px 14px 6px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.2px !important;
+  text-transform: none !important;
+  color: var(--on-surface-variant) !important;
+}
+
+#hilal-header-shell .hilal-search-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+#hilal-header-shell .hilal-search-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-height: 52px !important;
+  margin: 0 !important;
+  padding: 6px 12px !important;
+  border-radius: 6px !important;
+  background: var(--surface-container-high) !important;
+  color: var(--on-surface) !important;
+  cursor: pointer;
+  transition:
+    background-color 120ms linear,
+    border-radius 300ms var(--md-sys-motion-easing-emphasized);
+}
+
+#hilal-header-shell .hilal-search-item:first-child {
+  border-start-start-radius: 18px !important;
+  border-start-end-radius: 18px !important;
+}
+
+#hilal-header-shell .hilal-search-item:last-child {
+  border-end-start-radius: 18px !important;
+  border-end-end-radius: 18px !important;
+}
+
+#hilal-header-shell .hilal-search-item.selected {
+  background: var(--secondary-container) !important;
+  color: var(--on-secondary-container) !important;
+  border-radius: 18px !important;
+}
+
+#hilal-header-shell .hilal-search-icon-slot {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  border-radius: 18px !important;
+  background: var(--surface-container-highest) !important;
+  color: var(--on-surface-variant) !important;
+}
+
+#hilal-header-shell .hilal-search-item.selected .hilal-search-icon-slot {
+  background: color-mix(in srgb, var(--on-secondary-container) 12%, transparent) !important;
+  color: var(--on-secondary-container) !important;
+}
+
+#hilal-header-shell .hilal-search-icon-slot > i,
+#hilal-header-shell .hilal-search-trail {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+}
+
+#hilal-header-shell .hilal-search-favicon {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+#hilal-header-shell .hilal-search-item-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+#hilal-header-shell .hilal-search-item-label,
+#hilal-header-shell .hilal-search-item-sub {
+  overflow: hidden;
+  padding-inline: 2px;
+  margin-inline: -2px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#hilal-header-shell .hilal-search-item-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+#hilal-header-shell .hilal-search-item-sub {
+  font-size: 12px;
+  color: var(--on-surface-variant);
+}
+
+#hilal-header-shell .hilal-search-item.selected .hilal-search-item-sub {
+  color: color-mix(in srgb, var(--on-secondary-container) 80%, transparent);
+}
+
+#hilal-header-shell .hilal-search-trail {
+  color: var(--on-surface-variant);
+}
+
+#hilal-header-shell .hilal-search-chip {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border-radius: 8px;
+  background: var(--tertiary-container);
+  color: var(--on-tertiary-container);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hilal-header-shell #hilal-search-dropdown {
+    animation: none;
+  }
+}

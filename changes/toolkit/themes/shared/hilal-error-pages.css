@@ -1,0 +1,96 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*
+ * Firefox's error pages ("Hmm. That address doesn't look right." and the
+ * certificate errors) in Hilal's Material 3 Expressive style. Imported by
+ * aboutNetError.css, which the page and its net-error-card component load.
+ * Error pages run as web content with a chrome:-only policy, so everything
+ * here lives in chrome://global/skin.
+ */
+
+:root,
+:host {
+  --primary: light-dark(#6750a4, #d0bcff);
+  --on-primary: light-dark(#ffffff, #381e72);
+  --primary-container: light-dark(#eaddff, #4f378b);
+  --secondary-container: light-dark(#e8def8, #4a4458);
+  --on-secondary-container: light-dark(#1d192b, #e8def8);
+  --surface: light-dark(#fef7ff, #141218);
+  --surface-container: light-dark(#f3edf7, #211f26);
+  --surface-container-high: light-dark(#ece6f0, #2b2930);
+  --on-surface: light-dark(#1d1b20, #e6e0e9);
+  --on-surface-variant: light-dark(#49454f, #cac4d0);
+
+  --background-color-canvas: var(--surface);
+  --text-color: var(--on-surface);
+  --text-color-deemphasized: var(--on-surface-variant);
+  --link-color: var(--primary);
+  --color-accent-primary: var(--primary);
+  --button-border-radius: 9999px;
+  --button-background-color: var(--secondary-container);
+  --button-text-color: var(--on-secondary-container);
+  --button-background-color-primary: var(--primary);
+  --button-text-color-primary: var(--on-primary);
+  --focus-outline-color: var(--primary);
+}
+
+body {
+  background-color: var(--surface) !important;
+  color: var(--on-surface) !important;
+}
+
+/* The illustration: Hilal's logo on an M3 Expressive cookie shape instead
+   of Firefox's fox */
+.img-container {
+  display: grid !important;
+  place-items: center;
+  flex: none !important;
+  box-sizing: border-box;
+  width: 200px !important;
+  height: 200px !important;
+  min-height: 0 !important;
+  max-height: 200px !important;
+  aspect-ratio: 1;
+  padding: 0 !important;
+  margin-inline: auto;
+  background: light-dark(var(--primary), var(--primary-container));
+  mask: url("chrome://global/skin/hilal-shape-cookie9.svg") center / 100% 100% no-repeat;
+}
+
+.img-container > img {
+  width: 96px !important;
+  height: 96px !important;
+  margin: 0 !important;
+  object-fit: contain;
+  content: url("chrome://branding/content/about-logo.png");
+}
+
+/* Text and actions */
+h1,
+.title-text {
+  font-size: 28px !important;
+  font-weight: 500 !important;
+  color: var(--on-surface) !important;
+}
+
+.felt-privacy-container,
+.container {
+  color: var(--on-surface);
+}
+
+a,
+.text-link {
+  color: var(--primary) !important;
+}
+
+button,
+moz-button::part(button) {
+  border-radius: 9999px !important;
+}
+
+/* The classic error layout: the title's icon on a small shape */
+.title {
+  background-color: transparent !important;
+}

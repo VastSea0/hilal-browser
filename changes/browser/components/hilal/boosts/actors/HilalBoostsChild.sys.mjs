@@ -75,7 +75,119 @@ export class HilalBoostsChild extends JSWindowActorChild {
   handleEvent(event) {
     if (event.type === "DOMDocElementInserted") {
       this.#applyBoostForPageIfAvailable();
+      this.#shareAccentWithHilalSite();
+    } else if (
+      event.type === "DOMContentLoaded" &&
+      event.target === this.document &&
+      !this.browsingContext.parent
+    ) {
+      this.#reportSiteTheme();
     }
+  }
+
+  /**
+   * Hilal's own website can follow the browser's accent color. Only that site
+   * is told it runs in Hilal, through two attributes on its root element, so
+   * no other site can detect the browser this way.
+   */
+  async #shareAccentWithHilalSite() {
+    if (
+      this.browsingContext.parent ||
+      this.#hostWithoutPort !== "hilal-browser.vercel.app" ||
+      this.contentWindow?.location.protocol !== "https:"
+    ) {
+      return;
+    }
+    const info = await this.sendQuery("HilalBoost:GetBrowserAccent");
+    const root = this.document?.documentElement;
+    if (!root || !info) {
+      return;
+    }
+    root.setAttribute("data-hilal-browser", info.version);
+    if (info.accent) {
+      root.setAttribute("data-hilal-accent", info.accent);
+    } else {
+      root.removeAttribute("data-hilal-accent");
+    }
+  }
+
+  /**
+   * Tells the parent the page's own accent color and whether it styles itself
+   * (a dark color scheme or a dark page). Automatic boosts skip such pages in
+   * "compatible" mode, and the browser can take the accent as its own color.
+   */
+  #reportSiteTheme() {
+    const doc = this.document;
+    const win = this.contentWindow;
+    if (!doc?.documentElement || !win) {
+      return;
+    }
+    const toRgb = value => {
+      if (!value) {
+        return null;
+      }
+      const probe = doc.createElement("span");
+      probe.style.color = value;
+      if (!probe.style.color) {
+        return null;
+      }
+      doc.documentElement.appendChild(probe);
+      const computed = win.getComputedStyle(probe).color;
+      probe.remove();
+      const m = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/.exec(computed);
+      if (!m || (m[4] !== undefined && Number(m[4]) < 0.5)) {
+        return null;
+      }
+      return [Number(m[1]), Number(m[2]), Number(m[3])];
+    };
+    const saturation = ([r, g, b]) => {
+      const max = Math.max(r, g, b) / 255;
+      const min = Math.min(r, g, b) / 255;
+      const l = (max + min) / 2;
+      return max === min ? 0 : (max - min) / (1 - Math.abs(2 * l - 1));
+    };
+    const luminance = ([r, g, b]) => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    const hex = rgb => "#" + rgb.map(c => c.toString(16).padStart(2, "0")).join("");
+
+    let accent = null;
+    const meta = doc.querySelector('meta[name="theme-color"]');
+    const declared = toRgb(meta?.content?.trim());
+    if (declared && saturation(declared) > 0.2) {
+      accent = declared;
+    }
+    const bc = this.browsingContext;
+    const boosted = !!bc.hilalBoostsData || !!bc.isHilalBoostsInverted;
+    if (!accent && !boosted) {
+      // No usable theme-color: guess from the page header, then links. A
+      // boosted page shows the boost's colors, so no guess is made there.
+      const header = doc.querySelector("header, nav, [role='banner']");
+      const candidates = [
+        header && win.getComputedStyle(header).backgroundColor,
+        doc.querySelector("a[href]") &&
+          win.getComputedStyle(doc.querySelector("a[href]")).color,
+      ];
+      for (const candidate of candidates) {
+        const rgb = toRgb(candidate);
+        if (rgb && saturation(rgb) > 0.35 && luminance(rgb) > 0.15 && luminance(rgb) < 0.85) {
+          accent = rgb;
+          break;
+        }
+      }
+    }
+
+    const scheme = doc.querySelector('meta[name="color-scheme"]')?.content ?? "";
+    const pageBg = toRgb(
+      doc.body ? win.getComputedStyle(doc.body).backgroundColor : null
+    );
+    const ownTheme =
+      /\bdark\b/.test(scheme) || (!!pageBg && luminance(pageBg) < 0.35);
+
+    this.sendAsyncMessage("HilalBoost:SiteTheme", {
+      domain: this.#hostWithoutPort,
+      accent: accent ? hex(accent) : null,
+      ownTheme,
+      boosted,
+    });
   }
 
   didDestroy() {
@@ -247,6 +359,7 @@ export class HilalBoostsChild extends JSWindowActorChild {
       case "HilalBoost:BoostDataUpdated": {
         const { unloadStyles = false } = message.data || {};
         this.#applyBoostForPageIfAvailable(unloadStyles);
+        this.#shareAccentWithHilalSite();
         if (this.#currentState === HilalBoostsChild.STATES.ZAP) {
           this.#overlay?.updateZapList();
         }
@@ -446,6 +559,14 @@ export class HilalBoostsChild extends JSWindowActorChild {
           );
         }
         this.#setSyncedField(browsingContext, "hilalBoostsData", primaryColor);
+        // A boost can also set the browser's accent while its site is shown.
+        let browserAccent = null;
+        if (boostData.tintBrowser && !boostData.autoTheme) {
+          const rgb = this.#hslToRgb(boostData.dotAngleDeg / 360, 0.75, 0.55);
+          browserAccent =
+            "#" + rgb.map(c => c.toString(16).padStart(2, "0")).join("");
+        }
+        this.sendAsyncMessage("HilalBoost:BoostAccent", { color: browserAccent });
         // The complementary accent is derived in the backend by rotating the
         // primary accent's hue by this delta (in degrees).
         this.#setSyncedField(
@@ -458,6 +579,7 @@ export class HilalBoostsChild extends JSWindowActorChild {
     } else {
       this.#setSyncedField(browsingContext, "isHilalBoostsInverted", false);
     }
+    this.sendAsyncMessage("HilalBoost:BoostAccent", { color: null });
     this.#setSyncedField(browsingContext, "hilalBoostsData", 0);
     this.#setSyncedField(browsingContext, "hilalBoostsComplementaryRotation", 0);
   }

@@ -2,7 +2,7 @@ diff --git a/browser/components/DesktopActorRegistry.sys.mjs b/browser/component
 index aaf1e1be8466..b57c66cd2902 100644
 --- a/browser/components/DesktopActorRegistry.sys.mjs
 +++ b/browser/components/DesktopActorRegistry.sys.mjs
-@@ -554,6 +554,21 @@ let JSWINDOWACTORS = {
+@@ -554,6 +554,22 @@ let JSWINDOWACTORS = {
      },
    },
  
@@ -15,6 +15,7 @@ index aaf1e1be8466..b57c66cd2902 100644
 +      esModuleURI: "resource:///actors/HilalBoostsChild.sys.mjs",
 +      events: {
 +        DOMDocElementInserted: {},
++        DOMContentLoaded: {},
 +      },
 +    },
 +    remoteTypes: ["web", "file"],

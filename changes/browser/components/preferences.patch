@@ -68,7 +68,7 @@ index b66ff919d93b..e2566bfa9b76 100644
    };
  
    const items = includeIsDefaultPane
-@@ -1815,6 +1831,1391 @@ gMainPane.initialized = new Promise(res => {
+@@ -1815,6 +1831,1476 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
@@ -393,6 +393,73 @@ index b66ff919d93b..e2566bfa9b76 100644
 +
 +    refreshHilalSidebarCustomList();
 +
++    // Follow the browser when its accent changes (workspace, site, boost).
++    // The search field shows focus by lifting (hilal-settings.css); its
++    // native focus ring sits inside the widget's shadow DOM, out of reach of
++    // the stylesheet.
++    customElements.whenDefined("moz-input-search").then(async () => {
++      const search = document.getElementById("searchInput");
++      await search?.updateComplete;
++      search?.shadowRoot?.querySelector("input")?.style.setProperty("outline", "none");
++    });
++    const onBrowserAccent = () => applyPreferencesTheme();
++    Services.obs.addObserver(onBrowserAccent, "hilal-accent-changed");
++    window.addEventListener(
++      "unload",
++      () => Services.obs.removeObserver(onBrowserAccent, "hilal-accent-changed"),
++      { once: true }
++    );
++    // Automatic colors: boosts for unboosted sites and the site's accent.
++    const hilalAutoBoostMode = document.getElementById("hilalAutoBoostMode");
++    if (hilalAutoBoostMode) {
++      const showMode = mode => {
++        for (const seg of hilalAutoBoostMode.querySelectorAll("m3e-button-segment")) {
++          const on = seg.getAttribute("value") === mode;
++          seg.checked = on;
++          seg.toggleAttribute("checked", on);
++        }
++      };
++      showMode(Services.prefs.getStringPref("hilal.boosts.auto.mode", "off"));
++      hilalAutoBoostMode.addEventListener("click", e => {
++        const seg = e.target.closest("m3e-button-segment");
++        const mode = seg?.getAttribute("value");
++        if (mode) {
++          Services.prefs.setStringPref("hilal.boosts.auto.mode", mode);
++          showMode(mode);
++        }
++      });
++    }
++    try {
++      wireCheckbox(document.getElementById("hilalAutoBoostDarken"), "hilal.boosts.auto.darken", true);
++      wireCheckbox(document.getElementById("hilalFollowSiteColor"), "hilal.theme.followSite", false);
++    } catch (e) {
++      console.error("Hilal automatic colors init error:", e);
++    }
++
++    // Sidebar and tabs: segmented choices and footer button switches
++    // carry their pref in data-pref.
++    for (const group of document.querySelectorAll("#hilalSidebarGroup m3e-segmented-button[data-pref]")) {
++      const pref = group.dataset.pref;
++      const show = value => {
++        for (const seg of group.querySelectorAll("m3e-button-segment")) {
++          const on = seg.getAttribute("value") === value;
++          seg.checked = on;
++          seg.toggleAttribute("checked", on);
++        }
++      };
++      show(Services.prefs.getStringPref(pref, group.dataset.default));
++      group.addEventListener("click", e => {
++        const value = e.target.closest("m3e-button-segment")?.getAttribute("value");
++        if (value) {
++          Services.prefs.setStringPref(pref, value);
++          show(value);
++        }
++      });
++    }
++    for (const toggle of document.querySelectorAll("#hilalSidebarFooterChoices m3e-switch[data-pref]")) {
++      wireCheckbox(toggle, toggle.dataset.pref, Services.prefs.getDefaultBranch("").getBoolPref(toggle.dataset.pref, false));
++    }
++
 +    if (hilalPrivacyLevelRadioGroup) {
 +      const updatePrivacyLevelUI = (level) => {
 +        const normalized = normalizePrivacyLevel(level);
@@ -646,6 +713,24 @@ index b66ff919d93b..e2566bfa9b76 100644
 +    };
 +
 +    const applyPreferencesTheme = () => {
++      // The browser window's Material tokens are the source of truth;
++      // copying them keeps Settings in the same colors as the browser.
++      const browserWin = Services.wm.getMostRecentWindow("navigator:browser");
++      const browserStyle = browserWin?.document.documentElement.style;
++      if (browserStyle?.getPropertyValue("--primary")) {
++        const root = document.documentElement;
++        for (let i = 0; i < browserStyle.length; i++) {
++          const name = browserStyle[i];
++          if (name.startsWith("--")) {
++            root.style.setProperty(name, browserStyle.getPropertyValue(name));
++          }
++        }
++        root.setAttribute(
++          "data-theme",
++          browserWin.MaterialYouTheme?.isDarkMode?.() ? "dark" : "light"
++        );
++        return;
++      }
 +      // 1. Resolve Accent Color
 +      const mode = Services.prefs.getStringPref("hilal.theme.accentMode", "workspace");
 +      let hex = "#0b57d0";
@@ -1520,19 +1605,22 @@ index 1b8c38159314..855cb3c5a45f 100644
    <link
      rel="stylesheet"
      href="chrome://browser/content/preferences/dialogs/handlers.css"
-@@ -38,6 +34,11 @@
+@@ -38,6 +34,14 @@
    <link rel="stylesheet" href="chrome://browser/content/preferences/widgets/setting-group.css" />
    <link rel="stylesheet" href="chrome://browser/content/preferences/widgets/setting-pane.css" />
    <link rel="stylesheet" href="chrome://browser/content/preferences/widgets/setting-control.css" />
-+  <!-- Hilal's Material restyle loads last so it wins over the upstream sheets. -->
++  <!-- Firefox's settings styles, then Hilal's Material layer on top of them. -->
 +  <link
 +    rel="stylesheet"
 +    href="chrome://browser/skin/preferences/preferences.css"
 +  />
++  <link rel="stylesheet" href="chrome://browser/skin/hilal-m3-tokens.css" />
++  <link rel="stylesheet" href="chrome://browser/skin/hilal-m3-firefox.css" />
++  <link rel="stylesheet" href="chrome://browser/skin/preferences/hilal-settings.css" />
  
    <link rel="localization" href="branding/brand.ftl"/>
    <link rel="localization" href="browser/browser.ftl"/>
-@@ -98,6 +99,7 @@
+@@ -98,6 +102,7 @@
    <script type="module" src="chrome://browser/content/preferences/widgets/update-information.mjs"></script>
    <script type="module" src="chrome://browser/content/preferences/widgets/update-state.mjs"></script>
    <script type="module" src="chrome://browser/content/ipprotection/bandwidth-usage.mjs"></script>
@@ -1540,7 +1628,7 @@ index 1b8c38159314..855cb3c5a45f 100644
  </head>
  
  <html:body xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-@@ -124,6 +126,11 @@
+@@ -124,6 +129,11 @@
          iconsrc="chrome://browser/skin/preferences/category-sync.svg"
          data-l10n-id="pane-sync-title3">
        </html:moz-page-nav-button>
@@ -1552,7 +1640,7 @@ index 1b8c38159314..855cb3c5a45f 100644
        <html:moz-page-nav-button id="category-home"
          view="paneHome"
          iconsrc="chrome://browser/skin/home.svg"
-@@ -243,6 +250,7 @@
+@@ -243,6 +253,7 @@
          <vbox id="mainPrefPane">
  #include searchResults.inc.xhtml
  #include main.inc.xhtml

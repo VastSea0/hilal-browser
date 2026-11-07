@@ -30,6 +30,13 @@
         root.style.setProperty(cssVar, theme[key]);
       }
     }
+    // The browser's Material tokens (--primary, --surface-container, ...)
+    // win over the older summary values above.
+    for (const [name, value] of Object.entries(theme.tokens ?? {})) {
+      if (name.startsWith("--")) {
+        root.style.setProperty(name, value);
+      }
+    }
     if (typeof theme.isDark == "boolean") {
       root.style.colorScheme = theme.isDark ? "dark" : "light";
     }
@@ -167,9 +174,19 @@
     );
   }
 
-  function createIcon(shortcut) {
+  // Each shortcut sits on one of the Material 3 Expressive shapes.
+  const TILE_SHAPES = [
+    "cookie9", "clover4", "sunny", "gem", "puffy", "flower",
+    "cookie6", "pentagon", "soft-burst", "square", "cookie12", "clover8",
+  ];
+
+  function createIcon(shortcut, index = 0) {
     const box = document.createElement("span");
     box.className = "tile-icon";
+    const shape = document.createElement("span");
+    shape.className = "hilal-shape tile-shape";
+    shape.dataset.shape = TILE_SHAPES[index % TILE_SHAPES.length];
+    box.append(shape);
     const letter = document.createElement("span");
     letter.className = "tile-letter";
     letter.textContent = (shortcut.title || "?").charAt(0).toUpperCase();
@@ -207,15 +224,14 @@
       const edit = document.createElement("button");
       edit.className = "icon-button tile-edit";
       document.l10n.setAttributes(edit, "hilal-newtab-edit-shortcut");
-      edit.innerHTML =
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="6" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="18" r="1.4"/></svg>';
+      edit.innerHTML = '<i aria-hidden="true">more_vert</i>';
       edit.addEventListener("click", event => {
         event.preventDefault();
         event.stopPropagation();
         openDialog(index);
       });
 
-      tile.append(createIcon(shortcut), label, edit);
+      tile.append(createIcon(shortcut, index), label, edit);
       container.append(tile);
     });
 
@@ -225,7 +241,7 @@
       const icon = document.createElement("span");
       icon.className = "tile-icon";
       icon.innerHTML =
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+        '<span class="hilal-shape tile-shape" data-shape="circle"></span><i aria-hidden="true">add</i>';
       const label = document.createElement("span");
       label.className = "tile-label";
       document.l10n.setAttributes(label, "hilal-newtab-add-shortcut");

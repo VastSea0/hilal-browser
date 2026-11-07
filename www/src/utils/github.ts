@@ -243,38 +243,85 @@ export function getRecommendedAsset(assets: GithubAsset[], os: DetectionOS): Git
   return null;
 }
 
-export interface Contributor {
-  login: string;
-  name?: string;
-  avatar_url: string;
-  html_url: string;
-  contributions: number;
+import { ContributorItem } from "../data/contributorsData";
+
+const KNOWN_NAMES: Record<string, { name: string; role: string }> = {
+  vastsea0: { name: "Egehan KAHRAMAN", role: "Lead Developer" },
+  greenkod: { name: "GreenKod", role: "Contributor" },
+  ataberkcelil: { name: "Ataberk Celil", role: "Contributor" },
+  mmapro12: { name: "Muhammed Beshir", role: "Contributor" },
+};
+
+export function mergeContributors(
+  base: ContributorItem[],
+  incoming?: ContributorItem[] | null
+): ContributorItem[] {
+  const byLower = new Map<string, ContributorItem>();
+  for (const item of base) {
+    byLower.set(item.username.toLowerCase(), { ...item });
+  }
+  for (const item of incoming || []) {
+    const login = String(item.username || (item as any).login || "");
+    if (!login) continue;
+    const key = login.toLowerCase();
+    const known = KNOWN_NAMES[key];
+    const existing = byLower.get(key);
+    const contributions = Math.max(
+      Number(item.contributions || 0),
+      existing?.contributions || 0
+    );
+    byLower.set(key, {
+      username: existing?.username || login,
+      name: known?.name || item.name || existing?.name || login,
+      avatarUrl: item.avatarUrl || `https://github.com/${login}.png`,
+      githubUrl: item.githubUrl || (item as any).html_url || `https://github.com/${login}`,
+      contributions,
+      role: known?.role || item.role || existing?.role || "Contributor",
+    });
+  }
+  return Array.from(byLower.values()).sort(
+    (a, b) => b.contributions - a.contributions
+  );
 }
 
 /**
- * Fetch contributors from GitHub API with fallback
+ * Fetch live contributors and commit counts from local git API or GitHub API, merging with fallback data.
  */
-export async function fetchGithubContributors(): Promise<Contributor[]> {
+export async function fetchGithubContributors(
+  fallback: ContributorItem[] = []
+): Promise<ContributorItem[]> {
+  let merged = [...fallback];
+
   try {
-    const res = await fetch("https://api.github.com/repos/VastSea0/hilal-browser/contributors", {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-      },
+    const localRes = await fetch("/api/contributors", {
+      headers: { Accept: "application/json" },
     });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        return data.map((item: any) => ({
-          login: item.login || "",
-          name: item.name || item.login || "",
-          avatar_url: item.avatar_url || `https://github.com/${item.login}.png`,
-          html_url: item.html_url || `https://github.com/${item.login}`,
-          contributions: item.contributions || 0,
-        }));
+    if (localRes.ok) {
+      const localData = await localRes.json();
+      if (Array.isArray(localData) && localData.length > 0) {
+        merged = mergeContributors(merged, localData);
       }
     }
   } catch {}
-  return [];
+
+  try {
+    const res = await fetch(
+      "https://api.github.com/repos/VastSea0/hilal-browser/contributors?per_page=100",
+      {
+        headers: {
+          Accept: "application/vnd.github.v3+json",
+        },
+      }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        merged = mergeContributors(merged, data);
+      }
+    }
+  } catch {}
+
+  return merged;
 }
 
 

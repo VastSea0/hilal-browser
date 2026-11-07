@@ -78,11 +78,9 @@ Local development builds are unsigned. macOS Gatekeeper may complain
 the first time you launch from Finder; right-click → Open works around
 it, or run via `./mach run`.
 
-Do not upload unsigned local DMGs as public release assets. Downloaded macOS
-apps are subject to Gatekeeper quarantine, and a normal double-click launch for
-users requires a Developer ID signed and notarized app. The Apple Developer
-Program is required for public macOS releases. Without it, distribute unsigned
-development builds with manual Gatekeeper workaround instructions.
+Hilal has no Apple Developer account, so CI ad-hoc signs the release DMG.
+Users have to remove the quarantine flag once after installing; the steps are
+in [INSTALL-MACOS.md](INSTALL-MACOS.md) and in every release's notes.
 
 For distribution builds, use `scripts/sign-macos.sh` after packaging.
 

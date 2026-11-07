@@ -294,6 +294,11 @@ for (const line of rawAuthors) {
     username = "greenkod";
     cleanName = "GreenKod";
     role = "Contributor";
+  } else if (lowerEmail.includes("menemensogantutmuyor") || lowerName.includes("ataberk")) {
+    key = "AtaberkCelil";
+    username = "AtaberkCelil";
+    cleanName = "Ataberk Celil";
+    role = "Contributor";
   } else if (lowerEmail.includes("mmapro12") || lowerName.includes("muhammed beshir")) {
     key = "mmapro12";
     username = "mmapro12";

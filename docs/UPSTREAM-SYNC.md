@@ -53,3 +53,11 @@ scripts/build-macos.sh
 ```
 Then check the Hilal-specific parts: branding and version in `about:`, the
 shell, workspaces, bangs, and the privacy profiles.
+
+## Automatic ESR Watch
+
+`.github/workflows/esr-watch.yml` runs every day. When Mozilla tags a newer
+point release of the pinned ESR line, it runs `scripts/ci/esr-bump.sh`, pushes
+the result to an `esr/<version>` branch, starts CI on that branch and opens an
+issue. Merge the branch once CI is green; if a patch fails, fix it on that
+branch as described above.

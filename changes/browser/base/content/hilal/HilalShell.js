@@ -69,9 +69,23 @@
     _currentColor: "blue",
     _listenerAttached: false,
     _prefObserver: null,
+    // Accent the selected page asks for (its boost or, with
+    // hilal.theme.followSite, its own color). Wins over the workspace color.
+    _siteColor: null,
+
+    setSiteColor(color) {
+      if (color == this._siteColor) {
+        return;
+      }
+      this._siteColor = color;
+      this.applyTheme();
+    },
 
     getEffectiveColor(colorInput) {
       try {
+        if (this._siteColor) {
+          return this._siteColor;
+        }
         if (typeof Services !== "undefined" && Services.prefs) {
           const mode = Services.prefs.getStringPref("hilal.theme.accentMode", "workspace");
           if (mode === "global") {
@@ -282,7 +296,15 @@
       // Lets Boosts that follow the workspace color restyle their pages.
       Services.obs.notifyObservers(window, "hilal-accent-changed");
       try {
-        Services.ppmm.sharedData.set("hilal:activeTheme", this.getThemeData());
+        // Content-process pages such as Passwords apply the Material tokens.
+        const tokens = {};
+        const style = document.documentElement.style;
+        for (let i = 0; i < style.length; i++) {
+          if (/^--(?!md-sys-)[a-z-]+$/.test(style[i])) {
+            tokens[style[i]] = style.getPropertyValue(style[i]);
+          }
+        }
+        Services.ppmm.sharedData.set("hilal:activeTheme", { ...this.getThemeData(), tokens });
         Services.ppmm.sharedData.flush();
       } catch (e) {}
     },
@@ -347,6 +369,7 @@
         return;
       }
       this.initialized = true;
+      this.startupErrors = [];
 
       // Read saved tab mode preference
       if (typeof Services !== "undefined") {
@@ -360,18 +383,31 @@
         }
       }
 
-      this.ensureTabContextMenuReady();
-      this.createHeaderShell();
-      this.createSidebar();
-      this.setupUrlSearchAndSuggestions();
-      this.installPopupAnchorFallback();
-      this.mountNativeToolbarElements();
-      this.bindBrowserEvents();
-      this.hookWorkspaces();
-      this.setTabMode(this.tabMode, false);
-      this.renderWorkspaces();
-      this.renderTabs();
-      this.syncUrl();
+      // One failing step must not leave the user with Firefox's own chrome
+      // and no Hilal shell, so each step runs and reports on its own.
+      const steps = [
+        () => this.ensureTabContextMenuReady(),
+        () => this.createHeaderShell(),
+        () => this.createSidebar(),
+        () => this.setupUrlSearchAndSuggestions(),
+        () => this.installPopupAnchorFallback(),
+        () => this.installDownloadsAnchor(),
+        () => this.mountNativeToolbarElements(),
+        () => this.bindBrowserEvents(),
+        () => this.hookWorkspaces(),
+        () => this.setTabMode(this.tabMode, false),
+        () => this.renderWorkspaces(),
+        () => this.renderTabs(),
+        () => this.syncUrl(),
+      ];
+      for (const step of steps) {
+        try {
+          step();
+        } catch (e) {
+          this.startupErrors.push(`${step}: ${e}`);
+          console.error("Hilal shell: startup step failed", step.toString(), e);
+        }
+      }
 
       // Firefox focuses its own urlbar for new windows, new tabs and menu
       // commands, but it lives in the hidden toolbar; send that focus to the
@@ -388,6 +424,10 @@
         }
       });
 
+      this.themeChildWindows();
+      this.themeInContentPages();
+      this.trackSiteAccent();
+
       if (typeof CustomizableUI !== "undefined") {
         try {
           CustomizableUI.addListener({
@@ -403,6 +443,154 @@
         const obs = new MutationObserver(() => this.syncExtensions());
         obs.observe(nbTarget, { childList: true });
       }
+    },
+
+    /**
+     * Records the accent a page declares (or Hilal guessed) for its browser,
+     * and applies it when that browser is the selected one.
+     */
+    setSiteAccent(browser, color) {
+      browser._hilalSiteAccent = color;
+      this.updatePageAccent(browser);
+    },
+
+    // A boost with "Color the browser" on sets the accent for its site.
+    setBoostAccent(browser, color) {
+      browser._hilalBoostAccent = color;
+      this.updatePageAccent(browser);
+    },
+
+    updatePageAccent(browser = gBrowser.selectedBrowser) {
+      if (browser != gBrowser.selectedBrowser) {
+        return;
+      }
+      const followSite = Services.prefs.getBoolPref("hilal.theme.followSite", false);
+      MaterialYouTheme.setSiteColor(
+        browser._hilalBoostAccent ||
+          (followSite && browser._hilalSiteAccent) ||
+          null
+      );
+    },
+
+    trackSiteAccent() {
+      gBrowser.tabContainer.addEventListener("TabSelect", () =>
+        this.updatePageAccent()
+      );
+      const onFollowSite = () => this.updatePageAccent();
+      Services.prefs.addObserver("hilal.theme.followSite", onFollowSite);
+      window.addEventListener(
+        "unload",
+        () => Services.prefs.removeObserver("hilal.theme.followSite", onFollowSite),
+        { once: true }
+      );
+      gBrowser.addTabsProgressListener({
+        onLocationChange(browser, webProgress, request, location, flags) {
+          if (!webProgress.isTopLevel ||
+              flags & Ci.nsIWebProgressListener.LOCATION_CHANGE_SAME_DOCUMENT) {
+            return;
+          }
+          // Pages without the boosts actor (about:, file:) have no accent.
+          if (!location.schemeIs("http") && !location.schemeIs("https")) {
+            browser._hilalBoostAccent = null;
+            HilalShell.setSiteAccent(browser, null);
+          }
+        },
+      });
+    },
+
+    // Dialog windows such as About load the same Material tokens; give them
+    // this window's accent so they match the active workspace.
+    themeChildWindows() {
+      const observer = (subject, topic) => {
+        if (topic != "domwindowopened") {
+          return;
+        }
+        subject.addEventListener(
+          "DOMContentLoaded",
+          () => {
+            const doc = subject.document;
+            const root = doc?.documentElement;
+            if (root?.id == "places") {
+              // The Library window takes the Material styles too.
+              for (const href of [
+                "chrome://browser/skin/hilal-m3-tokens.css",
+                "chrome://browser/skin/hilal-m3-firefox.css",
+                "chrome://browser/content/hilal/HilalLibrary.css",
+              ]) {
+                doc.insertBefore(
+                  doc.createProcessingInstruction("xml-stylesheet", `href="${href}" type="text/css"`),
+                  root
+                );
+              }
+            } else if (root?.id != "aboutDialog") {
+              return;
+            }
+            const source = Services.wm.getMostRecentWindow("navigator:browser");
+            const style = source?.document.documentElement.style;
+            if (!style) {
+              return;
+            }
+            for (let i = 0; i < style.length; i++) {
+              const name = style[i];
+              if (name.startsWith("--")) {
+                root.style.setProperty(name, style.getPropertyValue(name));
+              }
+            }
+          },
+          { once: true }
+        );
+      };
+      Services.ww.registerNotification(observer);
+      window.addEventListener(
+        "unload",
+        () => Services.ww.unregisterNotification(observer),
+        { once: true }
+      );
+    },
+
+    // Add-ons and the other about: pages that run in this process load
+    // hilal-in-content.css; give them this window's accent, and keep it in
+    // step when the accent changes. Settings does this itself.
+    themeInContentPages() {
+      const copy = doc => {
+        const root = doc?.documentElement;
+        if (
+          !root ||
+          !doc.documentURI?.startsWith("about:") ||
+          /^about:(preferences|settings|blank|newtab|home)/.test(doc.documentURI)
+        ) {
+          return;
+        }
+        const style = document.documentElement.style;
+        for (let i = 0; i < style.length; i++) {
+          if (style[i].startsWith("--")) {
+            root.style.setProperty(style[i], style.getPropertyValue(style[i]));
+          }
+        }
+      };
+      const onLoad = event => {
+        const doc = event.originalTarget;
+        if (doc?.nodeType == Node.DOCUMENT_NODE && doc != document) {
+          copy(doc);
+        }
+      };
+      window.addEventListener("DOMContentLoaded", onLoad, true);
+      const onAccent = subject => {
+        if (subject != window) {
+          return;
+        }
+        for (const browser of gBrowser.browsers) {
+          if (!browser.isRemoteBrowser) {
+            copy(browser.contentDocument);
+          }
+        }
+      };
+      Services.obs.addObserver(onAccent, "hilal-accent-changed");
+      window.addEventListener(
+        "unload",
+        () => Services.obs.removeObserver(onAccent, "hilal-accent-changed"),
+        { once: true }
+      );
     },
 
     ensureTabContextMenuReady() {
@@ -640,7 +828,7 @@
       // Suggestions Dropdown Container (M3 Search View Specification)
       const suggestionsDropdown = document.createElement("div");
       suggestionsDropdown.id = "hilal-search-dropdown";
-      suggestionsDropdown.className = "vertical round medium-elevate surface-container-high";
+      suggestionsDropdown.setAttribute("role", "listbox");
       urlContainer.appendChild(suggestionsDropdown);
 
       topbar.appendChild(urlContainer);
@@ -767,7 +955,7 @@
       tabsHeader.className = "row";
 
       const label = document.createElement("label");
-      label.className = "max hilal-tabs-label";
+      label.className = "hilal-tabs-label";
       label.setAttribute("data-l10n-id", "urlbar-search-mode-tabs");
       label.textContent = "TABS";
       tabsHeader.appendChild(label);
@@ -788,13 +976,35 @@
       tabList.id = "hilal-tab-list";
       sidebar.appendChild(tabList);
 
-      // Sidebar Footer (Settings)
+      // Footer: bookmarks, history, downloads, passwords, privacy and
+      // settings, each shown when its hilal.sidebar.footer.* pref is on.
+      // Bookmarks and history open Firefox's own panels next to the
+      // sidebar; the others open their pages.
       const footer = document.createElement("nav");
       footer.id = "hilal-sidebar-footer";
-      footer.className = "row center-align";
+      const footerButton = (id, icon, l10nId, pref, defaultOn, onClick) => {
+        const btn = document.createElement("button");
+        btn.className = "hilal-btn hilal-footer-btn";
+        btn.id = id;
+        btn.innerHTML = `<i>${icon}</i>`;
+        btn.dataset.pref = pref;
+        btn.dataset.default = defaultOn;
+        document.l10n.setAttributes(btn, l10nId);
+        btn.addEventListener("click", onClick);
+        footer.appendChild(btn);
+      };
+      const togglePanel = id => () => {
+        SidebarController.toggle(id);
+        this.updateFooterButtons();
+      };
+      footerButton("hilal-footer-bookmarks", "bookmarks", "hilal-sidebar-bookmarks", "hilal.sidebar.footer.bookmarks", true, togglePanel("viewBookmarksSidebar"));
+      footerButton("hilal-footer-history", "history", "hilal-sidebar-history", "hilal.sidebar.footer.history", true, togglePanel("viewHistorySidebar"));
+      footerButton("hilal-footer-downloads", "download", "hilal-sidebar-downloads", "hilal.sidebar.footer.downloads", true, () => document.getElementById("Tools:Downloads")?.doCommand());
+      footerButton("hilal-footer-passwords", "key", "hilal-sidebar-passwords", "hilal.sidebar.footer.passwords", false, () => LoginHelper.openPasswordManager(window, { entryPoint: "mainmenu" }));
+      footerButton("hilal-footer-privacy", "shield", "hilal-sidebar-privacy", "hilal.sidebar.footer.privacy", false, () => openPreferences("panePrivacy"));
 
       const settingsBtn = document.createElement("button");
-      settingsBtn.className = "circle transparent small hilal-btn";
+      settingsBtn.className = "hilal-btn";
       settingsBtn.id = "hilal-settings-btn";
       settingsBtn.setAttribute("data-l10n-id", "hilal-toolbar-settings");
       settingsBtn.title = "Settings";
@@ -806,15 +1016,111 @@
           this.navigate("about:preferences");
         }
       });
+      settingsBtn.dataset.pref = "hilal.sidebar.footer.settings";
+      settingsBtn.dataset.default = "true";
+      settingsBtn.classList.add("hilal-footer-btn");
       footer.appendChild(settingsBtn);
 
       sidebar.appendChild(footer);
+      this.updateFooterButtons();
+      this.themeSidebarPanels();
+      Services.prefs.addObserver("hilal.sidebar.footer.", this._footerObserver = () => this.updateFooterButtons());
+      window.addEventListener("unload", () => Services.prefs.removeObserver("hilal.sidebar.footer.", this._footerObserver), { once: true });
+
+      // Settings can change the tab layout and the sidebar density while
+      // windows are open.
+      const applyDensity = () =>
+        document.documentElement.setAttribute(
+          "hilal-sidebar-density",
+          Services.prefs.getStringPref("hilal.sidebar.density", "comfortable")
+        );
+      applyDensity();
+      const onLayoutPref = (subject, topic, pref) => {
+        if (pref == "hilal.sidebar.density") {
+          applyDensity();
+          return;
+        }
+        const mode = Services.prefs.getStringPref("hilal.tabs.layoutMode", "vertical");
+        if (mode != this.tabMode) {
+          this.setTabMode(mode, false);
+        }
+      };
+      Services.prefs.addObserver("hilal.sidebar.density", onLayoutPref);
+      Services.prefs.addObserver("hilal.tabs.layoutMode", onLayoutPref);
+      window.addEventListener(
+        "unload",
+        () => {
+          Services.prefs.removeObserver("hilal.sidebar.density", onLayoutPref);
+          Services.prefs.removeObserver("hilal.tabs.layoutMode", onLayoutPref);
+        },
+        { once: true }
+      );
+      // Firefox's panel opens and closes from other places too (menus, keys).
+      document.getElementById("sidebar-box") &&
+        new MutationObserver(() => this.updateFooterButtons()).observe(
+          document.getElementById("sidebar-box"),
+          { attributes: true, attributeFilter: ["hidden", "sidebarcommand"] }
+        );
 
       // Insert sidebar as first child of #browser
       const browserEl = document.getElementById("browser");
       if (browserEl) {
         browserEl.insertBefore(sidebar, browserEl.firstElementChild);
       }
+    },
+
+    // Firefox's bookmarks and history panels are separate documents; give
+    // each one the browser's Material tokens and Hilal's panel styles.
+    themeSidebarPanels() {
+      const browser = document.getElementById("sidebar");
+      if (!browser) {
+        return;
+      }
+      const apply = () => {
+        const doc = browser.contentDocument;
+        if (!doc?.documentElement || doc.getElementById("hilal-panel-sheets")) {
+          return;
+        }
+        const marker = doc.createElementNS("http://www.w3.org/1999/xhtml", "meta");
+        marker.id = "hilal-panel-sheets";
+        doc.documentElement.prepend(marker);
+        for (const href of [
+          "chrome://browser/skin/hilal-m3-tokens.css",
+          "chrome://browser/skin/hilal-m3-firefox.css",
+          "chrome://browser/content/hilal/HilalPanelPages.css",
+        ]) {
+          const pi = doc.createProcessingInstruction(
+            "xml-stylesheet",
+            `href="${href}" type="text/css"`
+          );
+          doc.insertBefore(pi, doc.documentElement);
+        }
+        const style = document.documentElement.style;
+        for (let i = 0; i < style.length; i++) {
+          if (style[i].startsWith("--")) {
+            doc.documentElement.style.setProperty(style[i], style.getPropertyValue(style[i]));
+          }
+        }
+        // The search field's native focus ring is inside its shadow DOM.
+        browser.contentWindow?.customElements
+          ?.whenDefined("moz-input-search")
+          .then(async () => {
+            const search = doc.getElementById("search-box");
+            await search?.updateComplete;
+            search?.shadowRoot?.querySelector("input")?.style.setProperty("outline", "none");
+          });
+      };
+      browser.addEventListener("load", apply, true);
+      apply();
+    },
+
+    updateFooterButtons() {
+      const open = !document.getElementById("sidebar-box")?.hidden && SidebarController.currentID;
+      for (const btn of document.querySelectorAll("#hilal-sidebar-footer .hilal-footer-btn")) {
+        btn.hidden = !Services.prefs.getBoolPref(btn.dataset.pref, btn.dataset.default == "true");
+      }
+      document.getElementById("hilal-footer-bookmarks")?.toggleAttribute("checked", open == "viewBookmarksSidebar");
+      document.getElementById("hilal-footer-history")?.toggleAttribute("checked", open == "viewHistorySidebar");
     },
 
     setTabMode(mode, persist = true) {
@@ -883,19 +1189,13 @@
     updateModeButton() {
       const btn = document.getElementById("hilal-layout-mode-btn");
       if (!btn) return;
-
-      if (this.tabMode === "vertical") {
-        btn.title = "Tab Layout: Vertical Only (Click to switch)";
-        btn.innerHTML = this.MODE_ICONS.vertical;
-      } else if (this.tabMode === "dual") {
-        btn.title =
-          "Tab Layout: Dual Mode (Safari Style: Horizontal & Vertical, Click to switch)";
-        btn.innerHTML = this.MODE_ICONS.dual;
-      } else {
-        btn.title =
-          "Tab Layout: Horizontal Only (Chrome Style, Click to switch)";
-        btn.innerHTML = this.MODE_ICONS.horizontal;
-      }
+      const mode = this.MODE_ICONS[this.tabMode] ? this.tabMode : "horizontal";
+      btn.innerHTML = this.MODE_ICONS[mode];
+      document.l10n.formatValue(`hilal-shell-layout-${mode}`).then(label => {
+        if (label) {
+          btn.title = label;
+        }
+      });
     },
 
     showModeContextMenu(anchor, event) {
@@ -1196,9 +1496,7 @@
       items.forEach((item, index) => {
         const row = document.createElement("div");
         const isSelected = index === this._selectedSuggestionIndex;
-        row.className = `hilal-search-item row wave round tiny-space ${
-          isSelected ? "secondary-container selected" : ""
-        }`;
+        row.className = `hilal-search-item${isSelected ? " selected" : ""}`;
         row.dataset.index = index;
 
         // Icon container
@@ -1236,26 +1534,26 @@
           img.src = favSrc;
           img.onerror = () => {
             img.remove();
-            iconDiv.innerHTML = `<i class="tiny">${iconName}</i>`;
+            iconDiv.innerHTML = `<i>${iconName}</i>`;
           };
           iconDiv.appendChild(img);
         } else {
-          iconDiv.innerHTML = `<i class="tiny">${iconName}</i>`;
+          iconDiv.innerHTML = `<i>${iconName}</i>`;
         }
         row.appendChild(iconDiv);
 
         // Content
         const contentDiv = document.createElement("div");
-        contentDiv.className = "max";
+        contentDiv.className = "hilal-search-item-text";
 
         const labelSpan = document.createElement("div");
-        labelSpan.className = "hilal-search-item-label bold";
+        labelSpan.className = "hilal-search-item-label";
         labelSpan.textContent = item.label;
         contentDiv.appendChild(labelSpan);
 
         if (item.sub) {
           const subSpan = document.createElement("div");
-          subSpan.className = "hilal-search-item-sub small-text opacity";
+          subSpan.className = "hilal-search-item-sub";
           if (typeof item.sub === "object") {
             document.l10n.setAttributes(subSpan, item.sub.id, item.sub.args);
           } else {
@@ -1269,26 +1567,26 @@
         // Trailing Beer CSS chip or icon
         if (item.type === "tab") {
           const trail = document.createElement("span");
-          trail.className = "chip small primary";
+          trail.className = "hilal-search-chip";
           trail.setAttribute("data-l10n-id", "hilal-shell-switch-to-tab");
           trail.textContent = "Switch to tab";
           row.appendChild(trail);
         } else if (item.type === "bang") {
           const trail = document.createElement("span");
-          trail.className = "chip small tertiary";
+          trail.className = "hilal-search-chip";
           trail.setAttribute("data-l10n-id", "hilal-shell-bang");
           trail.textContent = "Bang";
           row.appendChild(trail);
         } else if (item.type === "bang_hint") {
           const trail = document.createElement("span");
-          trail.className = "chip small tertiary";
+          trail.className = "hilal-search-chip";
           trail.setAttribute("data-l10n-id", "hilal-shell-shortcut");
           trail.textContent = "Shortcut";
           row.appendChild(trail);
         } else if (item.type === "search" || item.type === "suggestion") {
           const trail = document.createElement("i");
-          trail.className = "small opacity";
-          trail.textContent = "call_made";
+          trail.className = "hilal-search-trail";
+          trail.textContent = "north_west";
           row.appendChild(trail);
         }
 
@@ -1318,7 +1616,6 @@
       items.forEach((item, i) => {
         const isSel = i === index;
         item.classList.toggle("selected", isSel);
-        item.classList.toggle("secondary-container", isSel);
         if (isSel) {
           item.scrollIntoView({ block: "nearest" });
         }
@@ -1967,94 +2264,436 @@
       this._toastTimer = setTimeout(() => toast.classList.remove("visible"), 2600);
     },
 
-    openThemePicker(anchor, event) {
-      const existing = document.getElementById("hilal-theme-menu");
+    // The palette button in the address bar: accent color, colors from
+    // websites and automatic boosts, as one Material 3 Expressive panel.
+    openThemePicker(anchor) {
+      const existing = document.getElementById("hilal-color-panel");
       if (existing) {
-        existing.remove();
+        this.closeWithAnimation(existing);
         return;
       }
-
-      const menu = document.createElement("div");
-      menu.id = "hilal-theme-menu";
-      menu.className =
-        "beer menu vertical round medium-elevate active surface-container-high";
-
-      const title = document.createElement("label");
-      title.className = "bold uppercase small-text opacity padding";
-      title.setAttribute("data-l10n-id", "hilal-shell-accent-color");
-      title.textContent = "Accent color";
-      menu.appendChild(title);
-
-      const swatchesRow = document.createElement("div");
-      swatchesRow.className = "hilal-theme-swatches-row";
-
-      const colors = [
-        { name: "blue", hex: "#37adff" },
-        { name: "turquoise", hex: "#00c79a" },
-        { name: "green", hex: "#51cd00" },
-        { name: "yellow", hex: "#ffcb00" },
-        { name: "orange", hex: "#ff9f00" },
-        { name: "red", hex: "#ff613d" },
-        { name: "pink", hex: "#ff4bda" },
-        { name: "purple", hex: "#af51f5" },
-      ];
-
-      const currentActiveColor = MaterialYouTheme._currentColor || "blue";
-
-      colors.forEach(({ name, hex }) => {
-        const swatch = document.createElement("button");
-        swatch.className = "circle hilal-theme-swatch";
-        if (name === currentActiveColor) {
-          swatch.classList.add("active");
-        }
-        swatch.style.backgroundColor = hex;
-        swatch.title = name.charAt(0).toUpperCase() + name.slice(1);
-        swatch.addEventListener("click", e => {
-          e.stopPropagation();
-          MaterialYouTheme.applyTheme(name);
-          if (typeof Services !== "undefined") {
-            try {
-              const raw = Services.prefs.getStringPref(
-                "hilal.workspaces.data",
-                "[]"
-              );
-              const workspaces = JSON.parse(raw);
-              const activeId = Services.prefs.getStringPref(
-                "hilal.workspaces.active",
-                workspaces[0]?.id
-              );
-              const activeWs = workspaces.find(w => w.id === activeId);
-              if (activeWs) {
-                activeWs.color = name;
-                Services.prefs.setStringPref(
-                  "hilal.workspaces.data",
-                  JSON.stringify(workspaces)
-                );
-              }
-            } catch (err) {}
+      const html = (tag, attrs = {}, ...children) => {
+        const el = document.createElementNS("http://www.w3.org/1999/xhtml", tag);
+        for (const [k, v] of Object.entries(attrs)) {
+          if (k == "l10n") {
+            document.l10n.setAttributes(el, v);
+          } else if (k.startsWith("on")) {
+            el.addEventListener(k.slice(2), v);
+          } else if (v !== false && v != null) {
+            el.setAttribute(k, v === true ? "" : v);
           }
-          this.renderWorkspaces();
-          this.renderTabs();
-          menu.remove();
+        }
+        el.append(...children);
+        return el;
+      };
+      const prefs = Services.prefs;
+      const host = (() => {
+        try {
+          const uri = gBrowser.selectedBrowser.currentURI;
+          return uri.schemeIs("http") || uri.schemeIs("https") ? uri.host.replace(/^www\./, "") : "";
+        } catch (e) {
+          return "";
+        }
+      })();
+      const excludedList = () =>
+        prefs.getStringPref("hilal.boosts.auto.excluded", "").split(",").map(d => d.trim()).filter(Boolean);
+
+      const switchRow = (icon, titleId, descId, descArgs, checked, onChange) => {
+        const input = html("input", {
+          type: "checkbox",
+          role: "switch",
+          class: "hcp-switch",
+          checked,
+          onchange: e => onChange(e.target.checked),
         });
-        swatchesRow.appendChild(swatch);
-      });
-      menu.appendChild(swatchesRow);
+        return html(
+          "label",
+          { class: "hcp-row" },
+          html("i", { class: "hcp-row-icon" }, icon),
+          html(
+            "span",
+            { class: "hcp-row-text" },
+            html("span", { class: "hcp-row-title", l10n: titleId }),
+            descId ? html("span", { class: "hcp-row-desc", l10n: descArgs ? { id: descId, args: descArgs } : descId }) : ""
+          ),
+          input
+        );
+      };
 
+      // Accent color
+      const current = MaterialYouTheme._currentColor || "blue";
+      const swatches = html("div", { class: "hcp-swatches", role: "radiogroup" });
+      for (const [name, hex] of Object.entries(MaterialYouTheme.COLOR_MAP)) {
+        swatches.append(
+          html(
+            "button",
+            {
+              class: "hcp-swatch",
+              role: "radio",
+              "aria-checked": name == current ? "true" : "false",
+              title: name,
+              style: `--hcp-swatch: ${hex}`,
+              onclick: () => {
+                this.setWorkspaceAccent(name);
+                for (const b of swatches.children) {
+                  b.setAttribute("aria-checked", b == swatches.querySelector(`[title="${name}"]`));
+                }
+              },
+            },
+            html("i", {}, "check")
+          )
+        );
+      }
+      const pageColor = MaterialYouTheme._siteColor;
+      const accentCard = html(
+        "section",
+        { class: "hcp-card" },
+        html("h3", { class: "hcp-title", l10n: "hilal-color-panel-accent" }),
+        swatches,
+        pageColor
+          ? html(
+              "p",
+              { class: "hcp-note" },
+              html("span", { class: "hcp-dot", style: `background: ${pageColor}` }),
+              html("span", { l10n: "hilal-color-panel-page-color" })
+            )
+          : ""
+      );
+
+      // Colors from websites
+      const siteCard = html(
+        "section",
+        { class: "hcp-card" },
+        switchRow(
+          "travel_explore",
+          "hilal-color-panel-follow-site",
+          "hilal-color-panel-follow-site-desc",
+          null,
+          prefs.getBoolPref("hilal.theme.followSite", false),
+          on => prefs.setBoolPref("hilal.theme.followSite", on)
+        )
+      );
+
+      // Automatic boosts
+      const mode = prefs.getStringPref("hilal.boosts.auto.mode", "off");
+      const segmented = html("div", { class: "hcp-segmented", role: "radiogroup" });
+      for (const value of ["off", "compatible", "all"]) {
+        segmented.append(
+          html(
+            "button",
+            {
+              class: "hcp-segment",
+              role: "radio",
+              "aria-checked": value == mode ? "true" : "false",
+              onclick: () => {
+                prefs.setStringPref("hilal.boosts.auto.mode", value);
+                for (const b of segmented.children) {
+                  b.setAttribute("aria-checked", b.dataset.value == value);
+                }
+                boostRows.hidden = value == "off";
+              },
+              "data-value": value,
+            },
+            html("i", {}, "check"),
+            html("span", { l10n: `hilal-auto-boost-${value}` })
+          )
+        );
+      }
+      const boostRows = html(
+        "div",
+        { class: "hcp-rows", hidden: mode == "off" },
+        host
+          ? switchRow(
+              "web",
+              "hilal-color-panel-this-site",
+              "hilal-color-panel-this-site-desc",
+              { host },
+              !excludedList().includes(host),
+              on => {
+                const list = excludedList().filter(d => d != host);
+                if (!on) {
+                  list.push(host);
+                }
+                prefs.setStringPref("hilal.boosts.auto.excluded", list.join(","));
+              }
+            )
+          : "",
+        switchRow(
+          "dark_mode",
+          "hilal-auto-boost-darken-title",
+          null,
+          null,
+          prefs.getBoolPref("hilal.boosts.auto.darken", true),
+          on => prefs.setBoolPref("hilal.boosts.auto.darken", on)
+        )
+      );
+      const boostCard = html(
+        "section",
+        { class: "hcp-card" },
+        html("h3", { class: "hcp-title", l10n: "hilal-auto-boost-title" }),
+        segmented,
+        boostRows
+      );
+
+      const panel = html(
+        "div",
+        { id: "hilal-color-panel", role: "dialog" },
+        accentCard,
+        siteCard,
+        boostCard
+      );
       const rect = anchor.getBoundingClientRect();
-      menu.style.position = "fixed";
-      menu.style.top = `${rect.bottom + 6}px`;
-      menu.style.right = `${window.innerWidth - rect.right}px`;
-      menu.style.display = "flex";
-      document.body.appendChild(menu);
+      panel.style.top = `${rect.bottom + 8}px`;
+      panel.style.left = `${Math.max(8, Math.min(rect.left - 160, window.innerWidth - 320))}px`;
+      document.documentElement.appendChild(panel);
 
-      const onDocClick = e => {
-        if (!menu.contains(e.target) && !anchor.contains(e.target)) {
-          menu.remove();
-          document.removeEventListener("mousedown", onDocClick);
+      const close = e => {
+        if (e.type == "keydown" ? e.key == "Escape" : !panel.contains(e.target) && !anchor.contains(e.target)) {
+          this.closeWithAnimation(panel);
+          document.removeEventListener("mousedown", close, true);
+          document.removeEventListener("keydown", close, true);
         }
       };
-      setTimeout(() => document.addEventListener("mousedown", onDocClick), 0);
+      setTimeout(() => {
+        document.addEventListener("mousedown", close, true);
+        document.addEventListener("keydown", close, true);
+      }, 0);
+    },
+
+    // Hilal's own main menu, built like the color panel. Every item runs the
+    // same Firefox command the stock app menu does, and the labels come from
+    // Firefox's own strings, so they are already translated.
+    async openAppMenu(anchor) {
+      const existing = document.getElementById("hilal-app-menu");
+      if (existing) {
+        this.closeWithAnimation(existing);
+        return;
+      }
+      const html = (tag, attrs = {}, ...children) => {
+        const el = document.createElementNS("http://www.w3.org/1999/xhtml", tag);
+        for (const [k, v] of Object.entries(attrs)) {
+          if (k.startsWith("on")) {
+            el.addEventListener(k.slice(2), v);
+          } else if (v !== false && v != null) {
+            el.setAttribute(k, v === true ? "" : v);
+          }
+        }
+        el.append(...children);
+        return el;
+      };
+      const ids = [
+        "appmenuitem-new-tab", "appmenuitem-new-window", "appmenuitem-new-private-window",
+        "library-bookmarks-menu", "appmenuitem-history", "appmenuitem-downloads",
+        "appmenuitem-passwords", "appmenuitem-extensions-and-themes", "appmenuitem-print",
+        "appmenuitem-save-page", "appmenuitem-find-in-page", "appmenuitem-translate",
+        "appmenuitem-zoom", "appmenuitem-settings", "appmenuitem-more-tools", "appmenuitem-help",
+        "appmenuitem-fullscreen", "appmenuitem-zoom-enlarge", "appmenuitem-zoom-reduce",
+        "appmenu-customizetoolbar", "appmenu-about", "appmenu-help-more-troubleshooting-info",
+        "appmenuitem-exit2", "hilal-app-menu-devtools", "hilal-app-menu-task-manager",
+        "hilal-app-menu-help", "hilal-app-menu-report",
+      ];
+      const messages = await document.l10n.formatMessages(ids);
+      const text = {};
+      ids.forEach((id, i) => {
+        const m = messages[i];
+        text[id] = m?.value || m?.attributes?.find(a => a.name == "label" || a.name == "value")?.value || "";
+      });
+      const fallback = {
+        "library-bookmarks-menu": "Bookmarks",
+        "appmenuitem-save-page": "Save Page As…",
+        "appmenu-help-more-troubleshooting-info": "Troubleshooting Information",
+      };
+      const t = id => text[id] || fallback[id] || id;
+      const shortcut = keyId => {
+        const key = document.getElementById(keyId);
+        try {
+          return key ? ShortcutUtils.prettifyShortcut(key) : "";
+        } catch (e) {
+          return "";
+        }
+      };
+      const command = id => () => document.getElementById(id)?.doCommand();
+
+      const close = () => {
+        document.removeEventListener("mousedown", onOutside, true);
+        document.removeEventListener("keydown", onKey, true);
+        this.closeWithAnimation(menu);
+      };
+      const row = ({ icon, label, key, onClick, sub, disabled }) =>
+        html(
+          "button",
+          {
+            class: "ham-row",
+            disabled,
+            onclick: () => {
+              if (sub) {
+                showPage(sub());
+              } else {
+                close();
+                onClick();
+              }
+            },
+          },
+          html("i", { class: "ham-icon" }, icon),
+          html("span", { class: "ham-label" }, label),
+          key ? html("span", { class: "ham-key" }, key) : "",
+          sub ? html("i", { class: "ham-chevron" }, "chevron_right") : ""
+        );
+      const group = (...rows) => html("div", { class: "ham-group" }, ...rows.filter(Boolean));
+
+      const zoomValue = html("button", {
+        class: "ham-zoom-value",
+        onclick: () => {
+          FullZoom.reset();
+          updateZoom();
+        },
+      });
+      const updateZoom = () => {
+        zoomValue.textContent = `${Math.round(ZoomManager.zoom * 100)}%`;
+      };
+      updateZoom();
+      const zoomRow = html(
+        "div",
+        { class: "ham-row ham-zoom" },
+        html("i", { class: "ham-icon" }, "zoom_in"),
+        html("span", { class: "ham-label" }, t("appmenuitem-zoom")),
+        html("button", { class: "ham-icon-button", title: t("appmenuitem-zoom-reduce"), onclick: () => { FullZoom.reduce(); updateZoom(); } }, html("i", {}, "remove")),
+        zoomValue,
+        html("button", { class: "ham-icon-button", title: t("appmenuitem-zoom-enlarge"), onclick: () => { FullZoom.enlarge(); updateZoom(); } }, html("i", {}, "add")),
+        html("button", { class: "ham-icon-button", title: t("appmenuitem-fullscreen"), onclick: () => { close(); BrowserCommands.fullScreen(); } }, html("i", {}, "fullscreen"))
+      );
+
+      const mainPage = () =>
+        html(
+          "div",
+          { class: "ham-page" },
+          group(
+            row({ icon: "tab", label: t("appmenuitem-new-tab"), key: shortcut("key_newNavigatorTab"), onClick: command("cmd_newNavigatorTab") }),
+            row({ icon: "open_in_new", label: t("appmenuitem-new-window"), key: shortcut("key_newNavigator"), onClick: command("cmd_newNavigator") }),
+            row({ icon: "domino_mask", label: t("appmenuitem-new-private-window"), key: shortcut("key_privatebrowsing"), onClick: command("Tools:PrivateBrowsing") })
+          ),
+          group(
+            row({ icon: "bookmarks", label: t("library-bookmarks-menu"), onClick: () => SidebarController.show("viewBookmarksSidebar") }),
+            row({ icon: "history", label: t("appmenuitem-history"), onClick: () => SidebarController.show("viewHistorySidebar") }),
+            row({ icon: "download", label: t("appmenuitem-downloads"), key: shortcut("key_openDownloads"), onClick: command("Tools:Downloads") }),
+            row({ icon: "key", label: t("appmenuitem-passwords"), onClick: () => LoginHelper.openPasswordManager(window, { entryPoint: "mainmenu" }) }),
+            row({ icon: "extension", label: t("appmenuitem-extensions-and-themes"), key: shortcut("key_openAddons"), onClick: command("Tools:Addons") })
+          ),
+          group(
+            row({ icon: "print", label: t("appmenuitem-print"), key: shortcut("printKb"), onClick: command("cmd_print") }),
+            row({ icon: "save", label: t("appmenuitem-save-page"), key: shortcut("key_savePage"), onClick: command("Browser:SavePage") }),
+            row({ icon: "search", label: t("appmenuitem-find-in-page"), key: shortcut("key_find"), onClick: command("cmd_find") }),
+            row({ icon: "translate", label: t("appmenuitem-translate"), onClick: () => FullPageTranslationsPanel.open(new CustomEvent("command"), true) }),
+            zoomRow
+          ),
+          group(
+            row({ icon: "settings", label: t("appmenuitem-settings"), key: shortcut("key_preferencesCmdMac"), onClick: () => openPreferences() }),
+            row({ icon: "construction", label: t("appmenuitem-more-tools"), sub: moreToolsPage }),
+            row({ icon: "help", label: t("appmenuitem-help"), sub: helpPage })
+          )
+        );
+
+      const subPage = (title, ...groups) =>
+        html(
+          "div",
+          { class: "ham-page" },
+          html(
+            "div",
+            { class: "ham-header" },
+            html("button", { class: "ham-icon-button", onclick: () => showPage(mainPage(), true) }, html("i", {}, "arrow_back")),
+            html("h2", { class: "ham-title" }, title)
+          ),
+          ...groups
+        );
+      const moreToolsPage = () =>
+        subPage(
+          t("appmenuitem-more-tools"),
+          group(
+            row({ icon: "dashboard_customize", label: t("appmenu-customizetoolbar"), onClick: () => gCustomizeMode.enter() }),
+            row({ icon: "code", label: t("hilal-app-menu-devtools"), key: shortcut("key_toggleToolbox"), onClick: () => document.getElementById("key_toggleToolbox")?.doCommand() }),
+            row({ icon: "monitoring", label: t("hilal-app-menu-task-manager"), onClick: () => switchToTabHavingURI("about:processes", true) })
+          )
+        );
+      const helpPage = () =>
+        subPage(
+          t("appmenuitem-help"),
+          group(
+            row({ icon: "menu_book", label: t("hilal-app-menu-help"), onClick: () => openTrustedLinkIn("https://hilal-browser.vercel.app/#docs", "tab") }),
+            row({ icon: "bug_report", label: t("hilal-app-menu-report"), onClick: () => openTrustedLinkIn("https://github.com/VastSea0/hilal-browser/issues/new/choose", "tab") }),
+            row({ icon: "troubleshoot", label: t("appmenu-help-more-troubleshooting-info"), onClick: () => switchToTabHavingURI("about:support", true) })
+          ),
+          group(row({ icon: "info", label: t("appmenu-about"), onClick: () => openAboutDialog() }))
+        );
+
+      const menu = html("div", { id: "hilal-app-menu", role: "menu" });
+      // Sub pages slide in while the menu grows or shrinks to the new page.
+      const showPage = (page, back = false) => {
+        const from = menu.getBoundingClientRect().height;
+        page.classList.add(back ? "ham-enter-back" : "ham-enter");
+        menu.replaceChildren(page);
+        const to = menu.getBoundingClientRect().height;
+        menu.animate([{ height: `${from}px` }, { height: `${to}px` }], {
+          duration: 300,
+          easing: "cubic-bezier(0.2, 0, 0, 1)",
+        });
+        page.querySelector("button:not([disabled])")?.focus({ focusVisible: false });
+      };
+      menu.append(mainPage());
+
+      const rect = anchor.getBoundingClientRect();
+      menu.style.top = `${rect.bottom + 8}px`;
+      menu.style.right = `${Math.max(8, window.innerWidth - rect.right)}px`;
+      document.documentElement.appendChild(menu);
+      anchor.setAttribute("open", "true");
+
+      const onOutside = e => {
+        if (!menu.contains(e.target) && !anchor.contains(e.target)) {
+          close();
+        }
+      };
+      const onKey = e => {
+        if (e.key == "Escape") {
+          close();
+        }
+      };
+      const observer = new MutationObserver(() => {
+        if (!menu.isConnected) {
+          anchor.removeAttribute("open");
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.documentElement, { childList: true });
+      setTimeout(() => {
+        document.addEventListener("mousedown", onOutside, true);
+        document.addEventListener("keydown", onKey, true);
+      }, 0);
+    },
+
+    // Plays the panel's exit animation, then removes it.
+    closeWithAnimation(panel) {
+      if (!panel?.isConnected || panel.hasAttribute("closing")) {
+        return;
+      }
+      panel.setAttribute("closing", "true");
+      const done = () => panel.remove();
+      panel.addEventListener("animationend", done, { once: true });
+      setTimeout(done, 300);
+    },
+
+    // Gives the active workspace a new accent color.
+    setWorkspaceAccent(name) {
+      MaterialYouTheme.applyTheme(name);
+      try {
+        const workspaces = JSON.parse(Services.prefs.getStringPref("hilal.workspaces.data", "[]"));
+        const activeId = Services.prefs.getStringPref("hilal.workspaces.active", workspaces[0]?.id);
+        const active = workspaces.find(w => w.id === activeId);
+        if (active) {
+          active.color = name;
+          Services.prefs.setStringPref("hilal.workspaces.data", JSON.stringify(workspaces));
+        }
+      } catch (err) {}
+      this.renderWorkspaces();
+      this.renderTabs();
     },
 
     mountNativeToolbarElements() {
@@ -2127,6 +2766,24 @@
             nativeSlot.appendChild(node);
           }
         }
+        // The menu button opens Hilal's own menu instead of Firefox's panel.
+        const menuButton = document.getElementById("PanelUI-menu-button");
+        if (menuButton && !menuButton._hilalMenu) {
+          menuButton._hilalMenu = true;
+          const open = event => {
+            if (event.type == "keypress" && event.key != "Enter" && event.key != " ") {
+              return;
+            }
+            if (event.type == "mousedown" && event.button != 0) {
+              return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            this.openAppMenu(menuButton);
+          };
+          menuButton.addEventListener("mousedown", open, true);
+          menuButton.addEventListener("keypress", open, true);
+        }
       }
     },
 
@@ -2192,6 +2849,16 @@
     },
 
     navigate(rawUrl) {
+      // Firefox has no pages at these addresses; open the matching panels.
+      const panels = {
+        "about:bookmarks": "viewBookmarksSidebar",
+        "about:history": "viewHistorySidebar",
+      };
+      const typed = String(rawUrl ?? "").trim().toLowerCase();
+      if (panels[typed]) {
+        SidebarController.show(panels[typed]);
+        return;
+      }
       if (!rawUrl || !window.gBrowser) return;
       let url = rawUrl.trim();
       if (!url) return;
@@ -2462,7 +3129,7 @@
     createTabPill(tab) {
       const isSelected = tab.selected || tab === window.gBrowser?.selectedTab;
       const pill = document.createElement("div");
-      pill.className = `hilal-tab-pill row wave round tiny-space ${isSelected ? "secondary-container active" : ""}`;
+      pill.className = `hilal-tab-pill${isSelected ? " active" : ""}`;
       pill._tab = tab;
       pill.tab = tab;
       pill.setAttribute("draggable", "true");
@@ -2477,7 +3144,7 @@
 
       // Title container
       const titleSpan = document.createElement("span");
-      titleSpan.className = "max hilal-tab-title";
+      titleSpan.className = "hilal-tab-title";
       const initialTitle = tab.label || tab.getAttribute("label") || "New Tab";
       titleSpan.textContent = initialTitle;
       titleSpan.title = initialTitle;
@@ -2495,7 +3162,7 @@
 
       // Close button — Beer CSS circle transparent button with Material Symbols close icon
       const closeBtn = document.createElement("button");
-      closeBtn.className = "circle transparent small hilal-tab-close-btn";
+      closeBtn.className = "hilal-tab-close-btn";
       closeBtn.setAttribute("aria-label", "Close tab");
       closeBtn.setAttribute("data-l10n-id", "hilal-toolbar-close-tab");
       closeBtn.innerHTML = "<i class=\"tiny\">close</i>";
@@ -2829,7 +3496,6 @@
         }
 
         pill.classList.toggle("active", isSelected);
-        pill.classList.toggle("secondary-container", isSelected);
         pill.classList.toggle("multiselected", isMultiSelected && !isSelected);
         pill.classList.toggle("split-tab", isSplit);
         pill.classList.toggle("split-active", isSplitActive);
@@ -3033,6 +3699,25 @@
           writable: true,
         });
       }
+    },
+
+    // The downloads panel anchors to the button's badge stack, which the
+    // shell hides while no download is running (it draws its own icon).
+    // A popup cannot open on an element without a box, so use the button.
+    installDownloadsAnchor() {
+      const button = window.DownloadsButton;
+      if (!button?.getAnchor || button._hilalAnchor) {
+        return;
+      }
+      const getAnchor = button.getAnchor.bind(button);
+      button._hilalAnchor = true;
+      button.getAnchor = () => {
+        const anchor = getAnchor();
+        if (anchor && !anchor.getBoundingClientRect().width) {
+          return anchor.closest("toolbarbutton") || anchor;
+        }
+        return anchor;
+      };
     },
 
     // Permission, password and add-on prompts anchor to icons inside the

@@ -1,0 +1,320 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*
+ * Firefox's in-content pages (Add-ons, "Your tab just crashed" and the other
+ * info pages) in Hilal's Material 3 Expressive style, the same language as
+ * Settings. Imported by aboutaddons.css and info-pages.css.
+ *
+ * The colors below are a baseline for the first paint and for pages in the
+ * content process. Pages in the parent process get the browser window's
+ * accent tokens as inline styles on their root (HilalShell.js), which win.
+ */
+
+:root {
+  --primary: light-dark(#6750a4, #d0bcff);
+  --on-primary: light-dark(#ffffff, #381e72);
+  --primary-container: light-dark(#eaddff, #4f378b);
+  --on-primary-container: light-dark(#21005d, #eaddff);
+  --secondary-container: light-dark(#e8def8, #4a4458);
+  --on-secondary-container: light-dark(#1d192b, #e8def8);
+  --surface: light-dark(#fef7ff, #141218);
+  --surface-container-low: light-dark(#f7f2fa, #1d1b20);
+  --surface-container: light-dark(#f3edf7, #211f26);
+  --surface-container-high: light-dark(#ece6f0, #2b2930);
+  --surface-container-highest: light-dark(#e6e0e9, #36343b);
+  --on-surface: light-dark(#1d1b20, #e6e0e9);
+  --on-surface-variant: light-dark(#49454f, #cac4d0);
+  --outline: light-dark(#79747e, #938f99);
+  --outline-variant: light-dark(#cac4d0, #49454f);
+}
+
+/* Firefox's widgets declare their defaults on :host inside shadow DOM, so
+   the tokens are set on the host elements too. */
+:root,
+:host,
+moz-page-nav,
+moz-page-nav-button,
+moz-card,
+moz-toggle,
+moz-select,
+moz-input-search,
+moz-input-text,
+moz-message-bar,
+moz-checkbox,
+moz-radio,
+moz-button,
+moz-button-group,
+moz-support-link,
+moz-box-item,
+moz-box-button {
+  --background-color-canvas: var(--surface);
+  --background-color-box: var(--surface-container);
+  --in-content-page-background: var(--surface);
+  --in-content-page-color: var(--on-surface);
+  --text-color: var(--on-surface);
+  --text-color-deemphasized: var(--on-surface-variant);
+  --link-color: var(--primary);
+  --link-color-hover: var(--primary);
+  --link-color-active: var(--primary);
+  --color-accent-primary: var(--primary);
+  --color-accent-primary-hover: color-mix(in srgb, var(--on-primary) 8%, var(--primary));
+  --color-accent-primary-active: color-mix(in srgb, var(--on-primary) 12%, var(--primary));
+  --border-color: var(--outline-variant);
+  --border-color-card: transparent;
+  --focus-outline-color: var(--primary);
+
+  --button-border-radius: 9999px;
+  --button-border: none;
+  --button-border-color: transparent;
+  --button-background-color: var(--secondary-container);
+  --button-background-color-hover: color-mix(in srgb, var(--on-secondary-container) 8%, var(--secondary-container));
+  --button-background-color-active: color-mix(in srgb, var(--on-secondary-container) 12%, var(--secondary-container));
+  --button-text-color: var(--on-secondary-container);
+  --button-text-color-hover: var(--on-secondary-container);
+  --button-text-color-active: var(--on-secondary-container);
+  --button-background-color-primary: var(--primary);
+  --button-background-color-primary-hover: color-mix(in srgb, var(--on-primary) 8%, var(--primary));
+  --button-background-color-primary-active: color-mix(in srgb, var(--on-primary) 12%, var(--primary));
+  --button-text-color-primary: var(--on-primary);
+  --button-text-color-primary-hover: var(--on-primary);
+  --button-text-color-primary-active: var(--on-primary);
+  --button-background-color-ghost-hover: color-mix(in srgb, var(--on-surface) 8%, transparent);
+  --button-background-color-ghost-active: color-mix(in srgb, var(--on-surface) 12%, transparent);
+
+  /* Navigation drawer: M3 pill indicator */
+  --page-nav-border-color: transparent;
+  --page-nav-button-border-radius: 28px;
+  --page-nav-button-padding: 10px 16px;
+  --page-nav-button-indicator-width: 0;
+  --page-nav-button-text-color: var(--on-surface-variant);
+  --page-nav-button-text-color-hover: var(--on-surface);
+  --page-nav-button-text-color-active: var(--on-secondary-container);
+  --page-nav-button-background-color: transparent;
+  --page-nav-button-background-color-hover: color-mix(in srgb, var(--on-surface) 8%, transparent);
+  --page-nav-button-background-color-active: color-mix(in srgb, var(--on-surface) 12%, transparent);
+  --page-nav-button-background-color-selected: var(--secondary-container);
+  --page-nav-button-border-color-hover: transparent;
+  --page-nav-button-border-color-active: transparent;
+  --page-nav-hr-background-color: var(--outline-variant);
+
+  --card-background-color: var(--surface-container);
+  --card-border-color: transparent;
+  --card-border-radius: 24px;
+  --card-box-shadow: none;
+  --card-box-shadow-hover: none;
+
+  /* Switches: M3 track and handle */
+  --toggle-width: 52px;
+  --toggle-height: 32px;
+  --toggle-border-radius: 16px;
+  --toggle-border-width: 2px;
+  --toggle-border-color: var(--outline);
+  --toggle-border-color-hover: var(--outline);
+  --toggle-border-color-active: var(--outline);
+  --toggle-background-color: var(--surface-container-highest);
+  --toggle-background-color-hover: var(--surface-container-highest);
+  --toggle-background-color-active: var(--surface-container-highest);
+  --toggle-background-color-pressed: var(--primary);
+  --toggle-background-color-pressed-hover: var(--primary);
+  --toggle-background-color-pressed-active: var(--primary);
+  --toggle-dot-background-color: var(--outline);
+  --toggle-dot-background-color-hover: var(--on-surface-variant);
+  --toggle-dot-background-color-active: var(--on-surface-variant);
+  --toggle-dot-background-color-on-pressed: var(--on-primary);
+  --toggle-dot-width: 16px;
+  --toggle-dot-height: 16px;
+  --toggle-dot-margin: 6px;
+
+  /* Fields: filled and tonal */
+  --input-text-background-color: var(--surface-container-high);
+  --input-text-border: 1px solid transparent;
+  --input-text-border-color: transparent;
+  --input-text-border-radius: 20px;
+  --input-text-min-height: 40px;
+  --input-text-color: var(--on-surface);
+  --select-background-color: var(--surface-container-highest);
+  --select-border: none;
+  --select-border-radius: 14px;
+
+  --message-bar-background-color: var(--secondary-container);
+  --message-bar-text-color: var(--on-secondary-container);
+  --message-bar-border-color: transparent;
+  --message-bar-border-radius: 18px;
+
+  /* Tables (Troubleshooting Information and others): tonal cells split
+     by the page color */
+  --table-background-color: var(--surface-container);
+  --table-header-background-color: var(--surface-container-high);
+  --table-header-text-color: var(--on-surface);
+  --table-border-color: var(--surface);
+}
+
+body {
+  background-color: var(--surface);
+  color: var(--on-surface);
+}
+
+/* Plain buttons on these pages are pills */
+button:not(.ghost-button, .tab-button, .more-options-button, [type="checkbox"]) {
+  border-radius: 9999px;
+  transition:
+    border-radius 300ms cubic-bezier(0.2, 0, 0, 1),
+    background-color 150ms linear;
+}
+
+button:not(.ghost-button, .tab-button, .more-options-button):active {
+  border-radius: 12px;
+}
+
+th {
+  font-weight: 500;
+}
+
+.action-box {
+  border: none !important;
+  border-radius: 24px;
+  background-color: var(--surface-container) !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Add-ons
+ * ------------------------------------------------------------------------- */
+
+#sidebar categories-box moz-page-nav {
+  --page-nav-margin-top: 0;
+}
+
+.main-heading > h1 {
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.list-section-heading {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--on-surface-variant);
+}
+
+/* Each add-on is a tonal card; the list reads as one group with large outer
+   and small inner corners, like Hilal's menus. */
+addon-list addon-card > .addon.card,
+addon-card[expanded] .addon.card {
+  border: none;
+  background-color: var(--surface-container);
+}
+
+addon-list section > addon-card:not([expanded]) > .addon.card {
+  margin-bottom: 2px;
+  border-radius: 6px;
+}
+
+addon-list section > addon-card:not([expanded]):first-of-type > .addon.card {
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+}
+
+addon-list section > addon-card:not([expanded]):last-of-type > .addon.card {
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+}
+
+addon-card:not([expanded]) > .addon.card:hover {
+  background-color: color-mix(in srgb, var(--on-surface) 5%, var(--surface-container));
+}
+
+addon-card[expanded] .addon.card {
+  border-radius: 28px;
+}
+
+.card-heading-icon {
+  border-radius: 10px;
+}
+
+.addon-name {
+  font-weight: 500;
+}
+
+.addon-description {
+  color: var(--on-surface-variant);
+}
+
+.tab-group {
+  border: none;
+}
+
+button.tab-button {
+  border-block-width: 3px;
+  border-radius: 0;
+}
+
+button.tab-button[selected] {
+  border-block-end-color: var(--primary);
+  color: var(--primary);
+}
+
+/* ---------------------------------------------------------------------------
+ * "Your tab just crashed": Hilal's logo on an M3 Expressive cookie shape
+ * ------------------------------------------------------------------------- */
+
+html:has(#restoreTab) .title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  background-image: none;
+  padding-inline-start: 0;
+  margin-inline-start: 0;
+}
+
+html:has(#restoreTab) .title::before {
+  content: "";
+  width: 136px;
+  height: 136px;
+  background:
+    url("chrome://branding/content/about-logo.png") center / 64px no-repeat,
+    light-dark(var(--primary), var(--primary-container));
+  mask: url("chrome://global/skin/hilal-shape-cookie9.svg") center / 100% 100% no-repeat;
+}
+
+html:has(#restoreTab) .title-text {
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+}
+
+html:has(#restoreTab) #reportBox {
+  border: none;
+  border-radius: 24px;
+  background-color: var(--surface-container);
+}
+
+html:has(#restoreTab) .button-container {
+  gap: 8px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Passwords (about:logins): Hilal's logo on a cookie shape instead of the
+ * fox, and pill search
+ * ------------------------------------------------------------------------- */
+
+img.illustration[src*="cpm-fox-illustration"] {
+  box-sizing: border-box;
+  width: 168px;
+  height: 168px;
+  padding: 44px;
+  content: url("chrome://branding/content/about-logo.png");
+  background-color: light-dark(var(--primary), var(--primary-container));
+  mask: url("chrome://global/skin/hilal-shape-cookie9.svg") center / 100% 100% no-repeat;
+}
+
+input.filter[type="text"] {
+  min-height: 40px;
+  border: none;
+  border-radius: 20px;
+  background-color: var(--surface-container-high);
+  color: var(--on-surface);
+  outline: none;
+}
+

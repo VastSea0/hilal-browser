@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { GithubRelease, GithubAsset } from "../types";
 import { formatBytes, isBrowserDownload } from "../utils/github";
 
+// Removes the quarantine flag macOS puts on downloads; Hilal is ad-hoc signed
+// because the project has no Apple Developer account.
+const MAC_FIX_COMMAND = 'xattr -dr com.apple.quarantine "/Applications/Hilal Browser.app"';
+
 interface DownloadModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,6 +20,7 @@ export default function DownloadModal({
   lang,
 }: DownloadModalProps) {
   const [downloadedAsset, setDownloadedAsset] = useState<GithubAsset | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const t = {
     tr: {
@@ -29,6 +34,10 @@ export default function DownloadModal({
       closeBtn: "Kapat",
       redownloadBtn: "Tekrar İndir",
       viewAllOnGh: "GitHub Releases'de Tümünü Gör",
+      macTitle: "macOS'ta ilk açılış",
+      macHint: "Hilal Apple tarafından imzalanmadığı için macOS uygulamayı \"hasarlı\" diye açmayabilir. Uygulamayı Uygulamalar klasörüne taşıdıktan sonra Terminal'de şunu bir kez çalıştırın:",
+      copy: "Kopyala",
+      copied: "Kopyalandı",
       platforms: {
         macos: "macOS Apple Silicon (.dmg)",
         windowsExe: "Windows Kurulum Paketi (.exe)",
@@ -51,6 +60,10 @@ export default function DownloadModal({
       closeBtn: "Close",
       redownloadBtn: "Download Again",
       viewAllOnGh: "View All on GitHub Releases",
+      macTitle: "First launch on macOS",
+      macHint: "Hilal is not signed by Apple, so macOS may refuse to open it or call it \"damaged\". After moving it to the Applications folder, run this once in Terminal:",
+      copy: "Copy",
+      copied: "Copied",
       platforms: {
         macos: "macOS Apple Silicon (.dmg)",
         windowsExe: "Windows Installer (.exe)",
@@ -94,6 +107,7 @@ export default function DownloadModal({
 
   const handleDownload = (asset: GithubAsset) => {
     setDownloadedAsset(asset);
+    setCopied(false);
     try {
       const link = document.createElement("a");
       link.href = asset.browser_download_url;
@@ -194,6 +208,29 @@ export default function DownloadModal({
                   <span>{formatBytes(downloadedAsset.size)}</span>
                 </div>
               </div>
+              {downloadedAsset.name.toLowerCase().endsWith(".dmg") && (
+                <div className="mx-auto max-w-lg text-left rounded-2xl bg-m3-container-high border border-[var(--outline-variant)]/30 p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-bold text-[var(--on-surface)]">
+                    <i className="text-lg text-[var(--primary)]">info</i>
+                    <span>{activeT.macTitle}</span>
+                  </div>
+                  <p className="text-xs text-[var(--on-surface-variant)] m-0">{activeT.macHint}</p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 min-w-0 overflow-x-auto whitespace-nowrap rounded-xl bg-m3-container-lowest px-3 py-2 text-xs font-mono text-[var(--on-surface)]">
+                      {MAC_FIX_COMMAND}
+                    </code>
+                    <button
+                      type="button"
+                      className="shrink-0 h-9 px-4 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-xs font-semibold border-0 cursor-pointer"
+                      onClick={() => {
+                        navigator.clipboard?.writeText(MAC_FIX_COMMAND).then(() => setCopied(true), () => {});
+                      }}
+                    >
+                      {copied ? activeT.copied : activeT.copy}
+                    </button>
+                  </div>
+                </div>
+              )}
               <div className="pt-2 text-xs text-[var(--on-surface-variant)]">
                 <span>{activeT.directLinkHint} </span>
                 <a

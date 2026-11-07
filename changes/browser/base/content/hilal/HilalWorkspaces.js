@@ -1578,9 +1578,9 @@
       }
     }
 
-    _makeMozBtn(label, type) {
+    _makeMozBtn(l10nId, type) {
       const button = document.createElement("moz-button");
-      button.setAttribute("label", label);
+      document.l10n.setAttributes(button, l10nId);
       if (type) {
         button.setAttribute("type", type);
       }
@@ -1641,11 +1641,11 @@
 
       const title = document.createElement("h3");
       title.id = "hilal-ws-dialog-title";
-      title.textContent = titleText;
+      document.l10n.setAttributes(title, titleText);
       box.appendChild(title);
 
       const emojiLabel = document.createElement("label");
-      emojiLabel.textContent = "Emoji";
+      document.l10n.setAttributes(emojiLabel, "hilal-ws-dialog-emoji");
       emojiLabel.id = "hilal-ws-emoji-label";
       box.appendChild(emojiLabel);
 
@@ -1682,7 +1682,7 @@
       box.appendChild(emojiGrid);
 
       const colorLabel = document.createElement("label");
-      colorLabel.textContent = "Color";
+      document.l10n.setAttributes(colorLabel, "hilal-ws-dialog-color");
       colorLabel.id = "hilal-ws-color-label";
       box.appendChild(colorLabel);
 
@@ -1718,7 +1718,7 @@
       box.appendChild(colorGrid);
 
       const nameLabel = document.createElement("label");
-      nameLabel.textContent = "Name";
+      document.l10n.setAttributes(nameLabel, "hilal-ws-dialog-name");
       nameLabel.htmlFor = "hilal-ws-name-input";
       box.appendChild(nameLabel);
 
@@ -1726,7 +1726,7 @@
       nameInput.id = "hilal-ws-name-input";
       nameInput.type = "text";
       nameInput.maxLength = MAX_NAME_LENGTH;
-      nameInput.placeholder = "Workspace name";
+      document.l10n.setAttributes(nameInput, "hilal-ws-dialog-name-input");
       nameInput.value = initialWorkspace.name;
       box.appendChild(nameInput);
 
@@ -1765,15 +1765,21 @@
 
     _showCreateDialog() {
       const index = this._workspaces.length;
-      const dialog = this._buildDialog("New Workspace", {
+      const dialog = this._buildDialog("hilal-ws-dialog-new-title", {
         name: "Workspace",
         emoji: this._defaultEmoji(index),
         color: this._defaultColor(index),
       });
       const { actions, nameInput, close, getName, getEmoji, getColor } = dialog;
+      document.l10n.formatValue("hilal-ws-dialog-default-name").then(name => {
+        if (name && nameInput.value == "Workspace") {
+          nameInput.value = name;
+          nameInput.select();
+        }
+      });
 
-      const cancelBtn = this._makeMozBtn("Cancel");
-      const createBtn = this._makeMozBtn("Create", "primary");
+      const cancelBtn = this._makeMozBtn("hilal-ws-dialog-cancel");
+      const createBtn = this._makeMozBtn("hilal-ws-dialog-create", "primary");
       const updateCreateState = () => {
         createBtn.disabled = !getName();
         nameInput.toggleAttribute("aria-invalid", !getName());
@@ -1799,14 +1805,14 @@
     }
 
     _showRenameDialog(workspace) {
-      const dialog = this._buildDialog("Edit Workspace", workspace);
+      const dialog = this._buildDialog("hilal-ws-dialog-edit-title", workspace);
       const { actions, nameInput, close, getName, getEmoji, getColor } = dialog;
 
-      const deleteBtn = this._makeMozBtn("Delete", "destructive");
+      const deleteBtn = this._makeMozBtn("hilal-ws-dialog-delete", "destructive");
       deleteBtn.id = "hilal-ws-dialog-delete";
       deleteBtn.disabled = this._workspaces.length <= 1;
-      const cancelBtn = this._makeMozBtn("Cancel");
-      const saveBtn = this._makeMozBtn("Save", "primary");
+      const cancelBtn = this._makeMozBtn("hilal-ws-dialog-cancel");
+      const saveBtn = this._makeMozBtn("hilal-ws-dialog-save", "primary");
       const updateSaveState = () => {
         saveBtn.disabled = !getName();
         nameInput.toggleAttribute("aria-invalid", !getName());
@@ -2045,169 +2051,10 @@
       `;
     }
 
+    // The dialog itself is styled in HilalShell.css; only the per-color
+    // rules are generated.
     _getDialogCSS() {
-      return `
-        ${this._getColorCSS()}
-
-        #hilal-ws-dialog-overlay {
-          position: fixed !important;
-          inset: 0 !important;
-          width: 100vw !important;
-          height: 100vh !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          z-index: 999999 !important;
-          background: rgba(0, 0, 0, 0.65) !important;
-          backdrop-filter: blur(8px) !important;
-        }
-
-        #hilal-ws-dialog {
-          background: var(--md-sys-color-surface-container-high, #21252d) !important;
-          color: var(--md-sys-color-on-surface, #f3f4f6) !important;
-          border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.14)) !important;
-          border-radius: 20px !important;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
-          padding: 24px !important;
-          width: 440px !important;
-          max-width: 90vw !important;
-          display: flex !important;
-          flex-direction: column !important;
-          gap: 14px !important;
-          box-sizing: border-box !important;
-          font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        }
-
-        #hilal-ws-dialog h3 {
-          margin: 0 !important;
-          font-size: 18px !important;
-          font-weight: 700 !important;
-          color: var(--md-sys-color-on-surface, #ffffff) !important;
-        }
-
-        #hilal-ws-dialog label {
-          font-size: 12px !important;
-          font-weight: 600 !important;
-          text-transform: uppercase !important;
-          letter-spacing: 0.5px !important;
-          color: var(--md-sys-color-on-surface-variant, #c3c7cf) !important;
-        }
-
-        #hilal-ws-name-input {
-          appearance: none !important;
-          background: var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.08)) !important;
-          color: var(--md-sys-color-on-surface, #ffffff) !important;
-          border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.16)) !important;
-          border-radius: 10px !important;
-          padding: 10px 14px !important;
-          font-size: 14px !important;
-          outline: none !important;
-          width: 100% !important;
-          box-sizing: border-box !important;
-          transition: border-color 140ms ease !important;
-        }
-
-        #hilal-ws-name-input:focus {
-          border-color: var(--md-sys-color-primary, #af51f5) !important;
-          box-shadow: 0 0 0 2px var(--md-sys-color-primary, #af51f5) !important;
-        }
-
-        #hilal-ws-name-input[aria-invalid] {
-          border-color: var(--md-sys-color-error, #ef4444) !important;
-        }
-
-        #hilal-ws-emoji-grid {
-          display: grid !important;
-          grid-template-columns: repeat(8, 1fr) !important;
-          gap: 6px !important;
-          max-height: 130px !important;
-          overflow-y: auto !important;
-          padding: 8px !important;
-          background: var(--md-sys-color-surface-container, rgba(0, 0, 0, 0.25)) !important;
-          border-radius: 12px !important;
-          border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.08)) !important;
-          scrollbar-width: thin !important;
-        }
-
-        #hilal-ws-color-grid {
-          display: flex !important;
-          flex-wrap: wrap !important;
-          gap: 10px !important;
-          padding: 4px 0 !important;
-        }
-
-        .hilal-ws-choice {
-          appearance: none !important;
-          border: 1px solid transparent !important;
-          background: transparent !important;
-          border-radius: 8px !important;
-          cursor: pointer !important;
-          width: 38px !important;
-          height: 38px !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          transition: all 120ms ease !important;
-        }
-
-        .hilal-ws-emoji-choice {
-          font-size: 20px !important;
-        }
-
-        .hilal-ws-emoji-choice:hover {
-          background: var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.1)) !important;
-        }
-
-        .hilal-ws-emoji-choice.hilal-ws-choice-selected {
-          background: var(--md-sys-color-primary-container, rgba(175, 81, 245, 0.25)) !important;
-          border-color: var(--md-sys-color-primary, #af51f5) !important;
-        }
-
-        .hilal-ws-color-choice {
-          width: 34px !important;
-          height: 34px !important;
-          border-radius: 50% !important;
-          border: 2px solid transparent !important;
-          padding: 0 !important;
-        }
-
-        .hilal-ws-color-choice::before {
-          content: "" !important;
-          width: 22px !important;
-          height: 22px !important;
-          border-radius: 50% !important;
-          background: var(--hilal-ws-accent) !important;
-        }
-
-        .hilal-ws-color-choice:hover {
-          transform: scale(1.1) !important;
-        }
-
-        .hilal-ws-color-choice.hilal-ws-choice-selected {
-          border-color: var(--md-sys-color-primary, #af51f5) !important;
-          background: rgba(255, 255, 255, 0.12) !important;
-        }
-
-        #hilal-ws-dialog-actions {
-          display: flex !important;
-          gap: 10px !important;
-          justify-content: flex-end !important;
-          align-items: center !important;
-          margin-top: 8px !important;
-        }
-
-        #hilal-ws-dialog-actions moz-button,
-        #hilal-ws-dialog-actions button {
-          border-radius: 9999px !important;
-          font-size: 13px !important;
-          font-weight: 600 !important;
-          cursor: pointer !important;
-        }
-
-        #hilal-ws-dialog-delete {
-          margin-inline-end: auto !important;
-        }
-      `;
+      return this._getColorCSS();
     }
 
     _buildUI() {

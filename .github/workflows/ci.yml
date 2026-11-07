@@ -84,27 +84,31 @@ jobs:
 
           # A push that only touches the tests or the packaging around the
           # build retests the newest packages instead of building again.
-          # Releases (tag pushes calling this workflow) always build.
+          # Releases (tag pushes calling this workflow) always build. The diff
+          # is taken from the commit those packages were built from, because
+          # queued pushes in between may have been skipped.
           if [ -z "$reuse" ] && [ "${{ github.event_name }}" = push ] && [ "${{ github.ref }}" = refs/heads/main ]; then
-            changed="$(gh api "repos/$GITHUB_REPOSITORY/compare/${{ github.event.before }}...${{ github.sha }}" \
-              -q '.files[].filename' 2>/dev/null)" || changed=""
-            build_paths="$(printf '%s\n' "$changed" | grep -v -E \
-              '^(scripts/ci/(ui-smoke\.py|flatpak-[^/]+|flatpak-run\.sh)|scripts/(build-appimage|build-flatpak)\.sh|scripts/[^/]+\.mjs|flatpak/.*|io\.github\.VastSea0\.Hilal\.yml|\.github/workflows/(ci|release|android-[^/]+)\.yml|(www|docs|media|android|playstore|scripts/android-ota)/.*|.*\.md)$' || true)"
-            if [ -n "$changed" ] && [ -z "$build_paths" ]; then
-              for id in $(gh run list -R "$GITHUB_REPOSITORY" -w ci.yml -b main -L 30 \
-                          --json databaseId,conclusion -q '.[] | select(.conclusion == "success" or .conclusion == "failure") | .databaseId'); do
-                names="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$id/artifacts" \
-                  -q '[.artifacts[] | select(.expired | not) | .name] | join(" ")')"
-                # Only the newest run that built counts; older packages would
-                # miss its changes.
-                [[ " $names " == *" package-"* ]] || continue
-                if [[ " $names " == *" package-linux "* && " $names " == *" package-macos "* && " $names " == *" package-windows "* ]]; then
-                  reuse="$id"
-                  echo "::notice::Only test/packaging files changed; testing the packages of run $id."
-                fi
-                break
-              done
-            fi
+            for row in $(gh run list -R "$GITHUB_REPOSITORY" -w ci.yml -b main -L 30 \
+                           --json databaseId,conclusion,headSha -q '.[] | select(.conclusion == "success" or .conclusion == "failure") | "\(.databaseId):\(.headSha)"'); do
+              id="${row%%:*}"
+              names="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$id/artifacts" \
+                -q '[.artifacts[] | select(.expired | not) | .name] | join(" ")')"
+              # Only the newest run that built counts; older packages would
+              # miss its changes.
+              [[ " $names " == *" package-"* ]] || continue
+              [[ " $names " == *" package-linux "* && " $names " == *" package-macos "* && " $names " == *" package-windows "* ]] || break
+              changed="$(gh api "repos/$GITHUB_REPOSITORY/compare/${row#*:}...${{ github.sha }}" \
+                -q '.files[].filename' 2>/dev/null)" || changed=""
+              # The compare API lists at most 300 files; build when it may have cut some.
+              [ "$(printf '%s\n' "$changed" | wc -l)" -lt 300 ] || changed=""
+              build_paths="$(printf '%s\n' "$changed" | grep -v -E \
+                '^(scripts/ci/(ui-smoke\.py|update-test\.py|flatpak-[^/]+|flatpak-run\.sh|esr-bump\.sh)|scripts/(build-appimage|build-flatpak)\.sh|scripts/[^/]+\.mjs|flatpak/.*|io\.github\.VastSea0\.Hilal\.yml|\.github/workflows/(ci|release|esr-watch|verify-patches|android-[^/]+)\.yml|(www|docs|media|android|playstore|scripts/android-ota)/.*|.*\.md)$' || true)"
+              if [ -n "$changed" ] && [ -z "$build_paths" ]; then
+                reuse="$id"
+                echo "::notice::Only test/packaging files changed since run $id; testing its packages."
+              fi
+              break
+            done
           fi
 
           if [ -n "$reuse" ]; then
@@ -176,7 +180,7 @@ jobs:
           scripts/ci/apt-install.sh \
             libgtk-3-0t64 libdbus-glib-1-2 libasound2t64 libx11-xcb1 libxtst6 \
             xvfb weston fonts-dejavu-core fonts-noto-color-emoji dbus-x11 \
-            mesa-utils libgl1-mesa-dri
+            mesa-utils libgl1-mesa-dri imagemagick desktop-file-utils
 
       - name: Unpack
         run: |
@@ -191,7 +195,34 @@ jobs:
           # buttons are tested.
           dbus-run-session -- xvfb-run -a -s "-screen 0 1600x1000x24" \
             python3 scripts/ci/ui-smoke.py --binary app/firefox/firefox \
-              --pref browser.tabs.inTitlebar=1 --out ui-smoke
+              --pref browser.tabs.inTitlebar=1 --require-safebrowsing --out ui-smoke
+
+      - name: Build the AppImage
+        if: matrix.session == 'x11'
+        run: |
+          mkdir -p .appimagetool dist
+          curl -fsSL -o .appimagetool/appimagetool \
+            https://github.com/AppImage/appimagetool/releases/download/1.9.0/appimagetool-x86_64.AppImage
+          chmod +x .appimagetool/appimagetool
+          cp package/*.linux-*.tar.* dist/
+          HILAL_FIREFOX_SRC=/nonexistent APPIMAGE_EXTRACT_AND_RUN=1 scripts/build-appimage.sh build
+          mkdir appimage && mv dist/*.AppImage appimage/Hilal-x86_64.AppImage
+
+      # Runs from the extracted image: runners have no FUSE. A restart would
+      # outlive the extracted copy, so that part is left to the tarball runs.
+      - name: UI smoke (AppImage)
+        if: matrix.session == 'x11'
+        run: |
+          APPIMAGE_EXTRACT_AND_RUN=1 dbus-run-session -- xvfb-run -a -s "-screen 0 1600x1000x24" \
+            python3 scripts/ci/ui-smoke.py --binary appimage/Hilal-x86_64.AppImage \
+              --no-restart --out ui-smoke-appimage
+
+      - uses: actions/upload-artifact@v7
+        if: matrix.session == 'x11'
+        with:
+          name: package-appimage
+          path: appimage/
+          retention-days: 14
 
       - name: UI smoke (Wayland)
         if: matrix.session == 'wayland'
@@ -204,13 +235,77 @@ jobs:
 
       - name: Summary
         if: always()
-        run: cat ui-smoke/summary.md >> "$GITHUB_STEP_SUMMARY" || true
+        run: cat ui-smoke/summary.md ui-smoke-appimage/summary.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
 
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ui-smoke-linux-${{ matrix.session }}
-          path: ui-smoke/
+          path: |
+            ui-smoke/
+            ui-smoke-appimage/
+          retention-days: 14
+
+  # Installs the latest release and lets its own updater move it to this
+  # build's signed MAR, as users of that release will.
+  test-update:
+    needs: [plan, build-linux]
+    if: >-
+      always() && !cancelled() && contains(needs.plan.outputs.targets, 'linux') &&
+      (needs.plan.outputs.build == 'false' || needs.build-linux.result == 'success')
+    name: test (linux update)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: package-linux
+          path: package
+          run-id: ${{ needs.plan.outputs.artifacts_run }}
+          github-token: ${{ github.token }}
+
+      - name: Cache apt packages
+        uses: actions/cache@v5
+        with:
+          path: ~/apt-cache
+          key: apt-test-linux-v1
+
+      - name: Install runtime dependencies
+        run: |
+          scripts/ci/apt-install.sh \
+            libgtk-3-0t64 libdbus-glib-1-2 libasound2t64 libx11-xcb1 libxtst6 \
+            xvfb fonts-dejavu-core dbus-x11 mesa-utils libgl1-mesa-dri
+
+      - name: Unpack this build and the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! ls package/*.complete.mar >/dev/null 2>&1; then
+            echo "::warning::This build has no signed MAR, so the update path was not tested."
+            echo "skip=1" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          mkdir new old
+          tar -xf package/*.linux-*.tar.* -C new
+          tag="$(gh release view -R "$GITHUB_REPOSITORY" --json tagName -q .tagName)"
+          echo "Updating from $tag"
+          gh release download "$tag" -R "$GITHUB_REPOSITORY" -p '*-linux-x86_64.tar.xz' -D old-dl
+          tar -xf old-dl/*.tar.xz -C old
+
+      - name: Update the latest release to this build
+        if: env.skip != '1'
+        run: |
+          dbus-run-session -- xvfb-run -a -s "-screen 0 1280x800x24" \
+            python3 scripts/ci/update-test.py --old-dir old/firefox \
+              --mar package/*.complete.mar --new-ini new/firefox/application.ini --out update-test
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: update-test-linux
+          path: update-test/
           retention-days: 14
 
   # Builds the Flatpak from the tested tarball exactly as Flathub would and
@@ -379,20 +474,38 @@ jobs:
           Expand-Archive $zip.FullName -DestinationPath app
           Get-ChildItem app
 
-      - name: UI smoke
+      - name: UI smoke (portable zip)
         shell: pwsh
         run: python scripts/ci/ui-smoke.py --binary app/firefox/firefox.exe --out ui-smoke
+
+      # Most Windows users run the installer and use Windows in Turkish, so
+      # the installed copy is tested that way.
+      - name: Install with the setup program
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem package/*.installer.exe | Select-Object -First 1
+          if (-not $setup) { throw "The build has no installer." }
+          $dir = Join-Path $env:RUNNER_TEMP "Hilal"
+          Start-Process -Wait -FilePath $setup.FullName -ArgumentList "/S", "/InstallDirectoryPath=$dir"
+          if (-not (Test-Path "$dir/firefox.exe")) { throw "The installer did not install Hilal to $dir." }
+          Get-ChildItem $dir | Select-Object -First 20
+
+      - name: UI smoke (installed, Turkish)
+        shell: pwsh
+        run: python scripts/ci/ui-smoke.py --binary "$env:RUNNER_TEMP/Hilal/firefox.exe" --locale tr --out ui-smoke-installed
 
       - name: Summary
         if: always()
         shell: bash
-        run: cat ui-smoke/summary.md >> "$GITHUB_STEP_SUMMARY" || true
+        run: cat ui-smoke/summary.md ui-smoke-installed/summary.md >> "$GITHUB_STEP_SUMMARY" || true
 
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ui-smoke-windows
-          path: ui-smoke/
+          path: |
+            ui-smoke/
+            ui-smoke-installed/
           retention-days: 14
 
   # A rolling pre-release friends and testers can download without a GitHub
@@ -421,6 +534,7 @@ jobs:
           mkdir -p out
           if [ "$LINUX_OK" = true ]; then
             cp artifacts/package-linux/*.linux-*.tar.* out/Hilal-nightly-linux-x86_64.tar.xz
+            cp artifacts/package-appimage/Hilal-x86_64.AppImage out/Hilal-nightly-x86_64.AppImage 2>/dev/null || true
           fi
           if [ "$MACOS_OK" = true ]; then
             cp artifacts/package-macos-signed/*.dmg out/Hilal-nightly-macos-arm64.dmg
@@ -439,6 +553,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           notes="Automatic build of ${GITHUB_SHA::7} from main ($(date -u +%Y-%m-%d)). Not a release: use it to test the latest changes. Every package here passed the UI smoke test on its own OS."
+          notes+=$'\n\n**macOS:** Hilal is not signed by Apple. After dragging it into Applications, run this once in Terminal:\n\n```bash\nxattr -dr com.apple.quarantine "/Applications/Hilal Browser.app"\n```'
           if ! gh release view nightly >/dev/null 2>&1; then
             gh release create nightly --prerelease --title "Hilal Nightly" --notes "$notes" --target "$GITHUB_SHA"
           fi

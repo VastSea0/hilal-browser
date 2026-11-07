@@ -6,6 +6,12 @@ Boosts restyle one site: colors, fonts, text size and case, hidden elements
 the MPL 2.0 like Hilal. Ported files keep their MPL headers and say where they
 came from.
 
+<p align="center">
+  <img src="../media/features/images/boosts-dark.webp" alt="The Boosts editor turning a Wikipedia page dark" width="720" />
+</p>
+
+See [the Boosts video](../media/features/videos/03-boosts.mp4) for the editor in use.
+
 ## Where the code lives
 
 | Part | Path in `changes/` |

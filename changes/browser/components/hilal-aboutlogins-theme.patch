@@ -1,0 +1,41 @@
+diff --git a/browser/components/aboutlogins/AboutLoginsChild.sys.mjs b/browser/components/aboutlogins/AboutLoginsChild.sys.mjs
+--- a/browser/components/aboutlogins/AboutLoginsChild.sys.mjs
++++ b/browser/components/aboutlogins/AboutLoginsChild.sys.mjs
+@@ -34,6 +34,28 @@
+ }
+ 
+ export class AboutLoginsChild extends JSWindowActorChild {
++  // Hilal: follow the browser's Material accent tokens.
++  #onSharedDataChange = event => {
++    if (event.changedKeys.includes("hilal:activeTheme")) {
++      this.#applyHilalTheme();
++    }
++  };
++
++  #applyHilalTheme() {
++    const tokens = Services.cpmm.sharedData.get("hilal:activeTheme")?.tokens;
++    const root = this.document?.documentElement;
++    if (!tokens || !root) {
++      return;
++    }
++    for (const [name, value] of Object.entries(tokens)) {
++      root.style.setProperty(name, value);
++    }
++  }
++
++  didDestroy() {
++    Services.cpmm.sharedData.removeEventListener("change", this.#onSharedDataChange);
++  }
++
+   handleEvent(event) {
+     switch (event.type) {
+       case "AboutLoginsInit": {
+@@ -101,6 +123,8 @@
+ 
+   #aboutLoginsInit() {
+     this.sendAsyncMessage("AboutLogins:Subscribe");
++    this.#applyHilalTheme();
++    Services.cpmm.sharedData.addEventListener("change", this.#onSharedDataChange);
+ 
+     let win = this.browsingContext.window;
+     let waivedContent = Cu.waiveXrays(win);

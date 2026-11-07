@@ -143,10 +143,6 @@ path   = "browser/actors/hilal-newtab-actor.patch"
 reason = "Register the Hilal new tab actor"
 
 [[patches]]
-path   = "browser/themes/material-preferences.patch"
-reason = "Material 3 Expressive restyle of the settings page"
-
-[[patches]]
 path   = "browser/components/preferences/m3e-web.all.min.mjs"
 reason = "Material 3 Expressive web components used by the settings page (MIT)"
 
@@ -169,3 +165,27 @@ reason = "English strings for Boosts"
 [[patches]]
 path   = "toolkit/content/hilal-license.patch"
 reason = "List the open source components Hilal adds in about:license"
+
+[[patches]]
+path   = "toolkit/themes/hilal-error-pages.patch"
+reason = "Load Hilal's Material styles on Firefox's error pages"
+
+[[patches]]
+path   = "toolkit/themes/shared/hilal-error-pages.css"
+reason = "Material 3 Expressive error pages"
+
+[[patches]]
+path   = "toolkit/themes/hilal-in-content.patch"
+reason = "Load Hilal's Material styles on Add-ons and Firefox's info pages"
+
+[[patches]]
+path   = "toolkit/themes/shared/hilal-in-content.css"
+reason = "Material 3 Expressive in-content pages"
+
+[[patches]]
+path   = "browser/components/hilal-aboutlogins-theme.patch"
+reason = "Passwords page follows the browser's accent colors"
+
+[[patches]]
+path   = "toolkit/themes/shared/hilal-shape-cookie9.svg"
+reason = "Shape behind the error page illustration"

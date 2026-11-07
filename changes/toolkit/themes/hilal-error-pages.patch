@@ -1,0 +1,23 @@
+diff --git a/toolkit/themes/shared/aboutNetError.css b/toolkit/themes/shared/aboutNetError.css
+--- a/toolkit/themes/shared/aboutNetError.css
++++ b/toolkit/themes/shared/aboutNetError.css
+@@ -3,6 +3,7 @@
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+ @import url("chrome://global/skin/error-pages.css");
++@import url("chrome://global/skin/hilal-error-pages.css");
+ 
+ body {
+   --warning-color: #ffa436;
+diff --git a/toolkit/themes/shared/desktop-jar.inc.mn b/toolkit/themes/shared/desktop-jar.inc.mn
+--- a/toolkit/themes/shared/desktop-jar.inc.mn
++++ b/toolkit/themes/shared/desktop-jar.inc.mn
+@@ -15,6 +15,8 @@
+   skin/classic/global/aboutHttpsOnlyError.css              (../../shared/aboutHttpsOnlyError.css)
+   skin/classic/global/aboutMemory.css                      (../../shared/aboutMemory.css)
+   skin/classic/global/aboutNetError.css                    (../../shared/aboutNetError.css)
++  skin/classic/global/hilal-error-pages.css                (../../shared/hilal-error-pages.css)
++  skin/classic/global/hilal-shape-cookie9.svg              (../../shared/hilal-shape-cookie9.svg)
+   skin/classic/global/aboutNetworking.css                  (../../shared/aboutNetworking.css)
+   skin/classic/global/aboutReader.css                      (../../shared/aboutReader.css)
+   skin/classic/global/aboutLicense.css                     (../../shared/aboutLicense.css)
