@@ -190,6 +190,11 @@ You can obtain one at http://mozilla.org/MPL/2.0/. */
   width: 64px;
   height: 64px;
   margin-bottom: 24px;
+  /* Hover turns the crescent mark to its correct orientation with a smooth motion. */
+  transition: transform 400ms ease;
+}
+#hilal-welcome-overlay .hw-logo:hover {
+  transform: rotateY(180deg);
 }
 
 #hilal-welcome-overlay .hw-intro .hw-primary {
