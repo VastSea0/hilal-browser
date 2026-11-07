@@ -2,6 +2,11 @@
 
 ac_add_options --enable-linker=lld
 
+# This runner has no wasm toolchain (wasi sysroot / wasm runtime), so RLBox
+# wasm sandboxing cannot be configured. --without-wasm-sandboxed-libraries is
+# the supported escape hatch (also used for HILAL_DEV_BUILD in mozconfigs/base).
+ac_add_options --without-wasm-sandboxed-libraries
+
 if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
   # Configure only bootstraps toolchains on Nightly by default. ESR builds on
   # CI need Mozilla's pinned clang, libclang and cbindgen, not the runner's.
