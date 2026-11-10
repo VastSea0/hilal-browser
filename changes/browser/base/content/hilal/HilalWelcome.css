@@ -190,6 +190,11 @@ You can obtain one at http://mozilla.org/MPL/2.0/. */
   width: 64px;
   height: 64px;
   margin-bottom: 24px;
+  transition: transform 400ms ease;
+}
+
+#hilal-welcome-overlay .hw-logo:hover {
+  transform: rotateY(180deg);
 }
 
 #hilal-welcome-overlay .hw-intro .hw-primary {
@@ -487,6 +492,7 @@ You can obtain one at http://mozilla.org/MPL/2.0/. */
 }
 
 @media (prefers-reduced-motion: reduce) {
+#hilal-welcome-overlay .hw-logo,
 #hilal-welcome-overlay .hw-switch,
 #hilal-welcome-overlay .hw-switch::after {
     transition: none;
