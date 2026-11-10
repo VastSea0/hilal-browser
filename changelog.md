@@ -4,8 +4,33 @@
 
 ## [Unreleased]
 
+---
+
+## [0.4.0-alpha.3] - 2026-11-11
+
 ### Security
-- Based on Firefox ESR 153.6.0, which carries Mozilla's latest security fixes.
+- Based on Firefox ESR 153.7.0, which carries Mozilla's latest security fixes.
+- Google Safe Browsing protection against phishing and malware is on in every package.
+- Extreme privacy turns on Firefox's fingerprinting resistance.
+- Every new ESR point release is detected within a day and built and tested automatically.
+- Every build is tested to update from the previous release through Hilal's own updater.
+
+### Added
+- Hilal's own Material 3 Expressive menu replaces Firefox's app menu.
+- Sidebar and tab settings: tab layout, density and which sidebar buttons show.
+- The bookmarks and history panels are back in the rebuilt sidebar.
+- Automatic Boosts and browser colors that follow the website you are on.
+- The downloads button opens the downloads panel.
+
+### Changed
+- Material 3 Expressive design across the browser: the top bar, sidebar, new tab page, settings, About dialog, Firefox's own panels and dialogs, site information and downloads panels, the Library window, Add-ons, passwords, and error and info pages.
+- The new tab page and the active workspace use Material 3 Expressive shapes.
+
+### Fixed
+- Hilal's Turkish strings are restored and every new string is translated.
+- The Hilal shell keeps starting when one of its startup steps fails.
+- The logo stays readable in light mode.
+- The bookmark panel's fields no longer touch its edges.
 
 ---
 

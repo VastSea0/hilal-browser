@@ -5,14 +5,14 @@ features, so the order is: stay secure, reach people, then stand out.
 
 ## 0.4.0-alpha.3: trust
 
-- [x] Move to Firefox ESR 153.6.0.
+- [x] Move to Firefox ESR 153.7.0.
 - [x] Check every day for a new ESR point release, test the bump in CI and open
       an issue (`.github/workflows/esr-watch.yml`).
 - [x] Test in CI that the latest release updates itself to each new build
       through its own updater (`scripts/ci/update-test.py`).
 - [x] Extreme privacy turns on fingerprinting resistance, checked in the UI
       smoke (#22).
-- [ ] Ship with a Google Safe Browsing key.
+- [x] Ship with a Google Safe Browsing key.
 - [x] Material 3 Expressive across the browser: shell, menu, color panel,
       sidebar, new tab, settings, Firefox's panels, the Library window,
       Add-ons, passwords, error and info pages.

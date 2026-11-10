@@ -59,7 +59,7 @@ modules:
     sources:
       # HILAL_ARCHIVE_BEGIN
       - type: archive
-        url: https://github.com/VastSea0/hilal-browser/releases/download/v0.4.0-alpha.2/Hilal-0.4.0-alpha.2-linux-x86_64.tar.xz
+        url: https://github.com/VastSea0/hilal-browser/releases/download/v0.4.0-alpha.3/Hilal-0.4.0-alpha.3-linux-x86_64.tar.xz
         sha256: 0000000000000000000000000000000000000000000000000000000000000000
         strip-components: 0
         only-arches:
@@ -77,6 +77,6 @@ modules:
       # HILAL_SOURCE_BEGIN
       - type: git
         url: https://github.com/VastSea0/hilal-browser.git
-        tag: v0.4.0-alpha.2
+        tag: v0.4.0-alpha.3
         dest: hilal-browser
       # HILAL_SOURCE_END

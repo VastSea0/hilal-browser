@@ -22,6 +22,7 @@ try {
 // Define standard release tags list
 const releaseTags = [
   "v0.4.0-alpha.2",
+  "v0.4.0-alpha.3",
   "v0.4.0-alpha.1",
   "v0.3.0-alpha.6",
   "v0.3.0-alpha.5",
