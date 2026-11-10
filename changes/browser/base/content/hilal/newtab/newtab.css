@@ -80,6 +80,29 @@ i {
  * Clock: hours and minutes on two expressive shapes
  * ------------------------------------------------------------------------- */
 
+/* The shapes come from the clip paths inlined in newtab.html; see there. */
+.hilal-shape {
+  mask-image: none;
+}
+
+.shape-defs {
+  position: absolute;
+}
+
+.hilal-shape[data-shape="cookie9"] { clip-path: url(#hilal-shape-cookie9); }
+.hilal-shape[data-shape="clover4"] { clip-path: url(#hilal-shape-clover4); }
+.hilal-shape[data-shape="sunny"] { clip-path: url(#hilal-shape-sunny); }
+.hilal-shape[data-shape="gem"] { clip-path: url(#hilal-shape-gem); }
+.hilal-shape[data-shape="puffy"] { clip-path: url(#hilal-shape-puffy); }
+.hilal-shape[data-shape="flower"] { clip-path: url(#hilal-shape-flower); }
+.hilal-shape[data-shape="cookie6"] { clip-path: url(#hilal-shape-cookie6); }
+.hilal-shape[data-shape="pentagon"] { clip-path: url(#hilal-shape-pentagon); }
+.hilal-shape[data-shape="soft-burst"] { clip-path: url(#hilal-shape-soft-burst); }
+.hilal-shape[data-shape="square"] { clip-path: url(#hilal-shape-square); }
+.hilal-shape[data-shape="cookie12"] { clip-path: url(#hilal-shape-cookie12); }
+.hilal-shape[data-shape="clover8"] { clip-path: url(#hilal-shape-clover8); }
+.hilal-shape[data-shape="circle"] { clip-path: url(#hilal-shape-circle); }
+
 .clock {
   display: flex;
   gap: 8px;

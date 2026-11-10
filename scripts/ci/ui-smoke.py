@@ -158,6 +158,24 @@ return out;
 """
 
 
+SHAPE_PIXELS_JS = r"""
+const resolve = arguments[arguments.length - 1];
+const [x, y, w, h] = arguments[0];
+const wg = gBrowser.selectedBrowser.browsingContext.currentWindowGlobal;
+wg.drawSnapshot(new DOMRect(x, y, w, h), 1, "rgb(255,0,255)").then(bitmap => {
+  const canvas = document.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
+  canvas.width = Math.ceil(w);
+  canvas.height = Math.ceil(h);
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(bitmap, 0, 0);
+  // Top middle is inside every cookie shape and above the digits; the
+  // corner of the box is outside it.
+  const inside = Array.from(ctx.getImageData(Math.round(w / 2), Math.round(h * 0.12), 1, 1).data);
+  const corner = Array.from(ctx.getImageData(1, 1, 1, 1).data);
+  resolve({ inside, corner });
+}, e => resolve({ error: String(e) }));
+"""
+
 ADDONS_JS = r"""
 const resolve = arguments[arguments.length - 1];
 const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
@@ -406,6 +424,25 @@ def main():
         m.screenshot(out / "04-new-tab.png")
         check("new tab page loads", "newtab" in m.script("return gBrowser.selectedBrowser.currentURI.spec") or "hilal" in m.script("return gBrowser.selectedBrowser.currentURI.spec"),
               m.script("return gBrowser.selectedBrowser.currentURI.spec"))
+
+        # The clock's shapes are masks; if they fail to load, the digits float
+        # on nothing (CSS masks are fetched with CORS).
+        chrome_handle = m.send("WebDriver:GetWindowHandle")
+        chrome_handle = chrome_handle.get("value", chrome_handle) if isinstance(chrome_handle, dict) else chrome_handle
+        m.context("content")
+        handles = m.send("WebDriver:GetWindowHandles")
+        handles = handles.get("value", handles) if isinstance(handles, dict) else handles
+        rect = None
+        for handle in reversed(handles):
+            m.send("WebDriver:SwitchToWindow", {"handle": handle})
+            rect = m.script("const e = document.querySelector('.clock-hours'); if (!e) return null; const r = e.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]")
+            if rect:
+                break
+        m.context("chrome")
+        m.send("WebDriver:SwitchToWindow", {"handle": chrome_handle})
+        pixels = m.script(SHAPE_PIXELS_JS, [rect], asynchronous=True) if rect else {"error": "no clock on the new tab page"}
+        drawn = "inside" in pixels and sum(abs(a - b) for a, b in zip(pixels["inside"][:3], pixels["corner"][:3])) > 24
+        check("new tab clock shapes are drawn", drawn, pixels)
 
         m.script("gBrowser.removeTab(gBrowser.selectedTab)")
         check("tab closes", wait_for(m, f"return gBrowser.tabs.length == {before}", 10))
