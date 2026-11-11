@@ -16,12 +16,13 @@
   </provides>
 
   <description>
-    <p>Hilal is a lightweight browser built as a patch and overlay layer on top of Firefox. It combines Gecko compatibility with Hilal workspaces, vertical tabs, privacy-focused defaults, and bundled uBlock Origin protection.</p>
+    <p>Hilal is a free and open source web browser built on Firefox ESR. It keeps Firefox's engine, extensions and security updates, and adds a calmer, more customizable interface.</p>
     <ul>
-      <li>Container-based workspaces for separating browsing contexts.</li>
-      <li>Vertical collapsible tabs for wide-screen browsing.</li>
-      <li>Bundled uBlock Origin with checksum-pinned release artifacts.</li>
-      <li>Hilal branding and preferences maintained separately from upstream Firefox.</li>
+      <li>Vertical tabs in a sidebar, with workspaces to keep work, study and personal browsing apart.</li>
+      <li>A Material 3 Expressive design that can take its colors from the website you are on.</li>
+      <li>Boosts: recolor any website, change its fonts, hide parts of it or add your own CSS.</li>
+      <li>Three protection levels, Balanced, Strict and Maximum, with uBlock Origin built in.</li>
+      <li>Safe Browsing protection against phishing and malware.</li>
     </ul>
   </description>
 

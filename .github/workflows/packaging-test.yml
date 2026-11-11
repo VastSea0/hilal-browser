@@ -91,8 +91,16 @@ jobs:
           winget settings --enable LocalManifestFiles
           winget validate --manifest $manifest.FullName
           if ($LASTEXITCODE) { throw "winget validate failed" }
-          winget install --manifest $manifest.FullName --silent --accept-package-agreements --accept-source-agreements --disable-interactivity
-          if ($LASTEXITCODE) { throw "winget install failed" }
+          $p = Start-Process -PassThru -NoNewWindow -FilePath winget -ArgumentList "install","--manifest",$manifest.FullName,"--silent","--accept-package-agreements","--accept-source-agreements","--disable-interactivity","--verbose-logs"
+          if (-not $p.WaitForExit(600000)) {
+            Write-Host "::error::winget install did not finish in 10 minutes."
+            Get-CimInstance Win32_Process | Where-Object { $_.CommandLine } |
+              Select-Object ProcessId, ParentProcessId, CommandLine | Format-Table -AutoSize -Wrap | Out-String -Width 400
+            Get-ChildItem "$env:LOCALAPPDATA\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\DiagOutputDir" -ErrorAction SilentlyContinue |
+              Sort-Object LastWriteTime | Select-Object -Last 1 | Get-Content -Tail 80
+            throw "winget install hung"
+          }
+          if ($p.ExitCode) { throw "winget install failed with $($p.ExitCode)" }
       - name: Check the installed browser
         shell: pwsh
         run: |

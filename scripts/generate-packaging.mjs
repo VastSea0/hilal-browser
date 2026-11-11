@@ -17,7 +17,7 @@ const HOMEPAGE = "https://hilal-browser.vercel.app";
 const SOURCE = `https://github.com/${REPO}`;
 const DESCRIPTION = "Privacy-first web browser built on Firefox ESR";
 const WINGET_ID = "VastSea0.Hilal";
-const WINGET_SCHEMA = "1.9.0";
+const WINGET_SCHEMA = "1.28.0";
 
 const args = parseArgs(process.argv.slice(2));
 const tag = args.tag;
