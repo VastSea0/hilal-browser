@@ -92,6 +92,13 @@ jobs:
           Get-ChildItem $src.FullName -File | ForEach-Object {
             (Get-Content -Raw $_.FullName) -replace '1\.28\.0', '1.9.0' | Set-Content -NoNewline (Join-Path $manifest $_.Name)
           }
+          # winget runs the downloaded, still unsigned installer through
+          # ShellExecute, which waits on a SmartScreen prompt nobody can
+          # answer on a runner. Users see that prompt until SignPath signs it.
+          $env:SEE_MASK_NOZONECHECKS = 1
+          New-Item -Force "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" | Out-Null
+          Set-ItemProperty "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" EnableSmartScreen 0
+          Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" SmartScreenEnabled Off
           winget settings --enable LocalManifestFiles
           winget validate --manifest $manifest.FullName
           if ($LASTEXITCODE) { throw "winget validate failed" }
