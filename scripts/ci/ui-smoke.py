@@ -435,13 +435,18 @@ def main():
         rect = None
         for handle in reversed(handles):
             m.send("WebDriver:SwitchToWindow", {"handle": handle})
-            rect = m.script("const e = document.querySelector('.clock-hours'); if (!e) return null; const r = e.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]")
+            rect = m.script("const e = document.querySelector('.clock-hours'); if (!e) return null; const r = e.getBoundingClientRect(); const s = getComputedStyle(e.querySelector('.clock-shape')); return [r.x, r.y, r.width, r.height, s.maskImage, s.clipPath]")
             if rect:
                 break
         m.context("chrome")
         m.send("WebDriver:SwitchToWindow", {"handle": chrome_handle})
-        pixels = m.script(SHAPE_PIXELS_JS, [rect], asynchronous=True) if rect else {"error": "no clock on the new tab page"}
+        # drawSnapshot paints a mask that failed to load as if there were none,
+        # while the screen hides the element, so also require no mask at all.
+        pixels = m.script(SHAPE_PIXELS_JS, [rect[:4]], asynchronous=True) if rect else {"error": "no clock on the new tab page"}
         drawn = "inside" in pixels and sum(abs(a - b) for a, b in zip(pixels["inside"][:3], pixels["corner"][:3])) > 24
+        if rect:
+            pixels["mask"], pixels["clip"] = rect[4], rect[5]
+        drawn = drawn and rect[4] == "none" and "hilal-shape" in rect[5]
         check("new tab clock shapes are drawn", drawn, pixels)
 
         m.script("gBrowser.removeTab(gBrowser.selectedTab)")

@@ -5,7 +5,7 @@
 /*
  * Hilal's new tab page in Material 3 Expressive. The colors are the browser's
  * Material tokens, sent by HilalNewTabParent; the values here only cover the
- * first paint before they arrive. Shapes come from hilal-shapes.css.
+ * first paint before they arrive. Shapes are clip paths in newtab.html.
  */
 
 @font-face {
@@ -80,11 +80,8 @@ i {
  * Clock: hours and minutes on two expressive shapes
  * ------------------------------------------------------------------------- */
 
-/* The shapes come from the clip paths inlined in newtab.html; see there. */
-.hilal-shape {
-  mask-image: none;
-}
-
+/* The shapes are the clip paths inlined in newtab.html, not
+ * hilal-shapes.css: its masks are fetched with CORS and blocked here. */
 .shape-defs {
   position: absolute;
 }
