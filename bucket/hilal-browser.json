@@ -1,0 +1,45 @@
+{
+  "version": "0.4.0-alpha.3",
+  "description": "Privacy-first web browser built on Firefox ESR",
+  "homepage": "https://hilal-browser.vercel.app",
+  "license": "MPL-2.0",
+  "architecture": {
+    "64bit": {
+      "url": "https://github.com/VastSea0/hilal-browser/releases/download/v0.4.0-alpha.3/Hilal-0.4.0-alpha.3-win64.zip",
+      "hash": "d31fd10b94c20273bc29136586f0e20304d6fd22ea774bceccb332d2da525252",
+      "extract_dir": "firefox"
+    }
+  },
+  "bin": [
+    [
+      "firefox.exe",
+      "hilal"
+    ]
+  ],
+  "shortcuts": [
+    [
+      "firefox.exe",
+      "Hilal Browser"
+    ]
+  ],
+  "post_install": [
+    "$p = \"$dir\\distribution\\policies.json\"",
+    "$j = Get-Content -Raw $p | ConvertFrom-Json",
+    "$j.policies | Add-Member -NotePropertyName DisableAppUpdate -NotePropertyValue $true -Force",
+    "$j.policies.PSObject.Properties.Remove('AppUpdateURL')",
+    "[IO.File]::WriteAllText($p, ($j | ConvertTo-Json -Depth 32))"
+  ],
+  "checkver": {
+    "github": "https://github.com/VastSea0/hilal-browser"
+  },
+  "autoupdate": {
+    "architecture": {
+      "64bit": {
+        "url": "https://github.com/VastSea0/hilal-browser/releases/download/v$version/Hilal-$version-win64.zip"
+      }
+    },
+    "hash": {
+      "url": "https://github.com/VastSea0/hilal-browser/releases/download/v$version/SHA256SUMS"
+    }
+  }
+}

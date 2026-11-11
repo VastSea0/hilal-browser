@@ -99,6 +99,21 @@ xattr -dr com.apple.quarantine "/Applications/Hilal Browser.app"
 
 See [docs/INSTALL-MACOS.md](docs/INSTALL-MACOS.md) for details.
 
+### Package managers
+
+Package managers keep Hilal up to date themselves, so Hilal's own updater is
+turned off when it comes from Scoop or the AUR.
+
+```bash
+# Windows, with Scoop
+scoop bucket add hilal https://github.com/VastSea0/hilal-browser
+scoop install hilal/hilal-browser
+
+# macOS (Apple silicon), with Homebrew
+brew tap vastsea0/hilal https://github.com/VastSea0/hilal-browser
+brew install --cask vastsea0/hilal/hilal-browser
+```
+
 ## Build from source
 
 Install the [Firefox build prerequisites](https://firefox-source-docs.mozilla.org/setup/index.html) for your platform first. Rust is also required to compile the `hil` patch manager.

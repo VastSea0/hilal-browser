@@ -1,0 +1,124 @@
+name: Packaging test
+
+# Installs the newest release through each package manager manifest that
+# scripts/generate-packaging.mjs wrote, the way users will. Runs after a
+# release updates the manifests, or by hand; never on regular pushes.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/generate-packaging.mjs
+      - .github/workflows/packaging-test.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: packaging-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  aur:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container: archlinux:base-devel
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build and install with makepkg
+        run: |
+          set -euo pipefail
+          pacman -Syu --noconfirm --needed git python xorg-server-xvfb
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+          cp -r packaging/aur/hilal-browser-bin /home/builder/pkg
+          chown -R builder /home/builder/pkg
+          cd /home/builder/pkg
+          sudo -u builder makepkg --printsrcinfo | diff -u .SRCINFO -
+          sudo -u builder makepkg -si --noconfirm
+      - name: Check the installed browser
+        run: |
+          set -euo pipefail
+          python -c "import json,sys; p=json.load(open('/opt/hilal-browser/distribution/policies.json'))['policies']; assert p.get('DisableAppUpdate') is True, p"
+          test -f /usr/share/applications/io.github.VastSea0.Hilal.desktop
+          test -f /usr/share/icons/hicolor/128x128/apps/io.github.VastSea0.Hilal.png
+          sudo -u builder /usr/bin/hilal --version
+          sudo -u builder mkdir -p /tmp/hilal-profile
+          sudo -u builder MOZ_HEADLESS=1 timeout 120 /usr/bin/hilal --headless --no-remote --profile /tmp/hilal-profile --screenshot /tmp/aur.png about:blank
+          test -s /tmp/aur.png
+
+  scoop:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install with Scoop
+        shell: pwsh
+        run: |
+          Invoke-RestMethod get.scoop.sh -OutFile install-scoop.ps1
+          .\install-scoop.ps1 -RunAsAdmin
+          $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
+          scoop install git
+          scoop install .\bucket\hilal-browser.json
+          if ($LASTEXITCODE) { throw "scoop install failed" }
+          "$env:USERPROFILE\scoop\shims" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
+      - name: Check the installed browser
+        shell: pwsh
+        run: |
+          $dir = scoop prefix hilal-browser
+          $p = Get-Content -Raw "$dir\distribution\policies.json" | ConvertFrom-Json
+          if ($p.policies.DisableAppUpdate -ne $true) { throw "Scoop install did not turn off the built-in updater." }
+          if ($p.policies.PSObject.Properties.Name -contains 'AppUpdateURL') { throw "AppUpdateURL is still set." }
+          $prof = New-Item -ItemType Directory (Join-Path $env:RUNNER_TEMP prof)
+          Start-Process -Wait -FilePath "$dir\firefox.exe" -ArgumentList "--headless","--no-remote","--profile",$prof.FullName,"--screenshot","$PWD\scoop.png","about:blank"
+          if (-not (Test-Path scoop.png)) { throw "Hilal installed with Scoop did not start." }
+
+  winget:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install with winget
+        shell: pwsh
+        run: |
+          if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+            Install-PackageProvider -Name NuGet -Force | Out-Null
+            Install-Module Microsoft.WinGet.Client -Force -Repository PSGallery
+            Repair-WinGetPackageManager -AllUsers -Latest
+          }
+          $manifest = Get-ChildItem -Directory packaging/winget/manifests/v/VastSea0/Hilal | Select-Object -First 1
+          winget settings --enable LocalManifestFiles
+          winget validate --manifest $manifest.FullName
+          if ($LASTEXITCODE) { throw "winget validate failed" }
+          winget install --manifest $manifest.FullName --silent --accept-package-agreements --accept-source-agreements --disable-interactivity
+          if ($LASTEXITCODE) { throw "winget install failed" }
+      - name: Check the installed browser
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem "$env:ProgramFiles\Hilal*\firefox.exe" | Select-Object -First 1
+          if (-not $exe) { throw "winget did not install Hilal under Program Files." }
+          $prof = New-Item -ItemType Directory (Join-Path $env:RUNNER_TEMP prof)
+          Start-Process -Wait -FilePath $exe.FullName -ArgumentList "--headless","--no-remote","--profile",$prof.FullName,"--screenshot","$PWD\winget.png","about:blank"
+          if (-not (Test-Path winget.png)) { throw "Hilal installed with winget did not start." }
+
+  homebrew:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install with Homebrew
+        run: |
+          set -euo pipefail
+          brew tap vastsea0/hilal "$GITHUB_WORKSPACE"
+          brew install --cask vastsea0/hilal/hilal-browser
+      - name: Check the installed browser
+        run: |
+          set -euo pipefail
+          app="/Applications/Hilal Browser.app"
+          if xattr "$app" | grep -q com.apple.quarantine; then
+            echo "::error::The cask left the app quarantined."; exit 1
+          fi
+          prof="$(mktemp -d)"
+          "$app/Contents/MacOS/firefox" --headless --no-remote --profile "$prof" --screenshot "$PWD/brew.png" about:blank
+          test -s brew.png

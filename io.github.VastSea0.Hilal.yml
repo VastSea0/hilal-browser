@@ -60,7 +60,7 @@ modules:
       # HILAL_ARCHIVE_BEGIN
       - type: archive
         url: https://github.com/VastSea0/hilal-browser/releases/download/v0.4.0-alpha.3/Hilal-0.4.0-alpha.3-linux-x86_64.tar.xz
-        sha256: 0000000000000000000000000000000000000000000000000000000000000000
+        sha256: a495c67683ffe991701cf4bd5d1f776d474ce1b6b8952e73b24c9aea97608098
         strip-components: 0
         only-arches:
           - x86_64

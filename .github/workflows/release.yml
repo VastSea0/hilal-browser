@@ -141,3 +141,41 @@ jobs:
           fi
           gh release upload "$TAG" dist/* --clobber
           gh release edit "$TAG" --draft=false
+
+  packaging:
+    # Scoop reads bucket/ and Homebrew reads Casks/ from main, so the
+    # manifests for the newest release are committed there.
+    needs: [prepare, publish]
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Update package manifests
+        run: |
+          set -euo pipefail
+          latest="$(gh release view --json tagName -q .tagName)"
+          if [ "$latest" != "$TAG" ]; then
+            echo "::notice::$TAG is not the latest release ($latest); manifests stay as they are."
+            exit 0
+          fi
+          gh release download "$TAG" -p SHA256SUMS -D "$RUNNER_TEMP"
+          node scripts/generate-packaging.mjs --tag "$TAG" --sums "$RUNNER_TEMP/SHA256SUMS"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A bucket Casks packaging io.github.VastSea0.Hilal.yml
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Update package manifests for $TAG"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && break
+            sleep 10
+          done
+          gh workflow run packaging-test.yml --ref main
