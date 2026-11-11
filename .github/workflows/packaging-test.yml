@@ -84,8 +84,7 @@ jobs:
         run: |
           # The runner's winget may predate the manifest schema winget-pkgs
           # requires, so always update it.
-          Install-PackageProvider -Name NuGet -Force | Out-Null
-          Install-Module Microsoft.WinGet.Client -Force -Repository PSGallery
+          Install-PSResource Microsoft.WinGet.Client -TrustRepository -Quiet
           Repair-WinGetPackageManager -AllUsers -Latest -Force
           winget --version
           $manifest = Get-ChildItem -Directory packaging/winget/manifests/v/VastSea0/Hilal | Select-Object -First 1
