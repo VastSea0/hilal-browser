@@ -633,10 +633,28 @@ def main():
         # Users start the browser again with the same profile; the shell has to
         # come back then too.
         if not args.no_restart:
+            # Quit and launch again, as a user does. Firefox's in-place restart
+            # is covered by the update test and was flaky inside the Flatpak.
             try:
-                m.send("Marionette:Quit", {"flags": ["eRestart", "eAttemptQuit"]})
+                m.send("Marionette:Quit", {"flags": ["eAttemptQuit"]})
             except MarionetteError:
                 pass
+            try:
+                proc.wait(timeout=60)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait()
+            # On Windows the launcher process can exit before the browser has;
+            # wait until Marionette is gone so the profile is unlocked.
+            deadline = time.time() + 60
+            while time.time() < deadline:
+                try:
+                    socket.create_connection(("127.0.0.1", port), timeout=2).close()
+                    time.sleep(0.5)
+                except OSError:
+                    break
+            time.sleep(2)
+            proc = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT, env=env)
             m = Marionette(port, timeout=args.timeout)
             m.send("WebDriver:NewSession", {"capabilities": {"alwaysMatch": {"acceptInsecureCerts": True}}})
             m.send("WebDriver:SetTimeouts", {"script": 60000})
