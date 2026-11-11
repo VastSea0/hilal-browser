@@ -22,7 +22,10 @@ features, so the order is: stay secure, reach people, then stand out.
 ## 0.4.0-alpha.4: reach
 
 - [ ] Submit to Flathub as `io.github.VastSea0.Hilal`.
-- [ ] AUR package, winget and Scoop manifests, Homebrew cask.
+- [x] AUR package, winget and Scoop manifests, Homebrew cask, made for every
+      release and install-tested in CI (`docs/PACKAGING.md`).
+- [x] Scoop bucket and Homebrew tap served from this repository.
+- [ ] Publish to the AUR and winget.
 - [ ] Sign Windows builds through SignPath Foundation.
 
 ## 0.5: stand out

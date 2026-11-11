@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+### Added
+- Install and update Hilal with Scoop on Windows and Homebrew on macOS. Hilal's own updater is turned off when a package manager updates it.
+- Package manifests for the AUR and winget, made for every release and install-tested on their own OS.
+- The welcome screen's logo flips when you hover over it (thanks to @AtaberkCelil).
+
+### Changed
+- The Flathub listing describes Hilal's current features.
+
+### Fixed
+- The clock and shortcut shapes on the new tab page are drawn again.
+
 ---
 
 ## [0.4.0-alpha.3] - 2026-11-11
