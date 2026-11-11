@@ -82,11 +82,12 @@ jobs:
       - name: Install with winget
         shell: pwsh
         run: |
-          if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-            Install-PackageProvider -Name NuGet -Force | Out-Null
-            Install-Module Microsoft.WinGet.Client -Force -Repository PSGallery
-            Repair-WinGetPackageManager -AllUsers -Latest
-          }
+          # The runner's winget may predate the manifest schema winget-pkgs
+          # requires, so always update it.
+          Install-PackageProvider -Name NuGet -Force | Out-Null
+          Install-Module Microsoft.WinGet.Client -Force -Repository PSGallery
+          Repair-WinGetPackageManager -AllUsers -Latest -Force
+          winget --version
           $manifest = Get-ChildItem -Directory packaging/winget/manifests/v/VastSea0/Hilal | Select-Object -First 1
           winget settings --enable LocalManifestFiles
           winget validate --manifest $manifest.FullName

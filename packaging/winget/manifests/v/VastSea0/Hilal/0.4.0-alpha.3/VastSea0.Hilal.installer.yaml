@@ -5,7 +5,22 @@ PackageIdentifier: VastSea0.Hilal
 PackageVersion: 0.4.0-alpha.3
 InstallerType: nullsoft
 Scope: machine
+InstallerSwitches:
+  Silent: /S /PreventRebootRequired=true
+  SilentWithProgress: /S /PreventRebootRequired=true
+  InstallLocation: /InstallDirectoryPath="<INSTALLPATH>"
 UpgradeBehavior: install
+Protocols:
+- http
+- https
+FileExtensions:
+- htm
+- html
+- pdf
+- svg
+- webp
+- xht
+- xhtml
 ReleaseDate: 2026-11-11
 Installers:
 - Architecture: x64

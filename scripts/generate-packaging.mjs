@@ -209,7 +209,22 @@ function writeWinget() {
 PackageVersion: ${version}
 InstallerType: nullsoft
 Scope: machine
+InstallerSwitches:
+  Silent: /S /PreventRebootRequired=true
+  SilentWithProgress: /S /PreventRebootRequired=true
+  InstallLocation: /InstallDirectoryPath="<INSTALLPATH>"
 UpgradeBehavior: install
+Protocols:
+- http
+- https
+FileExtensions:
+- htm
+- html
+- pdf
+- svg
+- webp
+- xht
+- xhtml
 ReleaseDate: ${date}
 Installers:
 - Architecture: x64
