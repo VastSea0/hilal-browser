@@ -82,12 +82,16 @@ jobs:
       - name: Install with winget
         shell: pwsh
         run: |
-          # The runner's winget may predate the manifest schema winget-pkgs
-          # requires, so always update it.
-          Install-PSResource Microsoft.WinGet.Client -TrustRepository -Quiet
-          Repair-WinGetPackageManager -AllUsers -Latest -Force
+          # The runner's winget predates the schema winget-pkgs requires and
+          # cannot be updated there (App Installer has no x64 package for
+          # Server 2025), so test a copy labelled with a schema it knows. The
+          # fields are the same; winget-pkgs validates the real one.
           winget --version
-          $manifest = Get-ChildItem -Directory packaging/winget/manifests/v/VastSea0/Hilal | Select-Object -First 1
+          $src = Get-ChildItem -Directory packaging/winget/manifests/v/VastSea0/Hilal | Select-Object -First 1
+          $manifest = New-Item -ItemType Directory (Join-Path $env:RUNNER_TEMP winget-manifest)
+          Get-ChildItem $src.FullName -File | ForEach-Object {
+            (Get-Content -Raw $_.FullName) -replace '1\.28\.0', '1.9.0' | Set-Content -NoNewline (Join-Path $manifest $_.Name)
+          }
           winget settings --enable LocalManifestFiles
           winget validate --manifest $manifest.FullName
           if ($LASTEXITCODE) { throw "winget validate failed" }
