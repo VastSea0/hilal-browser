@@ -13,8 +13,8 @@ android {
         minSdk = 26
         targetSdk = 36
         // CI passes these from the release tag; local builds use the defaults.
-        versionCode = providers.gradleProperty("hilal.versionCode").orNull?.toInt() ?: 20000
-        versionName = providers.gradleProperty("hilal.versionName").orNull ?: "2.0.0"
+        versionCode = providers.gradleProperty("hilal.versionCode").orNull?.toInt() ?: 20100
+        versionName = providers.gradleProperty("hilal.versionName").orNull ?: "2.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
