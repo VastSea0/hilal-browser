@@ -305,6 +305,11 @@ fun BrowserScreen(
                             isPrivate = isPrivate,
                             bottomPadding = with(density) { barMaxPx.toDp() },
                             onOpen = { url -> selected?.let { store.load(it.id, url) } },
+                            onNavigate = onNavigate,
+                            onOpenSearch = {
+                                editorInitialText = null
+                                overlay = Overlay.Editor
+                            },
                         )
                     }
                     cover?.let { id ->

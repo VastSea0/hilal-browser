@@ -37,6 +37,7 @@ import com.vastsea.hilal.R
 import com.vastsea.hilal.data.ThemeMode
 import com.vastsea.hilal.data.UiStyle
 import com.vastsea.hilal.search.SearchEngines
+import com.vastsea.hilal.ui.Screen
 import com.vastsea.hilal.ui.glass.GlassSegmentedControl
 import com.vastsea.hilal.ui.glass.isGlassSupported
 import com.vastsea.hilal.ui.glass.isLiquidGlassActive
@@ -45,7 +46,12 @@ import com.vastsea.hilal.ui.library.LibraryScaffold
 private const val SOURCE_URL = "https://github.com/vastsea0/hilal-browser"
 
 @Composable
-fun SettingsScreen(container: AppContainer, onBack: () -> Unit, onOpen: (String) -> Unit) {
+fun SettingsScreen(
+    container: AppContainer,
+    onBack: () -> Unit,
+    onOpen: (String) -> Unit,
+    onNavigate: (Screen) -> Unit = {},
+) {
     val repo = container.settings
     val settings by repo.settings.collectAsState()
     var pickEngine by remember { mutableStateOf(false) }
@@ -76,7 +82,7 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit, onOpen: (String)
                     stringResource(R.string.ui_style_liquid_glass),
                 )
                 val glass = isLiquidGlassActive()
-                SegmentedListItem(onClick = {}, shapes = ListItemDefaults.segmentedShapes(0, 5), supportingContent = {
+                SegmentedListItem(onClick = {}, shapes = ListItemDefaults.segmentedShapes(0, 6), supportingContent = {
                     if (glass) {
                         GlassSegmentedControl(
                             items = styleLabels,
@@ -116,7 +122,7 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit, onOpen: (String)
                     stringResource(R.string.theme_dark),
                 )
                 val glass = isLiquidGlassActive()
-                SegmentedListItem(onClick = {}, shapes = ListItemDefaults.segmentedShapes(1, 5), supportingContent = {
+                SegmentedListItem(onClick = {}, shapes = ListItemDefaults.segmentedShapes(1, 6), supportingContent = {
                     if (glass) {
                         GlassSegmentedControl(
                             items = themeLabels,
@@ -150,7 +156,7 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit, onOpen: (String)
             }
             item {
                 SwitchItem(
-                    shapes = ListItemDefaults.segmentedShapes(2, 5),
+                    shapes = ListItemDefaults.segmentedShapes(2, 6),
                     title = stringResource(R.string.settings_dynamic_color),
                     summary = stringResource(R.string.settings_dynamic_color_summary),
                     checked = settings.dynamicColor,
@@ -160,7 +166,7 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit, onOpen: (String)
             }
             item {
                 SwitchItem(
-                    shapes = ListItemDefaults.segmentedShapes(3, 5),
+                    shapes = ListItemDefaults.segmentedShapes(3, 6),
                     title = stringResource(R.string.settings_dark_websites),
                     summary = stringResource(R.string.settings_dark_websites_summary),
                     checked = settings.darkWebsites,
@@ -169,11 +175,19 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit, onOpen: (String)
             }
             item {
                 SwitchItem(
-                    shapes = ListItemDefaults.segmentedShapes(4, 5),
+                    shapes = ListItemDefaults.segmentedShapes(4, 6),
                     title = stringResource(R.string.settings_haptics),
                     summary = stringResource(R.string.settings_haptics_summary),
                     checked = settings.haptics,
                     onChange = { value -> repo.update { it.copy(haptics = value) } },
+                )
+            }
+            item {
+                Item(
+                    shapes = ListItemDefaults.segmentedShapes(5, 6),
+                    title = stringResource(R.string.settings_new_tab),
+                    summary = stringResource(R.string.settings_new_tab_summary),
+                    onClick = { onNavigate(Screen.CustomizeNewTab) },
                 )
             }
 

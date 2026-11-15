@@ -4,6 +4,7 @@ import android.app.Application
 import com.vastsea.hilal.addons.AddonController
 import com.vastsea.hilal.browser.TabStore
 import com.vastsea.hilal.data.HilalDatabase
+import com.vastsea.hilal.data.NewTabRepository
 import com.vastsea.hilal.data.SettingsRepository
 import com.vastsea.hilal.downloads.DownloadController
 import com.vastsea.hilal.gecko.GeckoProvider
@@ -31,6 +32,7 @@ class HilalApplication : Application() {
 class AppContainer(val app: Application) {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     val settings = SettingsRepository(app)
+    val newTab = NewTabRepository(app)
     val database = HilalDatabase.create(app)
     val runtime: GeckoRuntime by lazy { GeckoProvider.create(app) }
     val downloads by lazy { DownloadController(app, database.downloads()) }

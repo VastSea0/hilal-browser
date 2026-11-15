@@ -95,6 +95,8 @@ scratch/
 keystore.properties
 android/keystore/
 keystore-backup/
+android/app/schemas/
+schemas/
 
 # === Secrets & Environment ==================================================
 .env

@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import com.vastsea.hilal.AppContainer
 import com.vastsea.hilal.data.UiStyle
 import com.vastsea.hilal.ui.browser.BrowserScreen
+import com.vastsea.hilal.ui.browser.CustomizeNewTabScreen
 import com.vastsea.hilal.ui.glass.LocalAppBackdrop
 import com.vastsea.hilal.ui.glass.LocalLiquidGlassEnabled
 import com.vastsea.hilal.ui.glass.backdrop.backdrops.rememberLayerBackdrop
@@ -41,7 +42,7 @@ import com.vastsea.hilal.ui.theme.LocalHaptics
 import com.vastsea.hilal.ui.theme.rememberHaptics
 import kotlinx.coroutines.CancellationException
 
-enum class Screen { History, Bookmarks, Downloads, Addons, Settings }
+enum class Screen { History, Bookmarks, Downloads, Addons, Settings, CustomizeNewTab }
 
 /**
  * Root of the UI. The browser is always composed underneath so its GeckoView and state survive;
@@ -122,7 +123,8 @@ fun HilalApp(container: AppContainer, onFullscreenChange: (Boolean) -> Unit) {
                         Screen.Bookmarks -> BookmarksScreen(container, onBack = ::close, onOpen = { url, newTab, private -> openInBrowser(url, newTab, private) })
                         Screen.Downloads -> DownloadsScreen(container, onBack = ::close)
                         Screen.Addons -> AddonsScreen(container, onBack = ::close, onOpen = { url -> openInBrowser(url, newTab = true) })
-                        Screen.Settings -> SettingsScreen(container, onBack = ::close, onOpen = { url -> openInBrowser(url, newTab = true) })
+                        Screen.Settings -> SettingsScreen(container, onBack = ::close, onOpen = { url -> openInBrowser(url, newTab = true) }, onNavigate = ::open)
+                        Screen.CustomizeNewTab -> CustomizeNewTabScreen(container, onBack = ::close)
                     }
                 }
             }
