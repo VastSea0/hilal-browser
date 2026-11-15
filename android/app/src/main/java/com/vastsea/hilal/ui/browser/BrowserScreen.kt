@@ -73,7 +73,7 @@ import org.mozilla.geckoview.GeckoSession
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-private enum class Overlay { None, Editor, Overview, Menu, QuickActions, Find }
+private enum class Overlay { None, Editor, Overview, Menu, QuickActions, Find, CustomizeNewTab }
 
 @Composable
 fun BrowserScreen(
@@ -310,6 +310,9 @@ fun BrowserScreen(
                                 editorInitialText = null
                                 overlay = Overlay.Editor
                             },
+                            onOpenCustomize = {
+                                overlay = Overlay.CustomizeNewTab
+                            },
                         )
                     }
                     cover?.let { id ->
@@ -460,6 +463,13 @@ fun BrowserScreen(
                     overlay = Overlay.Editor
                 },
                 onDismiss = { if (overlay == Overlay.QuickActions) overlay = Overlay.None },
+            )
+        }
+
+        if (overlay == Overlay.CustomizeNewTab) {
+            CustomizeNewTabSheet(
+                container = container,
+                onDismiss = { if (overlay == Overlay.CustomizeNewTab) overlay = Overlay.None },
             )
         }
 

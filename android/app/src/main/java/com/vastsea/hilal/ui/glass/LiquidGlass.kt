@@ -32,6 +32,7 @@ import com.vastsea.hilal.ui.glass.backdrop.effects.lens
 import com.vastsea.hilal.ui.glass.backdrop.highlight.Highlight
 import com.vastsea.hilal.ui.glass.backdrop.highlight.HighlightElement
 import com.vastsea.hilal.ui.glass.backdrop.internal.ShapeProvider
+import com.vastsea.hilal.ui.glass.backdrop.shadow.Shadow
 
 val LocalLiquidGlassEnabled = staticCompositionLocalOf { false }
 
@@ -57,9 +58,10 @@ private const val LENS_HEIGHT = 0.5f
 private const val LENS_AMOUNT = 0.5f
 private const val LENS_MAX_DP = 48f
 private const val SURFACE_OPACITY = 0.4f
-private const val GLASS_RESOLUTION_SCALE = 0.25f
+private const val GLASS_RESOLUTION_SCALE = 0.33f
 private const val DARK_INDICATOR_OPACITY = 0.14f
 private val DEFAULT_HIGHLIGHT: () -> Highlight? = { Highlight.Default }
+private val DEFAULT_SHADOW: () -> Shadow? = { Shadow.Default }
 
 @Composable
 fun glassContentColor(): Color =
@@ -164,21 +166,15 @@ fun Modifier.liquidGlass(
         { drawRect(color = surfaceTintColor, size = size) }
     }
 
-    return shadow(
-        elevation = 6.dp,
-        shape = shape,
-        ambientColor = Color.Black.copy(alpha = 0.16f),
-        spotColor = Color.Black.copy(alpha = 0.22f),
+    return drawBackdrop(
+        backdrop = backdrop,
+        shape = shapeLambda,
+        effects = effectsLambda,
+        highlight = DEFAULT_HIGHLIGHT,
+        shadow = DEFAULT_SHADOW,
+        onDrawSurface = surfaceLambda,
+        exportedBackdrop = exportedBackdrop,
+        backdropScale = GLASS_RESOLUTION_SCALE,
     )
-        .drawBackdrop(
-            backdrop = backdrop,
-            shape = shapeLambda,
-            effects = effectsLambda,
-            highlight = DEFAULT_HIGHLIGHT,
-            shadow = null,
-            onDrawSurface = surfaceLambda,
-            exportedBackdrop = exportedBackdrop,
-            backdropScale = GLASS_RESOLUTION_SCALE,
-        )
         .border(GLASS_EDGE_WIDTH, GLASS_EDGE_COLOR, shape)
 }

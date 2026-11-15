@@ -573,7 +573,6 @@ private fun HeaderSegmented(
             items = labels,
             selectedIndex = selectedIndex,
             onSelect = onSelect,
-            useLightweightBar = true,
             modifier = Modifier.fillMaxWidth(),
         )
     } else {

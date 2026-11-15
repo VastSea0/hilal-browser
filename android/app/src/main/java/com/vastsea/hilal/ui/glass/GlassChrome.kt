@@ -277,14 +277,6 @@ fun GlassBottomDrawer(
                         onClick = {},
                     )
                     .nestedScroll(drawerScroll)
-                    .pointerInput(height) {
-                        detectVerticalDragGestures(
-                            onDragEnd = dismissOnRelease,
-                            onDragCancel = { drag = 0f },
-                        ) { _, delta ->
-                            drag = (drag + delta).coerceAtLeast(0f)
-                        }
-                    }
                     .padding(top = 10.dp, bottom = 16.dp)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -292,10 +284,24 @@ fun GlassBottomDrawer(
                 Box(
                     Modifier
                         .padding(bottom = 12.dp)
-                        .size(width = 36.dp, height = 4.dp)
-                        .clip(CircleShape)
-                        .background(contentColor.copy(alpha = 0.25f)),
-                )
+                        .size(width = 48.dp, height = 24.dp)
+                        .pointerInput(height) {
+                            detectVerticalDragGestures(
+                                onDragEnd = dismissOnRelease,
+                                onDragCancel = { drag = 0f },
+                            ) { _, delta ->
+                                drag = (drag + delta).coerceAtLeast(0f)
+                            }
+                        },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(
+                        Modifier
+                            .size(width = 36.dp, height = 4.dp)
+                            .clip(CircleShape)
+                            .background(contentColor.copy(alpha = 0.25f)),
+                    )
+                }
                 CompositionLocalProvider(LocalContentColor provides contentColor) {
                     if (!title.isNullOrBlank()) {
                         Text(

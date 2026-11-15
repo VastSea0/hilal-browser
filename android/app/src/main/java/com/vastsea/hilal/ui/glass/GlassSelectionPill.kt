@@ -588,7 +588,7 @@ fun GlassSegmentedControl(
     val indicatorColor = glassIndicatorColor()
 
     Box(modifier = modifier) {
-        CompositionLocalProvider(LocalGlassExport provides barGlass) {
+        CompositionLocalProvider(LocalGlassExport provides (if (useLightweightBar) null else barGlass)) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -605,7 +605,7 @@ fun GlassSegmentedControl(
                     )
                     .padding(contentPadding),
             ) {
-                if (showPill && (!glassPill || pill.isFlat)) {
+                if (showPill && (!glassPill || pill.isFlat || useLightweightBar)) {
                     FlatSelectionPill(
                         color = indicatorColor,
                         modifier = Modifier
@@ -621,7 +621,7 @@ fun GlassSegmentedControl(
                     modifier = Modifier
                         .fillMaxWidth()
                         .onSizeChanged { rowSize = it }
-                        .layerBackdrop(tabRow)
+                        .then(if (useLightweightBar) Modifier else Modifier.layerBackdrop(tabRow))
                         .pointerInput(count) {
                             var totalDrag = 0f
                             var dragStartIndex = currentSelectedIndex
@@ -729,7 +729,7 @@ fun GlassSegmentedControl(
             }
         }
 
-        if (glassPill && showPill && !pill.isFlat) {
+        if (glassPill && showPill && !pill.isFlat && !useLightweightBar) {
             GlassSelectionPill(
                 motion = pill,
                 fillColor = indicatorColor,

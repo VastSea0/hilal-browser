@@ -95,10 +95,15 @@ import com.vastsea.hilal.search.InputResolver
 import com.vastsea.hilal.ui.Screen
 import com.vastsea.hilal.ui.glass.GlassAmbientCanvas
 import com.vastsea.hilal.ui.glass.GlassSpring
+import com.vastsea.hilal.ui.glass.LocalAppBackdrop
+import com.vastsea.hilal.ui.glass.backdrop.backdrops.layerBackdrop
+import com.vastsea.hilal.ui.glass.backdrop.backdrops.rememberLayerBackdrop
 import com.vastsea.hilal.ui.glass.glassContentColor
 import com.vastsea.hilal.ui.glass.isLiquidGlassActive
 import com.vastsea.hilal.ui.glass.lightweightLiquidGlass
+import com.vastsea.hilal.ui.glass.liquidGlass
 import com.vastsea.hilal.ui.glass.liquidGlassRim
+import com.vastsea.hilal.ui.glass.rememberBackdropPainter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -130,6 +135,7 @@ fun StartPage(
     onOpen: (String) -> Unit,
     onNavigate: (Screen) -> Unit = {},
     onOpenSearch: () -> Unit = {},
+    onOpenCustomize: () -> Unit = {},
 ) {
     val config by container.newTab.config.collectAsState()
     val frequent by remember { container.database.history().topSites() }.collectAsState(emptyList())
@@ -169,7 +175,6 @@ fun StartPage(
         }
     }
 
-    var showCustomizeSheet by remember { mutableStateOf(false) }
     var addingShortcut by remember { mutableStateOf(false) }
     var editingShortcut by remember { mutableStateOf<PinnedShortcut?>(null) }
     var shortcutActionTarget by remember { mutableStateOf<PinnedShortcut?>(null) }
@@ -208,7 +213,7 @@ fun StartPage(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                 ) {
                     if (!isPrivate) {
-                        IconButton(onClick = { showCustomizeSheet = true }) {
+                        IconButton(onClick = onOpenCustomize) {
                             Icon(
                                 Icons.Outlined.Tune,
                                 contentDescription = stringResource(R.string.customize_new_tab),
@@ -247,7 +252,7 @@ fun StartPage(
                         onBookmarks = { onNavigate(Screen.Bookmarks) },
                         onHistory = { onNavigate(Screen.History) },
                         onDownloads = { onNavigate(Screen.Downloads) },
-                        onCustomize = { showCustomizeSheet = true },
+                        onCustomize = onOpenCustomize,
                     )
                 }
             }
@@ -329,45 +334,56 @@ fun StartPage(
         }
     }
 
+    val startPageBackdrop = rememberLayerBackdrop(onDraw = rememberBackdropPainter())
+
     Box(Modifier.fillMaxSize()) {
         // Wallpaper / Ambience background layer
-        if (wallpaperBitmap != null && !isPrivate) {
-            Image(
-                bitmap = wallpaperBitmap!!,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(
-                        if (config.wallpaperBlurDp > 0.01f && Build.VERSION.SDK_INT >= 31) {
-                            Modifier.blur(config.wallpaperBlurDp.dp)
-                        } else {
-                            Modifier
-                        }
-                    ),
-            )
-            if (config.wallpaperDim > 0.01f) {
-                Box(
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(if (glass) Modifier.layerBackdrop(startPageBackdrop) else Modifier)
+        ) {
+            if (wallpaperBitmap != null && !isPrivate) {
+                Image(
+                    bitmap = wallpaperBitmap!!,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black.copy(alpha = config.wallpaperDim)),
+                        .then(
+                            if (config.wallpaperBlurDp > 0.01f && Build.VERSION.SDK_INT >= 31) {
+                                Modifier.blur(config.wallpaperBlurDp.dp)
+                            } else {
+                                Modifier
+                            }
+                        ),
                 )
+                if (config.wallpaperDim > 0.01f) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = config.wallpaperDim)),
+                    )
+                }
+            } else if (presetColors != null && !isPrivate) {
+                GlassAmbientCanvas(
+                    accentColor = presetColors.first,
+                    secondaryColor = presetColors.second,
+                )
+            } else if (glass) {
+                GlassAmbientCanvas(
+                    accentColor = if (isPrivate) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                    secondaryColor = if (isPrivate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                )
+            } else {
+                Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {}
             }
-        } else if (presetColors != null && !isPrivate) {
-            GlassAmbientCanvas(
-                accentColor = presetColors.first,
-                secondaryColor = presetColors.second,
-            )
-        } else if (glass) {
-            GlassAmbientCanvas(
-                accentColor = if (isPrivate) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
-                secondaryColor = if (isPrivate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-            )
-        } else {
-            Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {}
         }
 
-        CompositionLocalProvider(LocalContentColor provides contentColor) {
+        CompositionLocalProvider(
+            LocalContentColor provides contentColor,
+            LocalAppBackdrop provides if (glass) startPageBackdrop else LocalAppBackdrop.current,
+        ) {
             grid()
         }
     }
@@ -511,14 +527,6 @@ fun StartPage(
             onDismiss = { editingShortcut = null },
         )
     }
-
-    // Customize sheet
-    if (showCustomizeSheet) {
-        CustomizeNewTabSheet(
-            container = container,
-            onDismiss = { showCustomizeSheet = false },
-        )
-    }
 }
 
 @Composable
@@ -553,7 +561,7 @@ private fun StartSearchBar(onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 4.dp, vertical = 4.dp)
-                .lightweightLiquidGlass(shape, MaterialTheme.colorScheme.surfaceContainerHigh)
+                .liquidGlass(shape)
                 .clickable(onClick = onClick),
         ) {
             content()
@@ -627,7 +635,7 @@ private fun QuickAccessChip(
     if (glass) {
         Box(
             modifier = Modifier
-                .lightweightLiquidGlass(shape, MaterialTheme.colorScheme.surfaceContainer)
+                .liquidGlass(shape)
                 .clickable(onClick = onClick),
         ) {
             content()
@@ -673,7 +681,7 @@ private fun NoticeCard(notice: Notice, onOpen: () -> Unit, onDismiss: () -> Unit
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .lightweightLiquidGlass(shape, MaterialTheme.colorScheme.secondaryContainer)
+                .liquidGlass(shape)
                 .then(if (notice.url != null) Modifier.clickable(onClick = onOpen) else Modifier),
         ) {
             CompositionLocalProvider(LocalContentColor provides glassContentColor()) {
@@ -871,9 +879,8 @@ private fun ShortcutTile(
                     scaleX = scale
                     scaleY = scale
                 }
-                .lightweightLiquidGlass(
+                .liquidGlass(
                     shape = RoundedCornerShape(20.dp),
-                    fallbackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 )
                 .combinedClickable(
                     interactionSource = interaction,
@@ -984,9 +991,8 @@ private fun AddShortcutTile(
                     scaleX = scale
                     scaleY = scale
                 }
-                .lightweightLiquidGlass(
+                .liquidGlass(
                     shape = RoundedCornerShape(20.dp),
-                    fallbackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 )
                 .clickable(interactionSource = interaction, indication = null, onClick = onClick),
         ) {
@@ -1032,9 +1038,8 @@ private fun SiteTile(
                     scaleX = scale
                     scaleY = scale
                 }
-                .lightweightLiquidGlass(
+                .liquidGlass(
                     shape = RoundedCornerShape(20.dp),
-                    fallbackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 )
                 .combinedClickable(
                     interactionSource = interaction,
@@ -1117,7 +1122,7 @@ fun Monogram(
     )
     val hash = host.hashCode().let { if (it < 0) -it else it }
     val (bg, fg) = palette[hash % palette.size]
-    Surface(shape = shape, color = bg, modifier = modifier) {
+    Surface(shape = shape, color = bg, modifier = modifier.liquidGlassRim(shape)) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 host.firstOrNull { it.isLetterOrDigit() }?.uppercase() ?: "•",
