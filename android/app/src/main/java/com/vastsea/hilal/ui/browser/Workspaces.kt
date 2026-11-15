@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -62,6 +64,10 @@ import com.vastsea.hilal.R
 import com.vastsea.hilal.browser.Workspace
 import com.vastsea.hilal.browser.WorkspaceColor
 import com.vastsea.hilal.browser.WorkspaceIcon
+import com.vastsea.hilal.ui.glass.GlassBottomDrawer
+import com.vastsea.hilal.ui.glass.glassContentColor
+import com.vastsea.hilal.ui.glass.isLiquidGlassActive
+import com.vastsea.hilal.ui.glass.lightweightLiquidGlass
 
 /** What the editor sheet hands back for a new or changed workspace. */
 data class WorkspaceEdit(
@@ -101,6 +107,8 @@ fun WorkspaceStrip(
     onAdd: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val glass = isLiquidGlassActive()
+    val fgColor = glassContentColor()
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 12.dp),
@@ -108,37 +116,95 @@ fun WorkspaceStrip(
     ) {
         items(workspaces, key = { it.id }) { workspace ->
             val active = workspace.id == activeId
-            FilterChip(
-                selected = active,
-                onClick = { if (active) onEdit(workspace) else onSwitch(workspace.id) },
-                label = { Text("${workspace.name} · ${tabCounts[workspace.id] ?: 0}") },
-                leadingIcon = {
+            if (glass) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .animateItem()
+                        .height(34.dp)
+                        .lightweightLiquidGlass(CircleShape, MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .then(
+                            if (active) {
+                                Modifier
+                                    .background(workspace.color.color.copy(alpha = 0.22f), CircleShape)
+                                    .border(1.dp, workspace.color.color.copy(alpha = 0.75f), CircleShape)
+                            } else {
+                                Modifier
+                            },
+                        )
+                        .clickable { if (active) onEdit(workspace) else onSwitch(workspace.id) }
+                        .padding(horizontal = 12.dp),
+                ) {
                     Icon(
                         workspace.icon.vector,
                         contentDescription = null,
                         tint = workspace.color.color,
                         modifier = Modifier.size(FilterChipDefaults.IconSize),
                     )
-                },
-                trailingIcon = if (active) {
-                    {
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        "${workspace.name} · ${tabCounts[workspace.id] ?: 0}",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = fgColor,
+                    )
+                    if (active) {
+                        Spacer(Modifier.width(6.dp))
                         Icon(
                             Icons.Outlined.Edit,
                             contentDescription = stringResource(R.string.workspace_edit),
+                            tint = fgColor,
                             modifier = Modifier.size(FilterChipDefaults.IconSize),
                         )
                     }
-                } else null,
-                modifier = Modifier.animateItem(),
-            )
+                }
+            } else {
+                FilterChip(
+                    selected = active,
+                    onClick = { if (active) onEdit(workspace) else onSwitch(workspace.id) },
+                    label = { Text("${workspace.name} · ${tabCounts[workspace.id] ?: 0}") },
+                    leadingIcon = {
+                        Icon(
+                            workspace.icon.vector,
+                            contentDescription = null,
+                            tint = workspace.color.color,
+                            modifier = Modifier.size(FilterChipDefaults.IconSize),
+                        )
+                    },
+                    trailingIcon = if (active) {
+                        {
+                            Icon(
+                                Icons.Outlined.Edit,
+                                contentDescription = stringResource(R.string.workspace_edit),
+                                modifier = Modifier.size(FilterChipDefaults.IconSize),
+                            )
+                        }
+                    } else null,
+                    modifier = Modifier.animateItem(),
+                )
+            }
         }
         item(key = "add") {
-            FilterChip(
-                selected = false,
-                onClick = onAdd,
-                label = { Text(stringResource(R.string.workspace_new)) },
-                leadingIcon = { Icon(Icons.Outlined.Add, null, Modifier.size(FilterChipDefaults.IconSize)) },
-            )
+            if (glass) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .height(34.dp)
+                        .lightweightLiquidGlass(CircleShape, MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .clickable(onClick = onAdd)
+                        .padding(horizontal = 12.dp),
+                ) {
+                    Icon(Icons.Outlined.Add, null, tint = fgColor, modifier = Modifier.size(FilterChipDefaults.IconSize))
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.workspace_new), style = MaterialTheme.typography.labelLarge, color = fgColor)
+                }
+            } else {
+                FilterChip(
+                    selected = false,
+                    onClick = onAdd,
+                    label = { Text(stringResource(R.string.workspace_new)) },
+                    leadingIcon = { Icon(Icons.Outlined.Add, null, Modifier.size(FilterChipDefaults.IconSize)) },
+                )
+            }
         }
     }
 }
@@ -151,23 +217,26 @@ fun WorkspaceEditorSheet(
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val glass = isLiquidGlassActive()
     var name by remember { mutableStateOf(workspace?.name.orEmpty()) }
     var icon by remember { mutableStateOf(workspace?.icon ?: WorkspaceIcon.Circle) }
     var color by remember { mutableStateOf(workspace?.color ?: WorkspaceColor.entries.random()) }
     var isolated by remember { mutableStateOf(workspace?.isolated ?: true) }
     var confirmDelete by remember { mutableStateOf(false) }
     val isDefault = workspace?.id == Workspace.DEFAULT_ID
+    val title = stringResource(if (workspace == null) R.string.workspace_new else R.string.workspace_edit)
 
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheet) {
+    val sheetContent: @Composable (showTitle: Boolean, showNavPadding: Boolean) -> Unit = { showTitle, showNavPadding ->
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).navigationBarsPadding(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .then(if (showNavPadding) Modifier.navigationBarsPadding() else Modifier),
         ) {
-            Text(
-                stringResource(if (workspace == null) R.string.workspace_new else R.string.workspace_edit),
-                style = MaterialTheme.typography.titleLarge,
-            )
+            if (showTitle) {
+                Text(title, style = MaterialTheme.typography.titleLarge)
+            }
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it.take(40) },
@@ -178,7 +247,11 @@ fun WorkspaceEditorSheet(
             FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 WorkspaceIcon.entries.forEach { option ->
                     IconToggleButton(checked = option == icon, onCheckedChange = { icon = option }) {
-                        Icon(option.vector, contentDescription = option.name, tint = if (option == icon) color.color else MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(
+                            option.vector,
+                            contentDescription = option.name,
+                            tint = if (option == icon) color.color else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }
@@ -192,8 +265,15 @@ fun WorkspaceEditorSheet(
                             .size(36.dp)
                             .background(option.color, CircleShape)
                             .then(
-                                if (option == color) Modifier.border(3.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-                                else Modifier
+                                if (option == color) {
+                                    Modifier.border(
+                                        3.dp,
+                                        if (glass) glassContentColor() else MaterialTheme.colorScheme.onSurface,
+                                        CircleShape,
+                                    )
+                                } else {
+                                    Modifier
+                                },
                             )
                             .clickable { color = option },
                     )
@@ -228,6 +308,17 @@ fun WorkspaceEditorSheet(
                     onClick = { onSave(WorkspaceEdit(name.trim(), icon, color, isolated && !isDefault)) },
                 ) { Text(stringResource(R.string.save)) }
             }
+        }
+    }
+
+    if (glass) {
+        GlassBottomDrawer(onDismiss = onDismiss, title = title) {
+            sheetContent(false, false)
+        }
+    } else {
+        val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheet) {
+            sheetContent(true, true)
         }
     }
 

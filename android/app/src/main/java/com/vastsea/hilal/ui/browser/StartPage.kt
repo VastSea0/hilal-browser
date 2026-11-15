@@ -1,11 +1,15 @@
 package com.vastsea.hilal.ui.browser
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,19 +28,21 @@ import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -45,9 +51,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.vastsea.hilal.AppContainer
 import com.vastsea.hilal.R
-import com.vastsea.hilal.live.Notice
 import com.vastsea.hilal.live.LocalizedText
+import com.vastsea.hilal.live.Notice
 import com.vastsea.hilal.search.InputResolver
+import com.vastsea.hilal.ui.glass.GlassAmbientCanvas
+import com.vastsea.hilal.ui.glass.GlassSpring
+import com.vastsea.hilal.ui.glass.glassContentColor
+import com.vastsea.hilal.ui.glass.isLiquidGlassActive
+import com.vastsea.hilal.ui.glass.lightweightLiquidGlass
+import com.vastsea.hilal.ui.glass.liquidGlassRim
 
 private data class Site(val url: String, val title: String)
 
@@ -77,7 +89,8 @@ fun StartPage(
         (listOfNotNull(apk) + live.notices).filter { it.id !in dismissed }
     }
 
-    Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
+    val glass = isLiquidGlassActive()
+    val grid: @Composable () -> Unit = {
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 84.dp),
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 48.dp, bottom = bottomPadding + 24.dp),
@@ -106,18 +119,29 @@ fun StartPage(
             }
         }
     }
+
+    if (glass) {
+        Box(Modifier.fillMaxSize()) {
+            GlassAmbientCanvas(
+                accentColor = if (isPrivate) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                secondaryColor = if (isPrivate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            )
+            CompositionLocalProvider(LocalContentColor provides glassContentColor()) {
+                grid()
+            }
+        }
+    } else {
+        Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
+            grid()
+        }
+    }
 }
 
 @Composable
 private fun NoticeCard(notice: Notice, onOpen: () -> Unit, onDismiss: () -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
-            .then(if (notice.url != null) Modifier.clickable(onClick = onOpen) else Modifier),
-    ) {
+    val glass = isLiquidGlassActive()
+    val shape = RoundedCornerShape(24.dp)
+    val content: @Composable () -> Unit = {
         Row(verticalAlignment = Alignment.Top, modifier = Modifier.padding(start = 20.dp, top = 8.dp, end = 4.dp, bottom = 16.dp)) {
             Column(Modifier.weight(1f).padding(top = 8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -136,18 +160,43 @@ private fun NoticeCard(notice: Notice, onOpen: () -> Unit, onDismiss: () -> Unit
             }
         }
     }
+
+    if (glass) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .lightweightLiquidGlass(shape, MaterialTheme.colorScheme.secondaryContainer)
+                .then(if (notice.url != null) Modifier.clickable(onClick = onOpen) else Modifier),
+        ) {
+            CompositionLocalProvider(LocalContentColor provides glassContentColor()) {
+                content()
+            }
+        }
+    } else {
+        Surface(
+            shape = shape,
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .then(if (notice.url != null) Modifier.clickable(onClick = onOpen) else Modifier),
+        ) {
+            content()
+        }
+    }
 }
 
 @Composable
 private fun Header() {
+    val shape = MaterialShapes.Cookie9Sided.toShape()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth().padding(top = 32.dp, bottom = 24.dp),
     ) {
         Surface(
-            shape = MaterialShapes.Cookie9Sided.toShape(),
+            shape = shape,
             color = MaterialTheme.colorScheme.primaryContainer,
-            modifier = Modifier.size(88.dp),
+            modifier = Modifier.size(88.dp).liquidGlassRim(shape),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Image(
@@ -161,21 +210,22 @@ private fun Header() {
         Text(
             stringResource(R.string.start_greeting),
             style = MaterialTheme.typography.headlineMediumEmphasized,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = if (isLiquidGlassActive()) glassContentColor() else MaterialTheme.colorScheme.onSurface,
         )
     }
 }
 
 @Composable
 private fun PrivateHeader() {
+    val shape = MaterialShapes.Ghostish.toShape()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth().padding(top = 32.dp, bottom = 24.dp, start = 8.dp, end = 8.dp),
     ) {
         Surface(
-            shape = MaterialShapes.Ghostish.toShape(),
+            shape = shape,
             color = MaterialTheme.colorScheme.tertiaryContainer,
-            modifier = Modifier.size(88.dp),
+            modifier = Modifier.size(88.dp).liquidGlassRim(shape),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
@@ -195,7 +245,7 @@ private fun PrivateHeader() {
         Text(
             stringResource(R.string.start_private_body),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (isLiquidGlassActive()) glassContentColor().copy(alpha = 0.72f) else MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
     }
@@ -214,23 +264,60 @@ private fun SectionTitle(text: String) {
 @Composable
 private fun SiteTile(site: Site, onOpen: (String) -> Unit) {
     val host = InputResolver.host(site.url)
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .clickable { onOpen(site.url) }
-            .padding(vertical = 8.dp),
-    ) {
-        Monogram(host, Modifier.size(56.dp))
-        Spacer(Modifier.height(8.dp))
-        Text(
-            site.title.ifBlank { host },
-            style = MaterialTheme.typography.labelMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.width(76.dp),
-            textAlign = TextAlign.Center,
+    val glass = isLiquidGlassActive()
+    if (glass) {
+        val interaction = remember { MutableInteractionSource() }
+        val pressed by interaction.collectIsPressedAsState()
+        val scale by animateFloatAsState(
+            targetValue = if (pressed) 0.94f else 1f,
+            animationSpec = GlassSpring,
+            label = "siteTileScale",
         )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
+                .lightweightLiquidGlass(
+                    shape = RoundedCornerShape(20.dp),
+                    fallbackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                )
+                .clickable(interactionSource = interaction, indication = null) { onOpen(site.url) }
+                .padding(horizontal = 4.dp, vertical = 10.dp),
+        ) {
+            Monogram(host, Modifier.size(56.dp))
+            Spacer(Modifier.height(8.dp))
+            Text(
+                site.title.ifBlank { host },
+                style = MaterialTheme.typography.labelMedium,
+                color = glassContentColor(),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.width(76.dp),
+                textAlign = TextAlign.Center,
+            )
+        }
+    } else {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .clip(RoundedCornerShape(20.dp))
+                .clickable { onOpen(site.url) }
+                .padding(vertical = 8.dp),
+        ) {
+            Monogram(host, Modifier.size(56.dp))
+            Spacer(Modifier.height(8.dp))
+            Text(
+                site.title.ifBlank { host },
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.width(76.dp),
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
 

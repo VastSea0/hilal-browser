@@ -46,14 +46,21 @@ fun GeckoHost(
     toolbarMaxHeightPx: Int,
     toolbarVisibleHeightPx: () -> Int,
     modifier: Modifier = Modifier,
+    useTextureBackend: Boolean = false,
 ) {
     val context = LocalContext.current
     val view = remember {
         GeckoView(context).apply {
+            if (useTextureBackend) {
+                setViewBackend(GeckoView.BACKEND_TEXTURE_VIEW)
+            }
             // A GeckoView never draws anything until a session paints into it, so start
             // with the window background rather than a black surface.
             coverUntilFirstPaint(android.graphics.Color.TRANSPARENT)
         }
+    }
+    val currentBackend = remember {
+        intArrayOf(if (useTextureBackend) GeckoView.BACKEND_TEXTURE_VIEW else GeckoView.BACKEND_SURFACE_VIEW)
     }
     DisposableEffect(view) {
         state.view = view
@@ -66,6 +73,16 @@ fun GeckoHost(
         factory = { view },
         modifier = modifier,
         update = { v ->
+            val desiredBackend = if (useTextureBackend) {
+                GeckoView.BACKEND_TEXTURE_VIEW
+            } else {
+                GeckoView.BACKEND_SURFACE_VIEW
+            }
+            if (currentBackend[0] != desiredBackend) {
+                currentBackend[0] = desiredBackend
+                v.setViewBackend(desiredBackend)
+                v.coverUntilFirstPaint(android.graphics.Color.TRANSPARENT)
+            }
             v.setTag(R_TAG_WANTED, session)
             attachWhenOpen(v, session)
             v.setDynamicToolbarMaxHeight(toolbarMaxHeightPx)

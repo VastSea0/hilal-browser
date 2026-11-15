@@ -20,10 +20,12 @@ import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,6 +43,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.vastsea.hilal.R
 import com.vastsea.hilal.addons.await
+import com.vastsea.hilal.ui.glass.glassContentColor
+import com.vastsea.hilal.ui.glass.isLiquidGlassActive
+import com.vastsea.hilal.ui.glass.liquidGlass
 import kotlinx.coroutines.launch
 import org.mozilla.geckoview.GeckoSession
 
@@ -75,20 +80,15 @@ fun FindBar(session: GeckoSession, onClose: () -> Unit) {
     }
     DisposableEffect(session) { onDispose { finder.clear() } }
 
-    Surface(
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shadowElevation = 3.dp,
-        modifier = Modifier
-            .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
-            .fillMaxWidth()
-            .padding(horizontal = BarSidePadding, vertical = BarVerticalPadding)
-            .height(BarHeight),
-    ) {
+    val glass = isLiquidGlassActive()
+    val fgColor = if (glass) glassContentColor() else MaterialTheme.colorScheme.onSurface
+    val mutedColor = if (glass) glassContentColor().copy(alpha = 0.68f) else MaterialTheme.colorScheme.onSurfaceVariant
+
+    val content: @Composable () -> Unit = {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 20.dp, end = 4.dp)) {
             Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                 if (query.isEmpty()) {
-                    Text(stringResource(R.string.find_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.find_placeholder), color = mutedColor)
                 }
                 BasicTextField(
                     value = query,
@@ -97,8 +97,8 @@ fun FindBar(session: GeckoSession, onClose: () -> Unit) {
                         find()
                     },
                     singleLine = true,
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = fgColor),
+                    cursorBrush = SolidColor(if (glass) fgColor else MaterialTheme.colorScheme.primary),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { find() }),
                     modifier = Modifier.fillMaxWidth().focusRequester(focus),
@@ -108,7 +108,7 @@ fun FindBar(session: GeckoSession, onClose: () -> Unit) {
                 Text(
                     stringResource(R.string.find_count, current, total),
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = mutedColor,
                     modifier = Modifier.padding(horizontal = 8.dp),
                 )
             }
@@ -121,6 +121,35 @@ fun FindBar(session: GeckoSession, onClose: () -> Unit) {
             IconButton(onClick = onClose) {
                 Icon(Icons.Outlined.Close, stringResource(R.string.close))
             }
+        }
+    }
+
+    if (glass) {
+        Box(
+            contentAlignment = Alignment.CenterStart,
+            modifier = Modifier
+                .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
+                .fillMaxWidth()
+                .padding(horizontal = BarSidePadding, vertical = BarVerticalPadding)
+                .height(BarHeight)
+                .liquidGlass(CircleShape),
+        ) {
+            CompositionLocalProvider(LocalContentColor provides fgColor) {
+                content()
+            }
+        }
+    } else {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shadowElevation = 3.dp,
+            modifier = Modifier
+                .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
+                .fillMaxWidth()
+                .padding(horizontal = BarSidePadding, vertical = BarVerticalPadding)
+                .height(BarHeight),
+        ) {
+            content()
         }
     }
 }

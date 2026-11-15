@@ -134,6 +134,9 @@
     <string name="settings_search_suggestions">Arama önerileri</string>
     <string name="settings_search_suggestions_summary">Öneri almak için yazdıklarınızı arama motorunuza gönderin</string>
     <string name="settings_appearance">Görünüm</string>
+    <string name="settings_ui_style">Arayüz stili</string>
+    <string name="ui_style_material">Material</string>
+    <string name="ui_style_liquid_glass">Liquid Glass</string>
     <string name="settings_theme">Tema</string>
     <string name="theme_system">Sistem</string>
     <string name="theme_light">Açık</string>

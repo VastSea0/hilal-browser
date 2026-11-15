@@ -2,6 +2,7 @@ package com.vastsea.hilal.ui.browser
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -36,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -51,6 +54,14 @@ import com.vastsea.hilal.R
 import com.vastsea.hilal.browser.Security
 import com.vastsea.hilal.browser.TabState
 import com.vastsea.hilal.search.InputResolver
+import com.vastsea.hilal.ui.glass.GlassIconButton
+import com.vastsea.hilal.ui.glass.GlassSpring
+import com.vastsea.hilal.ui.glass.SQUASH
+import com.vastsea.hilal.ui.glass.STRETCH
+import com.vastsea.hilal.ui.glass.glassContentColor
+import com.vastsea.hilal.ui.glass.isLiquidGlassActive
+import com.vastsea.hilal.ui.glass.liquidGlass
+import kotlin.math.abs
 
 val BarHeight = 56.dp
 val BarSidePadding = 12.dp
@@ -63,6 +74,44 @@ val BarVerticalPadding = 8.dp
  */
 @Composable
 fun AddressBar(
+    tab: TabState?,
+    tabCount: Int,
+    gestures: BarGestureHandler,
+    onTabsClick: () -> Unit,
+    onMenuClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    isPressed: Boolean = false,
+    swipeOffset: () -> Float = { 0f },
+    swipeWidth: () -> Float = { 1f },
+    pullProgress: () -> Float = { 0f },
+) {
+    if (isLiquidGlassActive()) {
+        GlassAddressBar(
+            tab = tab,
+            tabCount = tabCount,
+            gestures = gestures,
+            onTabsClick = onTabsClick,
+            onMenuClick = onMenuClick,
+            isPressed = isPressed,
+            swipeOffset = swipeOffset,
+            swipeWidth = swipeWidth,
+            pullProgress = pullProgress,
+            modifier = modifier,
+        )
+    } else {
+        MaterialAddressBar(
+            tab = tab,
+            tabCount = tabCount,
+            gestures = gestures,
+            onTabsClick = onTabsClick,
+            onMenuClick = onMenuClick,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun MaterialAddressBar(
     tab: TabState?,
     tabCount: Int,
     gestures: BarGestureHandler,
@@ -98,7 +147,7 @@ fun AddressBar(
                 .barGestures(gestures),
         ) {
             Box {
-                SiteLabel(tab)
+                SiteLabel(tab, useGlassColors = false)
                 LoadingWave(
                     tab = tab,
                     modifier = Modifier
@@ -107,13 +156,90 @@ fun AddressBar(
                 )
             }
         }
-        TabCountButton(count = tabCount, isPrivate = tab?.isPrivate == true, onClick = onTabsClick)
+        TabCountButton(count = tabCount, isPrivate = tab?.isPrivate == true, useGlass = false, onClick = onTabsClick)
         FilledTonalIconButton(
             onClick = onMenuClick,
             shapes = IconButtonDefaults.shapes(),
             modifier = Modifier.size(48.dp),
         ) {
             Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(R.string.menu))
+        }
+    }
+}
+
+@Composable
+private fun GlassAddressBar(
+    tab: TabState?,
+    tabCount: Int,
+    gestures: BarGestureHandler,
+    onTabsClick: () -> Unit,
+    onMenuClick: () -> Unit,
+    isPressed: Boolean,
+    swipeOffset: () -> Float,
+    swipeWidth: () -> Float,
+    pullProgress: () -> Float,
+    modifier: Modifier = Modifier,
+) {
+    val editLabel = stringResource(R.string.address_edit)
+    val quickActionsLabel = stringResource(R.string.address_quick_actions)
+    val pressFraction by animateFloatAsState(
+        targetValue = if (isPressed) 1f else 0f,
+        animationSpec = GlassSpring,
+        label = "glassBarPress",
+    )
+    val privateTint = if (tab?.isPrivate == true) {
+        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.22f)
+    } else {
+        null
+    }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = BarSidePadding, vertical = BarVerticalPadding)
+            .height(BarHeight),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(BarHeight)
+                .graphicsLayer {
+                    val w = swipeWidth().coerceAtLeast(1f)
+                    val hDrag = (swipeOffset() / w).coerceIn(-0.45f, 0.45f)
+                    val vPull = pullProgress().coerceIn(0f, 1f)
+                    val pressBoost = 1f + 0.025f * pressFraction
+                    scaleX = pressBoost + abs(hDrag) * STRETCH - vPull * (STRETCH * SQUASH)
+                    scaleY = pressBoost - abs(hDrag) * (STRETCH * SQUASH) + vPull * STRETCH
+                    translationX = swipeOffset() * 0.06f
+                }
+                .liquidGlass(shape = CircleShape, surfaceTint = privateTint)
+                .semantics {
+                    role = Role.Button
+                    contentDescription = editLabel
+                    onClick(editLabel) { gestures.onTap(); true }
+                    onLongClick(quickActionsLabel) { gestures.onLongPress(); true }
+                }
+                .barGestures(gestures),
+        ) {
+            Box(Modifier.fillMaxSize()) {
+                SiteLabel(tab, useGlassColors = true)
+                LoadingWave(
+                    tab = tab,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(horizontal = 28.dp, vertical = 5.dp),
+                )
+            }
+        }
+        TabCountButton(count = tabCount, isPrivate = tab?.isPrivate == true, useGlass = true, onClick = onTabsClick)
+        GlassIconButton(onClick = onMenuClick, size = 48.dp) {
+            Icon(
+                Icons.Outlined.MoreVert,
+                contentDescription = stringResource(R.string.menu),
+                tint = glassContentColor(),
+            )
         }
     }
 }
@@ -136,8 +262,14 @@ private fun LoadingWave(tab: TabState?, modifier: Modifier) {
 }
 
 @Composable
-private fun SiteLabel(tab: TabState?) {
+private fun SiteLabel(tab: TabState?, useGlassColors: Boolean) {
     val isBlank = tab == null || tab.isBlank
+    val primaryColor = if (useGlassColors) glassContentColor() else MaterialTheme.colorScheme.onSurface
+    val secondaryColor = if (useGlassColors) {
+        glassContentColor().copy(alpha = 0.72f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -156,8 +288,7 @@ private fun SiteLabel(tab: TabState?) {
             icon,
             contentDescription = null,
             modifier = Modifier.size(18.dp),
-            tint = if (tab?.security == Security.Insecure) MaterialTheme.colorScheme.error
-            else MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = if (tab?.security == Security.Insecure) MaterialTheme.colorScheme.error else secondaryColor,
         )
         Spacer(Modifier.width(8.dp))
         val motion = MaterialTheme.motionScheme
@@ -172,7 +303,7 @@ private fun SiteLabel(tab: TabState?) {
                 text = host.ifEmpty { stringResource(R.string.address_placeholder) },
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = if (host.isEmpty()) FontWeight.Normal else FontWeight.Medium,
-                color = if (host.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                color = if (host.isEmpty()) secondaryColor else primaryColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -181,30 +312,57 @@ private fun SiteLabel(tab: TabState?) {
 }
 
 @Composable
-private fun TabCountButton(count: Int, isPrivate: Boolean, onClick: () -> Unit) {
+private fun TabCountButton(count: Int, isPrivate: Boolean, useGlass: Boolean, onClick: () -> Unit) {
     val label = stringResource(R.string.tabs_count, count)
-    FilledTonalIconButton(
-        onClick = onClick,
-        shapes = IconButtonDefaults.shapes(),
-        modifier = Modifier
-            .size(48.dp)
-            .semantics { contentDescription = label },
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(22.dp)
-                .border(
-                    width = 2.dp,
-                    color = if (isPrivate) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSecondaryContainer,
-                    shape = RoundedCornerShape(7.dp),
-                ),
+    if (useGlass) {
+        val tint = if (isPrivate) MaterialTheme.colorScheme.tertiary else glassContentColor()
+        GlassIconButton(
+            onClick = onClick,
+            size = 48.dp,
+            modifier = Modifier.semantics { contentDescription = label },
         ) {
-            Text(
-                text = if (count > 99) ":D" else count.toString(),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(22.dp)
+                    .border(
+                        width = 2.dp,
+                        color = tint,
+                        shape = RoundedCornerShape(7.dp),
+                    ),
+            ) {
+                Text(
+                    text = if (count > 99) ":D" else count.toString(),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = tint,
+                )
+            }
+        }
+    } else {
+        FilledTonalIconButton(
+            onClick = onClick,
+            shapes = IconButtonDefaults.shapes(),
+            modifier = Modifier
+                .size(48.dp)
+                .semantics { contentDescription = label },
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(22.dp)
+                    .border(
+                        width = 2.dp,
+                        color = if (isPrivate) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSecondaryContainer,
+                        shape = RoundedCornerShape(7.dp),
+                    ),
+            ) {
+                Text(
+                    text = if (count > 99) ":D" else count.toString(),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
     }
 }

@@ -35,7 +35,11 @@ import com.vastsea.hilal.AppContainer
 import com.vastsea.hilal.BuildConfig
 import com.vastsea.hilal.R
 import com.vastsea.hilal.data.ThemeMode
+import com.vastsea.hilal.data.UiStyle
 import com.vastsea.hilal.search.SearchEngines
+import com.vastsea.hilal.ui.glass.GlassSegmentedControl
+import com.vastsea.hilal.ui.glass.isGlassSupported
+import com.vastsea.hilal.ui.glass.isLiquidGlassActive
 import com.vastsea.hilal.ui.library.LibraryScaffold
 
 private const val SOURCE_URL = "https://github.com/vastsea0/hilal-browser"
@@ -67,31 +71,78 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit, onOpen: (String)
 
             section(R.string.settings_appearance)
             item {
-                SegmentedListItem(onClick = {}, shapes = ListItemDefaults.segmentedShapes(0, 4), supportingContent = {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    ) {
-                        ThemeMode.entries.forEachIndexed { index, mode ->
-                            ToggleButton(
-                                checked = settings.themeMode == mode,
-                                onCheckedChange = { repo.update { it.copy(themeMode = mode) } },
-                                shapes = when (index) {
-                                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                                    ThemeMode.entries.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                                },
-                                modifier = Modifier.weight(1f),
-                            ) {
-                                Text(
-                                    stringResource(
-                                        when (mode) {
-                                            ThemeMode.System -> R.string.theme_system
-                                            ThemeMode.Light -> R.string.theme_light
-                                            ThemeMode.Dark -> R.string.theme_dark
-                                        }
-                                    )
-                                )
+                val styleLabels = listOf(
+                    stringResource(R.string.ui_style_material),
+                    stringResource(R.string.ui_style_liquid_glass),
+                )
+                val glass = isLiquidGlassActive()
+                SegmentedListItem(onClick = {}, shapes = ListItemDefaults.segmentedShapes(0, 5), supportingContent = {
+                    if (glass) {
+                        GlassSegmentedControl(
+                            items = styleLabels,
+                            selectedIndex = settings.uiStyle.ordinal,
+                            onSelect = { index -> repo.update { it.copy(uiStyle = UiStyle.entries[index]) } },
+                            enabled = { index -> index == 0 || isGlassSupported() },
+                            useLightweightBar = true,
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        )
+                    } else {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        ) {
+                            UiStyle.entries.forEachIndexed { index, style ->
+                                ToggleButton(
+                                    checked = settings.uiStyle == style,
+                                    onCheckedChange = { repo.update { it.copy(uiStyle = style) } },
+                                    enabled = style == UiStyle.Material || isGlassSupported(),
+                                    shapes = when (index) {
+                                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                        else -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                ) {
+                                    Text(styleLabels[index])
+                                }
+                            }
+                        }
+                    }
+                }) { Text(stringResource(R.string.settings_ui_style)) }
+            }
+            item {
+                val themeLabels = listOf(
+                    stringResource(R.string.theme_system),
+                    stringResource(R.string.theme_light),
+                    stringResource(R.string.theme_dark),
+                )
+                val glass = isLiquidGlassActive()
+                SegmentedListItem(onClick = {}, shapes = ListItemDefaults.segmentedShapes(1, 5), supportingContent = {
+                    if (glass) {
+                        GlassSegmentedControl(
+                            items = themeLabels,
+                            selectedIndex = settings.themeMode.ordinal,
+                            onSelect = { index -> repo.update { it.copy(themeMode = ThemeMode.entries[index]) } },
+                            useLightweightBar = true,
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        )
+                    } else {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        ) {
+                            ThemeMode.entries.forEachIndexed { index, mode ->
+                                ToggleButton(
+                                    checked = settings.themeMode == mode,
+                                    onCheckedChange = { repo.update { it.copy(themeMode = mode) } },
+                                    shapes = when (index) {
+                                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                        ThemeMode.entries.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                ) {
+                                    Text(themeLabels[index])
+                                }
                             }
                         }
                     }
@@ -99,7 +150,7 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit, onOpen: (String)
             }
             item {
                 SwitchItem(
-                    shapes = ListItemDefaults.segmentedShapes(1, 4),
+                    shapes = ListItemDefaults.segmentedShapes(2, 5),
                     title = stringResource(R.string.settings_dynamic_color),
                     summary = stringResource(R.string.settings_dynamic_color_summary),
                     checked = settings.dynamicColor,
@@ -109,7 +160,7 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit, onOpen: (String)
             }
             item {
                 SwitchItem(
-                    shapes = ListItemDefaults.segmentedShapes(2, 4),
+                    shapes = ListItemDefaults.segmentedShapes(3, 5),
                     title = stringResource(R.string.settings_dark_websites),
                     summary = stringResource(R.string.settings_dark_websites_summary),
                     checked = settings.darkWebsites,
@@ -118,7 +169,7 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit, onOpen: (String)
             }
             item {
                 SwitchItem(
-                    shapes = ListItemDefaults.segmentedShapes(3, 4),
+                    shapes = ListItemDefaults.segmentedShapes(4, 5),
                     title = stringResource(R.string.settings_haptics),
                     summary = stringResource(R.string.settings_haptics_summary),
                     checked = settings.haptics,

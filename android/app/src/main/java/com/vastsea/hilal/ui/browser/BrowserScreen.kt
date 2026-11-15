@@ -30,6 +30,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -57,6 +58,11 @@ import com.vastsea.hilal.browser.BrowserEvent
 import com.vastsea.hilal.browser.Tab
 import com.vastsea.hilal.browser.TabState
 import com.vastsea.hilal.ui.Screen
+import com.vastsea.hilal.ui.glass.LocalAppBackdrop
+import com.vastsea.hilal.ui.glass.backdrop.backdrops.layerBackdrop
+import com.vastsea.hilal.ui.glass.backdrop.backdrops.rememberLayerBackdrop
+import com.vastsea.hilal.ui.glass.isLiquidGlassActive
+import com.vastsea.hilal.ui.glass.rememberBackdropPainter
 import com.vastsea.hilal.ui.settings.AddonPermissionHost
 import com.vastsea.hilal.ui.theme.LocalHaptics
 import kotlinx.coroutines.delay
@@ -96,6 +102,10 @@ fun BrowserScreen(
     var editorInitialText by remember { mutableStateOf<String?>(null) }
     val snackbar = remember { SnackbarHostState() }
     val host = rememberGeckoHostState()
+    var barPressed by remember { mutableStateOf(false) }
+
+    val glass = isLiquidGlassActive()
+    val browserBackdrop = rememberLayerBackdrop(onDraw = rememberBackdropPainter())
 
     val isPrivate = state?.isPrivate == true
     val sameModeTabs = tabs.filter { it.current.isPrivate == isPrivate && (isPrivate || it.current.workspaceId == activeWorkspaceId) }
@@ -176,6 +186,10 @@ fun BrowserScreen(
 
     val gestures = remember {
         object : BarGestureHandler {
+            override fun onPressChange(pressed: Boolean) {
+                barPressed = pressed
+            }
+
             override fun onTap() {
                 editorInitialText = null
                 overlay = Overlay.Editor
@@ -244,82 +258,94 @@ fun BrowserScreen(
         selected?.session?.goBack()
     }
 
-    BoxWithConstraints(
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-    ) {
-        val widthPx = constraints.maxWidth.toFloat()
-        val gapPx = with(density) { 16.dp.toPx() }
-        swipe.width = widthPx
-        swipe.gap = gapPx
-        pull.distance = with(density) { 140.dp.toPx() }
+    CompositionLocalProvider(LocalAppBackdrop provides browserBackdrop) {
+        BoxWithConstraints(
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+        ) {
+            val widthPx = constraints.maxWidth.toFloat()
+            val gapPx = with(density) { 16.dp.toPx() }
+            swipe.width = widthPx
+            swipe.gap = gapPx
+            pull.distance = with(density) { 140.dp.toPx() }
 
-        val pageModifier = Modifier
-            .fillMaxSize()
-            .then(if (fullscreen) Modifier else Modifier.windowInsetsPadding(WindowInsets.statusBars))
-            .graphicsLayer {
-                translationX = swipe.offset.value
-                val p = pull.progress
-                val s = 1f - 0.07f * p
-                scaleX = s
-                scaleY = s
-                val moving = abs(swipe.offset.value) > 0.5f || p > 0.01f
-                clip = moving
-                shape = RoundedCornerShape((28 * (if (p > 0f) p.coerceAtMost(1f) else (abs(swipe.offset.value) / widthPx * 6f).coerceAtMost(1f))).dp)
-            }
-
-        Box(pageModifier.background(MaterialTheme.colorScheme.surface)) {
-            GeckoHost(
-                state = host,
-                session = selected?.session,
-                toolbarMaxHeightPx = if (fullscreen) 0 else barMaxPx,
-                toolbarVisibleHeightPx = barVisiblePx,
-                modifier = Modifier.fillMaxSize(),
-            )
-            if (state?.isBlank == true) {
-                StartPage(
-                    container = container,
-                    isPrivate = isPrivate,
-                    bottomPadding = with(density) { barMaxPx.toDp() },
-                    onOpen = { url -> selected?.let { store.load(it.id, url) } },
-                )
-            }
-            cover?.let { id ->
-                thumbnails[id]?.let { bitmap ->
-                    Image(bitmap, null, contentScale = ContentScale.Crop, alignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize())
+            val pageModifier = Modifier
+                .fillMaxSize()
+                .then(if (fullscreen) Modifier else Modifier.windowInsetsPadding(WindowInsets.statusBars))
+                .graphicsLayer {
+                    translationX = swipe.offset.value
+                    val p = pull.progress
+                    val s = 1f - 0.07f * p
+                    scaleX = s
+                    scaleY = s
+                    val moving = abs(swipe.offset.value) > 0.5f || p > 0.01f
+                    clip = moving
+                    shape = RoundedCornerShape((28 * (if (p > 0f) p.coerceAtMost(1f) else (abs(swipe.offset.value) / widthPx * 6f).coerceAtMost(1f))).dp)
                 }
-            }
-        }
 
-        // The tab sliding in next to the page during a swipe.
-        swipe.revealing?.let { id ->
-            val direction = if (swipe.offset.value < 0) 1 else -1
-            val neighbour = tabs.firstOrNull { it.id == id }
             Box(
                 Modifier
                     .fillMaxSize()
-                    .windowInsetsPadding(WindowInsets.statusBars)
-                    .graphicsLayer { translationX = swipe.offset.value + direction * (widthPx + gapPx) }
-                    .clip(RoundedCornerShape(28.dp))
+                    .then(if (glass) Modifier.layerBackdrop(browserBackdrop) else Modifier)
             ) {
-                TabPreview(neighbour?.current, thumbnails[id])
-            }
-        }
+                Box(pageModifier.background(MaterialTheme.colorScheme.surface)) {
+                    GeckoHost(
+                        state = host,
+                        session = selected?.session,
+                        toolbarMaxHeightPx = if (fullscreen) 0 else barMaxPx,
+                        toolbarVisibleHeightPx = barVisiblePx,
+                        modifier = Modifier.fillMaxSize(),
+                        useTextureBackend = glass,
+                    )
+                    if (state?.isBlank == true) {
+                        StartPage(
+                            container = container,
+                            isPrivate = isPrivate,
+                            bottomPadding = with(density) { barMaxPx.toDp() },
+                            onOpen = { url -> selected?.let { store.load(it.id, url) } },
+                        )
+                    }
+                    cover?.let { id ->
+                        thumbnails[id]?.let { bitmap ->
+                            Image(bitmap, null, contentScale = ContentScale.Crop, alignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize())
+                        }
+                    }
+                }
 
-        if (!fullscreen) {
-            AddressBar(
-                tab = state,
-                tabCount = sameModeTabs.size,
-                gestures = gestures,
-                onTabsClick = { overlay = Overlay.Overview },
-                onMenuClick = { overlay = Overlay.Menu },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset { IntOffset(0, (barHide.value + pull.offset.value * 0.35f).roundToInt()) }
-                    .windowInsetsPadding(WindowInsets.navigationBars),
-            )
-        }
+                // The tab sliding in next to the page during a swipe.
+                swipe.revealing?.let { id ->
+                    val direction = if (swipe.offset.value < 0) 1 else -1
+                    val neighbour = tabs.firstOrNull { it.id == id }
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .windowInsetsPadding(WindowInsets.statusBars)
+                            .graphicsLayer { translationX = swipe.offset.value + direction * (widthPx + gapPx) }
+                            .clip(RoundedCornerShape(28.dp))
+                    ) {
+                        TabPreview(neighbour?.current, thumbnails[id])
+                    }
+                }
+            }
+
+            if (!fullscreen) {
+                AddressBar(
+                    tab = state,
+                    tabCount = sameModeTabs.size,
+                    gestures = gestures,
+                    onTabsClick = { overlay = Overlay.Overview },
+                    onMenuClick = { overlay = Overlay.Menu },
+                    isPressed = barPressed,
+                    swipeOffset = { swipe.offset.value },
+                    swipeWidth = { widthPx },
+                    pullProgress = { pull.progress },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .offset { IntOffset(0, (barHide.value + pull.offset.value * 0.35f).roundToInt()) }
+                        .windowInsetsPadding(WindowInsets.navigationBars),
+                )
+            }
 
         SnackbarHost(
             snackbar,
@@ -428,8 +454,9 @@ fun BrowserScreen(
             )
         }
 
-        PageRequestHost(container = container, selectedTabId = selectedId)
-        AddonPermissionHost(container = container)
+            PageRequestHost(container = container, selectedTabId = selectedId)
+            AddonPermissionHost(container = container)
+        }
     }
 }
 

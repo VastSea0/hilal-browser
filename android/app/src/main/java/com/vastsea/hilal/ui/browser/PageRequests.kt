@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import com.vastsea.hilal.AppContainer
 import com.vastsea.hilal.R
 import com.vastsea.hilal.browser.PageRequest
+import com.vastsea.hilal.ui.glass.GlassBottomDrawer
+import com.vastsea.hilal.ui.glass.isLiquidGlassActive
 import org.mozilla.geckoview.GeckoSession.PermissionDelegate
 import org.mozilla.geckoview.GeckoSession.PromptDelegate
 
@@ -280,46 +282,58 @@ private fun FilePicker(request: PageRequest.File, done: () -> Unit) {
 private fun ContextMenuSheet(container: AppContainer, request: PageRequest.ContextMenu, done: () -> Unit) {
     val context = LocalContext.current
     val store = container.tabs
-    val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val parent = store.tab(request.tabId)
     val isPrivate = parent?.current?.isPrivate == true
+    val glass = isLiquidGlassActive()
     fun copy(text: String) {
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText(text, text))
     }
-    ModalBottomSheet(onDismissRequest = done, sheetState = sheet) {
-        Column(Modifier.padding(bottom = 16.dp)) {
-            val header = request.title?.takeIf { it.isNotBlank() } ?: request.linkUrl ?: request.srcUrl
-            header?.let {
-                Text(
-                    it,
-                    style = MaterialTheme.typography.titleSmall,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(horizontal = 28.dp, vertical = 8.dp),
-                )
+    val header = request.title?.takeIf { it.isNotBlank() } ?: request.linkUrl ?: request.srcUrl
+
+    val rows: @Composable () -> Unit = {
+        request.linkUrl?.let { link ->
+            MenuRow(Icons.Outlined.OpenInNew, R.string.open_link_in_new_tab) {
+                store.newTab(link, isPrivate = isPrivate, select = false, parentId = request.tabId); done()
             }
-            request.linkUrl?.let { link ->
-                MenuRow(Icons.Outlined.OpenInNew, R.string.open_link_in_new_tab) {
-                    store.newTab(link, isPrivate = isPrivate, select = false, parentId = request.tabId); done()
+            if (!isPrivate) {
+                MenuRow(Icons.Outlined.VisibilityOff, R.string.open_link_in_private_tab) {
+                    store.newTab(link, isPrivate = true, select = true); done()
                 }
-                if (!isPrivate) {
-                    MenuRow(Icons.Outlined.VisibilityOff, R.string.open_link_in_private_tab) {
-                        store.newTab(link, isPrivate = true, select = true); done()
-                    }
-                }
-                MenuRow(Icons.Outlined.ContentCopy, R.string.copy_link) { copy(link); done() }
-                MenuRow(Icons.Outlined.Share, R.string.share_link) { shareUrl(context, link, request.title.orEmpty()); done() }
             }
-            if (request.isImage) request.srcUrl?.let { src ->
-                MenuRow(Icons.Outlined.Image, R.string.open_image_in_new_tab) {
-                    store.newTab(src, isPrivate = isPrivate, select = false, parentId = request.tabId); done()
+            MenuRow(Icons.Outlined.ContentCopy, R.string.copy_link) { copy(link); done() }
+            MenuRow(Icons.Outlined.Share, R.string.share_link) { shareUrl(context, link, request.title.orEmpty()); done() }
+        }
+        if (request.isImage) request.srcUrl?.let { src ->
+            MenuRow(Icons.Outlined.Image, R.string.open_image_in_new_tab) {
+                store.newTab(src, isPrivate = isPrivate, select = false, parentId = request.tabId); done()
+            }
+            MenuRow(Icons.Outlined.Download, R.string.save_image) {
+                store.download(src, isPrivate, referrer = parent?.current?.url)
+                done()
+            }
+            MenuRow(Icons.Outlined.ContentCopy, R.string.copy_image_link) { copy(src); done() }
+        }
+    }
+
+    if (glass) {
+        GlassBottomDrawer(onDismiss = done, title = header) {
+            rows()
+        }
+    } else {
+        val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(onDismissRequest = done, sheetState = sheet) {
+            Column(Modifier.padding(bottom = 16.dp)) {
+                header?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.titleSmall,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(horizontal = 28.dp, vertical = 8.dp),
+                    )
                 }
-                MenuRow(Icons.Outlined.Download, R.string.save_image) {
-                    store.download(src, isPrivate, referrer = parent?.current?.url)
-                    done()
-                }
-                MenuRow(Icons.Outlined.ContentCopy, R.string.copy_image_link) { copy(src); done() }
+                rows()
             }
         }
     }

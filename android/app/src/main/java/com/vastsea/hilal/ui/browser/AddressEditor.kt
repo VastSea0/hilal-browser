@@ -1,6 +1,7 @@
 package com.vastsea.hilal.ui.browser
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,19 +30,21 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.NorthWest
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -67,6 +70,10 @@ import com.vastsea.hilal.R
 import com.vastsea.hilal.search.InputResolver
 import com.vastsea.hilal.search.SearchEngines
 import com.vastsea.hilal.search.Suggestion
+import com.vastsea.hilal.ui.glass.glassContentColor
+import com.vastsea.hilal.ui.glass.isLiquidGlassActive
+import com.vastsea.hilal.ui.glass.lightweightLiquidGlass
+import com.vastsea.hilal.ui.glass.liquidGlass
 import kotlinx.coroutines.delay
 
 /**
@@ -109,7 +116,8 @@ fun AddressEditor(
         onSubmit(InputResolver.resolve(input, engine))
     }
 
-    Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.fillMaxSize()) {
+    val glass = isLiquidGlassActive()
+    val editorBody: @Composable () -> Unit = {
         Column(
             Modifier
                 .fillMaxSize()
@@ -118,7 +126,7 @@ fun AddressEditor(
             LazyColumn(
                 reverseLayout = true,
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.Bottom),
+                verticalArrangement = Arrangement.spacedBy(if (glass) 8.dp else 2.dp, Alignment.Bottom),
                 modifier = Modifier.weight(1f).fillMaxWidth(),
             ) {
                 if (text.isNotBlank() && !editingCurrent && !text.trimStart().startsWith("!")) {
@@ -170,6 +178,20 @@ fun AddressEditor(
             )
         }
     }
+
+    if (glass) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.72f))
+        ) {
+            editorBody()
+        }
+    } else {
+        Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.fillMaxSize()) {
+            editorBody()
+        }
+    }
 }
 
 private fun Suggestion.key(): String = when (this) {
@@ -188,32 +210,29 @@ private fun InputField(
     isPrivate: Boolean,
     focus: FocusRequester,
 ) {
-    Surface(
-        shape = CircleShape,
-        color = if (isPrivate) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceContainerHighest,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = BarSidePadding, vertical = BarVerticalPadding)
-            .height(BarHeight),
-    ) {
+    val glass = isLiquidGlassActive()
+    val fgColor = if (glass) glassContentColor() else MaterialTheme.colorScheme.onSurface
+    val hintColor = if (glass) glassContentColor().copy(alpha = 0.65f) else MaterialTheme.colorScheme.onSurfaceVariant
+
+    val rowContent: @Composable () -> Unit = {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 4.dp)) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.close))
+                Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.close), tint = fgColor)
             }
             Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                 if (value.text.isEmpty()) {
                     Text(
                         stringResource(R.string.address_placeholder),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = hintColor,
                     )
                 }
                 BasicTextField(
                     value = value,
                     onValueChange = onValueChange,
                     singleLine = true,
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = fgColor),
+                    cursorBrush = SolidColor(if (glass) fgColor else MaterialTheme.colorScheme.primary),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Uri,
                         imeAction = ImeAction.Go,
@@ -225,9 +244,36 @@ private fun InputField(
             }
             if (value.text.isNotEmpty()) {
                 IconButton(onClick = onClear) {
-                    Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.clear_text))
+                    Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.clear_text), tint = fgColor)
                 }
             }
+        }
+    }
+
+    if (glass) {
+        val privateTint = if (isPrivate) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.22f) else null
+        Box(
+            contentAlignment = Alignment.CenterStart,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = BarSidePadding, vertical = BarVerticalPadding)
+                .height(BarHeight)
+                .liquidGlass(CircleShape, surfaceTint = privateTint),
+        ) {
+            CompositionLocalProvider(LocalContentColor provides fgColor) {
+                rowContent()
+            }
+        }
+    } else {
+        Surface(
+            shape = CircleShape,
+            color = if (isPrivate) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceContainerHighest,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = BarSidePadding, vertical = BarVerticalPadding)
+                .height(BarHeight),
+        ) {
+            rowContent()
         }
     }
 }
@@ -240,24 +286,40 @@ private fun SuggestionRow(
     onClick: () -> Unit,
     onFill: (() -> Unit)? = null,
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
+    val glass = isLiquidGlassActive()
+    val fgColor = if (glass) glassContentColor() else MaterialTheme.colorScheme.onSurface
+    val subColor = if (glass) glassContentColor().copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
+    val rowModifier = if (glass) {
+        Modifier
+            .fillMaxWidth()
+            .lightweightLiquidGlass(
+                shape = RoundedCornerShape(20.dp),
+                fallbackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            )
+            .clickable(onClick = onClick)
+            .padding(start = 16.dp, end = 4.dp, top = 10.dp, bottom = 10.dp)
+            .animateContentSize(MaterialTheme.motionScheme.fastSpatialSpec())
+    } else {
+        Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
             .padding(start = 16.dp, end = 4.dp, top = 10.dp, bottom = 10.dp)
-            .animateContentSize(MaterialTheme.motionScheme.fastSpatialSpec()),
+            .animateContentSize(MaterialTheme.motionScheme.fastSpatialSpec())
+    }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = rowModifier,
     ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+        Icon(icon, contentDescription = null, tint = subColor, modifier = Modifier.size(20.dp))
         Spacer(Modifier.width(16.dp))
         Column(Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = fgColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (subtitle != null) {
                 Text(
                     subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = subColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -265,7 +327,7 @@ private fun SuggestionRow(
         }
         if (onFill != null) {
             IconButton(onClick = onFill) {
-                Icon(Icons.Outlined.NorthWest, contentDescription = stringResource(R.string.fill_in))
+                Icon(Icons.Outlined.NorthWest, contentDescription = stringResource(R.string.fill_in), tint = fgColor)
             }
         } else {
             Spacer(Modifier.width(12.dp))

@@ -9,11 +9,14 @@ import kotlinx.coroutines.flow.asStateFlow
 
 enum class ThemeMode { System, Light, Dark }
 
+enum class UiStyle { Material, LiquidGlass }
+
 @Immutable
 data class Settings(
     val searchEngine: String = "DuckDuckGo",
     val searchSuggestions: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.System,
+    val uiStyle: UiStyle = UiStyle.Material,
     val dynamicColor: Boolean = true,
     val darkWebsites: Boolean = false,
     val haptics: Boolean = true,
@@ -37,6 +40,7 @@ class SettingsRepository(context: Context) {
             .putString(KEY_SEARCH_ENGINE, next.searchEngine)
             .putBoolean(KEY_SUGGESTIONS, next.searchSuggestions)
             .putInt(KEY_THEME, next.themeMode.ordinal)
+            .putInt(KEY_UI_STYLE, next.uiStyle.ordinal)
             .putBoolean(KEY_DYNAMIC_COLOR, next.dynamicColor)
             .putBoolean(KEY_DARK_WEBSITES, next.darkWebsites)
             .putBoolean(KEY_HAPTICS, next.haptics)
@@ -50,6 +54,7 @@ class SettingsRepository(context: Context) {
         searchEngine = prefs.getString(KEY_SEARCH_ENGINE, null) ?: "DuckDuckGo",
         searchSuggestions = prefs.getBoolean(KEY_SUGGESTIONS, true),
         themeMode = ThemeMode.entries.getOrElse(prefs.getInt(KEY_THEME, 0)) { ThemeMode.System },
+        uiStyle = UiStyle.entries.getOrElse(prefs.getInt(KEY_UI_STYLE, 0)) { UiStyle.Material },
         dynamicColor = prefs.getBoolean(KEY_DYNAMIC_COLOR, true),
         darkWebsites = prefs.getBoolean(KEY_DARK_WEBSITES, false),
         haptics = prefs.getBoolean(KEY_HAPTICS, true),
@@ -61,6 +66,7 @@ class SettingsRepository(context: Context) {
         const val KEY_SEARCH_ENGINE = "default_search_engine"
         const val KEY_SUGGESTIONS = "search_suggestions"
         const val KEY_THEME = "theme_mode"
+        const val KEY_UI_STYLE = "ui_style"
         const val KEY_DYNAMIC_COLOR = "dynamic_color"
         const val KEY_DARK_WEBSITES = "dark_websites"
         const val KEY_HAPTICS = "haptics"

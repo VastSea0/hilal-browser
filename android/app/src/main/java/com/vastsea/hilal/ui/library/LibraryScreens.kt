@@ -9,9 +9,14 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -37,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +61,14 @@ import com.vastsea.hilal.R
 import com.vastsea.hilal.data.DownloadEntry
 import com.vastsea.hilal.search.InputResolver
 import com.vastsea.hilal.ui.browser.Monogram
+import com.vastsea.hilal.ui.glass.GlassAmbientCanvas
+import com.vastsea.hilal.ui.glass.GlassTopBar
+import com.vastsea.hilal.ui.glass.LocalAppBackdrop
+import com.vastsea.hilal.ui.glass.backdrop.backdrops.layerBackdrop
+import com.vastsea.hilal.ui.glass.backdrop.backdrops.rememberLayerBackdrop
+import com.vastsea.hilal.ui.glass.glassContentColor
+import com.vastsea.hilal.ui.glass.isLiquidGlassActive
+import com.vastsea.hilal.ui.glass.rememberBackdropPainter
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -64,37 +78,70 @@ typealias OpenUrl = (url: String, newTab: Boolean, isPrivate: Boolean) -> Unit
 fun LibraryScaffold(
     title: String,
     onBack: () -> Unit,
-    actions: @Composable () -> Unit = {},
+    actions: (@Composable RowScope.() -> Unit)? = null,
     content: @Composable (PaddingValues) -> Unit,
 ) {
-    val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    Scaffold(
-        modifier = Modifier.nestedScroll(scroll.nestedScrollConnection),
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        topBar = {
-            MediumFlexibleTopAppBar(
-                title = { Text(title) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.back))
-                    }
-                },
-                actions = { actions() },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                ),
-                scrollBehavior = scroll,
-            )
-        },
-        content = content,
-    )
+    if (isLiquidGlassActive()) {
+        val screenBackdrop = rememberLayerBackdrop(onDraw = rememberBackdropPainter())
+        val statusTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+        val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        val innerPadding = PaddingValues(top = statusTop + 66.dp, bottom = navBottom)
+
+        CompositionLocalProvider(LocalAppBackdrop provides screenBackdrop) {
+            Box(Modifier.fillMaxSize()) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .layerBackdrop(screenBackdrop),
+                ) {
+                    GlassAmbientCanvas()
+                    content(innerPadding)
+                }
+                GlassTopBar(
+                    title = title,
+                    onBack = onBack,
+                    actions = actions,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 6.dp),
+                )
+            }
+        }
+    } else {
+        val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+        Scaffold(
+            modifier = Modifier.nestedScroll(scroll.nestedScrollConnection),
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            topBar = {
+                MediumFlexibleTopAppBar(
+                    title = { Text(title) },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.back))
+                        }
+                    },
+                    actions = { actions?.invoke(this) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    ),
+                    scrollBehavior = scroll,
+                )
+            },
+            content = content,
+        )
+    }
 }
 
 @Composable
 fun EmptyState(text: String, padding: PaddingValues) {
+    val textColor = if (isLiquidGlassActive()) {
+        glassContentColor().copy(alpha = 0.7f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
     Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-        Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(text, style = MaterialTheme.typography.bodyLarge, color = textColor)
     }
 }
 

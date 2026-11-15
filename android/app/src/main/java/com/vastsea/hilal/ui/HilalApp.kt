@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -22,7 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import com.vastsea.hilal.AppContainer
+import com.vastsea.hilal.data.UiStyle
 import com.vastsea.hilal.ui.browser.BrowserScreen
+import com.vastsea.hilal.ui.glass.LocalAppBackdrop
+import com.vastsea.hilal.ui.glass.LocalLiquidGlassEnabled
+import com.vastsea.hilal.ui.glass.backdrop.backdrops.rememberLayerBackdrop
+import com.vastsea.hilal.ui.glass.isGlassSupported
+import com.vastsea.hilal.ui.glass.rememberBackdropPainter
+import com.vastsea.hilal.ui.glass.rememberIosOverscrollFactory
 import com.vastsea.hilal.ui.library.BookmarksScreen
 import com.vastsea.hilal.ui.library.DownloadsScreen
 import com.vastsea.hilal.ui.library.HistoryScreen
@@ -42,8 +50,17 @@ enum class Screen { History, Bookmarks, Downloads, Addons, Settings }
 @Composable
 fun HilalApp(container: AppContainer, onFullscreenChange: (Boolean) -> Unit) {
     val settings by container.settings.settings.collectAsState()
+    val liquidGlass = settings.uiStyle == UiStyle.LiquidGlass && isGlassSupported()
     HilalTheme(themeMode = settings.themeMode, dynamicColor = settings.dynamicColor) {
-        CompositionLocalProvider(LocalHaptics provides rememberHaptics(settings.haptics)) {
+        val appBackdrop = rememberLayerBackdrop(onDraw = rememberBackdropPainter())
+        val iosOverscroll = if (liquidGlass) rememberIosOverscrollFactory() else null
+        val provided = buildList {
+            add(LocalHaptics provides rememberHaptics(settings.haptics))
+            add(LocalLiquidGlassEnabled provides liquidGlass)
+            add(LocalAppBackdrop provides appBackdrop)
+            if (iosOverscroll != null) add(LocalOverscrollFactory provides iosOverscroll)
+        }.toTypedArray()
+        CompositionLocalProvider(*provided) {
             val stack = remember { mutableStateListOf<Screen>() }
             val motion = MaterialTheme.motionScheme
             var backProgress by remember { mutableFloatStateOf(0f) }

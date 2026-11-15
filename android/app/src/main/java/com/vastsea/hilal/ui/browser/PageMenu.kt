@@ -3,6 +3,7 @@ package com.vastsea.hilal.ui.browser
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -20,6 +22,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CollectionsBookmark
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.Download
@@ -32,11 +35,11 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Tab
 import androidx.compose.material.icons.outlined.VisibilityOff
-import androidx.compose.material.icons.outlined.CollectionsBookmark
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -60,6 +63,10 @@ import com.vastsea.hilal.browser.TabState
 import com.vastsea.hilal.data.Bookmark
 import com.vastsea.hilal.search.InputResolver
 import com.vastsea.hilal.ui.Screen
+import com.vastsea.hilal.ui.glass.GlassBottomDrawer
+import com.vastsea.hilal.ui.glass.GlassIconButton
+import com.vastsea.hilal.ui.glass.glassContentColor
+import com.vastsea.hilal.ui.glass.isLiquidGlassActive
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
@@ -76,21 +83,15 @@ fun PageMenu(
     onNavigate: (Screen) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val glass = isLiquidGlassActive()
     val scope = rememberCoroutineScope()
     val bookmarks = container.database.bookmarks()
     val url = state?.url?.takeUnless { state.isBlank }
     val isBookmarked by remember(url) { url?.let(bookmarks::isBookmarked) ?: flowOf(false) }.collectAsState(false)
 
-    fun closeThen(action: () -> Unit) {
-        scope.launch { sheet.hide() }.invokeOnCompletion {
-            onDismiss()
-            action()
-        }
-    }
-
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheet) {
-        Column(Modifier.padding(bottom = 16.dp)) {
+    val menuContent: @Composable (closeThen: (() -> Unit) -> Unit) -> Unit = { closeThen ->
+        val subtitleColor = if (glass) glassContentColor().copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
+        Column(Modifier.padding(bottom = if (glass) 4.dp else 16.dp)) {
             if (url != null) {
                 Column(Modifier.padding(horizontal = 24.dp)) {
                     Text(
@@ -102,7 +103,7 @@ fun PageMenu(
                     Text(
                         InputResolver.displayUrl(url),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = subtitleColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -120,23 +121,49 @@ fun PageMenu(
                     if (state?.isLoading == true) R.string.stop else R.string.reload,
                     enabled = url != null,
                 ) { closeThen(onReload) }
-                FilledTonalIconToggleButton(
-                    checked = isBookmarked,
-                    onCheckedChange = { checked ->
-                        val current = state ?: return@FilledTonalIconToggleButton
-                        scope.launch {
-                            if (checked) bookmarks.insert(Bookmark(url = current.url, title = current.title))
-                            else bookmarks.deleteUrl(current.url)
-                        }
-                    },
-                    enabled = url != null && state?.isPrivate != true,
-                    shapes = IconButtonDefaults.toggleableShapes(),
-                    modifier = Modifier.size(56.dp),
-                ) {
-                    Icon(
-                        if (isBookmarked) Icons.Outlined.Bookmark else Icons.Outlined.BookmarkBorder,
-                        contentDescription = stringResource(if (isBookmarked) R.string.bookmarked else R.string.bookmark),
-                    )
+                if (glass) {
+                    GlassIconButton(
+                        onClick = {
+                            val current = state ?: return@GlassIconButton
+                            scope.launch {
+                                if (!isBookmarked) bookmarks.insert(Bookmark(url = current.url, title = current.title))
+                                else bookmarks.deleteUrl(current.url)
+                            }
+                        },
+                        enabled = url != null && state?.isPrivate != true,
+                        size = 56.dp,
+                        useLightweight = true,
+                        modifier = if (isBookmarked) {
+                            Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), CircleShape)
+                        } else {
+                            Modifier
+                        },
+                    ) {
+                        Icon(
+                            if (isBookmarked) Icons.Outlined.Bookmark else Icons.Outlined.BookmarkBorder,
+                            contentDescription = stringResource(if (isBookmarked) R.string.bookmarked else R.string.bookmark),
+                            tint = if (isBookmarked) MaterialTheme.colorScheme.primary else LocalContentColor.current,
+                        )
+                    }
+                } else {
+                    FilledTonalIconToggleButton(
+                        checked = isBookmarked,
+                        onCheckedChange = { checked ->
+                            val current = state ?: return@FilledTonalIconToggleButton
+                            scope.launch {
+                                if (checked) bookmarks.insert(Bookmark(url = current.url, title = current.title))
+                                else bookmarks.deleteUrl(current.url)
+                            }
+                        },
+                        enabled = url != null && state?.isPrivate != true,
+                        shapes = IconButtonDefaults.toggleableShapes(),
+                        modifier = Modifier.size(56.dp),
+                    ) {
+                        Icon(
+                            if (isBookmarked) Icons.Outlined.Bookmark else Icons.Outlined.BookmarkBorder,
+                            contentDescription = stringResource(if (isBookmarked) R.string.bookmarked else R.string.bookmark),
+                        )
+                    }
                 }
                 MenuIconButton(Icons.Outlined.Share, R.string.share, enabled = url != null) { closeThen(onShare) }
             }
@@ -151,22 +178,53 @@ fun PageMenu(
             MenuRow(Icons.Outlined.Settings, R.string.settings) { closeThen { onNavigate(Screen.Settings) } }
         }
     }
+
+    if (glass) {
+        GlassBottomDrawer(onDismiss = onDismiss) {
+            menuContent { action ->
+                onDismiss()
+                action()
+            }
+        }
+    } else {
+        val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        fun closeThen(action: () -> Unit) {
+            scope.launch { sheet.hide() }.invokeOnCompletion {
+                onDismiss()
+                action()
+            }
+        }
+        ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheet) {
+            menuContent(::closeThen)
+        }
+    }
 }
 
 @Composable
 private fun MenuIconButton(icon: ImageVector, label: Int, enabled: Boolean, onClick: () -> Unit) {
-    FilledTonalIconButton(
-        onClick = onClick,
-        enabled = enabled,
-        shapes = IconButtonDefaults.shapes(),
-        modifier = Modifier.size(56.dp),
-    ) {
-        Icon(icon, contentDescription = stringResource(label))
+    if (isLiquidGlassActive()) {
+        GlassIconButton(onClick = onClick, enabled = enabled, size = 56.dp, useLightweight = true) {
+            Icon(icon, contentDescription = stringResource(label))
+        }
+    } else {
+        FilledTonalIconButton(
+            onClick = onClick,
+            enabled = enabled,
+            shapes = IconButtonDefaults.shapes(),
+            modifier = Modifier.size(56.dp),
+        ) {
+            Icon(icon, contentDescription = stringResource(label))
+        }
     }
 }
 
 @Composable
 fun MenuRow(icon: ImageVector, label: Int, onClick: () -> Unit) {
+    val iconTint = if (isLiquidGlassActive()) {
+        LocalContentColor.current.copy(alpha = 0.78f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -176,7 +234,7 @@ fun MenuRow(icon: ImageVector, label: Int, onClick: () -> Unit) {
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 14.dp),
     ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(icon, contentDescription = null, tint = iconTint)
         Spacer(Modifier.width(20.dp))
         Text(stringResource(label), style = MaterialTheme.typography.bodyLarge)
     }
@@ -192,22 +250,17 @@ fun QuickActionsSheet(
     onEdit: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val glass = isLiquidGlassActive()
     val context = LocalContext.current
     val clipboard = remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
     val clip = remember {
         clipboard.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(context)?.toString()?.trim()
             ?.takeIf { it.isNotEmpty() && it.length < 2000 }
     }
-    val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
-    fun closeThen(action: () -> Unit) {
-        scope.launch { sheet.hide() }.invokeOnCompletion {
-            onDismiss()
-            action()
-        }
-    }
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheet) {
-        Column(Modifier.padding(bottom = 16.dp)) {
+
+    val actionsContent: @Composable (closeThen: (() -> Unit) -> Unit) -> Unit = { closeThen ->
+        Column(Modifier.padding(bottom = if (glass) 4.dp else 16.dp)) {
             if (clip != null) {
                 MenuRow(Icons.Outlined.ContentPaste, R.string.paste_and_go) { closeThen { onPasteAndGo(clip) } }
             }
@@ -220,6 +273,26 @@ fun QuickActionsSheet(
                 MenuRow(Icons.Outlined.Share, R.string.share) { closeThen(onShare) }
                 MenuRow(Icons.Outlined.Edit, R.string.address_edit) { closeThen { onEdit(url) } }
             }
+        }
+    }
+
+    if (glass) {
+        GlassBottomDrawer(onDismiss = onDismiss) {
+            actionsContent { action ->
+                onDismiss()
+                action()
+            }
+        }
+    } else {
+        val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        fun closeThen(action: () -> Unit) {
+            scope.launch { sheet.hide() }.invokeOnCompletion {
+                onDismiss()
+                action()
+            }
+        }
+        ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheet) {
+            actionsContent(::closeThen)
         }
     }
 }
