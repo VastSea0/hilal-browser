@@ -1,9 +1,10 @@
 # Build Hilal for Flatpak
 
-Hilal's Flatpak package is defined by `io.github.VastSea0.Hilal.yml`. It builds
-Firefox from the pinned upstream commit in `upstream.lock`, applies the Hilal
-patch and overlay layer, installs the browser under `/app/lib/firefox`, and
-exports the `hilal` command.
+Hilal's Flatpak package is defined by `io.github.VastSea0.Hilal.yml` alongside
+`flathub.json`. It repackages the CI-built Linux release tarball (following the
+same model as Firefox and Zen on Flathub), installs the browser under
+`/app/lib/hilal`, disables the built-in updater, and exports the `hilal`
+command.
 
 The Flatpak app id is:
 
@@ -11,98 +12,66 @@ The Flatpak app id is:
 io.github.VastSea0.Hilal
 ```
 
-## Current Flathub Status
-
-The packaging exists before the first stable Flathub submission. The current
-browser version is `0.2.0-alpha.4`, so stable Flathub submission is blocked
-until a stable tag is cut and the manifest source tag is updated.
-
-Run the readiness check before opening a Flathub PR:
-
-```bash
-scripts/build-flatpak.sh check-ready
-```
-
-It fails while the manifest or displayed browser version contains alpha, beta,
-nightly, or dev release markers.
-
 ## Prerequisites
 
-Install Flatpak, Flatpak Builder, and the Flathub remote. On Linux:
+Install Flatpak, Flatpak Builder, and the Flathub remote on Linux:
 
 ```bash
-flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-flatpak install flathub org.flatpak.Builder
-flatpak install flathub org.mozilla.firefox.BaseApp//25.08
-flatpak install flathub org.freedesktop.Sdk//25.08
-flatpak install flathub org.freedesktop.Sdk.Extension.llvm21//25.08
-flatpak install flathub org.freedesktop.Sdk.Extension.node24//25.08
-flatpak install flathub org.freedesktop.Sdk.Extension.rust-stable//25.08
+flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak install --user -y flathub org.flatpak.Builder
 ```
 
-## Local Build
+`flatpak-builder --install-deps-from=flathub` pulls `org.freedesktop.Platform//25.08`,
+`org.freedesktop.Sdk//25.08`, and `org.mozilla.firefox.BaseApp//25.08` automatically.
 
-For local development, use the helper script. It rewrites the Hilal source block
-in the manifest to use the current working tree, while keeping the pinned
-Firefox and uBlock sources intact.
+## Local Build & Lint
+
+Build directly from the published release manifest and export an OSTree repo:
 
 ```bash
-scripts/build-flatpak.sh build
+flatpak-builder --user --install-deps-from=flathub --install --force-clean \
+  --repo=flatpak-repo flatpak-build io.github.VastSea0.Hilal.yml
 ```
 
-Install into the user Flatpak installation:
+Run Flathub's official linter against both the manifest and the exported repo:
 
 ```bash
-scripts/build-flatpak.sh install
+flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.VastSea0.Hilal.yml
+flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder repo flatpak-repo
 ```
 
 Run the installed build:
 
 ```bash
-scripts/build-flatpak.sh run about:blank
+flatpak run --user io.github.VastSea0.Hilal about:blank
 ```
 
-Export a local OSTree repo:
+## CI Verification
 
-```bash
-scripts/build-flatpak.sh repo
-flatpak --user --no-gpg-verify remote-add hilal-local repo
-flatpak --user install hilal-local io.github.VastSea0.Hilal
-```
-
-## Linting
-
-Run the available manifest, desktop, AppStream, and repo checks:
-
-```bash
-scripts/build-flatpak.sh lint
-```
-
-If the standalone tools are not installed, the script tries the
-`org.flatpak.Builder` Flatpak for `flatpak-builder-lint` and skips tools that
-are missing.
+- `.github/workflows/ci.yml` (`test-flatpak`) builds the Flatpak from the newly
+  built Linux tarball, runs `flatpak-builder-lint` on the manifest and exported
+  repo, and executes `scripts/ci/ui-smoke.py` inside the sandbox.
+- `.github/workflows/packaging-test.yml` (`flathub`) builds directly from the
+  published `io.github.VastSea0.Hilal.yml`, runs `flatpak-builder-lint`, and
+  verifies the installed sandboxed browser starts cleanly with updates disabled.
 
 ## Flathub Submission Checklist
 
-Before opening a human-authored Flathub PR:
+Before opening the `flathub/flathub` PR on the `new-pr` branch:
 
-- Cut a stable Hilal release tag.
-- Update `io.github.VastSea0.Hilal.yml` to point at the stable Hilal tag and commit.
-- Update `flatpak/io.github.VastSea0.Hilal.metainfo.xml` release data and screenshot URLs.
-- Run `scripts/build-flatpak.sh check-ready`.
-- Run `scripts/build-flatpak.sh lint`.
-- Build and smoke-test both `x86_64` and `aarch64`.
-- Publish the Flathub verification token under `https://hilal-browser.vercel.app/.well-known/org.flathub.VerifiedApps.txt` when Flathub requests it.
+- Copy `io.github.VastSea0.Hilal.yml` and `flathub.json` into the PR branch.
+- Confirm both `flatpak-builder-lint manifest` and `flatpak-builder-lint repo`
+  pass cleanly in CI (`packaging-test.yml` / `test-flatpak`).
+- Confirm `x-checker-data` resolves the latest desktop `v*` release (ignoring
+  `android-v*` and `nightly` releases).
+- Verify ownership of `io.github.VastSea0.Hilal` on Flathub via GitHub sign-in
+  once the PR is merged.
 
 Do not automate the Flathub pull request from this repo. A maintainer should
 open and review it.
 
 ## Update Policy
 
-Flatpak builds disable Firefox's built-in application updater with
-`mozconfigs/flatpak` and a Flatpak-specific enterprise policy. Updates for this
-package are delivered by Flathub.
-
-The bundled uBlock Origin XPI is checksum-pinned in the manifest. Its source
-repository is also included in the manifest and its GPL license is installed
-into `/app/share/licenses/io.github.VastSea0.Hilal/uBlock-Origin/`.
+Flatpak builds disable Firefox's built-in application updater by setting
+`DisableAppUpdate: true` and removing `AppUpdateURL` in
+`/app/lib/hilal/distribution/policies.json`. Updates are delivered by Flathub.

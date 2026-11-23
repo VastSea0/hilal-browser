@@ -85,10 +85,10 @@ find_package() {
 find_manifest() {
     local candidate
     for candidate in \
-        "$HILAL_REPO_ROOT/flatpak/$APP_ID.json" \
-        "$HILAL_REPO_ROOT/$APP_ID.json" \
-        "$HILAL_REPO_ROOT/flatpak/io.github.VastSea0.Hilal.json" \
-        "$HILAL_REPO_ROOT/io.github.VastSea0.Hilal.json"; do
+        "$HILAL_REPO_ROOT/$APP_ID.yml" \
+        "$HILAL_REPO_ROOT/$APP_ID.yaml" \
+        "$HILAL_REPO_ROOT/flatpak/$APP_ID.yml" \
+        "$HILAL_REPO_ROOT/flatpak/$APP_ID.yaml"; do
         if [ -f "$candidate" ]; then
             echo "$candidate"
             return 0

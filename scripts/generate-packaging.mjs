@@ -300,12 +300,20 @@ end
 
 function updateFlatpakHash() {
   const file = join(root, "io.github.VastSea0.Hilal.yml");
-  const text = readFileSync(file, "utf8");
-  const block = /(# HILAL_ARCHIVE_BEGIN[\s\S]*?url: )(\S+)(\s+sha256: )([0-9a-f]{64})([\s\S]*?# HILAL_ARCHIVE_END)/;
-  if (!block.test(text)) {
+  let text = readFileSync(file, "utf8");
+  const archiveBlock = /(# HILAL_ARCHIVE_BEGIN[\s\S]*?url: )(\S+)(\s+sha256: )([0-9a-f]{64})([\s\S]*?# HILAL_ARCHIVE_END)/;
+  if (!archiveBlock.test(text)) {
     fail("io.github.VastSea0.Hilal.yml has no HILAL_ARCHIVE block with a url and sha256");
   }
-  writeFileSync(file, text.replace(block, `$1${download(assets.linux)}$3${hash.linux}$5`));
+  text = text.replace(archiveBlock, `$1${download(assets.linux)}$3${hash.linux}$5`);
+
+  const tagCommit = execFileSync("git", ["rev-list", "-n", "1", tag], { cwd: root, encoding: "utf8" }).trim();
+  const sourceBlock = /(# HILAL_SOURCE_BEGIN[\s\S]*?tag: )(\S+)(\s+commit: )([0-9a-f]{40})([\s\S]*?# HILAL_SOURCE_END)/;
+  if (!sourceBlock.test(text)) {
+    fail("io.github.VastSea0.Hilal.yml has no HILAL_SOURCE block with a tag and commit");
+  }
+  text = text.replace(sourceBlock, `$1${tag}$3${tagCommit}$5`);
+  writeFileSync(file, text);
 }
 
 function taggedFileHash(path) {

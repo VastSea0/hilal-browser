@@ -39,6 +39,7 @@ later versions.
 ## Flathub (one time, a PR to flathub/flathub)
 
 Follow Flathub's submission guide: open a pull request to `flathub/flathub` on
-the `new-pr` branch with `io.github.VastSea0.Hilal.yml`. Its archive source
-already has the real sha256 of the latest release. After Flathub accepts it,
-their external data checker opens a PR for each new release by itself.
+the `new-pr` branch with `io.github.VastSea0.Hilal.yml` and `flathub.json`.
+Its archive source already has the real sha256 of the latest release and the
+git source pins the release tag and commit. After Flathub accepts it, their
+external data checker opens a PR for each new desktop release by itself.

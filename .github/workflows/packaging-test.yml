@@ -10,6 +10,8 @@ on:
     branches: [main]
     paths:
       - scripts/generate-packaging.mjs
+      - io.github.VastSea0.Hilal.yml
+      - flathub.json
       - .github/workflows/packaging-test.yml
 
 permissions:
@@ -141,3 +143,37 @@ jobs:
           prof="$(mktemp -d)"
           "$app/Contents/MacOS/firefox" --headless --no-remote --profile "$prof" --screenshot "$PWD/brew.png" about:blank
           test -s brew.png
+
+  flathub:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Flatpak tooling
+        run: |
+          set -euo pipefail
+          scripts/ci/apt-install.sh flatpak flatpak-builder xvfb dbus-x11
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub org.flatpak.Builder
+      - name: Validate manifest and flathub.json
+        run: |
+          set -euo pipefail
+          jq empty flathub.json
+          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.VastSea0.Hilal.yml
+      - name: Build and lint exported repo
+        run: |
+          set -euo pipefail
+          flatpak-builder --user --install-deps-from=flathub --install --force-clean \
+            --repo=flatpak-repo --disable-rofiles-fuse flatpak-build io.github.VastSea0.Hilal.yml
+          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder repo flatpak-repo
+      - name: Check the installed Flatpak
+        run: |
+          set -euo pipefail
+          flatpak run --user --command=python3 io.github.VastSea0.Hilal -c \
+            "import json; p=json.load(open('/app/lib/hilal/distribution/policies.json'))['policies']; assert p.get('DisableAppUpdate') is True, p; assert 'AppUpdateURL' not in p, p"
+          mkdir -p "$PWD/flathub-profile"
+          dbus-run-session -- xvfb-run -a -s "-screen 0 1280x800x24" \
+            flatpak run --user --filesystem="$PWD" io.github.VastSea0.Hilal \
+              --headless --no-remote --profile "$PWD/flathub-profile" \
+              --screenshot "$PWD/flathub.png" about:blank
+          test -s "$PWD/flathub.png"

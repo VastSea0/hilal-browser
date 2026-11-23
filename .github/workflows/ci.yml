@@ -102,7 +102,7 @@ jobs:
               # The compare API lists at most 300 files; build when it may have cut some.
               [ "$(printf '%s\n' "$changed" | wc -l)" -lt 300 ] || changed=""
               build_paths="$(printf '%s\n' "$changed" | grep -v -E \
-                '^(scripts/ci/(ui-smoke\.py|update-test\.py|flatpak-[^/]+|flatpak-run\.sh|esr-bump\.sh)|scripts/(build-appimage|build-flatpak)\.sh|scripts/[^/]+\.mjs|flatpak/.*|io\.github\.VastSea0\.Hilal\.yml|\.github/workflows/(ci|release|esr-watch|verify-patches|android-[^/]+)\.yml|(www|docs|media|android|playstore|scripts/android-ota)/.*|.*\.md)$' || true)"
+                '^(scripts/ci/(ui-smoke\.py|update-test\.py|flatpak-[^/]+|flatpak-run\.sh|esr-bump\.sh)|scripts/(build-appimage|build-flatpak)\.sh|scripts/[^/]+\.mjs|flatpak/.*|io\.github\.VastSea0\.Hilal\.yml|flathub\.json|\.github/workflows/(ci|release|esr-watch|verify-patches|android-[^/]+)\.yml|(www|docs|media|android|playstore|scripts/android-ota)/.*|.*\.md)$' || true)"
               if [ -n "$changed" ] && [ -z "$build_paths" ]; then
                 reuse="$id"
                 echo "::notice::Only test/packaging files changed since run $id; testing its packages."
@@ -338,13 +338,22 @@ jobs:
         run: |
           scripts/ci/apt-install.sh flatpak flatpak-builder xvfb dbus-x11 fonts-dejavu-core
           flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub org.flatpak.Builder
+
+      - name: Lint Flatpak manifest
+        run: |
+          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.VastSea0.Hilal.yml
 
       - name: Build and install the Flatpak
         run: |
           tarball="$(ls package/*.linux-*.tar.xz | head -n1)"
           python3 scripts/ci/flatpak-test-manifest.py io.github.VastSea0.Hilal.yml "$tarball" . flatpak-test.yml
           flatpak-builder --user --install-deps-from=flathub --install --force-clean \
-            --disable-rofiles-fuse flatpak-build flatpak-test.yml
+            --repo=flatpak-repo --disable-rofiles-fuse flatpak-build flatpak-test.yml
+
+      - name: Lint exported Flatpak repo
+        run: |
+          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder repo flatpak-repo
 
       - name: UI smoke inside the Flatpak
         run: |

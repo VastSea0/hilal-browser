@@ -1,4 +1,4 @@
-app-id: io.github.VastSea0.Hilal
+id: io.github.VastSea0.Hilal
 runtime: org.freedesktop.Platform
 runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
@@ -65,18 +65,19 @@ modules:
         only-arches:
           - x86_64
         # Flathub's external data checker opens an update pull request in the
-        # Flathub repo for every new release. /releases/latest skips the
-        # nightly pre-release.
+        # Flathub repo for every new desktop release. Filter /releases so
+        # Android releases (android-v*) and nightly pre-releases are ignored.
         x-checker-data:
           type: json
-          url: https://api.github.com/repos/VastSea0/hilal-browser/releases/latest
-          version-query: .tag_name | sub("^v"; "")
-          url-query: .assets[] | select(.name | test("-linux-x86_64\\.tar\\.xz$")) | .browser_download_url
+          url: https://api.github.com/repos/VastSea0/hilal-browser/releases?per_page=20
+          version-query: '[.[] | select(.draft == false and .prerelease == false and (.tag_name | test("^v")) and any(.assets[]; .name | test("-linux-x86_64\\.tar\\.xz$")))] | first | .tag_name | sub("^v"; "")'
+          url-query: '[.[] | select(.draft == false and .prerelease == false and (.tag_name | test("^v")) and any(.assets[]; .name | test("-linux-x86_64\\.tar\\.xz$")))] | first | .assets[] | select(.name | test("-linux-x86_64\\.tar\\.xz$")) | .browser_download_url'
           is-main-source: true
       # HILAL_ARCHIVE_END
       # HILAL_SOURCE_BEGIN
       - type: git
         url: https://github.com/VastSea0/hilal-browser.git
         tag: v0.4.0-alpha.3
+        commit: 8287d6f2697d0a233ef15d29d08b792f2c8ed5e5
         dest: hilal-browser
       # HILAL_SOURCE_END
