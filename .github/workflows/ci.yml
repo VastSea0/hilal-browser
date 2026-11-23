@@ -348,7 +348,11 @@ jobs:
         run: |
           tarball="$(ls package/*.linux-*.tar.xz | head -n1)"
           python3 scripts/ci/flatpak-test-manifest.py io.github.VastSea0.hilal-browser.yml "$tarball" . flatpak-test.yml
-          flatpak run --user org.flatpak.Builder --user --install-deps-from=flathub --install --force-clean \
+          flatpak install --user -y flathub \
+            org.freedesktop.Platform//25.08 \
+            org.freedesktop.Sdk//25.08 \
+            org.mozilla.firefox.BaseApp//25.08
+          dbus-run-session -- flatpak run --user org.flatpak.Builder --user --install --force-clean \
             --mirror-screenshots-url=https://dl.flathub.org/media \
             --disable-rofiles-fuse flatpak-build flatpak-test.yml
 

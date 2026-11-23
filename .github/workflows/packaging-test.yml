@@ -163,7 +163,11 @@ jobs:
       - name: Build and lint builddir
         run: |
           set -euo pipefail
-          flatpak run --user org.flatpak.Builder --user --install-deps-from=flathub --install --force-clean \
+          flatpak install --user -y flathub \
+            org.freedesktop.Platform//25.08 \
+            org.freedesktop.Sdk//25.08 \
+            org.mozilla.firefox.BaseApp//25.08
+          dbus-run-session -- flatpak run --user org.flatpak.Builder --user --install --force-clean \
             --mirror-screenshots-url=https://dl.flathub.org/media \
             --disable-rofiles-fuse flatpak-build io.github.VastSea0.hilal-browser.yml
           flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder builddir flatpak-build
