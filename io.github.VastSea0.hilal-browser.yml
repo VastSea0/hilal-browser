@@ -76,7 +76,6 @@ modules:
       # HILAL_SOURCE_BEGIN
       - type: git
         url: https://github.com/VastSea0/hilal-browser.git
-        tag: v0.4.0-alpha.3
-        commit: 8287d6f2697d0a233ef15d29d08b792f2c8ed5e5
+        commit: b382602c96ac87a59252194a5debc7d78b927d16
         dest: hilal-browser
       # HILAL_SOURCE_END
