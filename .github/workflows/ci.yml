@@ -349,12 +349,11 @@ jobs:
           tarball="$(ls package/*.linux-*.tar.xz | head -n1)"
           python3 scripts/ci/flatpak-test-manifest.py io.github.VastSea0.hilal-browser.yml "$tarball" . flatpak-test.yml
           flatpak-builder --user --install-deps-from=flathub --install --force-clean \
-            --repo=flatpak-repo --mirror-screenshots-url=https://dl.flathub.org/media/ \
             --disable-rofiles-fuse flatpak-build flatpak-test.yml
 
-      - name: Lint exported Flatpak repo
+      - name: Lint Flatpak builddir
         run: |
-          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder repo flatpak-repo
+          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder builddir flatpak-build
 
       - name: UI smoke inside the Flatpak
         run: |

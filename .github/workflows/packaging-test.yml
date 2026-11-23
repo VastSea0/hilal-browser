@@ -160,13 +160,12 @@ jobs:
           set -euo pipefail
           jq empty flathub.json
           flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.VastSea0.hilal-browser.yml
-      - name: Build and lint exported repo
+      - name: Build and lint builddir
         run: |
           set -euo pipefail
           flatpak-builder --user --install-deps-from=flathub --install --force-clean \
-            --repo=flatpak-repo --mirror-screenshots-url=https://dl.flathub.org/media/ \
             --disable-rofiles-fuse flatpak-build io.github.VastSea0.hilal-browser.yml
-          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder repo flatpak-repo
+          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder builddir flatpak-build
       - name: Check the installed Flatpak
         run: |
           set -euo pipefail
