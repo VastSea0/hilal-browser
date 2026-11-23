@@ -26,7 +26,6 @@ import {
 } from "./utils/github";
 
 import DownloadModal from "./components/DownloadModal";
-import LiveDownloadCounter from "./components/LiveDownloadCounter";
 import { DesktopFrame, PhoneFrame, screen } from "./components/DeviceFrames";
 import { CONTRIBUTORS_DATA, ContributorItem } from "./data/contributorsData";
 import { applyAccentPalette, paletteFromAccent, useHilalBrowser } from "./utils/hilalAccent";
@@ -301,6 +300,9 @@ export default function App() {
         : prev.platforms,
     }));
   };
+
+  const formatCount = (n: number) =>
+    new Intl.NumberFormat(lang === "tr" ? "tr-TR" : "en-US").format(n);
 
   const handleCopyCommand = () => {
     const cmd = "git clone https://github.com/VastSea0/hilal-browser.git && cd hilal-browser && ./bin/hil setup";
@@ -866,18 +868,21 @@ export default function App() {
                 </div>
 
                 {/* Supporting artifact note */}
-                {recommendedAsset && (
-                  <p className="text-xs font-mono text-[var(--on-surface-variant)]">
-                    {recommendedAsset.name} • {formatBytes(recommendedAsset.size)}
+                {(recommendedAsset || downloadStats.total > 0) && (
+                  <p
+                    className="text-xs font-mono tabular-nums text-[var(--on-surface-variant)]"
+                    aria-live="polite"
+                  >
+                    {[
+                      recommendedAsset &&
+                        `${recommendedAsset.name} • ${formatBytes(recommendedAsset.size)}`,
+                      downloadStats.total > 0 &&
+                        `${formatCount(downloadStats.total)} ${lang === "tr" ? "indirme" : "downloads"}`,
+                    ]
+                      .filter(Boolean)
+                      .join(" • ")}
                   </p>
                 )}
-
-                <LiveDownloadCounter
-                  stats={downloadStats}
-                  lang={lang}
-                  variant="pill"
-                  onClick={() => scrollToId("download")}
-                />
               </motion.div>
             </motion.div>
 
@@ -1154,12 +1159,22 @@ export default function App() {
             <p className="mt-2 text-base text-[var(--on-surface-variant)]">
               {activeT.downloadSection.subtitle}
             </p>
-
-            <LiveDownloadCounter stats={downloadStats} lang={lang} variant="banner" />
+            {downloadStats.total > 0 && (
+              <p
+                className="mt-2 text-xs font-mono tabular-nums text-[var(--on-surface-variant)]"
+                aria-live="polite"
+              >
+                {formatCount(downloadStats.total)}{" "}
+                {lang === "tr" ? "toplam indirme" : "total downloads"}
+              </p>
+            )}
 
             {/* Platform cards */}
             <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
-              {activeT.downloadSection.platforms.map((p, idx) => (
+              {activeT.downloadSection.platforms.map((p, idx) => {
+                const platformKey = p.name.toLowerCase() as DownloadPlatform;
+                const platformCount = downloadStats.platforms[platformKey] || 0;
+                return (
                 <motion.div
                   key={idx}
                   whileHover={{ y: -6, scale: 1.02 }}
@@ -1179,12 +1194,20 @@ export default function App() {
                     </p>
                   </div>
 
-                  <div className="mt-8 flex items-center gap-2 text-xs font-bold text-[var(--primary)] group-hover:translate-x-1 transition-transform">
-                    <span>{activeT.downloadSection.directDownload}</span>
-                    <i className="text-base">arrow_forward</i>
+                  <div className="mt-8 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[var(--primary)] group-hover:translate-x-1 transition-transform">
+                      <span>{activeT.downloadSection.directDownload}</span>
+                      <i className="text-base">arrow_forward</i>
+                    </div>
+                    {platformCount > 0 && (
+                      <span className="text-xs font-mono tabular-nums text-[var(--on-surface-variant)]">
+                        {formatCount(platformCount)}
+                      </span>
+                    )}
                   </div>
                 </motion.div>
-              ))}
+                );
+              })}
             </div>
           </section>
 

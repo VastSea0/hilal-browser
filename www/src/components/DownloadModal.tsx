@@ -285,17 +285,12 @@ export default function DownloadModal({
                             <span className="text-sm sm:text-base font-bold text-[var(--on-surface)]">
                               {info.label}
                             </span>
-                            <span className="px-2.5 py-0.5 rounded-full bg-m3-container-high text-[11px] font-mono text-[var(--on-surface-variant)] font-medium">
+                            <span className="px-2.5 py-0.5 rounded-full bg-m3-container-high text-[11px] font-mono tabular-nums text-[var(--on-surface-variant)] font-medium">
                               {formatBytes(asset.size)}
+                              {typeof asset.download_count === "number" && asset.download_count > 0
+                                ? ` • ${new Intl.NumberFormat(lang === "tr" ? "tr-TR" : "en-US").format(asset.download_count)}`
+                                : ""}
                             </span>
-                            {typeof asset.download_count === "number" && asset.download_count > 0 && (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-m3-container-high text-[11px] font-mono text-[var(--on-surface-variant)] font-medium">
-                                <i className="text-[13px] text-[var(--primary)]">download</i>
-                                <span>
-                                  {new Intl.NumberFormat(lang === "tr" ? "tr-TR" : "en-US").format(asset.download_count)}
-                                </span>
-                              </span>
-                            )}
                           </div>
                           <div className="text-xs font-mono text-[var(--on-surface-variant)] truncate mt-1">
                             {asset.name}
