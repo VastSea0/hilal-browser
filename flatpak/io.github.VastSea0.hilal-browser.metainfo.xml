@@ -90,8 +90,4 @@
     <color type="primary" scheme_preference="light">#F7C948</color>
     <color type="primary" scheme_preference="dark">#FFE08A</color>
   </branding>
-
-  <custom>
-    <value key="flathub::manifest">https://github.com/VastSea0/hilal-browser/blob/main/io.github.VastSea0.hilal-browser.yml</value>
-  </custom>
 </component>
