@@ -29,7 +29,8 @@ flatpak install --user -y flathub org.flatpak.Builder
 Build directly from the published release manifest and export an OSTree repo:
 
 ```bash
-flatpak-builder --user --install-deps-from=flathub --install --force-clean \
+flatpak run --user org.flatpak.Builder --user --install-deps-from=flathub --install --force-clean \
+  --mirror-screenshots-url=https://dl.flathub.org/media \
   flatpak-build io.github.VastSea0.hilal-browser.yml
 ```
 

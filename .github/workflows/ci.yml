@@ -348,7 +348,8 @@ jobs:
         run: |
           tarball="$(ls package/*.linux-*.tar.xz | head -n1)"
           python3 scripts/ci/flatpak-test-manifest.py io.github.VastSea0.hilal-browser.yml "$tarball" . flatpak-test.yml
-          flatpak-builder --user --install-deps-from=flathub --install --force-clean \
+          flatpak run --user org.flatpak.Builder --user --install-deps-from=flathub --install --force-clean \
+            --mirror-screenshots-url=https://dl.flathub.org/media \
             --disable-rofiles-fuse flatpak-build flatpak-test.yml
 
       - name: Lint Flatpak builddir
