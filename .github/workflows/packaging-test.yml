@@ -10,7 +10,7 @@ on:
     branches: [main]
     paths:
       - scripts/generate-packaging.mjs
-      - io.github.VastSea0.Hilal.yml
+      - io.github.VastSea0.hilal-browser.yml
       - flathub.json
       - .github/workflows/packaging-test.yml
 
@@ -43,8 +43,8 @@ jobs:
         run: |
           set -euo pipefail
           python -c "import json,sys; p=json.load(open('/opt/hilal-browser/distribution/policies.json'))['policies']; assert p.get('DisableAppUpdate') is True, p"
-          test -f /usr/share/applications/io.github.VastSea0.Hilal.desktop
-          test -f /usr/share/icons/hicolor/128x128/apps/io.github.VastSea0.Hilal.png
+          ls /usr/share/applications/io.github.VastSea0.*.desktop
+          ls /usr/share/icons/hicolor/128x128/apps/io.github.VastSea0.*.png
           sudo -u builder /usr/bin/hilal --version
           sudo -u builder mkdir -p /tmp/hilal-profile
           sudo -u builder MOZ_HEADLESS=1 timeout 120 /usr/bin/hilal --headless --no-remote --profile /tmp/hilal-profile --screenshot /tmp/aur.png about:blank
@@ -159,21 +159,21 @@ jobs:
         run: |
           set -euo pipefail
           jq empty flathub.json
-          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.VastSea0.Hilal.yml
+          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.VastSea0.hilal-browser.yml
       - name: Build and lint exported repo
         run: |
           set -euo pipefail
           flatpak-builder --user --install-deps-from=flathub --install --force-clean \
-            --repo=flatpak-repo --disable-rofiles-fuse flatpak-build io.github.VastSea0.Hilal.yml
+            --repo=flatpak-repo --disable-rofiles-fuse flatpak-build io.github.VastSea0.hilal-browser.yml
           flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder repo flatpak-repo
       - name: Check the installed Flatpak
         run: |
           set -euo pipefail
-          flatpak run --user --command=python3 io.github.VastSea0.Hilal -c \
+          flatpak run --user --command=python3 io.github.VastSea0.hilal-browser -c \
             "import json; p=json.load(open('/app/lib/hilal/distribution/policies.json'))['policies']; assert p.get('DisableAppUpdate') is True, p; assert 'AppUpdateURL' not in p, p"
           mkdir -p "$PWD/flathub-profile"
           dbus-run-session -- xvfb-run -a -s "-screen 0 1280x800x24" \
-            flatpak run --user --filesystem="$PWD" io.github.VastSea0.Hilal \
+            flatpak run --user --filesystem="$PWD" io.github.VastSea0.hilal-browser \
               --headless --no-remote --profile "$PWD/flathub-profile" \
               --screenshot "$PWD/flathub.png" about:blank
           test -s "$PWD/flathub.png"

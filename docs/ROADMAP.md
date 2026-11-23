@@ -21,7 +21,7 @@ features, so the order is: stay secure, reach people, then stand out.
 
 ## 0.4.0-alpha.4: reach
 
-- [ ] Submit to Flathub as `io.github.VastSea0.Hilal`.
+- [ ] Submit to Flathub as `io.github.VastSea0.hilal-browser`.
 - [x] AUR package, winget and Scoop manifests, Homebrew cask, made for every
       release and install-tested in CI (`docs/PACKAGING.md`).
 - [x] Scoop bucket and Homebrew tap served from this repository.

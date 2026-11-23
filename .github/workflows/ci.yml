@@ -102,7 +102,7 @@ jobs:
               # The compare API lists at most 300 files; build when it may have cut some.
               [ "$(printf '%s\n' "$changed" | wc -l)" -lt 300 ] || changed=""
               build_paths="$(printf '%s\n' "$changed" | grep -v -E \
-                '^(scripts/ci/(ui-smoke\.py|update-test\.py|flatpak-[^/]+|flatpak-run\.sh|esr-bump\.sh)|scripts/(build-appimage|build-flatpak)\.sh|scripts/[^/]+\.mjs|flatpak/.*|io\.github\.VastSea0\.Hilal\.yml|flathub\.json|\.github/workflows/(ci|release|esr-watch|verify-patches|android-[^/]+)\.yml|(www|docs|media|android|playstore|scripts/android-ota)/.*|.*\.md)$' || true)"
+                '^(scripts/ci/(ui-smoke\.py|update-test\.py|flatpak-[^/]+|flatpak-run\.sh|esr-bump\.sh)|scripts/(build-appimage|build-flatpak)\.sh|scripts/[^/]+\.mjs|flatpak/.*|io\.github\.VastSea0\.hilal-browser\.yml|flathub\.json|\.github/workflows/(ci|release|esr-watch|verify-patches|android-[^/]+)\.yml|(www|docs|media|android|playstore|scripts/android-ota)/.*|.*\.md)$' || true)"
               if [ -n "$changed" ] && [ -z "$build_paths" ]; then
                 reuse="$id"
                 echo "::notice::Only test/packaging files changed since run $id; testing its packages."
@@ -342,12 +342,12 @@ jobs:
 
       - name: Lint Flatpak manifest
         run: |
-          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.VastSea0.Hilal.yml
+          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.VastSea0.hilal-browser.yml
 
       - name: Build and install the Flatpak
         run: |
           tarball="$(ls package/*.linux-*.tar.xz | head -n1)"
-          python3 scripts/ci/flatpak-test-manifest.py io.github.VastSea0.Hilal.yml "$tarball" . flatpak-test.yml
+          python3 scripts/ci/flatpak-test-manifest.py io.github.VastSea0.hilal-browser.yml "$tarball" . flatpak-test.yml
           flatpak-builder --user --install-deps-from=flathub --install --force-clean \
             --repo=flatpak-repo --disable-rofiles-fuse flatpak-build flatpak-test.yml
 

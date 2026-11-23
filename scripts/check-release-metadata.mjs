@@ -22,8 +22,8 @@ const paths = {
   hilMain: "hil/src/main.rs",
   updateGenerator: "scripts/generate-update-manifest.mjs",
   displayPatch: "changes/browser/config/version.patch",
-  flatpakManifest: "io.github.VastSea0.Hilal.yml",
-  flatpakMetainfo: "flatpak/io.github.VastSea0.Hilal.metainfo.xml",
+  flatpakManifest: "io.github.VastSea0.hilal-browser.yml",
+  flatpakMetainfo: "flatpak/io.github.VastSea0.hilal-browser.metainfo.xml",
   updateManifest: "dist/hilal-update-manifest.json",
   releaseWorkflow: ".github/workflows/release.yml",
   ciWorkflow: ".github/workflows/ci.yml",
@@ -264,7 +264,11 @@ function readFlatpakSourceTag(file) {
   }
 
   const jsonMatch = text.match(/"tag"\s*:\s*"([^"]+)"/);
-  return jsonMatch?.[1] || "";
+  if (jsonMatch) {
+    return jsonMatch[1];
+  }
+  const archiveMatch = text.match(/\/releases\/download\/(v[^/\s]+)\//);
+  return archiveMatch?.[1] || "";
 }
 
 function readFlatpakRelease(file) {

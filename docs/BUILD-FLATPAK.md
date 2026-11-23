@@ -1,6 +1,6 @@
 # Build Hilal for Flatpak
 
-Hilal's Flatpak package is defined by `io.github.VastSea0.Hilal.yml` alongside
+Hilal's Flatpak package is defined by `io.github.VastSea0.hilal-browser.yml` alongside
 `flathub.json`. It repackages the CI-built Linux release tarball (following the
 same model as Firefox and Zen on Flathub), installs the browser under
 `/app/lib/hilal`, disables the built-in updater, and exports the `hilal`
@@ -9,7 +9,7 @@ command.
 The Flatpak app id is:
 
 ```text
-io.github.VastSea0.Hilal
+io.github.VastSea0.hilal-browser
 ```
 
 ## Prerequisites
@@ -30,20 +30,20 @@ Build directly from the published release manifest and export an OSTree repo:
 
 ```bash
 flatpak-builder --user --install-deps-from=flathub --install --force-clean \
-  --repo=flatpak-repo flatpak-build io.github.VastSea0.Hilal.yml
+  --repo=flatpak-repo flatpak-build io.github.VastSea0.hilal-browser.yml
 ```
 
 Run Flathub's official linter against both the manifest and the exported repo:
 
 ```bash
-flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.VastSea0.Hilal.yml
+flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.VastSea0.hilal-browser.yml
 flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder repo flatpak-repo
 ```
 
 Run the installed build:
 
 ```bash
-flatpak run --user io.github.VastSea0.Hilal about:blank
+flatpak run --user io.github.VastSea0.hilal-browser about:blank
 ```
 
 ## CI Verification
@@ -52,19 +52,19 @@ flatpak run --user io.github.VastSea0.Hilal about:blank
   built Linux tarball, runs `flatpak-builder-lint` on the manifest and exported
   repo, and executes `scripts/ci/ui-smoke.py` inside the sandbox.
 - `.github/workflows/packaging-test.yml` (`flathub`) builds directly from the
-  published `io.github.VastSea0.Hilal.yml`, runs `flatpak-builder-lint`, and
+  published `io.github.VastSea0.hilal-browser.yml`, runs `flatpak-builder-lint`, and
   verifies the installed sandboxed browser starts cleanly with updates disabled.
 
 ## Flathub Submission Checklist
 
 Before opening the `flathub/flathub` PR on the `new-pr` branch:
 
-- Copy `io.github.VastSea0.Hilal.yml` and `flathub.json` into the PR branch.
+- Copy `io.github.VastSea0.hilal-browser.yml` and `flathub.json` into the PR branch.
 - Confirm both `flatpak-builder-lint manifest` and `flatpak-builder-lint repo`
   pass cleanly in CI (`packaging-test.yml` / `test-flatpak`).
 - Confirm `x-checker-data` resolves the latest desktop `v*` release (ignoring
   `android-v*` and `nightly` releases).
-- Verify ownership of `io.github.VastSea0.Hilal` on Flathub via GitHub sign-in
+- Verify ownership of `io.github.VastSea0.hilal-browser` on Flathub via GitHub sign-in
   once the PR is merged.
 
 Do not automate the Flathub pull request from this repo. A maintainer should

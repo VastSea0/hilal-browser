@@ -12,7 +12,7 @@ and checks that it starts.
 | Homebrew | `Casks/hilal-browser.rb` | This repo is the tap |
 | AUR | `packaging/aur/hilal-browser-bin/` | `aur.archlinux.org/hilal-browser-bin` |
 | winget | `packaging/winget/manifests/` | Copied into `microsoft/winget-pkgs` |
-| Flathub | `io.github.VastSea0.Hilal.yml` | `flathub/io.github.VastSea0.Hilal` |
+| Flathub | `io.github.VastSea0.hilal-browser.yml` | `flathub/io.github.VastSea0.hilal-browser` |
 
 Scoop and Homebrew work as soon as the manifests reach main. The other three
 are published in someone else's repository. Each needs a maintainer to submit
@@ -39,7 +39,7 @@ later versions.
 ## Flathub (one time, a PR to flathub/flathub)
 
 Follow Flathub's submission guide: open a pull request to `flathub/flathub` on
-the `new-pr` branch with `io.github.VastSea0.Hilal.yml` and `flathub.json`.
+the `new-pr` branch with `io.github.VastSea0.hilal-browser.yml` and `flathub.json`.
 Its archive source already has the real sha256 of the latest release and the
 git source pins the release tag and commit. After Flathub accepts it, their
 external data checker opens a PR for each new desktop release by itself.

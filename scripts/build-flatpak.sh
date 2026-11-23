@@ -33,7 +33,7 @@ fi
 HILAL_REPO_ROOT="$(cd "$(dirname "$0")/../" && pwd)"
 TARGET_DIST_DIR="${HILAL_REPO_ROOT}/dist"
 CONFIG_FILE="${HILAL_REPO_ROOT}/config.yml"
-APP_ID="io.github.VastSea0.Hilal"
+APP_ID="io.github.VastSea0.hilal-browser"
 BUILD_DIR="${HILAL_REPO_ROOT}/flatpak-build"
 REPO_DIR="${HILAL_REPO_ROOT}/repo"
 
