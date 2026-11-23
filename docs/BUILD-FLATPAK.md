@@ -30,7 +30,8 @@ Build directly from the published release manifest and export an OSTree repo:
 
 ```bash
 flatpak-builder --user --install-deps-from=flathub --install --force-clean \
-  --repo=flatpak-repo flatpak-build io.github.VastSea0.hilal-browser.yml
+  --repo=flatpak-repo --mirror-screenshots-url=https://dl.flathub.org/media/ \
+  flatpak-build io.github.VastSea0.hilal-browser.yml
 ```
 
 Run Flathub's official linter against both the manifest and the exported repo:

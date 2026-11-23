@@ -77,5 +77,6 @@ modules:
       - type: git
         url: https://github.com/VastSea0/hilal-browser.git
         commit: b382602c96ac87a59252194a5debc7d78b927d16
+        disable-submodules: true
         dest: hilal-browser
       # HILAL_SOURCE_END

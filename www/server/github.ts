@@ -5,6 +5,7 @@ export interface ReleaseAsset {
   browser_download_url: string;
   content_type?: string;
   digest?: string;
+  download_count?: number;
 }
 
 export interface ReleaseSummary {
@@ -100,7 +101,7 @@ const RELEASES_QUERY = `
           isDraft
           isPrerelease
           releaseAssets(first: 50) {
-            nodes { name size downloadUrl contentType }
+            nodes { name size downloadUrl contentType downloadCount }
           }
         }
       }
@@ -149,6 +150,7 @@ async function fetchGithubReleasesGraphQL(limit: number): Promise<ReleaseSummary
           size: asset.size,
           browser_download_url: asset.downloadUrl,
           content_type: asset.contentType,
+          download_count: Number(asset.downloadCount || 0),
         })),
       })
     );
@@ -220,6 +222,7 @@ export function normalizeRelease(item: any): ReleaseSummary {
             ? String(asset.content_type)
             : undefined,
           digest: asset.digest ? String(asset.digest) : undefined,
+          download_count: Number(asset.download_count || 0),
         }))
       : [],
   };

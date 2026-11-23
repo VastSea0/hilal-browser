@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "motion/react";
 function GithubIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -8,7 +8,7 @@ function GithubIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
-import { GithubRelease } from "./types";
+import { GithubAsset, GithubRelease } from "./types";
 import {
   fetchGithubReleases,
   fetchGithubContributors,
@@ -18,10 +18,15 @@ import {
   detectOS,
   getRecommendedAsset,
   pickReleaseFor,
-  formatBytes
+  formatBytes,
+  computeDownloadStats,
+  getAssetPlatform,
+  DownloadPlatform,
+  DownloadStats
 } from "./utils/github";
 
 import DownloadModal from "./components/DownloadModal";
+import LiveDownloadCounter from "./components/LiveDownloadCounter";
 import { DesktopFrame, PhoneFrame, screen } from "./components/DeviceFrames";
 import { CONTRIBUTORS_DATA, ContributorItem } from "./data/contributorsData";
 import { applyAccentPalette, paletteFromAccent, useHilalBrowser } from "./utils/hilalAccent";
@@ -113,6 +118,11 @@ export default function App() {
   const [androidTab, setAndroidTab] = useState<number>(0);
   const [copiedClone, setCopiedClone] = useState<boolean>(false);
   const [liveContributors, setLiveContributors] = useState<ContributorItem[] | null>(null);
+  const [localDownloads, setLocalDownloads] = useState<DownloadStats>({
+    total: 0,
+    platforms: { macos: 0, windows: 0, linux: 0, android: 0 },
+  });
+  const lastServerTotalRef = useRef<number>(0);
   const contributors = mergeContributors(CONTRIBUTORS_DATA, liveContributors);
 
   useEffect(() => {
@@ -172,25 +182,53 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
+    let lastReleaseFetch = 0;
+
     const loadData = async () => {
       try {
         const data = await fetchGithubReleases();
-        if (active) setReleases(data);
+        if (!active) return;
+        lastReleaseFetch = Date.now();
+        const nextTotal = computeDownloadStats(data).total;
+        // Clear optimistic increments once the server feed reflects new downloads.
+        if (nextTotal > lastServerTotalRef.current && lastServerTotalRef.current > 0) {
+          setLocalDownloads({
+            total: 0,
+            platforms: { macos: 0, windows: 0, linux: 0, android: 0 },
+          });
+        }
+        lastServerTotalRef.current = nextTotal;
+        setReleases(data);
       } catch {
-        if (active) setReleases([]);
+        // Keep previously loaded releases if a background poll fails.
       }
     };
     const syncContributors = () => {
+      if (document.hidden) return;
       fetchGithubContributors(CONTRIBUTORS_DATA).then((list) => {
         if (active) setLiveContributors(list);
       });
     };
+    const syncReleases = () => {
+      if (document.hidden) return;
+      loadData();
+    };
+    const handleVisibility = () => {
+      if (!document.hidden && Date.now() - lastReleaseFetch >= 60000) {
+        loadData();
+      }
+    };
+
     syncContributors();
     loadData();
-    const timer = window.setInterval(syncContributors, 30000);
+    const contributorTimer = window.setInterval(syncContributors, 30000);
+    const releaseTimer = window.setInterval(syncReleases, 60000);
+    document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       active = false;
-      window.clearInterval(timer);
+      window.clearInterval(contributorTimer);
+      window.clearInterval(releaseTimer);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 
@@ -240,6 +278,29 @@ export default function App() {
   const recommendedAsset = activeRelease?.assets
     ? getRecommendedAsset(activeRelease.assets, detectedOS as any)
     : null;
+
+  const downloadStats = useMemo<DownloadStats>(() => {
+    const base = computeDownloadStats(releases);
+    return {
+      total: base.total + localDownloads.total,
+      platforms: {
+        macos: base.platforms.macos + localDownloads.platforms.macos,
+        windows: base.platforms.windows + localDownloads.platforms.windows,
+        linux: base.platforms.linux + localDownloads.platforms.linux,
+        android: base.platforms.android + localDownloads.platforms.android,
+      },
+    };
+  }, [releases, localDownloads]);
+
+  const handleDownloadStart = (asset: GithubAsset) => {
+    const platform: DownloadPlatform | null = getAssetPlatform(asset.name);
+    setLocalDownloads((prev) => ({
+      total: prev.total + 1,
+      platforms: platform
+        ? { ...prev.platforms, [platform]: prev.platforms[platform] + 1 }
+        : prev.platforms,
+    }));
+  };
 
   const handleCopyCommand = () => {
     const cmd = "git clone https://github.com/VastSea0/hilal-browser.git && cd hilal-browser && ./bin/hil setup";
@@ -810,6 +871,13 @@ export default function App() {
                     {recommendedAsset.name} • {formatBytes(recommendedAsset.size)}
                   </p>
                 )}
+
+                <LiveDownloadCounter
+                  stats={downloadStats}
+                  lang={lang}
+                  variant="pill"
+                  onClick={() => scrollToId("download")}
+                />
               </motion.div>
             </motion.div>
 
@@ -1087,7 +1155,9 @@ export default function App() {
               {activeT.downloadSection.subtitle}
             </p>
 
-            {/* 3 M3 Tonal Container Cards */}
+            <LiveDownloadCounter stats={downloadStats} lang={lang} variant="banner" />
+
+            {/* Platform cards */}
             <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
               {activeT.downloadSection.platforms.map((p, idx) => (
                 <motion.div
@@ -1210,6 +1280,7 @@ export default function App() {
         onClose={() => setIsDownloadOpen(false)}
         release={activeRelease}
         lang={lang}
+        onDownloadStart={handleDownloadStart}
       />
     </div>
   );

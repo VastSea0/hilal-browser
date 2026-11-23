@@ -25,7 +25,7 @@ export async function fetchGithubReleases(): Promise<GithubRelease[]> {
     return feed;
   }
 
-  const url = "https://api.github.com/repos/VastSea0/hilal-browser/releases";
+  const url = "https://api.github.com/repos/VastSea0/hilal-browser/releases?per_page=100";
   const maxRetries = 2;
   let delay = 300;
 
@@ -93,6 +93,7 @@ function normalizeRelease(item: any): GithubRelease {
           browser_download_url: String(asset.browser_download_url || ""),
           content_type: asset.content_type ? String(asset.content_type) : undefined,
           digest: asset.digest ? String(asset.digest) : undefined,
+          download_count: Number(asset.download_count || 0),
         }))
       : [],
   };
@@ -356,4 +357,58 @@ export function pickReleaseFor(releases: GithubRelease[], os: DetectionOS): Gith
     published[0] ||
     null
   );
+}
+
+export type DownloadPlatform = "macos" | "windows" | "linux" | "android";
+
+export interface DownloadStats {
+  total: number;
+  platforms: Record<DownloadPlatform, number>;
+}
+
+export function getAssetPlatform(assetName: string): DownloadPlatform | null {
+  const n = assetName.toLowerCase();
+  if (n.endsWith(".apk") || n.endsWith(".aab")) return "android";
+  if (n.endsWith(".dmg")) return "macos";
+  if (n.endsWith(".exe") || n.endsWith(".zip") || n.includes("win64") || n.includes("windows")) {
+    return "windows";
+  }
+  if (
+    n.endsWith(".deb") ||
+    n.endsWith(".appimage") ||
+    n.endsWith(".tar.xz") ||
+    n.endsWith(".tar.gz") ||
+    n.endsWith(".rpm") ||
+    n.endsWith(".flatpak") ||
+    n.includes("linux")
+  ) {
+    return "linux";
+  }
+  return null;
+}
+
+export function computeDownloadStats(releases: GithubRelease[]): DownloadStats {
+  const platforms: Record<DownloadPlatform, number> = {
+    macos: 0,
+    windows: 0,
+    linux: 0,
+    android: 0,
+  };
+  let total = 0;
+
+  for (const release of releases) {
+    if (release.draft) continue;
+    for (const asset of release.assets || []) {
+      if (!isBrowserDownload(asset)) continue;
+      const count = Math.max(0, Number(asset.download_count || 0));
+      if (count === 0) continue;
+      total += count;
+      const platform = getAssetPlatform(asset.name);
+      if (platform) {
+        platforms[platform] += count;
+      }
+    }
+  }
+
+  return { total, platforms };
 }

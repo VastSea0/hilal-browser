@@ -164,7 +164,8 @@ jobs:
         run: |
           set -euo pipefail
           flatpak-builder --user --install-deps-from=flathub --install --force-clean \
-            --repo=flatpak-repo --disable-rofiles-fuse flatpak-build io.github.VastSea0.hilal-browser.yml
+            --repo=flatpak-repo --mirror-screenshots-url=https://dl.flathub.org/media/ \
+            --disable-rofiles-fuse flatpak-build io.github.VastSea0.hilal-browser.yml
           flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder repo flatpak-repo
       - name: Check the installed Flatpak
         run: |

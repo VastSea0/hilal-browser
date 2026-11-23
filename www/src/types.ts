@@ -5,6 +5,7 @@ export interface GithubAsset {
   browser_download_url: string;
   content_type?: string;
   digest?: string;
+  download_count?: number;
 }
 
 export interface GithubRelease {

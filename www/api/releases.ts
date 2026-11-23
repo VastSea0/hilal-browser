@@ -6,10 +6,10 @@ export default async function handler(
   res: ServerResponse
 ) {
   try {
-    const releases = await fetchGithubReleases(30);
+    const releases = await fetchGithubReleases(100);
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=900");
+    res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=300");
     res.end(
       JSON.stringify({
         source: "github",

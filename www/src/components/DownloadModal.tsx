@@ -11,6 +11,7 @@ interface DownloadModalProps {
   onClose: () => void;
   release: GithubRelease | null;
   lang: "tr" | "en";
+  onDownloadStart?: (asset: GithubAsset) => void;
 }
 
 export default function DownloadModal({
@@ -18,6 +19,7 @@ export default function DownloadModal({
   onClose,
   release,
   lang,
+  onDownloadStart,
 }: DownloadModalProps) {
   const [downloadedAsset, setDownloadedAsset] = useState<GithubAsset | null>(null);
   const [copied, setCopied] = useState(false);
@@ -108,6 +110,7 @@ export default function DownloadModal({
   const handleDownload = (asset: GithubAsset) => {
     setDownloadedAsset(asset);
     setCopied(false);
+    onDownloadStart?.(asset);
     try {
       const link = document.createElement("a");
       link.href = asset.browser_download_url;
@@ -285,6 +288,14 @@ export default function DownloadModal({
                             <span className="px-2.5 py-0.5 rounded-full bg-m3-container-high text-[11px] font-mono text-[var(--on-surface-variant)] font-medium">
                               {formatBytes(asset.size)}
                             </span>
+                            {typeof asset.download_count === "number" && asset.download_count > 0 && (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-m3-container-high text-[11px] font-mono text-[var(--on-surface-variant)] font-medium">
+                                <i className="text-[13px] text-[var(--primary)]">download</i>
+                                <span>
+                                  {new Intl.NumberFormat(lang === "tr" ? "tr-TR" : "en-US").format(asset.download_count)}
+                                </span>
+                              </span>
+                            )}
                           </div>
                           <div className="text-xs font-mono text-[var(--on-surface-variant)] truncate mt-1">
                             {asset.name}

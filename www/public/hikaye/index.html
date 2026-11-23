@@ -1,0 +1,1320 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hilal'in Hikâyesi</title>
+<meta name="description" content="İnternet bir zamanlar herkesindi. Hilal Tarayıcı'nın kısa hikâyesi.">
+<style>
+  :root {
+    --bg: #04070f;
+    --fg: #f0ece2;
+    --hilal: #b1d9f2;
+    --muted: rgba(240, 236, 226, 0.65);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { display: grid; place-items: center; overflow: hidden; }
+  #stage { position: relative; width: min(100vw, calc(100vh * 16 / 9)); aspect-ratio: 16 / 9; background: #000; }
+  canvas { display: block; width: 100%; height: 100%; }
+  #start { position: absolute; inset: 0; display: grid; place-items: center; align-content: center;
+    gap: 20px; background: #04070f; border: 0; color: var(--fg); cursor: pointer; font: inherit; }
+  #start svg { width: clamp(64px, 9vw, 112px); height: auto; }
+  #start .t { font-size: clamp(18px, 2.4vw, 30px); font-weight: 500; letter-spacing: 0.02em; }
+  #start .s { font-size: clamp(12px, 1.3vw, 15px); color: var(--muted); }
+  #start:hover svg, #start:focus-visible svg { transform: scale(1.04); }
+  #start svg { transition: transform 0.2s; }
+  #start:focus-visible { outline: 2px solid var(--hilal); outline-offset: -8px; }
+  #bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px; background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)); opacity: 0; transition: opacity 0.3s; }
+  #stage:hover #bar, #bar:focus-within, #stage.paused #bar { opacity: 1; }
+  #bar button { background: none; border: 0; color: var(--fg); cursor: pointer; padding: 6px; min-width: 32px;
+    display: grid; place-items: center; border-radius: 6px; font: inherit; font-size: 13px; letter-spacing: 0.04em; }
+  #bar button:hover { background: rgba(255, 255, 255, 0.12); }
+  #bar svg { width: 20px; height: 20px; fill: currentColor; }
+  #seek { flex: 1; accent-color: var(--hilal); min-width: 0; }
+  #time { font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); }
+  body.export #bar, body.export #start { display: none; }
+</style>
+<script src="timeline.js"></script>
+</head>
+<body>
+<div id="stage" class="paused">
+  <canvas id="c" width="1920" height="1080" aria-label="Hilal'in hikâyesini anlatan animasyon"></canvas>
+  <button id="start" aria-label="Animasyonu başlat">
+    <svg viewBox="0 0 512 512" aria-hidden="true">
+      <mask id="cut"><rect width="512" height="512" fill="#fff"/><circle cx="287.4" cy="228.9" r="210" fill="#000"/></mask>
+      <circle cx="256" cy="256" r="256" fill="#b1d9f2" mask="url(#cut)"/>
+    </svg>
+    <span class="t">Hilal'in Hikâyesi</span>
+    <span class="s">Sesli izleyin &middot; İngilizce anlatım, Türkçe altyazı</span>
+  </button>
+  <div id="bar">
+    <button id="pp" aria-label="Duraklat"><svg viewBox="0 0 24 24"><path id="ppi" d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button>
+    <input id="seek" type="range" min="0" max="1000" value="0" aria-label="Zaman">
+    <span id="time">0:00</span>
+    <button id="cc" aria-label="Altyazı dili">TR</button>
+    <button id="fs" aria-label="Tam ekran"><svg viewBox="0 0 24 24"><path d="M4 4h6v2H6v4H4zm10 0h6v6h-2V6h-4zM4 14h2v4h4v2H4zm14 0h2v6h-6v-2h4z"/></svg></button>
+  </div>
+</div>
+<audio id="audio" src="story.m4a" preload="auto"></audio>
+<script>
+"use strict";
+const TL = window.TIMELINE;
+const C = TL.cues;
+const W = 1920, H = 1080;
+const cv = document.getElementById("c");
+let g = cv.getContext("2d");
+const params = new URLSearchParams(location.search);
+let lang = params.get("lang") || "tr"; // "tr", "en" or "off"
+
+// ---------- math ----------
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, x) => a + (b - a) * x;
+const eo = x => 1 - Math.pow(1 - x, 3);
+const eio = x => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const mixc = (a, b, x) => [lerp(a[0], b[0], x), lerp(a[1], b[1], x), lerp(a[2], b[2], x)];
+const rgba = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+const env = (t, a, b, fi = 0.6, fo = 0.6) => seg(t, a, a + fi) * (1 - seg(t, b - fo, b));
+function rng(seed) {
+  return () => {
+    seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function kf(t, frames) {
+  if (t <= frames[0][0]) return frames[0][1];
+  for (let i = 1; i < frames.length; i++) {
+    const [t1, v1] = frames[i];
+    if (t <= t1) {
+      const [t0, v0] = frames[i - 1];
+      const x = eio(seg(t, t0, t1));
+      return Array.isArray(v0) ? mixc(v0, v1, x) : lerp(v0, v1, x);
+    }
+  }
+  return frames[frames.length - 1][1];
+}
+
+// ---------- palette ----------
+// One family of night blues; Hilal's own pale blue is the light of the story,
+// amber belongs to the Fox and red to the Empire.
+const HILAL = [177, 217, 242], CREAM = [240, 236, 226], AMBER = [236, 142, 62], RED = [214, 50, 64];
+const NIGHT0 = [5, 9, 22], NIGHT1 = [16, 28, 62], NIGHT2 = [34, 52, 104];
+const SIL = [6, 9, 18], ASH = [120, 122, 134];
+const VCOL = [[124, 212, 196], [172, 164, 236], [140, 196, 240], [240, 186, 142]];
+const VALUES = { tr: ["Açıklık", "Gizlilik", "Özgürlük", "Topluluk"], en: ["Openness", "Privacy", "Freedom", "Community"] };
+const HUES = [205, 28, 150, 265, 95, 350, 45, 175];
+const SANS = "Inter, system-ui, -apple-system, sans-serif";
+const SEA_Y = 760;
+
+// ---------- shared drawing ----------
+function soft(x, y, r, c, a) {
+  if (a <= 0.003) return;
+  const gr = g.createRadialGradient(x, y, 0, x, y, r);
+  gr.addColorStop(0, rgba(c, a));
+  gr.addColorStop(0.4, rgba(c, a * 0.35));
+  gr.addColorStop(1, rgba(c, 0));
+  g.fillStyle = gr;
+  g.fillRect(x - r, y - r, r * 2, r * 2);
+}
+function skyGrad(top, bot, y0 = 0, y1 = H) {
+  const gr = g.createLinearGradient(0, y0, 0, y1);
+  gr.addColorStop(0, rgba(top)); gr.addColorStop(1, rgba(bot));
+  g.fillStyle = gr; g.fillRect(-60, -60, W + 120, H + 120);
+}
+const STARS = (() => {
+  const r = rng(11), out = [];
+  for (let i = 0; i < 170; i++) out.push([r() * W, r() * H * 1.6 - H * 0.6, r() < 0.85 ? 1.5 : 2.5, r() * 6.28, r()]);
+  return out;
+})();
+function stars(t, a, dy = 0, maxY = H) {
+  if (a <= 0) return;
+  for (const [x, y, r, ph, k] of STARS) {
+    const yy = y + dy;
+    if (yy < -5 || yy > maxY) continue;
+    g.fillStyle = rgba(CREAM, a * (0.6 + 0.4 * Math.sin(t * (0.6 + k) + ph)) * (0.35 + 0.65 * k));
+    g.beginPath(); g.arc(x, yy, r / 2 + 0.3, 0, 7); g.fill();
+  }
+}
+function black(a) { if (a > 0) { g.fillStyle = `rgba(0,0,0,${a})`; g.fillRect(-60, -60, W + 120, H + 120); } }
+function wash(a, c) { if (a > 0) { g.fillStyle = rgba(c, a); g.fillRect(-60, -60, W + 120, H + 120); } }
+function poly(pts) { g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.closePath(); }
+// Layered hills with soft atmospheric depth.
+function ridge(seed, base, amp, color, w = W) {
+  g.fillStyle = rgba(color);
+  g.beginPath(); g.moveTo(-40, H + 400);
+  for (let x = -40; x <= w + 40; x += 20) {
+    g.lineTo(x, base - amp * (0.55 * Math.sin(x * 0.0024 + seed) + 0.3 * Math.sin(x * 0.0061 + seed * 2.3) + 0.15 * Math.sin(x * 0.013 + seed * 5)));
+  }
+  g.lineTo(w + 40, H + 400); g.fill();
+}
+function waterLines(t, y0, y1, c, a) {
+  g.fillStyle = rgba(c, a);
+  const r = rng(31);
+  for (let i = 0; i < 44; i++) {
+    const y = lerp(y0 + 10, y1, Math.pow(r(), 1.6));
+    const len = 30 + r() * 120 * (y - y0) / (y1 - y0 + 1);
+    const x = ((r() * W + t * (8 + r() * 10)) % (W + 200)) - 100;
+    g.fillRect(x, y, len, 2);
+  }
+}
+
+// Film grain, generated once, shifted every frame.
+const GRAIN = (() => {
+  const c = document.createElement("canvas"); c.width = c.height = 256;
+  const x = c.getContext("2d"), img = x.createImageData(256, 256), r = rng(99);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = r() * 255;
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255;
+  }
+  x.putImageData(img, 0, 0);
+  return c;
+})();
+function grain(t) {
+  const f = Math.floor(t * 24), ox = (f * 73) % 256, oy = (f * 151) % 256;
+  g.save();
+  g.globalAlpha = 0.045; g.globalCompositeOperation = "overlay";
+  g.translate(-ox, -oy);
+  g.fillStyle = g.createPattern(GRAIN, "repeat");
+  g.fillRect(0, 0, W + 256, H + 256);
+  g.restore();
+}
+function vignette() {
+  const v = g.createRadialGradient(W / 2, H / 2, H * 0.4, W / 2, H / 2, H * 1.0);
+  v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,0.45)");
+  g.fillStyle = v; g.fillRect(0, 0, W, H);
+}
+
+// ---------- the Hilal mark (two circles, as in branding/about-logo.svg) ----------
+function logoPath(x, y, size) {
+  const R = size / 2;
+  g.beginPath();
+  g.arc(x, y, R, 0, Math.PI * 2);
+  g.moveTo(x + R * 0.1227 + R * 0.8203, y - R * 0.1057);
+  g.arc(x + R * 0.1227, y - R * 0.1057, R * 0.8203, 0, Math.PI * 2, true);
+}
+function drawLogo(x, y, size, a = 1, color = HILAL, halo = 0.35) {
+  if (a <= 0) return;
+  const R = size / 2, gr = g.createRadialGradient(x, y, R * 0.98, x, y, R * 2.2);
+  gr.addColorStop(0, rgba(color, halo * a)); gr.addColorStop(0.3, rgba(color, halo * a * 0.35)); gr.addColorStop(1, rgba(color, 0));
+  g.save(); g.beginPath(); g.rect(x - R * 2.3, y - R * 2.3, R * 4.6, R * 4.6); g.moveTo(x + R * 0.98, y); g.arc(x, y, R * 0.98, 0, Math.PI * 2, true); g.clip("evenodd");
+  g.fillStyle = gr; g.fillRect(x - R * 2.3, y - R * 2.3, R * 4.6, R * 4.6); g.restore();
+  logoPath(x, y, size);
+  g.fillStyle = rgba(color, a); g.fill("evenodd");
+}
+function ghostMoon(x, y, size, a) {
+  if (a <= 0) return;
+  // The part of the moon that is still dark: a faint disc and a dotted edge.
+  const R = size / 2, cx = x + R * 0.1227, cy = y - R * 0.1057, r = R * 0.8203;
+  g.save();
+  g.fillStyle = rgba(HILAL, 0.1 * a); g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = rgba(HILAL, 0.6 * a); g.lineWidth = 2.5;
+  g.setLineDash([2, 12]); g.lineCap = "round";
+  g.beginPath(); g.arc(cx, cy, r - 6, 0, Math.PI * 2); g.stroke();
+  g.restore();
+}
+
+// ---------- value symbols: built from circles, like the mark ----------
+function drawValue(k, x, y, s, a, color, lit = 1, reveal = 1) {
+  if (a <= 0.005) return;
+  const c = mixc(ASH, color, lit);
+  g.save();
+  g.translate(x, y); g.scale(s, s);
+  g.globalAlpha *= a;
+  g.strokeStyle = rgba(c); g.fillStyle = rgba(c);
+  g.lineWidth = 6; g.lineCap = "round"; g.lineJoin = "round";
+  const sweep = reveal;
+  if (k === 0) {
+    // An open ring.
+    const gap = 0.55, s0 = -Math.PI / 4 + gap;
+    g.beginPath(); g.arc(0, 0, 30, s0, s0 + (Math.PI * 2 - gap * 2) * sweep); g.stroke();
+    if (reveal >= 1) { g.beginPath(); g.arc(Math.cos(-Math.PI / 4) * 44, Math.sin(-Math.PI / 4) * 44, 5, 0, 7); g.fill(); }
+  } else if (k === 1) {
+    // A disc with a keyhole cut out.
+    g.globalAlpha *= reveal;
+    g.beginPath(); g.arc(0, 0, 33, 0, 7);
+    g.moveTo(9, -8); g.arc(0, -8, 9, 0, Math.PI * 2, true);
+    g.moveTo(-5, -2); g.lineTo(-8, 18); g.lineTo(8, 18); g.lineTo(5, -2); g.closePath();
+    g.fill("evenodd");
+  } else if (k === 2) {
+    // Two wings.
+    g.beginPath(); g.arc(-18, 14, 22, Math.PI * 1.15, Math.PI * 1.15 + Math.PI * 0.75 * sweep); g.stroke();
+    g.beginPath(); g.arc(18, 14, 22, Math.PI * 1.85 - Math.PI * 0.75 * sweep, Math.PI * 1.85); g.stroke();
+  } else {
+    // Three linked rings.
+    for (const [px, py] of [[0, -12], [-13, 10], [13, 10]]) {
+      g.beginPath(); g.arc(px, py, 15, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * sweep); g.stroke();
+    }
+  }
+  g.restore();
+}
+
+// ---------- browser windows ----------
+function drawWindow(x, y, s, hue, a, light = 1) {
+  if (a <= 0.01) return;
+  const fr = hslRgb(hue, 0.6, lerp(0.35, 0.7, light));
+  soft(x, y, 120 * s, fr, 0.22 * light * a);
+  g.save();
+  g.translate(x, y); g.scale(s, s);
+  g.globalAlpha *= a;
+  g.fillStyle = rgba(mixc(fr, [10, 14, 30], 0.75));
+  g.beginPath(); g.roundRect(-44, -32, 88, 64, 10); g.fill();
+  g.fillStyle = rgba(fr);
+  g.beginPath(); g.roundRect(-44, -32, 88, 16, [10, 10, 0, 0]); g.fill();
+  g.fillStyle = rgba(mixc(fr, [10, 14, 30], 0.6));
+  for (let d = 0; d < 3; d++) { g.beginPath(); g.arc(-33 + d * 10, -24, 2.6, 0, 7); g.fill(); }
+  g.fillStyle = rgba(fr, 0.7);
+  g.fillRect(-32, -6, 46, 5); g.fillRect(-32, 6, 60, 5); g.fillRect(-32, 18, 34, 5);
+  g.restore();
+}
+function hslRgb(h, s, l) {
+  const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return [f(0) * 255, f(8) * 255, f(4) * 255];
+}
+
+// ---------- figures: robed silhouettes ----------
+// Angles are absolute: 0 points down, PI points up, positive turns toward +x.
+const dir = a => [Math.sin(a), Math.cos(a)];
+const P = (lean, la, ra, ll, rl, crouch = 0) => ({ lean, la, ra, ll, rl, crouch });
+const STAND = P(0, [-0.12, -0.06], [0.12, 0.06], [-0.08, 0], [0.08, 0]);
+function poseLerp(a, b, x) {
+  const o = {};
+  for (const k in a) o[k] = Array.isArray(a[k]) ? a[k].map((v, i) => lerp(v, b[k][i], x)) : lerp(a[k], b[k], x);
+  return o;
+}
+function poseAt(t, frames) {
+  if (t <= frames[0][0]) return frames[0][1];
+  for (let i = 1; i < frames.length; i++) {
+    if (t <= frames[i][0]) return poseLerp(frames[i - 1][1], frames[i][1], eio(seg(t, frames[i - 1][0], frames[i][0])));
+  }
+  return frames[frames.length - 1][1];
+}
+function figure(x, y, s, p, opt = {}) {
+  const fx = opt.flip ? -1 : 1;
+  const hip = [0, -94 + p.crouch];
+  const up = [Math.sin(p.lean), -Math.cos(p.lean)], side = [Math.cos(p.lean), Math.sin(p.lean)];
+  const top = [hip[0] + up[0] * 66, hip[1] + up[1] * 66];
+  const head = [top[0] + up[0] * 28, top[1] + up[1] * 28];
+  const limb = (from, [a1, a2], l1, l2) => {
+    const [x1, y1] = dir(a1), [x2, y2] = dir(a2);
+    const m = [from[0] + x1 * l1, from[1] + y1 * l1];
+    return [m, [m[0] + x2 * l2, m[1] + y2 * l2]];
+  };
+  const [lk, lf] = limb(hip, p.ll, 47, 47), [rk, rf] = limb(hip, p.rl, 47, 47);
+  const sh = (k) => [top[0] + side[0] * 15 * k, top[1] + side[1] * 15 * k + 4];
+  const [le, lh] = limb(sh(-1), p.la, 34, 32), [re, rh] = limb(sh(1), p.ra, 34, 32);
+  const col = rgba(opt.color || SIL);
+  g.save();
+  g.translate(x, y); g.scale(s * fx, s);
+  g.globalAlpha *= opt.alpha ?? 1;
+  g.lineCap = "round"; g.lineJoin = "round";
+  if (opt.sash) {
+    const tt = opt.t || 0;
+    const pt = u => [top[0] - 6 - u * 10, top[1] + 10 + u * 2 + Math.sin(tt * 6 - u * 0.6) * u * 1.6];
+    g.strokeStyle = rgba(opt.sash);
+    for (let i = 0; i < 11; i++) {
+      g.lineWidth = 8 - i * 0.5;
+      g.beginPath(); g.moveTo(...pt(i)); g.lineTo(...pt(i + 1)); g.stroke();
+    }
+  }
+  g.strokeStyle = col; g.fillStyle = col;
+  const stroke = (pts, w) => { g.lineWidth = w; g.beginPath(); pts.forEach((q, i) => (i ? g.lineTo(...q) : g.moveTo(...q))); g.stroke(); };
+  stroke([hip, lk, lf], 12); stroke([hip, rk, rf], 12);
+  // Robe: from the shoulders to a hem that follows the legs.
+  const hemL = [hip[0] + Math.sin(p.ll[0]) * 40 - 8, hip[1] + Math.cos(p.ll[0]) * 40];
+  const hemR = [hip[0] + Math.sin(p.rl[0]) * 40 + 8, hip[1] + Math.cos(p.rl[0]) * 40];
+  const sL = sh(-1.15), sR = sh(1.15);
+  g.beginPath(); g.moveTo(...sL);
+  g.quadraticCurveTo(hip[0] - side[0] * 20, hip[1] - side[1] * 20, ...hemL);
+  g.quadraticCurveTo((hemL[0] + hemR[0]) / 2, Math.max(hemL[1], hemR[1]) + 6, ...hemR);
+  g.quadraticCurveTo(hip[0] + side[0] * 20, hip[1] + side[1] * 20, ...sR);
+  g.closePath(); g.fill();
+  stroke([sh(-1), le, lh], 11); stroke([sh(1), re, rh], 11);
+  g.beginPath(); g.arc(head[0], head[1], 16, 0, 7); g.fill();
+  if (opt.rim) {
+    g.strokeStyle = rgba(opt.rim, 0.55); g.lineWidth = 1.6;
+    g.beginPath(); g.arc(head[0], head[1], 16, -Math.PI * 0.9, -Math.PI * 0.1); g.stroke();
+  }
+  if (opt.mark) {
+    // The keeper wears the mark on their chest.
+    const m = [top[0] + up[0] * -18 + side[0] * 2, top[1] + up[1] * -18];
+    logoPath(m[0], m[1], 12);
+    g.fillStyle = rgba(opt.mark); g.fill("evenodd");
+  }
+  g.restore();
+  const w = ([px, py]) => [x + px * s * fx, y + py * s];
+  return { lh: w(lh), rh: w(rh), head: w(head), top: w(top) };
+}
+function bird(x, y, size, flap, c, a) {
+  if (a <= 0) return;
+  g.strokeStyle = rgba(c, a); g.lineWidth = Math.max(2, size * 0.18); g.lineCap = "round";
+  g.beginPath();
+  g.moveTo(x - size, y - flap * size * 0.5);
+  g.quadraticCurveTo(x - size * 0.45, y - size * 0.25, x, y);
+  g.quadraticCurveTo(x + size * 0.45, y - size * 0.25, x + size, y - flap * size * 0.5);
+  g.stroke();
+}
+
+// ---------- the Fox ----------
+const FOX_BODY = new Path2D("M146 -191 Q116 -206 98 -216 L94 -264 L78 -226 L64 -258 L56 -216 C40 -200 30 -180 28 -160 C20 -120 -30 -90 -30 -40 C-30 -14 -10 0 20 0 L112 0 C116 -4 112 -10 100 -12 C98 -60 92 -100 96 -130 C100 -150 110 -168 120 -178 C128 -184 140 -186 146 -191 Z");
+const FOX_TAIL = new Path2D("M-24 -52 C-118 -76 -138 4 -72 12 C-24 20 72 16 118 4 C68 -10 6 -8 -24 -52 Z");
+const FOX_TIP = new Path2D("M72 12 C90 10 106 7 118 4 C106 -2 90 -4 72 -3 Z");
+const FOX_BIB = new Path2D("M120 -178 C108 -168 100 -148 100 -118 C110 -136 122 -158 134 -186 Z");
+const FOX_EAR = new Path2D("M91 -250 L83 -228 L94 -222 Z");
+const FOX_DOTS = (() => {
+  const r = rng(77), out = [], c = document.createElement("canvas").getContext("2d");
+  while (out.length < 240) {
+    const x = -140 + r() * 290, y = -264 + r() * 284;
+    if (c.isPointInPath(FOX_BODY, x, y) || c.isPointInPath(FOX_TAIL, x, y)) out.push([x, y, r(), r()]);
+  }
+  return out;
+})();
+function drawFox(x, y, s, a, color, eyes = 0) {
+  if (a <= 0.005) return;
+  g.save();
+  g.translate(x, y); g.scale(s, s); g.translate(-10, 0);
+  g.globalAlpha *= a;
+  const gr = g.createLinearGradient(-40, -260, 60, 0);
+  gr.addColorStop(0, rgba(mixc(color, [255, 255, 255], 0.12)));
+  gr.addColorStop(1, rgba(mixc(color, [0, 0, 0], 0.3)));
+  g.fillStyle = gr; g.fill(FOX_BODY);
+  g.fillStyle = rgba(mixc(color, [0, 0, 0], 0.18)); g.fill(FOX_TAIL);
+  g.fillStyle = rgba(mixc(color, [0, 0, 0], 0.45)); g.fill(FOX_EAR);
+  g.fillStyle = rgba(mixc(color, CREAM, 0.8)); g.fill(FOX_BIB); g.fill(FOX_TIP);
+  // Eye.
+  g.fillStyle = eyes > 0 ? rgba(mixc([24, 14, 8], [250, 252, 255], eyes)) : "rgb(24,14,8)";
+  g.beginPath(); g.ellipse(108, -203, 5, 2.4, -0.3, 0, 7); g.fill();
+  g.restore();
+  if (eyes > 0) soft(x + (108 - 10) * s, y - 203 * s, 40 * s, [255, 250, 230], 0.6 * eyes * a);
+}
+
+// ---------- the Empire ----------
+function drawEmblem(x, y, s, a, t) {
+  if (a <= 0) return;
+  g.save();
+  g.translate(x, y); g.scale(s, s);
+  g.globalAlpha *= a;
+  soft(0, 0, 200, RED, 0.35);
+  g.fillStyle = "#1c0710"; g.beginPath(); g.arc(0, 0, 96, 0, 7); g.fill();
+  g.strokeStyle = rgba(RED); g.lineWidth = 6;
+  g.beginPath(); g.arc(0, 0, 96, 0, 7); g.stroke();
+  g.lineWidth = 5;
+  for (let i = 0; i < 12; i++) {
+    const an = i * Math.PI / 6 + t * 0.12;
+    g.beginPath(); g.moveTo(Math.cos(an) * 108, Math.sin(an) * 108); g.lineTo(Math.cos(an) * 124, Math.sin(an) * 124); g.stroke();
+  }
+  g.fillStyle = rgba(RED);
+  g.beginPath(); g.moveTo(-62, 0); g.quadraticCurveTo(0, -52, 62, 0); g.quadraticCurveTo(0, 52, -62, 0); g.fill();
+  const px = Math.sin(t * 1.1) * 14;
+  g.fillStyle = "#14040a"; g.beginPath(); g.arc(px, 0, 21, 0, 7); g.fill();
+  g.fillStyle = "rgba(255,220,220,0.9)"; g.beginPath(); g.arc(px + 7, -7, 5, 0, 7); g.fill();
+  g.restore();
+}
+function drawAirship(x, y, s, t, seed) {
+  const yy = y + Math.sin(t * 1.2 + seed) * 5;
+  g.save();
+  g.translate(x, yy); g.scale(s, s);
+  for (let i = 0; i < 5; i++) {
+    const u = (t * 0.5 + i / 5 + seed) % 1;
+    g.fillStyle = `rgba(28,12,16,${0.5 * (1 - u)})`;
+    g.beginPath(); g.arc(250 + u * 360, 10 - u * 50, 22 + u * 40, 0, 7); g.fill();
+  }
+  g.fillStyle = "#170910";
+  g.beginPath(); g.moveTo(180, -10); g.lineTo(262, -70); g.lineTo(250, 0); g.lineTo(262, 70); g.lineTo(180, 10); g.fill();
+  const hull = g.createLinearGradient(0, -64, 0, 64);
+  hull.addColorStop(0, "#3a1520"); hull.addColorStop(0.5, "#1d0b12"); hull.addColorStop(1, "#0e0509");
+  g.fillStyle = hull;
+  g.beginPath(); g.ellipse(0, 0, 232, 64, 0, 0, 7); g.fill();
+  g.fillStyle = "rgba(214,50,64,0.85)"; g.fillRect(-200, -4, 380, 5);
+  g.fillStyle = "#12060b"; g.beginPath(); g.roundRect(-74, 52, 148, 32, 8); g.fill();
+  for (let i = 0; i < 5; i++) {
+    g.fillStyle = rgba(RED, Math.sin(t * 4 + i + seed) > 0 ? 0.95 : 0.35);
+    g.fillRect(-60 + i * 26, 62, 14, 10);
+  }
+  g.restore();
+  drawEmblem(x - 70 * s, yy, 0.3 * s, 1, t);
+}
+
+// ======================================================================
+// Scene 1: the four values
+// ======================================================================
+function sValues(t) {
+  skyGrad([3, 5, 12], [8, 12, 26]);
+  const v = C.values;
+  let k = -1;
+  for (let i = 0; i < 4; i++) if (t >= v[i] - 0.3) k = i;
+  if (k < 0) return;
+  const e = t - (v[k] - 0.3), col = VCOL[k];
+  const fx = 1260, fy = 850;
+  soft(fx, 560, 520, col, 0.16);
+  // Floor: a thin line of light.
+  const gl = g.createLinearGradient(fx - 560, 0, fx + 560, 0);
+  gl.addColorStop(0, rgba(col, 0)); gl.addColorStop(0.5, rgba(col, 0.5)); gl.addColorStop(1, rgba(col, 0));
+  g.fillStyle = gl; g.fillRect(fx - 560, fy, 1120, 1.5);
+  // Symbol and name.
+  const sx = 520, sy = 470;
+  const rev = eo(seg(e, 0, 0.6));
+  g.strokeStyle = rgba(col, 0.35); g.lineWidth = 1.5;
+  g.beginPath(); g.arc(sx, sy, 170, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * rev); g.stroke();
+  drawValue(k, sx, sy, 3.0, 1, col, 1, eo(seg(e, 0.1, 0.7)));
+  g.save();
+  const L = lang === "en" ? "en" : "tr";
+  g.font = `500 40px ${SANS}`; g.textAlign = "center"; g.letterSpacing = "12px";
+  g.fillStyle = rgba(CREAM, 0.9 * seg(e, 0.3, 0.7));
+  g.fillText(VALUES[L][k].toLocaleUpperCase(L), sx + 6, sy + 270);
+  g.restore();
+  [moveOpenness, movePrivacy, moveFreedom, moveCommunity][k](t, e, fx, fy, col);
+  wash(0.12 * (1 - seg(e, 0, 0.2)), col);
+}
+function moveOpenness(t, e, x, y, col) {
+  const pose = poseAt(e, [[0, P(0.15, [-0.7, -0.4], [-0.5, -0.2], [-0.45, 0.1], [0.45, -0.1], 12)],
+    [0.35, P(0.22, [-1.3, -0.9], [-1.1, -0.7], [-0.55, 0.15], [0.55, -0.1], 20)],
+    [0.7, P(-0.04, [1.85, 2.2], [1.65, 1.95], [-0.4, 0], [0.45, 0.15], 6)],
+    [2, P(-0.08, [2.0, 2.3], [1.8, 2.1], [-0.4, 0], [0.45, 0.15], 4)]]);
+  const f = figure(x - 160, y, 2.5, pose, { sash: col, t, rim: col });
+  const L = eo(seg(e, 0.5, 1.3));
+  if (L <= 0) return;
+  const [hx, hy] = f.rh;
+  const pt = u => [hx + u * 620 * L, hy - u * 280 * L + Math.sin(u * 7 - e * 6) * 60 * u];
+  // A ribbon of light, made of many short open-ring dashes.
+  g.save(); g.lineCap = "round";
+  for (let i = 0; i < 48; i++) {
+    const [x0, y0] = pt(i / 48), [x1, y1] = pt((i + 1) / 48);
+    g.strokeStyle = rgba(mixc(col, [255, 255, 255], 0.25), 0.9 * (1 - i / 56));
+    g.lineWidth = 16 * (1 - i / 60);
+    g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
+  }
+  g.restore();
+  for (let i = 0; i < 10; i++) {
+    const u = ((e * 0.9 + i / 10) % 1);
+    const [px, py] = pt(u);
+    soft(px, py - 20, 18, col, 0.5 * (1 - u));
+  }
+}
+function movePrivacy(t, e, x, y, col) {
+  const pose = poseAt(e, [[0, P(0, [1.7, 2.6], [1.5, 2.8], [-0.3, 0], [0.3, 0], 8)],
+    [0.35, P(-0.05, [2.1, 2.9], [1.9, 3.0], [-0.4, 0], [0.4, 0], 14)],
+    [0.65, P(0.16, [1.55, 1.6], [1.45, 1.5], [-0.5, 0.05], [0.45, 0], 16)],
+    [2, P(0.16, [1.55, 1.62], [1.45, 1.52], [-0.5, 0.05], [0.45, 0], 16)]]);
+  const f = figure(x - 200, y, 2.5, pose, { sash: col, t, rim: col });
+  const r = eo(seg(e, 0.5, 0.85)) * 230;
+  if (r <= 0) return;
+  const cx = f.rh[0] - 40, cy = f.rh[1];
+  const sg = g.createRadialGradient(cx, cy, r * 0.6, cx, cy, r);
+  sg.addColorStop(0, rgba(col, 0)); sg.addColorStop(1, rgba(col, 0.28));
+  g.fillStyle = sg;
+  g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, r, -1.1, 1.1); g.closePath(); g.fill();
+  g.strokeStyle = rgba(col, 0.95); g.lineWidth = 5; g.lineCap = "round";
+  g.beginPath(); g.arc(cx, cy, r, -1.1, 1.1); g.stroke();
+  // Trackers bounce off.
+  for (let i = 0; i < 6; i++) {
+    const st = 0.45 + i * 0.12, ang = (i / 5 - 0.5) * 1.5;
+    if (e < st) continue;
+    const d = 900 - 1500 * (e - st), edge = r + 10;
+    const dist = d > edge ? d : 2 * edge - d;
+    const a = d > edge ? 1 : 1 - seg(edge - d, 0, 380);
+    const px = cx + Math.cos(ang) * dist, py = cy + Math.sin(ang) * dist;
+    g.fillStyle = rgba(RED, a); g.beginPath(); g.arc(px, py, 7, 0, 7); g.fill();
+    if (Math.abs(d - edge) < 70) soft(cx + Math.cos(ang) * edge, cy + Math.sin(ang) * edge, 50, col, 0.6);
+  }
+}
+const BIRDS = (() => { const r = rng(4), o = []; for (let i = 0; i < 11; i++) o.push([-Math.PI / 2 + (r() - 0.3) * 1.2, 520 + r() * 420, r() * 6, 12 + r() * 12]); return o; })();
+function moveFreedom(t, e, x, y, col) {
+  const pose = poseAt(e, [[0, P(0.12, [-0.3, -0.2], [0.3, 0.2], [-0.35, 0.1], [0.4, -0.1], 16)],
+    [0.35, P(0.3, [-0.5, -0.3], [-0.2, -0.1], [-0.55, 0.2], [0.6, -0.15], 28)],
+    [0.62, P(-0.06, [2.8, 3.0], [3.45, 3.3], [-0.1, 0], [0.15, 0], 0)],
+    [2, P(-0.08, [2.85, 3.05], [3.4, 3.25], [-0.1, 0], [0.15, 0], 0)]]);
+  const f = figure(x - 60, y, 2.5, pose, { sash: col, t, rim: col });
+  const hx = (f.lh[0] + f.rh[0]) / 2, hy = (f.lh[1] + f.rh[1]) / 2;
+  const age = e - 0.55;
+  if (age > 0) {
+    for (const [ang, sp, ph, size] of BIRDS) {
+      const d = sp * age;
+      bird(hx + Math.cos(ang) * d + Math.sin(age * 3 + ph) * 18, hy + Math.sin(ang) * d, size * (1 + age * 0.3),
+        Math.sin(t * 14 + ph), mixc(col, [255, 255, 255], 0.35), 1 - seg(age, 1.0, 1.6));
+    }
+  }
+  soft(hx, hy, 90, col, 0.5 * env(e, 0.5, 1.2, 0.05, 0.6));
+}
+function moveCommunity(t, e, x, y, col) {
+  const down = P(0, [-0.15, -0.08], [0.15, 0.08], [-0.08, 0], [0.08, 0]);
+  const up = P(0, [-2.5, -2.75], [2.5, 2.75], [-0.14, 0], [0.14, 0]);
+  for (let i = 0; i < 4; i++) {
+    const side = i % 2 ? 1 : -1, slot = Math.floor(i / 2);
+    const tx = x + side * (400 + slot * 90), sx = x + side * 1100;
+    const px = lerp(sx, tx, eo(seg(e, 0.2 + slot * 0.15, 1.2 + slot * 0.15)));
+    figure(px, y, 1.6, poseAt(e, [[0.7, down], [1.4, up]]), { color: [16, 20, 36], flip: side > 0 });
+  }
+  const hands = [];
+  [-220, 0, 220].forEach((dx, i) => {
+    const pose = poseAt(e - i * 0.08, [[0.1, down], [0.6, up], [2.5, up]]);
+    const f = figure(x + dx, y, i === 1 ? 2.3 : 2.1, pose, { sash: col, t: t + i, rim: col });
+    hands.push(f.lh, f.rh);
+  });
+  const ring = eo(seg(e, 0.55, 1.0));
+  if (ring > 0) {
+    const cy = Math.min(...hands.map(h => h[1])) - 24;
+    soft(x, cy, 360 * ring, col, 0.25);
+    g.strokeStyle = rgba(col, 0.95); g.lineWidth = 4;
+    g.beginPath(); g.ellipse(x, cy, 290 * ring, 54 * ring, 0, 0, 7); g.stroke();
+  }
+}
+
+// ======================================================================
+// Scene 2: harmony, an unrolling scroll
+// ======================================================================
+const ISLES = [
+  { x: 260, w: 300, h: 80, mark: 0 }, { x: 640, w: 240, h: 66, mark: 1 }, { x: 980, w: 320, h: 92, mark: 2 },
+  { x: 1350, w: 250, h: 72, mark: 3 }, { x: 1700, w: 300, h: 86, mark: 4 }, { x: 2060, w: 240, h: 68, mark: 5 },
+  { x: 2420, w: 320, h: 92, mark: 6 }, { x: 2780, w: 250, h: 76, mark: 7 },
+];
+function isleTop(i) { return SEA_Y - ISLES[i].h; }
+// Flat silhouettes standing on each island.
+function landmark(m, x, y, t) {
+  g.beginPath();
+  if (m === 0) { poly([[x - 16, y], [x - 9, y - 110], [x + 9, y - 110], [x + 16, y]]); g.fill(); g.beginPath(); g.arc(x, y - 120, 12, 0, 7); }
+  else if (m === 1) { g.rect(x - 44, y - 40, 88, 40); g.moveTo(x + 40, y - 40); g.arc(x, y - 40, 40, 0, Math.PI, true); }
+  else if (m === 2) {
+    poly([[x - 14, y], [x - 7, y - 100], [x + 7, y - 100], [x + 14, y]]); g.fill();
+    g.beginPath();
+    for (let b = 0; b < 4; b++) {
+      const an = t * 0.7 + b * Math.PI / 2;
+      g.moveTo(x, y - 100); g.lineTo(x + Math.cos(an - 0.12) * 62, y - 100 + Math.sin(an - 0.12) * 62); g.lineTo(x + Math.cos(an + 0.12) * 62, y - 100 + Math.sin(an + 0.12) * 62);
+    }
+  } else if (m === 3) { g.rect(x - 5, y - 60, 10, 60); g.moveTo(x + 46, y - 92); g.arc(x, y - 92, 46, 0, 7); }
+  else if (m === 4) { g.moveTo(x - 54, y); g.lineTo(x - 54, y - 70); g.arc(x, y - 70, 54, Math.PI, 0); g.lineTo(x + 54, y); g.lineTo(x + 32, y); g.arc(x, y - 70, 32, 0, Math.PI, true); g.lineTo(x - 32, y); g.closePath(); }
+  else if (m === 5) { for (const dx of [-50, 0, 50]) poly([[x + dx - 20, y], [x + dx - 20, y - 34], [x + dx, y - 56], [x + dx + 20, y - 34], [x + dx + 20, y]]); }
+  else if (m === 6) { g.rect(x - 22, y - 124, 44, 124); g.moveTo(x - 30, y - 124); g.lineTo(x, y - 164); g.lineTo(x + 30, y - 124); }
+  else { g.rect(x - 48, y - 40, 96, 40); g.moveTo(x + 48, y - 40); g.arc(x, y - 40, 48, 0, Math.PI, true); }
+  g.fill();
+}
+function drawFire(x, y, a, t, seed) {
+  if (a <= 0) return;
+  soft(x, y - 40, 120, [255, 120, 50], 0.45 * a);
+  for (let i = 0; i < 4; i++) {
+    const fl = Math.sin(t * 8 + i * 1.7 + seed) * 0.2 + 0.8;
+    g.fillStyle = rgba(i % 2 ? [255, 196, 96] : [240, 92, 44], 0.9 * a);
+    const bx = x + (i - 1.5) * 16;
+    g.beginPath();
+    g.moveTo(bx - 14, y); g.quadraticCurveTo(bx - 10, y - 46 * fl, bx + Math.sin(t * 6 + i) * 4, y - 84 * fl);
+    g.quadraticCurveTo(bx + 10, y - 40 * fl, bx + 14, y); g.fill();
+  }
+}
+function drawIsles(t, ox, o = {}) {
+  const land = o.land || [12, 18, 42], mark = o.mark || [22, 32, 70], line = o.line || CREAM;
+  const br = o.bridges ?? 1;
+  for (let i = 0; i < ISLES.length - 1; i++) {
+    const a = ISLES[i], b = ISLES[i + 1];
+    const x0 = a.x + a.w * 0.36 + ox, x1 = b.x - b.w * 0.36 + ox, y0 = SEA_Y - a.h * 0.5, y1 = SEA_Y - b.h * 0.5;
+    const cx = (x0 + x1) / 2, cy = Math.min(y0, y1) - 60;
+    g.strokeStyle = rgba(line, 0.45 * br); g.lineWidth = 2.5;
+    g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo(cx, cy, x1, y1); g.stroke();
+    for (let j = 0; j < 2 && br > 0.5; j++) {
+      const u = (t * 0.2 + j / 2 + i * 0.17) % 1, q = 1 - u;
+      const px = q * q * x0 + 2 * q * u * cx + u * u * x1, py = q * q * y0 + 2 * q * u * cy + u * u * y1;
+      g.fillStyle = rgba(hslRgb(HUES[(i + j) % 8], 0.7, 0.72), br);
+      g.beginPath(); g.arc(px, py - 5, 4, 0, 7); g.fill();
+    }
+  }
+  ISLES.forEach((s, i) => {
+    const x = s.x + ox;
+    if (x < -300 || x > W + 300) return;
+    g.fillStyle = rgba(mark);
+    landmark(s.mark, x, isleTop(i) + 10, t);
+    g.fillStyle = rgba(land);
+    g.beginPath(); g.ellipse(x, SEA_Y, s.w / 2, s.h, 0, Math.PI, 0); g.closePath(); g.fill();
+    if (o.fire) drawFire(x, isleTop(i) + 12, o.fire[i], t, i);
+  });
+}
+function sHarmony(t) {
+  const a = C.harmony - 0.3;
+  skyGrad([3, 5, 12], [8, 12, 26]);
+  const hw = eo(seg(t, a, a + 1.2)) * 880;
+  if (hw < 2) return;
+  const top = 110, bot = 970;
+  const ox = -lerp(0, 1020, seg(t, a, C.attack + 2.2));
+  g.save();
+  g.beginPath(); g.rect(W / 2 - hw, top, hw * 2, bot - top); g.clip();
+  const pg = g.createLinearGradient(0, top, 0, SEA_Y);
+  pg.addColorStop(0, rgba([20, 30, 70])); pg.addColorStop(1, rgba([58, 74, 130]));
+  g.fillStyle = pg; g.fillRect(0, top, W, SEA_Y - top);
+  stars(t, 0.5, -200, SEA_Y - 160);
+  // Soft clouds.
+  for (let i = 0; i < 5; i++) {
+    const cx = ((i * 640 + t * 14 + ox * 0.35) % 3200 + 3200) % 3200 - 400, cy = 230 + (i % 3) * 60;
+    g.fillStyle = "rgba(120,140,200,0.14)";
+    for (const [dx, dy, r] of [[0, 0, 40], [46, -16, 52], [100, 0, 38]]) { g.beginPath(); g.arc(cx + dx, cy + dy, r, 0, 7); g.fill(); }
+  }
+  ridge(1, SEA_Y - 40, 40, [36, 50, 98]);
+  const sea = g.createLinearGradient(0, SEA_Y, 0, bot);
+  sea.addColorStop(0, rgba([20, 32, 72])); sea.addColorStop(1, rgba([10, 16, 40]));
+  g.fillStyle = sea; g.fillRect(0, SEA_Y, W, bot - SEA_Y);
+  waterLines(t, SEA_Y, bot, CREAM, 0.12);
+  const web = seg(t, C.side, C.side + 1.2);
+  const lan = ISLES.map((s, i) => [s.x + ox, isleTop(i) - 170 + Math.sin(t * 1.2 + i) * 6]);
+  if (web > 0) {
+    g.strokeStyle = rgba(HILAL, 0.5 * web); g.lineWidth = 2;
+    for (let i = 0; i < lan.length - 1; i++) {
+      const [x0, y0] = lan[i], [x1, y1] = lan[i + 1];
+      g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo((x0 + x1) / 2, Math.min(y0, y1) - 50, x1, y1); g.stroke();
+    }
+  }
+  drawIsles(t, ox);
+  lan.forEach(([x, y], i) => drawWindow(x, y, 0.85, HUES[i], eo(seg(t, a + 0.6 + i * 0.12, a + 1.2 + i * 0.12)), 0.65 + 0.35 * web));
+  g.strokeStyle = rgba(CREAM, 0.35); g.lineWidth = 2;
+  g.strokeRect(W / 2 - hw + 24, top + 20, hw * 2 - 48, bot - top - 40);
+  g.restore();
+  for (const side of [-1, 1]) {
+    const x = W / 2 + side * hw;
+    const rg = g.createLinearGradient(x - 20, 0, x + 20, 0);
+    rg.addColorStop(0, "#2b2f45"); rg.addColorStop(0.5, "#8d93b0"); rg.addColorStop(1, "#2b2f45");
+    g.fillStyle = rg; g.beginPath(); g.roundRect(x - 20, top - 34, 40, bot - top + 68, 20); g.fill();
+  }
+}
+
+// ======================================================================
+// Scene 3: the attack
+// ======================================================================
+function burnPath(r, t) {
+  g.beginPath();
+  for (let an = 0; an <= Math.PI * 2 + 0.01; an += 0.03) {
+    const rr = r * (1 + 0.05 * Math.sin(an * 6 + t * 2) + 0.03 * Math.sin(an * 15 - t * 3));
+    const x = W / 2 + Math.cos(an) * rr, y = H * 0.5 + Math.sin(an) * rr;
+    an ? g.lineTo(x, y) : g.moveTo(x, y);
+  }
+  g.closePath();
+}
+const SHIPS = [[1360, 250, 0.9, 0], [860, 160, 0.6, 0.3], [1640, 440, 1.05, 0.5], [480, 300, 0.7, 0.8], [1100, 470, 0.55, 1.0]];
+function attackWorld(t) {
+  skyGrad([26, 6, 12], [104, 24, 30]);
+  for (let i = 0; i < 9; i++) {
+    const x = ((i * 300 - t * 36) % 2700 + 2700) % 2700 - 300, y = 160 + (i * 113) % 420;
+    g.fillStyle = "rgba(22,6,10,0.45)";
+    for (const [dx, dy, r] of [[0, 0, 70], [70, -30, 90], [150, 0, 66]]) { g.beginPath(); g.arc(x + dx, y + dy, r, 0, 7); g.fill(); }
+  }
+  ridge(1, SEA_Y - 40, 40, [50, 14, 22]);
+  g.fillStyle = "#12050a"; g.fillRect(0, SEA_Y, W, H - SEA_Y);
+  waterLines(t, SEA_Y, H, [255, 120, 110], 0.1);
+  const ox = -1020;
+  const hits = ISLES.map((_, i) => seg(t, C.empire + 2.2 + (i % 4) * 0.35, C.empire + 2.6 + (i % 4) * 0.35));
+  drawIsles(t, ox, { land: [20, 6, 12], mark: [34, 10, 18], line: [180, 90, 90], bridges: 0.35, fire: hits });
+  const slam = seg(t, C.empire - 0.05, C.empire + 0.3);
+  if (slam > 0) {
+    drawEmblem(W / 2, 420, lerp(3.2, 1.5, eo(slam)), slam * (1 - seg(t, C.empire + 1.6, C.empire + 2.4)), t);
+    if (slam >= 1) wash(0.45 * (1 - seg(t, C.empire + 0.3, C.empire + 0.9)), [255, 110, 100]);
+  }
+  SHIPS.forEach(([tx, ty, s, d], i) => {
+    const st = C.empire + 0.9 + d * 0.5;
+    const p = eo(seg(t, st, st + 2.4));
+    if (p <= 0) return;
+    const x = lerp(W + 500, tx, p) - Math.max(0, t - st) * 16;
+    const fire = t - (C.empire + 2.1 + (i % 4) * 0.35);
+    if (fire > 0 && fire < 1.2) {
+      const isle = [5, 3, 6, 2, 4][i], ix = ISLES[isle].x + ox, iy = isleTop(isle);
+      g.strokeStyle = rgba([255, 140, 130], (1 - fire / 1.2) * 0.85); g.lineWidth = 4;
+      g.beginPath(); g.moveTo(x, ty + 80 * s); g.lineTo(ix, iy); g.stroke();
+    }
+    drawAirship(x, ty, s, t, i * 1.7);
+  });
+  const r = rng(9);
+  for (let i = 0; i < 50; i++) {
+    const x0 = r() * W, sp = 50 + r() * 100, ph = r() * 10;
+    const y = H - ((t * sp + ph * 100) % (H + 100));
+    g.fillStyle = `rgba(255,160,90,${0.5 + 0.4 * Math.sin(t * 5 + ph)})`;
+    g.fillRect(x0 + Math.sin(t + ph) * 30, y, 3, 3);
+  }
+}
+function sAttack(t) {
+  const a = C.attack + 0.3;
+  const r = eio(seg(t, a, a + 1.5)) * 1300;
+  if (r < 1300) sHarmony(t);
+  if (r <= 0) return;
+  g.save(); burnPath(r, t); g.clip(); attackWorld(t); g.restore();
+  if (r < 1300) {
+    // A charred, glowing edge.
+    g.save(); burnPath(r, t);
+    g.strokeStyle = "rgba(40,10,6,0.9)"; g.lineWidth = 26; g.stroke();
+    g.strokeStyle = "rgba(240,120,50,0.9)"; g.lineWidth = 8; g.stroke();
+    g.strokeStyle = "rgba(255,220,160,0.9)"; g.lineWidth = 2; g.stroke();
+    g.restore();
+  }
+}
+
+// ======================================================================
+// Scene 4: the Fox, and how it was lost
+// ======================================================================
+function sFox(t) {
+  const lost = seg(t, C.lost - 0.2, C.money + 1.8);
+  const zoom = lerp(1, 1.12, eio(seg(t, C.fox, C.lost))) - 0.05 * eio(lost);
+  skyGrad(mixc([18, 20, 52], [16, 16, 24], lost), mixc([96, 70, 110], [56, 54, 64], lost));
+  g.save();
+  g.translate(W / 2, 640); g.scale(zoom, zoom); g.translate(-W / 2, -640);
+  stars(t, 0.6 * (1 - lost), -260, 720);
+  const aura = seg(t, C.keeper - 0.3, C.keeper + 0.6) * (1 - lost);
+  soft(W / 2, 470, 520, AMBER, 0.22 * aura);
+  ridge(2, 860, 70, mixc([30, 26, 56], [30, 30, 36], lost));
+  ridge(4, 930, 50, mixc([18, 16, 36], [20, 20, 26], lost));
+  // The peak.
+  g.fillStyle = rgba(mixc([10, 10, 22], [12, 12, 16], lost));
+  g.beginPath(); g.moveTo(520, H + 60); g.quadraticCurveTo(760, 760, 900, 650); g.lineTo(1030, 650); g.quadraticCurveTo(1160, 760, 1400, H + 60); g.fill();
+  const fx = 960, fy = 652;
+  const drawOrbit = back => {
+    for (let k = 0; k < 4; k++) {
+      const an = k * Math.PI / 2 + (t - C.fox) * 0.8;
+      const depth = Math.sin(an);
+      if ((depth < 0) !== back) continue;
+      let x = fx + Math.cos(an) * 400, y = 450 + depth * 110;
+      const p = C.promises[k];
+      const appear = seg(t, C.fox + 0.2 + k * 0.15, C.fox + 0.8 + k * 0.15);
+      const fall = seg(t, p, p + 1.3), lit = 1 - seg(t, p, p + 0.3);
+      if (fall > 0) { y += 420 * fall * fall; x += (k - 1.5) * 70 * fall; }
+      const s = 0.95 + depth * 0.18;
+      if (fall > 0 && fall < 0.35) soft(x, y, 90, VCOL[k], 0.5 * (1 - fall / 0.35));
+      soft(x, y, 70, VCOL[k], 0.18 * appear * lit * (1 - fall));
+      drawValue(k, x, y, s, appear * (1 - fall) * (0.6 + 0.4 * (depth + 1) / 2), VCOL[k], lit * (1 - 0.3 * lost));
+    }
+  };
+  drawOrbit(true);
+  const color = mixc(AMBER, ASH, eio(lost));
+  const eyes = seg(t, C.keeper, C.keeper + 0.4) * (1 - seg(t, C.lost - 0.2, C.lost + 0.4));
+  const dissolve = seg(t, C.money + 0.5, C.years + 0.2);
+  drawFox(fx, fy, 1.45, (1 - eio(dissolve)) * seg(t, C.fox - 0.4, C.fox + 0.4), color, eyes);
+  if (dissolve > 0) {
+    for (const [px, py, r1, r2] of FOX_DOTS) {
+      const d = clamp(dissolve * 1.6 - r1 * 0.6);
+      if (d <= 0 || d >= 1) continue;
+      g.fillStyle = rgba(color, 1 - d);
+      g.beginPath(); g.arc(fx + (px - 10) * 1.45 + d * (200 + r2 * 420), fy + py * 1.45 - d * (60 + r2 * 160), 3.5, 0, 7); g.fill();
+    }
+  }
+  drawOrbit(false);
+  g.restore();
+  // Money and chains from the Empire, far away.
+  const money = env(t, C.money - 0.2, C.years + 0.2, 0.5, 0.8);
+  if (money > 0) {
+    const ex = 1740, ey = 170, tx = fx + 40, ty = fy - 200, cx = (ex + tx) / 2, cy = 90;
+    drawEmblem(ex, ey, 0.45, money, t);
+    g.save();
+    g.setLineDash([12, 8]); g.lineDashOffset = -t * 50; g.lineCap = "round";
+    for (let k = 0; k < 3; k++) {
+      g.strokeStyle = rgba([226, 178, 72], 0.5 * money); g.lineWidth = 3;
+      g.beginPath(); g.moveTo(ex, ey); g.quadraticCurveTo(cx, cy + k * 50, tx - k * 40, ty + k * 60); g.stroke();
+    }
+    g.restore();
+    for (let i = 0; i < 20; i++) {
+      const u = ((t - C.money) * 0.5 + i / 20) % 1, q = 1 - u;
+      const x = q * q * ex + 2 * q * u * cx + u * u * tx, y = q * q * ey + 2 * q * u * cy + u * u * ty;
+      g.fillStyle = rgba([240, 196, 80], money * Math.sin(u * Math.PI));
+      g.beginPath(); g.ellipse(x, y, 9, 9 * Math.abs(Math.cos(t * 5 + i)) + 1.5, 0, 0, 7); g.fill();
+    }
+  }
+  const mist = seg(t, C.lost - 0.4, C.lost + 1.5);
+  for (let i = 0; i < 8 && mist > 0; i++) {
+    const x = ((i * 330 + t * (26 + i * 5)) % 2700) - 380, y = 430 + (i % 3) * 170;
+    soft(x, y, 420, [150, 150, 168], 0.16 * mist);
+  }
+}
+
+// ======================================================================
+// Scene 5: years pass, the Empire grows
+// ======================================================================
+const AD_WORDS = { tr: ["REKLAM", "TIKLA", "SPONSORLU", "%70 İNDİRİM", "KAMPANYA", "ÜCRETSİZ", "HEMEN AL", "ÇEREZLERİ KABUL ET"],
+  en: ["AD", "CLICK HERE", "SPONSORED", "70% OFF", "LIMITED DEAL", "FREE", "BUY NOW", "ACCEPT ALL COOKIES"] };
+// Ads sit in a grid, so they cover the city without colliding.
+const ADS = (() => {
+  const r = rng(5), out = [], cols = 5, rows = 4;
+  for (let row = 0; row < rows; row++) for (let c = 0; c < cols; c++) {
+    if ((row === 1 || row === 2) && c === 2) continue; // keep the tower's face clear
+    out.push({ x: 250 + c * 355 + (r() - 0.5) * 40, y: 250 + row * 120 + (r() - 0.5) * 16, i: (row * 3 + c) % 8, d: r() * 1.4, red: r() > 0.5 });
+  }
+  return out;
+})();
+const SKYLINE = (() => { const r = rng(8), o = []; for (let i = 0; i < 24; i++) o.push([i * 82 - 10 + r() * 20, 140 + r() * 260, 56 + r() * 26, r()]); return o; })();
+function sYears(t) {
+  const a = C.years - 0.3;
+  const dayNight = env(t, a, C.grew + 0.4, 0.3, 0.5);
+  skyGrad([30, 8, 14], [110, 30, 34]);
+  if (dayNight > 0) {
+    wash((Math.sin((t - a) * 12) * 0.5 + 0.5) * 0.18 * dayNight, [255, 150, 120]);
+    const an = (t - a) * 6;
+    const sx = W / 2 + Math.cos(an) * 860, sy = 900 - Math.abs(Math.sin(an)) * 700;
+    g.fillStyle = rgba([255, 214, 170], 0.8 * dayNight); g.beginPath(); g.arc(sx, sy, 22, 0, 7); g.fill();
+  }
+  const yc = env(t, a, C.market, 0.3, 0.5);
+  if (yc > 0) {
+    g.save();
+    g.font = `300 132px ${SANS}`; g.textAlign = "center"; g.fontVariantNumeric = "tabular-nums";
+    g.fillStyle = rgba(CREAM, 0.8 * yc);
+    g.fillText(String(Math.round(lerp(2008, 2026, eio(seg(t, a + 0.2, C.grew + 0.6))))), W / 2, 220);
+    g.restore();
+  }
+  const grow = seg(t, a, C.grew + 1.4);
+  ridge(3, 840, 30, [44, 14, 22]);
+  SKYLINE.forEach(([x, h, w, k]) => {
+    const hh = h * eio(clamp(grow * 1.6 - k * 0.6)) * (1 + seg(t, C.grew, C.grew + 1.4) * 0.5);
+    if (hh < 2) return;
+    g.fillStyle = "#1a0810"; g.fillRect(x, 840 - hh, w, hh);
+    g.fillStyle = "rgba(214,50,64,0.5)";
+    for (let yy = 840 - hh + 14; yy < 828; yy += 24) for (let xx = x + 9; xx < x + w - 12; xx += 16) {
+      if (Math.sin(xx * 3.1 + yy * 7.3) > 0.1) g.fillRect(xx, yy, 7, 10);
+    }
+  });
+  // The tower.
+  const th = kf(t, [[a, 300], [C.grew, 420], [C.grew + 1.4, 600]]);
+  const bw = lerp(250, 340, seg(t, C.grew, C.grew + 1.4)), tw = bw * 0.4, base = 860, topY = base - th;
+  soft(W / 2, topY, 700, RED, 0.25);
+  const tg = g.createLinearGradient(W / 2 - bw / 2, 0, W / 2 + bw / 2, 0);
+  tg.addColorStop(0, "#2a0c16"); tg.addColorStop(0.5, "#1a0810"); tg.addColorStop(1, "#10050a");
+  g.fillStyle = tg;
+  poly([[W / 2 - bw / 2, base], [W / 2 - tw / 2, topY], [W / 2 + tw / 2, topY], [W / 2 + bw / 2, base]]); g.fill();
+  for (let yy = topY + 28; yy < base - 12; yy += 34) {
+    const ww = lerp(tw, bw, (yy - topY) / th) - 36;
+    g.fillStyle = "rgba(214,50,64,0.75)"; g.fillRect(W / 2 - ww / 2, yy, ww, 4);
+  }
+  const eyeY = topY - 80;
+  drawEmblem(W / 2, eyeY, 0.7, 1, t);
+  g.fillStyle = "#0a0306"; g.fillRect(0, 840, W, H - 840);
+  // Ads.
+  const adA = env(t, C.market - 0.1, C.unsafe + 0.3, 0.2, 0.5);
+  if (adA > 0) {
+    g.save(); g.textAlign = "center"; g.textBaseline = "middle";
+    for (const ad of ADS) {
+      const p = eo(seg(t, C.market + ad.d, C.market + ad.d + 0.25));
+      if (p <= 0) continue;
+      const word = AD_WORDS[lang === "en" ? "en" : "tr"][ad.i];
+      let fs = 26;
+      g.font = `700 ${fs}px ${SANS}`;
+      while (g.measureText(word).width > 260 && fs > 14) { fs -= 1; g.font = `700 ${fs}px ${SANS}`; }
+      g.save(); g.translate(ad.x, ad.y); g.scale(p, p); g.globalAlpha = adA;
+      g.fillStyle = ad.red ? "#d6323f" : "#f0c043";
+      g.beginPath(); g.roundRect(-150, -32, 300, 64, 8); g.fill();
+      g.fillStyle = ad.red ? "#fff3f0" : "#2a0a0e";
+      g.fillText(word, 0, 2);
+      g.restore();
+    }
+    g.restore();
+  }
+  // People become products.
+  const pa = env(t, C.market + 0.3, C.dark + 1, 0.5, 1);
+  if (pa > 0) {
+    const sx = lerp(-100, W + 100, seg(t, C.product - 0.3, C.unsafe - 0.3));
+    g.save(); g.globalAlpha = pa;
+    if (sx > -50 && sx < W + 50) {
+      const gr = g.createLinearGradient(W / 2, eyeY, sx, 920);
+      gr.addColorStop(0, rgba(RED, 0.45)); gr.addColorStop(1, rgba(RED, 0.1));
+      g.fillStyle = gr;
+      g.beginPath(); g.moveTo(W / 2, eyeY); g.lineTo(sx - 50, 1000); g.lineTo(sx + 50, 1000); g.closePath(); g.fill();
+    }
+    for (let i = 0; i < 21; i++) {
+      const x = 80 + i * 88, y = 930;
+      if (x > sx) {
+        g.fillStyle = rgba(CREAM, 0.8);
+        g.beginPath(); g.arc(x, y - 26, 12, 0, 7); g.fill();
+        g.beginPath(); g.ellipse(x, y + 10, 22, 22, 0, Math.PI, 0); g.fill();
+      } else {
+        // A price tag.
+        g.save(); g.translate(x, y - 50); g.rotate(Math.sin(t * 3 + i) * 0.12);
+        g.strokeStyle = rgba(CREAM, 0.5); g.lineWidth = 1.5; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, 14); g.stroke();
+        g.fillStyle = rgba(RED, 0.95);
+        g.beginPath(); g.moveTo(0, 12); g.lineTo(16, 26); g.lineTo(16, 66); g.lineTo(-16, 66); g.lineTo(-16, 26); g.closePath(); g.fill();
+        g.fillStyle = "#0a0306"; g.beginPath(); g.arc(0, 26, 3.5, 0, 7); g.fill();
+        g.fillStyle = "rgba(255,240,236,0.85)"; g.fillRect(-9, 40, 18, 3); g.fillRect(-9, 48, 12, 3);
+        g.restore();
+      }
+    }
+    g.restore();
+  }
+  // Neither free nor safe: the two values crack apart.
+  const br = env(t, C.unsafe - 0.05, C.dark + 1, 0.15, 1.2);
+  if (br > 0) {
+    const sp = eo(seg(t, C.unsafe + 0.9, C.dark + 1));
+    for (const [k, x] of [[2, W / 2 - 330], [1, W / 2 + 330]]) for (const side of [-1, 1]) {
+      g.save();
+      g.beginPath(); g.rect(side < 0 ? x - 200 : x, 0, 200, H); g.clip();
+      g.translate(side * sp * 60, sp * sp * 280);
+      g.translate(x, 470); g.rotate(side * sp * 0.35); g.translate(-x, -470);
+      drawValue(k, x, 470, 2.6, br, [240, 90, 96]);
+      g.restore();
+    }
+  }
+  black(seg(t, C.dark - 0.2, C.dark + 1.0));
+}
+
+// ======================================================================
+// Scene 6: the frozen sea, the ember and the beam
+// ======================================================================
+const ICE_X = 1040, ICE_Y = 724;
+const ICE_PTS = [[-250, 0], [-226, -150], [-146, -300], [-56, -360], [10, -420], [92, -330], [190, -276], [240, -140], [270, 0]];
+const ICE_CORE = [-30, -150];
+const EMBER_AT = [-120, -170];
+const CRACKS = (() => {
+  const r = rng(13), out = [];
+  const grow = (x, y, an, len, depth, t0) => {
+    const x2 = x + Math.cos(an) * len, y2 = y + Math.sin(an) * len;
+    out.push([x, y, x2, y2, t0, t0 + 0.25]);
+    if (depth > 0) for (let i = 0; i < 2; i++) grow(x2, y2, an + (r() - 0.5) * 1.4, len * 0.72, depth - 1, t0 + 0.22);
+  };
+  for (let i = 0; i < 6; i++) grow(EMBER_AT[0], EMBER_AT[1], i * Math.PI / 3 + 0.3, 64, 3, 0);
+  return out;
+})();
+const SHARDS = (() => { const r = rng(2), o = []; for (let i = 0; i < 36; i++) o.push([(r() - 0.5) * 400, -r() * 380, (r() - 0.5) * 900, -200 - r() * 700, r() * 6]); return o; })();
+function drawBoat(t, bx, by, standT) {
+  const row = Math.sin(t * 3);
+  // Lantern on a pole.
+  g.strokeStyle = rgba(SIL); g.lineWidth = 5; g.lineCap = "round";
+  g.beginPath(); g.moveTo(bx - 150, by - 10); g.lineTo(bx - 170, by - 170); g.lineTo(bx - 140, by - 176); g.stroke();
+  soft(bx - 140, by - 154, 120, [255, 214, 150], 0.4);
+  g.fillStyle = "#ffd696"; g.beginPath(); g.roundRect(-9 + bx - 140, by - 166, 18, 24, 4); g.fill();
+  const sit = s => P(0.15, [1.2 + s * 0.4, 1.6 + s * 0.3], [1.0 + s * 0.4, 1.4 + s * 0.3], [1.35, 0.2], [1.45, 0.3], 42);
+  const reach = poseAt(t - standT, [[0, sit(0)], [0.5, STAND], [1.0, P(0.08, [-0.2, -0.1], [1.9, 2.1], [-0.12, 0], [0.12, 0])]]);
+  figure(bx - 80, by - 8, 1.15, sit(row), { sash: [128, 196, 240], t, rim: [255, 214, 150] });
+  const standing = t > standT;
+  figure(bx + 80, by - 8, 1.2, standing ? reach : sit(-row), { sash: HILAL, t: t + 1, rim: [255, 214, 150] });
+  if (!standing) {
+    g.strokeStyle = "#2a1c12"; g.lineWidth = 6;
+    g.beginPath(); g.moveTo(bx - 40 + row * 30, by - 80); g.lineTo(bx - 90 - row * 50, by + 40); g.stroke();
+  }
+  g.fillStyle = "#1e140d";
+  g.beginPath(); g.moveTo(bx - 220, by - 26); g.quadraticCurveTo(bx - 190, by + 22, bx - 110, by + 24); g.lineTo(bx + 150, by + 24);
+  g.quadraticCurveTo(bx + 210, by + 16, bx + 236, by - 26); g.closePath(); g.fill();
+  g.fillStyle = "rgba(255,214,150,0.35)"; g.fillRect(bx - 206, by - 22, 430, 3);
+}
+function sIce(t) {
+  const tilt = kf(t, [[C.beam - 0.2, 0], [C.sky + 0.6, 720]]);
+  const push = lerp(1, 1.08, eio(seg(t, C.found, C.crack)));
+  skyGrad(NIGHT0, NIGHT1, -tilt, H - tilt);
+  g.save();
+  g.translate(0, tilt);
+  stars(t, 0.9, -tilt * 0.4 - 120, SEA_Y);
+  // Aurora.
+  for (let b = 0; b < 3; b++) {
+    g.beginPath();
+    for (let x = 0; x <= W; x += 30) {
+      const y = 190 + b * 50 + Math.sin(x * 0.003 + t * 0.35 + b) * 60 + Math.sin(x * 0.009 - t * 0.5) * 18;
+      x ? g.lineTo(x, y) : g.moveTo(x, y);
+    }
+    g.strokeStyle = rgba([[110, 230, 200], [150, 200, 240], [170, 160, 236]][b], 0.08);
+    g.lineWidth = 60 - b * 14; g.stroke();
+  }
+  // The Empire's searchlight sweeps past and misses it.
+  const sl = env(t, C.forgot - 0.3, C.code + 0.6, 0.5, 0.6);
+  if (sl > 0) {
+    const an = lerp(-2.25, -0.95, seg(t, C.forgot - 0.3, C.code + 0.6));
+    const ox = 1880, oy = SEA_Y - 20;
+    const gr = g.createLinearGradient(ox, oy, ox + Math.cos(an) * 1800, oy + Math.sin(an) * 1800);
+    gr.addColorStop(0, rgba(RED, 0.35 * sl)); gr.addColorStop(1, rgba(RED, 0));
+    g.fillStyle = gr;
+    g.beginPath(); g.moveTo(ox, oy);
+    g.lineTo(ox + Math.cos(an - 0.045) * 2000, oy + Math.sin(an - 0.045) * 2000);
+    g.lineTo(ox + Math.cos(an + 0.045) * 2000, oy + Math.sin(an + 0.045) * 2000); g.fill();
+    g.fillStyle = rgba(RED, sl); g.beginPath(); g.arc(ox, oy, 6, 0, 7); g.fill();
+  }
+  g.save();
+  g.translate(ICE_X, ICE_Y); g.scale(push, push); g.translate(-ICE_X, -ICE_Y);
+  const sea = g.createLinearGradient(0, SEA_Y, 0, H + 200);
+  sea.addColorStop(0, rgba([14, 28, 60])); sea.addColorStop(1, rgba([3, 7, 18]));
+  g.fillStyle = sea; g.fillRect(-200, SEA_Y, W + 400, H + 400);
+  waterLines(t, SEA_Y, H + 100, HILAL, 0.1);
+  g.fillStyle = "rgba(150,190,225,0.22)";
+  for (const [x, w] of [[220, 170], [520, 90], [1520, 150], [1780, 110]]) {
+    poly([[x - w / 2, SEA_Y + 4], [x - w / 3, SEA_Y - 16], [x + w / 4, SEA_Y - 22], [x + w / 2, SEA_Y + 4]]); g.fill();
+  }
+  const burst = seg(t, C.beam - 0.05, C.beam + 0.5);
+  const pulse = 0.5 + 0.5 * Math.sin(t * 2.2);
+  const flare = env(t, C.code - 0.05, C.code + 2.2, 0.08, 1.8);
+  const heat = clamp(seg(t, C.forgot, C.code) * 0.35 + flare * 0.65 + seg(t, C.crack, C.beam) * 0.6);
+  if (burst < 1) {
+    g.save();
+    g.globalAlpha = 1 - burst;
+    g.translate(ICE_X, ICE_Y);
+    // Reflection.
+    g.save(); g.scale(1, -0.32); g.globalAlpha *= 0.18; poly(ICE_PTS); g.fillStyle = rgba(HILAL); g.fill(); g.restore();
+    // Faceted ice: triangles fanned from a core point, in three tones.
+    const tones = ["#cfe8f8", "#a9d2ee", "#86b6dc", "#b9ddf3", "#9cc8e8", "#7aa8d2", "#c4e3f6", "#93c0e4"];
+    for (let i = 0; i < ICE_PTS.length - 1; i++) {
+      poly([ICE_CORE, ICE_PTS[i], ICE_PTS[i + 1]]); g.fillStyle = tones[i % tones.length]; g.fill();
+    }
+    poly([ICE_CORE, ICE_PTS[ICE_PTS.length - 1], ICE_PTS[0]]); g.fillStyle = "#6f9cc8"; g.fill();
+    g.save(); poly(ICE_PTS); g.clip();
+    // Old code, frozen: short lines like the text in a page.
+    g.fillStyle = "rgba(30,70,120,0.28)";
+    const r = rng(17);
+    for (let i = 0; i < 16; i++) g.fillRect(-200 + r() * 60, -380 + i * 22, 60 + r() * 220, 5);
+    // The ember: the Fox's warm fire, in the shape of the mark.
+    soft(EMBER_AT[0], EMBER_AT[1], 110 + 60 * heat, AMBER, 0.45 + 0.35 * heat * pulse);
+    logoPath(EMBER_AT[0], EMBER_AT[1], 64);
+    g.fillStyle = rgba(mixc(AMBER, [255, 236, 200], heat * 0.6)); g.fill("evenodd");
+    if (t > C.crack + 0.8) {
+      const ct = t - (C.crack + 0.8);
+      g.strokeStyle = "rgba(255,246,220,0.95)"; g.lineWidth = 3; g.lineCap = "round";
+      for (const [x0, y0, x1, y1, t0, t1] of CRACKS) {
+        const p = seg(ct, t0 * 2.4, t1 * 2.4);
+        if (p <= 0) continue;
+        g.beginPath(); g.moveTo(x0, y0); g.lineTo(lerp(x0, x1, p), lerp(y0, y1, p)); g.stroke();
+      }
+    }
+    g.restore();
+    g.restore();
+  }
+  if (flare > 0) {
+    g.strokeStyle = rgba(AMBER, 0.45 * (1 - seg(t, C.code, C.code + 1.4))); g.lineWidth = 2.5;
+    g.beginPath(); g.arc(ICE_X + EMBER_AT[0], ICE_Y + EMBER_AT[1], Math.max(1, (t - C.code) * 760), 0, 7); g.stroke();
+  }
+  const bx = lerp(-340, ICE_X - 500, eo(seg(t, C.found - 0.3, C.frozen + 0.8)));
+  if (bx > -320) drawBoat(t, bx, SEA_Y + 72 + Math.sin(t * 1.5) * 4, C.crack);
+  if (burst > 0 && burst < 1) {
+    for (const [x, y, vx, vy, sp] of SHARDS) {
+      g.save(); g.translate(ICE_X + x + vx * burst, ICE_Y + y + vy * burst + 400 * burst * burst); g.rotate(sp * burst * 4);
+      g.fillStyle = rgba(HILAL, 1 - burst); poly([[0, -14], [9, 8], [-9, 6]]); g.fill();
+      g.restore();
+    }
+  }
+  g.restore();
+  // The beam.
+  const beam = env(t, C.beam - 0.05, C.hilal + 0.5, 0.15, 0.7);
+  const bx2 = ICE_X + EMBER_AT[0] * push, by2 = ICE_Y + EMBER_AT[1] * push;
+  if (beam > 0) {
+    const top = -tilt - 400;
+    const gr = g.createLinearGradient(bx2 - 80, 0, bx2 + 80, 0);
+    gr.addColorStop(0, rgba(HILAL, 0)); gr.addColorStop(0.5, rgba([236, 246, 255], 0.95 * beam)); gr.addColorStop(1, rgba(HILAL, 0));
+    g.fillStyle = gr; g.fillRect(bx2 - 80, top, 160, by2 - top);
+    soft(bx2, by2, 260, HILAL, 0.6 * beam);
+    wash(0.5 * (1 - seg(t, C.beam, C.beam + 0.5)) * seg(t, C.beam - 0.05, C.beam), [236, 246, 255]);
+  }
+  g.restore();
+  // The new light in the sky, in screen space after the tilt.
+  const mx = bx2, my = 360;
+  const gather = seg(t, C.sky - 0.6, C.hilal);
+  if (gather > 0 && t < C.hilal + 0.2) soft(mx, my, 80 + 160 * gather, HILAL, 0.7 * gather * (1 - seg(t, C.hilal - 0.1, C.hilal + 0.2)));
+  const born = eo(seg(t, C.hilal - 0.1, C.hilal + 0.4));
+  if (born > 0) {
+    drawLogo(mx, my, lerp(220, 300, born), born, HILAL, 0.35 + 0.4 * env(t, C.hilal - 0.1, C.hilal + 2.2, 0.1, 2.0));
+    wash(0.4 * (1 - seg(t, C.hilal, C.hilal + 0.7)) * born, [236, 246, 255]);
+    g.save();
+    g.font = `600 112px ${SANS}`; g.textAlign = "center";
+    g.fillStyle = rgba(CREAM, seg(t, C.hilal + 0.2, C.hilal + 0.9));
+    g.fillText("Hilal", mx, my + 310);
+    g.restore();
+  }
+}
+
+// ======================================================================
+// Scene 7: still learning
+// ======================================================================
+function sLearn(t) {
+  const pan = kf(t, [[C.notyet - 0.3, 0], [C.notyet + 1.4, 1]]);
+  skyGrad(NIGHT0, NIGHT2);
+  const mx = 1380, my = 270;
+  g.save();
+  g.translate(0, pan * 560);
+  stars(t, 0.9, -300, SEA_Y);
+  drawLogo(mx, my - pan * 440, 300, 1);
+  ghostMoon(mx, my - pan * 440, 300, env(t, C.notyet - 0.1, C.believe + 1, 0.8, 0.6));
+  ridge(5, SEA_Y - 30, 30, [24, 36, 76]);
+  const sea = g.createLinearGradient(0, SEA_Y, 0, H + 400);
+  sea.addColorStop(0, rgba([18, 32, 70])); sea.addColorStop(1, rgba([4, 8, 20]));
+  g.fillStyle = sea; g.fillRect(-50, SEA_Y, W + 100, H + 600);
+  for (let i = 0; i < 8; i++) {
+    g.fillStyle = rgba(HILAL, 0.3 - i * 0.03);
+    g.fillRect(mx - 70 + Math.sin(t * 1.6 + i) * 18, SEA_Y + 16 + i * 26, 140 - i * 10, 3);
+  }
+  g.fillStyle = rgba(SIL);
+  g.beginPath(); g.moveTo(-50, H + 600); g.lineTo(-50, 830); g.quadraticCurveTo(400, 800, 660, 850); g.quadraticCurveTo(900, 880, 1180, H + 600); g.fill();
+  // The young keeper tries the move and fumbles it.
+  const e = t - C.learn;
+  const pose = poseAt(e, [[0, STAND], [0.4, P(0.28, [-0.4, -0.2], [-0.1, 0], [-0.55, 0.2], [0.55, -0.1], 24)],
+    [0.75, P(-0.08, [2.8, 3.0], [3.4, 3.3], [-0.1, 0], [0.18, 0], 0)],
+    [1.3, P(-0.22, [-1.0, -0.5], [1.2, 0.7], [-0.3, 0], [0.4, 0.2], 6)],
+    [2.0, P(0.04, [-0.15, -0.08], [2.4, -2.3], [-0.1, 0], [0.1, 0], 0)]]);
+  const f = figure(700, 848, 1.5, pose, { sash: HILAL, t, mark: HILAL, rim: HILAL });
+  const age = e - 0.7;
+  if (age > 0) {
+    const hx = (f.lh[0] + f.rh[0]) / 2, hy = (f.lh[1] + f.rh[1]) / 2;
+    soft(hx, hy, 70, VCOL[2], 0.5 * (1 - seg(age, 0, 0.6)));
+    bird(hx + age * 260, hy - age * 300, 14, Math.sin(t * 14), VCOL[2], 1 - seg(age, 1.2, 1.8));
+    const fy = Math.min(hy + 150, hy - 60 * age + 300 * age * age);
+    bird(hx - 20 + age * 40, fy, 11, Math.sin(t * 20) * (1 - seg(age, 0.5, 0.9)), VCOL[2], 1 - seg(age, 1.0, 1.6));
+  }
+  g.restore();
+}
+
+// ======================================================================
+// Scene 8: belief, and the end card
+// ======================================================================
+function sBelieve(t) {
+  const dawn = seg(t, C.believe, C.end + 1);
+  skyGrad(mixc(NIGHT0, [16, 26, 66], dawn), mixc(NIGHT2, [206, 150, 132], dawn));
+  stars(t, 0.8 * (1 - dawn * 0.7), -200, SEA_Y);
+  const mx = 1300, my = lerp(420, 340, eo(seg(t, C.believe - 0.3, C.believe + 2)));
+  drawLogo(mx, my, 330, 1, HILAL, 0.35 + 0.25 * env(t, C.return[3], C.return[3] + 2, 0.2, 1.5));
+  for (let k = 0; k < 4; k++) {
+    const r = C.return[k], a = eo(seg(t, r, r + 0.8));
+    if (a <= 0) continue;
+    const an = -Math.PI / 2 + k * Math.PI / 2 + (t - r) * 0.22;
+    const x = mx + Math.cos(an) * 300, y = my + Math.sin(an) * 210;
+    soft(x, y, 90, VCOL[k], 0.5 * (1 - seg(t, r, r + 0.8)));
+    drawValue(k, x, y, 0.75, a, VCOL[k]);
+  }
+  ridge(6, SEA_Y - 26, 26, mixc([24, 36, 76], [90, 70, 90], dawn));
+  const sea = g.createLinearGradient(0, SEA_Y, 0, H);
+  sea.addColorStop(0, rgba(mixc([18, 32, 70], [120, 96, 110], dawn))); sea.addColorStop(1, rgba([6, 10, 24]));
+  g.fillStyle = sea; g.fillRect(-50, SEA_Y, W + 100, H);
+  waterLines(t, SEA_Y, H, mixc(HILAL, [255, 214, 180], dawn), 0.14);
+  g.save();
+  g.translate(W / 2, SEA_Y); g.scale(0.5, 0.5); g.translate(-W / 2, -SEA_Y);
+  drawIsles(t, -500, { land: [10, 16, 38], mark: [20, 30, 64], bridges: seg(t, C.return[2], C.return[3] + 1) });
+  ISLES.forEach((s, i) => {
+    const at = C.return[0] + 0.6 + i * 0.18;
+    drawWindow(s.x - 500, isleTop(i) - 170 + Math.sin(t * 1.2 + i) * 6, 1.1, HUES[i], eo(seg(t, at, at + 0.6)));
+  });
+  g.restore();
+  g.fillStyle = rgba(SIL);
+  g.beginPath(); g.moveTo(-50, H + 50); g.lineTo(-50, 650); g.quadraticCurveTo(380, 640, 560, 720); g.lineTo(640, H + 50); g.fill();
+  const pose = poseAt(t - C.believe, [[0.3, STAND], [1.4, P(-0.05, [-0.15, -0.08], [2.3, 2.4], [-0.1, 0], [0.1, 0])]]);
+  figure(440, 684, 2.0, pose, { sash: HILAL, t, mark: HILAL, rim: mixc(HILAL, [255, 200, 170], dawn) });
+  const ec = seg(t, C.end + 0.6, C.end + 1.8);
+  if (ec > 0) {
+    g.fillStyle = rgba([4, 7, 15], ec); g.fillRect(-60, -60, W + 120, H + 120);
+    drawLogo(W / 2, 400, 260, ec, HILAL, 0.3);
+    const en = lang === "en";
+    const n1 = "Hilal", n2 = en ? "Browser" : "Tarayıcı";
+    g.save();
+    g.font = `600 96px ${SANS}`; const w1 = g.measureText(n1).width;
+    g.font = `300 96px ${SANS}`; const w2 = g.measureText(n2).width;
+    const x0 = W / 2 - (w1 + 28 + w2) / 2;
+    g.fillStyle = rgba(CREAM, ec);
+    g.font = `600 96px ${SANS}`; g.fillText(n1, x0, 720);
+    g.font = `300 96px ${SANS}`; g.fillText(n2, x0 + w1 + 28, 720);
+    g.textAlign = "center";
+    g.font = `400 32px ${SANS}`; g.fillStyle = rgba(CREAM, 0.7 * ec);
+    g.fillText(en ? "Open source. Private. For everyone." : "Açık kaynak. Gizliliğe saygılı. Herkesin.", W / 2, 796);
+    g.font = `400 26px ${SANS}`; g.fillStyle = rgba(HILAL, 0.9 * ec);
+    g.fillText("github.com/VastSea0/hilal-browser", W / 2, 856);
+    g.restore();
+  }
+}
+
+// ======================================================================
+// Scenes in order. Each fades in from the previous one at `a` over `fade`.
+// ======================================================================
+const SCENES = [
+  { a: 0, fade: 0, draw: sValues },
+  { a: C.harmony - 0.3, fade: 0.4, draw: sHarmony },
+  { a: C.attack + 0.3, fade: 0, draw: sAttack },
+  { a: C.fox - 0.5, fade: 0.7, draw: sFox },
+  { a: C.years - 0.3, fade: 0.6, draw: sYears },
+  { a: C.dark + 1.0, fade: 1.4, draw: sIce },
+  { a: C.learn - 0.4, fade: 0.7, draw: sLearn },
+  { a: C.believe - 0.4, fade: 0.8, draw: sBelieve },
+];
+const main = g;
+const buf = document.createElement("canvas");
+buf.width = W; buf.height = H;
+const bufG = buf.getContext("2d");
+function drawScene(s, t, alpha) {
+  if (alpha >= 1) { g.save(); s.draw(t); g.restore(); return; }
+  g = bufG;
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.clearRect(0, 0, W, H);
+  g.save(); s.draw(t); g.restore();
+  g = main;
+  g.save(); g.globalAlpha = alpha; g.drawImage(buf, 0, 0); g.restore();
+}
+
+// ---------- captions ----------
+const CAPS = (() => {
+  const all = TL.lines.flat();
+  return all.map((u, i) => ({ start: u.start, end: Math.min(u.end + 0.6, all[i + 1] ? all[i + 1].start - 0.05 : 1e9), tr: u.tr, en: u.en }));
+})();
+function drawCaption(t) {
+  if (lang === "off") return;
+  const cap = CAPS.find(c => t >= c.start && t < c.end);
+  if (!cap) return;
+  const text = cap[lang === "en" ? "en" : "tr"];
+  const a = Math.min(seg(t, cap.start, cap.start + 0.15), 1 - seg(t, cap.end - 0.2, cap.end));
+  g.save();
+  g.font = `500 40px ${SANS}`; g.textAlign = "center";
+  const words = text.split(" "), lines = [];
+  let cur = "";
+  for (const w of words) {
+    const next = cur ? cur + " " + w : w;
+    if (g.measureText(next).width > 1380 && cur) { lines.push(cur); cur = w; } else cur = next;
+  }
+  lines.push(cur);
+  // A soft dark band behind the text, no boxes.
+  const band = g.createLinearGradient(0, H - 200, 0, H);
+  band.addColorStop(0, "rgba(0,0,0,0)"); band.addColorStop(1, `rgba(0,0,0,${0.5 * a})`);
+  g.fillStyle = band; g.fillRect(0, H - 200, W, 200);
+  const lh = 54, base = H - 66 - (lines.length - 1) * lh;
+  g.shadowColor = "rgba(0,0,0,0.8)"; g.shadowBlur = 10; g.shadowOffsetY = 2;
+  g.fillStyle = rgba(CREAM, a);
+  lines.forEach((l, i) => g.fillText(l, W / 2, base + i * lh));
+  g.restore();
+}
+
+function render(t) {
+  g = main;
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.fillStyle = "#000"; g.fillRect(0, 0, W, H);
+  let cur = 0;
+  for (let i = 0; i < SCENES.length; i++) if (t >= SCENES[i].a) cur = i;
+  const s = SCENES[cur];
+  const x = s.fade ? seg(t, s.a, s.a + s.fade) : 1;
+  if (x < 1 && cur > 0) drawScene(SCENES[cur - 1], t, 1);
+  drawScene(s, t, x);
+  vignette();
+  grain(t);
+  black(Math.max(1 - seg(t, 0, 0.8), seg(t, TL.duration - 1.4, TL.duration)));
+  drawCaption(t);
+}
+window.renderAt = render;
+window.STORY_DURATION = TL.duration;
+
+// ---------- player ----------
+const audio = document.getElementById("audio");
+const stage = document.getElementById("stage");
+const start = document.getElementById("start");
+const pp = document.getElementById("pp"), ppi = document.getElementById("ppi");
+const seek = document.getElementById("seek"), time = document.getElementById("time");
+const cc = document.getElementById("cc"), fs = document.getElementById("fs");
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+const LANG_LABEL = { tr: "TR", en: "EN", off: "ALTYAZI YOK" };
+let seeking = false;
+function setPaused(p) {
+  stage.classList.toggle("paused", p);
+  ppi.setAttribute("d", p ? "M7 5l12 7-12 7z" : "M6 5h4v14H6zM14 5h4v14h-4z");
+  pp.setAttribute("aria-label", p ? "Oynat" : "Duraklat");
+}
+function loop() {
+  const t = audio.currentTime;
+  render(t);
+  if (!seeking) seek.value = String(Math.round((t / TL.duration) * 1000));
+  time.textContent = fmt(t);
+  requestAnimationFrame(loop);
+}
+start.addEventListener("click", () => { start.hidden = true; audio.currentTime = 0; audio.play(); });
+pp.addEventListener("click", () => (audio.paused ? audio.play() : audio.pause()));
+audio.addEventListener("play", () => setPaused(false));
+audio.addEventListener("pause", () => setPaused(true));
+audio.addEventListener("ended", () => setPaused(true));
+seek.addEventListener("input", () => { seeking = true; audio.currentTime = (seek.value / 1000) * TL.duration; });
+seek.addEventListener("change", () => { seeking = false; });
+cc.addEventListener("click", () => { lang = { tr: "en", en: "off", off: "tr" }[lang]; cc.textContent = LANG_LABEL[lang]; });
+fs.addEventListener("click", () => (document.fullscreenElement ? document.exitFullscreen() : stage.requestFullscreen()));
+document.addEventListener("keydown", e => { if (e.code === "Space" && start.hidden) { e.preventDefault(); pp.click(); } });
+cc.textContent = LANG_LABEL[lang];
+if (params.has("export")) {
+  document.body.classList.add("export");
+  render(0);
+} else {
+  if (params.has("t")) audio.currentTime = Number(params.get("t"));
+  requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
