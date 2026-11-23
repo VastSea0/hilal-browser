@@ -29,16 +29,14 @@ flatpak install --user -y flathub org.flatpak.Builder
 Build directly from the published release manifest and export an OSTree repo:
 
 ```bash
-flatpak run --user org.flatpak.Builder --user --install-deps-from=flathub --install --force-clean \
-  --mirror-screenshots-url=https://dl.flathub.org/media \
-  flatpak-build io.github.VastSea0.hilal-browser.yml
+flatpak run --user --command=flathub-build org.flatpak.Builder --install io.github.VastSea0.hilal-browser.yml
 ```
 
-Run Flathub's official linter against both the manifest and the builddir:
+Run Flathub's official linter against both the manifest and the exported repo:
 
 ```bash
 flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.VastSea0.hilal-browser.yml
-flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder builddir flatpak-build
+flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder repo repo
 ```
 
 Run the installed build:

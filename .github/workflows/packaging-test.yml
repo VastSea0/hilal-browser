@@ -160,17 +160,16 @@ jobs:
           set -euo pipefail
           jq empty flathub.json
           flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.VastSea0.hilal-browser.yml
-      - name: Build and lint builddir
+      - name: Build and lint with flathub-build
         run: |
           set -euo pipefail
           flatpak install --user -y flathub \
             org.freedesktop.Platform//25.08 \
             org.freedesktop.Sdk//25.08 \
             org.mozilla.firefox.BaseApp//25.08
-          dbus-run-session -- flatpak run --user org.flatpak.Builder --user --install --force-clean \
-            --mirror-screenshots-url=https://dl.flathub.org/media \
-            --disable-rofiles-fuse flatpak-build io.github.VastSea0.hilal-browser.yml
-          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder builddir flatpak-build
+          dbus-run-session -- flatpak run --user --command=flathub-build org.flatpak.Builder \
+            --install --disable-rofiles-fuse io.github.VastSea0.hilal-browser.yml
+          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder repo repo
       - name: Check the installed Flatpak
         run: |
           set -euo pipefail

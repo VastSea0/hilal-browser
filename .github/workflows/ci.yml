@@ -352,13 +352,12 @@ jobs:
             org.freedesktop.Platform//25.08 \
             org.freedesktop.Sdk//25.08 \
             org.mozilla.firefox.BaseApp//25.08
-          dbus-run-session -- flatpak run --user org.flatpak.Builder --user --install --force-clean \
-            --mirror-screenshots-url=https://dl.flathub.org/media \
-            --disable-rofiles-fuse flatpak-build flatpak-test.yml
+          dbus-run-session -- flatpak run --user --command=flathub-build org.flatpak.Builder \
+            --install --disable-rofiles-fuse flatpak-test.yml
 
-      - name: Lint Flatpak builddir
+      - name: Lint Flatpak repo
         run: |
-          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder builddir flatpak-build
+          flatpak run --user --command=flatpak-builder-lint org.flatpak.Builder repo repo
 
       - name: UI smoke inside the Flatpak
         run: |
