@@ -627,6 +627,90 @@ def main():
         check("Add-ons page has the Material look", bool(addons_look and addons_look["card"] == "24px" and addons_look["primary"]), addons_look)
         m.script("gBrowser.removeTab(gBrowser.selectedTab, {animate: false})")
 
+        # Workspaces: tabs of the other workspace leave the shell's tab list
+        # and come back when switching back.
+        ws = m.script("""
+          const mgr = gHilalWorkspaces;
+          const first = mgr._activeId;
+          window._smokeTab = gBrowser.selectedTab;
+          mgr.create("Smoke");
+          return { first, second: mgr._activeId };
+        """)
+        in_list_js = "[...document.querySelectorAll('#hilal-tab-list > :not(.hilal-tab-leaving)')].some(e => e._tab == window._smokeTab)"
+        switched = ws["second"] != ws["first"] and wait_for(m, f"""
+          return gHilalWorkspaces._activeId == {json.dumps(ws["second"])} &&
+            window._smokeTab.hidden && !{in_list_js};
+        """, 10)
+        m.screenshot(out / "09-workspace-second.png")
+        check("switching workspaces hides the other workspace's tabs", switched, ws)
+        m.script("gHilalWorkspaces.switchTo(arguments[0])", [ws["first"]])
+        back = wait_for(m, f"return !window._smokeTab.hidden && {in_list_js}", 10)
+        check("switching back shows its tabs again", back)
+        m.script("window._smokeTab = null")
+        m.script("return gHilalWorkspaces.remove(arguments[0])", [ws["second"]])
+        check("workspace is removed", wait_for(m, "return gHilalWorkspaces._workspaces.length == 1", 10))
+
+        # Extra windows: the shell has to start in a second and in a private
+        # window, their tabs must settle (no endless container reopening),
+        # and closing them must not keep them alive.
+        for kind in ("normal", "private"):
+            m.script("""
+              const win = OpenBrowserWindow({ private: arguments[0] == "private" });
+              window._smokeWin = win;
+              window._smokeWinRef = Cu.getWeakReference(win);
+            """, [kind])
+            started = wait_for(m, """
+              const w = window._smokeWin;
+              return !!(w.gHilalShell && w.gBrowser?.selectedBrowser &&
+                w.document.getElementById('hilal-header-shell'));
+            """, 30)
+            check(f"{kind} window: Hilal shell started", started)
+            if not started:
+                m.script("window._smokeWin?.close(); window._smokeWin = null")
+                continue
+            time.sleep(3)
+            first = m.script("""
+              const w = window._smokeWin;
+              window._smokeWinTab = w.gBrowser.selectedTab;
+              return {
+                tabs: w.gBrowser.tabs.length,
+                url: w.gBrowser.currentURI.spec,
+                errors: w.gHilalShell.startupErrors || [],
+                private: PrivateBrowsingUtils.isWindowPrivate(w),
+              };
+            """)
+            time.sleep(3)
+            later = m.script("""
+              const w = window._smokeWin;
+              const same = w.gBrowser.selectedTab == window._smokeWinTab;
+              window._smokeWinTab = null;
+              return { tabs: w.gBrowser.tabs.length, sameTab: same };
+            """)
+            report[f"window_{kind}"] = dict(first, later=later)
+            check(f"{kind} window: is {'private' if kind == 'private' else 'not private'}", first["private"] == (kind == "private"), first)
+            check(f"{kind} window: tabs settle", first["tabs"] == later["tabs"] == 1 and later["sameTab"], report[f"window_{kind}"])
+            check(f"{kind} window: shell started without errors", not first["errors"], first["errors"])
+            m.script("window._smokeWin.close(); window._smokeWin = null")
+            freed = m.script("""
+              const resolve = arguments[arguments.length - 1];
+              let tries = 0;
+              const step = () => {
+                Cu.forceGC();
+                Cu.forceCC();
+                Cu.forceShrinkingGC();
+                if (!window._smokeWinRef.get()) {
+                  resolve(true);
+                } else if (++tries > 20) {
+                  resolve(false);
+                } else {
+                  setTimeout(step, 500);
+                }
+              };
+              setTimeout(step, 500);
+            """, asynchronous=True)
+            check(f"{kind} window: freed after closing", freed,
+                  "closed window is still alive", known_issue="leak check is informational")
+
         # Errors from the first run; the restarted process has its own console.
         errors = m.script(ERRORS_JS)
 
