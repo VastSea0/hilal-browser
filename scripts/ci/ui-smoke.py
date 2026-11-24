@@ -775,6 +775,23 @@ def main():
         m.script("return gHilalWorkspaces.remove(arguments[0])", [ws["second"]])
         check("workspace is removed", wait_for(m, f"return gHilalWorkspaces._workspaces.length == {ws['count']}", 10))
 
+        # Every accent notification makes each boosted page reload its boost,
+        # so redrawing the workspaces with an unchanged accent must not send one.
+        accent_events = m.script("""
+          let count = 0;
+          const observer = () => count++;
+          Services.obs.addObserver(observer, "hilal-accent-changed");
+          try {
+            for (let i = 0; i < 3; i++) {
+              gHilalShell.renderWorkspaces();
+            }
+          } finally {
+            Services.obs.removeObserver(observer, "hilal-accent-changed");
+          }
+          return count;
+        """)
+        check("unchanged accent is not broadcast again", accent_events == 0, accent_events)
+
         # Extra windows: the shell has to start in a second and in a private
         # window, their tabs must settle (no endless container reopening),
         # and closing them must not keep them alive.

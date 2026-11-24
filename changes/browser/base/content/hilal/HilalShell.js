@@ -307,10 +307,13 @@
     },
 
     // HilalNewTabChild watches this key and asks its window for the new
-    // theme when it changes.
-    broadcastTheme() {
-      // Lets Boosts that follow the workspace color restyle their pages.
-      Services.obs.notifyObservers(window, "hilal-accent-changed");
+    // theme when it changes. applyTheme runs on every workspace render, so
+    // an unchanged theme is not sent again: each notification makes every
+    // boosted page in every window reload its boost. force still updates
+    // the shared key, for a new tab page that has to pick the theme up.
+    broadcastTheme({ force = false } = {}) {
+      let theme = null;
+      let serialized = null;
       try {
         // Content-process pages such as Passwords apply the Material tokens.
         const tokens = {};
@@ -320,9 +323,21 @@
             tokens[style[i]] = style.getPropertyValue(style[i]);
           }
         }
-        Services.ppmm.sharedData.set("hilal:activeTheme", { ...this.getThemeData(), tokens });
-        Services.ppmm.sharedData.flush();
+        theme = { ...this.getThemeData(), tokens };
+        serialized = JSON.stringify(theme);
       } catch (e) {}
+      const changed = serialized === null || serialized !== this._lastBroadcast;
+      this._lastBroadcast = serialized;
+      if (changed) {
+        // Lets Boosts that follow the workspace color restyle their pages.
+        Services.obs.notifyObservers(window, "hilal-accent-changed");
+      }
+      if (theme && (changed || force)) {
+        try {
+          Services.ppmm.sharedData.set("hilal:activeTheme", theme);
+          Services.ppmm.sharedData.flush();
+        } catch (e) {}
+      }
     },
   };
 
@@ -3036,10 +3051,10 @@
         window.gBrowser.selectedTab = tab;
         this.renderTabs();
         this.syncUrl();
-        MaterialYouTheme.broadcastTheme();
+        MaterialYouTheme.broadcastTheme({ force: true });
         setTimeout(() => {
           this.focusUrlInput(false);
-          MaterialYouTheme.broadcastTheme();
+          MaterialYouTheme.broadcastTheme({ force: true });
         }, 30);
       } catch (e) {
         console.error("Hilal openNewTab failed:", e);
