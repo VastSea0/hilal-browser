@@ -491,7 +491,7 @@ def main():
         """)
         check("after welcome: selected tab is in the active workspace",
               after_welcome_ws["tab"] == after_welcome_ws["active"] and not after_welcome_ws["hidden"],
-              after_welcome_ws, known_issue="under investigation; see the stability report")
+              after_welcome_ws)
         workspaces = m.script("return gHilalWorkspaces._workspaces.map(w => [w.name, w.emoji])")
         check("welcome makes the three starter workspaces it offers, no extra Default one",
               len(workspaces) == 3 and "Default" not in [w[0] for w in workspaces], workspaces)
@@ -744,13 +744,12 @@ def main():
             # started with; switch to the tab showing the site.
             chrome_handle = m.send("WebDriver:GetWindowHandle")
             chrome_handle = chrome_handle.get("value", chrome_handle) if isinstance(chrome_handle, dict) else chrome_handle
+            # Marionette selects every tab it switches to, which shows the
+            # hidden tabs of other workspaces, so go straight to this one: its
+            # handle is the browser's id.
+            site_handle = str(m.script("return gBrowser.selectedBrowser.browserId"))
             m.context("content")
-            handles = m.send("WebDriver:GetWindowHandles")
-            handles = handles.get("value", handles) if isinstance(handles, dict) else handles
-            for handle in reversed(handles):
-                m.send("WebDriver:SwitchToWindow", {"handle": handle})
-                if "hilal-browser.vercel.app" in m.script("return location.host"):
-                    break
+            m.send("WebDriver:SwitchToWindow", {"handle": site_handle})
             marked = wait_for(m, "return !!document.documentElement.getAttribute('data-hilal-accent')", 15)
             attrs = m.script("return [document.documentElement.getAttribute('data-hilal-browser'), document.documentElement.getAttribute('data-hilal-accent')]")
             m.context("chrome")
@@ -874,8 +873,7 @@ def main():
           }
           return { first, selected, second: mgr._activeId, count, found: !!window._smokeTab };
         """)
-        check("selected tab belongs to the active workspace", ws["selected"] == ws["first"], ws,
-              known_issue="seen after the welcome flow; see the stability report")
+        check("selected tab belongs to the active workspace", ws["selected"] == ws["first"], ws)
         check("active workspace has a visible tab", ws["found"], ws)
         if ws["found"]:
             in_list_js = "[...document.querySelectorAll('#hilal-tab-list > :not(.hilal-tab-leaving)')].some(e => e._tab == window._smokeTab)"
@@ -981,7 +979,7 @@ def main():
               setTimeout(step, 500);
             """, asynchronous=True)
             check(f"{kind} window: freed after closing", freed,
-                  "closed window is still alive", known_issue="leak check is informational")
+                  "closed window is still alive")
 
         # Hilal's settings page, top to bottom, for review.
         m.script("openPreferences()")
