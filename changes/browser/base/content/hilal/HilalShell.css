@@ -1310,6 +1310,36 @@
   object-fit: contain !important;
 }
 
+/* A loading tab shows a spinning ring in place of its favicon */
+.hilal-tab-icon[busy] > img,
+.hilal-htab-icon[busy] > img {
+  display: none !important;
+}
+
+.hilal-tab-icon[busy]::after,
+.hilal-htab-icon[busy]::after {
+  content: "";
+  display: block;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border: 2px solid color-mix(in srgb, var(--primary) 25%, transparent);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: hilal-tab-spin 800ms linear infinite;
+}
+
+@keyframes hilal-tab-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hilal-tab-icon[busy]::after,
+  .hilal-htab-icon[busy]::after {
+    animation: none;
+  }
+}
+
 .hilal-tab-icon i,
 .hilal-tab-favicon i {
   font-size: 16px !important;

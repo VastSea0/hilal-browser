@@ -722,7 +722,12 @@
       reloadBtn.title = "Reload";
       reloadBtn.innerHTML = '<i aria-hidden="true">refresh</i>';
       reloadBtn.addEventListener("click", () => {
-        if (window.gBrowser) window.gBrowser.reload();
+        if (!window.gBrowser) return;
+        if (reloadBtn.hasAttribute("busy")) {
+          BrowserCommands.stop();
+        } else {
+          window.gBrowser.reload();
+        }
       });
       navGroup.appendChild(reloadBtn);
 
@@ -3118,6 +3123,7 @@
     updateHorizontalTabContent(htab, tab) {
       const iconImg = htab.querySelector(".hilal-htab-icon img");
       if (iconImg) {
+        iconImg.parentNode.toggleAttribute("busy", tab.hasAttribute("busy"));
         const favSrc = tab.image || tab.getAttribute("image");
         const targetSrc =
           favSrc &&
@@ -3293,6 +3299,7 @@
     updateTabPillContent(pill, tab) {
       const iconImg = pill.querySelector(".hilal-tab-icon img");
       if (iconImg) {
+        iconImg.parentNode.toggleAttribute("busy", tab.hasAttribute("busy"));
         const favSrc = tab.image || tab.getAttribute("image");
         const targetSrc =
           favSrc &&
@@ -3424,12 +3431,23 @@
       });
     },
 
+    // Reload turns into Stop while the selected tab loads.
+    updateReloadButton() {
+      const btn = document.getElementById("hilal-reload-btn");
+      const busy = !!window.gBrowser?.selectedTab?.hasAttribute("busy");
+      if (!btn || btn.hasAttribute("busy") == busy) return;
+      btn.toggleAttribute("busy", busy);
+      btn.querySelector("i").textContent = busy ? "close" : "refresh";
+      document.l10n.setAttributes(btn, busy ? "hilal-toolbar-stop" : "hilal-toolbar-reload");
+    },
+
     renderTabs() {
       if (this._renderTabsFrame) {
         window.cancelAnimationFrame(this._renderTabsFrame);
         this._renderTabsFrame = 0;
       }
       if (!window.gBrowser) return;
+      this.updateReloadButton();
 
       const allTabs = Array.from(window.gBrowser.tabs || []);
       const manager = window.gHilalWorkspaces;

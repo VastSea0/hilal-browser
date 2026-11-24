@@ -191,3 +191,6 @@ hilal-auto-boost-off = Kapalı
 hilal-auto-boost-compatible = Uyumlu
 hilal-auto-boost-all = Tüm siteler
 hilal-auto-boost-darken-title = Koyu modda açık sayfaları koyulaştır
+
+hilal-toolbar-stop =
+    .title = Durdur

@@ -514,7 +514,26 @@ def main():
             "<!doctype html><meta name='theme-color' content='#e8590c'>"
             "<title>Hilal colors</title><body style='background:#fff'><h1>Colors</h1>"
         )
-        handler = lambda *a, **kw: http.server.SimpleHTTPRequestHandler(*a, directory=str(page_dir), **kw)
+        class SiteHandler(http.server.SimpleHTTPRequestHandler):
+            def __init__(self, *a, **kw):
+                super().__init__(*a, directory=str(page_dir), **kw)
+
+            def do_GET(self):
+                # /slow keeps loading for a while, to see the loading state.
+                if self.path != "/slow":
+                    return super().do_GET()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html")
+                self.end_headers()
+                self.wfile.write(b"<!doctype html><title>Hilal slow</title><h1>Loading</h1>")
+                self.wfile.flush()
+                time.sleep(8)
+                try:
+                    self.wfile.write(b"<p>done</p>")
+                except OSError:
+                    pass
+
+        handler = SiteHandler
         server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
         threading.Thread(target=server.serve_forever, daemon=True).start()
         site = f"http://127.0.0.1:{server.server_address[1]}/"
@@ -537,6 +556,27 @@ def main():
         """)
         check("turning automatic boosts off restores the site",
               wait_for(m, "return gBrowser.selectedBrowser.browsingContext.hilalBoostsData == 0", 10))
+
+        # A loading page shows a spinner in its tab and turns Reload into Stop.
+        m.script("gBrowser.selectedBrowser.loadURI(Services.io.newURI(arguments[0]), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})", [site + "slow"])
+        loading = wait_for(m, "return gBrowser.selectedTab.hasAttribute('busy') && !!document.querySelector('#hilal-reload-btn[busy]')", 10)
+        busy_ui = m.script("""
+          const btn = document.getElementById('hilal-reload-btn');
+          return {
+            icon: btn.querySelector('i').textContent,
+            l10n: btn.getAttribute('data-l10n-id'),
+            spinner: !!document.querySelector('.hilal-tab-pill.active .hilal-tab-icon[busy]'),
+          };
+        """)
+        check("loading tab shows a spinner and a Stop button",
+              loading and busy_ui["icon"] == "close" and busy_ui["l10n"] == "hilal-toolbar-stop" and busy_ui["spinner"], busy_ui)
+        time.sleep(0.5)
+        m.screenshot(out / "05-loading.png")
+        m.script("document.getElementById('hilal-reload-btn').click()")
+        stopped = wait_for(m, "return !gBrowser.selectedTab.hasAttribute('busy') && !document.querySelector('#hilal-reload-btn[busy]')", 4)
+        check("Stop ends the load and brings Reload back", stopped and m.script(
+              "return document.querySelector('#hilal-reload-btn i').textContent == 'refresh'"),
+              m.script("return [gBrowser.selectedTab.hasAttribute('busy'), document.getElementById('hilal-reload-btn').outerHTML]"))
         server.shutdown()
 
         # Hilal's own website learns the browser's accent; needs the network.
