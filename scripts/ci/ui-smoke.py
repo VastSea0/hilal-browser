@@ -464,6 +464,19 @@ def main():
         report["after_welcome"] = state
         m.screenshot(out / "01-after-welcome.png")
         check_shell("after welcome", state)
+        # Where the selected tab ends up relative to the active workspace,
+        # to tell which step leaves it outside (see the workspace checks).
+        after_welcome_ws = m.script("""
+          const mgr = gHilalWorkspaces, t = gBrowser.selectedTab;
+          return {
+            active: mgr._activeId, tab: mgr._getTabWorkspace(t), hidden: t.hidden,
+            container: t.userContextId, label: t.label,
+            tabs: gBrowser.tabs.map(x => [mgr._getTabWorkspace(x), x.userContextId, x.hidden, x.selected]),
+          };
+        """)
+        check("after welcome: selected tab is in the active workspace",
+              after_welcome_ws["tab"] == after_welcome_ws["active"] and not after_welcome_ws["hidden"],
+              after_welcome_ws, known_issue="under investigation; see the stability report")
         workspaces = m.script("return gHilalWorkspaces._workspaces.map(w => [w.name, w.emoji])")
         check("welcome makes the three starter workspaces it offers, no extra Default one",
               len(workspaces) == 3 and "Default" not in [w[0] for w in workspaces], workspaces)
