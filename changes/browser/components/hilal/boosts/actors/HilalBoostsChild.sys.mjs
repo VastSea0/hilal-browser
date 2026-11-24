@@ -72,10 +72,18 @@ export class HilalBoostsChild extends JSWindowActorChild {
 
   static PREVENTABLE_SET = new Set(HilalBoostsChild.PREVENTABLE_EVENTS);
 
+  // Queries are aborted when the page goes away before the parent answers,
+  // which happens on every quick navigation or tab close.
+  static #reportError(error) {
+    if (error?.name !== "AbortError") {
+      console.error("HilalBoostsChild:", error);
+    }
+  }
+
   handleEvent(event) {
     if (event.type === "DOMDocElementInserted") {
-      this.#applyBoostForPageIfAvailable();
-      this.#shareAccentWithHilalSite();
+      this.#applyBoostForPageIfAvailable().catch(HilalBoostsChild.#reportError);
+      this.#shareAccentWithHilalSite().catch(HilalBoostsChild.#reportError);
     } else if (
       event.type === "DOMContentLoaded" &&
       event.target === this.document &&

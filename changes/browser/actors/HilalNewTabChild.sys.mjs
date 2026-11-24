@@ -2,12 +2,19 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// Queries are aborted when the page goes away before the parent answers.
+function reportError(error) {
+  if (error?.name !== "AbortError") {
+    console.error("HilalNewTabChild:", error);
+  }
+}
+
 // Connects Hilal's new tab page to the browser window that shows it: the
 // page gets that window's theme and sends typed input back to its shell.
 export class HilalNewTabChild extends JSWindowActorChild {
   #onSharedDataChange = event => {
     if (event.changedKeys.includes("hilal:activeTheme")) {
-      this.#sendTheme();
+      this.#sendTheme().catch(reportError);
     }
   };
 
@@ -25,10 +32,10 @@ export class HilalNewTabChild extends JSWindowActorChild {
   handleEvent(event) {
     switch (event.type) {
       case "HilalNewTab:GetTheme":
-        this.#sendTheme();
+        this.#sendTheme().catch(reportError);
         break;
       case "HilalNewTab:GetSiteIcons":
-        this.#sendSiteIcons(event.detail);
+        this.#sendSiteIcons(event.detail).catch(reportError);
         break;
       case "HilalNewTab:Navigate":
         if (typeof event.detail == "string" && event.detail.trim()) {
