@@ -840,7 +840,15 @@ def main():
         check("switching workspaces hides the other workspace's tabs", switched, ws)
         m.script("gHilalWorkspaces.switchTo(arguments[0])", [ws["first"]])
         back = wait_for(m, f"return !window._smokeTab.hidden && {in_list_js}", 10)
-        check("switching back shows its tabs again", back)
+        check("switching back shows its tabs again", back, None if back else m.script("""
+          const t = window._smokeTab, mgr = gHilalWorkspaces;
+          return {
+            label: t.label, connected: t.isConnected, closing: t.closing, hidden: t.hidden,
+            workspace: mgr._getTabWorkspace(t), active: mgr._activeId,
+            container: t.userContextId, activeContainer: mgr.activeContainerId,
+            list: [...document.querySelectorAll('#hilal-tab-list > *')].map(e => [e.title, e.className]),
+          };
+        """))
         m.script("window._smokeTab = null")
         m.script("return gHilalWorkspaces.remove(arguments[0])", [ws["second"]])
         check("workspace is removed", wait_for(m, f"return gHilalWorkspaces._workspaces.length == {ws['count']}", 10))
