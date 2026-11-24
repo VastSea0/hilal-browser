@@ -623,6 +623,7 @@ def main():
         locales = m.script("return Services.locale.availableLocales")
         report["locales"] = locales
         check("Turkish is built in", "tr" in locales, locales)
+        probe_workspace("locales")
 
         policies = m.script(POLICIES_JS)
         report["policies"] = policies
@@ -651,6 +652,7 @@ def main():
         report["resist_fingerprinting"] = rfp
         check("Extreme privacy turns fingerprinting resistance on", rfp["extreme"] is True, rfp)
         check("Standard privacy leaves it off", rfp["standard"] is False, rfp)
+        probe_workspace("privacy")
 
         # Automatic colors, against a local page that declares a theme color.
         import http.server, threading
@@ -701,6 +703,7 @@ def main():
         """)
         check("turning automatic boosts off restores the site",
               wait_for(m, "return gBrowser.selectedBrowser.browsingContext.hilalBoostsData == 0", 10))
+        probe_workspace("boosts off")
 
         # A loading page shows a spinner in its tab and turns Reload into Stop.
         m.script("gBrowser.selectedBrowser.loadURI(Services.io.newURI(arguments[0]), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})", [site + "slow"])
@@ -765,6 +768,7 @@ def main():
         m.screenshot(out / "06-app-menu.png")
         labels = m.script("return [...document.querySelectorAll('#hilal-app-menu .ham-label')].map(e => e.textContent)")
         check("Hilal menu items are labelled", all(labels), labels)
+        probe_workspace("menu labels")
         menu_ui = m.script("""
           const menu = document.getElementById('hilal-app-menu');
           const cut = [...menu.querySelectorAll('.ham-label')]
@@ -783,6 +787,7 @@ def main():
         check("Hilal menu works with the keyboard",
               menu_ui["rows"] > 10 and menu_ui["startsInMenu"] and menu_ui["arrowMoves"], menu_ui)
         m.script("document.getElementById('hilal-app-menu')?.remove()")
+        probe_workspace("app menu")
 
         m.script("gHilalWorkspaces._showCreateDialog()")
         check("workspace dialog opens", wait_for(m, "return !!document.getElementById('hilal-ws-dialog')", 10))
@@ -803,6 +808,7 @@ def main():
             translated = translated and dialog["title"].lower() != "new workspace" and "Create" not in dialog["buttons"]
         check("workspace dialog is translated", translated, dialog)
         m.script("document.getElementById('hilal-ws-dialog-overlay')?.remove()")
+        probe_workspace("ws dialog")
 
         before_handles = m.send("WebDriver:GetWindowHandles")
         before_handles = before_handles.get("value", before_handles) if isinstance(before_handles, dict) else before_handles
