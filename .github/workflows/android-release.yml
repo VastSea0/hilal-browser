@@ -68,7 +68,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
 
       - name: Build signed APK and AAB
         working-directory: android
@@ -80,6 +80,11 @@ jobs:
           ./gradlew --no-daemon assembleRelease bundleRelease \
             -Philal.versionName=${{ steps.version.outputs.name }} \
             -Philal.versionCode=${{ steps.version.outputs.code }}
+
+      # Later steps, including third-party actions, have no use for the key.
+      - name: Remove signing key
+        if: always()
+        run: rm -f android/app/hilal-upload-key.jks
 
       - name: Verify signature
         run: |
@@ -127,7 +132,7 @@ jobs:
           retention-days: 90
 
       - name: Publish GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           tag_name: ${{ env.TAG }}
           name: Hilal Browser for Android ${{ steps.version.outputs.name }}
