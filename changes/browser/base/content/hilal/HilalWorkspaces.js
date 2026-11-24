@@ -947,9 +947,15 @@
       if (!tab) {
         return this._activeId || DEFAULT_WORKSPACE_ID;
       }
-      let workspaceId = tab.getAttribute("hilal-workspace");
-      if (!workspaceId && typeof SessionStore !== "undefined") {
-        workspaceId = SessionStore.getCustomTabValue(tab, STORE_KEY);
+      // The session value wins over the attribute: on session restore the
+      // TabOpen handler tags each tab with the active workspace before
+      // SessionStore puts back the workspace the tab was saved with.
+      let workspaceId =
+        typeof SessionStore !== "undefined"
+          ? SessionStore.getCustomTabValue(tab, STORE_KEY)
+          : "";
+      if (!workspaceId) {
+        workspaceId = tab.getAttribute("hilal-workspace");
       }
       if (!this._getWorkspaceById(workspaceId)) {
         workspaceId =

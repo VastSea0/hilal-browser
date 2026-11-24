@@ -875,6 +875,21 @@ def main():
         # Users start the browser again with the same profile; the shell has to
         # come back then too.
         if not args.no_restart:
+            # A tab outside the active workspace whose container does not tell
+            # its workspace (here an about: page in no container) has to come
+            # back in its own workspace when the session is restored.
+            keep = m.script("""
+              const mgr = gHilalWorkspaces;
+              const first = mgr._activeId;
+              mgr.create("Keep");
+              const keep = mgr._activeId;
+              const tab = gBrowser.addTrustedTab("about:robots", { userContextId: 0 });
+              const stored = SessionStore.getCustomTabValue(tab, "hilalWorkspace");
+              mgr.switchTo(first);
+              Services.prefs.setIntPref("browser.startup.page", 3);
+              return { keep, stored };
+            """)
+            check("tab is stored with its workspace", keep["stored"] == keep["keep"], keep)
             # Quit and launch again, as a user does. Firefox's in-place restart
             # is covered by the update test and was flaky inside the Flatpak.
             try:
@@ -909,6 +924,27 @@ def main():
             m.screenshot(out / "05-after-restart.png")
             check("no welcome screen after restart", not state["welcome"])
             check_shell("after restart", state)
+            restored = m.script("""
+              const tab = gBrowser.tabs.find(t => {
+                try {
+                  const entries = JSON.parse(SessionStore.getTabState(t)).entries || [];
+                  return entries.some(e => e.url == "about:robots");
+                } catch (e) {
+                  return false;
+                }
+              });
+              if (!tab) return null;
+              gHilalWorkspaces._apply();
+              return {
+                workspace: gHilalWorkspaces._getTabWorkspace(tab),
+                stored: SessionStore.getCustomTabValue(tab, "hilalWorkspace"),
+                hidden: tab.hidden,
+              };
+            """)
+            report["restored_workspace_tab"] = restored
+            check("restored tab stays in its workspace",
+                  bool(restored) and restored["workspace"] == restored["stored"] == keep["keep"] and restored["hidden"],
+                  restored)
             errors += m.script(ERRORS_JS)
 
         report["chrome_errors"] = errors
