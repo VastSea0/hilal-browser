@@ -639,6 +639,23 @@ def main():
         m.screenshot(out / "06-app-menu.png")
         labels = m.script("return [...document.querySelectorAll('#hilal-app-menu .ham-label')].map(e => e.textContent)")
         check("Hilal menu items are labelled", all(labels), labels)
+        menu_ui = m.script("""
+          const menu = document.getElementById('hilal-app-menu');
+          const cut = [...menu.querySelectorAll('.ham-label')]
+            .filter(l => l.scrollWidth > l.clientWidth + 1).map(l => l.textContent);
+          const first = document.activeElement;
+          document.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowDown', bubbles: true}));
+          const second = document.activeElement;
+          return {
+            cut,
+            rows: menu.querySelectorAll('.ham-row[role=menuitem]').length,
+            startsInMenu: menu.contains(first),
+            arrowMoves: menu.contains(second) && second != first,
+          };
+        """)
+        check("Hilal menu labels fit without being cut off", not menu_ui["cut"], menu_ui)
+        check("Hilal menu works with the keyboard",
+              menu_ui["rows"] > 10 and menu_ui["startsInMenu"] and menu_ui["arrowMoves"], menu_ui)
         m.script("document.getElementById('hilal-app-menu')?.remove()")
 
         m.script("gHilalWorkspaces._showCreateDialog()")

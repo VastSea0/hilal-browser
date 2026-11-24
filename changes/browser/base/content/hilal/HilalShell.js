@@ -2556,13 +2556,13 @@
         "appmenuitem-fullscreen", "appmenuitem-zoom-enlarge", "appmenuitem-zoom-reduce",
         "appmenu-customizetoolbar", "appmenu-about", "appmenu-help-more-troubleshooting-info",
         "appmenuitem-exit2", "hilal-app-menu-devtools", "hilal-app-menu-task-manager",
-        "hilal-app-menu-help", "hilal-app-menu-report",
+        "hilal-app-menu-help", "hilal-app-menu-report", "hilal-toolbar-back",
       ];
       const messages = await document.l10n.formatMessages(ids);
       const text = {};
       ids.forEach((id, i) => {
         const m = messages[i];
-        text[id] = m?.value || m?.attributes?.find(a => a.name == "label" || a.name == "value")?.value || "";
+        text[id] = m?.value || m?.attributes?.find(a => ["label", "value", "title"].includes(a.name))?.value || "";
       });
       const fallback = {
         "library-bookmarks-menu": "Bookmarks",
@@ -2590,6 +2590,7 @@
           "button",
           {
             class: "ham-row",
+            role: "menuitem",
             disabled,
             onclick: () => {
               if (sub) {
@@ -2605,7 +2606,7 @@
           key ? html("span", { class: "ham-key" }, key) : "",
           sub ? html("i", { class: "ham-chevron" }, "chevron_right") : ""
         );
-      const group = (...rows) => html("div", { class: "ham-group" }, ...rows.filter(Boolean));
+      const group = (...rows) => html("div", { class: "ham-group", role: "group" }, ...rows.filter(Boolean));
 
       const zoomValue = html("button", {
         class: "ham-zoom-value",
@@ -2666,7 +2667,7 @@
           html(
             "div",
             { class: "ham-header" },
-            html("button", { class: "ham-icon-button", onclick: () => showPage(mainPage(), true) }, html("i", {}, "arrow_back")),
+            html("button", { class: "ham-icon-button", role: "menuitem", "aria-label": t("hilal-toolbar-back"), onclick: () => showPage(mainPage(), true) }, html("i", {}, "arrow_back")),
             html("h2", { class: "ham-title" }, title)
           ),
           ...groups
@@ -2711,6 +2712,7 @@
       menu.style.right = `${Math.max(8, window.innerWidth - rect.right)}px`;
       document.documentElement.appendChild(menu);
       anchor.setAttribute("open", "true");
+      menu.querySelector("button:not([disabled])")?.focus({ focusVisible: false });
 
       const onOutside = e => {
         if (!menu.contains(e.target) && !anchor.contains(e.target)) {
@@ -2720,7 +2722,23 @@
       const onKey = e => {
         if (e.key == "Escape") {
           close();
+          anchor.focus?.();
+          return;
         }
+        // Arrow keys, Home and End move between the menu's buttons.
+        const items = [...menu.querySelectorAll("button:not([disabled])")];
+        const index = items.indexOf(document.activeElement);
+        const next = {
+          ArrowDown: index + 1,
+          ArrowUp: index - 1,
+          Home: 0,
+          End: items.length - 1,
+        }[e.key];
+        if (next === undefined || !items.length) {
+          return;
+        }
+        e.preventDefault();
+        items[(next + items.length) % items.length].focus();
       };
       const observer = new MutationObserver(() => {
         if (!menu.isConnected) {

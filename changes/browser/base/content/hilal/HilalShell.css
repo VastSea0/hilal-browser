@@ -2235,7 +2235,10 @@ browser[type="content"],
 #hilal-app-menu {
   position: fixed;
   z-index: 100003;
-  width: 300px;
+  /* As wide as the longest label, so translations are not cut off */
+  width: max-content;
+  min-width: 300px;
+  max-width: min(420px, calc(100vw - 16px));
   max-height: calc(100vh - 96px);
   overflow-y: auto;
   box-sizing: border-box;
@@ -2319,6 +2322,11 @@ browser[type="content"],
 #hilal-app-menu button.ham-row:focus-visible {
   background: color-mix(in srgb, var(--on-surface) 8%, var(--surface-container-high));
   outline: none;
+}
+
+#hilal-app-menu button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
 }
 
 /* M3 Expressive: a pressed row rounds into a pill */
