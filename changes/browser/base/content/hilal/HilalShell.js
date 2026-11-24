@@ -3398,7 +3398,22 @@
       }
     },
 
+    // Tab events come in bursts (a page load fires TabAttrModified many
+    // times, a workspace switch fires TabHide/TabShow once per tab), so
+    // they render at most once per frame.
+    scheduleRenderTabs() {
+      if (this._renderTabsFrame) return;
+      this._renderTabsFrame = window.requestAnimationFrame(() => {
+        this._renderTabsFrame = 0;
+        this.renderTabs();
+      });
+    },
+
     renderTabs() {
+      if (this._renderTabsFrame) {
+        window.cancelAnimationFrame(this._renderTabsFrame);
+        this._renderTabsFrame = 0;
+      }
       if (!window.gBrowser) return;
 
       const allTabs = Array.from(window.gBrowser.tabs || []);
@@ -3799,29 +3814,29 @@
             }, 30);
           }
         });
-        tc.addEventListener("TabClose", () => this.renderTabs());
+        tc.addEventListener("TabClose", () => this.scheduleRenderTabs());
         tc.addEventListener("TabSelect", () => {
-          this.renderTabs();
+          this.scheduleRenderTabs();
           this.syncUrl();
         });
-        tc.addEventListener("TabAttrModified", () => this.renderTabs());
-        tc.addEventListener("TabHide", () => this.renderTabs());
-        tc.addEventListener("TabShow", () => this.renderTabs());
-        tc.addEventListener("TabMultiSelect", () => this.renderTabs());
+        tc.addEventListener("TabAttrModified", () => this.scheduleRenderTabs());
+        tc.addEventListener("TabHide", () => this.scheduleRenderTabs());
+        tc.addEventListener("TabShow", () => this.scheduleRenderTabs());
+        tc.addEventListener("TabMultiSelect", () => this.scheduleRenderTabs());
       }
 
-      window.addEventListener("TabMultiSelect", () => this.renderTabs());
-      window.addEventListener("TabSplitViewActivate", () => this.renderTabs());
-      window.addEventListener("TabSplitViewDeactivate", () => this.renderTabs());
-      window.addEventListener("SplitViewCreated", () => this.renderTabs());
-      window.addEventListener("SplitViewRemoved", () => this.renderTabs());
-      window.addEventListener("SplitViewTabChange", () => this.renderTabs());
+      window.addEventListener("TabMultiSelect", () => this.scheduleRenderTabs());
+      window.addEventListener("TabSplitViewActivate", () => this.scheduleRenderTabs());
+      window.addEventListener("TabSplitViewDeactivate", () => this.scheduleRenderTabs());
+      window.addEventListener("SplitViewCreated", () => this.scheduleRenderTabs());
+      window.addEventListener("SplitViewRemoved", () => this.scheduleRenderTabs());
+      window.addEventListener("SplitViewTabChange", () => this.scheduleRenderTabs());
 
       window.gBrowser.addProgressListener({
         onLocationChange: (aWebProgress, aRequest, aLocation, aFlags) => {
           if (!aWebProgress || aWebProgress.isTopLevel) {
             this.syncUrl();
-            this.renderTabs();
+            this.scheduleRenderTabs();
             this.updateBoostButton();
             this.maybeReceiveSharedBoost(aWebProgress, aLocation);
           }
