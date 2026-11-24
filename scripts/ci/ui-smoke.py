@@ -413,6 +413,9 @@ def main():
             m.screenshot(out / f"02-mode-{mode}.png")
             check(f"{mode} tabs: top bar laid out", s["topbar"] and s["topbar"]["w"] > 200 and s["topbar"]["h"] > 0, s["topbar"])
             check_window_buttons(f"{mode} tabs", s)
+            if mode != "vertical":
+                line = m.script("const b = document.querySelector('#hilal-topbar-workspaces-slot #hilal-workspaces-bar'); return b ? getComputedStyle(b).borderBottomWidth : null")
+                check(f"{mode} tabs: no divider line under the workspace switcher", line == "0px", line)
         m.script("gHilalShell.setTabMode(arguments[0], false)", ["vertical"])
 
         # Settings change the layout and density through prefs while the
