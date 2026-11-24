@@ -810,7 +810,7 @@ def main():
             if not started:
                 m.script("window._smokeWin?.close(); window._smokeWin = null")
                 continue
-            time.sleep(3)
+            time.sleep(2)
             first = m.script("""
               const w = window._smokeWin;
               window._smokeWinTab = w.gBrowser.selectedTab;
@@ -821,7 +821,7 @@ def main():
                 private: PrivateBrowsingUtils.isWindowPrivate(w),
               };
             """)
-            time.sleep(3)
+            time.sleep(2)
             later = m.script("""
               const w = window._smokeWin;
               const same = w.gBrowser.selectedTab == window._smokeWinTab;
