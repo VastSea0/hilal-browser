@@ -892,6 +892,8 @@ class nsHilalBoostsManager {
       }
     }
     result.customCSS = this.sanitizeSharedCSS(result.customCSS);
+    result.zapSelectors = this.sanitizeSharedSelectors(result.zapSelectors);
+    result.focusSelectors = this.sanitizeSharedSelectors(result.focusSelectors);
     result.fontFamily = /^[\w\s,'"-]*$/.test(result.fontFamily)
       ? result.fontFamily
       : "";
@@ -907,10 +909,38 @@ class nsHilalBoostsManager {
     return result;
   }
 
+  // A shared boost's CSS runs as a user sheet on its site. If it could load
+  // anything, attribute selectors would send the page's form values to
+  // another server, so every way of loading a resource is removed.
   sanitizeSharedCSS(css) {
-    return String(css || "")
-      .replace(/@import\b[^;{]*;?/gi, "")
-      .replace(/\b(?:url|image-set|image)\s*\([^)]*\)/gi, "none");
+    return (
+      String(css || "")
+        // CSS escapes are decoded before tokenizing ("\75 rl(" is url(), so
+        // letters and digits are decoded first. Other escapes are kept.
+        .replace(
+          /\\(?:([0-9a-f]{1,6})[ \t\r\n\f]?|([^0-9a-f]))/gi,
+          (escape, hex, char) => {
+            const decoded =
+              char ??
+              (parseInt(hex, 16) <= 0x10ffff
+                ? String.fromCodePoint(parseInt(hex, 16))
+                : "");
+            return /^[a-z0-9_-]$/i.test(decoded) ? decoded : escape;
+          }
+        )
+        .replace(/@import\b[^;{]*;?/gi, "")
+        .replace(/\b(?:url|image-set|image|src)\s*\([^)]*\)/gi, "none")
+    );
+  }
+
+  // Zap and focus selectors are written into the boost's style sheet as
+  // they are. A selector that could end its rule or start an at-rule
+  // (@import) would let a shared boost add CSS that loads resources.
+  sanitizeSharedSelectors(selectors) {
+    return selectors.filter(selector => {
+      const unescaped = selector.replace(/\\(?:[0-9a-f]{1,6}\s?|[\s\S])/gi, "_");
+      return !/[{};@]|\/\*/.test(unescaped);
+    });
   }
 
   /**

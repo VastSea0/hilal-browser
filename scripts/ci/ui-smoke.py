@@ -199,6 +199,41 @@ return {
 """
 
 
+# Builds the style sheet of a hostile shared boost and lets Firefox's CSS
+# parser say whether any rule in it would load a resource.
+SHARED_BOOST_JS = r"""
+const { gHilalBoostsManager: mgr } = ChromeUtils.importESModule(
+  "resource:///modules/hilal/boosts/HilalBoostsManager.sys.mjs");
+const { nsHilalBoostStyles } = ChromeUtils.importESModule(
+  "resource:///modules/hilal/boosts/HilalBoostStyles.sys.mjs");
+const leak = "http://127.0.0.1:9/";
+const payload = {
+  customCSS: `input[value^='a']{background:\\75 rl(${leak}a)} @\\69mport '${leak}b.css';`,
+  zapSelectors: [`@import '${leak}c.css';a`, `x{} input{border-image:url(${leak}d) 1} y`, "div.ad\\:banner"],
+  focusSelectors: [`z) {} input{mask-image:url(${leak}e)} :is(q`, "#\\31 main"],
+};
+const css = data => decodeURIComponent(
+  new nsHilalBoostStyles().getStyleForBoost(data, "smoke.example").uri.spec.split(",").slice(1).join(","));
+const loads = text => {
+  if (/@import/i.test(text)) return true;
+  const sheet = new CSSStyleSheet();
+  sheet.replaceSync(text);
+  const all = [];
+  const walk = rules => { for (const r of rules) { all.push(r.cssText); if (r.cssRules) walk(r.cssRules); } };
+  walk(sheet.cssRules);
+  return all.some(t => /url\(|image\(|image-set\(/i.test(t));
+};
+const raw = { ...mgr.getEmptyBoostEntry().boostData, ...payload };
+const data = mgr.boostDataFromShared(payload, "smoke");
+return {
+  rawLoads: loads(css(raw)),
+  loads: loads(css(data)),
+  kept: data.zapSelectors.join() == "div.ad\\:banner" && data.focusSelectors.join() == "#\\31 main",
+  zap: data.zapSelectors, focus: data.focusSelectors, customCSS: data.customCSS,
+};
+"""
+
+
 # Asks Google's Safe Browsing API for its threat lists with the key built into
 # the browser. The response is 200 only when Google accepts the key. The key
 # itself is never returned, so it does not end up in the report.
@@ -632,6 +667,12 @@ def main():
               "return document.querySelector('#hilal-reload-btn i').textContent == 'refresh'"),
               m.script("return [gBrowser.selectedTab.hasAttribute('busy'), document.getElementById('hilal-reload-btn').outerHTML]"))
         server.shutdown()
+
+        shared = m.script(SHARED_BOOST_JS)
+        report["shared_boost"] = shared
+        check("test payload loads resources before sanitizing", shared["rawLoads"], shared)
+        check("a shared boost cannot load resources", not shared["loads"], shared)
+        check("a shared boost keeps its plain selectors", shared["kept"], shared)
 
         # Hilal's own website learns the browser's accent; needs the network.
         m.script("gBrowser.selectedBrowser.loadURI(Services.io.newURI('https://hilal-browser.vercel.app/'), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})")
