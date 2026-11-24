@@ -445,13 +445,20 @@
       this.trackSiteAccent();
 
       if (typeof CustomizableUI !== "undefined") {
+        const listener = {
+          onWidgetAdded: () => this.syncExtensions(),
+          onWidgetRemoved: () => this.syncExtensions(),
+          onWidgetMoved: () => this.syncExtensions(),
+          onAreaReset: () => this.syncExtensions(),
+        };
         try {
-          CustomizableUI.addListener({
-            onWidgetAdded: () => this.syncExtensions(),
-            onWidgetRemoved: () => this.syncExtensions(),
-            onWidgetMoved: () => this.syncExtensions(),
-            onAreaReset: () => this.syncExtensions(),
-          });
+          CustomizableUI.addListener(listener);
+          // CustomizableUI keeps its listeners for the whole session.
+          window.addEventListener(
+            "unload",
+            () => CustomizableUI.removeListener(listener),
+            { once: true }
+          );
         } catch (e) {}
       }
       const nbTarget = document.getElementById("nav-bar-customization-target");
