@@ -361,6 +361,18 @@ def main():
                        "known_issue": known_issue})
         print(f"{status} {name}" + (f": {known_issue or detail}" if detail and not ok else ""), flush=True)
 
+    # Records whether the selected tab is in the active workspace, to find
+    # the step that leaves it in another one.
+    def probe_workspace(step):
+        try:
+            report.setdefault("workspace_probe", []).append([step, m.script("""
+              const mgr = gHilalWorkspaces, t = gBrowser.selectedTab;
+              return { active: mgr._activeId, tab: mgr._getTabWorkspace(t), hidden: t.hidden,
+                       container: t.userContextId, url: t.linkedBrowser.currentURI.spec };
+            """)])
+        except MarionetteError as e:
+            report.setdefault("workspace_probe", []).append([step, str(e)])
+
     try:
         m = Marionette(port, timeout=args.timeout)
         m.send("WebDriver:NewSession", {"capabilities": {"alwaysMatch": {"acceptInsecureCerts": True}}})
@@ -524,6 +536,7 @@ def main():
         page = "data:text/html;charset=utf-8,<title>Hilal smoke</title><h1 style='font:48px sans-serif'>Hilal smoke page</h1>"
         m.script("gBrowser.selectedBrowser.loadURI(Services.io.newURI(arguments[0]), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})", [page])
         check("page loads in a tab", wait_for(m, "return gBrowser.selectedBrowser.contentTitle == 'Hilal smoke'", 30))
+        probe_workspace('page loaded')
         time.sleep(1)
         m.screenshot(out / "03-page.png")
 
@@ -559,6 +572,7 @@ def main():
         before = m.script("return gBrowser.tabs.length")
         m.script("gHilalShell.openNewTab()")
         check("new tab opens", wait_for(m, f"return gBrowser.tabs.length == {before + 1}", 10))
+        probe_workspace('new tab opened')
         time.sleep(2)
         m.screenshot(out / "04-new-tab.png")
         check("new tab page loads", "newtab" in m.script("return gBrowser.selectedBrowser.currentURI.spec") or "hilal" in m.script("return gBrowser.selectedBrowser.currentURI.spec"),
@@ -590,6 +604,7 @@ def main():
 
         m.script("gBrowser.removeTab(gBrowser.selectedTab)")
         check("tab closes", wait_for(m, f"return gBrowser.tabs.length == {before}", 10))
+        probe_workspace('tab closed')
 
         # Release-critical pieces that only show up in a running browser.
         addons = None
@@ -800,6 +815,7 @@ def main():
             about = new[0] if new else None
             time.sleep(0.5)
         check("About dialog opens", bool(about))
+        probe_workspace('about dialog')
         if about:
             m.send("WebDriver:SwitchToWindow", {"handle": about})
             time.sleep(2)
@@ -832,7 +848,9 @@ def main():
             """)
         m.screenshot(out / "07b-addons.png")
         check("Add-ons page has the Material look", bool(addons_look and addons_look["card"] == "24px" and addons_look["primary"]), addons_look)
+        probe_workspace('addons page')
         m.script("gBrowser.removeTab(gBrowser.selectedTab, {animate: false})")
+        probe_workspace("addons closed")
 
         # Workspaces: tabs of the other workspace leave the shell's tab list
         # and come back when switching back.
