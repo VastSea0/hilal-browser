@@ -835,6 +835,22 @@ def main():
             check(f"{kind} window: freed after closing", freed,
                   "closed window is still alive", known_issue="leak check is informational")
 
+        # Hilal's settings page, top to bottom, for review.
+        m.script("openPreferences()")
+        settings = wait_for(m, """
+          const doc = gBrowser.selectedBrowser.contentDocument;
+          const group = doc?.getElementById('hilalWorkspacesGroup');
+          return doc?.readyState == 'complete' && group && !group.hidden && group.getBoundingClientRect().height > 0;
+        """, 15)
+        check("Hilal settings page opens", settings)
+        if settings:
+            time.sleep(1)
+            for i, group in enumerate(("hilalWorkspacesGroup", "hilalThemeColorsGroup", "hilalBangsGroup", "hilalAboutGroup")):
+                m.script("gBrowser.selectedBrowser.contentDocument.getElementById(arguments[0])?.scrollIntoView({block: 'start'})", [group])
+                time.sleep(0.5)
+                m.screenshot(out / f"10-settings-{i}.png")
+        m.script("gBrowser.removeTab(gBrowser.selectedTab, {animate: false})")
+
         # Errors from the first run; the restarted process has its own console.
         errors = m.script(ERRORS_JS)
 
