@@ -236,6 +236,28 @@ return {
 """
 
 
+# Sends the Boosts parent actor of the selected tab the messages a
+# compromised content process could send about another site.
+FORGED_BOOST_MESSAGES_JS = r"""
+const resolve = arguments[arguments.length - 1];
+(async () => {
+  const { gHilalBoostsManager: mgr } = ChromeUtils.importESModule(
+    "resource:///modules/hilal/boosts/HilalBoostsManager.sys.mjs");
+  const other = mgr.createNewBoost("forged.example");
+  other.boostEntry.boostData.changeWasMade = true;
+  mgr.saveBoostToStore(other);
+  mgr.makeBoostActiveForDomain("forged.example", other.id);
+  const actor = gBrowser.selectedBrowser.browsingContext.currentWindowGlobal.getActor("HilalBoosts");
+  const leaked = await actor.receiveMessage({ name: "HilalBoost:GetBoostForDomain", data: "forged.example" });
+  await actor.receiveMessage({ name: "HilalBoost:ZapSelector", data: {
+    action: "add", domain: "forged.example", mode: "zap", selector: "div.forged" } });
+  const injected = mgr.loadActiveBoostFromStore("forged.example").boostEntry.boostData.zapSelectors.includes("div.forged");
+  mgr.deleteBoost(other);
+  return { leaked: !!leaked, injected };
+})().then(resolve, e => resolve({ error: String(e) }));
+"""
+
+
 # Asks Google's Safe Browsing API for its threat lists with the key built into
 # the browser. The response is 200 only when Google accepts the key. The key
 # itself is never returned, so it does not end up in the report.
@@ -676,6 +698,10 @@ def main():
         check("test payload loads resources before sanitizing", shared["rawLoads"], shared)
         check("a shared boost cannot load resources", not shared["loads"], shared)
         check("a shared boost keeps its plain selectors", shared["kept"], shared)
+        forged = m.script(FORGED_BOOST_MESSAGES_JS, asynchronous=True)
+        report["forged_boost_messages"] = forged
+        check("a page cannot read or change another site's boost",
+              forged.get("leaked") is False and forged.get("injected") is False, forged)
 
         # Hilal's own website learns the browser's accent; needs the network.
         m.script("gBrowser.selectedBrowser.loadURI(Services.io.newURI('https://hilal-browser.vercel.app/'), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})")

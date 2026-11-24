@@ -77,6 +77,16 @@ export class HilalBoostsParent extends JSWindowActorParent {
     "selector-picker-picked",
   ]);
 
+  // Messages name the domain they are about. Site isolation keeps each site
+  // in its own content process, so a process may only act on its own page.
+  #isOwnDomain(domain) {
+    let host = "";
+    try {
+      host = this.manager.documentURI?.host ?? "";
+    } catch (e) {}
+    return typeof domain == "string" && !!domain && domain === host;
+  }
+
   /**
    * Creates a new HilalBoostsParent actor instance and sets up an observer
    * for boost update notifications.
@@ -236,12 +246,19 @@ export class HilalBoostsParent extends JSWindowActorParent {
         if (!data.selector) {
           break;
         }
-        if (!data.domain) {
+        if (!this.#isOwnDomain(data.domain)) {
           break;
         }
 
         const mode = data.mode === "focus" ? "focus" : "zap";
         if (data.action == "add") {
+          if (
+            typeof data.selector != "string" ||
+            !lazy.gHilalBoostsManager.sanitizeSharedSelectors([data.selector])
+              .length
+          ) {
+            break;
+          }
           lazy.gHilalBoostsManager.addZapSelectorToActive(
             data.selector,
             data.domain,
@@ -292,7 +309,7 @@ export class HilalBoostsParent extends JSWindowActorParent {
       }
       case "HilalBoost:SiteTheme": {
         const { domain, accent, ownTheme, boosted } = message.data ?? {};
-        if (typeof domain != "string" || !domain) {
+        if (!this.#isOwnDomain(domain)) {
           break;
         }
         const hadOwnTheme = ownThemeDomains.get(domain);
@@ -327,7 +344,7 @@ export class HilalBoostsParent extends JSWindowActorParent {
         const domain = message.data;
         const embedder = this.browsingContext.top.embedderElement;
 
-        if (!embedder || !domain) {
+        if (!embedder || !this.#isOwnDomain(domain)) {
           break;
         }
 
