@@ -1939,12 +1939,17 @@
         const pill = document.createElement("button");
         pill.className = "chip border round wave";
         pill.id = "hilal-ws-dropdown-pill";
-        pill.title = `Current Workspace: ${activeWs.name || activeWs.id} (Click to switch)`;
-        pill.innerHTML = `
-          <span>${activeWs.emoji || "\u{1F4C1}"}</span>
-          <span class="max">${activeWs.name || activeWs.id}</span>
-          <i aria-hidden="true">arrow_drop_down</i>
-        `;
+        document.l10n.setAttributes(pill, "hilal-ws-pill", { name: activeWs.name || activeWs.id });
+        // Names are typed by the user, so they go in as text, never markup.
+        const pillEmoji = document.createElement("span");
+        pillEmoji.textContent = activeWs.emoji || "\u{1F4C1}";
+        const pillName = document.createElement("span");
+        pillName.className = "max";
+        pillName.textContent = activeWs.name || activeWs.id;
+        const pillArrow = document.createElement("i");
+        pillArrow.setAttribute("aria-hidden", "true");
+        pillArrow.textContent = "arrow_drop_down";
+        pill.append(pillEmoji, pillName, pillArrow);
         pill.addEventListener("click", e => {
           e.stopPropagation();
           this.showWorkspacesDropdown(pill, workspaces, activeId);
@@ -1964,8 +1969,9 @@
         const chip = document.createElement("button");
         chip.className = `circle small ${isAct ? "primary active" : "secondary-container"} hilal-ws-chip`;
         chip.textContent = ws.emoji || "\u{1F5C2}";
-        chip.title = `${ws.name || ws.id} (Right click to edit)`;
+        document.l10n.setAttributes(chip, "hilal-ws-chip", { name: ws.name || ws.id });
         chip.setAttribute("aria-label", ws.name || ws.id);
+        chip.setAttribute("aria-pressed", isAct);
         chip.dataset.workspaceId = ws.id;
 
         chip.addEventListener("click", () => {
@@ -2068,11 +2074,20 @@
         item.className =
           "row wave round tiny-space transparent" +
           (isActive ? " secondary-container active" : "");
-        item.innerHTML = `
-          <span class="small">${ws.emoji || "\u{1F4C1}"}</span>
-          <span class="max">${ws.name || ws.id}</span>
-          ${isActive ? '<i aria-hidden="true">check</i>' : ""}
-        `;
+        const emoji = document.createElement("span");
+        emoji.className = "small";
+        emoji.textContent = ws.emoji || "\u{1F4C1}";
+        const name = document.createElement("span");
+        name.className = "max";
+        name.textContent = ws.name || ws.id;
+        item.append(emoji, name);
+        if (isActive) {
+          const check = document.createElement("i");
+          check.setAttribute("aria-hidden", "true");
+          check.textContent = "check";
+          item.append(check);
+          item.setAttribute("aria-current", "true");
+        }
 
         item.addEventListener("click", () => {
           if (ws.color) {

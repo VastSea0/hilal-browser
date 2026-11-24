@@ -408,6 +408,11 @@ def main():
         workspaces = m.script("return gHilalWorkspaces._workspaces.map(w => [w.name, w.emoji])")
         check("welcome makes the three starter workspaces it offers, no extra Default one",
               len(workspaces) == 3 and "Default" not in [w[0] for w in workspaces], workspaces)
+        chips = m.script("return [...document.querySelectorAll('#hilal-workspaces-bar .hilal-ws-chip[data-workspace-id]')].map(c => [c.title, c.getAttribute('aria-pressed')])")
+        chips_ok = bool(chips) and all(t and "${" not in t for t, _ in chips) and [p for _, p in chips].count("true") == 1
+        if args.locale == "tr":
+            chips_ok = chips_ok and not any("right-click" in t for t, _ in chips)
+        check("workspace buttons have translated tooltips and mark the active one", chips_ok, chips)
 
         # Icons are font ligatures ("arrow_back"); a screen reader must get the
         # button's title instead of the ligature text.

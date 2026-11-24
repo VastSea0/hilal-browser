@@ -194,3 +194,11 @@ hilal-auto-boost-darken-title = Koyu modda açık sayfaları koyulaştır
 
 hilal-toolbar-stop =
     .title = Durdur
+# Variables:
+#   $name (String) - the workspace name
+hilal-ws-chip =
+    .title = { $name } (düzenlemek için sağ tıklayın)
+# Variables:
+#   $name (String) - the workspace name
+hilal-ws-pill =
+    .title = Çalışma alanı: { $name }. Değiştirmek için tıklayın, düzenlemek için sağ tıklayın.
