@@ -468,16 +468,26 @@ You can obtain one at http://mozilla.org/MPL/2.0/. */
   padding: 14px 24px;
 }
 
+/* Back, step count and Continue; the outer columns share the leftover
+   width so the count stays centered whatever the button labels are. */
 #hilal-welcome-overlay .hw-footer-inner {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 16px;
   width: min(560px, 100%);
   margin-inline: auto;
 }
 
+#hilal-welcome-overlay .hw-footer-inner > .hw-secondary {
+  justify-self: start;
+}
+
+#hilal-welcome-overlay .hw-footer-inner > .hw-primary {
+  justify-self: end;
+}
+
 #hilal-welcome-overlay .hw-step-count {
-  flex: 1;
   text-align: center;
   color: var(--hw-muted);
   font-size: 13px;

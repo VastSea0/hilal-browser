@@ -379,13 +379,27 @@ def main():
 
         # Go through the welcome screen the way a user does: Start, then Next
         # on every step and Finish, keeping the default choices.
+        welcome_steps = []
         for step in range(6):
             if not m.script("return !!document.getElementById('hilal-welcome-overlay')"):
                 break
             m.screenshot(out / f"01-welcome-{step}.png")
+            welcome_steps.append(m.script("""
+              const o = document.getElementById('hilal-welcome-overlay');
+              const f = o.querySelector('.hw-footer-inner');
+              const c = f?.querySelector('.hw-step-count');
+              const center = r => r.left + r.width / 2;
+              return {
+                countOffset: c ? Math.round(Math.abs(center(f.getBoundingClientRect()) - center(c.getBoundingClientRect()))) : 0,
+                siteSearch: /wikipedia|vikipedi/i.test(o.textContent),
+              };
+            """))
             m.script("document.querySelector('#hilal-welcome-overlay .hw-primary')?.click()")
             time.sleep(1)
         check("welcome screen finishes", wait_for(m, "return !document.getElementById('hilal-welcome-overlay')", 15))
+        check("welcome step count is centered", all(w["countOffset"] <= 2 for w in welcome_steps), welcome_steps)
+        check("welcome offers no site search (Wikipedia) as the default engine",
+              not any(w["siteSearch"] for w in welcome_steps), welcome_steps)
         time.sleep(2)
         state = m.script(STATE_JS)
         report["after_welcome"] = state

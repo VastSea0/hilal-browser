@@ -491,8 +491,9 @@
         const engines = await SearchService.getVisibleEngines();
         this._engines = await Promise.all(
           engines
-            // Site search engines are not useful as the default.
-            .filter(engine => !/wikipedia|ebay|amazon/i.test(engine.name))
+            // Site search engines are not useful as the default. Their names
+            // are translated (Vikipedi), so match the id too.
+            .filter(engine => !/wikipedia|ebay|amazon/i.test(`${engine.name} ${engine.id}`))
             .map(async engine => ({
               name: engine.name,
               engine,
