@@ -368,7 +368,10 @@ def main():
             report.setdefault("workspace_probe", []).append([step, m.script("""
               const mgr = gHilalWorkspaces, t = gBrowser.selectedTab;
               return { active: mgr._activeId, tab: mgr._getTabWorkspace(t), hidden: t.hidden,
-                       container: t.userContextId, url: t.linkedBrowser.currentURI.spec };
+                       container: t.userContextId, url: t.linkedBrowser.currentURI.spec,
+                       visible: gBrowser.visibleTabs.length,
+                       tabs: gBrowser.tabs.map(x => [mgr._getTabWorkspace(x), x.userContextId, x.hidden,
+                         x.selected, x.linkedBrowser.currentURI.spec.slice(0, 40), !!x.owner, !!x.successor]) };
             """)])
         except MarionetteError as e:
             report.setdefault("workspace_probe", []).append([step, str(e)])
