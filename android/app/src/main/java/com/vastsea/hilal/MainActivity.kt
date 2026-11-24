@@ -17,6 +17,8 @@ import com.vastsea.hilal.ui.HilalApp
 import kotlinx.coroutines.launch
 import org.mozilla.geckoview.GeckoRuntimeSettings
 
+private val WEB_SCHEMES = setOf("http", "https")
+
 class MainActivity : ComponentActivity() {
     // Queue of Gecko permission requests waiting for the system dialog.
     // A single slot loses requests made while another dialog is pending.
@@ -123,7 +125,9 @@ class MainActivity : ComponentActivity() {
 
     private fun handleIntent(intent: Intent?) {
         val url = when (intent?.action) {
-            Intent.ACTION_VIEW -> intent.dataString
+            // MainActivity is exported, so any app can send an explicit intent with
+            // file:, data: or about: URLs. Only open what the intent filter declares.
+            Intent.ACTION_VIEW -> intent.data?.takeIf { it.scheme?.lowercase() in WEB_SCHEMES }?.toString()
             Intent.ACTION_SEND -> intent.getStringExtra(Intent.EXTRA_TEXT)?.trim()
                 ?.let { text -> Regex("https?://\\S+").find(text)?.value }
             else -> null
