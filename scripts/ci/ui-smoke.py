@@ -405,6 +405,9 @@ def main():
         report["after_welcome"] = state
         m.screenshot(out / "01-after-welcome.png")
         check_shell("after welcome", state)
+        workspaces = m.script("return gHilalWorkspaces._workspaces.map(w => [w.name, w.emoji])")
+        check("welcome makes the three starter workspaces it offers, no extra Default one",
+              len(workspaces) == 3 and "Default" not in [w[0] for w in workspaces], workspaces)
 
         # Icons are font ligatures ("arrow_back"); a screen reader must get the
         # button's title instead of the ligature text.

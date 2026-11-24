@@ -53,9 +53,9 @@
   ];
 
   const STARTER_WORKSPACES = [
-    { key: "personal", label: "Personal", color: "blue" },
-    { key: "work", label: "Work", color: "orange" },
-    { key: "social", label: "Social", color: "pink" },
+    { key: "personal", label: "Personal", emoji: "\u{1F3E0}", color: "blue" },
+    { key: "work", label: "Work", emoji: "\u{1F4BC}", color: "orange" },
+    { key: "social", label: "Social", emoji: "\u{1F3A8}", color: "pink" },
   ];
 
   const STEP_COUNT = 3;
@@ -569,11 +569,26 @@
         try {
           prefs.setBoolPref(PREF_WORKSPACES_ENABLED, true);
           let first = null;
+          // A new profile has one "Default" workspace holding the tabs open
+          // now. It becomes the first starter workspace, so the user gets the
+          // three workspaces this step offered instead of four.
+          const existing = this._workspaces._workspaces;
+          let reuse =
+            existing?.length == 1 && existing[0].id == "default" && existing[0].name == "Default"
+              ? existing[0]
+              : null;
           for (const preset of STARTER_WORKSPACES) {
             const label =
               (await document.l10n.formatValue(`hilal-welcome-workspace-label-${preset.key}`)) ||
               preset.label;
-            const workspace = this._workspaces.ensureWorkspace(label, "", preset.color);
+            let workspace;
+            if (reuse) {
+              this._workspaces.rename(reuse.id, label, preset.emoji, preset.color);
+              workspace = reuse;
+              reuse = null;
+            } else {
+              workspace = this._workspaces.ensureWorkspace(label, preset.emoji, preset.color);
+            }
             first ??= workspace;
           }
           if (first?.id) {
