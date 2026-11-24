@@ -149,12 +149,28 @@
             window.gHilalShell.renderWorkspaces();
           }
         };
+        const prefs = [
+          "hilal.theme.accentMode",
+          "hilal.theme.globalAccentColor",
+          "hilal.workspaces.data",
+          "layout.css.prefers-color-scheme.content-override",
+        ];
         try {
-          Services.prefs.addObserver("hilal.theme.accentMode", this._prefObserver);
-          Services.prefs.addObserver("hilal.theme.globalAccentColor", this._prefObserver);
-          Services.prefs.addObserver("hilal.workspaces.data", this._prefObserver);
-          Services.prefs.addObserver("layout.css.prefers-color-scheme.content-override", this._prefObserver);
+          for (const pref of prefs) {
+            Services.prefs.addObserver(pref, this._prefObserver);
+          }
         } catch (e) {}
+        // The pref service holds its observers strongly, so a closed window
+        // would otherwise stay alive and keep restyling itself.
+        window.addEventListener(
+          "unload",
+          () => {
+            for (const pref of prefs) {
+              Services.prefs.removeObserver(pref, this._prefObserver);
+            }
+          },
+          { once: true }
+        );
       }
     },
 
