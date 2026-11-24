@@ -189,7 +189,9 @@ POLICIES_JS = r"""
 const active = Services.policies.getActivePolicies() || {};
 const status = { 0: "inactive", 1: "active", 2: "failed" }[Services.policies.status] || String(Services.policies.status);
 const key = Services.urlFormatter.formatURL("%GOOGLE_SAFEBROWSING_API_KEY%");
+const { AddonSettings } = ChromeUtils.importESModule("resource://gre/modules/addons/AddonSettings.sys.mjs");
 return {
+  requireSigning: AddonSettings.REQUIRE_SIGNING,
   status,
   names: Object.keys(active),
   updateURL: active.AppUpdateURL ? String(active.AppUpdateURL.spec || active.AppUpdateURL) : null,
@@ -572,6 +574,7 @@ def main():
         policies = m.script(POLICIES_JS)
         report["policies"] = policies
         check("enterprise policies loaded without errors", policies["status"] == "active", policies)
+        check("add-ons must be signed", policies["requireSigning"] is True, policies)
         if args.expect_updates == "hilal":
             check("updates point at the Hilal update server",
                   "hilal-browser.vercel.app/update/" in (policies["updateURL"] or ""), policies)

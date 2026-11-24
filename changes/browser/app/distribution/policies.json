@@ -1,8 +1,5 @@
 {
   "policies": {
-    "AppUpdateURL": "https://hilal-browser.vercel.app/update/6/%PRODUCT%/%VERSION%/%BUILD_ID%/%BUILD_TARGET%/%LOCALE%/%CHANNEL%/%OS_VERSION%/%SYSTEM_CAPABILITIES%/%DISTRIBUTION%/%DISTRIBUTION_VERSION%/update.xml",
-    "Preferences": {
-      "xpinstall.signatures.required": false
-    }
+    "AppUpdateURL": "https://hilal-browser.vercel.app/update/6/%PRODUCT%/%VERSION%/%BUILD_ID%/%BUILD_TARGET%/%LOCALE%/%CHANNEL%/%OS_VERSION%/%SYSTEM_CAPABILITIES%/%DISTRIBUTION%/%DISTRIBUTION_VERSION%/update.xml"
   }
 }
