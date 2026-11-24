@@ -767,6 +767,10 @@
       urlInput.setAttribute("placeholder", "Search or enter address");
       urlInput.setAttribute("autocomplete", "off");
       urlInput.setAttribute("spellcheck", "false");
+      urlInput.setAttribute("role", "combobox");
+      urlInput.setAttribute("aria-autocomplete", "list");
+      urlInput.setAttribute("aria-controls", "hilal-search-dropdown");
+      urlInput.setAttribute("aria-expanded", "false");
       urlContainer.appendChild(urlInput);
 
       // Clear button
@@ -1361,6 +1365,16 @@
           }
         }
 
+        // With the suggestions closed, Escape undoes what was typed, as in
+        // Firefox's address bar.
+        if (e.key === "Escape") {
+          e.preventDefault();
+          input.value = window.gBrowser?.currentURI?.spec || "";
+          this.syncUrl();
+          input.select();
+          return;
+        }
+
         if (e.key === "Enter") {
           e.preventDefault();
           if (
@@ -1507,18 +1521,23 @@
 
       const header = document.createElement("div");
       header.className = "hilal-search-header";
+      header.setAttribute("aria-hidden", "true");
       header.setAttribute("data-l10n-id", "hilal-shell-results");
       header.textContent = "Results";
       dropdown.appendChild(header);
 
       const list = document.createElement("div");
       list.className = "hilal-search-list";
+      list.setAttribute("role", "presentation");
 
       items.forEach((item, index) => {
         const row = document.createElement("div");
         const isSelected = index === this._selectedSuggestionIndex;
         row.className = `hilal-search-item${isSelected ? " selected" : ""}`;
         row.dataset.index = index;
+        row.id = `hilal-search-item-${index}`;
+        row.setAttribute("role", "option");
+        row.setAttribute("aria-selected", isSelected);
 
         // Icon container
         const iconDiv = document.createElement("div");
@@ -1629,6 +1648,19 @@
 
       dropdown.appendChild(list);
       dropdown.style.display = "flex";
+      this.setSuggestionsExpanded(true);
+    },
+
+    setSuggestionsExpanded(expanded) {
+      const input = document.getElementById("hilal-url-input");
+      if (!input) return;
+      input.setAttribute("aria-expanded", expanded);
+      const index = this._selectedSuggestionIndex;
+      if (expanded && index >= 0) {
+        input.setAttribute("aria-activedescendant", `hilal-search-item-${index}`);
+      } else {
+        input.removeAttribute("aria-activedescendant");
+      }
     },
 
     highlightSuggestion(index) {
@@ -1638,10 +1670,12 @@
       items.forEach((item, i) => {
         const isSel = i === index;
         item.classList.toggle("selected", isSel);
+        item.setAttribute("aria-selected", isSel);
         if (isSel) {
           item.scrollIntoView({ block: "nearest" });
         }
       });
+      this.setSuggestionsExpanded(true);
     },
 
     executeSuggestion(item) {
@@ -1673,6 +1707,7 @@
       }
       this._suggestions = [];
       this._selectedSuggestionIndex = -1;
+      this.setSuggestionsExpanded(false);
     },
 
     getMatchingOpenTabs(query) {

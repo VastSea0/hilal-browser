@@ -430,6 +430,35 @@ def main():
         time.sleep(1)
         m.screenshot(out / "03-page.png")
 
+        # Typing shows suggestions a screen reader can follow; Escape closes
+        # them, and a second Escape puts the page address back.
+        m.script("""
+          const input = document.getElementById('hilal-url-input');
+          input.focus();
+          input.value = 'hilal smoke typed';
+          input.dispatchEvent(new Event('input'));
+        """)
+        shown = wait_for(m, "return document.getElementById('hilal-search-dropdown').style.display == 'flex'", 10)
+        typed = m.script("""
+          const input = document.getElementById('hilal-url-input');
+          const esc = () => input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+          const open = {
+            expanded: input.getAttribute('aria-expanded'),
+            role: input.getAttribute('role'),
+            options: document.querySelectorAll('#hilal-search-dropdown [role=option]').length,
+          };
+          esc();
+          const afterFirst = { expanded: input.getAttribute('aria-expanded'), value: input.value };
+          esc();
+          const afterSecond = input.value;
+          input.blur();
+          return { open, afterFirst, afterSecond, url: gBrowser.currentURI.spec };
+        """)
+        check("address bar suggestions are exposed as a combobox",
+              shown and typed["open"]["expanded"] == "true" and typed["open"]["role"] == "combobox" and typed["open"]["options"] > 0, typed)
+        check("Escape closes suggestions, then restores the page address",
+              typed["afterFirst"] == {"expanded": "false", "value": "hilal smoke typed"} and typed["afterSecond"] == typed["url"], typed)
+
         before = m.script("return gBrowser.tabs.length")
         m.script("gHilalShell.openNewTab()")
         check("new tab opens", wait_for(m, f"return gBrowser.tabs.length == {before + 1}", 10))
