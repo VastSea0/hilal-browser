@@ -94,8 +94,9 @@ jobs:
               names="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$id/artifacts" \
                 -q '[.artifacts[] | select(.expired | not) | .name] | join(" ")')"
               # Only the newest run that built counts; older packages would
-              # miss its changes.
-              [[ " $names " == *" package-"* ]] || continue
+              # miss its changes. Test-only runs upload package-appimage and
+              # package-macos-signed too, so look for the build outputs.
+              [[ " $names " =~ \ package-(linux|macos|windows)\  ]] || continue
               [[ " $names " == *" package-linux "* && " $names " == *" package-macos "* && " $names " == *" package-windows "* ]] || break
               changed="$(gh api "repos/$GITHUB_REPOSITORY/compare/${row#*:}...${{ github.sha }}" \
                 -q '.files[].filename' 2>/dev/null)" || changed=""
