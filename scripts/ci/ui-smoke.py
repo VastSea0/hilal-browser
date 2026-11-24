@@ -836,7 +836,12 @@ def main():
           return gHilalWorkspaces._activeId == {json.dumps(ws["second"])} &&
             window._smokeTab.hidden && !{in_list_js};
         """, 10)
-        m.screenshot(out / "09-workspace-second.png")
+        # macOS has refused this capture mid-switch; the picture is only for
+        # review, so it must not end the run.
+        try:
+            m.screenshot(out / "09-workspace-second.png")
+        except MarionetteError as e:
+            print("SKIP workspace screenshot:", e, flush=True)
         check("switching workspaces hides the other workspace's tabs", switched, ws)
         m.script("gHilalWorkspaces.switchTo(arguments[0])", [ws["first"]])
         back = wait_for(m, f"return !window._smokeTab.hidden && {in_list_js}", 10)
