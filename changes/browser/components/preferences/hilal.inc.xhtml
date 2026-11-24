@@ -301,13 +301,14 @@
 
   <vbox id="hilalBangsForm" hidden="true" style="margin-top: 10px; padding: 16px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 16px; background-color: var(--md-sys-color-surface-container-low);">
     <html:div style="display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; gap: 8px 12px;">
-      <label data-l10n-id="hilal-bangs-trigger-label" style="font-weight: 500;"/>
+      <label control="hilalBangsTrigger" data-l10n-id="hilal-bangs-trigger-label" style="font-weight: 500;"/>
       <html:input id="hilalBangsTrigger" type="text" placeholder="g" style="min-width: 0;"/>
-      <label data-l10n-id="hilal-bangs-searchurl-label" style="font-weight: 500;"/>
+      <label control="hilalBangsSearchUrl" data-l10n-id="hilal-bangs-searchurl-label" style="font-weight: 500;"/>
       <html:input id="hilalBangsSearchUrl" type="text" placeholder="https://www.google.com/search?q={query}" style="min-width: 0;"/>
-      <label data-l10n-id="hilal-bangs-homeurl-label" style="font-weight: 500;"/>
+      <label control="hilalBangsHomeUrl" data-l10n-id="hilal-bangs-homeurl-label" style="font-weight: 500;"/>
       <html:input id="hilalBangsHomeUrl" type="text" placeholder="https://www.google.com" style="min-width: 0;"/>
     </html:div>
+    <html:p id="hilalBangsError" role="alert" hidden="hidden" style="margin: 10px 0 0; color: var(--md-sys-color-error, #b3261e);"/>
     <hbox spacing="10" style="margin-top: 12px; gap: 8px;">
       <html:m3e-button id="hilalBangsSave"
                       variant="filled"

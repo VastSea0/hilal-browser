@@ -937,6 +937,35 @@ def main():
                 m.script("gBrowser.selectedBrowser.contentDocument.getElementById(arguments[0])?.scrollIntoView({block: 'start'})", [group])
                 time.sleep(0.5)
                 m.screenshot(out / f"10-settings-{i}.png")
+            # A custom bang without {query} is refused with a message under
+            # the form, not a modal alert.
+            m.script("""
+              const doc = gBrowser.selectedBrowser.contentDocument;
+              doc.getElementById('hilalBangsAdd').click();
+              doc.getElementById('hilalBangsTrigger').value = 'smk';
+              doc.getElementById('hilalBangsSearchUrl').value = 'https://example.com/search';
+              doc.getElementById('hilalBangsSave').click();
+              doc.getElementById('hilalBangsForm').scrollIntoView({block: 'center'});
+            """)
+            wait_for(m, "return !!gBrowser.selectedBrowser.contentDocument.getElementById('hilalBangsError')?.textContent", 5)
+            time.sleep(0.5)
+            m.screenshot(out / "10-settings-bang-error.png")
+            bang_form = m.script("""
+              const doc = gBrowser.selectedBrowser.contentDocument;
+              const error = doc.getElementById('hilalBangsError');
+              const types = [...doc.querySelectorAll('#hilalBangsList richlistitem label:nth-of-type(2)')].map(l => l.textContent);
+              return {
+                error: error.hidden ? null : error.textContent,
+                saved: Services.prefs.getStringPref('hilal.bangs.custom', '').includes('smk'),
+                types: [...new Set(types)],
+              };
+            """)
+            bang_ok = bool(bang_form["error"]) and "{query}" in bang_form["error"] and not bang_form["saved"] \
+                and bang_form["types"] and all(bang_form["types"])
+            if args.locale == "tr":
+                bang_ok = bang_ok and "(default)" not in bang_form["types"]
+            check("bang form explains a missing {query} in place and lists translated bang types", bang_ok, bang_form)
+            m.script("gBrowser.selectedBrowser.contentDocument.getElementById('hilalBangsCancel').click()")
         m.script("gBrowser.removeTab(gBrowser.selectedTab, {animate: false})")
 
         # Errors from the first run; the restarted process has its own console.

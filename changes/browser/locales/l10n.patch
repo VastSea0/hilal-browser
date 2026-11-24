@@ -216,10 +216,10 @@ index 759a6d2638c3..482fe596e431 100644
 +hilal-about-helpus = Want to help? <label data-l10n-name="hilal-about-contribute-link">Contribute on GitHub</label> or <label data-l10n-name="hilal-about-issue-link">report a problem</label>.
 +hilal-about-source-link = Source code
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
-index a890aeb558f8..343759f813f7 100644
+index a890aeb558f8..84ae7859caf6 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2686,3 +2686,178 @@ security-privacy-issue-warning-ech =
+@@ -2686,3 +2686,183 @@ security-privacy-issue-warning-ech =
  security-privacy-issue-warning-proxy-autodetection =
    .label = Proxy auto-configuration is enabled
    .description = Proxy auto-configuration could let untrusted networks to monitor your activity.
@@ -353,6 +353,11 @@ index a890aeb558f8..343759f813f7 100644
 +hilal-bangs-homeurl-label = Home URL (optional):
 +hilal-bangs-default-label = (default)
 +hilal-bangs-custom-label = (custom)
++hilal-bangs-error-required = Enter a trigger and a search URL.
++hilal-bangs-error-query = The search URL needs {"{query}"} where the search terms go.
++# Variables:
++#   $trigger (String) - the trigger the user typed, without the !
++hilal-bangs-error-reserved = !{ $trigger } is a built-in bang. Choose another trigger.
 +
 +## Language Selection
 +

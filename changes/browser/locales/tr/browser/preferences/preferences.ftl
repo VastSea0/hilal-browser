@@ -170,3 +170,9 @@ hilal-sidebar-footer-downloads = İndirilenler
 hilal-sidebar-footer-passwords = Parolalar
 hilal-sidebar-footer-privacy = Gizlilik ve güvenlik
 hilal-sidebar-footer-settings = Ayarlar
+
+hilal-bangs-error-required = Bir tetikleyici ve arama URL'si girin.
+hilal-bangs-error-query = Arama URL'sinde, arama sözcüklerinin geleceği yere {"{query}"} yazılmalı.
+# Variables:
+#   $trigger (String) - the trigger the user typed, without the !
+hilal-bangs-error-reserved = !{ $trigger } yerleşik bir bang. Başka bir tetikleyici seçin.

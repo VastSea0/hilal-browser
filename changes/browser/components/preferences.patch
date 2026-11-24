@@ -68,7 +68,7 @@ index b66ff919d93b..e2566bfa9b76 100644
    };
  
    const items = includeIsDefaultPane
-@@ -1815,6 +1831,1476 @@ gMainPane.initialized = new Promise(res => {
+@@ -1815,6 +1831,1499 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
@@ -899,7 +899,10 @@ index b66ff919d93b..e2566bfa9b76 100644
 +        item.appendChild(triggerLabel);
 +
 +        const typeLabel = document.createXULElement("label");
-+        typeLabel.setAttribute("value", isCustom ? "(custom)" : "(default)");
++        document.l10n.setAttributes(
++          typeLabel,
++          isCustom ? "hilal-bangs-custom-label" : "hilal-bangs-default-label"
++        );
 +        typeLabel.setAttribute("style", "color: gray; width: 80px; min-width: 80px; margin-right: 10px;");
 +        item.appendChild(typeLabel);
 +
@@ -941,8 +944,21 @@ index b66ff919d93b..e2566bfa9b76 100644
 +      });
 +    }
 +
++    // Form problems show under the fields instead of in a modal alert.
++    const bangsError = document.getElementById("hilalBangsError");
++    const showBangsError = (id, args) => {
++      if (!bangsError) {
++        return;
++      }
++      bangsError.hidden = !id;
++      if (id) {
++        document.l10n.setAttributes(bangsError, id, args);
++      }
++    };
++
 +    if (bangsAddBtn) {
 +      bangsAddBtn.addEventListener("click", () => {
++        showBangsError(null);
 +        if (bangsForm) {
 +          bangsForm.hidden = false;
 +        }
@@ -961,6 +977,7 @@ index b66ff919d93b..e2566bfa9b76 100644
 +
 +    if (bangsCancelBtn) {
 +      bangsCancelBtn.addEventListener("click", () => {
++        showBangsError(null);
 +        if (bangsForm) {
 +          bangsForm.hidden = true;
 +        }
@@ -974,14 +991,19 @@ index b66ff919d93b..e2566bfa9b76 100644
 +        const home = bangsHomeUrlInput ? bangsHomeUrlInput.value.trim() : "";
 +
 +        if (!trigger || !search) {
-+          Services.prompt.alert(window, "Invalid Input", "Trigger and Search URL are required.");
++          showBangsError("hilal-bangs-error-required");
++          return;
++        }
++        // Without {query} the search terms would be dropped.
++        if (!search.includes("{query}")) {
++          showBangsError("hilal-bangs-error-query");
 +          return;
 +        }
 +
 +        // Check if trigger is already in use by default bangs
 +        const defaults = HilalBangs.getDefaultBangs();
 +        if (trigger in defaults) {
-+          Services.prompt.alert(window, "Duplicate Trigger", "The trigger '!" + trigger + "' is reserved as a default bang.");
++          showBangsError("hilal-bangs-error-reserved", { trigger });
 +          return;
 +        }
 +
@@ -996,6 +1018,7 @@ index b66ff919d93b..e2566bfa9b76 100644
 +
 +        HilalBangs.setCustomBangs(customs);
 +        refreshBangsList();
++        showBangsError(null);
 +
 +        if (bangsForm) {
 +          bangsForm.hidden = true;
