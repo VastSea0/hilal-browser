@@ -392,6 +392,19 @@ def main():
         m.screenshot(out / "01-after-welcome.png")
         check_shell("after welcome", state)
 
+        # Icons are font ligatures ("arrow_back"); a screen reader must get the
+        # button's title instead of the ligature text.
+        unnamed = m.script(r"""
+          const visible = [...document.querySelectorAll('#hilal-header-shell button, #hilal-sidebar button')]
+            .filter(b => b.checkVisibility());
+          const name = b => b.getAttribute('aria-label') || b.title ||
+            [...b.childNodes].filter(n => !(n.nodeType == 1 && n.getAttribute('aria-hidden') == 'true'))
+              .map(n => n.textContent).join('').trim();
+          return visible.filter(b => !name(b) || [...b.querySelectorAll('i')].some(i => i.getAttribute('aria-hidden') != 'true'))
+            .map(b => b.id || b.className);
+        """)
+        check("toolbar buttons are named by their label, not the icon text", not unnamed, unnamed)
+
         for mode in ("vertical", "dual", "horizontal"):
             m.script("gHilalShell.setTabMode(arguments[0], false)", [mode])
             time.sleep(1)

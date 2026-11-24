@@ -690,7 +690,7 @@
       backBtn.id = "hilal-back-btn";
       backBtn.setAttribute("data-l10n-id", "hilal-toolbar-back");
       backBtn.title = "Back";
-      backBtn.innerHTML = "<i>arrow_back</i>";
+      backBtn.innerHTML = '<i aria-hidden="true">arrow_back</i>';
       backBtn.addEventListener("click", () => {
         if (window.gBrowser?.canGoBack) {
           window.gBrowser.goBack();
@@ -705,7 +705,7 @@
       forwardBtn.id = "hilal-forward-btn";
       forwardBtn.setAttribute("data-l10n-id", "hilal-toolbar-forward");
       forwardBtn.title = "Forward";
-      forwardBtn.innerHTML = "<i>arrow_forward</i>";
+      forwardBtn.innerHTML = '<i aria-hidden="true">arrow_forward</i>';
       forwardBtn.addEventListener("click", () => {
         if (window.gBrowser?.canGoForward) {
           window.gBrowser.goForward();
@@ -720,7 +720,7 @@
       reloadBtn.id = "hilal-reload-btn";
       reloadBtn.setAttribute("data-l10n-id", "hilal-toolbar-reload");
       reloadBtn.title = "Reload";
-      reloadBtn.innerHTML = "<i>refresh</i>";
+      reloadBtn.innerHTML = '<i aria-hidden="true">refresh</i>';
       reloadBtn.addEventListener("click", () => {
         if (window.gBrowser) window.gBrowser.reload();
       });
@@ -770,7 +770,7 @@
       clearBtn.className = "circle transparent small hilal-btn";
       clearBtn.setAttribute("data-l10n-id", "hilal-toolbar-clear");
       clearBtn.title = "Clear";
-      clearBtn.innerHTML = "<i>close</i>";
+      clearBtn.innerHTML = '<i aria-hidden="true">close</i>';
       clearBtn.style.display = "none";
       clearBtn.addEventListener("click", e => {
         e.preventDefault();
@@ -788,17 +788,17 @@
       copyBtn.className = "circle transparent small hilal-btn hilal-url-action-btn";
       copyBtn.setAttribute("data-l10n-id", "hilal-toolbar-copy-url");
       copyBtn.title = "Copy URL";
-      copyBtn.innerHTML = "<i>content_copy</i>";
+      copyBtn.innerHTML = '<i aria-hidden="true">content_copy</i>';
       copyBtn.addEventListener("click", e => {
         e.preventDefault();
         e.stopPropagation();
         const url = window.gBrowser?.currentURI?.spec;
         if (url && url !== "about:blank" && url !== "about:newtab") {
           navigator.clipboard.writeText(url);
-          copyBtn.innerHTML = "<i>check</i>";
+          copyBtn.innerHTML = '<i aria-hidden="true">check</i>';
           copyBtn.classList.add("primary-text");
           setTimeout(() => {
-            copyBtn.innerHTML = "<i>content_copy</i>";
+            copyBtn.innerHTML = '<i aria-hidden="true">content_copy</i>';
             copyBtn.classList.remove("primary-text");
           }, 1200);
         }
@@ -811,7 +811,7 @@
       themeBtn.className = "circle transparent small hilal-btn hilal-url-action-btn";
       themeBtn.setAttribute("data-l10n-id", "hilal-toolbar-theme");
       themeBtn.title = "Palette & Theme";
-      themeBtn.innerHTML = "<i>palette</i>";
+      themeBtn.innerHTML = '<i aria-hidden="true">palette</i>';
       themeBtn.addEventListener("click", e => {
         e.preventDefault();
         e.stopPropagation();
@@ -823,7 +823,7 @@
       boostBtn.id = "hilal-url-boost-btn";
       boostBtn.className = "circle transparent small hilal-btn hilal-url-action-btn";
       boostBtn.setAttribute("data-l10n-id", "hilal-boosts-button");
-      boostBtn.innerHTML = "<i>bolt</i>";
+      boostBtn.innerHTML = '<i aria-hidden="true">bolt</i>';
       boostBtn.addEventListener("click", e => {
         e.preventDefault();
         e.stopPropagation();
@@ -894,7 +894,7 @@
         "hilal-toolbar-sidebar-toggle"
       );
       sidebarToggle.title = "Toggle Sidebar";
-      sidebarToggle.innerHTML = "<i>dock_to_left</i>";
+      sidebarToggle.innerHTML = '<i aria-hidden="true">dock_to_left</i>';
       sidebarToggle.addEventListener("click", () => {
         const sb = document.getElementById("hilal-sidebar");
         if (sb) {
@@ -937,7 +937,7 @@
       hNewTabBtn.id = "hilal-htab-newtab-btn";
       hNewTabBtn.setAttribute("data-l10n-id", "hilal-toolbar-newtab");
       hNewTabBtn.title = "New Tab";
-      hNewTabBtn.innerHTML = "<i>add</i>";
+      hNewTabBtn.innerHTML = '<i aria-hidden="true">add</i>';
       hNewTabBtn.addEventListener("click", () => this.openNewTab());
       hTabs.appendChild(hNewTabBtn);
 
@@ -981,7 +981,7 @@
       newTabBtn.id = "hilal-newtab-btn";
       newTabBtn.setAttribute("data-l10n-id", "hilal-toolbar-newtab");
       newTabBtn.title = "New Tab";
-      newTabBtn.innerHTML = "<i>add</i>";
+      newTabBtn.innerHTML = '<i aria-hidden="true">add</i>';
       newTabBtn.addEventListener("click", () => this.openNewTab());
       tabsHeader.appendChild(newTabBtn);
 
@@ -1002,7 +1002,7 @@
         const btn = document.createElement("button");
         btn.className = "hilal-btn hilal-footer-btn";
         btn.id = id;
-        btn.innerHTML = `<i>${icon}</i>`;
+        btn.innerHTML = `<i aria-hidden="true">${icon}</i>`;
         btn.dataset.pref = pref;
         btn.dataset.default = defaultOn;
         document.l10n.setAttributes(btn, l10nId);
@@ -1024,7 +1024,7 @@
       settingsBtn.id = "hilal-settings-btn";
       settingsBtn.setAttribute("data-l10n-id", "hilal-toolbar-settings");
       settingsBtn.title = "Settings";
-      settingsBtn.innerHTML = "<i>settings</i>";
+      settingsBtn.innerHTML = '<i aria-hidden="true">settings</i>';
       settingsBtn.addEventListener("click", () => {
         if (typeof window.openPreferences === "function") {
           window.openPreferences();
@@ -1197,9 +1197,9 @@
     },
 
     MODE_ICONS: {
-      vertical: "<i>view_sidebar</i>",
-      dual: "<i>splitscreen</i>",
-      horizontal: "<i>tab</i>",
+      vertical: '<i aria-hidden="true">view_sidebar</i>',
+      dual: '<i aria-hidden="true">splitscreen</i>',
+      horizontal: '<i aria-hidden="true">tab</i>',
     },
 
     updateModeButton() {
@@ -1250,7 +1250,7 @@
             "row wave round tiny-space transparent" +
             (opt.id === this.tabMode ? " secondary-container active" : "");
           item.dataset.mode = opt.id;
-          item.innerHTML = `<i>${opt.icon}</i><span class="max" data-l10n-id="${opt.l10n}">${opt.label}</span>`;
+          item.innerHTML = `<i aria-hidden="true">${opt.icon}</i><span class="max" data-l10n-id="${opt.l10n}">${opt.label}</span>`;
           item.addEventListener("click", () => {
             this.setTabMode(opt.id);
             menu.style.display = "none";
@@ -1550,11 +1550,11 @@
           img.src = favSrc;
           img.onerror = () => {
             img.remove();
-            iconDiv.innerHTML = `<i>${iconName}</i>`;
+            iconDiv.innerHTML = `<i aria-hidden="true">${iconName}</i>`;
           };
           iconDiv.appendChild(img);
         } else {
-          iconDiv.innerHTML = `<i>${iconName}</i>`;
+          iconDiv.innerHTML = `<i aria-hidden="true">${iconName}</i>`;
         }
         row.appendChild(iconDiv);
 
@@ -1602,6 +1602,7 @@
         } else if (item.type === "search" || item.type === "suggestion") {
           const trail = document.createElement("i");
           trail.className = "hilal-search-trail";
+          trail.setAttribute("aria-hidden", "true");
           trail.textContent = "north_west";
           row.appendChild(trail);
         }
@@ -1902,7 +1903,7 @@
         pill.innerHTML = `
           <span>${activeWs.emoji || "\u{1F4C1}"}</span>
           <span class="max">${activeWs.name || activeWs.id}</span>
-          <i>arrow_drop_down</i>
+          <i aria-hidden="true">arrow_drop_down</i>
         `;
         pill.addEventListener("click", e => {
           e.stopPropagation();
@@ -1954,7 +1955,7 @@
       addWsBtn.className = "circle small border hilal-ws-chip hilal-ws-add";
       addWsBtn.setAttribute("data-l10n-id", "hilal-toolbar-new-workspace");
       addWsBtn.title = "New Workspace";
-      addWsBtn.innerHTML = "<i>add</i>";
+      addWsBtn.innerHTML = '<i aria-hidden="true">add</i>';
       addWsBtn.addEventListener("click", () => {
         if (manager && typeof manager._showCreateDialog === "function") {
           manager._showCreateDialog();
@@ -2030,7 +2031,7 @@
         item.innerHTML = `
           <span class="small">${ws.emoji || "\u{1F4C1}"}</span>
           <span class="max">${ws.name || ws.id}</span>
-          ${isActive ? "<i>check</i>" : ""}
+          ${isActive ? '<i aria-hidden="true">check</i>' : ""}
         `;
 
         item.addEventListener("click", () => {
@@ -2064,7 +2065,7 @@
       const addBtn = document.createElement("button");
       addBtn.className = "row wave round tiny-space transparent";
       addBtn.innerHTML = `
-        <i>add</i>
+        <i aria-hidden="true">add</i>
         <span class="max" data-l10n-id="hilal-shell-new-workspace"></span>
       `;
       addBtn.addEventListener("click", () => {
@@ -2173,6 +2174,7 @@
         toggle.className = "row wave round tiny-space transparent";
         toggle.toggleAttribute("aria-pressed", boost.id == activeId);
         const icon = document.createElement("i");
+        icon.setAttribute("aria-hidden", "true");
         icon.textContent = boost.id == activeId ? "toggle_on" : "toggle_off";
         const name = document.createElement("span");
         name.className = "max";
@@ -2193,7 +2195,7 @@
         const edit = document.createElement("button");
         edit.className = "circle transparent small";
         edit.setAttribute("data-l10n-id", "hilal-boosts-edit");
-        edit.innerHTML = "<i>edit</i>";
+        edit.innerHTML = '<i aria-hidden="true">edit</i>';
         edit.addEventListener("click", () => {
           menu.remove();
           openEditor(manager.loadBoostFromStore(domain, boost.id));
@@ -2204,7 +2206,7 @@
 
       const create = document.createElement("button");
       create.className = "row wave round tiny-space transparent";
-      create.innerHTML = '<i>add</i><span class="max" data-l10n-id="hilal-boosts-new"></span>';
+      create.innerHTML = '<i aria-hidden="true">add</i><span class="max" data-l10n-id="hilal-boosts-new"></span>';
       create.addEventListener("click", () => {
         menu.remove();
         openEditor(manager.createNewBoost(domain));
@@ -2290,6 +2292,10 @@
       }
       const html = (tag, attrs = {}, ...children) => {
         const el = document.createElementNS("http://www.w3.org/1999/xhtml", tag);
+        // Icons are Material Symbols ligatures; their text is not a label.
+        if (tag == "i") {
+          el.setAttribute("aria-hidden", "true");
+        }
         for (const [k, v] of Object.entries(attrs)) {
           if (k == "l10n") {
             document.l10n.setAttributes(el, v);
@@ -2487,6 +2493,10 @@
       }
       const html = (tag, attrs = {}, ...children) => {
         const el = document.createElementNS("http://www.w3.org/1999/xhtml", tag);
+        // Icons are Material Symbols ligatures; their text is not a label.
+        if (tag == "i") {
+          el.setAttribute("aria-hidden", "true");
+        }
         for (const [k, v] of Object.entries(attrs)) {
           if (k.startsWith("on")) {
             el.addEventListener(k.slice(2), v);
@@ -2990,14 +3000,14 @@
       splitBadge.setAttribute("data-l10n-id", "hilal-toolbar-split-view");
       splitBadge.title = "Split View";
       splitBadge.style.display = "none";
-      splitBadge.innerHTML = "<i class=\"tiny\">splitscreen</i>";
+      splitBadge.innerHTML = '<i aria-hidden="true" class="tiny">splitscreen</i>';
       htab.appendChild(splitBadge);
 
       // Sound indicator
       const soundBtn = document.createElement("button");
       soundBtn.className = "circle transparent small hilal-htab-sound-btn";
       soundBtn.style.display = "none";
-      soundBtn.innerHTML = "<i class=\"tiny\">volume_up</i>";
+      soundBtn.innerHTML = '<i aria-hidden="true" class="tiny">volume_up</i>';
       soundBtn.addEventListener("click", e => {
         e.stopPropagation();
         tab.toggleMuteAudio?.();
@@ -3011,7 +3021,7 @@
       closeBtn.setAttribute("aria-label", "Close tab");
       closeBtn.setAttribute("data-l10n-id", "hilal-toolbar-close-tab");
       closeBtn.title = "Close tab";
-      closeBtn.innerHTML = "<i class=\"tiny\">close</i>";
+      closeBtn.innerHTML = '<i aria-hidden="true" class="tiny">close</i>';
       closeBtn.addEventListener("click", e => {
         e.stopPropagation();
         const isMulti =
@@ -3133,8 +3143,13 @@
       if (soundBtn) {
         if (tab.soundPlaying || tab.muted) {
           soundBtn.style.display = "inline-flex";
-          soundBtn.title = tab.muted ? "Unmute Tab" : "Mute Tab";
-          soundBtn.innerHTML = tab.muted ? "<i>volume_off</i>" : "<i>volume_up</i>";
+          const l10nId = tab.muted
+            ? "tabbrowser-unmute-tab-audio-aria-label"
+            : "tabbrowser-mute-tab-audio-aria-label";
+          if (soundBtn.getAttribute("data-l10n-id") != l10nId) {
+            document.l10n.setAttributes(soundBtn, l10nId);
+            soundBtn.innerHTML = tab.muted ? '<i aria-hidden="true">volume_off</i>' : '<i aria-hidden="true">volume_up</i>';
+          }
         } else {
           soundBtn.style.display = "none";
         }
@@ -3173,7 +3188,7 @@
       splitBadge.setAttribute("data-l10n-id", "hilal-toolbar-split-view");
       splitBadge.title = "Split View";
       splitBadge.style.display = "none";
-      splitBadge.innerHTML = "<i class=\"tiny\">splitscreen</i>";
+      splitBadge.innerHTML = '<i aria-hidden="true" class="tiny">splitscreen</i>';
       pill.appendChild(splitBadge);
 
       // Close button — Beer CSS circle transparent button with Material Symbols close icon
@@ -3181,7 +3196,7 @@
       closeBtn.className = "hilal-tab-close-btn";
       closeBtn.setAttribute("aria-label", "Close tab");
       closeBtn.setAttribute("data-l10n-id", "hilal-toolbar-close-tab");
-      closeBtn.innerHTML = "<i class=\"tiny\">close</i>";
+      closeBtn.innerHTML = '<i aria-hidden="true" class="tiny">close</i>';
       closeBtn.addEventListener("click", e => {
         e.stopPropagation();
         const isMulti =
