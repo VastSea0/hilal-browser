@@ -745,9 +745,12 @@ def main():
             chrome_handle = m.send("WebDriver:GetWindowHandle")
             chrome_handle = chrome_handle.get("value", chrome_handle) if isinstance(chrome_handle, dict) else chrome_handle
             # Marionette selects every tab it switches to, which shows the
-            # hidden tabs of other workspaces, so go straight to this one: its
-            # handle is the browser's id.
-            site_handle = str(m.script("return gBrowser.selectedBrowser.browserId"))
+            # hidden tabs of other workspaces, so go straight to this one.
+            site_handle = m.script("""
+              const { NavigableManager } = ChromeUtils.importESModule(
+                "chrome://remote/content/shared/NavigableManager.sys.mjs");
+              return NavigableManager.getIdForBrowser(gBrowser.selectedBrowser);
+            """)
             m.context("content")
             m.send("WebDriver:SwitchToWindow", {"handle": site_handle})
             marked = wait_for(m, "return !!document.documentElement.getAttribute('data-hilal-accent')", 15)
