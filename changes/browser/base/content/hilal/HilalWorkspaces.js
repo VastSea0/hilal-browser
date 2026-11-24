@@ -1110,7 +1110,7 @@
             copy: false,
             select: tab.selected,
             locationURI,
-          });
+          }).catch(e => this._warn("failed to move tab to its container", e));
         }
       }, 0);
     }
