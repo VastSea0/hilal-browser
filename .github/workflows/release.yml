@@ -160,9 +160,12 @@ jobs:
       - name: Update package manifests
         run: |
           set -euo pipefail
-          latest="$(gh release view --json tagName -q .tagName)"
+          # Android releases share the repo, so compare with the newest desktop
+          # release rather than the repo's "latest" one.
+          latest="$(gh release list -L 50 --exclude-drafts --exclude-pre-releases \
+            --json tagName -q '.[].tagName' | grep -E '^v[0-9]' | head -n1 || true)"
           if [ "$latest" != "$TAG" ]; then
-            echo "::notice::$TAG is not the latest release ($latest); manifests stay as they are."
+            echo "::notice::$TAG is not the latest desktop release ($latest); manifests stay as they are."
             exit 0
           fi
           gh release download "$TAG" -p SHA256SUMS -D "$RUNNER_TEMP"

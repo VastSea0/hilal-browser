@@ -289,7 +289,14 @@ jobs:
           fi
           mkdir new old
           tar -xf package/*.linux-*.tar.* -C new
-          tag="$(gh release view -R "$GITHUB_REPOSITORY" --json tagName -q .tagName)"
+          # The repo's "latest" release can be an Android one, so pick the
+          # newest published desktop release (v* tag) explicitly.
+          tag="$(gh release list -R "$GITHUB_REPOSITORY" -L 50 --exclude-drafts --exclude-pre-releases \
+            --json tagName -q '.[].tagName' | grep -E '^v[0-9]' | head -n1 || true)"
+          if [ -z "$tag" ]; then
+            echo "::error::No published desktop release found to update from."
+            exit 1
+          fi
           echo "Updating from $tag"
           gh release download "$tag" -R "$GITHUB_REPOSITORY" -p '*-linux-x86_64.tar.xz' -D old-dl
           tar -xf old-dl/*.tar.xz -C old
