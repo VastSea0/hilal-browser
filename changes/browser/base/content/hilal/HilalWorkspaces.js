@@ -966,7 +966,12 @@
         return;
       }
       tab.setAttribute("hilal-workspace", workspaceId);
-      if (typeof SessionStore !== "undefined") {
+      // _getTabWorkspace runs for every tab on each tab list render, and
+      // every setCustomTabValue marks the window dirty for a session save.
+      if (
+        typeof SessionStore !== "undefined" &&
+        SessionStore.getCustomTabValue(tab, STORE_KEY) !== workspaceId
+      ) {
         SessionStore.setCustomTabValue(tab, STORE_KEY, workspaceId);
       }
     }
