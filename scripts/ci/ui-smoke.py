@@ -757,8 +757,9 @@ def main():
           const mgr = gHilalWorkspaces;
           const first = mgr._activeId;
           window._smokeTab = gBrowser.selectedTab;
+          const count = mgr._workspaces.length;
           mgr.create("Smoke");
-          return { first, second: mgr._activeId };
+          return { first, second: mgr._activeId, count };
         """)
         in_list_js = "[...document.querySelectorAll('#hilal-tab-list > :not(.hilal-tab-leaving)')].some(e => e._tab == window._smokeTab)"
         switched = ws["second"] != ws["first"] and wait_for(m, f"""
@@ -772,7 +773,7 @@ def main():
         check("switching back shows its tabs again", back)
         m.script("window._smokeTab = null")
         m.script("return gHilalWorkspaces.remove(arguments[0])", [ws["second"]])
-        check("workspace is removed", wait_for(m, "return gHilalWorkspaces._workspaces.length == 1", 10))
+        check("workspace is removed", wait_for(m, f"return gHilalWorkspaces._workspaces.length == {ws['count']}", 10))
 
         # Extra windows: the shell has to start in a second and in a private
         # window, their tabs must settle (no endless container reopening),
