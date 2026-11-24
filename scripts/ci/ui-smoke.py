@@ -1065,6 +1065,13 @@ def main():
         log.close()
         shutil.rmtree(profile, ignore_errors=True)
 
+    # Uncaught errors from content processes, such as a query of one of
+    # Hilal's actors left unanswered when its page went away, only show up
+    # in the log.
+    actor_errors = [line.strip() for line in (out / "browser.log").read_text(errors="replace").splitlines()
+                    if "Actor 'Hilal" in line]
+    check("no uncaught errors from Hilal's actors", not actor_errors, actor_errors[:10])
+
     (out / "report.json").write_text(json.dumps(report, indent=2))
     failed = [c for c in checks if c["status"] == "FAIL"]
     lines = [f"## Hilal UI smoke ({report['host']})", ""]
