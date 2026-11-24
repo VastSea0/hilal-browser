@@ -826,37 +826,44 @@ def main():
         ws = m.script("""
           const mgr = gHilalWorkspaces;
           const first = mgr._activeId;
-          window._smokeTab = gBrowser.selectedTab;
+          const selected = mgr._getTabWorkspace(gBrowser.selectedTab);
+          window._smokeTab = gBrowser.visibleTabs.find(t => mgr._getTabWorkspace(t) == first) || null;
           const count = mgr._workspaces.length;
-          mgr.create("Smoke");
-          return { first, second: mgr._activeId, count };
+          if (window._smokeTab) {
+            mgr.create("Smoke");
+          }
+          return { first, selected, second: mgr._activeId, count, found: !!window._smokeTab };
         """)
-        in_list_js = "[...document.querySelectorAll('#hilal-tab-list > :not(.hilal-tab-leaving)')].some(e => e._tab == window._smokeTab)"
-        switched = ws["second"] != ws["first"] and wait_for(m, f"""
-          return gHilalWorkspaces._activeId == {json.dumps(ws["second"])} &&
-            window._smokeTab.hidden && !{in_list_js};
-        """, 10)
-        # macOS has refused this capture mid-switch; the picture is only for
-        # review, so it must not end the run.
-        try:
-            m.screenshot(out / "09-workspace-second.png")
-        except MarionetteError as e:
-            print("SKIP workspace screenshot:", e, flush=True)
-        check("switching workspaces hides the other workspace's tabs", switched, ws)
-        m.script("gHilalWorkspaces.switchTo(arguments[0])", [ws["first"]])
-        back = wait_for(m, f"return !window._smokeTab.hidden && {in_list_js}", 10)
-        check("switching back shows its tabs again", back, None if back else m.script("""
-          const t = window._smokeTab, mgr = gHilalWorkspaces;
-          return {
-            label: t.label, connected: t.isConnected, closing: t.closing, hidden: t.hidden,
-            workspace: mgr._getTabWorkspace(t), active: mgr._activeId,
-            container: t.userContextId, activeContainer: mgr.activeContainerId,
-            list: [...document.querySelectorAll('#hilal-tab-list > *')].map(e => [e.title, e.className]),
-          };
-        """))
-        m.script("window._smokeTab = null")
-        m.script("return gHilalWorkspaces.remove(arguments[0])", [ws["second"]])
-        check("workspace is removed", wait_for(m, f"return gHilalWorkspaces._workspaces.length == {ws['count']}", 10))
+        check("selected tab belongs to the active workspace", ws["selected"] == ws["first"], ws,
+              known_issue="seen after the welcome flow; see the stability report")
+        check("active workspace has a visible tab", ws["found"], ws)
+        if ws["found"]:
+            in_list_js = "[...document.querySelectorAll('#hilal-tab-list > :not(.hilal-tab-leaving)')].some(e => e._tab == window._smokeTab)"
+            switched = ws["second"] != ws["first"] and wait_for(m, f"""
+              return gHilalWorkspaces._activeId == {json.dumps(ws["second"])} &&
+                window._smokeTab.hidden && !{in_list_js};
+            """, 10)
+            # macOS has refused this capture mid-switch; the picture is only for
+            # review, so it must not end the run.
+            try:
+                m.screenshot(out / "09-workspace-second.png")
+            except MarionetteError as e:
+                print("SKIP workspace screenshot:", e, flush=True)
+            check("switching workspaces hides the other workspace's tabs", switched, ws)
+            m.script("gHilalWorkspaces.switchTo(arguments[0])", [ws["first"]])
+            back = wait_for(m, f"return !window._smokeTab.hidden && {in_list_js}", 10)
+            check("switching back shows its tabs again", back, None if back else m.script("""
+              const t = window._smokeTab, mgr = gHilalWorkspaces;
+              return {
+                label: t.label, connected: t.isConnected, closing: t.closing, hidden: t.hidden,
+                workspace: mgr._getTabWorkspace(t), active: mgr._activeId,
+                container: t.userContextId, activeContainer: mgr.activeContainerId,
+                list: [...document.querySelectorAll('#hilal-tab-list > *')].map(e => [e.title, e.className]),
+              };
+            """))
+            m.script("window._smokeTab = null")
+            m.script("return gHilalWorkspaces.remove(arguments[0])", [ws["second"]])
+            check("workspace is removed", wait_for(m, f"return gHilalWorkspaces._workspaces.length == {ws['count']}", 10))
 
         # Every accent notification makes each boosted page reload its boost,
         # so redrawing the workspaces with an unchanged accent must not send one.
@@ -996,10 +1003,17 @@ def main():
               mgr.create("Keep");
               const keep = mgr._activeId;
               const tab = gBrowser.addTrustedTab("about:robots", { userContextId: 0 });
+              window._keepTab = tab;
+              window._keepFirst = first;
               const stored = SessionStore.getCustomTabValue(tab, "hilalWorkspace");
-              mgr.switchTo(first);
-              Services.prefs.setIntPref("browser.startup.page", 3);
               return { keep, stored };
+            """)
+            # The session only keeps the page once it has loaded.
+            wait_for(m, "return window._keepTab.linkedBrowser.currentURI.spec == 'about:robots'", 15)
+            m.script("""
+              gHilalWorkspaces.switchTo(window._keepFirst);
+              window._keepTab = null;
+              Services.prefs.setIntPref("browser.startup.page", 3);
             """)
             check("tab is stored with its workspace", keep["stored"] == keep["keep"], keep)
             # Quit and launch again, as a user does. Firefox's in-place restart
@@ -1039,13 +1053,16 @@ def main():
             restored = m.script("""
               const tab = gBrowser.tabs.find(t => {
                 try {
-                  const entries = JSON.parse(SessionStore.getTabState(t)).entries || [];
-                  return entries.some(e => e.url == "about:robots");
+                  const state = JSON.parse(SessionStore.getTabState(t));
+                  return state.userTypedValue == "about:robots" ||
+                    (state.entries || []).some(e => e.url == "about:robots");
                 } catch (e) {
                   return false;
                 }
               });
-              if (!tab) return null;
+              if (!tab) {
+                return { tabs: gBrowser.tabs.map(t => SessionStore.getTabState(t).slice(0, 300)) };
+              }
               gHilalWorkspaces._apply();
               return {
                 workspace: gHilalWorkspaces._getTabWorkspace(tab),
@@ -1055,7 +1072,7 @@ def main():
             """)
             report["restored_workspace_tab"] = restored
             check("restored tab stays in its workspace",
-                  bool(restored) and restored["workspace"] == restored["stored"] == keep["keep"] and restored["hidden"],
+                  bool(restored) and restored.get("workspace") == restored.get("stored") == keep["keep"] and restored.get("hidden") is True,
                   restored)
             errors += m.script(ERRORS_JS)
 
