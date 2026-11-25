@@ -1308,7 +1308,11 @@
         return;
       }
 
-      this._ensureWorkspaceContainers();
+      // A container the user deleted is made again; save its id, or the next
+      // start makes yet another one and leaves this one orphaned.
+      if (this._ensureWorkspaceContainers()) {
+        this._saveData();
+      }
 
       const selected = gBrowser.selectedTab;
       const selectedWorkspace = this._getTabWorkspace(selected);

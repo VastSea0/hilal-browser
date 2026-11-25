@@ -975,6 +975,33 @@ def main():
         check("boost CSS is saved, kept and removed with its boost",
               boost_css.get("written") and boost_css.get("unchanged") and boost_css.get("removed"), boost_css)
 
+        # A workspace whose container was deleted gets a new one, and its id
+        # is saved so the next start does not make yet another.
+        container = m.script("""
+          const resolve = arguments[arguments.length - 1];
+          (async () => {
+            const mgr = gHilalWorkspaces;
+            const first = mgr._activeId;
+            mgr.create("Orphan");
+            const ws = mgr._workspaces.find(w => w.id == mgr._activeId);
+            const old = ws.containerId;
+            mgr.switchTo(first);
+            ContextualIdentityService.remove(old);
+            mgr._apply();
+            const saved = JSON.parse(Services.prefs.getStringPref("hilal.workspaces.data"))
+              .find(w => w.id == ws.id)?.containerId;
+            const result = {
+              old, now: ws.containerId, saved,
+              exists: !!ContextualIdentityService.getPublicIdentityFromId(ws.containerId),
+            };
+            await mgr.remove(ws.id);
+            return result;
+          })().then(resolve, e => resolve({ error: String(e) }));
+        """, asynchronous=True)
+        check("recreated workspace container is saved",
+              container.get("exists") and container.get("now") != container.get("old")
+              and container.get("saved") == container.get("now"), container)
+
         # Extra windows: the shell has to start in a second and in a private
         # window, their tabs must settle (no endless container reopening),
         # and closing them must not keep them alive.
