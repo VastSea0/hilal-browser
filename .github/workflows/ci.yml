@@ -500,8 +500,10 @@ jobs:
         run: python scripts/ci/ui-smoke.py --binary app/firefox/firefox.exe --out ui-smoke
 
       # Most Windows users run the installer and use Windows in Turkish, so
-      # the installed copy is tested that way.
+      # the installed copy is tested that way. It runs even when the portable
+      # smoke failed, so one failing check does not hide the Turkish results.
       - name: Install with the setup program
+        if: ${{ !cancelled() }}
         shell: pwsh
         run: |
           $setup = Get-ChildItem package/*.installer.exe | Select-Object -First 1
@@ -512,6 +514,7 @@ jobs:
           Get-ChildItem $dir | Select-Object -First 20
 
       - name: UI smoke (installed, Turkish)
+        if: ${{ !cancelled() }}
         shell: pwsh
         run: python scripts/ci/ui-smoke.py --binary "$env:RUNNER_TEMP/Hilal/firefox.exe" --locale tr --out ui-smoke-installed
 
