@@ -16,7 +16,19 @@ const AUTO_EXCLUDED_PREF = "hilal.boosts.auto.excluded";
 // dark page), learned when a page finishes loading without an automatic
 // boost on it. "Compatible" automatic boosts skip such sites, and only light
 // pages are turned dark. Unknown domains are left as they are until known.
+// Kept to the most recently seen domains; a forgotten one is learned again
+// on its next page load.
 const ownThemeDomains = new Map();
+const OWN_THEME_DOMAINS_MAX = 500;
+
+function rememberOwnTheme(domain, ownTheme) {
+  // Re-inserting moves the domain to the end, so the oldest comes first.
+  ownThemeDomains.delete(domain);
+  ownThemeDomains.set(domain, ownTheme);
+  if (ownThemeDomains.size > OWN_THEME_DOMAINS_MAX) {
+    ownThemeDomains.delete(ownThemeDomains.keys().next().value);
+  }
+}
 
 export class HilalBoostsParent extends JSWindowActorParent {
   #zapBar = null;
@@ -315,7 +327,7 @@ export class HilalBoostsParent extends JSWindowActorParent {
         const hadOwnTheme = ownThemeDomains.get(domain);
         // A boosted page reports the boost's colors, not its own.
         if (!boosted) {
-          ownThemeDomains.set(domain, !!ownTheme);
+          rememberOwnTheme(domain, !!ownTheme);
         }
         const browser = this.browsingContext.top.embedderElement;
         // A <browser>'s ownerGlobal is undefined from a window actor parent.
