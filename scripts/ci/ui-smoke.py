@@ -525,6 +525,12 @@ def main():
             if mode != "vertical":
                 line = m.script("const b = document.querySelector('#hilal-topbar-workspaces-slot #hilal-workspaces-bar'); return b ? getComputedStyle(b).borderBottomWidth : null")
                 check(f"{mode} tabs: no divider line under the workspace switcher", line == "0px", line)
+            if mode == "horizontal":
+                pill = m.script("return document.getElementById('hilal-ws-dropdown-pill')?.title || null")
+                pill_ok = bool(pill) and "${" not in pill and "Current Workspace" not in pill
+                if args.locale == "tr":
+                    pill_ok = pill_ok and "Click" not in pill
+                check("horizontal tabs: workspace switcher has a translated tooltip", pill_ok, pill)
         m.script("gHilalShell.setTabMode(arguments[0], false)", ["vertical"])
 
         # Settings change the layout and density through prefs while the
@@ -718,6 +724,18 @@ def main():
         """)
         check("loading tab shows a spinner and a Stop button",
               loading and busy_ui["icon"] == "close" and busy_ui["l10n"] == "hilal-toolbar-stop" and busy_ui["spinner"], busy_ui)
+        stop_title = m.script("""
+          const resolve = arguments[arguments.length - 1];
+          document.l10n.formatMessages(["hilal-toolbar-stop"]).then(([msg]) => {
+            window._smokeStopTitle = msg?.attributes?.find(a => a.name == "title")?.value || null;
+            resolve(window._smokeStopTitle);
+          });
+        """, asynchronous=True)
+        titled = bool(stop_title) and wait_for(m, "return document.getElementById('hilal-reload-btn').title == window._smokeStopTitle", 5)
+        if args.locale == "tr":
+            titled = titled and stop_title != "Stop"
+        check("Stop button has a translated tooltip", titled,
+              [stop_title, m.script("return document.getElementById('hilal-reload-btn').title")])
         time.sleep(0.5)
         m.screenshot(out / "05-loading.png")
         m.script("document.getElementById('hilal-reload-btn').click()")
