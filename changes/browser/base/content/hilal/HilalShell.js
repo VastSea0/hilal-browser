@@ -1864,10 +1864,16 @@
 
           if (manager.remove) {
             const origRemove = manager.remove.bind(manager);
+            // remove() is async: render again once its tabs have moved, and
+            // hand its promise on so callers can catch a failure.
             manager.remove = (...args) => {
-              origRemove(...args);
+              const done = Promise.resolve(origRemove(...args));
               this.renderWorkspaces();
               this.renderTabs();
+              return done.finally(() => {
+                this.renderWorkspaces();
+                this.renderTabs();
+              });
             };
           }
 

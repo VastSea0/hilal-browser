@@ -1106,13 +1106,28 @@
           this._getTabWorkspace(tab) === workspaceId &&
           this._needsContainerRetarget(tab, workspaceId, locationURI)
         ) {
-          this._moveTabToWorkspace(tab, workspaceId, {
+          this._moveTabSafely(tab, workspaceId, {
             copy: false,
             select: tab.selected,
             locationURI,
-          }).catch(e => this._warn("failed to move tab to its container", e));
+          });
         }
       }, 0);
+    }
+
+    // For callers that do not wait for the move: a failure is reported
+    // instead of becoming an unhandled rejection.
+    _moveTabSafely(tab, workspaceId, options) {
+      return this._moveTabToWorkspace(tab, workspaceId, options).catch(e => {
+        this._warn("failed to move tab to another workspace", e);
+        return null;
+      });
+    }
+
+    _removeSafely(id) {
+      return Promise.resolve(this.remove(id)).catch(e =>
+        this._warn("failed to delete workspace", e)
+      );
     }
 
     async _moveTabToWorkspace(
@@ -1837,7 +1852,7 @@
             `Delete "${workspace.name}" and clear its isolated site data?`
           )
         ) {
-          this.remove(workspace.id);
+          this._removeSafely(workspace.id);
           close();
         }
       });
@@ -1889,12 +1904,12 @@
 
       addMenuItem(
         "Move Current Tab Here",
-        () => this._moveTabToWorkspace(currentTab, workspace.id),
+        () => this._moveTabSafely(currentTab, workspace.id),
         { disabled: currentWorkspace === workspace.id }
       );
 
       addMenuItem("Copy Current Tab Here", () =>
-        this._moveTabToWorkspace(currentTab, workspace.id, { copy: true })
+        this._moveTabSafely(currentTab, workspace.id, { copy: true })
       );
 
       popup.appendChild(document.createXULElement("menuseparator"));
@@ -1921,7 +1936,7 @@
               `Delete "${workspace.name}" and clear its isolated site data?`
             )
           ) {
-            this.remove(workspace.id);
+            this._removeSafely(workspace.id);
           }
         },
         { disabled: this._workspaces.length <= 1 }
@@ -2212,7 +2227,7 @@
             );
             if (draggedTab && gBrowser.isTab(draggedTab)) {
               event.preventDefault();
-              this._moveTabToWorkspace(draggedTab, workspace.id);
+              this._moveTabSafely(draggedTab, workspace.id);
             }
           } else if (event.dataTransfer.types.includes(WS_DROP_TYPE)) {
             const draggedWsId = event.dataTransfer.getData(WS_DROP_TYPE);
