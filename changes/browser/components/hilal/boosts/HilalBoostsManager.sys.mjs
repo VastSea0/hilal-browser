@@ -33,8 +33,21 @@ class nsHilalBoostsManager {
 
   #file = null;
 
+  // Saves wait for the startup read, so a save made before it finishes
+  // cannot replace the stored boosts with the few known so far.
+  #loaded = false;
+  #pendingWrite = false;
+
+  // The user CSS last written for each boost id, so a save only touches the
+  // files that changed. Writes run one after another to keep their order.
+  #writtenCSS = new Map();
+  #cssWrites = Promise.resolve();
+
+  /** Resolves once the stored boosts are loaded (or failed to load). */
+  ready;
+
   constructor() {
-    this.#readBoostsFromStore(this.notify);
+    this.ready = this.#readBoostsFromStore(this.notify);
   }
 
   /**
@@ -465,10 +478,37 @@ class nsHilalBoostsManager {
    * @private
    */
   #readBoostsFromStore(done) {
-    this.#readFromDisk().then(data => {
-      this.registeredDomains = data;
-      done();
-    });
+    return this.#readFromDisk().then(
+      data => {
+        // Boosts created before the read finished win over stored ones
+        // with the same id.
+        for (const [domain, entry] of this.registeredDomains) {
+          const stored = data.get(domain);
+          if (!stored) {
+            data.set(domain, entry);
+            continue;
+          }
+          for (const [id, boostEntry] of entry.boostEntries) {
+            stored.boostEntries.set(id, boostEntry);
+          }
+          if (entry.activeBoostId) {
+            stored.activeBoostId = entry.activeBoostId;
+          }
+        }
+        this.registeredDomains = data;
+        this.#loaded = true;
+        if (this.#pendingWrite) {
+          this.#pendingWrite = false;
+          this.#writeToDisk(this.registeredDomains);
+        }
+        done();
+      },
+      error => {
+        // Without the stored data a save would overwrite it, so saving stays
+        // off for this session.
+        console.error("Hilal Boosts: could not read the stored boosts", error);
+      }
+    );
   }
 
   /**
@@ -510,6 +550,7 @@ class nsHilalBoostsManager {
     const raw = this.#file.data ?? {};
     const map = new Map();
 
+    await IOUtils.makeDirectory(this.#cssPath, { createAncestors: true });
     for (const [domain, entry] of Object.entries(raw)) {
       const boostsMap = new Map();
       for (const [id, boostEntry] of Object.entries(entry.boostEntries ?? {})) {
@@ -517,6 +558,7 @@ class nsHilalBoostsManager {
         const userCSS = await this.#readBoostCSS(id);
         if (userCSS) {
           boostEntry.boostData.customCSS = userCSS;
+          this.#writtenCSS.set(id, userCSS);
         }
 
         boostsMap.set(id, boostEntry);
@@ -543,14 +585,14 @@ class nsHilalBoostsManager {
     const directoryPath = this.#cssPath;
     const savePath = PathUtils.join(directoryPath, fileName);
 
-    await IOUtils.makeDirectory(directoryPath, { createAncestors: true });
-
-    if (await IOUtils.exists(savePath)) {
-      const css = await IOUtils.readUTF8(savePath);
-      return css;
+    try {
+      return await IOUtils.readUTF8(savePath);
+    } catch (e) {
+      if (e.name != "NotFoundError") {
+        console.error(`Hilal Boosts: could not read the CSS of ${id}`, e);
+      }
+      return null;
     }
-
-    return null;
   }
 
   /**
@@ -560,7 +602,12 @@ class nsHilalBoostsManager {
    * @private
    */
   #writeToDisk(map) {
+    if (!this.#loaded) {
+      this.#pendingWrite = true;
+      return;
+    }
     const obj = {};
+    const cssById = new Map();
 
     for (const [domain, entry] of map) {
       const boostsObj = {};
@@ -569,7 +616,8 @@ class nsHilalBoostsManager {
         boostsObj[id] = structuredClone(boostEntry);
         delete boostsObj[id].boostData.customCSS;
 
-        this.#writeBoostCSS(id, boostEntry.boostData.customCSS);
+        const css = boostEntry.boostData.customCSS?.trim() ? boostEntry.boostData.customCSS : "";
+        cssById.set(id, css);
       }
       obj[domain] = {
         activeBoostId: entry.activeBoostId ?? null,
@@ -579,6 +627,28 @@ class nsHilalBoostsManager {
 
     this.#file.data = obj;
     this.#file.saveSoon();
+
+    // Only boosts whose CSS changed, and deleted boosts, touch the disk.
+    for (const id of this.#writtenCSS.keys()) {
+      if (!cssById.has(id)) {
+        cssById.set(id, "");
+      }
+    }
+    for (const [id, css] of cssById) {
+      if ((this.#writtenCSS.get(id) ?? "") === css) {
+        continue;
+      }
+      if (css) {
+        this.#writtenCSS.set(id, css);
+      } else {
+        this.#writtenCSS.delete(id);
+      }
+      this.#cssWrites = this.#cssWrites
+        .then(() => this.#writeBoostCSS(id, css))
+        .catch(e =>
+          console.error(`Hilal Boosts: could not save the CSS of ${id}`, e)
+        );
+    }
   }
 
   /**
@@ -593,9 +663,7 @@ class nsHilalBoostsManager {
     const savePath = PathUtils.join(directoryPath, fileName);
 
     if (!css || css.trim() === "") {
-      if (await IOUtils.exists(savePath)) {
-        await IOUtils.remove(savePath);
-      }
+      await IOUtils.remove(savePath, { ignoreAbsent: true });
       return;
     }
     await IOUtils.makeDirectory(directoryPath, { createAncestors: true });

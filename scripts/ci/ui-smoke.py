@@ -941,6 +941,40 @@ def main():
         """)
         check("unchanged accent is not broadcast again", accent_events == 0, accent_events)
 
+        # A boost's own CSS lives in a file next to the store: saved when it
+        # changes, left alone when it does not, removed with the boost.
+        boost_css = m.script("""
+          const resolve = arguments[arguments.length - 1];
+          (async () => {
+            const { gHilalBoostsManager: mgr } = ChromeUtils.importESModule(
+              "resource:///modules/hilal/boosts/HilalBoostsManager.sys.mjs");
+            await mgr.ready;
+            const sleep = ms => new Promise(r => setTimeout(r, ms));
+            const until = async (test, ms = 5000) => {
+              for (const end = Date.now() + ms; Date.now() < end; await sleep(100)) {
+                if (await test()) return true;
+              }
+              return false;
+            };
+            const boost = mgr.createNewBoost("smoke.example");
+            const path = PathUtils.join(PathUtils.profileDir, "hilal-boosts", boost.id + ".css");
+            boost.boostEntry.boostData.customCSS = "body { color: red; }";
+            boost.boostEntry.boostData.changeWasMade = true;
+            mgr.saveBoostToStore(boost);
+            const written = await until(() => IOUtils.exists(path));
+            const before = written ? (await IOUtils.stat(path)).lastModified : null;
+            await sleep(1100);
+            mgr.saveBoostToStore(boost);
+            await sleep(1000);
+            const after = written ? (await IOUtils.stat(path)).lastModified : null;
+            mgr.deleteBoost(boost);
+            const removed = await until(async () => !(await IOUtils.exists(path)));
+            return { written, unchanged: written && before == after, removed };
+          })().then(resolve, e => resolve({ error: String(e) }));
+        """, asynchronous=True)
+        check("boost CSS is saved, kept and removed with its boost",
+              boost_css.get("written") and boost_css.get("unchanged") and boost_css.get("removed"), boost_css)
+
         # Extra windows: the shell has to start in a second and in a private
         # window, their tabs must settle (no endless container reopening),
         # and closing them must not keep them alive.
