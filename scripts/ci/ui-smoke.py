@@ -1113,6 +1113,8 @@ def main():
                 commit: Services.prefs.getStringPref("hilal.build.commit", ""),
                 version: v ? v.textContent : null,
                 experimental: !document.getElementById("experimental")?.hidden,
+                updateChannelShown: !!document.getElementById("currentChannelText") &&
+                  !document.getElementById("currentChannelText").hidden,
               };
             """)
             report["about_channel"] = channel
@@ -1122,6 +1124,10 @@ def main():
             check("About dialog names the channel",
                   shown == nightly and channel["experimental"] == nightly and
                   (not nightly or channel["commit"] in channel["version"]), channel)
+            # The updater channel is hilal-release on every build; next to
+            # "Nightly" it only confuses.
+            check("About dialog hides the hilal-release update channel",
+                  not channel["updateChannelShown"], channel)
             m.screenshot(out / "08-about.png")
             m.script("window.close()")
             m.send("WebDriver:SwitchToWindow", {"handle": main_handle})
