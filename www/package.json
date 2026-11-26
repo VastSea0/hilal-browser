@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "test:update": "tsx --test api/update.test.ts"
+    "test:update": "tsx --test api/update.test.ts",
+    "test:boosts": "tsx --test api/boosts.test.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",

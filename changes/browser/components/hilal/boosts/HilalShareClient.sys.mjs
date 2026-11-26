@@ -28,8 +28,9 @@ XPCOMUtils.defineLazyPreferenceGetter(
 
 const CACHE_FILE = "hilal-share-cache.json";
 const MAX_CACHE_ENTRIES = 200;
-// Matches the server's limit; screenshots are the bulk of a share.
-const MAX_SHARE_BYTES = 4 * 1024 * 1024;
+// Matches the server's limit (www/api/boosts.ts); screenshots are the bulk
+// of a share.
+const MAX_SHARE_BYTES = 1024 * 1024;
 const MAX_NAME_LENGTH = 200;
 const CREATE_TIMEOUT_MS = 120000;
 const READ_TIMEOUT_MS = 30000;
