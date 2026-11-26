@@ -553,4 +553,9 @@ i {
   .clock-digits {
     font-size: 54px;
   }
+
+  .clock-period {
+    bottom: 10px;
+    font-size: 12px;
+  }
 }
