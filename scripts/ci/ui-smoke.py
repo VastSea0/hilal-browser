@@ -201,6 +201,32 @@ return {
 """
 
 
+# Runs in the new tab page: what it shows, then whether an inline script or
+# a javascript: link can run there.
+NEWTAB_CSP_JS = r"""
+const imgs = [...document.querySelectorAll("#shortcuts img")];
+const result = {
+  csp: document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content || null,
+  tiles: document.querySelectorAll("#shortcuts .tile:not(.tile-add)").length,
+  icons: imgs.length,
+  iconsLoaded: imgs.filter(i => i.complete && i.naturalWidth > 0).length,
+  clock: document.getElementById("clock-hours")?.textContent + ":" + document.getElementById("clock-minutes")?.textContent,
+  iconFont: document.fonts.check('24px "Material Symbols Outlined"'),
+  titleBefore: document.title,
+};
+const link = document.createElement("a");
+link.href = 'javascript:document.title="javascript: link ran";void 0';
+document.body.append(link);
+link.click();
+link.remove();
+const script = document.createElement("script");
+script.textContent = 'document.title = "inline script ran"';
+document.body.append(script);
+script.remove();
+return result;
+"""
+
+
 # Builds the style sheet of a hostile shared boost and lets Firefox's CSS
 # parser say whether any rule in it would load a resource.
 SHARED_BOOST_JS = r"""
@@ -599,9 +625,20 @@ def main():
             m.send("WebDriver:SwitchToWindow", {"handle": handle})
             rect = m.script("const e = document.querySelector('.clock-hours'); if (!e) return null; const r = e.getBoundingClientRect(); const s = getComputedStyle(e.querySelector('.clock-shape')); return [r.x, r.y, r.width, r.height, s.maskImage, s.clipPath]")
             if rect:
+                newtab_csp = m.script(NEWTAB_CSP_JS)
+                # A javascript: link runs after the click returns.
+                time.sleep(1)
+                newtab_csp["titleAfter"] = m.script("return document.title")
                 break
         m.context("chrome")
         m.send("WebDriver:SwitchToWindow", {"handle": chrome_handle})
+        if rect:
+            report["newtab_csp"] = newtab_csp
+            check("new tab shows its shortcuts and clock under its CSP",
+                  newtab_csp["csp"] and newtab_csp["tiles"] > 0 and newtab_csp["iconsLoaded"] == newtab_csp["icons"]
+                  and newtab_csp["clock"] and newtab_csp["iconFont"], newtab_csp)
+            check("new tab CSP blocks inline scripts and javascript: links",
+                  newtab_csp["titleAfter"] == newtab_csp["titleBefore"], newtab_csp)
         # drawSnapshot paints a mask that failed to load as if there were none,
         # while the screen hides the element, so also require no mask at all.
         pixels = m.script(SHAPE_PIXELS_JS, [rect[:4]], asynchronous=True) if rect else {"error": "no clock on the new tab page"}

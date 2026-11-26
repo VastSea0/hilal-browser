@@ -2,6 +2,13 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <!-- Only Hilal's own files run here; inline scripts, javascript: links
+         and outside resources are blocked. page-icon: draws shortcut icons
+         from Firefox's favicon cache. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src chrome:; style-src chrome:; img-src chrome: page-icon:; font-src chrome:; object-src 'none'; base-uri 'none'"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark light" />
     <title data-l10n-id="hilal-newtab-title"></title>
