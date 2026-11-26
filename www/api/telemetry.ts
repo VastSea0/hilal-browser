@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { createHash, timingSafeEqual } from "node:crypto";
 
 interface TelemetryPayload {
   event?: string;
@@ -57,6 +58,21 @@ async function updateAggregateCounters(isFirstRun: boolean): Promise<void> {
   }).catch(() => {});
 }
 
+// The admin key comes only in a header: a query string ends up in access
+// logs and browser history. Both sides are hashed first so the comparison
+// runs on equal-length buffers and in constant time.
+export function isAdminRequest(
+  req: IncomingMessage,
+  secret: string | undefined = process.env.TELEMETRY_ADMIN_SECRET
+): boolean {
+  const key = req.headers["x-telemetry-admin-key"];
+  if (!secret || typeof key != "string" || !key) {
+    return false;
+  }
+  const digest = (value: string) => createHash("sha256").update(value).digest();
+  return timingSafeEqual(digest(key), digest(secret));
+}
+
 export default async function handler(
   req: IncomingMessage,
   res: ServerResponse
@@ -74,14 +90,8 @@ export default async function handler(
 
   // Health check on GET — stats are strictly private
   if (req.method === "GET") {
-    // Constant base: req.headers.host is attacker-controlled and can break
-    // URL parsing.
-    const parsedUrl = new URL(req.url || "/", "https://telemetry.hilal.local");
-    const adminKey = parsedUrl.searchParams.get("key") || req.headers["x-telemetry-admin-key"];
-    const configuredSecret = process.env.TELEMETRY_ADMIN_SECRET;
-
     // If correct admin secret provided, return real-time stats
-    if (configuredSecret && adminKey && adminKey === configuredSecret) {
+    if (isAdminRequest(req)) {
       if (!FIREBASE_PROJECT_ID || !FIREBASE_API_KEY) {
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json; charset=utf-8");
