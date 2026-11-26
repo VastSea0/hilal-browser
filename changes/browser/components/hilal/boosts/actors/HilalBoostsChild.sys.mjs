@@ -89,7 +89,21 @@ export class HilalBoostsChild extends JSWindowActorChild {
       event.target === this.document &&
       !this.browsingContext.parent
     ) {
-      this.#reportSiteTheme();
+      // Reading the page's colors flushes its styles; do it once the page
+      // has settled rather than on the load path.
+      const doc = this.document;
+      this.contentWindow?.requestIdleCallback(
+        () => {
+          try {
+            if (this.document === doc) {
+              this.#reportSiteTheme();
+            }
+          } catch (e) {
+            // The page went away or the actor was destroyed meanwhile.
+          }
+        },
+        { timeout: 2000 }
+      );
     }
   }
 
@@ -130,19 +144,9 @@ export class HilalBoostsChild extends JSWindowActorChild {
     if (!doc?.documentElement || !win) {
       return;
     }
-    const toRgb = value => {
-      if (!value) {
-        return null;
-      }
-      const probe = doc.createElement("span");
-      probe.style.color = value;
-      if (!probe.style.color) {
-        return null;
-      }
-      doc.documentElement.appendChild(probe);
-      const computed = win.getComputedStyle(probe).color;
-      probe.remove();
-      const m = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/.exec(computed);
+    // Computed colors serialize as rgb()/rgba(); anything else is ignored.
+    const parseRgb = computed => {
+      const m = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/.exec(computed ?? "");
       if (!m || (m[4] !== undefined && Number(m[4]) < 0.5)) {
         return null;
       }
@@ -157,9 +161,34 @@ export class HilalBoostsChild extends JSWindowActorChild {
     const luminance = ([r, g, b]) => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
     const hex = rgb => "#" + rgb.map(c => c.toString(16).padStart(2, "0")).join("");
 
+    // The declared theme-color can be any CSS color, so resolve it through a
+    // probe element. The probe goes in before any style is read, and nothing
+    // changes the page until the reads are done, so all of them share a
+    // single style flush.
+    const meta = doc.querySelector('meta[name="theme-color"]')?.content?.trim();
+    let probe = null;
+    if (meta) {
+      probe = doc.createElement("span");
+      probe.style.color = meta;
+      if (probe.style.color) {
+        doc.documentElement.appendChild(probe);
+      } else {
+        probe = null;
+      }
+    }
+    const header = doc.querySelector("header, nav, [role='banner']");
+    const link = doc.querySelector("a[href]");
+    let declared, headerBg, linkColor, pageBg;
+    try {
+      declared = probe ? parseRgb(win.getComputedStyle(probe).color) : null;
+      headerBg = header ? parseRgb(win.getComputedStyle(header).backgroundColor) : null;
+      linkColor = link ? parseRgb(win.getComputedStyle(link).color) : null;
+      pageBg = doc.body ? parseRgb(win.getComputedStyle(doc.body).backgroundColor) : null;
+    } finally {
+      probe?.remove();
+    }
+
     let accent = null;
-    const meta = doc.querySelector('meta[name="theme-color"]');
-    const declared = toRgb(meta?.content?.trim());
     if (declared && saturation(declared) > 0.2) {
       accent = declared;
     }
@@ -168,14 +197,7 @@ export class HilalBoostsChild extends JSWindowActorChild {
     if (!accent && !boosted) {
       // No usable theme-color: guess from the page header, then links. A
       // boosted page shows the boost's colors, so no guess is made there.
-      const header = doc.querySelector("header, nav, [role='banner']");
-      const candidates = [
-        header && win.getComputedStyle(header).backgroundColor,
-        doc.querySelector("a[href]") &&
-          win.getComputedStyle(doc.querySelector("a[href]")).color,
-      ];
-      for (const candidate of candidates) {
-        const rgb = toRgb(candidate);
+      for (const rgb of [headerBg, linkColor]) {
         if (rgb && saturation(rgb) > 0.35 && luminance(rgb) > 0.15 && luminance(rgb) < 0.85) {
           accent = rgb;
           break;
@@ -184,9 +206,6 @@ export class HilalBoostsChild extends JSWindowActorChild {
     }
 
     const scheme = doc.querySelector('meta[name="color-scheme"]')?.content ?? "";
-    const pageBg = toRgb(
-      doc.body ? win.getComputedStyle(doc.body).backgroundColor : null
-    );
     const ownTheme =
       /\bdark\b/.test(scheme) || (!!pageBg && luminance(pageBg) < 0.35);
 
