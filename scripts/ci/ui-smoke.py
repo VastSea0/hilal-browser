@@ -176,6 +176,92 @@ wg.drawSnapshot(new DOMRect(x, y, w, h), 1, "rgb(255,0,255)").then(bitmap => {
 }, e => resolve({ error: String(e) }));
 """
 
+# Drives a tab list with synthesized keys. "setup" opens three background
+# tabs and leaves keyboard focus on the second; "keys" moves focus, selects,
+# closes and cleans up.
+TAB_KEYS_JS = r"""
+const resolve = arguments[arguments.length - 1];
+const [listId, phase] = arguments;
+const list = document.getElementById(listId);
+const rows = () => [...list.children].filter(r => r._tab && !r.classList.contains('hilal-tab-leaving'));
+const rowOf = tab => rows().find(r => r._tab == tab);
+const on = tab => !!tab && document.activeElement == rowOf(tab);
+const key = k => document.activeElement.dispatchEvent(
+  new KeyboardEvent('keydown', {key: k, bubbles: true, cancelable: true}));
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const size = el => { const q = el.getBoundingClientRect(); return [Math.round(q.width), Math.round(q.height)]; };
+const horizontal = list.getAttribute('aria-orientation') == 'horizontal';
+(async () => {
+  const out = {};
+  if (phase == 'setup') {
+    const mgr = gHilalWorkspaces;
+    window._smokeKeyOrig = gBrowser.selectedTab;
+    window._smokeKeyTabs = [1, 2, 3].map(() => {
+      const t = gBrowser.addTab('about:blank', {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()});
+      if (mgr?._activeId) mgr._setTabWorkspace(t, mgr._activeId);
+      return t;
+    });
+    gHilalShell.renderTabs();
+    const [a, b] = window._smokeKeyTabs;
+    const r = rows();
+    out.tablist = list.getAttribute('role');
+    out.rows = r.length;
+    out.roles = r.every(x => x.getAttribute('role') == 'tab' && x.hasAttribute('aria-selected'));
+    out.tabStops = r.filter(x => x.tabIndex == 0).length;
+    out.selectedIsStop = rowOf(gBrowser.selectedTab)?.tabIndex == 0;
+    out.named = r.every(x => !!document.getElementById(x.getAttribute('aria-labelledby'))?.textContent);
+    rowOf(a)?.focus({focusVisible: true});
+    key(horizontal ? 'ArrowRight' : 'ArrowDown');
+    out.arrowNext = on(b);
+    rowOf(b)?.focus({focusVisible: true});
+    out.stopMoved = rowOf(b)?.tabIndex == 0 && rows().filter(x => x.tabIndex == 0).length == 1;
+    await wait(300);
+    const row = rowOf(b), cs = getComputedStyle(row);
+    out.ring = row.matches(':focus-visible') && cs.outlineStyle == 'solid' && parseFloat(cs.outlineWidth) >= 2;
+    const close = row.querySelector('.hilal-htab-close-btn, .hilal-tab-close-btn');
+    out.closeOpacity = parseFloat(getComputedStyle(close).opacity);
+    out.closeSize = size(close);
+    const sound = row.querySelector('.hilal-htab-sound-btn');
+    if (sound) {
+      sound.style.display = 'inline-flex';
+      out.soundSize = size(sound);
+      sound.style.display = 'none';
+    }
+  } else {
+    const [a, b, c] = window._smokeKeyTabs;
+    rowOf(b)?.focus({focusVisible: true});
+    key('Home');
+    out.home = document.activeElement == rows()[0];
+    key('End');
+    out.end = on(c);
+    key(horizontal ? 'ArrowLeft' : 'ArrowUp');
+    out.back = on(b);
+    // Moving the focused tab re-inserts its row; focus has to stay on it.
+    gBrowser.moveTabTo(b, {tabIndex: gBrowser.tabs.length - 1});
+    gHilalShell.scheduleRenderTabs();
+    await wait(300);
+    gHilalShell.renderTabs();
+    out.moved = rows().at(-1)?._tab == b;
+    out.survives = on(b);
+    key('Enter');
+    await wait(500);
+    out.enterSelects = gBrowser.selectedTab == b;
+    out.enterKeepsFocus = on(b);
+    key('Delete');
+    await wait(800);
+    out.deleteCloses = !b.isConnected || !!b.closing;
+    const active = document.activeElement;
+    out.focusAfterDelete = list.contains(active) && active.getAttribute('role') == 'tab' && !!active._tab;
+    gBrowser.selectedTab = window._smokeKeyOrig;
+    for (const t of [a, c]) {
+      if (t.isConnected) gBrowser.removeTab(t, {animate: false});
+    }
+    document.activeElement?.blur?.();
+  }
+  resolve(out);
+})().catch(e => resolve({error: String(e)}));
+"""
+
 ADDONS_JS = r"""
 const resolve = arguments[arguments.length - 1];
 const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
@@ -557,6 +643,28 @@ def main():
                 if args.locale == "tr":
                     pill_ok = pill_ok and "Click" not in pill
                 check("horizontal tabs: workspace switcher has a translated tooltip", pill_ok, pill)
+        m.script("gHilalShell.setTabMode(arguments[0], false)", ["vertical"])
+
+        # Both tab lists work from the keyboard and keep focus through renders.
+        for mode, list_id in (("vertical", "hilal-tab-list"), ("horizontal", "hilal-horizontal-tab-list")):
+            m.script("gHilalShell.setTabMode(arguments[0], false)", [mode])
+            time.sleep(1)
+            keys = m.script(TAB_KEYS_JS, [list_id, "setup"], asynchronous=True) or {}
+            m.screenshot(out / f"02-tab-keys-{mode}.png")
+            keys.update(m.script(TAB_KEYS_JS, [list_id, "keys"], asynchronous=True) or {})
+            report[f"tab_keys_{mode}"] = keys
+            check(f"{mode} tabs: rows form a tab list with one Tab stop",
+                  keys.get("tablist") == "tablist" and keys.get("roles") and keys.get("named")
+                  and keys.get("tabStops") == 1 and keys.get("selectedIsStop") and keys.get("stopMoved"), keys)
+            check(f"{mode} tabs: keyboard focus shows a ring and the close button",
+                  keys.get("ring") and keys.get("closeOpacity", 0) > 0.5, keys)
+            check(f"{mode} tabs: arrow keys, Home and End move focus",
+                  keys.get("arrowNext") and keys.get("home") and keys.get("end") and keys.get("back"), keys)
+            check(f"{mode} tabs: focus stays on its tab when the list re-renders",
+                  keys.get("moved") and keys.get("survives"), keys)
+            check(f"{mode} tabs: Enter selects and Delete closes the focused tab",
+                  keys.get("enterSelects") and keys.get("enterKeepsFocus") and keys.get("deleteCloses")
+                  and keys.get("focusAfterDelete"), keys)
         m.script("gHilalShell.setTabMode(arguments[0], false)", ["vertical"])
 
         # Settings change the layout and density through prefs while the

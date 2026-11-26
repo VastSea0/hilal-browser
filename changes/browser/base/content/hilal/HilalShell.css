@@ -947,6 +947,27 @@
   opacity: 1 !important;
 }
 
+/* Keyboard focus: a ring on the tab row or button, and the close button
+   shows on a focused row. */
+.hilal-htab:focus-visible,
+.hilal-tab-pill:focus-visible,
+.hilal-htab-sound-btn:focus-visible,
+.hilal-htab-close-btn:focus-visible,
+.hilal-tab-close-btn:focus-visible {
+  outline: 2px solid var(--primary, var(--md-sys-color-primary, #a8c7fa)) !important;
+  outline-offset: -2px !important;
+}
+
+.hilal-htab:focus-visible .hilal-htab-close-btn,
+.hilal-tab-pill:focus-visible .hilal-tab-close-btn {
+  opacity: 0.7;
+}
+
+.hilal-htab-close-btn:focus-visible,
+.hilal-tab-close-btn:focus-visible {
+  opacity: 1 !important;
+}
+
 /* Split View Badge Indicator — hidden by default, visible only on split tabs */
 .hilal-split-badge {
   display: none;

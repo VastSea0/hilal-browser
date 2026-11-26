@@ -972,6 +972,7 @@
       const hTabList = document.createElement("div");
       hTabList.id = "hilal-horizontal-tab-list";
       hTabList.className = "row tiny-space max";
+      this.setupTabList(hTabList, "horizontal");
       hTabs.appendChild(hTabList);
 
       // New Tab Button
@@ -1015,6 +1016,7 @@
 
       const label = document.createElement("label");
       label.className = "hilal-tabs-label";
+      label.id = "hilal-tabs-label";
       label.setAttribute("data-l10n-id", "urlbar-search-mode-tabs");
       label.textContent = "TABS";
       tabsHeader.appendChild(label);
@@ -1033,6 +1035,7 @@
       // Vertical tab list
       const tabList = document.createElement("div");
       tabList.id = "hilal-tab-list";
+      this.setupTabList(tabList, "vertical");
       sidebar.appendChild(tabList);
 
       // Footer: bookmarks, history, downloads, passwords, privacy and
@@ -3089,6 +3092,7 @@
       htab._tab = tab;
       htab.tab = tab;
       htab.setAttribute("draggable", "true");
+      this.makeTabRow(htab, isSelected);
 
       // Favicon
       const iconDiv = document.createElement("div");
@@ -3101,6 +3105,8 @@
       // Title
       const titleSpan = document.createElement("span");
       titleSpan.className = "max hilal-htab-title";
+      titleSpan.id = `hilal-tab-title-${++this._tabRowCount}`;
+      htab.setAttribute("aria-labelledby", titleSpan.id);
       const initialTitle = tab.label || tab.getAttribute("label") || "New Tab";
       titleSpan.textContent = initialTitle;
       titleSpan.title = initialTitle;
@@ -3278,6 +3284,7 @@
       pill._tab = tab;
       pill.tab = tab;
       pill.setAttribute("draggable", "true");
+      this.makeTabRow(pill, isSelected);
 
       // Favicon container
       const iconDiv = document.createElement("div");
@@ -3290,6 +3297,8 @@
       // Title container
       const titleSpan = document.createElement("span");
       titleSpan.className = "hilal-tab-title";
+      titleSpan.id = `hilal-tab-title-${++this._tabRowCount}`;
+      pill.setAttribute("aria-labelledby", titleSpan.id);
       const initialTitle = tab.label || tab.getAttribute("label") || "New Tab";
       titleSpan.textContent = initialTitle;
       titleSpan.title = initialTitle;
@@ -3528,6 +3537,110 @@
       }
     },
 
+    _tabRowCount: 0,
+
+    makeTabRow(row, isSelected) {
+      row.setAttribute("role", "tab");
+      row.setAttribute("aria-selected", isSelected);
+      row.tabIndex = -1;
+    },
+
+    // The tab lists follow the ARIA tabs pattern: one row is in the Tab
+    // order, arrow keys, Home and End move between rows, Enter and Space
+    // select and Delete closes.
+    setupTabList(list, orientation) {
+      list.setAttribute("role", "tablist");
+      list.setAttribute("aria-orientation", orientation);
+      list.setAttribute("aria-multiselectable", "true");
+      list.setAttribute("aria-labelledby", "hilal-tabs-label");
+      list.addEventListener("keydown", e => this.onTabListKeyDown(e));
+      list.addEventListener("focusin", e => {
+        const row = e.target.closest?.("[role=tab]");
+        if (row?._tab) {
+          list._focusTab = row._tab;
+          this.syncTabListFocus(list, false);
+        }
+      });
+      // Coming back into the list starts on the selected tab again.
+      list.addEventListener("focusout", e => {
+        if (!list.contains(e.relatedTarget)) {
+          list._focusTab = null;
+        }
+      });
+    },
+
+    tabRows(list) {
+      return [...this.liveTabElements(list)].filter(row => row._tab);
+    },
+
+    // Keeps one row (and its buttons) in the Tab order: the focused one, or
+    // the selected tab. With restore, focus goes back to that row when a
+    // render moved or removed the focused row.
+    syncTabListFocus(list, restore) {
+      const rows = this.tabRows(list);
+      const current =
+        rows.find(row => row._tab == list._focusTab) ||
+        rows.find(row => row.classList.contains("active")) ||
+        rows[0];
+      for (const row of rows) {
+        const index = row == current ? 0 : -1;
+        row.tabIndex = index;
+        for (const button of row.querySelectorAll("button")) {
+          button.tabIndex = index;
+        }
+      }
+      if (
+        restore &&
+        current &&
+        !rows.includes(document.activeElement?.closest?.("[role=tab]"))
+      ) {
+        current.focus();
+      }
+    },
+
+    onTabListKeyDown(event) {
+      const list = event.currentTarget;
+      const row = event.target;
+      if (row.getAttribute("role") != "tab" || !row._tab || event.altKey) {
+        return;
+      }
+      const rows = this.tabRows(list);
+      const index = rows.indexOf(row);
+      const rtl = getComputedStyle(list).direction == "rtl";
+      const step = {
+        ArrowDown: 1,
+        ArrowUp: -1,
+        ArrowRight: rtl ? -1 : 1,
+        ArrowLeft: rtl ? 1 : -1,
+      }[event.key];
+      let target = null;
+      if (step && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+        target = rows[(index + step + rows.length) % rows.length];
+      } else if (event.key == "Home") {
+        target = rows[0];
+      } else if (event.key == "End") {
+        target = rows[rows.length - 1];
+      } else if (event.key == "Enter" || event.key == " ") {
+        event.preventDefault();
+        // Selecting moves focus to the page; the list keeps it instead.
+        this.handleTabClick(row._tab, event);
+        row.focus();
+        return;
+      } else if (event.key == "Delete") {
+        event.preventDefault();
+        list._focusTab = row._tab.selected
+          ? null
+          : (rows[index + 1] || rows[index - 1])?._tab;
+        row.querySelector(".hilal-tab-close-btn, .hilal-htab-close-btn")?.click();
+        this.syncTabListFocus(list, true);
+        return;
+      }
+      if (target) {
+        event.preventDefault();
+        target.focus();
+      }
+    },
+
     // Tab events come in bursts (a page load fires TabAttrModified many
     // times, a workspace switch fires TabHide/TabShow once per tab), so
     // they render at most once per frame.
@@ -3624,6 +3737,7 @@
           continue;
         }
         el._tab = null;
+        el.tabIndex = -1;
         el.classList.remove("hilal-tab-entering");
         el.classList.add("hilal-tab-leaving");
         el.addEventListener("animationend", event => {
@@ -3639,6 +3753,7 @@
     renderVerticalTabs(visibleTabs) {
       const container = document.getElementById("hilal-tab-list");
       if (!container) return;
+      const hadFocus = container.contains(document.activeElement);
 
       const existingPills = new Map();
       for (const child of Array.from(container.children)) {
@@ -3668,6 +3783,7 @@
         }
 
         pill.classList.toggle("active", isSelected);
+        pill.setAttribute("aria-selected", isSelected || isMultiSelected);
         pill.classList.toggle("multiselected", isMultiSelected && !isSelected);
         pill.classList.toggle("split-tab", isSplit);
         pill.classList.toggle("split-active", isSplitActive);
@@ -3694,11 +3810,13 @@
           container.insertBefore(pill, currentChild || null);
         }
       });
+      this.syncTabListFocus(container, hadFocus);
     },
 
     renderHorizontalTabs(visibleTabs) {
       const container = document.getElementById("hilal-horizontal-tab-list");
       if (!container) return;
+      const hadFocus = container.contains(document.activeElement);
 
       const existingTabs = new Map();
       for (const child of Array.from(container.children)) {
@@ -3728,6 +3846,7 @@
         }
 
         htab.classList.toggle("active", isSelected);
+        htab.setAttribute("aria-selected", isSelected || isMultiSelected);
         htab.classList.toggle("secondary-container", isSelected);
         htab.classList.toggle("multiselected", isMultiSelected && !isSelected);
         htab.classList.toggle("split-tab", isSplit);
@@ -3755,6 +3874,7 @@
           container.insertBefore(htab, currentChild || null);
         }
       });
+      this.syncTabListFocus(container, hadFocus);
     },
 
     syncUrl() {
