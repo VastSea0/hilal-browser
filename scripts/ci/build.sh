@@ -25,6 +25,18 @@ cp "$repo/mozconfigs/ci-$target" "$engine/mozconfig"
 echo "=== mozconfig ($target)"
 cat "$engine/mozconfig"
 
+# The About dialog reads these to tell nightly builds from releases.
+if [ -n "${HILAL_CHANNEL:-}" ]; then
+  prefs="$engine/browser/branding/hilal/pref/firefox-branding.js"
+  sed -i.bak '/^pref("hilal\.build\./d' "$prefs" && rm -f "$prefs.bak"
+  {
+    echo "pref(\"hilal.build.channel\", \"$HILAL_CHANNEL\");"
+    echo "pref(\"hilal.build.commit\", \"$(git -C "$repo" rev-parse --short HEAD)\");"
+  } >> "$prefs"
+  echo "=== channel: $HILAL_CHANNEL"
+  tail -n 2 "$prefs"
+fi
+
 cd "$engine"
 export MOZBUILD_STATE_PATH="${MOZBUILD_STATE_PATH:-$HOME/.mozbuild}"
 

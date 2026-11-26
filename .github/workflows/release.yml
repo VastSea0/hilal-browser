@@ -50,6 +50,7 @@ jobs:
     with:
       targets: all
       publish_nightly: false
+      channel: release
     secrets: inherit
 
   publish:

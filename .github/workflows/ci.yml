@@ -45,6 +45,10 @@ on:
       publish_nightly:
         type: boolean
         default: false
+      # Shown in the About dialog; release.yml passes "release".
+      channel:
+        type: string
+        default: nightly
 
 concurrency:
   # github.workflow is the caller's name when called, so a release run does
@@ -127,6 +131,7 @@ jobs:
     with:
       target: linux
       build_date: ${{ needs.plan.outputs.build_date }}
+      channel: ${{ inputs.channel || 'nightly' }}
     secrets: inherit
 
   build-macos:
@@ -136,6 +141,7 @@ jobs:
     with:
       target: macos
       build_date: ${{ needs.plan.outputs.build_date }}
+      channel: ${{ inputs.channel || 'nightly' }}
     secrets: inherit
 
   build-windows:
@@ -145,6 +151,7 @@ jobs:
     with:
       target: windows
       build_date: ${{ needs.plan.outputs.build_date }}
+      channel: ${{ inputs.channel || 'nightly' }}
     secrets: inherit
 
   test-linux:

@@ -12,6 +12,9 @@ on:
       build_date:
         type: string
         required: true
+      channel:
+        type: string
+        default: nightly
 
 permissions:
   contents: read
@@ -30,6 +33,7 @@ jobs:
       MOZBUILD_STATE_PATH: /mnt/mozbuild
       HILAL_MAC_TOOLS: /mnt/mac-tools
       MOZ_BUILD_DATE: ${{ inputs.build_date }}
+      HILAL_CHANNEL: ${{ inputs.channel }}
     steps:
       # Deleting takes minutes, so it runs in the background while the
       # source is fetched; "Build and package" waits for it.

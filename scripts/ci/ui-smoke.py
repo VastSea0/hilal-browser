@@ -963,6 +963,22 @@ def main():
         if about:
             m.send("WebDriver:SwitchToWindow", {"handle": about})
             time.sleep(2)
+            channel = m.script("""
+              const v = document.getElementById("version");
+              return {
+                channel: Services.prefs.getStringPref("hilal.build.channel", ""),
+                commit: Services.prefs.getStringPref("hilal.build.commit", ""),
+                version: v ? v.textContent : null,
+                experimental: !document.getElementById("experimental")?.hidden,
+              };
+            """)
+            report["about_channel"] = channel
+            check("build has a channel", channel["channel"] in ("nightly", "release"), channel)
+            nightly = channel["channel"] == "nightly"
+            shown = "Nightly" in (channel["version"] or "")
+            check("About dialog names the channel",
+                  shown == nightly and channel["experimental"] == nightly and
+                  (not nightly or channel["commit"] in channel["version"]), channel)
             m.screenshot(out / "08-about.png")
             m.script("window.close()")
             m.send("WebDriver:SwitchToWindow", {"handle": main_handle})

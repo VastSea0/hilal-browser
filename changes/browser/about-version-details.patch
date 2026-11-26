@@ -1,5 +1,5 @@
 diff --git a/browser/base/content/aboutDialog.js b/browser/base/content/aboutDialog.js
-index f6e1391baf12..7cddd446681a 100644
+index f6e1391..b4c3f19 100644
 --- a/browser/base/content/aboutDialog.js
 +++ b/browser/base/content/aboutDialog.js
 @@ -52,7 +52,7 @@ function init() {
@@ -11,18 +11,38 @@ index f6e1391baf12..7cddd446681a 100644
    };
  
    let arch = Services.sysinfo.get("arch");
-@@ -152,4 +152,14 @@ function init() {
+@@ -64,7 +64,7 @@ function init() {
+   }
+ 
+   let version = Services.appinfo.version;
+-  if (/a\d+$/.test(version)) {
++  if (/a\d+$/.test(version) || getHilalChannel() == "nightly") {
+     versionIdKey += "-nightly";
+     let buildID = Services.appinfo.appBuildID;
+     let year = buildID.slice(0, 4);
+@@ -152,4 +152,25 @@ function init() {
    }
  }
  
-+function getHilalVersionLabel() {
-+  let displayVersion = AppConstants.MOZ_APP_VERSION_DISPLAY;
-+  let appVersion = Services.appinfo.version;
-+  if (!appVersion || appVersion === displayVersion) {
-+    return displayVersion;
-+  }
++// CI writes these prefs at build time; local builds have neither.
++function getHilalChannel() {
++  return Services.prefs.getStringPref("hilal.build.channel", "");
++}
 +
-+  return `${displayVersion} (Firefox ${appVersion} ESR)`;
++function getHilalVersionLabel() {
++  let label = AppConstants.MOZ_APP_VERSION_DISPLAY;
++  if (getHilalChannel() == "nightly") {
++    label += " Nightly";
++    let commit = Services.prefs.getStringPref("hilal.build.commit", "");
++    if (commit) {
++      label += ` ${commit}`;
++    }
++  }
++  let appVersion = Services.appinfo.version;
++  if (appVersion && appVersion !== AppConstants.MOZ_APP_VERSION_DISPLAY) {
++    label += ` (Firefox ${appVersion} ESR)`;
++  }
++  return label;
 +}
 +
  init();
