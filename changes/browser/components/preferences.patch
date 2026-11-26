@@ -11,7 +11,7 @@ index de83282c2c8a..5e67f723b792 100644
     content/browser/preferences/home.js
     content/browser/preferences/search.js
 diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
-index b66ff919d93b..e2566bfa9b76 100644
+index b3ffca79af8f..36c90b266d7e 100644
 --- a/browser/components/preferences/main.js
 +++ b/browser/components/preferences/main.js
 @@ -13,7 +13,7 @@
@@ -23,7 +23,7 @@ index b66ff919d93b..e2566bfa9b76 100644
  
  /**
   * @import { Setting } from "chrome://global/content/preferences/Setting.mjs"
-@@ -26,6 +26,8 @@ const { Multilingual } = ChromeUtils.importESModule(
+@@ -43,6 +43,8 @@ const { Multilingual } = importIntoWindow(
  
  ChromeUtils.defineESModuleGetters(this, {
    BackgroundUpdate: "resource://gre/modules/BackgroundUpdate.sys.mjs",
@@ -32,7 +32,7 @@ index b66ff919d93b..e2566bfa9b76 100644
    UpdateListener: "resource://gre/modules/UpdateListener.sys.mjs",
    LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
    MigrationUtils: "resource:///modules/MigrationUtils.sys.mjs",
-@@ -116,6 +118,24 @@ Preferences.addAll([
+@@ -125,6 +127,24 @@ Preferences.addAll([
      id: "privacy.userContext.newTabContainerOnLeftClick.enabled",
      type: "bool",
    },
@@ -57,7 +57,7 @@ index b66ff919d93b..e2566bfa9b76 100644
  ]);
  
  if (AppConstants.HAVE_SHELL_SERVICE) {
-@@ -632,10 +652,6 @@ function createDefaultBrowserConfig({
+@@ -641,10 +661,6 @@ function createDefaultBrowserConfig({
          },
        },
      ],
@@ -68,7 +68,7 @@ index b66ff919d93b..e2566bfa9b76 100644
    };
  
    const items = includeIsDefaultPane
-@@ -1815,6 +1831,1499 @@ gMainPane.initialized = new Promise(res => {
+@@ -1824,6 +1840,1521 @@ gMainPane.initialized = new Promise(res => {
    gMainPane.setInitialized = res;
  });
  
@@ -284,8 +284,33 @@ index b66ff919d93b..e2566bfa9b76 100644
 +      }
 +    };
 +
++    // Form problems show under the fields instead of in a modal alert.
++    let customError = null;
++    const showHilalSidebarCustomError = id => {
++      if (!customError && id && customForm) {
++        customError = document.createElementNS(
++          "http://www.w3.org/1999/xhtml",
++          "p"
++        );
++        customError.setAttribute("role", "alert");
++        customError.setAttribute(
++          "style",
++          "margin: 10px 0 0; color: var(--md-sys-color-error, #b3261e);"
++        );
++        customForm.appendChild(customError);
++      }
++      if (!customError) {
++        return;
++      }
++      customError.hidden = !id;
++      if (id) {
++        document.l10n.setAttributes(customError, id);
++      }
++    };
++
 +    const resetHilalSidebarCustomForm = () => {
 +      editingCustomItemId = null;
++      showHilalSidebarCustomError(null);
 +      if (customForm) {
 +        customForm.hidden = true;
 +      }
@@ -305,6 +330,7 @@ index b66ff919d93b..e2566bfa9b76 100644
 +        customForm.hidden = false;
 +      }
 +      editingCustomItemId = item?.id || null;
++      showHilalSidebarCustomError(null);
 +      if (customNameInput) {
 +        customNameInput.value = item?.name || "";
 +        customNameInput.focus();
@@ -341,11 +367,7 @@ index b66ff919d93b..e2566bfa9b76 100644
 +        const url = customUrlInput ? customUrlInput.value.trim() : "";
 +        const icon = customIconSelect ? customIconSelect.value : "link";
 +        if (!name || !url) {
-+          Services.prompt.alert(
-+            window,
-+            "Invalid Input",
-+            "Name and URL are required."
-+          );
++          showHilalSidebarCustomError("hilal-sidebar-custom-error-required");
 +          return;
 +        }
 +
@@ -1614,7 +1636,7 @@ index c76a0647e14b..1f76a41d521b 100644
    let category = aCategory || hash.substring(1) || kDefaultCategoryInternalName;
  
 diff --git a/browser/components/preferences/preferences.xhtml b/browser/components/preferences/preferences.xhtml
-index 1b8c38159314..855cb3c5a45f 100644
+index 1b8c38159314..bb328e29b9ff 100644
 --- a/browser/components/preferences/preferences.xhtml
 +++ b/browser/components/preferences/preferences.xhtml
 @@ -20,10 +20,6 @@

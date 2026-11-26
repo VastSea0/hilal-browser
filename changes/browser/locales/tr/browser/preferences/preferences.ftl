@@ -176,3 +176,4 @@ hilal-bangs-error-query = Arama URL'sinde, arama sözcüklerinin geleceği yere 
 # Variables:
 #   $trigger (String) - the trigger the user typed, without the !
 hilal-bangs-error-reserved = !{ $trigger } yerleşik bir bang. Başka bir tetikleyici seçin.
+hilal-sidebar-custom-error-required = Bir ad ve URL girin.

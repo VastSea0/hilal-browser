@@ -216,10 +216,10 @@ index 759a6d2638c3..482fe596e431 100644
 +hilal-about-helpus = Want to help? <label data-l10n-name="hilal-about-contribute-link">Contribute on GitHub</label> or <label data-l10n-name="hilal-about-issue-link">report a problem</label>.
 +hilal-about-source-link = Source code
 diff --git a/browser/locales/en-US/browser/preferences/preferences.ftl b/browser/locales/en-US/browser/preferences/preferences.ftl
-index a890aeb558f8..84ae7859caf6 100644
+index a890aeb558f8..dc488319d4d8 100644
 --- a/browser/locales/en-US/browser/preferences/preferences.ftl
 +++ b/browser/locales/en-US/browser/preferences/preferences.ftl
-@@ -2686,3 +2686,183 @@ security-privacy-issue-warning-ech =
+@@ -2686,3 +2686,184 @@ security-privacy-issue-warning-ech =
  security-privacy-issue-warning-proxy-autodetection =
    .label = Proxy auto-configuration is enabled
    .description = Proxy auto-configuration could let untrusted networks to monitor your activity.
@@ -321,6 +321,7 @@ index a890aeb558f8..84ae7859caf6 100644
 +    .label = Save
 +hilal-sidebar-custom-cancel =
 +    .label = Cancel
++hilal-sidebar-custom-error-required = Enter a name and a URL.
 +
 +## Privacy Level
 +
