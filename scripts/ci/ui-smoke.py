@@ -711,6 +711,84 @@ def main():
               wait_for(m, "return gBrowser.selectedBrowser.browsingContext.hilalBoostsData == 0", 10))
         probe_workspace("boosts off")
 
+        # A popup a page opens with window features gets Firefox's minimal
+        # chrome, not the Hilal shell, and goes away cleanly.
+        page_handle = m.script("""
+          const { NavigableManager } = ChromeUtils.importESModule(
+            "chrome://remote/content/shared/NavigableManager.sys.mjs");
+          window._smokeMain = NavigableManager.getIdForBrowsingContext(window.browsingContext);
+          return NavigableManager.getIdForBrowser(gBrowser.selectedBrowser);
+        """)
+        main_chrome = m.script("return window._smokeMain")
+        m.context("content")
+        m.send("WebDriver:SwitchToWindow", {"handle": page_handle})
+        m.script("window.open(arguments[0], '_blank', 'popup,width=500,height=400')", [site])
+        m.context("chrome")
+        m.send("WebDriver:SwitchToWindow", {"handle": main_chrome})
+        opened = wait_for(m, """
+          const w = [...Services.wm.getEnumerator("navigator:browser")]
+            .find(w => w != window && !w.toolbar.visible);
+          if (!w || w.document.readyState != "complete" || !w.gBrowser?.selectedBrowser) return false;
+          window._smokePopup = w;
+          window._smokePopupRef = Cu.getWeakReference(w);
+          return w.gBrowser.selectedBrowser.contentTitle == "Hilal colors";
+        """, 20)
+        check("page popup opens", opened)
+        if opened:
+            time.sleep(1)
+            popup = m.script("""
+              const w = window._smokePopup, d = w.document;
+              const box = el => {
+                if (!el) return null;
+                const r = el.getBoundingClientRect();
+                return { w: Math.round(r.width), h: Math.round(r.height) };
+              };
+              return {
+                chromehidden: d.documentElement.getAttribute("chromehidden"),
+                shell: !!d.getElementById("hilal-header-shell"),
+                sidebar: !!d.getElementById("hilal-sidebar"),
+                gHilalShell: typeof w.gHilalShell,
+                gHilalWorkspaces: typeof w.gHilalWorkspaces,
+                hilalSheets: d.querySelectorAll('link[href^="chrome://browser/content/hilal/"]').length,
+                urlbar: box(d.getElementById("urlbar")),
+                url: w.gBrowser.currentURI.spec,
+                handle: ChromeUtils.importESModule(
+                  "chrome://remote/content/shared/NavigableManager.sys.mjs"
+                ).NavigableManager.getIdForBrowsingContext(w.browsingContext),
+              };
+            """)
+            report["popup"] = popup
+            check("page popup has no Hilal shell",
+                  not popup["shell"] and not popup["sidebar"] and popup["gHilalShell"] == "undefined"
+                  and popup["gHilalWorkspaces"] == "undefined" and popup["hilalSheets"] == 0, popup)
+            check("page popup shows its address",
+                  bool(popup["urlbar"] and popup["urlbar"]["w"] > 0 and popup["urlbar"]["h"] > 0), popup)
+            try:
+                m.send("WebDriver:SwitchToWindow", {"handle": popup["handle"]})
+                m.screenshot(out / "05-popup.png")
+            except MarionetteError as e:
+                print("SKIP popup screenshot:", e, flush=True)
+            m.send("WebDriver:SwitchToWindow", {"handle": main_chrome})
+            m.script("window._smokePopup.close(); window._smokePopup = null")
+            freed = m.script("""
+              const resolve = arguments[arguments.length - 1];
+              let tries = 0;
+              const step = () => {
+                Cu.forceGC();
+                Cu.forceCC();
+                Cu.forceShrinkingGC();
+                if (!window._smokePopupRef.get()) {
+                  resolve(true);
+                } else if (++tries > 20) {
+                  resolve(false);
+                } else {
+                  setTimeout(step, 500);
+                }
+              };
+              setTimeout(step, 500);
+            """, asynchronous=True)
+            check("page popup is freed after closing", freed)
+
         # A loading page shows a spinner in its tab and turns Reload into Stop.
         m.script("gBrowser.selectedBrowser.loadURI(Services.io.newURI(arguments[0]), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()})", [site + "slow"])
         loading = wait_for(m, "return gBrowser.selectedTab.hasAttribute('busy') && !!document.querySelector('#hilal-reload-btn[busy]')", 10)

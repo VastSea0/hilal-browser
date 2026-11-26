@@ -5,6 +5,18 @@
 /* global gBrowser, Services, ChromeUtils, Ci, AppConstants, TabContextMenu, PrivateBrowsingUtils */
 
 (function () {
+  // Popups that pages open with window features (sign-in windows and the
+  // like) keep Firefox's own minimal chrome: a read-only address and identity
+  // display, no tabs. The shell, its styles and its observers stay out.
+  if (!window.toolbar.visible) {
+    for (const link of document.querySelectorAll(
+      'link[rel="stylesheet"][href^="chrome://browser/content/hilal/"]'
+    )) {
+      link.remove();
+    }
+    return;
+  }
+
   const MaterialYouTheme = {
     COLOR_MAP: {
       blue: "#37adff",

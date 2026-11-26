@@ -2263,7 +2263,8 @@
   }
 
   function tryInit() {
-    if (typeof gBrowser !== "undefined") {
+    // Popups (see HilalShell.js) have no workspaces.
+    if (typeof gBrowser !== "undefined" && window.toolbar.visible) {
       window.gHilalWorkspaces = new HilalWorkspaces();
       window.gHilalWorkspaces.init();
     }
