@@ -930,12 +930,25 @@ def main():
                   and popup["gHilalWorkspaces"] == "undefined" and popup["hilalSheets"] == 0, popup)
             check("page popup shows its address",
                   bool(popup["urlbar"] and popup["urlbar"]["w"] > 0 and popup["urlbar"]["h"] > 0), popup)
-            try:
-                m.send("WebDriver:SwitchToWindow", {"handle": popup["handle"]})
-                m.screenshot(out / "05-popup.png")
-            except MarionetteError as e:
-                print("SKIP popup screenshot:", e, flush=True)
-            m.send("WebDriver:SwitchToWindow", {"handle": main_chrome})
+            # Switching Marionette to the popup would keep it alive, so the
+            # picture comes from the popup's own snapshot instead.
+            shot = m.script("""
+              const resolve = arguments[arguments.length - 1];
+              const w = window._smokePopup;
+              w.browsingContext.currentWindowGlobal
+                .drawSnapshot(null, 1, "white")
+                .then(bitmap => {
+                  const c = document.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
+                  c.width = bitmap.width;
+                  c.height = bitmap.height;
+                  c.getContext("2d").drawImage(bitmap, 0, 0);
+                  resolve(c.toDataURL("image/png").split(",")[1]);
+                }, e => resolve({ error: String(e) }));
+            """, asynchronous=True)
+            if isinstance(shot, str):
+                (out / "05-popup.png").write_bytes(base64.b64decode(shot))
+            else:
+                print("SKIP popup screenshot:", shot, flush=True)
             m.script("window._smokePopup.close(); window._smokePopup = null")
             freed = m.script("""
               const resolve = arguments[arguments.length - 1];
