@@ -913,14 +913,15 @@
   display: block !important;
 }
 
+/* 24px is the smallest comfortable pointer target (WCAG 2.5.8). */
 .hilal-htab-sound-btn,
 .hilal-htab-close-btn {
-  width: 20px !important;
-  height: 20px !important;
-  min-width: 20px !important;
-  min-height: 20px !important;
-  max-width: 20px !important;
-  max-height: 20px !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  max-width: 24px !important;
+  max-height: 24px !important;
   padding: 0 !important;
   flex-shrink: 0 !important;
 }
@@ -1383,12 +1384,10 @@
 }
 
 .hilal-tab-close-btn {
-  width: 20px !important;
-  height: 20px !important;
-  min-width: 20px !important;
-  min-height: 20px !important;
-  max-width: 20px !important;
-  max-height: 20px !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
   padding: 0 !important;
   opacity: 0;
   transition: opacity 120ms ease;

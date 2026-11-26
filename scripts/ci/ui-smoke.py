@@ -658,6 +658,9 @@ def main():
                   and keys.get("tabStops") == 1 and keys.get("selectedIsStop") and keys.get("stopMoved"), keys)
             check(f"{mode} tabs: keyboard focus shows a ring and the close button",
                   keys.get("ring") and keys.get("closeOpacity", 0) > 0.5, keys)
+            sizes = [keys.get("closeSize")] + ([keys.get("soundSize")] if mode == "horizontal" else [])
+            check(f"{mode} tabs: close{' and mute' if mode == 'horizontal' else ''} buttons are at least 24px",
+                  all(s and min(s) >= 24 for s in sizes), sizes)
             check(f"{mode} tabs: arrow keys, Home and End move focus",
                   keys.get("arrowNext") and keys.get("home") and keys.get("end") and keys.get("back"), keys)
             check(f"{mode} tabs: focus stays on its tab when the list re-renders",
