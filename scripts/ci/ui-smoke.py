@@ -731,11 +731,22 @@ def main():
         m.context("content")
         handles = m.send("WebDriver:GetWindowHandles")
         handles = handles.get("value", handles) if isinstance(handles, dict) else handles
-        rect = None
+        rect = clock = None
         for handle in reversed(handles):
             m.send("WebDriver:SwitchToWindow", {"handle": handle})
             rect = m.script("const e = document.querySelector('.clock-hours'); if (!e) return null; const r = e.getBoundingClientRect(); const s = getComputedStyle(e.querySelector('.clock-shape')); return [r.x, r.y, r.width, r.height, s.maskImage, s.clipPath]")
             if rect:
+                clock = m.script("""
+                  const period = document.getElementById('clock-period');
+                  const format = new Intl.DateTimeFormat(undefined, {hour: 'numeric'}).resolvedOptions();
+                  return {
+                    locale: format.locale,
+                    hourCycle: format.hourCycle,
+                    period: period.textContent,
+                    inClock: !!period.closest('.clock'),
+                    chip: document.querySelector('.clock-date').textContent.trim(),
+                  };
+                """)
                 newtab_csp = m.script(NEWTAB_CSP_JS)
                 # A javascript: link runs after the click returns.
                 time.sleep(1)
@@ -758,6 +769,14 @@ def main():
             pixels["mask"], pixels["clip"] = rect[4], rect[5]
         drawn = drawn and rect[4] == "none" and "hilal-shape" in rect[5]
         check("new tab clock shapes are drawn", drawn, pixels)
+        # In 12-hour locales AM/PM belongs to the clock, not the date chip
+        # ("Monday, November 23 PM"). The English runs use en-US, which is 12h.
+        if args.locale == "tr":
+            clock_ok = bool(clock) and not clock["period"] and clock["inClock"]
+        else:
+            clock_ok = bool(clock) and clock["locale"] == "en-US" and clock["hourCycle"] in ("h11", "h12") \
+                and bool(clock["period"]) and clock["inClock"] and clock["period"] not in clock["chip"]
+        check("new tab clock keeps AM/PM with the time, not on the date", clock_ok, clock)
 
         m.script("gBrowser.removeTab(gBrowser.selectedTab)")
         check("tab closes", wait_for(m, f"return gBrowser.tabs.length == {before}", 10))

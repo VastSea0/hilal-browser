@@ -149,6 +149,18 @@ i {
   color: var(--on-tertiary-container);
 }
 
+/* AM/PM sits under the minutes, inside the clock rather than on the date. */
+.clock-period {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 18px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--on-tertiary-container);
+}
+
 .clock-date {
   display: inline-flex;
   gap: 6px;
